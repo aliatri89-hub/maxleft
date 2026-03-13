@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Phase 5a — Dark Feed & Friends Screen
+   
+   Import AFTER shell-dark.css in main.jsx:
+     @import './styles/feed-dark.css';
+   
+   Covers: feed cards, reactions, comments, wishlist buttons,
+   friends search, friend list, report modal.
+   Same pattern as Phase 3/4: CSS overrides, zero JSX changes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Friends Screen Container ── */
+
+.friends-screen.friends-screen {
+  background: var(--bg-primary);
+}
+
+/* ── Friends Header ── */
+
+.friends-header.friends-header {
+  color: var(--text-primary);
+}
+
+.friends-sub.friends-sub {
+  color: var(--text-muted);
+}
+
+/* ── Friends Empty State ── */
+
+.friends-empty.friends-empty {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.friends-empty-title.friends-empty-title {
+  color: var(--text-primary);
+}
+
+.friends-empty-text.friends-empty-text {
+  color: var(--text-muted);
+}
+
+/* ── Friends Search ── */
+
+.friends-search-input.friends-search-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+.friends-search-input:focus {
+  border-color: var(--accent-green) !important;
+}
+.friends-search-input::placeholder {
+  color: var(--text-faint) !important;
+}
+
+/* ── Share Row ── */
+
+.friends-share-row.friends-share-row {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.friends-share-link.friends-share-link {
+  color: var(--text-muted);
+}
+
+.friends-share-btn.friends-share-btn {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* ── Search Results ── */
+
+.friends-search-result.friends-search-result {
+  border-bottom-color: var(--border-subtle);
+}
+
+.friends-result-avatar.friends-result-avatar {
+  background: var(--bg-elevated);
+}
+
+.friends-result-name.friends-result-name {
+  color: var(--text-primary);
+}
+
+.friends-result-username.friends-result-username {
+  color: var(--text-faint);
+}
+
+.friends-result-action.add {
+  background: var(--accent-green) !important;
+  color: #0a0a0a !important;
+}
+
+.friends-result-action.pending {
+  border-color: var(--border-medium) !important;
+  color: var(--text-faint) !important;
+}
+
+.friends-result-action.accepted {
+  color: var(--accent-green) !important;
+  border-color: var(--accent-green) !important;
+}
+
+/* ── Section Labels ── */
+
+.friends-section-label.friends-section-label {
+  color: var(--text-faint);
+  border-bottom-color: var(--border-subtle);
+}
+
+/* ── No Results ── */
+
+.friends-no-results.friends-no-results {
+  color: var(--text-faint);
+}
+
+/* ── Feed Cards ── */
+
+.feed-card.feed-card {
+  border-bottom-color: var(--border-subtle);
+}
+
+.feed-avatar.feed-avatar {
+  background: var(--bg-elevated);
+}
+
+.feed-action-text.feed-action-text {
+  color: var(--text-secondary);
+}
+
+.feed-action-text strong {
+  color: var(--text-primary) !important;
+}
+
+/* ── Feed Item Row (media cards inside feed) ── */
+
+.feed-item-row.feed-item-row {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+.feed-item-cover.feed-item-cover {
+  background: var(--bg-elevated);
+}
+
+.feed-item-title.feed-item-title {
+  color: var(--text-primary);
+}
+
+.feed-item-meta.feed-item-meta {
+  color: var(--text-faint);
+}
+
+.feed-item-rating.feed-item-rating {
+  color: var(--accent-gold) !important;
+}
+
+/* ── Feed Loading / Empty ── */
+
+.feed-loading.feed-loading,
+.feed-empty.feed-empty {
+  color: var(--text-faint);
+}
+
+/* ── Reactions ── */
+
+.feed-reaction-btn.feed-reaction-btn {
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+}
+
+.feed-reaction-btn:hover {
+  background: rgba(74, 222, 128, 0.06) !important;
+}
+
+.feed-reaction-btn.active {
+  background: var(--accent-green-dim) !important;
+  border-color: var(--accent-green) !important;
+}
+
+.feed-reaction-count.feed-reaction-count {
+  color: var(--text-muted);
+}
+
+.feed-reaction-btn.active .feed-reaction-count {
+  color: var(--accent-green) !important;
+}
+
+/* ── Wishlist Button ── */
+
+.feed-wishlist-btn.feed-wishlist-btn {
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+  color: var(--text-muted);
+}
+
+.feed-wishlist-btn:hover {
+  background: rgba(74, 222, 128, 0.06) !important;
+  border-color: var(--accent-green) !important;
+}
+
+.feed-wishlist-btn.added {
+  background: var(--accent-green-dim) !important;
+  border-color: var(--accent-green) !important;
+  color: var(--accent-green) !important;
+}
+
+/* ── Comments Section ── */
+
+.feed-comments-section.feed-comments-section {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+.feed-comment.feed-comment {
+  border-bottom-color: var(--border-subtle);
+}
+
+.feed-comment-avatar.feed-comment-avatar {
+  background: var(--bg-elevated);
+}
+
+.feed-comment-name.feed-comment-name {
+  color: var(--text-primary);
+}
+
+.feed-comment-text.feed-comment-text {
+  color: var(--text-secondary);
+}
+
+.feed-comment-time.feed-comment-time {
+  color: var(--text-faint);
+}
+
+.feed-comment-input.feed-comment-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+.feed-comment-input:focus {
+  border-color: var(--accent-green) !important;
+}
+.feed-comment-input::placeholder {
+  color: var(--text-faint) !important;
+}
+
+.feed-comment-send.feed-comment-send {
+  background: var(--accent-green);
+  color: #0a0a0a;
+}
+
+/* ── Report Modal (inside friends-screen) ── */
+
+.friends-screen .overlay .pin-picker {
+  background: var(--bg-card) !important;
+}
+
+.friends-screen .event-form-label {
+  color: var(--text-secondary) !important;
+}

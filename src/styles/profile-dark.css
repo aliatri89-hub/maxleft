@@ -1,0 +1,249 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Phase 5c — Dark Profile Screen
+   
+   Import AFTER explore-dark.css in main.jsx:
+     @import './styles/profile-dark.css';
+   
+   Covers: profile header, stats card, share link section,
+   settings, edit profile form, manage shelves, friends panel,
+   groups, sync panels, wishlist, sign out, delete account.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Profile Screen Container ── */
+
+.profile-screen.profile-screen {
+  background: var(--bg-primary);
+}
+
+/* ── Profile Hero Banner ── */
+
+.profile-hero.profile-hero {
+  border-color: var(--border-subtle);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Key fix: bring back color + brightness on dark backgrounds */
+.profile-hero-bg.profile-hero-bg {
+  filter: grayscale(20%) brightness(0.6) saturate(1.2);
+}
+
+/* Bottom gradient for text legibility over brighter image */
+.profile-hero-overlay.has-bg {
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%) !important;
+}
+
+/* No-banner fallback */
+.profile-hero-overlay:not(.has-bg) {
+  background: var(--bg-card);
+}
+
+/* Text colors only for the no-banner state */
+.profile-hero-name {
+  color: var(--text-primary);
+}
+
+.profile-hero-location {
+  color: var(--text-muted);
+}
+
+.profile-hero-bio {
+  color: var(--text-muted);
+}
+
+/* ── Back Button ── */
+
+.profile-back.profile-back {
+  color: var(--text-muted);
+}
+.profile-back:hover {
+  color: var(--text-primary) !important;
+}
+
+/* ── Avatar ── */
+
+.profile-big-avatar.profile-big-avatar {
+  background: var(--bg-elevated);
+  border-color: var(--border-medium);
+}
+
+/* ── Name / Handle / Bio ── */
+
+.profile-big-name.profile-big-name {
+  color: var(--text-primary);
+}
+
+.profile-big-handle.profile-big-handle {
+  color: var(--text-muted);
+}
+
+.profile-bio.profile-bio {
+  color: var(--text-muted);
+}
+
+/* ── Stats Card ── */
+
+.profile-card.profile-card {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-card);
+}
+
+.profile-stats.profile-stats {
+  border-top-color: var(--border-subtle);
+}
+
+.stat-num.stat-num {
+  color: var(--text-primary);
+}
+
+.stat-label.stat-label {
+  color: var(--text-faint);
+}
+
+/* ── Share Link Section ── */
+
+.share-link-section.share-link-section {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+.share-link-label.share-link-label {
+  color: var(--text-faint);
+}
+
+.share-link-url.share-link-url {
+  color: var(--accent-green);
+}
+
+.share-link-btn.share-link-btn {
+  background: var(--accent-green);
+  color: #0a0a0a;
+}
+
+/* ── Settings Section ── */
+
+.settings-section.settings-section {
+  border-top-color: var(--border-subtle);
+}
+
+.settings-label.settings-label {
+  color: var(--text-faint);
+}
+
+.settings-item.settings-item {
+  border-bottom-color: var(--border-subtle);
+}
+
+.settings-item-text.settings-item-text {
+  color: var(--text-secondary);
+}
+
+.settings-item-arrow.settings-item-arrow {
+  color: var(--text-faint);
+}
+
+/* ── Edit Profile Form ── */
+
+.edit-profile-form.edit-profile-form {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.btn-save-profile.btn-save-profile {
+  background: var(--accent-green);
+  color: #0a0a0a;
+}
+
+/* ── Manage Shelves ── */
+
+.shelf-toggle-row.shelf-toggle-row {
+  border-bottom-color: var(--border-subtle);
+}
+
+.shelf-toggle-row.shelf-dragging {
+  background: var(--bg-elevated) !important;
+}
+
+.shelf-drag-handle.shelf-drag-handle {
+  color: var(--text-muted);
+}
+
+.shelf-toggle-label.shelf-toggle-label {
+  color: var(--text-secondary);
+}
+
+.shelf-toggle-label.disabled {
+  color: var(--text-faint) !important;
+}
+
+.shelf-toggle-switch.shelf-toggle-switch {
+  background: var(--border-medium);
+}
+
+.shelf-toggle-switch.on {
+  background: var(--accent-green) !important;
+}
+
+.shelf-toggle-permanent.shelf-toggle-permanent {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-faint);
+}
+
+/* ── Sign Out / Delete ── */
+
+.btn-signout.btn-signout {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.25);
+  background: transparent;
+}
+.btn-signout:hover {
+  background: rgba(248, 113, 113, 0.06) !important;
+}
+
+.btn-confirm-yes.btn-confirm-yes {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-confirm-no.btn-confirm-no {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+
+/* ── Friends Panel (inside ProfileScreen) ── */
+
+.profile-screen .friends-share-btn {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* ── Event Form Inputs (used in edit profile, groups, sync) ── */
+
+.profile-screen .event-form-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+.profile-screen .event-form-input:focus {
+  border-color: var(--accent-green);
+}
+
+.profile-screen .event-form-input::placeholder {
+  color: var(--text-faint);
+}
+
+.profile-screen .event-form-label {
+  color: var(--text-secondary);
+}
+
+.profile-screen .event-form-hint {
+  color: var(--text-faint);
+}
+
+/* ── Shelf-It Button (used in groups join) ── */
+
+.profile-screen .btn-shelf-it {
+  background: var(--accent-green);
+  color: #0a0a0a;
+}

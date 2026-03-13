@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Mantl — Shelf what you're made of</title>
+    <meta name="description" content="Track what you read, watch, play, and do — all on one shelf." />
+    <meta property="og:title" content="Mantl — Shelf what you're made of" />
+    <meta property="og:description" content="Track what you read, watch, play, and do — all on one shelf." />
+    <meta property="og:url" content="https://mymantl.app" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#F5F0E8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mantl" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Preload fonts so splash text renders with correct font -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Lora:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+    <style>
+      body { margin: 0; background: #F5F0E8; }
+      #splash-screen {
+        position: fixed; inset: 0; z-index: 9999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: #F5F0E8;
+        transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
+      }
+      #splash-screen.hidden { opacity: 0; transform: scale(1.02); visibility: hidden; pointer-events: none; }
+      .splash-logo {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 900; font-size: 44px;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: #2c2420;
+        animation: splashUp 0.6s ease both;
+      }
+      .splash-line {
+        height: 3px; background: #C4734F;
+        border-radius: 2px; margin-top: 6px;
+        animation: splashLine 0.8s ease 0.3s both;
+      }
+      .splash-tagline {
+        font-family: 'Lora', serif; font-style: italic;
+        font-size: 13px; color: #8a7e72;
+        margin-top: 16px; letter-spacing: 0.02em;
+        animation: splashUp 0.8s ease 0.5s both;
+      }
+      .splash-dots {
+        display: flex; gap: 6px; margin-top: 28px;
+        animation: splashUp 0.6s ease 0.8s both;
+      }
+      .splash-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: #C4734F; opacity: 0.3;
+        animation: splashPulse 1.2s ease-in-out infinite;
+      }
+      .splash-dot:nth-child(2) { animation-delay: 0.2s; }
+      .splash-dot:nth-child(3) { animation-delay: 0.4s; }
+      @keyframes splashUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes splashLine { from { width: 0; } to { width: 52px; } }
+      @keyframes splashPulse { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 0.8; transform: scale(1.2); } }
+    </style>
+  </head>
+  <body>
+    <div id="splash-screen">
+      <div class="splash-logo">MANTL</div>
+      <div class="splash-line"></div>
+      <div class="splash-tagline">Shelf what you're made of</div>
+      <div class="splash-dots">
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+        <div class="splash-dot"></div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script>
+      // Intercept Strava OAuth code BEFORE Supabase module loads.
+      // Supabase's detectSessionInUrl consumes ?code= params — this runs first.
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var code = params.get('code');
+        var scope = params.get('scope');
+        if (code && scope && scope.indexOf('activity:read') !== -1) {
+          sessionStorage.setItem('strava_code', code);
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      })();
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+    <script src="/register-sw.js"></script>
+  </body>
+</html>

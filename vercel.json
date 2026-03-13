@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/delete-account", "destination": "/delete-account.html" },
+    { "source": "/community/:slug/dashboard", "destination": "/index.html" },
+    { "source": "/join/:code", "destination": "/index.html" },
+    { "source": "/:username", "destination": "/index.html" }
+  ]
+}

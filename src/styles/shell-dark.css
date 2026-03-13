@@ -1,0 +1,365 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Phase 4 — Dark App Shell
+   
+   Import AFTER modals-dark.css in main.jsx:
+     @import './styles/tokens.css';
+     @import './styles/base.css';
+     @import './styles/modals-dark.css';
+     @import './styles/shell-dark.css';
+   
+   Covers: app container, header, bottom nav, tab panes,
+   notification panel, ShelfIt modal, loading screen, toast,
+   skeletons. Zero JSX changes.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── App Container ── */
+
+.mantl-app.mantl-app {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.main.main {
+  background: var(--bg-primary);
+}
+
+.tab-pane {
+  background: var(--bg-primary);
+}
+
+.screen-fade.screen-fade {
+  background: var(--bg-primary);
+}
+
+/* ── Header ── */
+
+.header.header {
+  background: var(--bg-card);
+  border-bottom-color: var(--border-subtle);
+}
+
+.header-brand.header-brand {
+  color: var(--text-primary);
+}
+
+.header-brand-line.header-brand-line {
+  background: var(--accent-green);
+}
+
+.header-tagline.header-tagline {
+  color: var(--text-muted);
+}
+
+/* ── Notification Bell ── */
+
+.notif-bell.notif-bell:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.notif-bell-icon svg {
+  stroke: var(--text-secondary) !important;
+}
+
+.notif-bell-badge.notif-bell-badge {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--bg-card);
+}
+
+/* ── Header Profile Avatar ── */
+
+.header-profile.header-profile {
+  background: var(--bg-elevated);
+  border-color: var(--border-medium);
+  color: var(--accent-terra);
+}
+.header-profile:hover {
+  border-color: var(--accent-green) !important;
+}
+
+/* ── Notification Panel ── */
+
+.notif-panel.notif-panel {
+  background: var(--bg-card);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.notif-panel-header.notif-panel-header {
+  border-bottom-color: var(--border-subtle);
+}
+
+.notif-panel-title.notif-panel-title {
+  color: var(--text-primary);
+}
+
+.notif-panel-close.notif-panel-close {
+  color: var(--text-muted);
+}
+
+.notif-item.notif-item {
+  border-bottom-color: var(--border-subtle);
+}
+
+.notif-item.unread {
+  background: rgba(74, 222, 128, 0.04) !important;
+}
+
+.notif-item-avatar.notif-item-avatar {
+  background: var(--bg-elevated);
+}
+
+.notif-item-text.notif-item-text {
+  color: var(--text-secondary);
+}
+
+.notif-item-time.notif-item-time {
+  color: var(--text-faint);
+}
+
+/* ── Bottom Nav Bar ── */
+
+.nav-bar.nav-bar {
+  background: var(--bg-card);
+  border-top-color: var(--border-subtle);
+}
+
+.nav-item.nav-item {
+  color: var(--text-faint);
+}
+
+.nav-item.active {
+  color: var(--accent-green) !important;
+}
+
+.nav-label.nav-label {
+  /* inherits color from .nav-item */
+}
+
+/* ── FAB (Shelf It button) ── */
+
+.fab.fab {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #0a0a0a;
+  box-shadow: 0 4px 16px rgba(74, 222, 128, 0.25);
+}
+
+.fab-label.fab-label {
+  color: var(--accent-green);
+}
+
+/* ── ShelfIt Modal ── */
+
+.modal-overlay.modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-sheet.modal-sheet {
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-end) 100%);
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  box-shadow: var(--shadow-modal);
+}
+
+.modal-handle.modal-handle {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-title.modal-title {
+  color: var(--text-primary);
+}
+
+.modal-sub.modal-sub {
+  color: var(--text-muted);
+}
+
+.search-input.search-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+.search-input::placeholder {
+  color: var(--text-faint) !important;
+}
+.search-input:focus {
+  border-color: rgba(74, 222, 128, 0.4) !important;
+}
+
+/* ── Category Pills ── */
+
+.pill.pill {
+  border-color: var(--border-medium);
+  color: var(--text-muted);
+  background: transparent;
+}
+.pill.active {
+  background: var(--accent-green) !important;
+  color: #0a0a0a !important;
+  border-color: var(--accent-green) !important;
+}
+
+/* ── Search Results ── */
+
+.search-result.search-result:hover {
+  background: var(--bg-hover);
+}
+.search-result.search-result:active {
+  background: var(--bg-elevated);
+}
+
+.result-poster.result-poster {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-poster);
+}
+
+.result-title.result-title {
+  color: var(--text-primary);
+}
+
+.result-meta.result-meta {
+  color: var(--text-muted);
+}
+
+.result-type-badge.result-type-badge {
+  background: var(--accent-terra-dim);
+  color: var(--accent-terra);
+}
+
+.search-placeholder-text.search-placeholder-text {
+  color: var(--text-muted);
+}
+
+.search-loading {
+  color: var(--text-muted) !important;
+}
+
+/* ── Toast ── */
+
+.toast.toast {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Loading Screen ── */
+
+.loading-screen.loading-screen {
+  background: var(--bg-primary);
+}
+
+.loading-brand.loading-brand {
+  color: var(--text-primary);
+}
+
+.loading-brand-line.loading-brand-line {
+  background: var(--accent-green);
+}
+
+.loading-spinner.loading-spinner {
+  border-color: var(--border-medium);
+  border-top-color: var(--accent-green);
+}
+
+/* ── Skeleton Loading ── */
+
+.skel-shimmer.skel-shimmer {
+  background: linear-gradient(90deg, var(--bg-elevated) 25%, rgba(255, 255, 255, 0.03) 50%, var(--bg-elevated) 75%);
+  background-size: 800px 100%;
+}
+
+.skel-surface.skel-surface {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+}
+
+/* ── Shelf Item Covers (scroll rows in feed/shelves) ── */
+
+.shelf-item.shelf-item {
+  /* preserve existing layout, just dark shadow context */
+}
+
+.shelf-item-cover.shelf-item-cover {
+  box-shadow: var(--shadow-poster);
+}
+
+.shelf-item-title.shelf-item-title {
+  color: var(--text-primary);
+}
+
+.shelf-item-stars .star-filled {
+  color: var(--accent-gold) !important;
+}
+
+.shelf-item-reading-tag.shelf-item-reading-tag {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--accent-green);
+}
+
+.shelf-item-progress.shelf-item-progress {
+  background: var(--bg-elevated);
+}
+
+.shelf-item-progress-fill.shelf-item-progress-fill {
+  background: var(--accent-terra);
+}
+
+/* ── Shelf Empty State ── */
+
+.shelf-empty-cta.shelf-empty-cta {
+  color: var(--accent-green);
+}
+
+/* ── Book Status Toggle (in ShelfIt modal) ── */
+
+.book-status-toggle.book-status-toggle {
+  border-color: var(--border-medium);
+}
+
+.book-status-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-medium) !important;
+}
+.book-status-btn.active {
+  background: var(--accent-green) !important;
+  color: #0a0a0a !important;
+  border-color: var(--accent-green) !important;
+}
+
+/* ── CreateGroupModal ── */
+
+.modal-overlay .modal-sheet input,
+.modal-overlay .modal-sheet textarea,
+.modal-overlay .modal-sheet select {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+.modal-overlay .modal-sheet input:focus,
+.modal-overlay .modal-sheet textarea:focus,
+.modal-overlay .modal-sheet select:focus {
+  border-color: rgba(74, 222, 128, 0.4);
+}
+.modal-overlay .modal-sheet input::placeholder,
+.modal-overlay .modal-sheet textarea::placeholder {
+  color: var(--text-faint);
+}
+
+/* ── Scrollbars (dark thin) ── */
+
+.modal-sheet,
+.notif-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+.modal-sheet::-webkit-scrollbar,
+.notif-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-sheet::-webkit-scrollbar-thumb,
+.notif-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}

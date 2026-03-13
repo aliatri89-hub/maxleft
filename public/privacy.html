@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — MANTL</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Lora:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #f5f0e8;
+      --charcoal: #2c2420;
+      --terracotta: #c4734f;
+      --text-dim: #6b5e54;
+      --border: rgba(44,36,32,0.08);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Lora', serif;
+      background: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.7;
+      padding: 0 20px;
+    }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+    .brand {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 0.15em;
+      color: var(--terracotta);
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 32px;
+    }
+    h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .effective {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-bottom: 32px;
+    }
+    h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--charcoal);
+      margin-top: 28px;
+      margin-bottom: 8px;
+    }
+    p { margin-bottom: 14px; font-size: 14px; color: var(--text-dim); }
+    ul { margin: 0 0 14px 20px; font-size: 14px; color: var(--text-dim); }
+    li { margin-bottom: 6px; }
+    a { color: var(--terracotta); }
+    .footer-links {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+    }
+    .footer-links a { color: var(--text-dim); margin-right: 20px; text-decoration: none; }
+    .footer-links a:hover { color: var(--terracotta); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="brand">MANTL</a>
+
+    <h1>Privacy Policy</h1>
+    <div class="effective">Effective: February 20, 2026</div>
+
+    <p>MANTL ("we," "our," or "us") operates the mymantl.app website and application. This Privacy Policy explains how we collect, use, and protect your information when you use our service.</p>
+
+    <h2>Information We Collect</h2>
+    <p><strong>Account Information.</strong> When you sign up, we collect your name, email address, and profile photo through Google OAuth. You may also provide a username, bio, location, and avatar.</p>
+    <p><strong>Shelf Data.</strong> We store information about books, films, shows, and games you add to your shelves, including titles, ratings, notes, progress, and journal entries.</p>
+    <p><strong>Activity &amp; Social Data.</strong> We store friend connections, activity feed items, reactions, comments, and wishlist items you create through using the app.</p>
+    <p><strong>Third-Party Integrations.</strong> If you connect Strava, we store your Strava access and refresh tokens to retrieve your activity data. We only access activity data you authorize.</p>
+    <p><strong>Usage Data.</strong> We may collect basic usage information such as pages visited and features used to improve the service.</p>
+
+    <h2>How We Use Your Information</h2>
+    <ul>
+      <li>To provide and maintain the MANTL service</li>
+      <li>To display your public profile at mymantl.app/[username]</li>
+      <li>To show your activity to friends who you have accepted</li>
+      <li>To generate your monthly recap cards</li>
+      <li>To retrieve fitness data from connected services like Strava</li>
+      <li>To improve and develop new features</li>
+    </ul>
+
+    <h2>Data Sharing</h2>
+    <p>We do not sell your personal data. We share information only in these circumstances:</p>
+    <ul>
+      <li><strong>Public Profiles.</strong> Your username, bio, location, avatar, and shelf contents are visible at your public profile URL. You can control shelf visibility in settings.</li>
+      <li><strong>Friends.</strong> Your activity feed is visible to users you have accepted as friends.</li>
+      <li><strong>Service Providers.</strong> We use Supabase for database and authentication, Vercel for hosting, and third-party APIs (TMDB, Google Books, RAWG, Strava) to power app features.</li>
+      <li><strong>Legal Requirements.</strong> We may disclose information if required by law.</li>
+    </ul>
+
+    <h2>Data Storage &amp; Security</h2>
+    <p>Your data is stored securely in Supabase (PostgreSQL) with row-level security policies ensuring users can only access their own data. Authentication is handled through Supabase Auth with Google OAuth. All connections use HTTPS.</p>
+
+    <h2>Your Rights</h2>
+    <p>You can:</p>
+    <ul>
+      <li>Edit or delete your profile information at any time</li>
+      <li>Remove any shelved items, journal entries, or comments</li>
+      <li>Disconnect third-party integrations like Strava</li>
+      <li>Control which shelves are visible on your public profile</li>
+      <li>Request deletion of your account by contacting us</li>
+    </ul>
+
+    <h2>Third-Party Services</h2>
+    <p>MANTL integrates with the following third-party services, each governed by their own privacy policies:</p>
+    <ul>
+      <li>Google (OAuth authentication, Books API)</li>
+      <li>Supabase (database, authentication, storage)</li>
+      <li>TMDB (movie and TV show metadata)</li>
+      <li>RAWG (video game metadata)</li>
+      <li>Strava (fitness activity data, optional)</li>
+      <li>Vercel (hosting)</li>
+    </ul>
+
+    <h2>Children's Privacy</h2>
+    <p>MANTL is not directed to children under 13. We do not knowingly collect personal information from children under 13. If you believe a child has provided us with personal data, please contact us.</p>
+
+    <h2>Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. We will notify users of significant changes through the app or by updating the effective date above.</p>
+
+    <h2>Contact</h2>
+    <p>For questions about this Privacy Policy or to request account deletion, contact us at <a href="mailto:hello@mymantl.app">hello@mymantl.app</a>.</p>
+
+    <div class="footer-links">
+      <a href="/terms">Terms of Service</a>
+      <a href="/">Back to MANTL</a>
+    </div>
+  </div>
+</body>
+</html>

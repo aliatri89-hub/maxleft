@@ -1,0 +1,245 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Base Styles — Dark-First Foundations
+   
+   Import AFTER tokens.css:
+     @import './tokens.css';
+     @import './base.css';
+   
+   These styles are ADDITIVE. They define new dark-theme classes
+   without touching .mantl-app, .header, .nav-bar, or any existing
+   cream-theme selectors. Existing App.css continues to work.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Dark scrollbar (applied globally, looks good on both themes) ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.12) transparent;
+}
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 2px;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* ── Hide scrollbar utility ── */
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Film grain texture (add class="grain" to any element) ── */
+.grain { position: relative; }
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* ── Shared animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Dark skeleton loading ── */
+.skeleton-dark {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Dark typography classes ── */
+.dark-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.dark-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.dark-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.dark-meta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ── Dark input ── */
+.dark-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+.dark-input:focus { border-color: rgba(74,222,128,0.4); }
+.dark-input::placeholder { color: var(--text-faint); }
+
+/* ── Dark textarea ── */
+.dark-textarea {
+  width: 100%;
+  min-height: 60px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 10px 14px;
+  resize: none;
+  outline: none;
+  transition: border-color var(--duration-fast);
+}
+.dark-textarea:focus { border-color: rgba(74,222,128,0.4); }
+.dark-textarea::placeholder { color: var(--text-faint); }
+
+/* ── Dark buttons ── */
+.btn-dark-primary {
+  width: 100%;
+  padding: 13px 0;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #0a0a0a;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity var(--duration-fast);
+}
+.btn-dark-primary:disabled { opacity: 0.6; cursor: wait; }
+
+.btn-dark-secondary {
+  width: 100%;
+  padding: 11px 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: #ccc;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+.btn-dark-secondary:hover { background: var(--bg-hover); }
+
+.btn-dark-danger {
+  width: 100%;
+  padding: 11px 0;
+  background: var(--accent-red-dim);
+  border: 1px solid rgba(233,69,96,0.2);
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.btn-dark-ghost {
+  width: 100%;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ── Dark pill / badge ── */
+.dark-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+}
+.dark-pill-green {
+  background: var(--accent-green-dim);
+  border: 1px solid rgba(74,222,128,0.3);
+  color: var(--accent-green);
+}
+.dark-pill-red {
+  background: var(--accent-red-dim);
+  border: 1px solid rgba(233,69,96,0.3);
+  color: var(--accent-red);
+}
+.dark-pill-gold {
+  background: var(--accent-gold-dim);
+  border: 1px solid rgba(250,204,21,0.3);
+  color: var(--accent-gold);
+}
+
+/* ── Poster shadow (reusable on any cover art) ── */
+.poster-shadow {
+  box-shadow: var(--shadow-poster);
+  border-radius: var(--radius-sm);
+}
+
+/* ── Tap highlight removal (mobile) ── */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,680 @@
+import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
+import { useCommunityProgress, useCommunityActions, useBadges } from "../../../hooks/community";
+import BadgeCelebration from "../shared/BadgeCelebration";
+import BadgeProgressToast from "../shared/BadgeProgressToast";
+import BadgeDetailScreen from "../shared/BadgeDetailScreen";
+import BadgePage from "../shared/BadgePage";
+import BlankCheckHero from "./BlankCheckHero";
+import BlankCheckPatreonTab from "./BlankCheckPatreonTab";
+import CommunityAwardsTab from "./CommunityAwardsTab";
+import MiniseriesShelf from "../shared/MiniseriesShelf";
+import BlankCheckItemCard from "./BlankCheckItemCard";
+import BlankCheckLogModal from "./BlankCheckLogModal";
+import CommunityBottomNav from "../shared/CommunityBottomNav";
+import CommunityTabSlider from "../shared/CommunityTabSlider";
+import CommunityFilter from "../shared/CommunityFilter";
+import AddItemTool from "../dashboard/AddItemTool";
+import AdminFab from "../dashboard/AdminFab";
+import RSSSyncTool from "../dashboard/RSSSyncTool";
+import { useAudioPlayer } from "../shared/AudioPlayerProvider";
+import ComedyPointsToast from "../shared/ComedyPointsToast";
+import { useComedyPoints } from "../../../hooks/community/useComedyPoints";
+import { useRecentlyLogged } from "../../../hooks/community/useRecentlyLogged";
+import { useRecentEpisodes } from "../../../hooks/community/useRecentEpisodes";
+
+const DEFAULT_TABS = [{ key: "filmography", label: "Filmography", icon: "🎬" }];
+
+/**
+ * BlankCheckScreen — self-contained community screen for Blank Check with Griffin & David.
+ *
+ * Owns all tab routing, state, swipe gestures, and hero rendering.
+ * Commentary toggle wiring lives here — it's BC-specific.
+ * Changing this file never touches Now Playing or Big Picture.
+ *
+ * Props:
+ *   community        — community_pages row
+ *   miniseries       — all series for this community
+ *   session          — supabase session
+ *   onBack           — () => void
+ *   onToast          — (msg) => void
+ *   onShelvesChanged — () => void
+ */
+export default function BlankCheckScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal }) {
+  const userId = session?.user?.id;
+  const accent = community?.theme_config?.accent || "#e94560";
+  const rssUrl = community?.theme_config?.rss_url || "https://feeds.megaphone.fm/blank-check";
+
+  // Load podcast episodes into the global audio player
+  const { loadEpisodes, episodes, currentEp, isPlaying, minimize } = useAudioPlayer();
+  const isPlayingRef = useRef(false);
+  isPlayingRef.current = isPlaying;
+
+  useEffect(() => {
+    loadEpisodes(rssUrl, {
+      community: "Blank Check",
+      artwork: community?.theme_config?.banner_url || null,
+    });
+  }, [rssUrl, loadEpisodes]);
+
+  // Auto-minimize mini bar when leaving — but only if audio is paused
+  useEffect(() => {
+    return () => {
+      if (!isPlayingRef.current) minimize();
+    };
+  }, [minimize]);
+
+  const tabs = useMemo(() => {
+    const t = community?.theme_config?.tabs;
+    return t && Array.isArray(t) && t.length > 0 ? t : DEFAULT_TABS;
+  }, [community]);
+
+  const [activeTab, setActiveTab] = useState(() => tabs[0]?.key || "filmography");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [mediaFilter, setMediaFilter] = useState(null);
+  const [coverCache, setCoverCache] = useState({});
+  const [modalItem, setModalItem] = useState(null);
+  const [showAddTool, setShowAddTool] = useState(false);
+  const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Badge system ──────────────────────────────────────────
+  const {
+    badges, earnedBadgeIds, badgeProgress, checkForBadge, checkAllBadges,
+    getBadgeForItem, revokeBadgeIfNeeded, loading: badgesLoading,
+  } = useBadges(community?.id, userId);
+
+  const [celebrationBadge, setCelebrationBadge] = useState(null);
+  const [detailBadge, setDetailBadge] = useState(null);
+  const [badgeToasts, setBadgeToasts] = useState([]);
+  const badgeToastTimers = useRef([]);
+  const [showBadgePage, setShowBadgePage] = useState(false);
+
+  // Count only badges earned in THIS community (earnedBadgeIds may include other communities)
+  const earnedCount = useMemo(() => badges.filter(b => earnedBadgeIds.has(b.id)).length, [badges, earnedBadgeIds]);
+
+  // ── Comedy Points (Blank Check exclusive) ──────────────────
+  const { checkAndAward: checkComedyPoints, comedyToast, dismissToast: dismissComedyToast } = useComedyPoints(userId);
+
+  const clearBadgeToastTimers = () => {
+    badgeToastTimers.current.forEach(t => clearTimeout(t));
+    badgeToastTimers.current = [];
+  };
+
+  const showSingleBadgeToast = useCallback((toastData, { delayToCelebration, celebrationBadge: celBadge } = {}) => {
+    clearBadgeToastTimers();
+    setBadgeToasts([{ ...toastData, visible: false }]);
+
+    const t0 = setTimeout(() => {
+      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: true })));
+    }, 50);
+    badgeToastTimers.current.push(t0);
+
+    const displayTime = delayToCelebration ? 2000 : 3000;
+    const t1 = setTimeout(() => {
+      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: false })));
+    }, displayTime);
+    badgeToastTimers.current.push(t1);
+
+    const t2 = setTimeout(() => {
+      setBadgeToasts([]);
+      if (delayToCelebration && celBadge) setCelebrationBadge(celBadge);
+    }, displayTime + 500);
+    badgeToastTimers.current.push(t2);
+  }, []);
+
+  const showBadgeProgressToasts = useCallback(() => {
+    const toasts = [];
+    for (const b of badges) {
+      if (earnedBadgeIds.has(b.id)) continue;
+      const bp = badgeProgress[b.id];
+      if (!bp || bp.current === 0) continue;
+      toasts.push({ badge: b, current: bp.current, total: bp.total, isComplete: false });
+    }
+    if (!toasts.length) return;
+
+    toasts.sort((a, b) => (b.current / b.total) - (a.current / a.total));
+    const capped = toasts.slice(0, 3);
+
+    clearBadgeToastTimers();
+    setBadgeToasts(capped.map(t => ({ ...t, visible: false })));
+
+    capped.forEach((_, i) => {
+      const tid = setTimeout(() => {
+        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: true } : t));
+      }, i * 350);
+      badgeToastTimers.current.push(tid);
+    });
+
+    capped.forEach((_, i) => {
+      const tid = setTimeout(() => {
+        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: false } : t));
+      }, 4000 + i * 250);
+      badgeToastTimers.current.push(tid);
+    });
+
+    const tidClear = setTimeout(() => setBadgeToasts([]), 4000 + capped.length * 250 + 600);
+    badgeToastTimers.current.push(tidClear);
+  }, [badges, earnedBadgeIds, badgeProgress]);
+
+  // Auto-check badges on load
+  const badgeAutoChecked = useRef(false);
+  useEffect(() => {
+    if (badgeAutoChecked.current || badgesLoading || badges.length === 0) return;
+    badgeAutoChecked.current = true;
+    checkAllBadges().then(earned => {
+      if (earned.length > 0) {
+        setCelebrationBadge(earned[0]);
+      }
+    });
+  }, [badgesLoading, badges.length, checkAllBadges]);
+
+  // Re-check badges when Letterboxd sync completes
+  const prevSyncSignal = useRef(letterboxdSyncSignal);
+  useEffect(() => {
+    if (!letterboxdSyncSignal || letterboxdSyncSignal === prevSyncSignal.current) return;
+    prevSyncSignal.current = letterboxdSyncSignal;
+    checkAllBadges().then(earned => {
+      if (earned.length > 0) {
+        setCelebrationBadge(earned[0]);
+      } else {
+        showBadgeProgressToasts();
+      }
+    });
+  }, [letterboxdSyncSignal, checkAllBadges, showBadgeProgressToasts]);
+
+  // Scroll to shelf when deep-linked from another community
+  useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
+
+  // Reset on tab change
+  useEffect(() => { setMediaFilter(null); setSearchQuery(""); }, [activeTab]);
+
+  // ── Tab slider ref (for animated nav taps) ──────────────
+  const sliderRef = useRef(null);
+  const hasBottomNav = tabs.length > 1;
+
+  // ── Data ──────────────────────────────────────────────────
+  const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
+
+  const patreonItemIds = useMemo(() => {
+    const ids = new Set();
+    miniseries.filter(s => s.tab_key === "patreon").forEach(s => {
+      (s.items || []).forEach(item => ids.add(item.id));
+    });
+    return ids;
+  }, [miniseries]);
+
+  const getHeroMiniseries = useCallback((tabKey) => {
+    if (tabKey === "patreon") return miniseries.filter(s => s.tab_key === "patreon");
+    if (tabKey === "awards") return [];
+    return miniseries.filter(s => !s.tab_key || s.tab_key === "filmography");
+  }, [miniseries]);
+
+  const { progress, setProgress } = useCommunityProgress(community?.id, userId, allItems);
+  const { logItem, logCommentaryOnly, unlogItem, addToWatchlist } = useCommunityActions(userId, setProgress);
+
+  // ── Dynamic shelves ────────────────────────────────────────
+  const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(episodes, allItems, 10, "blankcheck");
+
+  useEffect(() => {
+    if (allItems.length === 0) return;
+    fetchCoversForItems(allItems, setCoverCache);
+  }, [allItems]);
+
+  // ── Handlers ──────────────────────────────────────────────
+  const handleItemTap = useCallback((itemId) => {
+    const item = allItems.find(i => i.id === itemId);
+    if (item) {
+      if (item.title === "Suicide Squad") {
+        new Audio("https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/NOTProf%20Krispy%20-%20twisted_sound_cue4.wav").play().catch(() => {});
+      }
+      if (item.title === "Unbreakable") {
+        new Audio("https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/unbreakable.mp3").play().catch(() => {});
+      }
+      setModalItem(item);
+    }
+  }, [allItems]);
+
+  const handleLog = useCallback(async (itemId, { rating, notes, completed_at, listened_with_commentary, isUpdate }) => {
+    const item = allItems.find(i => i.id === itemId);
+    const coverUrl = item ? getCoverUrl(item) : null;
+    await logItem(itemId, item, coverUrl, { rating, notes, completed_at, listened_with_commentary, isUpdate });
+    if (onToast) onToast(isUpdate ? "Updated! 🎬" : "Shelf'd! 🎬");
+    if (!isUpdate && onShelvesChanged) onShelvesChanged();
+
+    // ── Badge check (only on fresh logs, not updates) ──
+    if (!isUpdate && item) {
+      const earnedBadge = await checkForBadge(itemId);
+
+      if (earnedBadge) {
+        const progress = badgeProgress[earnedBadge.id];
+        showSingleBadgeToast({
+          badge: earnedBadge,
+          current: progress?.total || 14,
+          total: progress?.total || 14,
+          isComplete: true,
+        }, { delayToCelebration: true, celebrationBadge: earnedBadge });
+      } else {
+        const miniseriesId = item.miniseries_id;
+        if (miniseriesId) {
+          const badge = getBadgeForItem(itemId, miniseriesId, item.media_type);
+          if (badge) {
+            const bp = badgeProgress[badge.id];
+            if (bp && !bp.complete) {
+              showSingleBadgeToast({
+                badge,
+                current: bp.current + 1,
+                total: bp.total,
+                isComplete: false,
+              });
+            }
+          }
+        }
+      }
+
+      // ── Comedy Points check (fire-and-forget, doesn't block badge flow) ──
+      checkComedyPoints(item);
+    }
+  }, [allItems, logItem, onToast, onShelvesChanged, checkForBadge, getBadgeForItem, badgeProgress, showSingleBadgeToast, checkComedyPoints]);
+
+  const handleUnlog = useCallback(async (itemId) => {
+    await revokeBadgeIfNeeded(itemId);
+    await unlogItem(itemId);
+    if (onToast) onToast("Removed from log");
+  }, [unlogItem, onToast, revokeBadgeIfNeeded]);
+
+  const handleWatchlist = useCallback(async (item, coverUrl) => {
+    await addToWatchlist(item, coverUrl);
+    if (onToast) onToast("Added to watch list! 👁");
+  }, [addToWatchlist, onToast]);
+
+  // Commentary toggle — BC-specific, decoupled from film logging
+  const handleToggleCommentary = useCallback(async (itemId, newValue) => {
+    await logCommentaryOnly(itemId, newValue);
+    if (onToast) onToast(newValue ? "🎧 Commentary logged!" : "Commentary removed");
+  }, [logCommentaryOnly, onToast]);
+
+  const isMediaVisible = useCallback((mediaType) => {
+    if (!mediaFilter) return true;
+    const [mode, type] = mediaFilter.split(":");
+    if (type === "listened") return true;
+    if (mode === "solo") return (mediaType || "film") === type;
+    if (mode === "hide") return (mediaType || "film") !== type;
+    return true;
+  }, [mediaFilter]);
+
+  return (
+    <div style={{
+      height: "100dvh", display: "flex", flexDirection: "column",
+      background: "#0f0f1a", overflowX: "hidden",
+    }}>
+      {/* Back nav */}
+      <div style={{
+        flexShrink: 0, zIndex: 10,
+        background: "rgba(15,15,26,0.95)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        padding: "12px 16px",
+        display: "flex", alignItems: "center", gap: 8,
+        borderBottom: "1px solid rgba(255,255,255,0.04)",
+      }}>
+        <button onClick={onBack} style={{
+          background: "none", border: "none", color: accent,
+          fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
+        }}>← Back</button>
+        <div style={{
+          fontSize: 14, fontWeight: 700, color: "#fff",
+          fontFamily: "'Barlow Condensed', sans-serif",
+          flex: 1, textAlign: "center",
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>{community.name}</div>
+        <div style={{ width: 48 }}>
+          {badges.length > 0 && (
+            <button
+              onClick={() => setShowBadgePage(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "none",
+                border: "none",
+                padding: "4px 4px",
+                cursor: "pointer",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 1L2 3.5V7C2 10.87 4.56 14.47 8 15.5C11.44 14.47 14 10.87 14 7V3.5L8 1Z"
+                  fill="rgba(255,255,255,0.08)"
+                  stroke="rgba(255,255,255,0.35)"
+                  strokeWidth="1"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M6 8L7.5 9.5L10.5 6.5"
+                  stroke={earnedCount > 0 ? "#22c55e" : "rgba(255,255,255,0.2)"}
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: earnedCount > 0 ? "#ffffffcc" : "#ffffff40",
+                fontFamily: "'Barlow Condensed', sans-serif",
+              }}>
+                {earnedCount}/{badges.length}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tab slider — all panes side-by-side, smooth swipe */}
+      <CommunityTabSlider
+        ref={sliderRef}
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(key) => { setActiveTab(key); setSearchQuery(""); }}
+        bottomPad={hasBottomNav ? 80 : 0}
+      >
+        {(tabKey) => (
+          <>
+            {/* Hero — hidden on awards tab */}
+            {tabKey !== "awards" && (
+              <BlankCheckHero
+                community={community}
+                miniseries={getHeroMiniseries(tabKey)}
+                progress={progress}
+                activeTab={tabKey}
+                mediaFilter={mediaFilter}
+                onMediaFilterChange={setMediaFilter}
+              />
+            )}
+
+            {/* Patreon tab */}
+            {tabKey === "patreon" && (
+              <BlankCheckPatreonTab
+                community={community}
+                progress={progress}
+                onToggle={handleItemTap}
+                onToggleCommentary={handleToggleCommentary}
+                miniseries={miniseries}
+                coverCacheVersion={coverCache}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                mediaFilter={mediaFilter}
+              />
+            )}
+
+            {/* Awards tab */}
+            {tabKey === "awards" && (
+              <CommunityAwardsTab
+                community={community}
+                session={session}
+                progress={progress}
+                miniseries={miniseries}
+                onToggle={handleItemTap}
+              />
+            )}
+
+            {/* Filmography tab (default) */}
+            {tabKey !== "patreon" && tabKey !== "awards" && (
+              <>
+                {/* Search bar */}
+                <div style={{ padding: "12px 16px 0", position: "relative" }}>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search films, directors, years…"
+                    style={{
+                      width: "100%",
+                      padding: "10px 16px 10px 40px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 12,
+                      color: "#fff",
+                      fontSize: 14,
+                      outline: "none",
+                      boxSizing: "border-box",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      letterSpacing: "0.01em",
+                    }}
+                    onFocus={(e) => { e.target.style.borderColor = accent; }}
+                    onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; }}
+                  />
+                  <span style={{
+                    position: "absolute", left: 28, top: "50%",
+                    transform: "translateY(-50%)", fontSize: 15,
+                    color: "#555", pointerEvents: "none",
+                  }}>🔍</span>
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      style={{
+                        position: "absolute", right: 28, top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "rgba(255,255,255,0.1)", border: "none",
+                        color: "#aaa", fontSize: 13, cursor: "pointer",
+                        borderRadius: 20, width: 24, height: 24,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        padding: 0, lineHeight: 1,
+                      }}
+                    >✕</button>
+                  )}
+                </div>
+
+                <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
+
+                {/* Dynamic shelves — only on filmography tab with no search */}
+                {!searchQuery.trim() && (
+                  <>
+                    {recentItems.length > 0 && (
+                      <MiniseriesShelf
+                        key="recent-logged"
+                        series={{ id: "recent-logged", title: "⏪ Recently Logged", items: recentItems }}
+                        progress={progress}
+                        onToggle={handleItemTap}
+                        onToggleCommentary={handleToggleCommentary}
+                        CardComponent={BlankCheckItemCard}
+                        coverCacheVersion={coverCache}
+                        filter="all"
+                        hideTracker
+                      />
+                    )}
+                    {recentEpisodeItems.length > 0 && (
+                      <MiniseriesShelf
+                        key="recent-episodes"
+                        series={{ id: "recent-episodes", title: "🎙 New Episodes", items: recentEpisodeItems.map(r => r.item) }}
+                        progress={progress}
+                        onToggle={handleItemTap}
+                        onToggleCommentary={handleToggleCommentary}
+                        CardComponent={BlankCheckItemCard}
+                        coverCacheVersion={coverCache}
+                        filter="all"
+                        hideTracker
+                      />
+                    )}
+                  </>
+                )}
+
+                <div style={{ paddingTop: 8 }}>
+                  {miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").map((s) => {
+                    const q = searchQuery.trim().toLowerCase();
+                    let items = (s.items || []).filter(i => isMediaVisible(i.media_type));
+                    if (q.length >= 2) {
+                      const seriesMatch =
+                        s.title.toLowerCase().includes(q) ||
+                        (s.director_name || "").toLowerCase().includes(q);
+                      if (!seriesMatch) {
+                        items = items.filter(i =>
+                          i.title.toLowerCase().includes(q) ||
+                          (i.creator || "").toLowerCase().includes(q) ||
+                          String(i.year || "").includes(q)
+                        );
+                      }
+                    }
+                    if (items.length === 0) return null;
+                    return (
+                      <MiniseriesShelf
+                        key={s.id}
+                        series={{ ...s, items }}
+                        progress={progress}
+                        onToggle={handleItemTap}
+                        onToggleCommentary={handleToggleCommentary}
+                        CardComponent={BlankCheckItemCard}
+                        coverCacheVersion={coverCache}
+                        filter={filter}
+                        shelfCap={10}
+                        accent={accent}
+                      />
+                    );
+                  })}
+                </div>
+                {searchQuery.trim().length >= 2 &&
+                  miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").every((s) => {
+                    const q = searchQuery.trim().toLowerCase();
+                    const seriesMatch = s.title.toLowerCase().includes(q) || (s.director_name || "").toLowerCase().includes(q);
+                    const items = (s.items || []).filter(i => isMediaVisible(i.media_type));
+                    return !seriesMatch && !items.some(i =>
+                      i.title.toLowerCase().includes(q) || (i.creator || "").toLowerCase().includes(q) || String(i.year || "").includes(q)
+                    );
+                  }) && (
+                    <div style={{ textAlign: "center", padding: "40px 16px", color: "#555", fontSize: 14 }}>
+                      No results for "{searchQuery.trim()}"
+                    </div>
+                  )
+                }
+              </>
+            )}
+          </>
+        )}
+      </CommunityTabSlider>
+
+      <CommunityBottomNav
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(newTab) => {
+          if (newTab === activeTab) return;
+          sliderRef.current?.animateToTab(newTab);
+          setActiveTab(newTab);
+          setSearchQuery("");
+        }}
+        accent={accent}
+      />
+
+      {modalItem && (
+        <BlankCheckLogModal
+          item={modalItem}
+          coverUrl={getCoverUrl(modalItem)}
+          isCompleted={progress[modalItem.id]?.status === "completed"}
+          progressData={progress[modalItem.id] || null}
+          isPatreon={patreonItemIds.has(modalItem.id)}
+          coverCacheVersion={coverCache}
+          onLog={handleLog}
+          onUnlog={handleUnlog}
+          onWatchlist={handleWatchlist}
+          onToggleCommentary={handleToggleCommentary}
+          onClose={() => setModalItem(null)}
+          userId={userId}
+          miniseries={miniseries}
+          communityId={community.id}
+          communitySubscriptions={communitySubscriptions}
+          onNavigateCommunity={(slug, tmdbId) => {
+            setModalItem(null);
+            onBack();
+            onOpenCommunity?.(slug, tmdbId);
+          }}
+          onToast={onToast}
+        />
+      )}
+
+      <AdminFab
+        userId={userId}
+        accent={accent}
+        onAddItem={() => setShowAddTool(true)}
+        onRSSSync={() => setShowRSSSync(true)}
+        bottomOffset={hasBottomNav ? 80 : 24}
+      />
+
+      {showAddTool && (
+        <AddItemTool
+          community={community}
+          miniseries={miniseries}
+          session={session}
+          onClose={() => setShowAddTool(false)}
+          onToast={onToast}
+          onAdded={() => { if (onShelvesChanged) onShelvesChanged(); }}
+        />
+      )}
+
+      {showRSSSync && (
+        <RSSSyncTool
+          community={community}
+          miniseries={miniseries}
+          session={session}
+          onClose={() => setShowRSSSync(false)}
+          onToast={onToast}
+          onAdded={() => { if (onShelvesChanged) onShelvesChanged(); }}
+        />
+      )}
+
+      {/* Badge celebration */}
+      {celebrationBadge && (
+        <BadgeCelebration
+          badge={celebrationBadge}
+          onClose={() => {
+            const badge = celebrationBadge;
+            setCelebrationBadge(null);
+            setDetailBadge(badge);
+          }}
+        />
+      )}
+
+      {/* Badge detail screen */}
+      {detailBadge && (
+        <BadgeDetailScreen
+          badge={detailBadge}
+          userId={userId}
+          earnedAt={new Date().toISOString()}
+          onClose={() => setDetailBadge(null)}
+        />
+      )}
+
+      {/* Badge collection page */}
+      {showBadgePage && (
+        <BadgePage
+          badges={badges}
+          earnedBadgeIds={earnedBadgeIds}
+          badgeProgress={badgeProgress}
+          userId={userId}
+          accent={accent}
+          onClose={() => setShowBadgePage(false)}
+        />
+      )}
+
+      {/* Badge progress toasts (stacked) */}
+      {badgeToasts.map((t, i) => (
+        <BadgeProgressToast
+          key={`badge-toast-${t.badge?.id || i}`}
+          badge={t.badge}
+          current={t.current}
+          total={t.total}
+          isComplete={t.isComplete}
+          visible={t.visible}
+          bottomOffset={24 + i * 82}
+        />
+      ))}
+
+      {/* Comedy Points toast (BC exclusive) */}
+      {comedyToast && (
+        <ComedyPointsToast
+          points={comedyToast.points}
+          visible={comedyToast.visible}
+          onDone={dismissComedyToast}
+        />
+      )}
+    </div>
+  );
+}

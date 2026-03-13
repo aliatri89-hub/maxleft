@@ -1,0 +1,435 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Phase 3 — Dark Modal Overrides
+   
+   Import AFTER base.css:
+     @import './tokens.css';
+     @import './base.css';
+     @import './modals-dark.css';
+   
+   Overrides cream-themed modal classes from App.css with dark 
+   token-based styles. Zero JSX changes needed — same class names,
+   dark look. Specificity is handled via doubled selectors where
+   needed to beat App.css without !important.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Overlay Backdrops ── */
+
+.overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.item-detail-overlay.item-detail-overlay {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ── Item Detail Sheet (bottom sheet) ── */
+
+.item-detail-sheet.item-detail-sheet {
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-end) 100%);
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  box-shadow: var(--shadow-modal);
+}
+
+.item-detail-close.item-detail-close {
+  color: var(--text-muted);
+}
+.item-detail-close:hover {
+  color: var(--text-primary);
+}
+
+.item-detail-title.item-detail-title {
+  color: var(--text-primary);
+}
+
+.item-detail-meta.item-detail-meta {
+  color: var(--text-muted);
+}
+
+.item-detail-actions.item-detail-actions {
+  border-top-color: var(--border-subtle);
+}
+
+.modal-handle.modal-handle {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Pin Picker / Form Modals (bottom sheet) ── */
+
+.pin-picker.pin-picker {
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-end) 100%);
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  box-shadow: var(--shadow-modal);
+}
+
+.pin-picker-header.pin-picker-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.pin-picker-title.pin-picker-title {
+  color: var(--text-primary);
+}
+
+.pin-picker-close.pin-picker-close {
+  color: var(--text-muted);
+}
+.pin-picker-close:hover {
+  color: var(--text-primary);
+}
+
+.pin-picker-search.pin-picker-search {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+.pin-picker-search:focus {
+  border-color: rgba(74, 222, 128, 0.4) !important;
+}
+.pin-picker-search::placeholder {
+  color: var(--text-faint);
+}
+
+.pin-picker-cat.pin-picker-cat {
+  color: var(--text-muted);
+}
+
+.pin-picker-item.pin-picker-item {
+  transition: background 0.15s;
+}
+.pin-picker-item:hover {
+  background: var(--bg-hover) !important;
+}
+.pin-picker-item.pinned {
+  background: var(--accent-terra-dim) !important;
+}
+.pin-picker-item.disabled {
+  opacity: 0.3;
+}
+
+.pin-picker-item-cover.pin-picker-item-cover {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-poster);
+}
+
+.pin-picker-item-title.pin-picker-item-title {
+  color: var(--text-primary);
+}
+
+.pin-picker-item-meta.pin-picker-item-meta {
+  color: var(--text-muted);
+}
+
+.pin-picker-item-action.pin-picker-item-action {
+  color: var(--accent-terra);
+}
+
+.pin-picker-empty.pin-picker-empty {
+  color: var(--text-muted);
+  font-family: var(--font-serif);
+}
+
+/* ── Event / Trophy Form ── */
+
+.event-form-label.event-form-label {
+  color: var(--text-muted);
+}
+
+.event-form-input.event-form-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+.event-form-input:focus {
+  border-color: rgba(74, 222, 128, 0.4) !important;
+}
+.event-form-input::placeholder {
+  color: var(--text-faint);
+}
+
+.event-form-hint.event-form-hint {
+  color: var(--text-faint);
+}
+
+.event-add-goal.event-add-goal {
+  color: var(--accent-green);
+}
+
+/* ── Primary Action Button ── */
+
+.btn-shelf-it.btn-shelf-it {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #0a0a0a;
+  border: none;
+  box-shadow: 0 4px 16px rgba(74, 222, 128, 0.2);
+}
+
+.btn-save-profile.btn-save-profile {
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #0a0a0a;
+}
+
+/* ── Edit / Action Buttons ── */
+
+.btn-edit-rating.btn-edit-rating {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+.btn-edit-rating:hover {
+  border-color: var(--accent-terra) !important;
+  background: var(--bg-hover) !important;
+}
+
+.btn-remove.btn-remove {
+  background: var(--accent-red-dim);
+  color: var(--accent-red);
+  border-color: rgba(233, 69, 96, 0.2);
+}
+.btn-remove:hover {
+  background: rgba(233, 69, 96, 0.18) !important;
+  border-color: var(--accent-red) !important;
+}
+
+.btn-pin-mantl.btn-pin-mantl {
+  color: var(--accent-terra);
+  background: var(--accent-terra-dim);
+  border-color: rgba(196, 115, 79, 0.3);
+}
+.btn-pin-mantl.pinned {
+  background: var(--accent-terra);
+  color: white;
+  border-color: var(--accent-terra);
+}
+
+/* ── Confirm Delete ── */
+
+.confirm-delete.confirm-delete {
+  background: var(--accent-red-dim);
+  border-color: rgba(233, 69, 96, 0.2);
+}
+
+.confirm-delete-text.confirm-delete-text {
+  color: var(--accent-red);
+}
+
+.btn-confirm-yes.btn-confirm-yes {
+  background: var(--accent-red);
+  color: white;
+}
+
+.btn-confirm-no.btn-confirm-no {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+
+/* ── Edit Rating Section ── */
+
+.edit-rating-section {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-medium) !important;
+}
+
+.edit-rating-btns .btn-edit-rating {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+
+/* ── Notes ── */
+
+.item-detail-notes.item-detail-notes {
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.item-detail-notes-label {
+  color: var(--text-muted) !important;
+}
+
+.notes-input.notes-input {
+  background: var(--bg-input);
+  border-color: var(--border-medium);
+  color: var(--text-secondary);
+}
+.notes-input::placeholder {
+  color: var(--text-faint) !important;
+}
+.notes-input:focus {
+  border-color: rgba(74, 222, 128, 0.4) !important;
+}
+
+/* ── Trophy Case Expanded ── */
+
+.trophy-case-list.trophy-case-list {
+  /* Layout stays the same, just inherits dark sheet background */
+}
+
+.trophy-overlay-card-fallback.trophy-overlay-card-fallback {
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.08), rgba(196, 115, 79, 0.06));
+}
+
+.trophy-overlay-gradient.trophy-overlay-gradient {
+  background: linear-gradient(to top, rgba(15, 15, 26, 0.9) 0%, rgba(15, 15, 26, 0.4) 60%, transparent 100%);
+}
+
+/* ── Trophy Photo ── */
+
+.trophy-photo-empty.trophy-photo-empty {
+  border-color: var(--border-medium);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+}
+
+/* ── Passport Map Overlay ── */
+
+.passport-map-overlay.passport-map-overlay {
+  background: var(--bg-primary);
+}
+
+.passport-map-header.passport-map-header {
+  border-bottom-color: var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.passport-map-title.passport-map-title {
+  color: var(--text-primary);
+}
+
+.passport-map-close.passport-map-close {
+  color: var(--text-muted);
+}
+.passport-map-close:hover {
+  color: var(--text-primary);
+}
+
+.passport-map-body.passport-map-body {
+  background: var(--bg-primary);
+}
+
+.passport-map-container.passport-map-container {
+  background: rgba(34, 211, 238, 0.04);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-subtle);
+}
+
+.passport-map-stat-num.passport-map-stat-num {
+  color: var(--text-primary);
+}
+
+.passport-map-stat-label.passport-map-stat-label {
+  color: var(--text-muted);
+}
+
+.passport-map-legend-item.passport-map-legend-item {
+  color: var(--text-muted);
+}
+
+.passport-map-loading.passport-map-loading {
+  color: var(--text-muted);
+}
+
+.passport-map-country-tooltip.passport-map-country-tooltip {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Passport Detail (Country overlay) ── */
+
+.passport-detail-hero-overlay.passport-detail-hero-overlay {
+  background: linear-gradient(transparent 20%, rgba(15, 15, 26, 0.8));
+}
+
+/* ── Passport Tabs (inside country add modal) ── */
+
+.passport-tabs.passport-tabs {
+  border-color: var(--border-subtle);
+}
+
+.passport-empty-tab.passport-empty-tab {
+  color: var(--text-muted);
+}
+
+/* ── Shelf Empty CTA ── */
+
+.shelf-empty-cta.shelf-empty-cta {
+  color: var(--accent-green);
+}
+
+/* ── Strava Disconnect ── */
+
+.strava-disconnect.strava-disconnect {
+  color: var(--text-faint);
+}
+
+/* ── Book Status Toggle ── */
+
+.book-status-toggle.book-status-toggle {
+  border-color: var(--border-medium);
+}
+
+.book-status-btn {
+  background: var(--bg-input) !important;
+  color: var(--text-muted) !important;
+  border-color: var(--border-medium) !important;
+}
+.book-status-btn.active {
+  background: var(--accent-terra) !important;
+  color: white !important;
+  border-color: var(--accent-terra) !important;
+}
+
+/* ── Generic Text Overrides ── */
+
+/* Barlow Condensed bold labels */
+.bb {
+  color: var(--text-primary) !important;
+}
+
+/* Mono labels */
+.mono {
+  color: var(--text-muted) !important;
+}
+
+/* ── Date input dark mode ── */
+.event-form-input[type="date"] {
+  color-scheme: dark;
+}
+
+/* ── LocationInput override (if it uses internal styling) ── */
+input[type="text"].event-form-input,
+input[type="date"].event-form-input,
+input.event-form-input {
+  background: var(--bg-input) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Scrollbar inside dark modals ── */
+.pin-picker-list,
+.trophy-case-list,
+.item-detail-sheet {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+.pin-picker-list::-webkit-scrollbar,
+.trophy-case-list::-webkit-scrollbar,
+.item-detail-sheet::-webkit-scrollbar {
+  width: 4px;
+}
+.pin-picker-list::-webkit-scrollbar-thumb,
+.trophy-case-list::-webkit-scrollbar-thumb,
+.item-detail-sheet::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}

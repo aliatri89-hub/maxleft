@@ -1,0 +1,209 @@
+import { useState, useEffect } from "react";
+import AdminItemEditor from "../shared/AdminItemEditor";
+import PinToMantl from "../shared/PinToMantl";
+import CrossCommunityChips from "../shared/CrossCommunityChips";
+
+/**
+ * FilmspottingLogModal — Filmspotting community log modal.
+ * Films only. No commentary, no brown arrow, no Listen On badges.
+ * Same pattern as HDTGMLogModal.
+ */
+export default function FilmspottingLogModal({
+  item, coverUrl, isCompleted, progressData,
+  onLog, onUnlog, onWatchlist, onClose,
+  userId, miniseries, onViewMantl,
+  communitySubscriptions, communityId, onNavigateCommunity,
+}) {
+  const [confirmUnlog, setConfirmUnlog] = useState(false);
+  const [rating, setRating] = useState(progressData?.rating || 0);
+  const [notes, setNotes] = useState(progressData?.notes || "");
+  const [completedAt, setCompletedAt] = useState(
+    progressData?.completed_at ? new Date(progressData.completed_at).toISOString().split("T")[0] : ""
+  );
+
+  useEffect(() => {
+    setRating(progressData?.rating || 0);
+    setNotes(progressData?.notes || "");
+    setCompletedAt(
+      progressData?.completed_at ? new Date(progressData.completed_at).toISOString().split("T")[0] : ""
+    );
+  }, [progressData, item?.id]);
+
+  const handleSave = () => {
+    onLog(item.id, {
+      rating: rating || null,
+      notes: notes || null,
+      completed_at: completedAt || null,
+      isUpdate: isCompleted,
+    });
+    onClose();
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 999,
+        background: "rgba(0,0,0,0.75)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+        backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 440, maxHeight: "85vh", overflowY: "auto",
+          background: "#1a1a2e", borderRadius: "16px 16px 0 0",
+          padding: "20px 16px env(safe-area-inset-bottom, 16px)",
+        }}
+      >
+        {/* Header */}
+        <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+          <div style={{ position: "relative", width: 60, height: 90, flexShrink: 0 }}>
+            {coverUrl && (
+              <img src={coverUrl} alt="" style={{
+                width: 60, height: 90, borderRadius: 6, objectFit: "cover", display: "block",
+              }} />
+            )}
+            <PinToMantl
+              compact
+              userId={userId}
+              isCompleted={isCompleted}
+              itemType={"movie"}
+              itemTitle={item.title}
+              tmdbId={item.tmdb_id}
+              coverUrl={coverUrl}
+              communitySlug="filmspotting"
+              onViewMantl={onViewMantl}
+              onClose={onClose}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 16, fontWeight: 700, color: "#fff",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>{item.title}</div>
+            <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+              {item.year}
+            </div>
+          </div>
+          <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} onSaved={onClose} />
+          <button onClick={onClose} style={{
+            background: "none", border: "none", color: "#666",
+            fontSize: 20, cursor: "pointer", padding: 4, alignSelf: "flex-start",
+          }}>✕</button>
+        </div>
+
+        {/* Cross-community chips */}
+        {item.tmdb_id && communitySubscriptions && (
+          <CrossCommunityChips
+            tmdbId={item.tmdb_id}
+            currentCommunityId={communityId}
+            communitySubscriptions={communitySubscriptions}
+            onNavigateCommunity={(slug, tmdbId) => {
+              onClose();
+              onNavigateCommunity?.(slug, tmdbId);
+            }}
+          />
+        )}
+
+        {/* Star rating */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Rating
+          </div>
+          <div style={{ display: "flex", gap: 2 }}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star === rating ? 0 : star)}
+                style={{
+                  background: "none", border: "none", fontSize: 28, cursor: "pointer",
+                  color: star <= rating ? "#facc15" : "rgba(255,255,255,0.15)",
+                  padding: "0 2px", transition: "color 0.15s",
+                }}
+              >★</button>
+            ))}
+            <button
+              onClick={() => setRating(rating === 0.5 ? 0 : 0.5)}
+              style={{
+                background: rating === 0.5 ? "rgba(250,204,21,0.2)" : "rgba(255,255,255,0.05)",
+                border: `1px solid ${rating === 0.5 ? "rgba(250,204,21,0.5)" : "rgba(255,255,255,0.1)"}`,
+                borderRadius: 6, padding: "4px 8px", marginLeft: 8,
+                color: rating === 0.5 ? "#facc15" : "#666",
+                fontSize: 11, cursor: "pointer", fontWeight: 600,
+              }}
+            >½</button>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Notes
+          </div>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Add your thoughts..."
+            rows={3}
+            style={{
+              width: "100%", background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
+              color: "#e0e0e0", padding: "10px 12px", fontSize: 14,
+              fontFamily: "inherit", resize: "vertical",
+              outline: "none",
+            }}
+          />
+        </div>
+
+        {/* Date */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            Date Watched
+          </div>
+          <input
+            type="date"
+            value={completedAt}
+            onChange={(e) => setCompletedAt(e.target.value)}
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
+              color: "#e0e0e0", padding: "10px 12px", fontSize: 14,
+              fontFamily: "inherit", outline: "none",
+            }}
+          />
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={handleSave} style={{
+            flex: 1, padding: "12px 0", borderRadius: 10,
+            background: "#4ade80", color: "#0a0a0a",
+            fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer",
+          }}>
+            {isCompleted ? "Update" : "Log It"}
+          </button>
+
+          {!isCompleted && item.media_type === "film" && (
+            <button onClick={() => { onWatchlist(item, coverUrl); onClose(); }} style={{
+              padding: "12px 16px", borderRadius: 10,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#888", fontSize: 14, cursor: "pointer",
+            }}>👁</button>
+          )}
+
+          {isCompleted && (
+            <button onClick={() => { if (!confirmUnlog) { setConfirmUnlog(true); return; } onUnlog(item.id); onClose(); }} style={{
+              padding: "12px 16px", borderRadius: 10,
+              background: "rgba(239,68,68,0.1)",
+              border: "1px solid rgba(239,68,68,0.2)",
+              color: "#ef4444", fontSize: 14, cursor: "pointer",
+            }}>{confirmUnlog ? "Confirm?" : "Remove"}</button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

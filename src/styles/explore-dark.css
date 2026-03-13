@@ -1,0 +1,17 @@
+/* ═══════════════════════════════════════════════════════════════
+   MANTL Phase 5b — Dark Explore Screen
+   
+   Import AFTER feed-dark.css in main.jsx:
+     @import './styles/explore-dark.css';
+   
+   Note: ExploreScreen uses mostly inline styles, so this file
+   catches any class-based styles. The JSX inline fixes are
+   in the updated ExploreScreen.jsx.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Explore container (if class is added) ── */
+
+.explore-screen.explore-screen {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
