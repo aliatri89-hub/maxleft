@@ -12,7 +12,7 @@ const TMDB_IMG = "https://image.tmdb.org/t/p";
 
 const CACHE_KEY = "mantl_cover_cache";
 const CACHE_VERSION = 6; // keep at 6 — write-back is server-side, no client cache change needed
-const MAX_CACHE_ENTRIES = 3000; // NPP alone is ~1000, 8+ communities need headroom
+const MAX_CACHE_ENTRIES = 6000; // 8+ communities × ~500-1000 items each
 
 // ─── Persistent cache: load from localStorage on init ────────
 let coverCache = {};
@@ -43,6 +43,10 @@ const saveCache = () => {
 
 // ─── Public getter ───────────────────────────────────────────
 export const getCoverUrl = (item) => {
+  // Books with cover_image in extra_data don't need the cache — read directly
+  if (item.media_type === "book" && item.extra_data?.cover_image) {
+    return item.extra_data.cover_image;
+  }
   const key = cacheKey(item);
   return coverCache[key] || null;
 };
@@ -238,7 +242,11 @@ const fetchCover = async (item) => {
 
 // ─── Batch-fetch all covers with parallel rate limiting ───────
 export const fetchCoversForItems = async (items, onUpdate) => {
-  const uncached = items.filter((i) => !coverCache[cacheKey(i)]);
+  const uncached = items.filter((i) => {
+    // Books with cover_image in extra_data resolve instantly via getCoverUrl — skip
+    if (i.media_type === "book" && i.extra_data?.cover_image) return false;
+    return !coverCache[cacheKey(i)];
+  });
 
   // If everything is cached, return immediately — no state update needed.
   // Calling onUpdate here would create a new object reference every time,

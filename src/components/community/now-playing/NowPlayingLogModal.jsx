@@ -393,7 +393,7 @@ export default function NowPlayingLogModal({
           padding: "12px 0 16px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
-          <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} onToast={onToast} onSaved={() => {
+          <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} communitySlug="npp" onToast={onToast} onSaved={() => {
             if (onShelvesChanged) onShelvesChanged();
             onClose();
           }} />

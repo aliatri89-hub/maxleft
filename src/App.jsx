@@ -30,8 +30,8 @@ import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
 // Components
 import ShelfItModal from "./components/ShelfItModal";
 import FlappyMantl from "./components/FlappyMantl";
-import ComedyPointsReveal from "./components/community/shared/ComedyPointsReveal";
-import ComedyPointsToast from "./components/community/shared/ComedyPointsToast";
+// import ComedyPointsReveal from "./components/community/shared/ComedyPointsReveal"; // DISABLED for launch
+// import ComedyPointsToast from "./components/community/shared/ComedyPointsToast"; // DISABLED for launch
 import CreateGroupModal from "./components/CreateGroupModal";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
@@ -120,8 +120,8 @@ export default function App() {
   const [tabSwipeOffset, setTabSwipeOffset] = useState(0); // for indicator bar only
   const [preloadTab, setPreloadTab] = useState(null); // tab name to pre-render during swipe
   const [easterEggGame, setEasterEggGame] = useState(false);
-  const [showComedyPoints, setShowComedyPoints] = useState(false);
-  const [syncComedyToast, setSyncComedyToast] = useState(null); // { points, visible }
+  const [showComedyPoints, setShowComedyPoints] = useState(false); // DISABLED for launch
+  const [syncComedyToast, setSyncComedyToast] = useState(null); // DISABLED for launch
   const feedTapCount = useRef(0);
   const feedTapTimer = useRef(null);
   const [pendingFriendCount, setPendingFriendCount] = useState(0);
@@ -1371,65 +1371,9 @@ export default function App() {
         if (upsertErr) console.error("[AutoLog] Community progress upsert error:", upsertErr);
         else console.log(`[AutoLog] Logged ${newRows.length} film(s) into community progress`);
 
-        // ── Comedy Points check (Blank Check exclusive) ──────
-        // Check if any newly logged items are BC comedies
-        try {
-          const newItemIds = newRows.map(r => r.item_id);
-          const { data: newItemDetails } = await supabase
-            .from("community_items")
-            .select("id, tmdb_id, extra_data, miniseries_id")
-            .in("id", newItemIds);
-
-          // Filter to BC items only (miniseries belongs to BC community)
-          const BC_ID = "cb2f3b1a-eca8-4e0f-b296-1e1dcabdcca7";
-          const { data: bcSeries } = await supabase
-            .from("community_miniseries")
-            .select("id")
-            .eq("community_id", BC_ID);
-          const bcSeriesSet = new Set((bcSeries || []).map(s => s.id));
-
-          const bcComedies = (newItemDetails || []).filter(item => {
-            if (!bcSeriesSet.has(item.miniseries_id)) return false;
-            // Priority 1: genre data carried through from TMDB fetch during sync
-            const syncedGenres = ratingMap[item.tmdb_id]?.genreIds;
-            if (Array.isArray(syncedGenres) && syncedGenres.length > 0) {
-              return syncedGenres[0] === 35;
-            }
-            // Priority 2: extra_data.genre_ids (int array seeded on community_items)
-            const seededIds = item.extra_data?.genre_ids;
-            if (Array.isArray(seededIds) && seededIds.length > 0) {
-              return seededIds[0] === 35;
-            }
-            // Priority 3: extra_data.genres ({id,name} array)
-            const seededGenres = item.extra_data?.genres;
-            if (Array.isArray(seededGenres) && seededGenres.length > 0 && seededGenres[0].id) {
-              return seededGenres[0].id === 35;
-            }
-            return false;
-          });
-
-          if (bcComedies.length > 0) {
-            // Roll comedy points — one roll per comedy
-            let points = 0;
-            for (let c = 0; c < bcComedies.length; c++) {
-              points += Math.floor(Math.random() * 1000) + 1;
-            }
-
-            // Persist to localStorage
-            const lsKey = "mantl_comedy_pts_" + uid;
-            const prev = parseInt(localStorage.getItem(lsKey), 10) || 0;
-            localStorage.setItem(lsKey, String(prev + points));
-
-            console.log("[ComedyPts] Letterboxd sync: " + bcComedies.length + " comedy/ies → +" + points + " pts");
-
-            // Show toast (delayed slightly so badge toasts get priority)
-            setTimeout(() => {
-              setSyncComedyToast({ points, visible: true });
-            }, 1500);
-          }
-        } catch (e) {
-          console.warn("[ComedyPts] Sync check failed:", e);
-        }
+        // ── Comedy Points check — DISABLED for launch ──────
+        // Re-enable post-launch: checks if newly logged BC items are comedies,
+        // rolls random 1-1000 points, persists to localStorage, shows toast.
       }
 
       // ── 4. Badge progress check (Queries 4-7) ──
@@ -1744,7 +1688,11 @@ if (!tmdbId) {
             title: feedKey, item_title: title, item_cover: poster,
             rating: ratingFromTitle || null,
             metadata: { source: "letterboxd", letterboxd_username: username, watched_date: watchedDate },
-            created_at: watchedDate ? new Date(watchedDate + "T12:00:00").toISOString() : new Date().toISOString(),
+            created_at: watchedDate
+              ? (new Date(watchedDate + "T12:00:00Z").getTime() > Date.now() + 86400000
+                  ? new Date().toISOString()                          // genuinely future — clamp to now
+                  : new Date(watchedDate + "T12:00:00Z").toISOString()) // trust it (today or past)
+              : new Date().toISOString(),
           };
           if (year) feedRow.item_year = year;
           if (director) feedRow.item_author = director;
@@ -1781,7 +1729,9 @@ if (!tmdbId) {
           .update({
             watch_count: newCount,
             watch_dates: newDates,
-            watched_at: new Date(rw.newDate + "T12:00:00Z").toISOString(),
+            watched_at: new Date(rw.newDate + "T12:00:00Z").getTime() > Date.now() + 86400000
+              ? new Date().toISOString()
+              : new Date(rw.newDate + "T12:00:00Z").toISOString(),
           })
           .eq("user_id", userId)
           .eq("tmdb_id", rw.tmdb_id);
@@ -1817,7 +1767,9 @@ if (!tmdbId) {
                 .update({
                   rewatch_count: newCount - 1, // rewatch_count = total watches minus the first
                   rewatch_dates: rewatchDatesOnly,
-                  updated_at: new Date(rw.newDate + "T12:00:00Z").toISOString(),
+                  updated_at: new Date(rw.newDate + "T12:00:00Z").getTime() > Date.now() + 86400000
+                    ? new Date().toISOString()
+                    : new Date(rw.newDate + "T12:00:00Z").toISOString(),
                 })
                 .eq("user_id", userId)
                 .in("item_id", progressItemIds);
@@ -2447,6 +2399,7 @@ if (!tmdbId) {
       <div className="mantl-app">
 
         {easterEggGame && <FlappyMantl onClose={() => setEasterEggGame(false)} />}
+        {/* DISABLED for launch — Comedy Points
         {showComedyPoints && <ComedyPointsReveal userId={session?.user?.id} onClose={() => setShowComedyPoints(false)} />}
         {syncComedyToast && (
           <ComedyPointsToast
@@ -2455,6 +2408,7 @@ if (!tmdbId) {
             onDone={() => setSyncComedyToast(null)}
           />
         )}
+        */}
         {toast && (
           <div className={`toast${toastExiting ? " toast-exit" : ""}`} style={{ overflow: "hidden" }}>
             {toast}
@@ -2901,13 +2855,11 @@ if (!tmdbId) {
               onTouchStart={() => { if (activeTab !== "feed") setPreloadTab("feed"); }}
               onClick={() => {
                 tapLight(); removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setPreloadTab(null);
-                feedTapCount.current++;
-                clearTimeout(feedTapTimer.current);
-                feedTapTimer.current = setTimeout(() => { feedTapCount.current = 0; }, 2000);
-                if (feedTapCount.current >= 5) {
-                  feedTapCount.current = 0;
-                  setShowComedyPoints(true);
-                }
+                // Comedy Points easter egg — DISABLED for launch
+                // feedTapCount.current++;
+                // clearTimeout(feedTapTimer.current);
+                // feedTapTimer.current = setTimeout(() => { feedTapCount.current = 0; }, 2000);
+                // if (feedTapCount.current >= 5) { feedTapCount.current = 0; setShowComedyPoints(true); }
               }}
             >
               <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>

@@ -586,7 +586,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
           backgroundImage: `url(${resolveImg(data.backdrop_url, TMDB_BACKDROP)})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
-          opacity: 0.3,
+          opacity: 0.2,
         }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -715,15 +715,15 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
             backgroundSize: "cover",
             backgroundPosition: "center top",
-            opacity: 0.4,
+            opacity: 0.18,
           }}>
             <div style={{
               position: "absolute", inset: 0,
               background: `linear-gradient(
                 90deg,
-                var(--bg-card, #131828) 30%,
-                rgba(19,24,40,0.4) 55%,
-                transparent 80%
+                var(--bg-card, #131828) 35%,
+                rgba(19,24,40,0.6) 55%,
+                rgba(19,24,40,0.25) 80%
               )`,
             }} />
             {/* Bottom fade so it doesn't bleed into community strips */}
@@ -731,7 +731,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               position: "absolute", inset: 0,
               background: `linear-gradient(
                 180deg,
-                transparent 60%,
+                transparent 50%,
                 var(--bg-card, #131828) 100%
               )`,
             }} />
@@ -1107,8 +1107,6 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             <div style={{
               fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
               color: "var(--text-primary, #e8ecf4)", marginBottom: 1,
-              filter: pct < 50 ? `blur(${Math.max(0, 3 - pct / 15)}px)` : "none",
-              transition: "filter 0.4s ease",
             }}>
               {data.badge_name}
             </div>
@@ -1199,15 +1197,15 @@ function TrendingCard({ data, onNavigateCommunity }) {
           backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
-          opacity: 0.4,
+          opacity: 0.18,
         }}>
           <div style={{
             position: "absolute", inset: 0,
             background: `linear-gradient(
               90deg,
-              var(--bg-card, #131828) 30%,
-              rgba(19,24,40,0.4) 55%,
-              transparent 80%
+              var(--bg-card, #131828) 35%,
+              rgba(19,24,40,0.6) 55%,
+              rgba(19,24,40,0.25) 80%
             )`,
           }} />
           <div style={{

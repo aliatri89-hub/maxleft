@@ -134,17 +134,24 @@ export function useFeed(userId, subscribedIds) {
       // ── Group community logs by tmdb_id + completed_at date ──
       // Return to Oz in BC + NPP = one card with two community strips
       const logGroups = new Map();
-      const tmdbSeen = new Set(); // track which tmdb_ids are covered by community logs
+      // FIX: Don't populate tmdbSeen eagerly — defer until after subscription
+      // filtering so unsubscribed-community logs don't block shelf versions.
 
       for (const log of rawLogs) {
         // Skip books — cover pipeline not wired up yet
         if (log.media_type === "book") continue;
 
-        // Group by logged_at (= updated_at) so rewatches across communities merge into one card
-        const dateKey = new Date(log.logged_at).toISOString().slice(0, 10);
-        const groupKey = `${log.tmdb_id || log.item_id}_${dateKey}`;
+        // FIX: Use the MOST RECENT timestamp for grouping + sorting.
+        // After a Letterboxd sync, logged_at (= GREATEST(completed_at, updated_at)
+        // from the SQL view) reflects "now" rather than the old Letterboxd date.
+        // If the view also exposes updated_at separately, prefer the newer of the two.
+        const effectiveDate = log.updated_at && new Date(log.updated_at) > new Date(log.logged_at)
+          ? log.updated_at
+          : log.logged_at;
 
-        if (log.tmdb_id) tmdbSeen.add(log.tmdb_id);
+        // Group by date so rewatches across communities merge into one card
+        const dateKey = new Date(effectiveDate).toISOString().slice(0, 10);
+        const groupKey = `${log.tmdb_id || log.item_id}_${dateKey}`;
 
         if (!logGroups.has(groupKey)) {
           logGroups.set(groupKey, {
@@ -157,7 +164,7 @@ export function useFeed(userId, subscribedIds) {
             media_type: log.media_type,
             tmdb_id: log.tmdb_id,
             rating: log.rating,
-            logged_at: log.logged_at,
+            logged_at: effectiveDate, // FIX: use effective date for sort
             completed_at: log.completed_at,
             communities: [],
           });
@@ -167,6 +174,12 @@ export function useFeed(userId, subscribedIds) {
         const group = logGroups.get(groupKey);
         if (!group.backdrop_path && log.backdrop_path) {
           group.backdrop_path = log.backdrop_path;
+        }
+
+        // FIX: Promote group's logged_at to the newest effective date seen
+        // (handles multiple community rows for the same film)
+        if (new Date(effectiveDate) > new Date(group.logged_at)) {
+          group.logged_at = effectiveDate;
         }
 
         // Attach community context if present AND user is subscribed
@@ -193,6 +206,27 @@ export function useFeed(userId, subscribedIds) {
               episode_title: log.episode_title || null,
             });
           }
+        }
+      }
+
+      // ── FIX: Build tmdbSeen AFTER grouping + subscription filtering ──
+      // Only claim a tmdb_id if the group actually has visible community strips.
+      // Groups with zero communities (all filtered out by subscription) should NOT
+      // block the shelf version from appearing — otherwise synced films vanish.
+      const tmdbSeen = new Set();
+      for (const group of logGroups.values()) {
+        if (group.communities.length > 0 && group.tmdb_id) {
+          tmdbSeen.add(group.tmdb_id);
+        }
+      }
+
+      // ── Remove empty community groups ──
+      // If a log group lost all its community strips to subscription filtering
+      // AND has no standalone value (no title visible without a community), drop it
+      // so the shelf version can take over with its fresh created_at timestamp.
+      for (const [key, group] of logGroups) {
+        if (group.communities.length === 0) {
+          logGroups.delete(key);
         }
       }
 

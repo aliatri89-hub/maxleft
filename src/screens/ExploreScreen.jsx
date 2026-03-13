@@ -37,6 +37,18 @@ export default function ExploreScreen({
   }, [isActive]);
 
   // Re-sort when communities load or tab becomes active (but NOT on subscription toggle)
+  // ── Launch plan: custom ordering + coming soon labels ──
+  // Launched: blankcheck, nowplaying (users follow these)
+  // Coming May 1st: filmspotting, chapo
+  // Coming Soon: everything else
+  const UNFOLLOWED_ORDER = [
+    "filmspotting", "chapo",           // next wave — Coming May 1st
+    "rewatchables", "bigpicture",      // paired together
+    "filmjunk", "hdtgm", "getplayed", // Coming Soon
+  ];
+  const COMING_MAY = new Set(["filmspotting", "chapo"]);
+  const DISPLAY_NAMES = { chapo: "Movie Mindset (Chapo)" };
+
   useEffect(() => {
     if (!communities.length || !subscriptionsLoaded) return;
 
@@ -45,14 +57,20 @@ export default function ExploreScreen({
     if (subsKey === lastSortedSubs.current && sortedIds.length > 0) return;
 
     const followed = communities.filter(c => communitySubscriptions?.has(c.id));
-    const unfollowed = communities.filter(c => !communitySubscriptions?.has(c.id) && !c.theme_config?.coming_soon);
-    const comingSoon = communities.filter(c => c.theme_config?.coming_soon);
+    const unfollowed = communities.filter(c => !communitySubscriptions?.has(c.id));
+
+    // Sort unfollowed by launch plan order
+    const slugOrder = new Map(UNFOLLOWED_ORDER.map((s, i) => [s, i]));
+    unfollowed.sort((a, b) => {
+      const ai = slugOrder.get(a.slug) ?? 99;
+      const bi = slugOrder.get(b.slug) ?? 99;
+      return ai - bi;
+    });
 
     setSortedIds([
       ...followed.map(c => c.id),
       "__divider__",
       ...unfollowed.map(c => c.id),
-      ...comingSoon.map(c => c.id),
     ]);
     lastSortedSubs.current = subsKey;
   }, [communities, subscriptionsLoaded]); // intentionally omitting communitySubscriptions
@@ -91,7 +109,7 @@ export default function ExploreScreen({
           if (id === "__divider__") {
             // Only show divider if there are unfollowed communities below
             const hasUnfollowed = communities.some(c =>
-              !communitySubscriptions?.has(c.id) && !c.theme_config?.coming_soon
+              !communitySubscriptions?.has(c.id)
             );
             if (!hasUnfollowed) return null;
             return (
@@ -101,7 +119,7 @@ export default function ExploreScreen({
                 padding: "20px 4px 10px",
                 fontFamily: "'Barlow Condensed', sans-serif",
               }}>
-                Discover More
+                Coming Up
               </div>
             );
           }
@@ -109,11 +127,14 @@ export default function ExploreScreen({
           const c = communityMap[id];
           if (!c) return null;
           const isSub = communitySubscriptions?.has(c.id);
+          const isComingMay = !isSub && COMING_MAY.has(c.slug);
+          const isComingSoon = !isSub && !isComingMay;
+          const displayName = DISPLAY_NAMES[c.slug] || c.name;
 
           return (
             <CommunityCard
               key={c.id}
-              community={c}
+              community={{ ...c, name: displayName }}
               onOpen={() => onOpenCommunity(c.slug)}
               isSubscribed={isSub}
               subscriptionsLoaded={subscriptionsLoaded}
@@ -121,6 +142,7 @@ export default function ExploreScreen({
                 if (isSub) onUnsubscribe?.(c.id);
                 else onSubscribe?.(c.id);
               }}
+              comingSoonLabel={isComingMay ? "Coming May 1st" : isComingSoon ? "Coming Soon" : null}
             />
           );
         })}
@@ -136,11 +158,11 @@ export default function ExploreScreen({
   );
 }
 
-function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, onToggleSubscription }) {
+function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, onToggleSubscription, comingSoonLabel }) {
   const theme = community.theme_config || {};
-  const comingSoon = theme.coming_soon === true;
+  const comingSoon = !!comingSoonLabel;
   const accent = theme.accent || "#e94560";
-  const showFull = !subscriptionsLoaded || isSubscribed || comingSoon;
+  const showFull = !subscriptionsLoaded || isSubscribed;
 
   return (
     <div style={{
@@ -248,10 +270,11 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
         transition: "all 0.35s ease, opacity 0.2s ease 0.1s",
       }}>
         <button
-          onClick={onOpen}
+          onClick={comingSoon ? undefined : onOpen}
+          disabled={comingSoon}
           style={{
             background: "none", border: "none", padding: 0,
-            cursor: "pointer", textAlign: "left", flex: 1, minWidth: 0,
+            cursor: comingSoon ? "default" : "pointer", textAlign: "left", flex: 1, minWidth: 0,
             WebkitTapHighlightColor: "transparent",
             display: "flex", alignItems: "center", gap: 10,
           }}
@@ -271,22 +294,22 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
         </button>
 
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleSubscription(); }}
+          onClick={(e) => { e.stopPropagation(); if (!comingSoon) onToggleSubscription(); }}
           style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "1.5px solid rgba(255,255,255,0.12)",
+            background: comingSoon ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.06)",
+            border: comingSoon ? "1.5px solid rgba(255,255,255,0.06)" : "1.5px solid rgba(255,255,255,0.12)",
             borderRadius: 8, padding: "6px 12px",
-            cursor: "pointer", flexShrink: 0,
+            cursor: comingSoon ? "default" : "pointer", flexShrink: 0,
             transition: "all 0.15s",
             WebkitTapHighlightColor: "transparent",
           }}
         >
           <span style={{
-            fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.4)",
+            fontSize: 11, fontWeight: 700, color: comingSoon ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.4)",
             fontFamily: "'Barlow Condensed', sans-serif",
             letterSpacing: "0.03em", textTransform: "uppercase",
           }}>
-            Follow
+            {comingSoonLabel || "Follow"}
           </span>
         </button>
       </div>

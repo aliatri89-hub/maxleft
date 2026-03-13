@@ -224,6 +224,8 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
         .csl-pane {
           width: 100%;
           min-width: 100%;
+          height: 100%;
+          min-height: 0;
           flex-shrink: 0;
           overflow-y: auto;
           overflow-x: hidden;
@@ -234,6 +236,7 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       <div
         style={{
           flex: 1,
+          minHeight: 0,
           overflow: "hidden",
           position: "relative",
           touchAction: "pan-y",

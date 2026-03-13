@@ -1,6 +1,22 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import { HeroBanner, StatPill, CyclePill } from "../primitives";
 import { useMediaFilter } from "../../../hooks/useMediaFilter";
+
+// ── Slide-up reveal: hides until value loads, then slides up smoothly ──
+function useSlideReveal(value) {
+  const [revealed, setRevealed] = useState(false);
+  const hasTriggered = useRef(false);
+
+  useEffect(() => {
+    if (!hasTriggered.current && value > 0) {
+      hasTriggered.current = true;
+      const t = setTimeout(() => setRevealed(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [value]);
+
+  return revealed;
+}
 
 // ── Easy swap when the inside joke lands ────────────────────
 const BANK_NAME = "The Two Friends Bank";
@@ -244,13 +260,14 @@ export default function BlankCheckHero({ community, miniseries, progress, active
    ═══════════════════════════════════════════════════════════════ */
 
 function HeroStats({ watched, totalFilms, completedSeries, totalSeries, accent }) {
+  const watchedRevealed = useSlideReveal(watched);
   return (
     <div style={{
       display: "flex",
       justifyContent: "center",
       gap: 0,
     }}>
-      <StatColumn value={watched} label="Watched" color={accent} />
+      <StatColumn value={watched} label="Watched" color={accent} reveal={watchedRevealed} />
       <div style={{ width: 1, alignSelf: "stretch", background: "rgba(255,255,255,0.08)", margin: "4px 0" }} />
       <StatColumn value={totalFilms} label="Films" color="#fff" />
       <div style={{ width: 1, alignSelf: "stretch", background: "rgba(255,255,255,0.08)", margin: "4px 0" }} />
@@ -259,7 +276,7 @@ function HeroStats({ watched, totalFilms, completedSeries, totalSeries, accent }
   );
 }
 
-function StatColumn({ value, suffix, label, color }) {
+function StatColumn({ value, suffix, label, color, reveal }) {
   return (
     <div style={{
       flex: 1, maxWidth: 120,
@@ -267,16 +284,26 @@ function StatColumn({ value, suffix, label, color }) {
       padding: "8px 0",
     }}>
       <div style={{
-        fontSize: 36, fontWeight: 800, color,
-        fontFamily: "'Barlow Condensed', sans-serif",
-        lineHeight: 1,
+        overflow: reveal !== undefined ? "hidden" : undefined,
+        height: reveal !== undefined ? 40 : undefined,
       }}>
-        {value}
-        {suffix && (
-          <span style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>
-            {suffix}
-          </span>
-        )}
+        <div style={{
+          fontSize: 36, fontWeight: 800, color,
+          fontFamily: "'Barlow Condensed', sans-serif",
+          lineHeight: 1,
+          ...(reveal !== undefined ? {
+            transform: reveal ? "translateY(0)" : "translateY(100%)",
+            opacity: reveal ? 1 : 0,
+            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
+          } : {}),
+        }}>
+          {value}
+          {suffix && (
+            <span style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>
+              {suffix}
+            </span>
+          )}
+        </div>
       </div>
       <div style={{
         fontSize: 10, fontWeight: 600,
@@ -298,8 +325,21 @@ function StatColumn({ value, suffix, label, color }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function BlankCheck({ director }) {
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    // Delay the reveal so stats animate in first
+    const t = setTimeout(() => setRevealed(true), 400);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div style={{ marginTop: 16 }}>
+    <div style={{
+      marginTop: 16,
+      transform: revealed ? "translateY(0)" : "translateY(12px)",
+      opacity: revealed ? 1 : 0,
+      transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
+    }}>
       <div style={{
         fontSize: 10, fontWeight: 700,
         color: "rgba(255,255,255,0.4)",
@@ -445,6 +485,7 @@ function BlankCheck({ director }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function PatreonRings({ stats, accent }) {
+  const watchedRevealed = useSlideReveal(stats.seenFilms);
   const size = 130;
   const cx = size / 2;
   const cy = size / 2;
@@ -492,13 +533,18 @@ function PatreonRings({ stats, accent }) {
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
       }}>
-        <div style={{
-          fontSize: 26, fontWeight: 800,
-          color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
-          lineHeight: 1,
-        }}>
-          {stats.seenFilms}
+        <div style={{ overflow: "hidden", height: 30 }}>
+          <div style={{
+            fontSize: 26, fontWeight: 800,
+            color: "#fff",
+            fontFamily: "'Barlow Condensed', sans-serif",
+            lineHeight: 1,
+            transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
+            opacity: watchedRevealed ? 1 : 0,
+            transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
+          }}>
+            {stats.seenFilms}
+          </div>
         </div>
         <div style={{
           fontSize: 9, color: "rgba(255,255,255,0.4)",

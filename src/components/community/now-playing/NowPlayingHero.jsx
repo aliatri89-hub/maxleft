@@ -1,6 +1,23 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { HeroBanner } from "../primitives";
 
+// ── Slide-up reveal: hides until value loads, then slides up smoothly ──
+function useSlideReveal(value) {
+  const [revealed, setRevealed] = useState(false);
+  const hasTriggered = useRef(false);
+
+  useEffect(() => {
+    if (!hasTriggered.current && value > 0) {
+      hasTriggered.current = true;
+      // Brief delay so the 0 state is never visible — goes straight to reveal
+      const t = setTimeout(() => setRevealed(true), 50);
+      return () => clearTimeout(t);
+    }
+  }, [value]);
+
+  return revealed;
+}
+
 /**
  * NowPlayingHero — Hero section for the Now Playing Podcast community page.
  *
@@ -99,6 +116,9 @@ export default function NowPlayingHero({
     });
     return { completed, total, pages: 0 };
   }, [miniseries, progress, isBooks, isArcade]);
+
+  // ── Slide-up reveal for watched count ──
+  const watchedRevealed = useSlideReveal(stats.completed);
 
   // ── Pop animation on count change ──
   const prevCount = useRef(stats.completed);
@@ -208,7 +228,7 @@ export default function NowPlayingHero({
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
-          {isArcade ? "Now Playing Arcade" : (heroTagline || community?.name || "Now Playing")}
+          {isArcade ? "Now Playing Arcade" : isBooks ? "Books & Nachos" : (heroTagline || community?.name || "Now Playing")}
         </div>
         <div style={{
           fontSize: isArcade ? 11 : 13,
@@ -217,15 +237,17 @@ export default function NowPlayingHero({
           maxWidth: 300, margin: "0 auto 14px", whiteSpace: "pre-line",
           fontStyle: isArcade ? "italic" : "normal",
         }}>
-          {isArcade ? "The Boll and the Beautiful" : heroDescription}
+          {isArcade ? "The Boll and the Beautiful" : isBooks ? "Source novels, tie-ins, and novelisations from the NP universe" : heroDescription}
         </div>
 
         {/* ═══ STATS ═══ */}
         {isArcade ? (
           <div>
             <div style={{
-              display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 6,
-              padding: "0 0",
+              display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 4,
+              padding: "0 8px",
+              maxWidth: "100%",
+              overflow: "hidden",
             }}>
               <HunterCabinet
                 label="Watched"
@@ -433,13 +455,20 @@ export default function NowPlayingHero({
           }}>
             <div style={{ textAlign: "center" }}>
               <div style={{
-                fontSize: 30, fontWeight: 800, color: "#facc15",
-                fontFamily: "'Barlow Condensed', sans-serif",
-                animation: pop ? "statPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
-                filter: pop ? "drop-shadow(0 0 8px rgba(250,204,21,0.5))" : "none",
-                transition: "filter 0.3s",
+                overflow: "hidden",
+                height: 36,
               }}>
-                {stats.completed}
+                <div style={{
+                  fontSize: 30, fontWeight: 800, color: "#facc15",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  animation: pop ? "statPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
+                  filter: pop ? "drop-shadow(0 0 8px rgba(250,204,21,0.5))" : "none",
+                  transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
+                  opacity: watchedRevealed ? 1 : 0,
+                  transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, filter 0.3s",
+                }}>
+                  {stats.completed}
+                </div>
               </div>
               <div style={{
                 fontSize: 9, color: "rgba(255,255,255,0.35)",
@@ -489,8 +518,8 @@ function HunterCabinet({ label, value, color, pop }) {
   };
 
   return (
-    <div style={{ textAlign: "center", width: 110 }}>
-      <svg width="110" height="157" viewBox="0 0 140 200">
+    <div style={{ textAlign: "center", flex: "0 1 100px", minWidth: 0 }}>
+      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 100 }}>
         <defs>
           {/* Wood grain pattern */}
           <pattern id="hunterWood" x="0" y="0" width="6" height="200" patternUnits="userSpaceOnUse">
@@ -724,8 +753,8 @@ function ShooterCabinet({ label, value, color }) {
   };
 
   return (
-    <div style={{ textAlign: "center", width: 110 }}>
-      <svg width="110" height="157" viewBox="0 0 140 200">
+    <div style={{ textAlign: "center", flex: "0 1 100px", minWidth: 0 }}>
+      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 100 }}>
         <defs>
           <radialGradient id="shooterScreenGlow" cx="50%" cy="45%" r="60%">
             <stop offset="0%" stopColor="#0a1a0e" />
@@ -953,8 +982,8 @@ function CandyCabinet({ label, gameTitle, bgImage }) {
   const gold = "rgba(245,197,24,";
 
   return (
-    <div style={{ textAlign: "center", width: 140 }}>
-      <svg width="140" height="200" viewBox="0 0 140 200">
+    <div style={{ textAlign: "center", flex: "0 1 110px", minWidth: 0 }}>
+      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 110 }}>
         <defs>
           <clipPath id="candyScreen">
             <rect x="30" y="44" width="80" height="42" rx="2" />

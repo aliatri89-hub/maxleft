@@ -352,7 +352,7 @@ export default function BlankCheckLogModal({
           padding: "12px 0 16px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
-          <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} onSaved={onClose} />
+          <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} communitySlug="blankcheck" onSaved={onClose} />
           <div style={{ flex: 1 }} />
           <button
             onClick={onClose}
