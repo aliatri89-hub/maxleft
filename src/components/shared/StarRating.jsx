@@ -99,7 +99,12 @@ export default function StarRating({
                   zIndex: 1,
                 }}
               />
-              {isFull ? "★" : isHalf ? "⯨" : "☆"}
+              {isFull ? "★" : isHalf ? (
+                <span style={{ position: "relative", display: "inline-block", width: "1em", height: "1em" }}>
+                  <span style={{ position: "absolute", inset: 0, color, overflow: "hidden", width: "0.5em" }}>★</span>
+                  <span style={{ position: "absolute", inset: 0, color: "#444" }}>☆</span>
+                </span>
+              ) : "☆"}
             </div>
           );
         })}
