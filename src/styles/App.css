@@ -242,17 +242,18 @@
   .landing-learn-more span {
     font-family: 'Lora', serif;
     font-style: italic;
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: 600;
     letter-spacing: 0.02em;
-    color: #a89e93;
+    color: #b8ada2;
     cursor: pointer;
     transition: color 0.2s;
   }
   .landing-learn-more span:hover { color: var(--terracotta); }
   .landing-learn-more-arrow {
     display: block;
-    margin-top: 6px;
-    font-size: 18px;
+    margin-top: 10px;
+    font-size: 28px;
     color: var(--terracotta);
     animation: bounce 2s ease infinite 1.5s;
   }
