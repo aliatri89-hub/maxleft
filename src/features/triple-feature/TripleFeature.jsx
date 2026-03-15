@@ -162,7 +162,6 @@ export default function TripleFeature({ session, onBack, onToast }) {
   const [phase, setPhase] = useState(PHASE.PICKING);
   const [revealIndex, setRevealIndex] = useState(-1);
   const [runningTotal, setRunningTotal] = useState(0);
-  const [showOptimal, setShowOptimal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const selectedArray = Array.from(selected).sort((a, b) => a - b);
@@ -281,10 +280,10 @@ export default function TripleFeature({ session, onBack, onToast }) {
         <BackButton onBack={onBack} />
 
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
           <div style={S.title}>TRIPLE FEATURE</div>
           <div style={S.subtitle}>Pick 3 · Hit the target · Domestic gross</div>
-          <div style={{ fontSize: 10, color: "#555", marginTop: 6, fontStyle: "italic" }}>
+          <div style={{ fontSize: 10, color: "#555", marginTop: 4, fontStyle: "italic" }}>
             Original domestic gross — not adjusted for inflation
           </div>
         </div>
@@ -309,7 +308,7 @@ export default function TripleFeature({ session, onBack, onToast }) {
             const sel = selected.has(idx);
             const revealing = phase === PHASE.REVEALING && selectedArray.indexOf(idx) <= revealIndex && sel;
             const revealed = phase === PHASE.RESULT && sel;
-            const optimal = showOptimal && puzzle.optimalCombo.includes(idx);
+            const optimal = phase === PHASE.RESULT && puzzle.optimalCombo.includes(idx);
             const currentReveal = phase === PHASE.REVEALING && selectedArray.indexOf(idx) === revealIndex;
             const notPicked = phase === PHASE.RESULT && !sel;
 
@@ -402,29 +401,29 @@ export default function TripleFeature({ session, onBack, onToast }) {
             <GoldConfetti active={userRank === 1} />
 
             <div style={S.resultCard}>
-              <div style={{ marginBottom: 10 }}>
+              <div style={{ marginBottom: 6 }}>
                 <div style={{
-                  fontFamily: "'Playfair Display',serif", fontSize: 48, fontWeight: 900, lineHeight: 1,
+                  fontFamily: "'Playfair Display',serif", fontSize: 40, fontWeight: 900, lineHeight: 1,
                   color: userRank === 1 ? "#d4af37" : userRank <= 3 ? "#f0ece4" : "#8a8070",
                 }}>#{userRank}</div>
-                <div style={{ fontSize: 13, color: "#666", marginTop: 2 }}>out of 10 possible picks</div>
+                <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>out of 10 possible picks</div>
                 <div style={{
-                  fontSize: 12, fontWeight: 600, marginTop: 6, fontStyle: "italic",
+                  fontSize: 11, fontWeight: 600, marginTop: 4, fontStyle: "italic",
                   color: userRank === 1 ? "#d4af37" : userRank <= 3 ? "#4ade80" : userRank <= 6 ? "#f59e0b" : "#ef4444",
                 }}>{FLAVOR[userRank] || ""}</div>
               </div>
 
-              <div style={{ fontSize: 13, color: "#8a8070", marginBottom: 4 }}>Your total</div>
+              <div style={{ fontSize: 12, color: "#8a8070", marginBottom: 2 }}>Your total</div>
               <div style={S.resultTotal}>{formatMoney(userTotal)}</div>
               <div style={{
-                fontSize: 14, fontWeight: 600,
+                fontSize: 13, fontWeight: 600,
                 color: userDiff === 0 ? "#4ade80" : userTotal > puzzle.target ? "#ef4444" : "#f59e0b",
               }}>
                 {userDiff === 0 ? "PERFECT!" : `${formatMoney(userDiff)} ${userTotal > puzzle.target ? "over" : "under"}`}
               </div>
 
               {percentile !== null && playerCount > 1 && (
-                <div style={{ fontSize: 12, color: "#8a8070", marginTop: 8 }}>
+                <div style={{ fontSize: 11, color: "#8a8070", marginTop: 6 }}>
                   Top {Math.round(100 - percentile + 1)}% of {playerCount} players
                 </div>
               )}
@@ -433,23 +432,11 @@ export default function TripleFeature({ session, onBack, onToast }) {
             {/* ── Stats ────────────────────────────────────── */}
             <StatsCard stats={stats} />
 
-            {!showOptimal && userRank > 1 && (
-              <button onClick={() => setShowOptimal(true)} style={S.optBtn}>
-                Show optimal pick → {formatMoney(puzzle.optimalTotal)} ({formatMoney(Math.abs(puzzle.optimalTotal - puzzle.target))} off)
-              </button>
-            )}
-
-            {showOptimal && (
-              <div style={S.optCard}>
-                Optimal: {puzzle.optimalCombo.map((i) => puzzle.movies[i].title).join(" + ")} = {formatMoney(puzzle.optimalTotal)}
-              </div>
-            )}
-
             <button onClick={shareResult} style={S.shareBtn}>
               {copied ? "Copied!" : "Share"}
             </button>
 
-            <div style={{ textAlign: "center", fontSize: 13, color: "#666", marginTop: 16 }}>
+            <div style={{ textAlign: "center", fontSize: 12, color: "#666", marginTop: 12 }}>
               New puzzle in <CountdownTimer getTimeUntilNext={getTimeUntilNext} />
             </div>
           </div>
@@ -513,14 +500,14 @@ const S = {
   subtitle: { fontSize: 11, letterSpacing: "3px", textTransform: "uppercase", color: "#666", fontWeight: 500 },
   label: { fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#8a8070", marginBottom: 6 },
   targetBox: {
-    textAlign: "center", marginBottom: 24, padding: "16px 20px",
+    textAlign: "center", marginBottom: 16, padding: "12px 20px",
     background: "linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.03))",
     border: "1px solid rgba(212,175,55,0.2)", borderRadius: 12,
   },
-  targetVal: { fontFamily: "'Playfair Display',serif", fontSize: 42, fontWeight: 900, color: "#d4af37", lineHeight: 1 },
+  targetVal: { fontFamily: "'Playfair Display',serif", fontSize: 38, fontWeight: 900, color: "#d4af37", lineHeight: 1 },
   runningBox: { textAlign: "center", marginBottom: 20, padding: 10, background: "rgba(212,175,55,0.05)", borderRadius: 8 },
   runningVal: { fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 900, color: "#f0ece4" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 24 },
+  grid: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 16 },
   check: {
     position: "absolute", top: 4, right: 4, width: 22, height: 22,
     borderRadius: "50%", background: "#d4af37", color: "#0a0a0f",
@@ -550,21 +537,11 @@ const S = {
     transition: "all 0.3s ease",
   },
   resultCard: {
-    textAlign: "center", padding: 20,
+    textAlign: "center", padding: "14px 20px",
     background: "linear-gradient(135deg,rgba(212,175,55,0.08),rgba(212,175,55,0.02))",
-    border: "1px solid rgba(212,175,55,0.15)", borderRadius: 14, marginBottom: 16,
+    border: "1px solid rgba(212,175,55,0.15)", borderRadius: 14, marginBottom: 12,
   },
-  resultTotal: { fontFamily: "'Playfair Display',serif", fontSize: 36, fontWeight: 900, color: "#f0ece4", marginBottom: 4 },
-  optBtn: {
-    width: "100%", padding: 10, borderRadius: 8,
-    border: "1px solid rgba(74,222,128,0.2)", background: "rgba(74,222,128,0.05)",
-    color: "#4ade80", fontSize: 13, fontWeight: 500, cursor: "pointer", marginBottom: 12,
-  },
-  optCard: {
-    padding: "10px 14px", borderRadius: 8,
-    background: "rgba(74,222,128,0.05)", border: "1px solid rgba(74,222,128,0.15)",
-    marginBottom: 12, fontSize: 12, color: "#8a8070", textAlign: "center",
-  },
+  resultTotal: { fontFamily: "'Playfair Display',serif", fontSize: 30, fontWeight: 900, color: "#f0ece4", marginBottom: 2 },
   shareBtn: {
     width: "100%", padding: "13px 16px", borderRadius: 10, border: "none",
     background: "linear-gradient(135deg,#d4af37,#f4d03f)",
@@ -573,21 +550,21 @@ const S = {
 
   // ── Stats card styles ──────────────────────────────────
   statsCard: {
-    marginBottom: 16, padding: "16px 12px",
+    marginBottom: 12, padding: "12px 10px",
     background: "rgba(255,255,255,0.03)",
     border: "1px solid rgba(255,255,255,0.06)", borderRadius: 14,
   },
   statsTitle: {
     fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-    color: "#666", textAlign: "center", marginBottom: 12, fontWeight: 600,
+    color: "#666", textAlign: "center", marginBottom: 8, fontWeight: 600,
   },
   statsGrid: {
-    display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px 8px",
+    display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px 8px",
   },
   statItem: { textAlign: "center" },
   statValue: {
-    fontFamily: "'Playfair Display',serif", fontSize: 22, fontWeight: 900,
+    fontFamily: "'Playfair Display',serif", fontSize: 20, fontWeight: 900,
     color: "#f0ece4", lineHeight: 1.2,
   },
-  statLabel: { fontSize: 10, color: "#666", marginTop: 2, fontWeight: 500 },
+  statLabel: { fontSize: 9, color: "#666", marginTop: 1, fontWeight: 500 },
 };

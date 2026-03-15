@@ -37,6 +37,7 @@ import CreateGroupModal from "./components/CreateGroupModal";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
+import { toLogTimestamp } from "./utils/helpers";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
 // Shown instantly when navigating to a community from feed cards.
@@ -1301,7 +1302,7 @@ if (!tmdbId) {
         const movieRow = {
           user_id: userId, title, year, rating: ratingFromTitle || null,
           director, poster_url: poster, backdrop_url: backdrop, genre, runtime, tmdb_id: tmdbId,
-          watched_at: watchedDate ? new Date(watchedDate).toISOString() : new Date().toISOString(),
+          watched_at: watchedDate ? toLogTimestamp(watchedDate) : new Date().toISOString(),
           source: "letterboxd",
           watch_count: 1,
           watch_dates: [watchDateStr],
@@ -1320,7 +1321,7 @@ if (!tmdbId) {
             rating: ratingFromTitle || null,
             metadata: { source: "letterboxd", letterboxd_username: username, watched_date: watchedDate },
             created_at: watchedDate
-              ? new Date(Math.min(new Date(watchedDate + "T12:00:00Z").getTime(), Date.now())).toISOString()
+              ? toLogTimestamp(watchedDate)
               : new Date().toISOString(),
           };
           if (year) feedRow.item_year = year;
@@ -1359,7 +1360,7 @@ if (!tmdbId) {
             watch_count: newCount,
             watch_dates: newDates,
             watched_at: new Date(
-              Math.min(new Date(rw.newDate + "T12:00:00Z").getTime(), Date.now())
+              new Date(toLogTimestamp(rw.newDate)).getTime()
             ).toISOString(),
           })
           .eq("user_id", userId)
@@ -1395,7 +1396,7 @@ if (!tmdbId) {
               // of the feed (feed_user_logs sorts by COALESCE(completed_at, created_at))
               // Clamp to now — noon UTC on the same day can be hours in the future
               const rewatchTimestamp = new Date(
-                Math.min(new Date(rw.newDate + "T12:00:00Z").getTime(), Date.now())
+                new Date(toLogTimestamp(rw.newDate)).getTime()
               ).toISOString();
               await supabase
                 .from("community_user_progress")

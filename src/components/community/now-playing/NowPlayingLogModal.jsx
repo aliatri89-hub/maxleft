@@ -5,6 +5,7 @@ import { useAudioPlayer } from "../shared/AudioPlayerProvider";
 import { useState, useEffect, useMemo } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
+import { toLogTimestamp } from "../../../utils/helpers";
 const PATREON_URL = "https://www.patreon.com/nowplayingpodcast";
 
 /**
@@ -194,7 +195,7 @@ export default function NowPlayingLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
+        completed_at: toLogTimestamp(logDate),
         brown_arrow: (isFilm || isShow || !item.media_type) ? brownArrow : undefined,
         isUpdate: isCompleted,
       });

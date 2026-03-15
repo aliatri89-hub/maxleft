@@ -2,6 +2,7 @@ import AdminGameEditor from "../shared/AdminGameEditor";
 import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState } from "react";
+import { toLogTimestamp } from "../../../utils/helpers";
 
 const FANATICAL_AFFILIATE_TAG = ""; // TODO: Add your Fanatical affiliate ID
 const PATREON_URL = "https://www.patreon.com/getplayed";
@@ -73,7 +74,7 @@ export default function GetPlayedLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        completed_at: status === "completed" ? new Date(logDate + "T12:00:00Z").toISOString() : null,
+        completed_at: status === "completed" ? toLogTimestamp(logDate) : null,
         played_along: playedAlong,
         platform: platform,
         status: status,

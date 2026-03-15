@@ -86,7 +86,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           .from("feed_shelf_logs")
           .select("*")
           .eq("user_id", userId)
-          .order("created_at", { ascending: false })
+          .order("watched_at", { ascending: false, nullsFirst: false })
           .limit(30),
 
         // 6. Recently earned badges
@@ -209,6 +209,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
             tmdb_id: log.tmdb_id,
             rating: log.rating,
             logged_at: effectiveDate,
+            _created_at: log.created_at,
             completed_at: log.completed_at,
             communities: [],
           });
@@ -277,7 +278,8 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
             media_type: "film",
             tmdb_id: shelf.tmdb_id,
             rating: shelf.rating,
-            logged_at: shelf.created_at || shelf.watched_at,
+            logged_at: shelf.watched_at || shelf.created_at,
+            _created_at: shelf.created_at,
             completed_at: shelf.watched_at,
             communities: [],
             isShelfLog: true,
@@ -311,7 +313,11 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
 
       // ── Build chronological stream ──
       const logCards = [...logGroups.values()]
-        .sort((a, b) => new Date(b.logged_at || 0) - new Date(a.logged_at || 0));
+        .sort((a, b) => {
+          const diff = new Date(b.logged_at || 0) - new Date(a.logged_at || 0);
+          if (diff !== 0) return diff;
+          return new Date(b._created_at || 0) - new Date(a._created_at || 0);
+        });
 
       const completionCards = filteredCompletions
         .map(c => ({ type: "badge_complete", data: c, sortDate: new Date(c.earned_at || 0) }));

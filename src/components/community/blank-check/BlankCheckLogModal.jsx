@@ -5,6 +5,7 @@ import { useAudioPlayer } from "../shared/AudioPlayerProvider";
 import { useState, useEffect, useMemo } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
+import { toLogTimestamp } from "../../../utils/helpers";
 const PATREON_URL = "https://www.patreon.com/blankcheck";
 
 /**
@@ -171,7 +172,7 @@ export default function BlankCheckLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
+        completed_at: toLogTimestamp(logDate),
         listened_with_commentary: listenedWithCommentary,
         isUpdate: isCompleted,
       });

@@ -3,6 +3,7 @@ import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useAudioPlayer } from "../shared/AudioPlayerProvider";
 import { useState, useMemo } from "react";
+import { toLogTimestamp } from "../../../utils/helpers";
 
 const PATREON_URL = "https://www.patreon.com/nowplayingpodcast";
 
@@ -178,7 +179,7 @@ export default function NowPlayingGameLogModal({
         rating: rating || null,
         completed_at:
           status === "completed"
-            ? new Date(logDate + "T12:00:00Z").toISOString()
+            ? toLogTimestamp(logDate)
             : null,
         platform,
         status,

@@ -4,6 +4,7 @@ import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState, useEffect, useRef } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
+import { toLogTimestamp } from "../../../utils/helpers";
 
 /**
  * FilmJunkLogModal — Film Junk community log modal.
@@ -87,7 +88,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
     try {
       await onLog(item.id, {
         rating: rating || null,
-        completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
+        completed_at: toLogTimestamp(logDate),
         isUpdate: isCompleted,
       });
       onClose();
