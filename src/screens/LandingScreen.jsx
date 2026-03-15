@@ -1066,6 +1066,9 @@ function LandingScreen({ onSignIn }) {
             </span>
             <span className="landing-wordmark-line" />
           </div>
+          <div className="landing-descriptor">
+            The shelf for everything your podcasts recommend.
+          </div>
           <div className="landing-tagline">
             Discover what to watch,<br />
             read, and play from<br />
