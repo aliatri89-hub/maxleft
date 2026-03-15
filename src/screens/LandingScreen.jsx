@@ -256,7 +256,7 @@ const featureStyles = `
     border: 1px solid rgba(255,255,255,0.06);
   }
   .badge-slot {
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     border-radius: 12px;
     position: relative;
     cursor: pointer;
