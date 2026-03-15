@@ -12,6 +12,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [managingShelves, setManagingShelves] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [expandedListType, setExpandedListType] = useState(null);
   const [editName, setEditName] = useState(profile.name || "");
   const [editBio, setEditBio] = useState(profile.bio || "");
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
@@ -462,60 +463,86 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <span className="profile-group-row-chevron">{wishlistOpen ? "▾" : "›"}</span>
           </div>
           {wishlistOpen && (
-            <div style={{ padding: "4px 16px 12px" }}>
+            <div style={{ padding: "4px 0 8px" }}>
               {wishlist.length === 0 ? (
-                <div style={{ fontFamily: "'Lora', serif", fontSize: 12, color: "var(--text-faint)", fontStyle: "italic", padding: "8px 0" }}>
+                <div style={{ fontFamily: "var(--font-serif)", fontSize: 12, color: "var(--text-faint)", fontStyle: "italic", padding: "8px 18px" }}>
                   No items yet. Tap "Want to read/watch/play" on a friend's activity to add items here.
                 </div>
               ) : (
                 ["book", "movie", "show", "game"].map(type => {
                   const items = wishlist.filter(w => w.item_type === type);
                   if (items.length === 0) return null;
-                  const label = type === "book" ? "📚 Reading List" : type === "movie" ? "🎬 Watch List" : type === "show" ? "📺 Watch List" : "🎮 Play List";
+                  const emoji = type === "book" ? "📚" : type === "movie" ? "🎬" : type === "show" ? "📺" : "🎮";
+                  const label = type === "book" ? "Reading List" : type === "movie" ? "Watch List" : type === "show" ? "Show List" : "Play List";
+                  const isExpanded = expandedListType === type;
+                  const previewItems = isExpanded ? items : [];
+                  const MAX_PREVIEW = 5;
+
                   return (
-                    <div key={type} style={{ marginBottom: 12 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 6 }}>{label} <span style={{ color: "var(--terracotta)" }}>{items.length}</span></div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {items.map(item => {
-                          const isNextUp = type === "book" && profile.nextUpBook?.id === item.id;
-                          return (
-                          <div key={item.id} style={{
-                            display: "flex", alignItems: "center", gap: 10,
-                            padding: "8px 10px", background: isNextUp ? "rgba(196,115,79,0.08)" : "var(--bg-elevated)", border: `1px solid ${isNextUp ? "var(--accent-terra)" : "var(--border-subtle)"}`, borderRadius: 10,
-                          }}>
-                            {item.cover_url ? (
-                              <img src={item.cover_url} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />
-                            ) : (
-                              <div style={{ width: 30, height: 44, borderRadius: 4, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>
-                                {type === "book" ? "📖" : type === "movie" ? "🎬" : type === "show" ? "📺" : "🎮"}
-                              </div>
-                            )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
-                              {item.author && <div style={{ fontFamily: "'Lora', serif", fontSize: 10, color: "var(--text-faint)" }}>{item.author}</div>}
-                              {isNextUp && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", color: "var(--terracotta)", marginTop: 2 }}>UP NEXT</div>}
-                            </div>
-                            {type === "book" && (
-                              <div
-                                style={{ fontSize: 16, cursor: "pointer", padding: "4px 6px", color: isNextUp ? "var(--terracotta)" : "var(--text-faint)", opacity: isNextUp ? 1 : 0.4 }}
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  const nextUp = isNextUp ? null : { id: item.id, title: item.title, author: item.author, cover: item.cover_url };
-                                  await supabase.from("profiles").update({ next_up_book: nextUp }).eq("id", session.user.id);
-                                  onUpdateProfile({ nextUpBook: nextUp });
-                                  onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title} 📖`);
-                                }}
-                                title={isNextUp ? "Remove next up" : "Set as next up"}
-                              >🔖</div>
-                            )}
-                            <div
-                              style={{ fontSize: 14, color: "var(--text-faint)", cursor: "pointer", padding: "4px 8px" }}
-                              onClick={() => removeFromWishlist(item.id)}
-                            >✕</div>
-                          </div>
-                          );
-                        })}
+                    <div key={type}>
+                      {/* Summary row */}
+                      <div className="profile-group-sub-row" onClick={() => setExpandedListType(isExpanded ? null : type)}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ fontSize: 16 }}>{emoji}</span>
+                          <span className="profile-group-row-text" style={{ fontSize: 14 }}>{label}</span>
+                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-terra)", marginLeft: 2 }}>{items.length}</span>
+                        </span>
+                        <span className="profile-group-row-chevron">{isExpanded ? "▾" : "›"}</span>
                       </div>
+
+                      {/* Expanded items */}
+                      {isExpanded && (
+                        <div style={{ padding: "0 18px 12px 38px", display: "flex", flexDirection: "column", gap: 4 }}>
+                          {previewItems.slice(0, MAX_PREVIEW).map(item => {
+                            const isNextUp = type === "book" && profile.nextUpBook?.id === item.id;
+                            return (
+                              <div key={item.id} style={{
+                                display: "flex", alignItems: "center", gap: 10,
+                                padding: "8px 10px", background: isNextUp ? "rgba(196,115,79,0.08)" : "var(--bg-elevated)", border: `1px solid ${isNextUp ? "var(--accent-terra)" : "var(--border-subtle)"}`, borderRadius: 10,
+                              }}>
+                                {item.cover_url ? (
+                                  <img src={item.cover_url} alt="" style={{ width: 28, height: 42, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />
+                                ) : (
+                                  <div style={{ width: 28, height: 42, borderRadius: 4, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
+                                    {emoji}
+                                  </div>
+                                )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
+                                  {item.author && <div style={{ fontFamily: "var(--font-serif)", fontSize: 10, color: "var(--text-faint)" }}>{item.author}</div>}
+                                  {isNextUp && <div style={{ fontFamily: "var(--font-mono)", fontSize: 8, letterSpacing: "0.1em", color: "var(--accent-terra)", marginTop: 2 }}>UP NEXT</div>}
+                                </div>
+                                {type === "book" && (
+                                  <div
+                                    style={{ fontSize: 15, cursor: "pointer", padding: "4px 4px", color: isNextUp ? "var(--accent-terra)" : "var(--text-faint)", opacity: isNextUp ? 1 : 0.4 }}
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const nextUp = isNextUp ? null : { id: item.id, title: item.title, author: item.author, cover: item.cover_url };
+                                      await supabase.from("profiles").update({ next_up_book: nextUp }).eq("id", session.user.id);
+                                      onUpdateProfile({ nextUpBook: nextUp });
+                                      onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title} 📖`);
+                                    }}
+                                    title={isNextUp ? "Remove next up" : "Set as next up"}
+                                  >🔖</div>
+                                )}
+                                <div
+                                  style={{ fontSize: 13, color: "var(--text-faint)", cursor: "pointer", padding: "4px 6px" }}
+                                  onClick={() => removeFromWishlist(item.id)}
+                                >✕</div>
+                              </div>
+                            );
+                          })}
+                          {items.length > MAX_PREVIEW && (
+                            <div style={{
+                              textAlign: "center", padding: "8px 0 4px",
+                              fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-terra)",
+                              letterSpacing: "0.04em", cursor: "pointer",
+                            }}>
+                              + {items.length - MAX_PREVIEW} more
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })
