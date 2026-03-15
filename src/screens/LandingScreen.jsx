@@ -595,6 +595,23 @@ const featureStyles = `
     position: relative;
     overflow: hidden;
   }
+  .community-backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  .community-backdrop-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15,13,11,0.85) 0%, rgba(15,13,11,0.6) 50%, rgba(15,13,11,0.4) 100%);
+    z-index: 0;
+  }
+  .community-row > :not(.community-backdrop):not(.community-backdrop-overlay) {
+    position: relative;
+    z-index: 1;
+  }
   .community-row:hover {
     background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.1);
@@ -746,7 +763,7 @@ const DEMO_BADGES = [
 
 const DEMO_COMMUNITIES = [
   { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23 },
-  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21 },
+  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/lv_0_20260315162245.jpg" },
 ];
 
 function LandingScreen({ onSignIn }) {
@@ -1125,6 +1142,12 @@ function LandingScreen({ onSignIn }) {
                   className="community-row"
                   style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
                 >
+                  {c.backdrop && (
+                    <>
+                      <div className="community-backdrop" style={{ backgroundImage: `url(${c.backdrop})` }} />
+                      <div className="community-backdrop-overlay" />
+                    </>
+                  )}
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
                   <img
                     className="community-avatar"
