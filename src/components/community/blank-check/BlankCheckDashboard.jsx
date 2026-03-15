@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "../../../supabase";
+import CommunityLoadingScreen from "../../CommunityLoadingScreen";
 
 // ── Blank Check Brand Colors ──────────────────────────────────────────
 const C = {
@@ -481,16 +482,7 @@ const Toast = ({ message, link, onDone }) => {
   );
 };
 
-const Skeleton = () => (
-  <div style={{
-    minHeight: "100vh", background: C.bg,
-    display: "flex", alignItems: "center", justifyContent: "center",
-  }}>
-    <div style={{ fontSize: 14, color: C.textDim, fontFamily: "'JetBrains Mono', monospace" }}>
-      Loading community...
-    </div>
-  </div>
-);
+const Skeleton = () => <CommunityLoadingScreen slug="blankcheck" />;
 
 // ── Film Card ───────────────────────────────────────────────────────────
 

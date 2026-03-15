@@ -1,4 +1,5 @@
 import { useCommunityPage } from "../hooks/community";
+import CommunityLoadingScreen from "../components/CommunityLoadingScreen";
 import NowPlayingScreen from "../components/community/now-playing/NowPlayingScreen";
 import BlankCheckScreen from "../components/community/blank-check/BlankCheckScreen";
 import BigPictureScreen from "../components/community/big-picture/BigPictureScreen";
@@ -38,14 +39,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   const { community, miniseries, loading, error } = useCommunityPage(slug);
 
   if (loading) {
-    return (
-      <div style={{
-        minHeight: "100vh", background: "#0f0f1a",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}>
-        <div style={{ color: "#888", fontSize: 14 }}>Loading community...</div>
-      </div>
-    );
+    return <CommunityLoadingScreen slug={slug} />;
   }
 
   if (error || !community) {
