@@ -1418,11 +1418,8 @@ function LandingScreen({ onSignIn }) {
         {/* ── BOTTOM CTA ───────────────────────────────────── */}
         <div className="mantl-bottom-cta">
           <button className="btn-primary" onClick={onSignIn}>
-            Start shelving
+            Press Play
           </button>
-          <div className="mantl-bottom-tagline">
-            The best recommendations come from reviews, not algorithms.
-          </div>
         </div>
       </div>
     </div>
