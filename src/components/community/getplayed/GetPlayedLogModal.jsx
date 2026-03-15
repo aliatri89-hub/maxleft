@@ -39,7 +39,7 @@ const STATUSES = [
  *   isCompleted    — whether already logged
  *   progressData   — { played_along, rating, platform, status } or null
  *   isWpyp         — whether this is a WPYP game
- *   onLog          — (itemId, { rating, notes, completed_at, played_along, platform, status }) => void
+ *   onLog          — (itemId, { rating, completed_at, played_along, platform, status }) => void
  *   onUnlog        — (itemId) => void
  *   onWatchlist    — (item, coverUrl) => void
  *   onClose        — () => void
@@ -51,7 +51,6 @@ export default function GetPlayedLogModal({
   communitySubscriptions, communityId, onNavigateCommunity,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState("");
   const [playedAlong, setPlayedAlong] = useState(progressData?.played_along || false);
   const [platform, setPlatform] = useState(progressData?.platform || null);
   const [status, setStatus] = useState(progressData?.status || null);
@@ -74,7 +73,6 @@ export default function GetPlayedLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: status === "completed" ? new Date(logDate + "T12:00:00Z").toISOString() : null,
         played_along: playedAlong,
         platform: platform,
@@ -158,17 +156,6 @@ export default function GetPlayedLogModal({
         }
         .gp-star-btn .gp-star-zone.left { left: 0; }
         .gp-star-btn .gp-star-zone.right { right: 0; }
-        .gp-notes-input {
-          width: 100%; min-height: 60px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px; color: #e0e0e0;
-          font-size: 13px; padding: 10px 12px;
-          resize: none; font-family: inherit; outline: none;
-          transition: border-color 0.2s;
-        }
-        .gp-notes-input:focus { border-color: rgba(233,30,140,0.4); }
-        .gp-notes-input::placeholder { color: rgba(255,255,255,0.25); }
         .gp-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
@@ -477,22 +464,6 @@ export default function GetPlayedLogModal({
             )}
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: "#888",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            marginBottom: 6,
-          }}>Notes</div>
-          <textarea
-            className="gp-notes-input"
-            placeholder="What did you think?"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
         {/* ─── Played Along toggle (WPYP games only) ─── */}
         {isWpyp && (
           <div style={{ marginBottom: 16 }}>

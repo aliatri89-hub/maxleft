@@ -43,7 +43,7 @@ const STATUSES = [
  *   progressData     — { status, platform, rating, played_along, _steamAchievements } or null
  *   steamStats       — { earned, total } or null (from bridge.getSteamStats)
  *   userOwnsGame     — boolean — does user own this on Steam / games table
- *   onLog            — (itemId, { rating, notes, completed_at, platform, status }) => void
+ *   onLog            — (itemId, { rating, completed_at, platform, status }) => void
  *   onUnlog          — (itemId) => void
  *   onWatchlist      — (item, coverUrl) => void  (adds to backlog)
  *   onClose          — () => void
@@ -56,7 +56,6 @@ export default function NowPlayingGameLogModal({
   onToast, onShelvesChanged,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState("");
   const [platform, setPlatform] = useState(progressData?.platform || null);
   const [status, setStatus] = useState(progressData?.status || null);
   const [saving, setSaving] = useState(false);
@@ -143,7 +142,7 @@ export default function NowPlayingGameLogModal({
       return;
     }
 
-    // Beat → just select it, user fills in rating/date/notes then hits Log Game
+    // Beat → just select it, user fills in rating/date then hits Log Game
     if (key === "completed") {
       setStatus("completed");
       return;
@@ -154,7 +153,6 @@ export default function NowPlayingGameLogModal({
     try {
       await onLog(item.id, {
         rating: null,
-        notes: notes.trim() || null,
         completed_at: null,
         platform,
         status: key,
@@ -178,7 +176,6 @@ export default function NowPlayingGameLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at:
           status === "completed"
             ? new Date(logDate + "T12:00:00Z").toISOString()
@@ -278,17 +275,6 @@ export default function NowPlayingGameLogModal({
         }
         .nppg-star-btn .nppg-star-zone.left { left: 0; }
         .nppg-star-btn .nppg-star-zone.right { right: 0; }
-        .nppg-notes-input {
-          width: 100%; min-height: 60px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px; color: #e0e0e0;
-          font-size: 13px; padding: 10px 12px;
-          resize: none; font-family: inherit; outline: none;
-          transition: border-color 0.2s;
-        }
-        .nppg-notes-input:focus { border-color: rgba(245,197,24,0.4); }
-        .nppg-notes-input::placeholder { color: rgba(255,255,255,0.25); }
         .nppg-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
@@ -836,7 +822,7 @@ export default function NowPlayingGameLogModal({
           </div>
         </div>
 
-        {/* ─── Rating / Notes / Actions — only for Beat or editing ─── */}
+        {/* ─── Rating / Actions — only for Beat or editing ─── */}
         {(status === "completed" || isCompleted) && (
           <>
 
@@ -917,29 +903,6 @@ export default function NowPlayingGameLogModal({
             )}
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 16 }}>
-          <div
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              color: "#888",
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              marginBottom: 6,
-            }}
-          >
-            Notes
-          </div>
-          <textarea
-            className="nppg-notes-input"
-            placeholder="How was the game?"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
         {/* ── Action buttons ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {/* NOT YET LOGGED — Beat selected */}

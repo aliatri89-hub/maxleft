@@ -127,10 +127,10 @@ export default function BigPictureScreen({ community, miniseries, session, onBac
     if (item) setModalItem(item);
   }, [allItems]);
 
-  const handleLog = useCallback(async (itemId, { rating, notes, completed_at, listened_with_commentary, isUpdate }) => {
+  const handleLog = useCallback(async (itemId, { rating, completed_at, listened_with_commentary, isUpdate }) => {
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
-    await logItem(itemId, item, coverUrl, { rating, notes, completed_at, listened_with_commentary, isUpdate });
+    await logItem(itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, isUpdate });
     const typeLabel = item?.media_type === "film" ? "🎬" : item?.media_type === "book" ? "📚" : "🎮";
     if (onToast) onToast(isUpdate ? `Updated! ${typeLabel}` : `Shelf'd! ${typeLabel}`);
     if (!isUpdate && onShelvesChanged) onShelvesChanged();

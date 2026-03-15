@@ -39,10 +39,10 @@ export default function FilmspottingScreen({ community, miniseries, session, onB
     if (allItems.length > 0) fetchCoversForItems(allItems, setCoverCache);
   }, [allItems]);
 
-  const handleLog = useCallback(async (itemId, { rating, notes, completed_at, isUpdate }) => {
+  const handleLog = useCallback(async (itemId, { rating, completed_at, isUpdate }) => {
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
-    await logItem(itemId, item, coverUrl, { rating, notes, completed_at, isUpdate });
+    await logItem(itemId, item, coverUrl, { rating, completed_at, isUpdate });
     if (onToast) onToast(isUpdate ? "Updated! 🎬" : "Shelf'd! 🎬");
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
   }, [allItems, logItem, onToast, onShelvesChanged]);

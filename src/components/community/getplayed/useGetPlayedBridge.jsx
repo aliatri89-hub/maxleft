@@ -130,7 +130,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
 
       const {
         rating,
-        notes,
         completed_at,
         played_along,
         platform,
@@ -144,7 +143,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
         item_id: itemId,
         status: status,
         rating: rating || null,
-        notes: notes || null,
         completed_at: completed_at || null,
         updated_at: new Date().toISOString(),
         extra_data: {
@@ -179,7 +177,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
           genre: item.genre_bucket || null,
           status: status,
           rating: rating || null,
-          notes: notes || null,
           started_at: null,
           finished_at: completed_at || null,
           source: "community_getplayed",
@@ -203,7 +200,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
               rating: rating || null,
               platform: platform || gameRow.platform,
               finished_at: completed_at || null,
-              notes: notes || null,
             })
             .eq("id", existing.id);
         } else {
@@ -219,7 +215,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
         ...prev,
         [itemId]: {
           rating,
-          notes,
           completed_at,
           status,
           played_along: played_along || false,

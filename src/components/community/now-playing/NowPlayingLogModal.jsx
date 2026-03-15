@@ -18,7 +18,7 @@ const PATREON_URL = "https://www.patreon.com/nowplayingpodcast";
  *   coverUrl       — resolved poster/cover URL
  *   isCompleted    — whether already checked off
  *   progressData   — { rating, brown_arrow } or null
- *   onLog          — (itemId, { rating, notes, completed_at, brown_arrow }) => void
+ *   onLog          — (itemId, { rating, completed_at, brown_arrow }) => void
  *   onUnlog        — (itemId) => void
  *   onWatchlist    — (item, coverUrl) => void
  *   onClose        — () => void
@@ -31,7 +31,6 @@ export default function NowPlayingLogModal({
   onToast, onShelvesChanged, coverCacheVersion,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState("");
   const [brownArrow, setBrownArrow] = useState(progressData?.brown_arrow || false);
   const [saving, setSaving] = useState(false);
   const [episodeToast, setEpisodeToast] = useState(false); // shows after logging if episode available
@@ -195,7 +194,6 @@ export default function NowPlayingLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
         brown_arrow: (isFilm || isShow || !item.media_type) ? brownArrow : undefined,
         isUpdate: isCompleted,
@@ -220,7 +218,6 @@ export default function NowPlayingLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: null,
         brown_arrow: (isFilm || isShow || !item.media_type) ? brownArrow : undefined,
         isUpdate: isCompleted,
@@ -314,26 +311,6 @@ export default function NowPlayingLogModal({
         }
         .npp-star-btn .npp-star-zone.left { left: 0; }
         .npp-star-btn .npp-star-zone.right { right: 0; }
-        .npp-notes-input {
-          width: 100%;
-          min-height: 60px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
-          color: #e0e0e0;
-          font-size: 13px;
-          padding: 10px 12px;
-          resize: none;
-          font-family: inherit;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .npp-notes-input:focus {
-          border-color: rgba(74,222,128,0.4);
-        }
-        .npp-notes-input::placeholder {
-          color: rgba(255,255,255,0.25);
-        }
         .npp-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
@@ -699,22 +676,6 @@ export default function NowPlayingLogModal({
             )}
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: "#888",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            marginBottom: 6,
-          }}>Notes</div>
-          <textarea
-            className="npp-notes-input"
-            placeholder={(isFilm || isShow) ? "What did you think?" : isBook ? "Your thoughts..." : "How was it?"}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
         {/* Action buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 

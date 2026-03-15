@@ -23,7 +23,7 @@ const PATREON_URL = "https://www.patreon.com/blankcheck";
  *   progressData      — { listened_with_commentary: bool, rating } or null
  *   isPatreon         — whether this item is a Patreon commentary episode
  *   coverCacheVersion — reactive cover cache from screen state
- *   onLog             — (itemId, { rating, notes, completed_at, listened_with_commentary }) => void
+ *   onLog             — (itemId, { rating, completed_at, listened_with_commentary }) => void
  *   onUnlog           — (itemId) => void
  *   onWatchlist       — (item, coverUrl) => void
  *   onClose           — () => void
@@ -36,7 +36,6 @@ export default function BlankCheckLogModal({
   onToast,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState("");
   const [listenedWithCommentary, setListenedWithCommentary] = useState(
     progressData?.listened_with_commentary || false
   );
@@ -172,7 +171,6 @@ export default function BlankCheckLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
         listened_with_commentary: listenedWithCommentary,
         isUpdate: isCompleted,
@@ -196,7 +194,6 @@ export default function BlankCheckLogModal({
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: null,
         listened_with_commentary: listenedWithCommentary,
         isUpdate: isCompleted,
@@ -281,26 +278,6 @@ export default function BlankCheckLogModal({
         }
         .bc-star-btn .bc-star-zone.left { left: 0; }
         .bc-star-btn .bc-star-zone.right { right: 0; }
-        .bc-notes-input {
-          width: 100%;
-          min-height: 60px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
-          color: #e0e0e0;
-          font-size: 13px;
-          padding: 10px 12px;
-          resize: none;
-          font-family: inherit;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .bc-notes-input:focus {
-          border-color: rgba(74,222,128,0.4);
-        }
-        .bc-notes-input::placeholder {
-          color: rgba(255,255,255,0.25);
-        }
         .bc-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
@@ -606,22 +583,6 @@ export default function BlankCheckLogModal({
             )}
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: "#888",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            marginBottom: 6,
-          }}>Notes</div>
-          <textarea
-            className="bc-notes-input"
-            placeholder={(isFilm || isShow) ? "What did you think?" : isBook ? "Your thoughts..." : "How was it?"}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
         {/* ─── Listened with Commentary toggle ─── */}
         {isPatreon && (
           <div style={{ marginBottom: 16 }}>

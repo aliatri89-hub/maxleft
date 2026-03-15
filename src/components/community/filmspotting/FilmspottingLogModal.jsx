@@ -16,14 +16,12 @@ export default function FilmspottingLogModal({
 }) {
   const [confirmUnlog, setConfirmUnlog] = useState(false);
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState(progressData?.notes || "");
   const [completedAt, setCompletedAt] = useState(
     progressData?.completed_at ? new Date(progressData.completed_at).toISOString().split("T")[0] : ""
   );
 
   useEffect(() => {
     setRating(progressData?.rating || 0);
-    setNotes(progressData?.notes || "");
     setCompletedAt(
       progressData?.completed_at ? new Date(progressData.completed_at).toISOString().split("T")[0] : ""
     );
@@ -32,7 +30,6 @@ export default function FilmspottingLogModal({
   const handleSave = () => {
     onLog(item.id, {
       rating: rating || null,
-      notes: notes || null,
       completed_at: completedAt || null,
       isUpdate: isCompleted,
     });
@@ -136,27 +133,6 @@ export default function FilmspottingLogModal({
             >½</button>
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Notes
-          </div>
-          <textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Add your thoughts..."
-            rows={3}
-            style={{
-              width: "100%", background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8,
-              color: "#e0e0e0", padding: "10px 12px", fontSize: 14,
-              fontFamily: "inherit", resize: "vertical",
-              outline: "none",
-            }}
-          />
-        </div>
-
         {/* Date */}
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>

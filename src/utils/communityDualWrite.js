@@ -12,7 +12,7 @@ import { supabase } from "../supabase";
  */
 
 // ─── Film: single RPC call handles movies + feed_activity + wishlist cleanup ──
-export async function dualWriteFilm(userId, item, coverUrl, { rating, notes, completed_at } = {}) {
+export async function dualWriteFilm(userId, item, coverUrl, { rating, completed_at } = {}) {
   if (!userId || !item?.tmdb_id) return;
 
   const { error } = await supabase.rpc("dual_write_film", {
@@ -23,7 +23,7 @@ export async function dualWriteFilm(userId, item, coverUrl, { rating, notes, com
     p_director: item.creator || null,
     p_cover_url: coverUrl || null,
     p_rating: rating ? Math.round(rating) : null,
-    p_notes: notes || null,
+    p_notes: null,
     p_watched_at: completed_at || null,
   });
 
@@ -35,7 +35,7 @@ export async function dualWriteFilm(userId, item, coverUrl, { rating, notes, com
 }
 
 // ─── Show: single RPC call handles shows + feed_activity + wishlist cleanup ───
-export async function dualWriteShow(userId, item, coverUrl, { rating, notes, completed_at } = {}) {
+export async function dualWriteShow(userId, item, coverUrl, { rating, completed_at } = {}) {
   if (!userId || !item?.tmdb_id) return;
 
   const { error } = await supabase.rpc("dual_write_show", {
@@ -46,7 +46,7 @@ export async function dualWriteShow(userId, item, coverUrl, { rating, notes, com
     p_creator: item.creator || null,
     p_cover_url: coverUrl || null,
     p_rating: rating ? Math.round(rating) : null,
-    p_notes: notes || null,
+    p_notes: null,
     p_watched_at: completed_at || null,
   });
 
@@ -58,7 +58,7 @@ export async function dualWriteShow(userId, item, coverUrl, { rating, notes, com
 }
 
 // ─── Book: single RPC call handles fuzzy match + books + feed + wishlist ──────
-export async function dualWriteBook(userId, item, coverUrl, { rating, notes, completed_at } = {}) {
+export async function dualWriteBook(userId, item, coverUrl, { rating, completed_at } = {}) {
   if (!userId || !item) return;
 
   const { error } = await supabase.rpc("dual_write_book", {
@@ -67,7 +67,7 @@ export async function dualWriteBook(userId, item, coverUrl, { rating, notes, com
     p_creator: item.creator || null,
     p_cover_url: coverUrl || null,
     p_rating: rating ? Math.round(rating) : null,
-    p_notes: notes || null,
+    p_notes: null,
     p_completed_at: completed_at || null,
   });
 

@@ -9,17 +9,12 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
   const [searching, setSearching] = useState(false);
   const [selected, setSelected] = useState(null); // detail view
   const [rating, setRating] = useState(0);
-  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [details, setDetails] = useState(null);
   const [searchError, setSearchError] = useState(null);
   const [bookStatus, setBookStatus] = useState("finished"); // "reading" or "finished"
   const [bookFinishDate, setBookFinishDate] = useState("today"); // "today" or "YYYY-MM-DD"
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [showStatus, setShowStatus] = useState("watching"); // "watching" or "finished"
-  const [currentSeason, setCurrentSeason] = useState(1);
-  const [currentEpisode, setCurrentEpisode] = useState(1);
   const [gameStatus, setGameStatus] = useState("finished"); // "playing" or "finished"
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [addedToWishlist, setAddedToWishlist] = useState(false);
@@ -110,16 +105,12 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
   useEffect(() => {
     if (!selected) { setDetails(null); return; }
     if (selected.type === "book") {
-      setTotalPages(selected.pages || null);
-      setCurrentPage(0);
       setBookStatus("finished");
       setBookFinishDate("today");
       return;
     }
     if (selected.type === "tv") {
       setShowStatus("watching");
-      setCurrentSeason(1);
-      setCurrentEpisode(1);
     }
     if (selected.type === "game") {
       setGameStatus("finished");
@@ -151,7 +142,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
           genre: details?.genre || null,
           runtime: details?.runtime || null,
           rating: rating || null,
-          notes: notes.trim() || null,
           watched_at: new Date().toISOString(),
           source: "mantl",
         }, { onConflict: "user_id,tmdb_id" });
@@ -159,7 +149,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
         if (error) throw error;
       } else if (selected.type === "tv") {
         const isWatching = showStatus === "watching";
-        const totalEps = details?.totalEpisodes || null;
         const { error } = await supabase.from("shows").upsert({
           user_id: session.user.id,
           tmdb_id: selected.tmdbId,
@@ -168,34 +157,26 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
           poster_url: selected.poster,
           backdrop_url: selected.backdrop,
           genre: details?.genre || null,
-          total_episodes: totalEps,
+          total_episodes: details?.totalEpisodes || null,
           total_seasons: details?.totalSeasons || null,
-          current_season: isWatching ? currentSeason : (details?.totalSeasons || 1),
-          current_episode: isWatching ? currentEpisode : null,
-          episodes_watched: isWatching ? currentEpisode : totalEps,
           status: isWatching ? "watching" : "finished",
           rating: isWatching ? null : (rating || null),
-          notes: notes.trim() || null,
           source: "mantl",
         }, { onConflict: "user_id,tmdb_id" });
 
         if (error) throw error;
       } else if (selected.type === "book") {
         const isReading = bookStatus === "reading";
-        const pages = totalPages || selected.pages || null;
         const { error } = await supabase.from("books").insert({
           user_id: session.user.id,
           habit_id: 0,
           title: selected.title,
           author: selected.author || null,
-          total_pages: pages,
-          current_page: isReading ? (currentPage || 0) : (pages || 0),
           cover_url: selected.cover || null,
           is_active: isReading,
           started_at: new Date().toISOString(),
           finished_at: isReading ? null : (bookFinishDate === "today" ? new Date().toISOString() : new Date(bookFinishDate + "T12:00:00").toISOString()),
           rating: isReading ? null : (rating || null),
-          notes: notes.trim() || null,
           source: "mantl",
         });
 
@@ -213,7 +194,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
           genre: selected.genres || null,
           status: isPlaying ? "playing" : "completed",
           rating: isPlaying ? null : (rating || null),
-          notes: notes.trim() || null,
           started_at: new Date().toISOString(),
           finished_at: isPlaying ? null : new Date().toISOString(),
           source: "mantl",
@@ -278,7 +258,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
         <div className="modal-sheet">
           <div className="modal-handle" />
 
-          <button className="shelf-detail-back" onClick={() => { setSelected(null); setRating(0); setNotes(""); setDetails(null); setBookStatus("finished"); setCurrentPage(0); setTotalPages(0); setAddedToWishlist(false); }}>
+          <button className="shelf-detail-back" onClick={() => { setSelected(null); setRating(0); setDetails(null); setBookStatus("finished"); setAddedToWishlist(false); }}>
             ← Back to results
           </button>
 
@@ -380,43 +360,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                     />
                   </div>
                 )}
-
-                <div className="page-tracker">
-                  <div className="rating-label">{bookStatus === "reading" ? "Page Progress" : "Total Pages"} <span style={{ color: "var(--text-faint)", fontWeight: 400, fontSize: 10 }}>(optional)</span></div>
-                  <div className="page-tracker-row">
-                    {bookStatus === "reading" && (
-                      <>
-                        <input
-                          className="page-input"
-                          type="number"
-                          min="0"
-                          max={totalPages || 99999}
-                          value={currentPage || ""}
-                          onChange={(e) => setCurrentPage(Math.max(0, parseInt(e.target.value) || 0))}
-                          placeholder="0"
-                        />
-                        <span className="page-separator">of</span>
-                      </>
-                    )}
-                    <input
-                      className="page-input"
-                      type="number"
-                      min="0"
-                      value={totalPages || ""}
-                      onChange={(e) => setTotalPages(Math.max(0, parseInt(e.target.value) || 0))}
-                      placeholder="—"
-                    />
-                    <span className="page-label-text">pages</span>
-                  </div>
-                  {bookStatus === "reading" && totalPages > 0 && (
-                    <div className="page-progress-bar">
-                      <div
-                        className="page-progress-fill"
-                        style={{ width: `${Math.min(100, (currentPage / totalPages) * 100)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
               </>
             )}
 
@@ -444,47 +387,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                     ✓ Finished
                   </button>
                 </div>
-
-                {showStatus === "watching" && details?.seasons && (
-                  <div className="page-tracker">
-                    <div className="rating-label">Where are you?</div>
-                    <div className="page-tracker-row">
-                      <span className="page-label-text">S</span>
-                      <select
-                        className="page-input"
-                        value={currentSeason}
-                        onChange={(e) => { setCurrentSeason(parseInt(e.target.value)); setCurrentEpisode(1); }}
-                        style={{ width: 72 }}
-                      >
-                        {details.seasons.map((s) => (
-                          <option key={s.number} value={s.number}>
-                            {s.number}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="page-label-text">E</span>
-                      <select
-                        className="page-input"
-                        value={currentEpisode}
-                        onChange={(e) => setCurrentEpisode(parseInt(e.target.value))}
-                        style={{ width: 72 }}
-                      >
-                        {Array.from({ length: (details.seasons.find(s => s.number === currentSeason)?.episodes || 10) }, (_, i) => (
-                          <option key={i + 1} value={i + 1}>{i + 1}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {details.totalEpisodes > 0 && (() => {
-                      const epsBeforeSeason = details.seasons.filter(s => s.number < currentSeason).reduce((sum, s) => sum + s.episodes, 0);
-                      const totalWatched = epsBeforeSeason + currentEpisode;
-                      return (
-                        <div className="page-progress-bar" style={{ marginTop: 10 }}>
-                          <div className="page-progress-fill" style={{ width: `${Math.min(100, (totalWatched / details.totalEpisodes) * 100)}%` }} />
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
               </>
             )}
 
@@ -543,13 +445,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                 {rating > 0 && <div className="rating-display">{rating} / 5</div>}
               </div>
             )}
-
-            <textarea
-              className="notes-input"
-              placeholder="Add a note... (optional)"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
 
             <button
               className="btn-shelf-it"

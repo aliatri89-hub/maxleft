@@ -43,7 +43,6 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
   const [watchSearching, setWatchSearching] = useState(false);
   const [watchSelected, setWatchSelected] = useState(null); // { tmdbId, title, year, poster, type }
   const [watchRating, setWatchRating] = useState(0);
-  const [watchNotes, setWatchNotes] = useState("");
   const [watchType, setWatchType] = useState("movie"); // "movie" | "tv"
   const [recentFilms, setRecentFilms] = useState([]); // recent movies for quick-select
   const [todayFilm, setTodayFilm] = useState(null); // movie logged today (for auto-complete confirmation)
@@ -467,7 +466,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
         setGoalForm({ name: "", targetDate: "", emoji: "", location: "" });
         setLearnInput(learnTopics[hId]?.topic || "");
         setBookRating(0);
-        setWatchSelected(null); setWatchSearchQuery(""); setWatchSearchResults([]); setWatchRating(0); setWatchNotes(""); setWatchType("movie");
+        setWatchSelected(null); setWatchSearchQuery(""); setWatchSearchResults([]); setWatchRating(0); setWatchType("movie");
         setTodayFilm(null);
         setTodayShow(null);
         // Load today's film/show + recent films for watching habits
@@ -777,7 +776,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
             title: watchSelected.title, year: watchSelected.year ? parseInt(watchSelected.year) : null,
             poster_url: watchSelected.poster, backdrop_url: watchSelected.backdrop,
             status: "finished", rating: watchRating || null,
-            notes: watchNotes.trim() || null, source: "mantl",
+            source: "mantl",
           }, { onConflict: "user_id,tmdb_id" });
         } else {
           const details = await fetchTMDBDetails(watchSelected.tmdbId, "movie");
@@ -787,12 +786,12 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
             director: details?.director || null, poster_url: watchSelected.poster,
             backdrop_url: watchSelected.backdrop, genre: details?.genre || null,
             runtime: details?.runtime || null, rating: watchRating || null,
-            notes: watchNotes.trim() || null, watched_at: new Date().toISOString(), source: "mantl",
+            watched_at: new Date().toISOString(), source: "mantl",
           }, { onConflict: "user_id,tmdb_id" });
         }
       } else if (watchRating) {
         // Quick-select but user added a rating — update existing movie
-        await supabase.from("movies").update({ rating: watchRating, notes: watchNotes.trim() || null })
+        await supabase.from("movies").update({ rating: watchRating })
           .eq("user_id", session.user.id).eq("tmdb_id", watchSelected.tmdbId);
       }
 
@@ -823,7 +822,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
     }
 
     // Reset
-    setWatchSelected(null); setWatchRating(0); setWatchNotes(""); setWatchSearchQuery("");
+    setWatchSelected(null); setWatchRating(0); setWatchSearchQuery("");
     setExpandedHabit(null);
     computeGoalProgress();
   };
@@ -1727,7 +1726,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
                               <div className="mono" style={{ fontSize: 10, color: "var(--text-faint)" }}>{watchSelected.year}{watchSelected.type === "tv" ? " · Show" : ""}</div>
                             </div>
                             <span className="mono" style={{ fontSize: 10, color: "var(--terracotta)", cursor: "pointer" }}
-                              onClick={() => { setWatchSelected(null); setWatchRating(0); setWatchNotes(""); }}>Change</span>
+                              onClick={() => { setWatchSelected(null); setWatchRating(0); }}>Change</span>
                           </div>
 
                           <div className="mono" style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>Rate it:</div>
@@ -1737,9 +1736,6 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
                                 onClick={() => setWatchRating(s)}>★</span>
                             ))}
                           </div>
-
-                          <input className="ch-input mono" placeholder="Quick thought... (optional)" value={watchNotes}
-                            onChange={e => setWatchNotes(e.target.value)} style={{ marginBottom: 8 }} />
 
                           <button className="btn-primary" onClick={() => finishWatch(hId)}>
                             Shelf It 🎬

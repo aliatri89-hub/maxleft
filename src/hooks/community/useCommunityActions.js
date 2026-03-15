@@ -11,7 +11,7 @@ import { dualWriteFilm, dualWriteShow, dualWriteBook } from "../../utils/communi
 export function useCommunityActions(userId, setProgress) {
 
   // ─── Log an item (dual-write: community progress + shelf) ───
-  const logItem = useCallback(async (itemId, item, coverUrl, { rating, notes, completed_at, listened_with_commentary, brown_arrow, isUpdate } = {}) => {
+  const logItem = useCallback(async (itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, brown_arrow, isUpdate } = {}) => {
     if (!userId) return;
 
     // Optimistic update
@@ -31,7 +31,6 @@ export function useCommunityActions(userId, setProgress) {
       if (isUpdate) {
         const updateFields = { updated_at: new Date().toISOString() };
         if (rating) updateFields.rating = Math.round(rating);
-        if (notes) updateFields.notes = notes;
         if (completed_at) updateFields.completed_at = completed_at;
         if (listened_with_commentary !== undefined) updateFields.listened_with_commentary = listened_with_commentary;
         if (brown_arrow !== undefined) updateFields.brown_arrow = brown_arrow;
@@ -54,7 +53,6 @@ export function useCommunityActions(userId, setProgress) {
             item_id: itemId,
             status: "completed",
             rating: rating ? Math.round(rating) : null,
-            notes: notes || null,
             completed_at: completed_at || null,
             listened_with_commentary: listened_with_commentary || false,
             brown_arrow: brown_arrow || false,
@@ -69,7 +67,7 @@ export function useCommunityActions(userId, setProgress) {
 
       // 2. Dual-write to shelf (only on first log, not updates)
       if (!isUpdate && item) {
-        const opts = { rating, notes, completed_at };
+        const opts = { rating, completed_at };
         if (item.media_type === "film" && item.tmdb_id) {
           await dualWriteFilm(userId, item, coverUrl, opts);
         } else if (item.media_type === "show" && item.tmdb_id) {

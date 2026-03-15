@@ -252,21 +252,6 @@
   color: var(--text-secondary);
 }
 
-.item-detail-notes-label {
-  color: var(--text-muted) !important;
-}
-
-.notes-input.notes-input {
-  background: var(--bg-input);
-  border-color: var(--border-medium);
-  color: var(--text-secondary);
-}
-.notes-input::placeholder {
-  color: var(--text-faint) !important;
-}
-.notes-input:focus {
-  border-color: rgba(74, 222, 128, 0.4) !important;
-}
 
 /* ── Trophy Case Expanded ── */
 

@@ -16,7 +16,7 @@ const PATREON_URL = "https://www.patreon.com/thebigpicture";
  *   coverUrl       — resolved poster URL
  *   isCompleted    — whether already checked off
  *   progressData   — { rating } or null
- *   onLog          — (itemId, { rating, notes, completed_at }) => void
+ *   onLog          — (itemId, { rating, completed_at }) => void
  *   onUnlog        — (itemId) => void
  *   onWatchlist    — (item, coverUrl) => void
  *   onClose        — () => void
@@ -28,7 +28,6 @@ export default function BigPictureLogModal({
   communitySubscriptions, communityId, onNavigateCommunity,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
-  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [overview, setOverview] = useState(null);
   const [overviewExpanded, setOverviewExpanded] = useState(false);
@@ -76,7 +75,6 @@ fetchTMDBWatchProviders(item.tmdb_id)
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: new Date(logDate + "T12:00:00Z").toISOString(),
         isUpdate: isCompleted,
       });
@@ -93,7 +91,6 @@ fetchTMDBWatchProviders(item.tmdb_id)
     try {
       await onLog(item.id, {
         rating: rating || null,
-        notes: notes.trim() || null,
         completed_at: null,
         isUpdate: isCompleted,
       });
@@ -170,26 +167,6 @@ fetchTMDBWatchProviders(item.tmdb_id)
         }
         .bp-star-btn .bp-star-zone.left { left: 0; }
         .bp-star-btn .bp-star-zone.right { right: 0; }
-        .bp-notes-input {
-          width: 100%;
-          min-height: 60px;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
-          color: #e0e0e0;
-          font-size: 13px;
-          padding: 10px 12px;
-          resize: none;
-          font-family: inherit;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .bp-notes-input:focus {
-          border-color: rgba(74,222,128,0.4);
-        }
-        .bp-notes-input::placeholder {
-          color: rgba(255,255,255,0.25);
-        }
         .bp-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
@@ -387,22 +364,6 @@ fetchTMDBWatchProviders(item.tmdb_id)
             )}
           </div>
         </div>
-
-        {/* Notes */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: "#888",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            marginBottom: 6,
-          }}>Notes</div>
-          <textarea
-            className="bp-notes-input"
-            placeholder="What did you think?"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-
         {/* Action buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
 
