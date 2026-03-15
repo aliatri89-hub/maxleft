@@ -6,6 +6,22 @@ import { sb } from "../utils/api";
 import InitialAvatar from "../components/InitialAvatar";
 import ImportCSVModal from "../components/ImportCSVModal";
 
+/** Smooth expand/collapse wrapper using CSS grid trick */
+function Expandable({ open, children }) {
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateRows: open ? "1fr" : "0fr",
+      opacity: open ? 1 : 0,
+      transition: "grid-template-rows 0.3s cubic-bezier(0.2,0.9,0.3,1), opacity 0.25s ease",
+    }}>
+      <div style={{ overflow: "hidden" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, userGroups, onOpenGroup, onCreateGroup, onJoinCode, onImportComplete }) {
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -213,7 +229,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <span className="profile-group-row-text">Edit Profile</span>
             <span className="profile-group-row-chevron">{editing ? "▾" : "›"}</span>
           </div>
-          {editing && (
+          <Expandable open={editing}>
             <div className="profile-group-expand">
               <div>
                 <div className="event-form-label">Name</div>
@@ -227,7 +243,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                 {savingProfile ? "Saving..." : "Save"}
               </button>
             </div>
-          )}
+          </Expandable>
 
           <div className="profile-group-divider" />
 
@@ -235,7 +251,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <span className="profile-group-row-text">Manage Shelves</span>
             <span className="profile-group-row-chevron">{managingShelves ? "▾" : "›"}</span>
           </div>
-          {managingShelves && (
+          <Expandable open={managingShelves}>
             <div className="manage-shelves-panel" ref={shelfListRef}
               onTouchMove={onShelfDragMove} onTouchEnd={onShelfDragEnd} onTouchCancel={onShelfDragCancel}
               onMouseMove={shelfDragIdx !== null ? onShelfDragMove : undefined}
@@ -270,7 +286,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                 );
               })}
             </div>
-          )}
+          </Expandable>
         </div>
       </div>
 
@@ -288,7 +304,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
               {syncOpen ? "▾" : "›"}
             </span>
           </div>
-          {syncOpen && (
+          <Expandable open={syncOpen}>
             <div style={{ padding: "4px 0 8px" }}>
               {/* Letterboxd */}
               <div className="profile-group-sub-row" onClick={() => setLetterboxdOpen(!letterboxdOpen)}>
@@ -298,7 +314,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   {letterboxdOpen ? "▾" : "›"}
                 </span>
               </div>
-              {letterboxdOpen && (
+              <Expandable open={letterboxdOpen}>
                 <div className="profile-sync-panel">
                   {profile.letterboxd_username ? (
                     <>
@@ -343,7 +359,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   )}
                 </div>
-              )}
+              </Expandable>
 
               {/* Goodreads */}
               <div className="profile-group-sub-row" onClick={() => setGoodreadsOpen(!goodreadsOpen)}>
@@ -353,7 +369,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   {goodreadsOpen ? "▾" : "›"}
                 </span>
               </div>
-              {goodreadsOpen && (
+              <Expandable open={goodreadsOpen}>
                 <div className="profile-sync-panel">
                   {profile.goodreads_user_id ? (
                     <>
@@ -397,7 +413,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   )}
                 </div>
-              )}
+              </Expandable>
 
               {/* Steam */}
               <div className="profile-group-sub-row" onClick={() => setSteamOpen(!steamOpen)}>
@@ -407,7 +423,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   {steamOpen ? "▾" : "›"}
                 </span>
               </div>
-              {steamOpen && (
+              <Expandable open={steamOpen}>
                 <div className="profile-sync-panel">
                   {profile.steam_id ? (
                     <>
@@ -445,9 +461,9 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   )}
                 </div>
-              )}
+              </Expandable>
             </div>
-          )}
+          </Expandable>
 
           <div className="profile-group-divider" />
 
@@ -462,7 +478,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <span className="profile-group-row-text">My Lists</span>
             <span className="profile-group-row-chevron">{wishlistOpen ? "▾" : "›"}</span>
           </div>
-          {wishlistOpen && (
+          <Expandable open={wishlistOpen}>
             <div style={{ padding: "4px 0 8px" }}>
               {wishlist.length === 0 ? (
                 <div style={{ fontFamily: "var(--font-serif)", fontSize: 12, color: "var(--text-faint)", fontStyle: "italic", padding: "8px 18px" }}>
@@ -475,7 +491,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   const emoji = type === "book" ? "📚" : type === "movie" ? "🎬" : type === "show" ? "📺" : "🎮";
                   const label = type === "book" ? "Reading List" : type === "movie" ? "Watch List" : type === "show" ? "Show List" : "Play List";
                   const isExpanded = expandedListType === type;
-                  const previewItems = isExpanded ? items : [];
                   const MAX_PREVIEW = 5;
 
                   return (
@@ -491,9 +506,9 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       </div>
 
                       {/* Expanded items */}
-                      {isExpanded && (
+                      <Expandable open={isExpanded}>
                         <div style={{ padding: "0 18px 12px 38px", display: "flex", flexDirection: "column", gap: 4 }}>
-                          {previewItems.slice(0, MAX_PREVIEW).map(item => {
+                          {items.slice(0, MAX_PREVIEW).map(item => {
                             const isNextUp = type === "book" && profile.nextUpBook?.id === item.id;
                             return (
                               <div key={item.id} style={{
@@ -542,13 +557,13 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                             </div>
                           )}
                         </div>
-                      )}
+                      </Expandable>
                     </div>
                   );
                 })
               )}
             </div>
-          )}
+          </Expandable>
         </div>
       </div>
 
