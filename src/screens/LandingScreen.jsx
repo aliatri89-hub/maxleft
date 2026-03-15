@@ -172,7 +172,7 @@ const featureStyles = `
   /* ── FEATURES SECTION OVERHAUL ───────────────────────────── */
   .mantl-features {
     background: linear-gradient(180deg, #1a1714 0%, #0f0d0b 100%);
-    padding: 60px 20px 80px;
+    padding: 60px 12px 80px;
     overflow: hidden;
     position: relative;
   }
@@ -210,7 +210,7 @@ const featureStyles = `
 
   /* ── FEATURE BLOCKS ──────────────────────────────────────── */
   .mantl-feature-block {
-    max-width: 380px;
+    max-width: 420px;
     margin: 0 auto 64px;
     opacity: 0;
     transform: translateY(30px);
@@ -248,9 +248,9 @@ const featureStyles = `
   /* ── BADGE COLLECTION DEMO ───────────────────────────────── */
   .badge-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 18px;
     background: rgba(255,255,255,0.03);
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
@@ -297,7 +297,7 @@ const featureStyles = `
     backdrop-filter: blur(8px);
   }
   .badge-front-icon {
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     filter: blur(4px) saturate(0);
     opacity: 0.4;
     transition: filter 0.3s, opacity 0.3s;
@@ -308,7 +308,7 @@ const featureStyles = `
   }
   .badge-front-q {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: rgba(255,255,255,0.25);
@@ -316,16 +316,16 @@ const featureStyles = `
   .badge-back {
     transform: rotateY(180deg);
     border: 1px solid;
-    padding: 8px;
+    padding: 10px;
     text-align: center;
   }
   .badge-back-icon {
-    font-size: 1.6rem;
+    font-size: 2rem;
     line-height: 1;
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.58rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-weight: 600;
@@ -334,7 +334,7 @@ const featureStyles = `
   .badge-back-flair {
     font-family: 'Lora', serif;
     font-style: italic;
-    font-size: 0.5rem;
+    font-size: 0.62rem;
     opacity: 0.7;
   }
   @keyframes badgeRevealPulse {
@@ -651,7 +651,7 @@ const featureStyles = `
   .mantl-bottom-cta {
     text-align: center;
     margin-top: 20px;
-    padding: 0 20px;
+    padding: 0 12px;
   }
   .mantl-bottom-tagline {
     font-family: 'Lora', serif;
@@ -682,10 +682,8 @@ const featureStyles = `
 /* ── Badge data for the demo ────────────────────────────── */
 const DEMO_BADGES = [
   { icon: "🎃", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
-  { icon: "🏕️", name: "Camp Crystal Lake Survivor", sub: "Friday the 13th", color: "#1a8a4a", bg: "rgba(26,138,74,0.12)" },
   { icon: "👽", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
   { icon: "🔥", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
-  { icon: "🥊", name: "Adrian's Corner", sub: "Rocky", color: "#c4916a", bg: "rgba(196,145,106,0.12)" },
   { icon: "🔪", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
 ];
 
