@@ -297,8 +297,8 @@ const featureStyles = `
     backdrop-filter: blur(8px);
   }
   .badge-front-art {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
     object-fit: contain;
     filter: blur(5px) saturate(0) brightness(0.7);
     opacity: 0.35;
@@ -340,8 +340,8 @@ const featureStyles = `
     z-index: 1;
   }
   .badge-back-art {
-    width: 66px;
-    height: 66px;
+    width: 78px;
+    height: 78px;
     object-fit: contain;
     border-radius: 50%;
     border: 2px solid;
