@@ -150,9 +150,8 @@ export default function NowPlayingHero({
   return (
     <div style={{
       position: "relative",
-      borderBottom: isArcade ? "1px solid rgba(0,255,200,0.06)" : "1px solid rgba(255,255,255,0.06)",
+      borderBottom: "1px solid rgba(255,255,255,0.06)",
       overflow: "hidden",
-      background: isArcade ? "#08080f" : undefined,
     }}>
       <style>{`
         @keyframes statPop {
@@ -175,56 +174,21 @@ export default function NowPlayingHero({
         }
       `}</style>
 
-      {/* Arcade: amber vignette + scanlines */}
-      {isArcade ? (
-        <>
-          <div style={{
-            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-            background: [
-              "radial-gradient(ellipse at center, transparent 30%, rgba(245,197,24,0.05) 70%, rgba(245,197,24,0.10) 100%)",
-              "linear-gradient(180deg, rgba(245,197,24,0.03) 0%, transparent 40%, transparent 60%, rgba(245,197,24,0.02) 100%)",
-            ].join(", "),
-          }} />
-          <div style={{
-            position: "absolute", top: 0, left: 0, width: "40%", height: "40%",
-            background: "radial-gradient(ellipse at top left, rgba(245,197,24,0.07) 0%, transparent 70%)",
-            pointerEvents: "none", zIndex: 0,
-          }} />
-          <div style={{
-            position: "absolute", top: 0, right: 0, width: "40%", height: "40%",
-            background: "radial-gradient(ellipse at top right, rgba(245,197,24,0.07) 0%, transparent 70%)",
-            pointerEvents: "none", zIndex: 0,
-          }} />
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, width: "40%", height: "40%",
-            background: "radial-gradient(ellipse at bottom left, rgba(245,197,24,0.05) 0%, transparent 70%)",
-            pointerEvents: "none", zIndex: 0,
-          }} />
-          <div style={{
-            position: "absolute", bottom: 0, right: 0, width: "40%", height: "40%",
-            background: "radial-gradient(ellipse at bottom right, rgba(245,197,24,0.05) 0%, transparent 70%)",
-            pointerEvents: "none", zIndex: 0,
-          }} />
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "repeating-linear-gradient(0deg, rgba(245,197,24,0.008) 0px, rgba(245,197,24,0.008) 1px, transparent 1px, transparent 3px)",
-            pointerEvents: "none", zIndex: 0,
-          }} />
-        </>
-      ) : (
-        <HeroBanner
-          bannerUrl={heroBanner}
-          contain={isBooks ? false : tabHero?.banner_contain}
-          position={isBooks ? "center center" : tabHero?.banner_position}
-          opacity={isBooks ? 0.2 : tabHero?.banner_opacity}
-          gradientStrength={isBooks ? 0.9 : tabHero?.gradient_strength}
-        />
-      )}
+      {/* Banner — all tabs use HeroBanner now */}
+      <HeroBanner
+        bannerUrl={isArcade
+          ? "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BannerNowPlayingArcade.jpg"
+          : heroBanner}
+        contain={isBooks ? false : (isArcade ? false : tabHero?.banner_contain)}
+        position={isBooks ? "center center" : (isArcade ? "center center" : tabHero?.banner_position)}
+        opacity={isBooks ? 0.2 : (isArcade ? 0.3 : tabHero?.banner_opacity)}
+        gradientStrength={isBooks ? 0.9 : (isArcade ? 0.85 : tabHero?.gradient_strength)}
+      />
 
-      <div style={{ position: "relative", zIndex: 1, padding: isArcade ? "20px 16px 6px" : "24px 16px 20px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         {/* Title + tagline */}
         <div style={{
-          fontSize: isArcade ? 22 : 28, fontWeight: 800, color: "#fff",
+          fontSize: 28, fontWeight: 800, color: "#fff",
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
@@ -232,11 +196,10 @@ export default function NowPlayingHero({
           {isArcade ? "Now Playing Arcade" : isBooks ? "Books & Nachos" : (heroTagline || community?.name || "Now Playing")}
         </div>
         <div style={{
-          fontSize: isArcade ? 11 : 13,
-          color: isArcade ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.5)",
+          fontSize: 13,
+          color: "rgba(255,255,255,0.5)",
           textAlign: "center",
           maxWidth: 300, margin: "0 auto 14px", whiteSpace: "pre-line",
-          fontStyle: isArcade ? "italic" : "normal",
         }}>
           {isArcade ? "The Boll and the Beautiful" : isBooks ? "Source novels, tie-ins, and novelisations from the Now Playing universe" : heroDescription}
         </div>
@@ -244,37 +207,47 @@ export default function NowPlayingHero({
         {/* ═══ STATS ═══ */}
         {isArcade ? (
           <div>
+            {/* Clean stats */}
             <div style={{
-              display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 12,
-              padding: "0 8px",
-              maxWidth: "100%",
+              display: "flex", justifyContent: "center", gap: 24, marginBottom: 14,
             }}>
-              <HunterCabinet
-                label="Watched"
-                value={stats.completed}
-                color="#00ffc8"
-                pop={pop}
-              />
-
-              <CandyCabinet
-                label="Now Playing"
-                gameTitle={stats.playingGame?.title || null}
-                bgImage={stats.playingGame?.bgImage || null}
-              />
-            </div>
-            <div style={{
-              textAlign: "center", marginTop: 6, paddingBottom: 4,
-              fontSize: 8, color: "rgba(245,197,24,0.18)",
-              fontFamily: "'Courier New', monospace",
-              letterSpacing: "0.12em", textTransform: "uppercase",
-            }}>
-              Insert coin to continue
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: 30, fontWeight: 800, color: "#00ffc8",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  animation: pop ? "statPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" : "none",
+                  filter: pop ? "drop-shadow(0 0 8px rgba(0,255,200,0.5))" : "none",
+                  transition: "filter 0.3s",
+                }}>
+                  {stats.completed}
+                </div>
+                <div style={{
+                  fontSize: 9, color: "rgba(255,255,255,0.35)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>
+                  Watched
+                </div>
+              </div>
+              <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: 30, fontWeight: 800, color: "#fff",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                }}>
+                  {stats.total}
+                </div>
+                <div style={{
+                  fontSize: 9, color: "rgba(255,255,255,0.35)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>
+                  Titles
+                </div>
+              </div>
             </div>
 
             {/* ── Filter pills + search toggle ── */}
             <div style={{
               display: "flex", alignItems: "center", gap: 6,
-              marginTop: 10, padding: "0 0",
             }}>
               {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
                 <button
