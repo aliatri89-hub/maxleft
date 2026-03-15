@@ -289,22 +289,24 @@ const featureStyles = `
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   }
   .badge-front {
     background: rgba(255,255,255,0.04);
     border: 1px dashed rgba(255,255,255,0.12);
     backdrop-filter: blur(8px);
   }
-  .badge-front-icon {
-    font-size: 1.8rem;
-    filter: blur(4px) saturate(0);
-    opacity: 0.4;
+  .badge-front-art {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    filter: blur(5px) saturate(0) brightness(0.7);
+    opacity: 0.35;
     transition: filter 0.3s, opacity 0.3s;
   }
-  .badge-slot:hover .badge-front-icon {
-    filter: blur(2px) saturate(0.3);
-    opacity: 0.6;
+  .badge-slot:hover .badge-front-art {
+    filter: blur(3px) saturate(0.3) brightness(0.8);
+    opacity: 0.5;
   }
   .badge-front-q {
     font-family: 'Barlow Condensed', sans-serif;
@@ -319,9 +321,14 @@ const featureStyles = `
     padding: 10px;
     text-align: center;
   }
-  .badge-back-icon {
-    font-size: 2rem;
-    line-height: 1;
+  .badge-back-art {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 2px solid;
+    padding: 2px;
+    background: rgba(0,0,0,0.3);
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
@@ -755,10 +762,10 @@ const featureStyles = `
 
 /* ── Badge data for the demo ────────────────────────────── */
 const DEMO_BADGES = [
-  { icon: "🎃", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
-  { icon: "👽", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
-  { icon: "🔥", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
-  { icon: "🔪", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
 ];
 
 const DEMO_COMMUNITIES = [
@@ -1214,11 +1221,11 @@ function LandingScreen({ onSignIn }) {
               >
                 <div className="badge-inner">
                   <div className="badge-front">
-                    <span className="badge-front-icon">{badge.icon}</span>
+                    <img className="badge-front-art" src={badge.art} alt="" />
                     <span className="badge-front-q">?</span>
                   </div>
                   <div className="badge-back" style={{ background: badge.bg, borderColor: badge.color + '44' }}>
-                    <span className="badge-back-icon">{badge.icon}</span>
+                    <img className="badge-back-art" src={badge.art} alt={badge.name} style={{ borderColor: badge.color + '66' }} />
                     <span className="badge-back-name" style={{ color: badge.color }}>{badge.name}</span>
                     <span className="badge-back-flair" style={{ color: badge.color }}>{badge.sub}</span>
                   </div>
