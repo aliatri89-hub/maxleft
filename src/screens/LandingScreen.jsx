@@ -321,7 +321,6 @@ const featureStyles = `
     padding: 10px;
     text-align: center;
     overflow: hidden;
-    position: relative;
   }
   .badge-back > img,
   .badge-back > span {
