@@ -1055,7 +1055,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">The <strong>shelf</strong> for everything your <strong>podcasts</strong> recommend.</div>
+          <div className="landing-eyebrow">The <strong>shelf</strong> for what<br />your <strong>podcasts</strong><br />recommend.</div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
