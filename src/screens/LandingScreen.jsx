@@ -1055,7 +1055,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">From the <strong>Podcast</strong> to Your <strong>Shelf</strong></div>
+          <div className="landing-eyebrow">The <strong>shelf</strong> for everything your <strong>podcasts</strong> recommend.</div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
@@ -1065,9 +1065,6 @@ function LandingScreen({ onSignIn }) {
               ))}
             </span>
             <span className="landing-wordmark-line" />
-          </div>
-          <div className="landing-descriptor">
-            The shelf for everything your podcasts recommend.
           </div>
           <div className="landing-tagline">
             Discover what to watch,<br />
