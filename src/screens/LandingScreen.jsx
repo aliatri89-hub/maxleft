@@ -633,13 +633,25 @@ const featureStyles = `
     color: #9a938a;
     font-style: italic;
   }
-  .community-count {
+  .community-donut {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .community-donut svg {
+    position: absolute;
+    inset: 0;
+  }
+  .community-donut-pct {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.58rem;
     font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.05);
+    position: relative;
+    z-index: 1;
   }
 
 
@@ -733,8 +745,8 @@ const DEMO_BADGES = [
 ];
 
 const DEMO_COMMUNITIES = [
-  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Over 1,000 movies, books, and games" },
-  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Over 40 director filmographies" },
+  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23 },
+  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21 },
 ];
 
 function LandingScreen({ onSignIn }) {
@@ -1102,25 +1114,46 @@ function LandingScreen({ onSignIn }) {
             leaderboards, and listeners tracking right alongside you.
           </div>
           <div className="community-demo">
-            {DEMO_COMMUNITIES.map((c, i) => (
-              <div
-                key={i}
-                className="community-row"
-                style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
-              >
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
-                <img
-                  className="community-avatar"
-                  src={c.art}
-                  alt={c.name}
-                  style={{ background: c.color + '20' }}
-                />
-                <div className="community-info" style={{ textAlign: 'center', flex: 1 }}>
-                  <div className="community-name">{c.name}</div>
-                  <div className="community-stat">{c.stat}</div>
+            {DEMO_COMMUNITIES.map((c, i) => {
+              const pct = Math.round((c.done / c.total) * 100);
+              const r = 18;
+              const circ = 2 * Math.PI * r;
+              const offset = circ - (pct / 100) * circ;
+              return (
+                <div
+                  key={i}
+                  className="community-row"
+                  style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
+                >
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
+                  <img
+                    className="community-avatar"
+                    src={c.art}
+                    alt={c.name}
+                    style={{ background: c.color + '20' }}
+                  />
+                  <div className="community-info">
+                    <div className="community-name">{c.name}</div>
+                    <div className="community-stat">{c.stat}</div>
+                  </div>
+                  <div className="community-donut">
+                    <svg width="44" height="44" viewBox="0 0 44 44">
+                      <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3.5" />
+                      <circle
+                        cx="22" cy="22" r={r} fill="none"
+                        stroke={c.color} strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeDasharray={circ}
+                        strokeDashoffset={offset}
+                        transform="rotate(-90 22 22)"
+                        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)' }}
+                      />
+                    </svg>
+                    <span className="community-donut-pct" style={{ color: c.color }}>{pct}%</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div style={{
             fontFamily: "'Lora', serif",
