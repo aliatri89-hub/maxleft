@@ -355,20 +355,19 @@ const featureStyles = `
     position: relative;
   }
   .log-demo-backdrop {
-    height: 120px;
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center top;
-    position: relative;
   }
   .log-demo-backdrop::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(15,13,11,0.3) 0%, #0f0d0b 100%);
+    background: linear-gradient(180deg, rgba(15,13,11,0.45) 0%, rgba(15,13,11,0.75) 35%, rgba(15,13,11,0.92) 60%, #0f0d0b 85%);
   }
   .log-demo-content {
-    padding: 0 16px 16px;
-    margin-top: -20px;
+    padding: 100px 16px 16px;
     position: relative;
     z-index: 1;
   }
@@ -610,13 +609,10 @@ const featureStyles = `
     border-radius: 0 2px 2px 0;
   }
   .community-avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    object-fit: cover;
     flex-shrink: 0;
   }
   .community-info {
@@ -737,8 +733,8 @@ const DEMO_BADGES = [
 ];
 
 const DEMO_COMMUNITIES = [
-  { name: "Now Playing Podcast", emoji: "🎬", color: "#C75B3F", stat: "Over 1000 movies, books, and games", count: "312" },
-  { name: "Blank Check with Griffin & David", emoji: "✅", color: "#4a9eff", stat: "Over 40 director filmographies, franchise commentary", count: "186" },
+  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Over 1,000 movies, books, and games" },
+  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Over 40 director filmographies" },
 ];
 
 function LandingScreen({ onSignIn }) {
@@ -1113,15 +1109,15 @@ function LandingScreen({ onSignIn }) {
                 style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
               >
                 <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
-                <div className="community-avatar" style={{ background: c.color + '20' }}>
-                  {c.emoji}
-                </div>
-                <div className="community-info">
+                <img
+                  className="community-avatar"
+                  src={c.art}
+                  alt={c.name}
+                  style={{ background: c.color + '20' }}
+                />
+                <div className="community-info" style={{ textAlign: 'center', flex: 1 }}>
                   <div className="community-name">{c.name}</div>
                   <div className="community-stat">{c.stat}</div>
-                </div>
-                <div className="community-count" style={{ color: c.color }}>
-                  {c.count}
                 </div>
               </div>
             ))}
