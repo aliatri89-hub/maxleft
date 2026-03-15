@@ -742,23 +742,44 @@ const featureStyles = `
     background: linear-gradient(90deg, transparent, var(--terracotta, #C75B3F), transparent);
     opacity: 0.4;
   }
-  .growing-icon-row {
+  .growing-art-row {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    margin: 24px 0 20px;
+    gap: 18px;
+    margin: 24px 0 22px;
   }
-  .growing-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--terracotta, #C75B3F);
-    opacity: 0.3;
-    animation: growPulse 2s ease-in-out infinite;
+  .growing-art-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: growArtIn 0.6s ease forwards;
   }
-  @keyframes growPulse {
-    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-    50% { opacity: 0.7; transform: scale(1.2); }
+  @keyframes growArtIn {
+    from { opacity: 0; transform: scale(0.8) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .growing-art-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,0.1);
+    opacity: 0.75;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+  .growing-art-item:hover .growing-art-img {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  .growing-art-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.35);
+    font-weight: 500;
   }
   .growing-headline {
     font-family: 'Barlow Condensed', sans-serif;
@@ -1346,15 +1367,22 @@ function LandingScreen({ onSignIn }) {
         >
           <div className="growing-section">
             <div className="growing-divider" />
-            <div className="growing-icon-row">
-              <span className="growing-dot" style={{ animationDelay: '0s' }} />
-              <span className="growing-dot" style={{ animationDelay: '0.3s' }} />
-              <span className="growing-dot" style={{ animationDelay: '0.6s' }} />
+            <div className="growing-art-row">
+              {[
+                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
+                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
+                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
+                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
+              ].map((p, i) => (
+                <div key={i} className="growing-art-item" style={{ animationDelay: `${i * 0.15}s` }}>
+                  <img src={p.src} alt={p.name} className="growing-art-img" />
+                  <span className="growing-art-label">{p.name}</span>
+                </div>
+              ))}
             </div>
             <div className="growing-headline">New communities<br />added regularly</div>
             <div className="growing-sub">
-              Film Junk, Get Played, Filmspotting, HDTGM, and more —<br />
-              if your podcast has a shelf, we're building it.
+              If your podcast has a shelf, we're building it.
             </div>
             <div className="growing-divider" />
           </div>
