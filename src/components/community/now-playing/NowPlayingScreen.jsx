@@ -191,6 +191,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
+  const upcomingCount = useMemo(() => allItems.filter(i => i.extra_data?.coming_soon).length, [allItems]);
 
 
   const { progress, setProgress } = useCommunityProgress(community?.id, userId, allItems);
@@ -343,7 +344,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   return (
     <div style={{
-      height: "100dvh", display: "flex", flexDirection: "column",
+      width: "100%", height: "100dvh", display: "flex", flexDirection: "column",
       background: "#0f0f1a", overflowX: "hidden",
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap');`}</style>
@@ -431,6 +432,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
               onFilterChange={setFilter}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
+              upcomingCount={upcomingCount}
             />
             {tabKey === "arcade" && (
               <NowPlayingArcadeTab
@@ -477,6 +479,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 recentEpisodeItems={recentEpisodeItems}
                 progressLoading={recentLoading}
                 episodesLoading={episodesLoading}
+                upcomingCount={upcomingCount}
               />
             )}
           </>

@@ -1,8 +1,9 @@
-export default function CommunityFilter({ value = "all", onChange, accent = "#e94560" }) {
+export default function CommunityFilter({ value = "all", onChange, accent = "#e94560", upcomingCount = 0 }) {
   const options = [
     { key: "all", label: "All" },
     { key: "seen", label: "Seen" },
     { key: "unseen", label: "Unseen" },
+    ...(upcomingCount > 0 ? [{ key: "upcoming", label: `Upcoming (${upcomingCount})` }] : []),
   ];
 
   return (

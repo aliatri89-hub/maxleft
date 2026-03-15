@@ -72,6 +72,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   const [activeTab, setActiveTab] = useState(() => tabs[0]?.key || "filmography");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
   const [filter, setFilter] = useState("all");
   const [mediaFilter, setMediaFilter] = useState(null);
   const [coverCache, setCoverCache] = useState({});
@@ -188,7 +190,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
 
   // Reset on tab change
-  useEffect(() => { setMediaFilter(null); setSearchQuery(""); }, [activeTab]);
+  useEffect(() => { setMediaFilter(null); setSearchQuery(""); setSearchOpen(false); }, [activeTab]);
 
   // ── Tab slider ref (for animated nav taps) ──────────────
   const sliderRef = useRef(null);
@@ -196,6 +198,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
+  const upcomingCount = useMemo(() => allItems.filter(i => i.extra_data?.coming_soon).length, [allItems]);
 
   const patreonItemIds = useMemo(() => {
     const ids = new Set();
@@ -216,7 +219,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress);
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(episodes, allItems, 10, "blankcheck");
+  const bcEpisodes = useMemo(() => episodes.filter(e => e.feedUrl === rssUrl || e.community === "Blank Check"), [episodes, rssUrl]);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(bcEpisodes, allItems, 10, "blankcheck");
 
   useEffect(() => {
     if (allItems.length === 0) return;
@@ -375,7 +379,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
         ref={sliderRef}
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={(key) => { setActiveTab(key); setSearchQuery(""); }}
+        onTabChange={(key) => { setActiveTab(key); setSearchQuery(""); setSearchOpen(false); }}
         bottomPad={hasBottomNav ? 80 : 0}
       >
         {(tabKey) => (
@@ -421,54 +425,92 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
             {/* Filmography tab (default) */}
             {tabKey !== "patreon" && tabKey !== "awards" && (
               <>
-                {/* Search bar */}
-                <div style={{ padding: "12px 16px 0", position: "relative" }}>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search films, directors, years…"
-                    style={{
-                      width: "100%",
-                      padding: "10px 16px 10px 40px",
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      borderRadius: 12,
-                      color: "#fff",
-                      fontSize: 14,
-                      outline: "none",
-                      boxSizing: "border-box",
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      letterSpacing: "0.01em",
-                    }}
-                    onFocus={(e) => { e.target.style.borderColor = accent; }}
-                    onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; }}
-                  />
-                  <span style={{
-                    position: "absolute", left: 28, top: "50%",
-                    transform: "translateY(-50%)", fontSize: 15,
-                    color: "#555", pointerEvents: "none",
-                  }}>🔍</span>
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      style={{
-                        position: "absolute", right: 28, top: "50%",
+                {/* Search + Filter row */}
+                <div style={{
+                  padding: "10px 16px 0",
+                  display: "flex", alignItems: "center", gap: 8,
+                }}>
+                  {searchOpen ? (
+                    /* Expanded search input — takes full row */
+                    <div style={{ flex: 1, position: "relative" }}>
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search films, directors, years…"
+                        style={{
+                          width: "100%",
+                          padding: "8px 36px 8px 34px",
+                          background: "rgba(255,255,255,0.06)",
+                          border: `1px solid ${accent}`,
+                          borderRadius: 10,
+                          color: "#fff",
+                          fontSize: 14,
+                          outline: "none",
+                          boxSizing: "border-box",
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          letterSpacing: "0.01em",
+                        }}
+                      />
+                      <span style={{
+                        position: "absolute", left: 10, top: "50%",
                         transform: "translateY(-50%)",
-                        background: "rgba(255,255,255,0.1)", border: "none",
-                        color: "#aaa", fontSize: 13, cursor: "pointer",
-                        borderRadius: 20, width: 24, height: 24,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        padding: 0, lineHeight: 1,
-                      }}
-                    >✕</button>
+                        pointerEvents: "none",
+                        display: "flex", alignItems: "center",
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </span>
+                      <button
+                        onClick={() => { setSearchQuery(""); setSearchOpen(false); }}
+                        style={{
+                          position: "absolute", right: 8, top: "50%",
+                          transform: "translateY(-50%)",
+                          background: "rgba(255,255,255,0.1)", border: "none",
+                          color: "#aaa", fontSize: 12, cursor: "pointer",
+                          borderRadius: 20, width: 22, height: 22,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          padding: 0, lineHeight: 1,
+                        }}
+                      >✕</button>
+                    </div>
+                  ) : (
+                    /* Collapsed: filter pills + search icon on right */
+                    <>
+                      <div style={{ flex: 1 }}>
+                        <CommunityFilter value={filter} onChange={setFilter} accent={accent} upcomingCount={upcomingCount} />
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSearchOpen(true);
+                          setTimeout(() => searchInputRef.current?.focus(), 50);
+                        }}
+                        style={{
+                          flexShrink: 0,
+                          width: 34, height: 34,
+                          borderRadius: 10,
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          cursor: "pointer",
+                          WebkitTapHighlightColor: "transparent",
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </button>
+                    </>
                   )}
                 </div>
 
-                <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
 
-                {/* Dynamic shelves — only on filmography tab with no search */}
-                {!searchQuery.trim() && (
+                {/* Dynamic shelves — only on filmography tab with no search + no filter */}
+                {!searchQuery.trim() && filter === "all" && (
                   <>
                     {recentItems.length > 0 && (
                       <MiniseriesShelf
@@ -560,6 +602,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           sliderRef.current?.animateToTab(newTab);
           setActiveTab(newTab);
           setSearchQuery("");
+          setSearchOpen(false);
         }}
         accent={accent}
       />

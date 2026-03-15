@@ -327,6 +327,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
                 key={item.id}
                 item={item}
                 isCompleted={progress[item.id]?.status === "completed"}
+                status={progress[item.id]?.status || null}
                 onToggle={() => onToggle(item.id)}
                 accent={accent}
               />
@@ -343,7 +344,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
    GameLandscapeCard — wide card using RAWG background image
    ═══════════════════════════════════════════════════════════════ */
 
-function GameLandscapeCard({ item, isCompleted, onToggle, accent }) {
+function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
   const extra = item.extra_data || {};
   const bgImage = extra.bg_image || "";
   const year = item.year;
@@ -379,7 +380,7 @@ function GameLandscapeCard({ item, isCompleted, onToggle, accent }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            filter: isCompleted ? "brightness(0.5)" : "brightness(0.7)",
+            filter: isCompleted ? "brightness(0.6)" : "brightness(0.9)",
             transition: "filter 0.3s",
           }}
         />
@@ -393,7 +394,7 @@ function GameLandscapeCard({ item, isCompleted, onToggle, accent }) {
       {/* Gradient overlay */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.1) 100%)",
+        background: "linear-gradient(0deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.0) 100%)",
       }} />
 
       {/* Completed checkmark */}
@@ -424,6 +425,40 @@ function GameLandscapeCard({ item, isCompleted, onToggle, accent }) {
       }}>
         🎮
       </div>
+
+      {/* Playing badge */}
+      {status === "playing" && !isCompleted && (
+        <div style={{
+          position: "absolute", top: 6, right: 6, zIndex: 3,
+          background: "rgba(0,212,255,0.9)",
+          borderRadius: 10, padding: "2px 8px",
+          display: "flex", alignItems: "center", gap: 3,
+          boxShadow: "0 2px 6px rgba(0,212,255,0.4)",
+        }}>
+          <span style={{ fontSize: 8 }}>▶</span>
+          <span style={{
+            fontSize: 8, fontWeight: 800, color: "#fff",
+            textTransform: "uppercase", letterSpacing: "0.06em",
+          }}>Playing</span>
+        </div>
+      )}
+
+      {/* Backlog badge */}
+      {status === "backlog" && !isCompleted && (
+        <div style={{
+          position: "absolute", top: 6, right: 6, zIndex: 3,
+          background: "rgba(250,204,21,0.9)",
+          borderRadius: 10, padding: "2px 8px",
+          display: "flex", alignItems: "center", gap: 3,
+          boxShadow: "0 2px 6px rgba(250,204,21,0.4)",
+        }}>
+          <span style={{ fontSize: 8 }}>📋</span>
+          <span style={{
+            fontSize: 8, fontWeight: 800, color: "#1a1a2e",
+            textTransform: "uppercase", letterSpacing: "0.06em",
+          }}>Backlog</span>
+        </div>
+      )}
 
       {/* Text overlay */}
       <div style={{

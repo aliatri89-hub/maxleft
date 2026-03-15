@@ -74,7 +74,8 @@ export default function ItemCard({
 
   const isBook = item.media_type === "book";
   const isGame = item.media_type === "game";
-  const borderColor = isCompleted ? "#4ade80" : "transparent";
+  const comingSoon = item.extra_data?.coming_soon;
+  const borderColor = comingSoon ? "rgba(250,204,21,0.3)" : isCompleted ? "#4ade80" : "transparent";
 
   return (
     <div
@@ -115,7 +116,7 @@ export default function ItemCard({
               width: "100%",
               height: "100%",
               objectFit: "cover",
-              opacity: imgLoaded ? (isCompleted ? 1 : 0.85) : 0,
+              opacity: imgLoaded ? (comingSoon ? 0.4 : isCompleted ? 1 : 0.85) : 0,
               transition: "opacity 0.3s",
             }}
           />
@@ -142,8 +143,44 @@ export default function ItemCard({
         {/* Community-specific overlays injected here */}
         {children}
 
+        {/* Coming Soon overlay */}
+        {comingSoon && (
+          <div style={{
+            position: "absolute", inset: 0, zIndex: 5,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            background: "rgba(0,0,0,0.35)",
+          }}>
+            <div style={{
+              background: "rgba(250,204,21,0.15)",
+              border: "1px solid rgba(250,204,21,0.4)",
+              borderRadius: 6,
+              padding: "4px 10px",
+              backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+            }}>
+              <div style={{
+                fontSize: 8, fontWeight: 700, color: "#facc15",
+                textTransform: "uppercase", letterSpacing: "0.1em",
+                textAlign: "center",
+              }}>Coming Soon</div>
+            </div>
+            {item.air_date && (
+              <div style={{
+                position: "absolute",
+                bottom: 0, left: 0, right: 0,
+                padding: "6px 0",
+                background: "linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)",
+                textAlign: "center",
+                fontSize: 10, fontWeight: 600, color: "rgba(250,204,21,0.7)",
+                letterSpacing: "0.03em",
+              }}>
+                {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Completed overlay */}
-        {isCompleted && (
+        {isCompleted && !comingSoon && (
           <div style={{
             position: "absolute", inset: 0,
             background: "linear-gradient(0deg, rgba(16,185,129,0.25) 0%, transparent 60%)",

@@ -197,49 +197,6 @@ export const searchRAWG = async (query) => {
   }
 };
 
-// ─── Wikipedia location image cache (unchanged — no API key involved) ─────────
-
-const MAX_WIKI_CACHE = 200;
-export const wikiImageCache = (() => {
-  try {
-    return JSON.parse(localStorage.getItem("wikiImageCache") || "{}");
-  } catch {
-    return {};
-  }
-})();
-const saveWikiCache = () => {
-  try {
-    const entries = Object.entries(wikiImageCache);
-    if (entries.length > MAX_WIKI_CACHE) {
-      const trimmed = Object.fromEntries(entries.slice(-MAX_WIKI_CACHE));
-      Object.keys(wikiImageCache).forEach(k => { if (!(k in trimmed)) delete wikiImageCache[k]; });
-    }
-    localStorage.setItem("wikiImageCache", JSON.stringify(wikiImageCache));
-  } catch {
-    try { localStorage.removeItem("wikiImageCache"); } catch {}
-  }
-};
-
-export const fetchWikiImage = async (location) => {
-  if (!location) return null;
-  const city = location.split(",")[0].trim();
-  if (wikiImageCache[city]) return wikiImageCache[city];
-  try {
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const url = data.originalimage?.source || data.thumbnail?.source || null;
-    wikiImageCache[city] = url;
-    saveWikiCache();
-    return url;
-  } catch (err) {
-    console.error("Wiki image error:", err);
-    return null;
-  }
-};
-
 // ─── Image compression (unchanged — no API key involved) ──────
 
 export const compressImage = (file, maxWidth = 1200, quality = 0.82) =>

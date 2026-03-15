@@ -249,7 +249,7 @@ export default function NowPlayingGameLogModal({
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         display: "flex",
-        alignItems: "stretch",
+        alignItems: "flex-end",
         justifyContent: "center",
         animation: "nppGameFadeIn 0.2s ease",
       }}
@@ -304,14 +304,20 @@ export default function NowPlayingGameLogModal({
         style={{
           width: "100%",
           maxWidth: 420,
+          maxHeight: "75dvh",
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
-          borderRadius: 0,
+          borderRadius: "16px 16px 0 0",
           padding: "0 20px calc(20px + env(safe-area-inset-bottom, 0px))",
           animation: "nppGameSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
       >
+        {/* Drag handle */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 0" }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+        </div>
+
         {/* Close + Admin */}
         <div
           style={{
@@ -430,28 +436,6 @@ export default function NowPlayingGameLogModal({
                 {item.episode_number}
               </div>
             )}
-
-            {/* NPP Arcade badge */}
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                marginTop: 6,
-                padding: "2px 8px",
-                background: "rgba(245,197,24,0.08)",
-                border: "1px solid rgba(245,197,24,0.2)",
-                borderRadius: 12,
-                fontSize: 9,
-                fontWeight: 700,
-                color: "#F5C518",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                fontFamily: "'IBM Plex Mono', monospace",
-              }}
-            >
-              🕹 NPP Arcade
-            </div>
 
             {/* Status badges */}
             {isCompleted && (
@@ -799,10 +783,7 @@ export default function NowPlayingGameLogModal({
           </div>
         </div>
 
-        {/* ─── Platform / Rating / Notes / Actions — only for Beat or editing ─── */}
-        {(status === "completed" || isCompleted) && (
-          <>
-        {/* ─── Platform ─── */}
+        {/* ─── Platform (always visible) ─── */}
         <div style={{ marginBottom: 14 }}>
           <div
             style={{
@@ -854,6 +835,10 @@ export default function NowPlayingGameLogModal({
             ))}
           </div>
         </div>
+
+        {/* ─── Rating / Notes / Actions — only for Beat or editing ─── */}
+        {(status === "completed" || isCompleted) && (
+          <>
 
         {/* ─── Rating ─── */}
         <div style={{ marginBottom: 14 }}>

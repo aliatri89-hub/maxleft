@@ -93,6 +93,9 @@ export default function AdminItemEditor({
   const [commentaryOnly, setCommentaryOnly] = useState(
     item.extra_data?.commentary_only || false
   );
+  const [comingSoon, setComingSoon] = useState(
+    item.extra_data?.coming_soon || false
+  );
 
   // ─── UI state ───
   const [saving, setSaving] = useState(false);
@@ -383,6 +386,13 @@ export default function AdminItemEditor({
         newExtra.commentary_only = true;
       } else {
         delete newExtra.commentary_only;
+      }
+
+      // Coming soon flag
+      if (comingSoon) {
+        newExtra.coming_soon = true;
+      } else {
+        delete newExtra.coming_soon;
       }
 
       // Cover image for books/games
@@ -1213,6 +1223,28 @@ export default function AdminItemEditor({
               Commentary Only
               <span style={{ fontSize: 9, color: "#666" }}>
                 (Patreon tab — no green card frame)
+              </span>
+            </label>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: 12,
+                color: "#ccc",
+                cursor: "pointer",
+                padding: "6px 0",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={comingSoon}
+                onChange={(e) => setComingSoon(e.target.checked)}
+                style={{ accentColor: "#facc15" }}
+              />
+              Coming Soon
+              <span style={{ fontSize: 9, color: "#666" }}>
+                (episode seeded but not yet aired)
               </span>
             </label>
           </div>

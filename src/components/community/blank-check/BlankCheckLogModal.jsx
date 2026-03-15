@@ -46,6 +46,7 @@ export default function BlankCheckLogModal({
   const [overviewExpanded, setOverviewExpanded] = useState(false);
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [providers, setProviders] = useState(null); // { stream: [], rent: [], buy: [], country }
+  const [backdropUrl, setBackdropUrl] = useState(null);
 
   // ── Reactive cover URL ────────────────────────────────────
   const [fetchedCoverUrl, setFetchedCoverUrl] = useState(null);
@@ -132,6 +133,9 @@ export default function BlankCheckLogModal({
         if (data?.overview) setOverview(data.overview);
         if (data?.poster_path && !resolvedCoverUrl) {
           setFetchedCoverUrl(`https://image.tmdb.org/t/p/w342${data.poster_path}`);
+        }
+        if (data?.backdrop_path) {
+          setBackdropUrl(`https://image.tmdb.org/t/p/w780${data.backdrop_path}`);
         }
       })
       .catch(() => {});
@@ -343,12 +347,29 @@ export default function BlankCheckLogModal({
           animation: "bcLogSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
+          position: "relative",
         }}
       >
+        {/* Backdrop image — top of modal only, fades out before description */}
+        {backdropUrl && (
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0,
+            height: 280,
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            zIndex: 0,
+            maskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
+          }} />
+        )}
+
         {/* Close button + Admin gear */}
         <div style={{
           position: "sticky", top: 0, zIndex: 2,
-          background: "linear-gradient(180deg, #1a1a2e 0%, rgba(26,26,46,0.95) 80%, transparent 100%)",
+          background: "transparent",
           padding: "12px 0 16px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
@@ -368,9 +389,9 @@ export default function BlankCheckLogModal({
         </div>
 
         {/* Hero: poster + info */}
-        <div style={{ display: "flex", gap: 14, marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
           <div style={{
-            width: 110, flexShrink: 0,
+            width: 120, flexShrink: 0,
             aspectRatio: isGame ? "16/9" : "2/3",
             borderRadius: 8, overflow: "hidden",
             background: "linear-gradient(135deg, #1a1a2e, #16213e)",

@@ -369,22 +369,15 @@ export default function NowPlayingLogModal({
             position: "absolute", top: 0, left: 0, right: 0,
             height: 280, zIndex: 0, overflow: "hidden",
             pointerEvents: "none",
-          }}>
-            <img
-              src={backdropUrl}
-              alt=""
-              style={{
-                width: "100%", height: "100%",
-                objectFit: "cover", objectPosition: "center top",
-                opacity: 0.12,
-                filter: "saturate(0.6)",
-              }}
-            />
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(180deg, transparent 0%, rgba(26,26,46,0.5) 40%, #1a1a2e 75%)",
-            }} />
-          </div>
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            filter: "saturate(0.6)",
+            maskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
+          }} />
         )}
         {/* Close button + Admin gear */}
         <div style={{
@@ -414,7 +407,7 @@ export default function NowPlayingLogModal({
         {/* Hero: poster + info */}
         <div style={{ display: "flex", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
           <div style={{
-            width: 80, flexShrink: 0,
+            width: 90, flexShrink: 0,
             aspectRatio: isGame ? "16/9" : "2/3",
             borderRadius: 8, overflow: "hidden",
             background: "linear-gradient(135deg, #1a1a2e, #16213e)",

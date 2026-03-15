@@ -294,7 +294,6 @@ function UsernameSetup({ name, session, onComplete }) {
   // ── Letterboxd (single screen) ───────────────────────────
   const [letterboxdUsername, setLetterboxdUsername] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [showCsvUpload, setShowCsvUpload] = useState(false);
   const fileInputRef = useRef(null);
 
   // ── Books (single screen) ────────────────────────────────
@@ -316,6 +315,9 @@ function UsernameSetup({ name, session, onComplete }) {
   const [savedCommunityIds, setSavedCommunityIds] = useState([]);
 
   // Load communities
+  const isDev = new URLSearchParams(window.location.search).has("dev");
+  const LIVE_SLUGS = new Set(["blankcheck", "nowplaying"]);
+
   useEffect(() => {
     if (phase !== "communities") return;
     let cancelled = false;
@@ -327,7 +329,7 @@ function UsernameSetup({ name, session, onComplete }) {
         .order("sort_order", { ascending: true });
 
       if (!cancelled && !error && data) {
-        const live = data.filter(c => !c.theme_config?.coming_soon);
+        const live = isDev ? data : data.filter(c => LIVE_SLUGS.has(c.slug));
         setCommunities(live);
         const defaults = {};
         live.forEach(c => { defaults[c.id] = true; });
@@ -559,7 +561,7 @@ function UsernameSetup({ name, session, onComplete }) {
           Welcome{name ? `, ${name.split(" ")[0]}` : ""}
         </div>
         <div className="setup-sub">
-          Pick a username. This is how friends will find you on Mantl.
+          Pick a username. This is your identity on Mantl.
         </div>
 
         <div>
@@ -705,12 +707,30 @@ function UsernameSetup({ name, session, onComplete }) {
         <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🎬</div>
         <div className="setup-title">Connect Letterboxd</div>
         <div className="setup-sub">
-          Enter your username to auto-sync new logs. Your RSS feed keeps your shelf up to date automatically.
+          Two ways to bring your watch history into Mantl. Do both for the best experience.
         </div>
 
-        {/* Username input */}
-        <div style={{ marginBottom: 16 }}>
-          <label className="field-label">Letterboxd Username</label>
+        {/* 1. Username / RSS */}
+        <div style={{
+          marginBottom: 14, padding: 14,
+          background: dk.accent,
+          border: "1px solid " + dk.border,
+          borderRadius: 12,
+        }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <span style={{ fontSize: 15 }}>📡</span> Live Sync
+          </div>
+          <div style={{
+            fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+            lineHeight: 1.5, marginBottom: 10,
+          }}>
+            Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
+          </div>
+          <label className="field-label" style={{ marginBottom: 4 }}>Letterboxd Username</label>
           <input
             className="field-input"
             type="text"
@@ -730,53 +750,62 @@ function UsernameSetup({ name, session, onComplete }) {
           )}
         </div>
 
-        {/* Optional CSV import — collapsed by default */}
-        {!showCsvUpload ? (
-          <div
-            onClick={() => setShowCsvUpload(true)}
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-              color: dk.terracotta, textAlign: "center",
-              cursor: "pointer", padding: "10px 0", letterSpacing: "0.02em",
-              marginBottom: 8,
-            }}
-          >
-            Already have an export? Import your full history →
-          </div>
-        ) : (
+        {/* 2. CSV Export */}
+        <div style={{
+          marginBottom: 16, padding: 14,
+          background: dk.accent,
+          border: "1px solid " + dk.border,
+          borderRadius: 12,
+        }}>
           <div style={{
-            marginBottom: 16, padding: 14,
-            background: dk.accent,
-            border: "1px solid " + dk.border,
-            borderRadius: 12,
+            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            display: "flex", alignItems: "center", gap: 8,
           }}>
-            <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
-              textTransform: "uppercase", color: dk.text, marginBottom: 8,
-            }}>
-              Import Watch History
-            </div>
-            <div style={{
-              fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
-              lineHeight: 1.5, marginBottom: 12,
-            }}>
-              Go to{" "}
-              <span
-                onClick={() => window.open("https://letterboxd.com/data/export/", "_blank")}
-                style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer" }}
-              >
-                letterboxd.com/data/export
-              </span>
-              , download and unzip your data, then upload <strong>watched.csv</strong> below.
-            </div>
-            <FileUploadZone
-              file={uploadedFile}
-              onFileSelect={(f) => setUploadedFile(f)}
-              fileInputRef={fileInputRef}
-              label="Tap to upload watched.csv"
-            />
+            <span style={{ fontSize: 15 }}>📦</span> Import Full History
           </div>
-        )}
+          <div style={{
+            fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+            lineHeight: 1.5, marginBottom: 10,
+          }}>
+            This brings in everything you've ever logged — ratings, dates, the works.
+          </div>
+
+          {/* How-to steps */}
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
+            color: dk.text, lineHeight: 1.8, marginBottom: 12,
+            padding: "10px 12px",
+            background: "rgba(255,255,255,0.03)",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.05)",
+          }}>
+            <div><span style={{ color: dk.terracotta }}>1.</span> Open your browser and go to:<br />
+              <span
+                onClick={() => {
+                  navigator.clipboard.writeText("https://letterboxd.com/data/export/");
+                  const el = document.getElementById("lb-copy-confirm");
+                  if (el) { el.textContent = "Copied!"; setTimeout(() => { el.textContent = "tap to copy link"; }, 1500); }
+                }}
+                style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer", wordBreak: "break-all" }}
+              >letterboxd.com/data/export</span>{" "}
+              <span id="lb-copy-confirm" style={{ fontSize: 9, color: dk.textDim }}>(tap to copy link)</span>
+            </div>
+            <div style={{ fontSize: 9, color: dk.textDim, marginLeft: 14, marginTop: -4 }}>
+              ⚠️ Use your browser, not the Letterboxd app
+            </div>
+            <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
+            <div><span style={{ color: dk.terracotta }}>3.</span> Unzip the download</div>
+            <div><span style={{ color: dk.terracotta }}>4.</span> Upload <strong>diary.csv</strong> below</div>
+          </div>
+
+          <FileUploadZone
+            file={uploadedFile}
+            onFileSelect={(f) => setUploadedFile(f)}
+            fileInputRef={fileInputRef}
+            label="Tap to upload diary.csv"
+          />
+        </div>
 
         <div className="setup-spacer" />
 
@@ -787,7 +816,7 @@ function UsernameSetup({ name, session, onComplete }) {
             onClick={() => advanceFrom("letterboxd")}
             style={{ flex: 1 }}
           >
-            {hasAnything ? "Next →" : "Next →"}
+            Next →
           </button>
         </div>
         {!letterboxdUsername && !uploadedFile && (
@@ -1058,6 +1087,27 @@ function UsernameSetup({ name, session, onComplete }) {
                 </div>
               );
             })}
+
+            {/* Coming soon teaser */}
+            <div style={{
+              background: dk.card,
+              border: `2px dashed ${dk.border}`,
+              borderRadius: 14,
+              padding: "20px 16px",
+              textAlign: "center",
+            }}>
+              <div style={{ fontSize: 22, marginBottom: 6 }}>🎙️</div>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 700, fontSize: 14,
+                textTransform: "uppercase", letterSpacing: "0.04em",
+                color: dk.text,
+              }}>More communities coming soon</div>
+              <div style={{
+                fontFamily: "'Lora', serif", fontSize: 11, fontStyle: "italic",
+                color: dk.textDim, marginTop: 4,
+              }}>New podcast communities are added regularly.</div>
+            </div>
           </div>
         )}
 
@@ -1065,7 +1115,7 @@ function UsernameSetup({ name, session, onComplete }) {
           fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
           color: dk.textDim, textAlign: "center", marginBottom: 16, letterSpacing: "0.03em",
         }}>
-          {selectedCount} of {communities.length} selected · Manage anytime in settings
+          {selectedCount} selected · Manage anytime in settings
         </div>
 
         <div className="setup-spacer" />

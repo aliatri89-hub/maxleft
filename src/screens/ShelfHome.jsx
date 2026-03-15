@@ -1,14 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
 import LazyShelf from "../components/LazyShelf";
 
 // Shelf sections (dark)
-import ProfileHero from "../components/shelf/ProfileHero";
 import MantlPiece from "../components/shelf/MantlPiece";
-import ActivityPane from "../components/shelf/ActivityPane";
-import RecapScreen from "./RecapScreen";
 // HIDDEN: Lifestyle shelves — focused on media (books/movies/shows/games)
 // import TrainingShelf from "../components/shelf/TrainingShelf";
 // import TrophyShelf from "../components/shelf/TrophyShelf";
@@ -48,17 +45,6 @@ const skelCompact = (
   </div>
 );
 
-// ── Toggle button style ──
-const toggleStyle = (active) => ({
-  padding: "7px 20px", cursor: "pointer",
-  background: active ? "rgba(255,255,255,0.08)" : "transparent",
-  color: active ? "var(--text-primary)" : "var(--text-faint)",
-  border: `1px solid ${active ? "var(--border-medium)" : "var(--border-subtle)"}`,
-  fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
-  textTransform: "uppercase", letterSpacing: "0.04em",
-  transition: "all 0.15s",
-});
-
 function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onPin, onUnpin, onUpdateProfile, stravaActivities, stravaConnected, stravaLoading, stravaDismissed, setStravaDismissed, onStravaConnect, onStravaDisconnect, onToast, challengeShelf, onOpenChallenge, letterboxdSyncing, steamSyncing, userGroups, onOpenGroup, onAutoComplete, isActive }) {
 
   // ── Trigger state (controls which modal/overlay is open) ──
@@ -74,33 +60,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   const [showPinPicker, setShowPinPicker] = useState(false);
 
   // ── UI state ──
-  const [shelfPane, setShelfPane] = useState("shelves");
-  const [showActivityLog, setShowActivityLog] = useState(false);
   const [beatAnimId, setBeatAnimId] = useState(null);
-
-  // ── Activity feed ──
-  const [activityItems, setActivityItems] = useState([]);
-  const [activityLoading, setActivityLoading] = useState(false);
-  const activityLoaded = useRef(false);
-
-  const loadActivity = useCallback(async () => {
-    if (!session) return;
-    setActivityLoading(true);
-    try {
-      const { data } = await supabase.from("feed_activity")
-        .select("id, activity_type, action, item_title, item_author, item_cover, item_year, rating, metadata, created_at")
-        .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      setActivityItems(data || []);
-    } catch (e) { console.error("Activity load error:", e); }
-    setActivityLoading(false);
-    activityLoaded.current = true;
-  }, [session]);
-
-  useEffect(() => {
-    if (showActivityLog && !activityLoaded.current) loadActivity();
-  }, [showActivityLog, loadActivity]);
 
   // ── Back gesture navigation ──
   useEffect(() => {
@@ -137,53 +97,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
-      {/* Profile Card */}
-      <ProfileHero profile={profile} />
-
-      {/* Shelves / Recap toggle */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 0, padding: "12px 16px 4px" }}>
-        <div onClick={() => { setShelfPane("shelves"); setShowActivityLog(false); }}
-          style={{ ...toggleStyle(shelfPane === "shelves"), borderRadius: "var(--radius-full) 0 0 var(--radius-full)", borderRight: "none" }}>
-          📚 Shelves
-        </div>
-        <div onClick={() => { setShelfPane("recap"); setShowActivityLog(false); }}
-          style={{ ...toggleStyle(shelfPane === "recap"), borderRadius: "0 var(--radius-full) var(--radius-full) 0" }}>
-          📊 Recap
-        </div>
-      </div>
-
-      {/* Recap Pane */}
-      {shelfPane === "recap" ? (
-        <div style={{ padding: "0 0 80px" }}>
-          <RecapScreen session={session} profile={profile} onToast={onToast} embedded />
-
-          {/* Activity log toggle */}
-          <div style={{ padding: "16px 16px 0", textAlign: "center" }}>
-            <div
-              onClick={() => { setShowActivityLog(!showActivityLog); }}
-              style={{
-                fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 700,
-                color: "var(--text-faint)", cursor: "pointer",
-                textTransform: "uppercase", letterSpacing: "0.06em",
-                padding: "12px", borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.06)",
-                background: showActivityLog ? "rgba(255,255,255,0.04)" : "transparent",
-                transition: "all 0.15s",
-              }}
-            >
-              📋 Activity Log {showActivityLog ? "▾" : "→"}
-            </div>
-          </div>
-          {showActivityLog && (
-            <div style={{ padding: "8px 0 0" }}>
-              <ActivityPane items={activityItems} loading={activityLoading} />
-            </div>
-          )}
-        </div>
-      ) : (
-      <>
-        {/* My Mantl */}
-        <MantlPiece
+      {/* My Mantl */}
+      <MantlPiece
           profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
           session={session} onUpdateProfile={onUpdateProfile} onToast={onToast}
           onViewItem={(item) => {
@@ -256,8 +171,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
           {/* Groups — DISABLED for launch */}
 
         </div>
-      </>
-      )}
 
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(

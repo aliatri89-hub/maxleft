@@ -33,8 +33,12 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
 
   const currentItems = grouped[activeType] || [];
 
-  // Apply seen/unseen filter
-  const filteredItems = filter && filter !== "all"
+  // Apply seen/unseen/upcoming filter
+  const filteredItems = filter === "upcoming"
+    ? currentItems
+        .filter((i) => i.extra_data?.coming_soon)
+        .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""))
+    : filter && filter !== "all"
     ? currentItems.filter((i) =>
         filter === "seen" ? progress[i.id]?.status === "completed" : progress[i.id]?.status !== "completed"
       )

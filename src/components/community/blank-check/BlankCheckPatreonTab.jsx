@@ -103,11 +103,14 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
             let items = (s.items || []).filter(i => isWatchedVisible(i.id) && isListenedVisible(i.id));
 
             if (isSearching) {
-              items = items.filter(i =>
-                i.title.toLowerCase().includes(q) ||
-                (i.creator || "").toLowerCase().includes(q) ||
-                String(i.year || "").includes(q)
-              );
+              const shelfMatches = s.title?.toLowerCase().includes(q);
+              if (!shelfMatches) {
+                items = items.filter(i =>
+                  i.title.toLowerCase().includes(q) ||
+                  (i.creator || "").toLowerCase().includes(q) ||
+                  String(i.year || "").includes(q)
+                );
+              }
             }
             if (items.length === 0) return null;
 

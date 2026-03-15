@@ -21,12 +21,32 @@ function Stars({ rating, size = 14 }) {
   if (!rating || rating <= 0) return null;
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.25;
+  const gold = "var(--accent-gold, #f5c542)";
+  const empty = "rgba(255,255,255,0.12)";
+
+  const StarSVG = ({ fill = "full" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" style={{ display: "block" }}>
+      {fill === "half" && (
+        <defs>
+          <linearGradient id={`halfGrad-${size}`}>
+            <stop offset="50%" stopColor={gold} />
+            <stop offset="50%" stopColor={empty} />
+          </linearGradient>
+        </defs>
+      )}
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        fill={fill === "full" ? gold : fill === "half" ? `url(#halfGrad-${size})` : empty}
+      />
+    </svg>
+  );
+
   return (
     <div style={{ display: "flex", gap: 1, alignItems: "center" }}>
       {Array.from({ length: full }, (_, i) => (
-        <span key={i} style={{ fontSize: size, color: "var(--accent-gold, #f5c542)" }}>★</span>
+        <StarSVG key={i} fill="full" />
       ))}
-      {half && <span style={{ fontSize: size, color: "var(--accent-gold, #f5c542)", opacity: 0.6 }}>★</span>}
+      {half && <StarSVG fill="half" />}
     </div>
   );
 }
@@ -429,6 +449,13 @@ function UpNextCard({ data, onNavigateCommunity }) {
   const hasBackdrop = !!data.backdrop_path;
   const pct = data.total_count > 0 ? Math.round((data.watched_count / data.total_count) * 100) : 0;
 
+  // SVG donut math
+  const donutSize = 52;
+  const strokeWidth = 4;
+  const radius = (donutSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (pct / 100) * circumference;
+
   return (
     <div
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
@@ -447,7 +474,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
           backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
-          opacity: 0.25,
+          opacity: 0.30,
         }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -478,82 +505,89 @@ function UpNextCard({ data, onNavigateCommunity }) {
         pointerEvents: "none",
       }} />
 
-      {/* Header label */}
+      {/* Poster + info + donut */}
       <div style={{
-        display: "flex", alignItems: "center",
-        padding: "14px 18px 0",
-        position: "relative", zIndex: 1,
+        display: "flex", gap: 12, padding: "14px 16px",
+        position: "relative", zIndex: 1, alignItems: "center",
       }}>
-        <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-          letterSpacing: "0.1em", textTransform: "uppercase",
-          color: "#60a5fa",
-        }}>
-          On deck
-        </span>
-      </div>
-
-      {/* Poster + info */}
-      <div style={{
-        display: "flex", gap: 14, padding: "10px 18px 6px",
-        position: "relative", zIndex: 1,
-      }}>
-        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={70} height={105} radius={8} />
+        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
         <div style={{ flex: 1, paddingTop: 2 }}>
           <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17,
-            color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
+            fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            color: "#60a5fa", marginBottom: 4,
+          }}>
+            On deck
+          </div>
+          <div style={{
+            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
+            color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 2,
           }}>
             {data.title}
           </div>
           {(data.creator || data.year) && (
             <div style={{
               fontFamily: "var(--font-body)", fontSize: 12,
-              color: "var(--text-muted, #8892a8)",
+              color: "var(--text-muted, #8892a8)", marginBottom: 2,
             }}>
               {[data.creator, data.year].filter(Boolean).join(" · ")}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ padding: "6px 18px 14px", position: "relative", zIndex: 1 }}>
-        <div style={{
-          width: "100%", height: 4, borderRadius: 2,
-          background: "rgba(255,255,255,0.06)", overflow: "hidden",
-        }}>
+          {/* Community context */}
           <div style={{
-            height: "100%", borderRadius: 2,
-            width: `${pct}%`,
-            background: "linear-gradient(90deg, #60a5fa99, #60a5fa)",
-            transition: "width 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-          }} />
-        </div>
-        <div style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6,
-          fontFamily: "var(--font-mono)", fontSize: 10,
-          color: "var(--text-faint, #5a6480)",
-        }}>
-          <span>
-            <span style={{ color: "var(--text-muted, #8892a8)", fontWeight: 600 }}>
-              {data.watched_count}
-            </span>
-            {" "}of {data.total_count}
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            fontFamily: "var(--font-body)", fontSize: 12,
+            color: "var(--text-muted, #8892a8)",
+            display: "flex", alignItems: "center", gap: 6,
+          }}>
             {data.community_image && (
-              <img src={data.community_image} alt="" style={{
-                width: 18, height: 18, borderRadius: 5, objectFit: "cover",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }} />
+              <img src={data.community_image} alt=""
+                style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
+                  border: "1px solid rgba(255,255,255,0.08)" }}
+              />
             )}
-            <span style={{
-              fontFamily: "var(--font-body)", fontSize: 11,
-              color: "var(--text-muted, #8892a8)",
+            {data.series_title}
+          </div>
+        </div>
+
+        {/* Donut tracker */}
+        <div style={{
+          flexShrink: 0, display: "flex", flexDirection: "column",
+          alignItems: "center", gap: 4,
+        }}>
+          <div style={{ position: "relative", width: donutSize, height: donutSize }}>
+            <svg width={donutSize} height={donutSize} style={{ transform: "rotate(-90deg)" }}>
+              {/* Background ring */}
+              <circle
+                cx={donutSize / 2} cy={donutSize / 2} r={radius}
+                fill="none" stroke="rgba(255,255,255,0.06)"
+                strokeWidth={strokeWidth}
+              />
+              {/* Progress ring */}
+              <circle
+                cx={donutSize / 2} cy={donutSize / 2} r={radius}
+                fill="none" stroke="#60a5fa"
+                strokeWidth={strokeWidth}
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}
+              />
+            </svg>
+            {/* Percentage text centered */}
+            <div style={{
+              position: "absolute", inset: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--font-mono)", fontWeight: 700,
+              fontSize: 13, color: "#60a5fa",
             }}>
-              {data.series_title}
-            </span>
+              {pct}%
+            </div>
+          </div>
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 9,
+            color: "var(--text-faint, #5a6480)",
+          }}>
+            {data.watched_count}/{data.total_count}
           </div>
         </div>
       </div>
@@ -586,7 +620,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
           backgroundImage: `url(${resolveImg(data.backdrop_url, TMDB_BACKDROP)})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
-          opacity: 0.2,
+          opacity: 0.30,
         }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -617,72 +651,303 @@ function RandomPickCard({ data, onNavigateCommunity }) {
         pointerEvents: "none",
       }} />
 
-      {/* Header label */}
-      <div style={{
-        display: "flex", alignItems: "center",
-        padding: "14px 18px 0",
-        position: "relative", zIndex: 1,
-      }}>
-        <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-          letterSpacing: "0.1em", textTransform: "uppercase",
-          color: "#a78bfa",
-        }}>
-          Have you seen...?
-        </span>
-      </div>
-
       {/* Poster + info */}
       <div style={{
-        display: "flex", gap: 14, padding: "10px 18px 6px",
+        display: "flex", gap: 12, padding: "14px 16px 4px",
         position: "relative", zIndex: 1,
       }}>
-        <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={70} height={105} radius={8} />
+        <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
         <div style={{ flex: 1, paddingTop: 2 }}>
           <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 17,
-            color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
+            fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+            letterSpacing: "0.08em", textTransform: "uppercase",
+            color: "var(--accent-green, #34d399)", marginBottom: 4,
+          }}>
+            Have you seen...?
+          </div>
+          <div style={{
+            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
+            color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 2,
           }}>
             {data.title}
           </div>
-          {(data.creator || data.year) && (
+          {/* Series context — moved up from bottom bar */}
+          {data.series_title && (
             <div style={{
               fontFamily: "var(--font-body)", fontSize: 12,
-              color: "var(--text-muted, #8892a8)",
+              color: "var(--text-muted, #8892a8)", marginBottom: 2,
             }}>
-              {[data.creator, data.year].filter(Boolean).join(" · ")}
+              {data.series_title}
             </div>
           )}
         </div>
       </div>
 
-      {/* Community context — bottom bar */}
+      {/* Bottom bar — podcast name + shuffle icon */}
       <div style={{
         display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "8px 18px 14px",
+        padding: "6px 16px 12px",
         position: "relative", zIndex: 1,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {data.community_image && (
-            <img src={data.community_image} alt="" style={{
-              width: 18, height: 18, borderRadius: 5, objectFit: "cover",
-              border: "1px solid rgba(255,255,255,0.1)",
-            }} />
-          )}
-          <span style={{
-            fontFamily: "var(--font-body)", fontSize: 11,
-            color: "var(--text-muted, #8892a8)",
-          }}>
-            {data.series_title}
-          </span>
-        </div>
-        <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 10,
-          color: "#a78bfa", fontWeight: 600,
-          letterSpacing: "0.04em",
+        <div style={{
+          fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600,
+          color: "#a78bfa",
+          display: "flex", alignItems: "center", gap: 6,
         }}>
-          {data.community_name} →
-        </span>
+          {data.community_image && (
+            <img src={data.community_image} alt=""
+              style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
+                border: "1px solid rgba(167,139,250,0.2)" }}
+            />
+          )}
+          {data.community_name}
+        </div>
+        {/* Shuffle icon — signals this is a random pick */}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          style={{ opacity: 0.5 }}
+        >
+          <polyline points="16 3 21 3 21 8" />
+          <line x1="4" y1="20" x2="21" y2="3" />
+          <polyline points="21 16 21 21 16 21" />
+          <line x1="15" y1="15" x2="21" y2="21" />
+          <line x1="4" y1="4" x2="9" y2="9" />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+
+// ════════════════════════════════════════════════
+// EPISODE CARD — unified (dropped + upcoming)
+// Reads data.status: 'dropped' → Listen button, 'upcoming' → Watched badge
+// ════════════════════════════════════════════════
+const EPISODE_LABELS = [
+  "New Episode", "Just Dropped", "Now Streaming",
+  "Fresh Off the Pod", "Out Now",
+];
+
+function EpisodeCard({ data, onNavigateCommunity }) {
+  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const hasBackdrop = !!data.backdrop_path;
+  const isDropped = data.status === "dropped";
+  const isThisPlaying = isDropped && currentEp?.enclosureUrl === data.episode_url && isPlaying;
+  const seen = !!data.user_has_watched;
+
+  const handlePlay = (e) => {
+    e.stopPropagation();
+    if (!data.episode_url) return;
+    playEpisode({
+      guid: `episode-${data.item_id}`,
+      title: data.episode_title || data.title,
+      enclosureUrl: data.episode_url,
+      community: data.community_name || null,
+      artwork: data.community_image || null,
+    });
+  };
+
+  // Stable label for dropped episodes
+  const labelIndex = (data.item_id || "")
+    .split("")
+    .reduce((acc, ch) => acc + ch.charCodeAt(0), 0) % EPISODE_LABELS.length;
+  const droppedLabel = EPISODE_LABELS[labelIndex];
+
+  // Day-of-week label for upcoming episodes
+  const dayLabel = (() => {
+    if (isDropped || !data.air_date) return null;
+    const airDate = new Date(data.air_date);
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const airStart = new Date(airDate.getFullYear(), airDate.getMonth(), airDate.getDate());
+    const diffDays = Math.round((airStart - todayStart) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+    return airDate.toLocaleDateString("en-US", { weekday: "long" });
+  })();
+
+  const podName = (data.community_name || "").split(" with")[0];
+  const accent = getCommunityAccent(data.community_slug);
+
+  return (
+    <div
+      onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
+      style={{
+        margin: "6px 16px",
+        background: "var(--bg-card, #131828)",
+        borderRadius: 16, overflow: "hidden",
+        border: isDropped
+          ? `1px solid ${accent}18`
+          : `1px dashed ${accent}40`,
+        cursor: "pointer", position: "relative",
+      }}
+    >
+      {/* Backdrop wash */}
+      {hasBackdrop && (
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
+          backgroundSize: "cover", backgroundPosition: "center top",
+          opacity: 0.30,
+        }}>
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(90deg, var(--bg-card, #131828) 30%, transparent 80%)",
+          }} />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(180deg, transparent 40%, var(--bg-card, #131828) 100%)",
+          }} />
+        </div>
+      )}
+
+      {/* Ambient glow */}
+      <div style={{
+        position: "absolute", top: -20, right: 30, width: 160, height: 80,
+        borderRadius: "50%",
+        background: accent,
+        opacity: isDropped ? 0.06 : 0.07,
+        filter: "blur(40px)", pointerEvents: "none",
+      }} />
+
+      {/* Poster + info stack */}
+      <div style={{
+        display: "flex", gap: 12, padding: "14px 16px 0",
+        position: "relative", zIndex: 1,
+      }}>
+        <Poster
+          path={data.poster_path} tmdbId={data.tmdb_id}
+          title={data.title} mediaType={data.media_type || "film"}
+          width={64} height={96} radius={8}
+        />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 96 }}>
+          {/* Top row — label + optional stars */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isDropped ? 4 : 6 }}>
+            {isDropped ? (
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                color: accent,
+              }}>
+                {droppedLabel}
+              </div>
+            ) : (
+              <div style={{
+                fontFamily: "var(--font-display)", fontWeight: 800,
+                fontSize: 15, lineHeight: 1,
+                color: accent,
+                letterSpacing: "-0.02em",
+              }}>
+                {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
+              </div>
+            )}
+            {isDropped && seen && data.user_rating > 0 && (
+              <Stars rating={data.user_rating} size={12} />
+            )}
+          </div>
+
+          {/* Movie title */}
+          <div style={{
+            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 19,
+            color: "var(--text-primary, #e8ecf4)",
+            lineHeight: 1.2, marginBottom: 2,
+          }}>
+            {data.title}
+          </div>
+
+          {/* Series context */}
+          {data.miniseries_title ? (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 5,
+              fontFamily: "var(--font-body)", fontSize: 12,
+              color: "var(--text-muted, #8892a8)", marginBottom: 2,
+            }}>
+              <span>{data.miniseries_title}</span>
+              {data.sort_order && (
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 10,
+                  color: "var(--text-faint, #5a6480)",
+                }}>
+                  #{data.sort_order}
+                </span>
+              )}
+            </div>
+          ) : null}
+
+          {/* Podcast name */}
+          <div style={{
+            fontFamily: "var(--font-body)", fontSize: 12,
+            color: "var(--text-muted, #8892a8)",
+            display: "flex", alignItems: "center", gap: 6,
+            marginTop: "auto",
+          }}>
+            {data.community_image && (
+              <img src={data.community_image} alt=""
+                style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
+                  border: "1px solid rgba(255,255,255,0.08)" }}
+              />
+            )}
+            {podName}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar — Listen (dropped) or Watched badge (upcoming) */}
+      <div style={{
+        display: "flex", justifyContent: "flex-end", alignItems: "center",
+        padding: "6px 16px 12px", position: "relative", zIndex: 1,
+      }}>
+        {isDropped && data.episode_url ? (
+          <button
+            onClick={handlePlay}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "5px 12px", borderRadius: 16,
+              background: isThisPlaying ? `${accent}25` : `${accent}14`,
+              border: `1px solid ${isThisPlaying ? `${accent}66` : `${accent}33`}`,
+              color: accent, fontSize: 11, fontWeight: 600,
+              cursor: "pointer", fontFamily: "var(--font-body)",
+              transition: "all 0.2s",
+            }}
+          >
+            <svg width="9" height="9" viewBox="0 0 24 24" fill={accent}>
+              {isThisPlaying
+                ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
+                : <path d="M8 5v14l11-7z"/>
+              }
+            </svg>
+            {isThisPlaying ? "Playing…" : "Listen"}
+          </button>
+        ) : !isDropped ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
+              letterSpacing: "0.04em",
+              color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
+              transition: "color 0.3s ease",
+            }}>
+              Watched
+            </span>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+              border: seen
+                ? "2px solid rgba(52,211,153,0.5)"
+                : "2px dashed rgba(255,255,255,0.12)",
+              transition: "all 0.3s ease",
+            }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                strokeWidth={seen ? "3" : "2"}
+                strokeLinecap="round" strokeLinejoin="round"
+                style={{ transition: "all 0.3s ease" }}
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -694,8 +959,20 @@ function RandomPickCard({ data, onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   const [expanded, setExpanded] = useState(false);
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState(0);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const hasBackdrop = !!data.backdrop_path;
+
+  // Measure real content height for smooth animation
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const measure = () => setContentHeight(contentRef.current.offsetHeight);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(contentRef.current);
+    return () => observer.disconnect();
+  }, [data.communities]);
 
   return (
     <div style={{
@@ -715,7 +992,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
             backgroundSize: "cover",
             backgroundPosition: "center top",
-            opacity: 0.18,
+            opacity: 0.30,
           }}>
             <div style={{
               position: "absolute", inset: 0,
@@ -740,47 +1017,50 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
         {/* Main poster + info area */}
         <div style={{
-          display: "flex", gap: 16,
-          padding: data.communities?.length > 0 ? "18px 18px 8px" : 18,
+          display: "flex", gap: 12,
+          padding: data.communities?.length > 0 && !expanded ? "14px 16px 8px" : "14px 16px",
           position: "relative", zIndex: 1,
         }}>
-          <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} />
+          <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
           <div style={{ flex: 1, paddingTop: 2 }}>
-            <div style={{
-              fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em",
-              color: "var(--text-faint, #5a6480)", textTransform: "uppercase", marginBottom: 5,
-            }}>
-              {data.media_type === "book" ? "You read" : data.media_type === "game" ? "You played" : "You watched"}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                color: "var(--text-muted, #8892a8)",
+              }}>
+                {data.media_type === "book" ? "You read" : data.media_type === "game" ? "You played" : "You watched"}
+              </div>
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 10,
+                color: "var(--text-faint, #5a6480)",
+              }}>
+                {timeAgo}
+              </div>
             </div>
             <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18,
+              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
               color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
             }}>
               {data.title}
             </div>
             {(data.creator || data.year) && (
               <div style={{
-                fontFamily: "var(--font-body)", fontSize: 13,
-                color: "var(--text-muted, #8892a8)", marginBottom: 8,
+                fontFamily: "var(--font-body)", fontSize: 12,
+                color: "var(--text-muted, #8892a8)", marginBottom: 6,
               }}>
                 {[data.creator, data.year].filter(Boolean).join(" · ")}
               </div>
             )}
             <Stars rating={data.rating} />
-            <div style={{
-              fontFamily: "var(--font-mono)", fontSize: 10,
-              color: "var(--text-faint, #5a6480)", marginTop: 8,
-            }}>
-              {timeAgo}
-            </div>
           </div>
         </div>
 
-        {/* Collapsed: compact avatar strip + drawer handle */}
+        {/* Collapsed: community avatars inline below poster area */}
         {data.communities?.length > 0 && !expanded && (
           <div style={{
-            display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 6,
-            padding: "2px 18px 12px",
+            display: "flex", alignItems: "center", gap: 5,
+            padding: "0 16px 10px",
             position: "relative", zIndex: 1,
           }}>
             {data.communities.map((c, i) => {
@@ -808,10 +1088,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 </div>
               );
             })}
-            {/* Subtle chevron hint */}
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
               stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"
-              style={{ marginLeft: 2 }}
             >
               <polyline points="6 9 12 15 18 9" />
             </svg>
@@ -838,11 +1116,15 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
       {data.communities?.length > 0 && (
         <div>
           {/* Collapsible community rows */}
-          <div style={{
-            maxHeight: expanded ? 500 : 0,
-            overflow: "hidden",
-            transition: "max-height 0.3s ease",
-          }}>
+          <div
+            style={{
+              maxHeight: expanded ? contentHeight : 0,
+              overflow: "hidden",
+              opacity: expanded ? 1 : 0,
+              transition: "max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease",
+            }}
+          >
+          <div ref={contentRef}>
           {data.communities.map((c, i) => {
             const hasBadge = !!c.badge;
             const accentColor = c.badge?.accent_color || "var(--accent-gold, #f5c542)";
@@ -869,7 +1151,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   }
                 }}
                 style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "12px 18px",
+                  display: "flex", alignItems: "center", gap: 12, padding: "10px 16px",
                   borderBottom: i < data.communities.length - 1
                     ? "1px solid var(--border-subtle, rgba(255,255,255,0.06))" : "none",
                   cursor: "pointer",
@@ -1000,6 +1282,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               </div>
             );
           })}
+          </div>
           </div>
         </div>
       )}
@@ -1166,22 +1449,8 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 // TRENDING CARD — dynamic, energetic, cinematic
 // ════════════════════════════════════════════════
 function TrendingCard({ data, onNavigateCommunity }) {
-  const communities = data.communities || [];
   const avgRating = data.avg_rating ? parseFloat(data.avg_rating).toFixed(1) : null;
   const hasBackdrop = !!data.backdrop_path;
-
-  // Build smarter tag label: prefer "Community · Series" but use tab_key context if series_title looks like a bare year
-  const getTagLabel = (c) => {
-    const name = c.community_name || "";
-    const series = c.series_title || "";
-    const tabKey = c.tab_key || "";
-    // If series_title is just a number (year), prefix with tab_key if available
-    if (/^\d{4}$/.test(series) && tabKey) {
-      const tabLabel = tabKey.charAt(0).toUpperCase() + tabKey.slice(1).replace(/_/g, " ");
-      return `${name} · ${tabLabel} ${series}`;
-    }
-    return series ? `${name} · ${series}` : name;
-  };
 
   return (
     <div style={{
@@ -1197,7 +1466,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
           backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
-          opacity: 0.18,
+          opacity: 0.30,
         }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -1228,31 +1497,28 @@ function TrendingCard({ data, onNavigateCommunity }) {
         pointerEvents: "none",
       }} />
 
-      {/* Header label */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "14px 18px 0",
-        position: "relative", zIndex: 1,
-      }}>
-        <div style={{
-          width: 7, height: 7, borderRadius: "50%",
-          background: "var(--accent-green, #34d399)",
-          boxShadow: "0 0 8px rgba(52,211,153,0.5)",
-          animation: "pulse-dot 2s ease infinite",
-        }} />
-        <span style={{
-          fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-          letterSpacing: "0.1em", textTransform: "uppercase",
-          color: "var(--accent-green, #34d399)",
-        }}>
-          Popular this week
-        </span>
-      </div>
-
       {/* Poster + info */}
-      <div style={{ display: "flex", gap: 14, padding: "12px 18px 16px", position: "relative", zIndex: 1 }}>
-        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={70} height={105} radius={8} />
+      <div style={{ display: "flex", gap: 12, padding: "14px 16px 14px", position: "relative", zIndex: 1 }}>
+        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
         <div style={{ flex: 1, paddingTop: 2 }}>
+          {/* Label with pulse dot */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6, marginBottom: 4,
+          }}>
+            <div style={{
+              width: 6, height: 6, borderRadius: "50%",
+              background: "var(--accent-green, #34d399)",
+              boxShadow: "0 0 8px rgba(52,211,153,0.5)",
+              animation: "pulse-dot 2s ease infinite",
+            }} />
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              color: "var(--accent-green, #34d399)",
+            }}>
+              Popular this week
+            </span>
+          </div>
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
             color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
@@ -1262,7 +1528,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
           {(data.creator || data.year) && (
             <div style={{
               fontFamily: "var(--font-body)", fontSize: 12,
-              color: "var(--text-muted, #8892a8)", marginBottom: 10,
+              color: "var(--text-muted, #8892a8)", marginBottom: 8,
             }}>
               {[data.creator, data.year].filter(Boolean).join(" · ")}
             </div>
@@ -1271,13 +1537,13 @@ function TrendingCard({ data, onNavigateCommunity }) {
           {/* Stats row — pill style */}
           <div style={{ display: "flex", gap: 10 }}>
             <div style={{
-              padding: "5px 10px", borderRadius: 8,
+              padding: "4px 9px", borderRadius: 8,
               background: "rgba(52,211,153,0.08)",
               border: "1px solid rgba(52,211,153,0.15)",
               display: "flex", alignItems: "center", gap: 5,
             }}>
               <span style={{
-                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 15,
+                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 14,
                 color: "var(--text-primary, #e8ecf4)",
               }}>
                 {data.watch_count}
@@ -1291,13 +1557,13 @@ function TrendingCard({ data, onNavigateCommunity }) {
             </div>
             {avgRating && (
               <div style={{
-                padding: "5px 10px", borderRadius: 8,
+                padding: "4px 9px", borderRadius: 8,
                 background: "rgba(245,197,66,0.08)",
                 border: "1px solid rgba(245,197,66,0.15)",
                 display: "flex", alignItems: "center", gap: 5,
               }}>
                 <span style={{
-                  fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 15,
+                  fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 14,
                   color: "var(--accent-gold, #f5c542)",
                 }}>
                   {avgRating}
@@ -1314,28 +1580,6 @@ function TrendingCard({ data, onNavigateCommunity }) {
         </div>
       </div>
 
-      {/* Community tags — smarter labels */}
-      {communities.length > 0 && (
-        <div style={{
-          padding: "0 18px 14px",
-          display: "flex", flexWrap: "wrap", gap: 6,
-          position: "relative", zIndex: 1,
-        }}>
-          {communities.map((c, i) => (
-            <div key={i} onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.(c.community_slug, data.tmdb_id); }} style={{
-              padding: "5px 10px", borderRadius: 8,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              fontFamily: "var(--font-mono)", fontSize: 10,
-              color: "var(--text-muted, #8892a8)",
-              cursor: "pointer",
-              transition: "background 0.15s, border-color 0.15s",
-            }}>
-              {getTagLabel(c)}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -1456,11 +1700,25 @@ function EmptyFeed({ onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions }) {
   const userId = session?.user?.id;
-  const { feedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions);
+  const [feedMode, setFeedMode] = useState("discover"); // "all" | "activity" | "discover"
+  const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
   const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
+  const refreshRef = useRef(refresh);
+  refreshRef.current = refresh;
+  const latchedRandomPick = useRef(null);
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
+
+  // Stabilize random pick across refreshes — latch the first one we see,
+  // only clear on pull-to-refresh so swipe-back doesn't re-roll
+  const feedItems = rawFeedItems.map((item) => {
+    if (item.type !== "random_pick") return item;
+    if (!latchedRandomPick.current) {
+      latchedRandomPick.current = item;
+    }
+    return latchedRandomPick.current;
+  });
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
@@ -1499,33 +1757,34 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (pullDistance >= PULL_THRESHOLD) {
       setRefreshing(true);
       setPullDistance(PULL_THRESHOLD); // Hold at threshold during refresh
-      await refresh();
+      latchedRandomPick.current = null; // Clear latch — user wants a fresh feed
+      await refreshRef.current();
       setRefreshing(false);
     }
     setPullDistance(0);
-  }, [pullDistance, refresh]);
+  }, [pullDistance]);
 
   // Refresh feed when tab becomes active (catches community logs, syncs, etc.)
   useEffect(() => {
     if (isActive && !wasActive.current) {
-      refresh();
+      refreshRef.current();
     }
     wasActive.current = isActive;
-  }, [isActive, refresh]);
+  }, [isActive]);
 
   // Refresh feed after autoLogAndCheckBadges completes (community_user_progress rows are written)
   useEffect(() => {
     if (autoLogCompleteSignal) {
-      refresh();
+      refreshRef.current();
     }
-  }, [autoLogCompleteSignal, refresh]);
+  }, [autoLogCompleteSignal]);
 
   // Refresh feed after Letterboxd sync completes — new movie appears at top
   useEffect(() => {
     if (letterboxdSyncSignal) {
-      refresh();
+      refreshRef.current();
     }
-  }, [letterboxdSyncSignal, refresh]);
+  }, [letterboxdSyncSignal]);
 
   if (loading && feedItems.length === 0) {
     return (
@@ -1587,28 +1846,77 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {(() => {
         const hasUserActivity = feedItems.some(item => item.type === "log" || item.type === "badge_complete");
-        const showWelcome = feedItems.length === 0 || !hasUserActivity;
+        const showWelcome = feedMode !== "discover" && (feedItems.length === 0 || !hasUserActivity);
 
-        if (feedItems.length === 0) {
+        if (feedItems.length === 0 && feedMode === "activity") {
           return <EmptyFeed onNavigateCommunity={onNavigateCommunity} />;
         }
 
         return (
         <div style={{ paddingTop: 4, position: "relative" }}>
-          {/* Feed label — floats right, overlaps top of first card */}
+          {/* Feed mode toggle */}
           <div style={{
-            textAlign: "right",
-            padding: "4px 22px 2px",
-            fontFamily: "var(--font-mono)", fontWeight: 600, fontSize: 10,
-            letterSpacing: "0.08em", textTransform: "uppercase",
-            color: "var(--text-faint, #5a6480)",
+            display: "flex", justifyContent: "center",
+            padding: "6px 16px 4px",
           }}>
-            Your Feed
+            <div style={{
+              display: "inline-flex",
+              background: "rgba(255,255,255,0.04)",
+              borderRadius: 8,
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: 2,
+              gap: 2,
+            }}>
+              {[
+                { key: "discover", label: "Discover" },
+                { key: "activity", label: "My Activity" },
+              ].map(tab => {
+                const active = feedMode === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setFeedMode(tab.key)}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: 6,
+                      border: "none",
+                      background: active
+                        ? "rgba(255,255,255,0.08)"
+                        : "transparent",
+                      color: active
+                        ? "var(--text-primary, #e2e6f0)"
+                        : "var(--text-faint, #5a6480)",
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Welcome cards for users with no real activity yet */}
           {showWelcome && (
             <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
+          )}
+
+          {/* Empty discover state */}
+          {feedMode === "discover" && feedItems.length === 0 && (
+            <div style={{
+              padding: "40px 24px", textAlign: "center",
+              color: "var(--text-muted, #8892a8)", fontSize: 13,
+              fontFamily: "var(--font-body)",
+            }}>
+              <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
+              Subscribe to more communities to unlock episode drops, recommendations, and badge nudges.
+            </div>
           )}
 
           {feedItems.map((item, i) => {
@@ -1619,7 +1927,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               ? { type: "up_next", key: item.data.miniseries_id }
               : item.type === "random_pick"
               ? { type: "random_pick", key: item.data.item_id }
-              : null; // future: milestone
+              : item.type === "episode" && item.data.status === "upcoming"
+              ? { type: "episode", key: item.data.item_id }
+              : null;
 
             // Skip dismissed cards
             if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
@@ -1636,6 +1946,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               ? `upnext-${item.data.miniseries_id}`
               : item.type === "random_pick"
               ? `random-${item.data.item_id}`
+              : item.type === "episode"
+              ? `episode-${item.data.status}-${item.data.tmdb_id}`
               : `feed-${i}`;
 
             const card = (() => {
@@ -1652,6 +1964,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                   return <UpNextCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
                 case "random_pick":
                   return <RandomPickCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
+                case "episode":
+                  return <EpisodeCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
                 default:
                   return null;
               }
@@ -1661,7 +1975,10 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                 key={stableKey}
                 index={i}
                 dismissable={!!dismissKey}
-                onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
+                onDismiss={dismissKey ? () => {
+                  if (dismissKey.type === "random_pick") latchedRandomPick.current = null;
+                  dismiss(dismissKey.type, dismissKey.key);
+                } : undefined}
               >
                 {card}
               </FeedCard>
@@ -1772,6 +2089,22 @@ function getSlugAbbrev(slug) {
     getplayed: "GP",
   };
   return map[slug] || (slug || "").slice(0, 2).toUpperCase();
+}
+
+// Community brand colors — used for episode & upcoming card accents
+function getCommunityAccent(slug) {
+  const map = {
+    blankcheck: "#9B72CF",
+    nowplaying: "#F2C811",
+    bigpicture: "#34d399",
+    filmjunk: "#60a5fa",
+    hdtgm: "#f87171",
+    filmspotting: "#fb923c",
+    rewatchables: "#60a5fa",
+    chapo: "#f87171",
+    getplayed: "#34d399",
+  };
+  return map[slug] || "#34d399";
 }
 
 function getTimeAgo(dateStr) {

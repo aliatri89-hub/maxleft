@@ -1,31 +1,19 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
-import { COUNTRIES } from "../utils/countries";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER, GROUP_TYPE_CONFIG } from "../utils/constants";
-import { fetchWikiImage, sb } from "../utils/api";
-import RecapScreen from "./RecapScreen";
-import ChallengeScreen from "./ChallengeScreen";
+import { sb } from "../utils/api";
+import InitialAvatar from "../components/InitialAvatar";
 import ImportCSVModal from "../components/ImportCSVModal";
 
 function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, userGroups, onOpenGroup, onCreateGroup, onJoinCode, onImportComplete }) {
   const [uploading, setUploading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [managingShelves, setManagingShelves] = useState(false);
-  const [showRecap, setShowRecap] = useState(false);
-  useEffect(() => {
-    if (showRecap && pushNav) pushNav("recap", () => setShowRecap(false));
-    else if (!showRecap && removeNav) removeNav("recap");
-  }, [showRecap]);
-  const [showChallenge, setShowChallenge] = useState(initialView === "challenge");
   const [wishlist, setWishlist] = useState([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [editName, setEditName] = useState(profile.name || "");
   const [editBio, setEditBio] = useState(profile.bio || "");
-  const [editLocation, setEditLocation] = useState(profile.location || "");
-  const [editHomeCountry, setEditHomeCountry] = useState(profile.homeCountry || "");
-  const [countryDropdown, setCountryDropdown] = useState(false);
-  const [countryFilter, setCountryFilter] = useState("");
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
   const [groupsOpen, setGroupsOpen] = useState(false);
   const [joinCodeInput, setJoinCodeInput] = useState("");
@@ -41,101 +29,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [showImportCSV, setShowImportCSV] = useState(false);
   useEffect(() => { console.log("[Import] showImportCSV changed to:", showImportCSV); }, [showImportCSV]);
   const fileRef = useRef(null);
-
-  // Friends
-  const [friendsOpen, setFriendsOpen] = useState(false);
-  const [friendsList, setFriendsList] = useState([]);
-  const [friendsPending, setFriendsPending] = useState([]);
-  const [friendsLoading, setFriendsLoading] = useState(false);
-  const [friendsLoaded, setFriendsLoaded] = useState(false);
-  const [friendSearch, setFriendSearch] = useState("");
-  const [friendSearchResults, setFriendSearchResults] = useState([]);
-  const [friendSearching, setFriendSearching] = useState(false);
-  const [friendPendingSent, setFriendPendingSent] = useState([]);
-  const [friendActionLoading, setFriendActionLoading] = useState(null);
-  const [friendExpanded, setFriendExpanded] = useState(null);
-  const friendSearchTimer = useRef(null);
-
-  const loadFriendsList = useCallback(async () => {
-    if (!session) return;
-    setFriendsLoading(true);
-    const uid = session.user.id;
-    const [{ data: accepted }, { data: incoming }, { data: sent }] = await Promise.all([
-      supabase.from("friends").select("id, requester_id, receiver_id").eq("status", "accepted").or(`requester_id.eq.${uid},receiver_id.eq.${uid}`),
-      supabase.from("friends").select("id, requester_id").eq("receiver_id", uid).eq("status", "pending"),
-      supabase.from("friends").select("id, receiver_id").eq("requester_id", uid).eq("status", "pending"),
-    ]);
-    setFriendPendingSent((sent || []).map(s => s.receiver_id));
-    const friendIds = (accepted || []).map(f => f.requester_id === uid ? f.receiver_id : f.requester_id);
-    const incomingIds = (incoming || []).map(r => r.requester_id);
-    const allIds = [...new Set([...friendIds, ...incomingIds])];
-    let allProfiles = [];
-    if (allIds.length > 0) {
-      const { data } = await supabase.from("profiles").select("id, name, username, avatar_url, avatar_emoji").in("id", allIds);
-      allProfiles = data || [];
-    }
-    setFriendsList(friendIds.map(fid => {
-      const p = allProfiles.find(pp => pp.id === fid) || {};
-      return { id: fid, name: p.name || "", username: p.username || "", avatarUrl: p.avatar_url || "", avatar: p.avatar_emoji || "👤", friendshipId: (accepted || []).find(f => f.requester_id === fid || f.receiver_id === fid)?.id };
-    }));
-    setFriendsPending((incoming || []).map(r => {
-      const p = allProfiles.find(pp => pp.id === r.requester_id) || {};
-      return { friendshipId: r.id, id: r.requester_id, name: p.name || "", username: p.username || "", avatarUrl: p.avatar_url || "", avatar: p.avatar_emoji || "👤" };
-    }));
-    setFriendsLoading(false);
-    setFriendsLoaded(true);
-  }, [session]);
-
-  const handleFriendSearch = (q) => {
-    setFriendSearch(q);
-    if (friendSearchTimer.current) clearTimeout(friendSearchTimer.current);
-    if (!q.trim()) { setFriendSearchResults([]); return; }
-    friendSearchTimer.current = setTimeout(async () => {
-      setFriendSearching(true);
-      const { data } = await supabase.from("profiles").select("id, name, username, avatar_url, avatar_emoji")
-        .or(`username.ilike.%${q}%,name.ilike.%${q}%`).neq("id", session.user.id).limit(10);
-      setFriendSearchResults(data || []);
-      setFriendSearching(false);
-    }, 300);
-  };
-
-  const sendFriendRequest = async (userId) => {
-    setFriendActionLoading(userId);
-    await supabase.from("friends").insert({ requester_id: session.user.id, receiver_id: userId, status: "pending" });
-    setFriendPendingSent(prev => [...prev, userId]);
-    setFriendActionLoading(null);
-    onToast("Friend request sent!");
-  };
-
-  const acceptFriendRequest = async (friendshipId, user) => {
-    setFriendActionLoading(friendshipId);
-    await supabase.from("friends").update({ status: "accepted" }).eq("id", friendshipId);
-    setFriendsPending(prev => prev.filter(p => p.friendshipId !== friendshipId));
-    setFriendsList(prev => [...prev, user]);
-    setFriendActionLoading(null);
-    onToast(`You and ${user.name || user.username} are now friends!`);
-  };
-
-  const declineFriendRequest = async (friendshipId) => {
-    setFriendActionLoading(friendshipId);
-    await supabase.from("friends").delete().eq("id", friendshipId);
-    setFriendsPending(prev => prev.filter(p => p.friendshipId !== friendshipId));
-    setFriendActionLoading(null);
-  };
-
-  const removeFriend = async (userId) => {
-    const uid = session.user.id;
-    await supabase.from("friends").delete().or(`and(requester_id.eq.${uid},receiver_id.eq.${userId}),and(requester_id.eq.${userId},receiver_id.eq.${uid})`);
-    setFriendsList(prev => prev.filter(f => f.id !== userId));
-    onToast("Friend removed");
-  };
-
-  const getFriendStatus = (userId) => {
-    if (friendsList.find(f => f.id === userId)) return "accepted";
-    if (friendsPending.find(p => p.id === userId)) return "incoming";
-    if (friendPendingSent.includes(userId)) return "pending";
-    return "none";
-  };
 
   // Shelf drag-to-reorder
   const [shelfDragIdx, setShelfDragIdx] = useState(null);
@@ -237,21 +130,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
     if (!session) return;
     setSavingProfile(true);
     try {
-      let locationImage = profile.locationImage || "";
-      if (editLocation && editLocation !== profile.location) {
-        const img = await fetchWikiImage(editLocation);
-        locationImage = img || "";
-      } else if (!editLocation) {
-        locationImage = "";
-      }
       await supabase.from("profiles").update({
         name: editName,
         bio: editBio,
-        location: editLocation,
-        location_image: locationImage,
-        home_country: editHomeCountry || null,
       }).eq("id", session.user.id);
-      if (onUpdateProfile) onUpdateProfile({ name: editName, bio: editBio, location: editLocation, locationImage, homeCountry: editHomeCountry });
+      if (onUpdateProfile) onUpdateProfile({ name: editName, bio: editBio });
       setEditing(false);
       onToast("Profile updated!");
     } catch (e) {
@@ -289,23 +172,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
     setUploading(false);
   };
 
-  if (showRecap) {
-    return <RecapScreen session={session} profile={profile} onBack={() => setShowRecap(false)} onToast={onToast} />;
-  }
-
-  /* Challenge/Habits screen DISABLED for launch
-  if (showChallenge) {
-    return (
-      <div className="profile-screen">
-        <div className="profile-screen-header">
-          <button className="profile-back" onClick={() => setShowChallenge(false)}>← Back</button>
-        </div>
-        <ChallengeScreen session={session} onToast={onToast} />
-      </div>
-    );
-  }
-  */
-
   const loadWishlist = async () => {
     if (!session) return;
     const { data } = await supabase.from("wishlist").select("*")
@@ -327,7 +193,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
 
       <div className="avatar-upload-wrap" onClick={() => fileRef.current?.click()}>
         <div className="profile-big-avatar">
-          {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : (profile.avatar || "👤")}
+          {profile.avatarUrl ? <img src={profile.avatarUrl} alt="" /> : <InitialAvatar username={profile.username} size={80} />}
           {uploading && (
             <div className="avatar-uploading"><div className="save-spinner" style={{ borderTopColor: "white" }} /></div>
           )}
@@ -369,31 +235,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
         </div>
       </div>
 
-      {/* Share your Mantl */}
-      <div className="share-link-section">
-        <div className="share-link-label">Share your Mantl</div>
-        <div className="share-link-url" onClick={() => {
-          navigator.clipboard.writeText(`https://mymantl.app/${profile.username}`);
-        }}>mymantl.app/{profile.username}</div>
-        <div className="share-link-btns">
-          <button className="share-link-btn" onClick={() => {
-            const url = `https://mymantl.app/${profile.username}`;
-            navigator.clipboard.writeText(url).then(() => {
-              if (onToast) onToast("Link copied!");
-            });
-          }}>
-            Copy Link
-          </button>
-          {typeof navigator !== "undefined" && navigator.share && (
-            <button className="share-link-btn" style={{ background: "var(--accent-green)", color: "#0a0a0a" }} onClick={() => {
-              navigator.share({ title: `${profile.name}'s Mantl`, url: `https://mymantl.app/${profile.username}` });
-            }}>
-              Share
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Settings */}
       <div className="settings-section">
         <div className="settings-label">Settings</div>
@@ -411,50 +252,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <div>
               <div className="event-form-label">Bio</div>
               <input className="event-form-input" placeholder="A short bio..." value={editBio} onChange={e => setEditBio(e.target.value)} />
-            </div>
-            <div>
-              <div className="event-form-label">Location</div>
-              <input className="event-form-input" placeholder="e.g. Zürich, London, Tokyo" value={editLocation} onChange={e => setEditLocation(e.target.value)} />
-              <div className="event-form-hint">Used as your profile card background</div>
-            </div>
-            <div>
-              <div className="event-form-label">Home Country</div>
-              {editHomeCountry ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div className="event-form-input" style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => { setCountryDropdown(true); setCountryFilter(""); }}>
-                    <img src={`https://flagcdn.com/w40/${editHomeCountry.toLowerCase()}.png`} alt="" style={{ width: 20, height: 14, objectFit: "cover", borderRadius: 2 }} />
-                    <span>{COUNTRIES.find(c => c.code === editHomeCountry)?.name || editHomeCountry}</span>
-                  </div>
-                  <div style={{ cursor: "pointer", color: "var(--text-faint)", fontSize: 18, padding: "0 4px" }} onClick={() => setEditHomeCountry("")}>✕</div>
-                </div>
-              ) : (
-                <div className="event-form-input" style={{ cursor: "pointer", color: "var(--text-faint)" }} onClick={() => { setCountryDropdown(true); setCountryFilter(""); }}>
-                  Select your home country
-                </div>
-              )}
-              <div className="event-form-hint">Shows on your Passport</div>
-              {countryDropdown && (
-                <div style={{ border: "1px solid var(--border-medium)", borderRadius: 10, marginTop: 6, maxHeight: 200, overflow: "auto", background: "var(--bg-card)" }}>
-                  <input
-                    className="event-form-input"
-                    placeholder="Search..."
-                    value={countryFilter}
-                    onChange={e => setCountryFilter(e.target.value)}
-                    autoFocus
-                    style={{ borderBottom: "1px solid var(--border-subtle)", borderRadius: "10px 10px 0 0", position: "sticky", top: 0, background: "var(--bg-input)", zIndex: 1 }}
-                  />
-                  {COUNTRIES.filter(c => !countryFilter || c.name.toLowerCase().includes(countryFilter.toLowerCase())).map(c => (
-                    <div
-                      key={c.code}
-                      style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13, fontFamily: "'Lora', serif", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                      onClick={() => { setEditHomeCountry(c.code); setCountryDropdown(false); setCountryFilter(""); }}
-                    >
-                      <img src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`} alt="" style={{ width: 22, height: 15, objectFit: "cover", borderRadius: 2 }} />
-                      <span>{c.name}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
             <button className="btn-save-profile" onClick={handleSaveProfile} disabled={savingProfile}>
               {savingProfile ? "Saving..." : "Save"}
@@ -769,141 +566,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           <div className="settings-item-arrow">→</div>
         </div>
 
-        {/* Friends */}
-        <div className="settings-item" onClick={() => { setFriendsOpen(!friendsOpen); if (!friendsOpen && !friendsLoaded) loadFriendsList(); }}>
-          <div className="settings-item-text">Friends</div>
-          <div className="settings-item-arrow">
-            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {friendsPending.length > 0 && <span className="mono" style={{ fontSize: 10, color: "var(--accent-green)", fontWeight: 700 }}>{friendsPending.length}</span>}
-              {friendsList.length > 0 && <span className="mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>{friendsList.length}</span>}
-              {friendsOpen ? "▾" : "→"}
-            </span>
-          </div>
-        </div>
-        {friendsOpen && (
-          <div style={{ padding: "0 0 12px" }}>
-            {/* Search */}
-            <div style={{ padding: "0 4px", marginBottom: 10 }}>
-              <input className="event-form-input" placeholder="Search by username..." value={friendSearch}
-                onChange={e => handleFriendSearch(e.target.value)}
-                style={{ width: "100%", fontFamily: "'IBM Plex Mono', monospace" }} />
-            </div>
-
-            {/* Share link */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "0 4px", marginBottom: 12 }}>
-              <div style={{ fontSize: 14 }}>🔗</div>
-              <div className="mono" style={{ flex: 1, fontSize: 11, color: "var(--text-muted)" }}>mymantl.app/{profile.username}</div>
-              <button className="friends-share-btn" onClick={() => {
-                try { navigator.clipboard.writeText(`https://mymantl.app/${profile.username}`); onToast("Link copied!"); } catch {}
-              }}>Copy</button>
-              {navigator.share && (
-                <button className="friends-share-btn" onClick={() => {
-                  navigator.share({ title: "My Mantl Profile", url: `https://mymantl.app/${profile.username}` }).catch(() => {});
-                }}>Share</button>
-              )}
-            </div>
-
-            {/* Search results */}
-            {friendSearch.trim() && (
-              <div style={{ padding: "0 4px", marginBottom: 12 }}>
-                {friendSearching ? (
-                  <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", padding: 8 }}>Searching...</div>
-                ) : friendSearchResults.length === 0 ? (
-                  <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", padding: 8 }}>No users found</div>
-                ) : (
-                  friendSearchResults.map(user => {
-                    const status = getFriendStatus(user.id);
-                    return (
-                      <div key={user.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "var(--bg-card)", borderRadius: 10, border: "1px solid var(--border-subtle)", marginBottom: 6 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
-                          {user.avatar_url ? <img src={user.avatar_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (user.avatar_emoji || "👤")}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }} onClick={() => window.open(`https://mymantl.app/${user.username}`, "_blank")}>
-                          <div className="bb" style={{ fontSize: 13 }}>{user.name}</div>
-                          <div className="mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>@{user.username}</div>
-                        </div>
-                        {status === "none" && (
-                          <button className="friends-share-btn" disabled={friendActionLoading === user.id}
-                            onClick={() => sendFriendRequest(user.id)}>{friendActionLoading === user.id ? "..." : "Add"}</button>
-                        )}
-                        {status === "pending" && <span className="mono" style={{ fontSize: 10, color: "var(--text-faint)" }}>Sent</span>}
-                        {status === "incoming" && (
-                          <button className="friends-share-btn" onClick={() => { const req = friendsPending.find(p => p.id === user.id); if (req) acceptFriendRequest(req.friendshipId, user); }}>Accept</button>
-                        )}
-                        {status === "accepted" && <span className="mono" style={{ fontSize: 10, color: "var(--accent-green)" }}>Friends ✓</span>}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            )}
-
-            {/* Pending requests */}
-            {friendsPending.length > 0 && (
-              <div style={{ padding: "0 4px", marginBottom: 12 }}>
-                <div className="mono" style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
-                  Friend Requests <span style={{ color: "var(--accent-green)" }}>({friendsPending.length})</span>
-                </div>
-                {friendsPending.map(user => (
-                  <div key={user.friendshipId} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "rgba(74,222,128,0.06)", borderRadius: 10, border: "1px solid var(--border-subtle)", marginBottom: 6 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>
-                      {user.avatarUrl ? <img src={user.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (user.avatar || "👤")}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="bb" style={{ fontSize: 13 }}>{user.name}</div>
-                      <div className="mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>@{user.username}</div>
-                    </div>
-                    <button className="friends-share-btn" style={{ background: "var(--accent-green)", color: "#0a0a0a", borderColor: "var(--accent-green)" }}
-                      disabled={friendActionLoading === user.friendshipId}
-                      onClick={() => acceptFriendRequest(user.friendshipId, user)}>
-                      {friendActionLoading === user.friendshipId ? "..." : "Accept"}
-                    </button>
-                    <button className="friends-share-btn" style={{ color: "#f87171", borderColor: "rgba(248,113,113,0.3)" }}
-                      onClick={() => declineFriendRequest(user.friendshipId)}>✕</button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Friends list */}
-            {friendsLoading ? (
-              <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", padding: "8px 4px" }}>Loading...</div>
-            ) : !friendSearch.trim() && (
-              <div style={{ padding: "0 4px" }}>
-                {friendsList.length === 0 && friendsPending.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "16px 0" }}>
-                    <div style={{ fontSize: 24, marginBottom: 4 }}>👋</div>
-                    <div className="lr" style={{ fontSize: 12, color: "var(--text-muted)" }}>Search for friends above</div>
-                  </div>
-                ) : (
-                  friendsList.map(user => (
-                    <div key={user.id}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", cursor: "pointer" }}>
-                        <div style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}
-                          onClick={() => window.open(`https://mymantl.app/${user.username}`, "_blank")}>
-                          {user.avatarUrl ? <img src={user.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : (user.avatar || "👤")}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }} onClick={() => window.open(`https://mymantl.app/${user.username}`, "_blank")}>
-                          <div className="bb" style={{ fontSize: 13 }}>{user.name}</div>
-                          <div className="mono" style={{ fontSize: 10, color: "var(--text-muted)" }}>@{user.username}</div>
-                        </div>
-                        <div style={{ padding: "4px 8px", fontSize: 14, color: "var(--text-faint)", cursor: "pointer" }}
-                          onClick={() => setFriendExpanded(friendExpanded === user.id ? null : user.id)}>•••</div>
-                      </div>
-                      {friendExpanded === user.id && (
-                        <div style={{ display: "flex", gap: 6, padding: "2px 10px 10px", justifyContent: "flex-end" }}>
-                          <button className="friends-share-btn" onClick={() => { window.open(`https://mymantl.app/${user.username}`, "_blank"); setFriendExpanded(null); }}>View</button>
-                          <button className="friends-share-btn" style={{ color: "#f87171", borderColor: "rgba(248,113,113,0.3)" }}
-                            onClick={() => { removeFriend(user.id); setFriendExpanded(null); }}>Remove</button>
-                        </div>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Groups — DISABLED for launch */}
         {false && (<>

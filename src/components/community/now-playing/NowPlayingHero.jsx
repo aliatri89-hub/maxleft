@@ -30,6 +30,7 @@ function useSlideReveal(value) {
 export default function NowPlayingHero({
   community, miniseries, progress, activeTab,
   filter, onFilterChange, searchQuery, onSearchChange,
+  upcomingCount = 0,
 }) {
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
@@ -237,17 +238,16 @@ export default function NowPlayingHero({
           maxWidth: 300, margin: "0 auto 14px", whiteSpace: "pre-line",
           fontStyle: isArcade ? "italic" : "normal",
         }}>
-          {isArcade ? "The Boll and the Beautiful" : isBooks ? "Source novels, tie-ins, and novelisations from the NP universe" : heroDescription}
+          {isArcade ? "The Boll and the Beautiful" : isBooks ? "Source novels, tie-ins, and novelisations from the Now Playing universe" : heroDescription}
         </div>
 
         {/* ═══ STATS ═══ */}
         {isArcade ? (
           <div>
             <div style={{
-              display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 4,
+              display: "flex", justifyContent: "center", alignItems: "flex-end", gap: 12,
               padding: "0 8px",
               maxWidth: "100%",
-              overflow: "hidden",
             }}>
               <HunterCabinet
                 label="Watched"
@@ -256,21 +256,11 @@ export default function NowPlayingHero({
                 pop={pop}
               />
 
-              {stats.playingGame && (
-                <CandyCabinet
-                  label="Now Playing"
-                  gameTitle={stats.playingGame.title}
-                  bgImage={stats.playingGame.bgImage}
-                />
-              )}
-
-              {stats.gamesBeat > 0 && (
-                <ShooterCabinet
-                  label="Beat"
-                  value={stats.gamesBeat}
-                  color="#4ade80"
-                />
-              )}
+              <CandyCabinet
+                label="Now Playing"
+                gameTitle={stats.playingGame?.title || null}
+                bgImage={stats.playingGame?.bgImage || null}
+              />
             </div>
             <div style={{
               textAlign: "center", marginTop: 6, paddingBottom: 4,
@@ -286,7 +276,7 @@ export default function NowPlayingHero({
               display: "flex", alignItems: "center", gap: 6,
               marginTop: 10, padding: "0 0",
             }}>
-              {["all", "seen", "unseen"].map((f) => (
+              {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
                 <button
                   key={f}
                   onClick={() => onFilterChange?.(f)}
@@ -308,7 +298,7 @@ export default function NowPlayingHero({
                     transition: "all 0.2s",
                   }}
                 >
-                  {f}
+                  {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
                 </button>
               ))}
 
@@ -518,8 +508,8 @@ function HunterCabinet({ label, value, color, pop }) {
   };
 
   return (
-    <div style={{ textAlign: "center", flex: "0 1 100px", minWidth: 0 }}>
-      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 100 }}>
+    <div style={{ textAlign: "center", flex: "0 1 140px", minWidth: 0 }}>
+      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 140 }}>
         <defs>
           {/* Wood grain pattern */}
           <pattern id="hunterWood" x="0" y="0" width="6" height="200" patternUnits="userSpaceOnUse">
@@ -982,8 +972,8 @@ function CandyCabinet({ label, gameTitle, bgImage }) {
   const gold = "rgba(245,197,24,";
 
   return (
-    <div style={{ textAlign: "center", flex: "0 1 110px", minWidth: 0 }}>
-      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 110 }}>
+    <div style={{ textAlign: "center", flex: "0 1 140px", minWidth: 0 }}>
+      <svg width="100%" viewBox="0 0 140 200" style={{ maxWidth: 140 }}>
         <defs>
           <clipPath id="candyScreen">
             <rect x="30" y="44" width="80" height="42" rx="2" />
@@ -1135,26 +1125,15 @@ function CandyCabinet({ label, gameTitle, bgImage }) {
           fill="rgba(14,12,8,0.9)" stroke={`${gold}0.15)`} strokeWidth="0.6"
         />
         {gameTitle ? (
-          <>
             <text
-              x="70" y="102" textAnchor="middle"
-              fill={`${gold}0.35)`}
-              fontSize="4.5" fontWeight="600"
-              fontFamily="'Barlow Condensed', sans-serif"
-              letterSpacing="1.5"
-            >
-              NOW PLAYING
-            </text>
-            <text
-              x="70" y="111" textAnchor="middle"
+              x="70" y="108" textAnchor="middle"
               fill="rgba(255,255,255,0.92)"
-              fontSize="8" fontWeight="800"
+              fontSize="10" fontWeight="800"
               fontFamily="'Barlow Condensed', sans-serif"
               letterSpacing="0.3"
             >
-              {gameTitle.length > 16 ? gameTitle.slice(0, 15) + "…" : gameTitle}
+              {gameTitle.length > 14 ? gameTitle.slice(0, 13) + "…" : gameTitle}
             </text>
-          </>
         ) : (
           <text
             x="70" y="107" textAnchor="middle"

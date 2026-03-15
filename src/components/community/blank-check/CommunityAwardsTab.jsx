@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import CommunityFilter from "../shared/CommunityFilter";
 
@@ -38,10 +38,13 @@ export default function CommunityAwardsTab({
   const [selectedYear, setSelectedYear] = useState(null);
   const [filter, setFilter] = useState("all");
   const [selectedHost, setSelectedHost] = useState(null); // null = all hosts
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
   const accent = community?.theme_config?.accent || "#e94560";
 
   // Reset filters when year changes
-  useEffect(() => { setFilter("all"); setSelectedHost(null); }, [selectedYear]);
+  useEffect(() => { setFilter("all"); setSelectedHost(null); setSearchQuery(""); setSearchOpen(false); }, [selectedYear]);
 
   // ─── Map tmdb_id → community_items.id for progress lookup ──
   const tmdbToItemId = useMemo(() => {
@@ -169,8 +172,86 @@ export default function CommunityAwardsTab({
         </div>
       </AwardsHeroBanner>
 
-      {/* ─── Seen/Unseen filter ─────────────────────────────── */}
-      <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
+      {/* ─── Search + Filter row ────────────────────────────── */}
+      <div style={{
+        padding: "10px 16px 0",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        {searchOpen ? (
+          <div style={{ flex: 1, position: "relative" }}>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search categories, films…"
+              style={{
+                width: "100%",
+                padding: "8px 36px 8px 34px",
+                background: "rgba(255,255,255,0.06)",
+                border: `1px solid ${accent}`,
+                borderRadius: 10,
+                color: "#fff",
+                fontSize: 14,
+                outline: "none",
+                boxSizing: "border-box",
+                fontFamily: "'Barlow Condensed', sans-serif",
+                letterSpacing: "0.01em",
+              }}
+            />
+            <span style={{
+              position: "absolute", left: 10, top: "50%",
+              transform: "translateY(-50%)",
+              pointerEvents: "none",
+              display: "flex", alignItems: "center",
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </span>
+            <button
+              onClick={() => { setSearchQuery(""); setSearchOpen(false); }}
+              style={{
+                position: "absolute", right: 8, top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)", border: "none",
+                color: "#aaa", fontSize: 12, cursor: "pointer",
+                borderRadius: 20, width: 22, height: 22,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: 0, lineHeight: 1,
+              }}
+            >✕</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ flex: 1 }}>
+              <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
+            </div>
+            <button
+              onClick={() => {
+                setSearchOpen(true);
+                setTimeout(() => searchInputRef.current?.focus(), 50);
+              }}
+              style={{
+                flexShrink: 0,
+                width: 34, height: 34,
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
 
       {/* ─── Standard Categories ────────────────────────────── */}
       {yearData.standard.length > 0 && (
@@ -186,6 +267,7 @@ export default function CommunityAwardsTab({
               isLast={ci === yearData.standard.length - 1}
               filter={filter}
               selectedHost={selectedHost}
+              searchQuery={searchQuery}
             />
           ))}
         </div>
@@ -226,6 +308,7 @@ export default function CommunityAwardsTab({
               getItemId={getItemId}
               onToggle={userId ? onToggle : null}
               filter={filter}
+              searchQuery={searchQuery}
             />
           ))}
         </div>
@@ -246,9 +329,12 @@ export default function CommunityAwardsTab({
    CategorySection — horizontal scroll: winners → nominees
    ═══════════════════════════════════════════════════════════════ */
 
-function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast, filter, selectedHost }) {
+function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast, filter, selectedHost, searchQuery }) {
   const { category: name, picks } = category;
   const isPerformance = name.includes("Actor") || name.includes("Actress") || name.includes("Voice");
+  const q = (searchQuery || "").trim().toLowerCase();
+  const isSearching = q.length >= 2;
+  const categoryMatches = isSearching && name.toLowerCase().includes(q);
 
   // ─── Collect all films, deduped, with host info ─────────────
   // When a host is selected, only include picks from that host
@@ -292,6 +378,14 @@ function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast,
   // Apply seen/unseen filter
   if (filter === "seen") cards = cards.filter(c => isSeen(c.title, c.tmdbId));
   else if (filter === "unseen") cards = cards.filter(c => !isSeen(c.title, c.tmdbId));
+
+  // Apply search filter — if category name matches, show all; otherwise filter by title
+  if (isSearching && !categoryMatches) {
+    cards = cards.filter(c =>
+      c.title.toLowerCase().includes(q) ||
+      (c.subtitle || "").toLowerCase().includes(q)
+    );
+  }
 
   if (cards.length === 0) return null;
 
@@ -479,16 +573,24 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
    BenCategoryShelf — poster shelf with Ben's commentary
    ═══════════════════════════════════════════════════════════════ */
 
-function BenCategoryShelf({ category, isSeen, getItemId, onToggle, filter }) {
+function BenCategoryShelf({ category, isSeen, getItemId, onToggle, filter, searchQuery }) {
   let benPicks = category.picks.ben || [];
   const catName = category.category;
   const isNoThankYou = catName.toLowerCase().includes("no thank");
   const isHonorable = catName.toLowerCase().includes("honorable");
   const tint = isNoThankYou ? "#e94560" : BEN_COLOR;
+  const q = (searchQuery || "").trim().toLowerCase();
+  const isSearching = q.length >= 2;
+  const categoryMatches = isSearching && catName.toLowerCase().includes(q);
 
   // Apply seen/unseen filter
   if (filter === "seen") benPicks = benPicks.filter(p => isSeen(p.title, p.tmdbId));
   else if (filter === "unseen") benPicks = benPicks.filter(p => !isSeen(p.title, p.tmdbId));
+
+  // Apply search filter
+  if (isSearching && !categoryMatches) {
+    benPicks = benPicks.filter(p => p.title.toLowerCase().includes(q));
+  }
 
   if (benPicks.length === 0) return null;
 

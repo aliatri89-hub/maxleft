@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../supabase";
 import { COUNTRIES } from "../../utils/countries";
 import { VISIT_MONTHS, formatVisitDate } from "../../utils/constants";
-import { fetchWikiImage, compressImage, sb } from "../../utils/api";
+import { compressImage, sb } from "../../utils/api";
 import { formatDate } from "../../utils/helpers";
 import { WORLD_MAP_URL, ISO_NUM_A2, decodeTopojson, geoPathStr } from "../../utils/geo";
 import LocationInput from "../LocationInput";
@@ -60,7 +60,6 @@ export default function ShelfModals({
   const [editVisitYear, setEditVisitYear] = useState("");
   const [mapData, setMapData] = useState(null);
   const [mapTooltip, setMapTooltip] = useState(null);
-  const [wikiImageCache] = useState({});
 
   // Diary state
   const [diaryView, setDiaryView] = useState("diary");
@@ -432,8 +431,7 @@ export default function ShelfModals({
                             await supabase.from("workout_goals").update({ photo_url: null, photo_position: "50 50" }).eq("id", viewingEvent.id);
                             // Try to delete from storage (best effort)
                             try { await supabase.storage.from("trophy-photos").remove([`${session.user.id}/${viewingEvent.id}`]); } catch (e) {}
-                            const wikiImg = wikiImageCache[viewingEvent.location?.split(",")[0]?.trim()] || null;
-                            setViewingEvent(prev => ({ ...prev, photoUrl: null, locationImage: wikiImg, photoPosition: "50 50" }));
+                            setViewingEvent(prev => ({ ...prev, photoUrl: null, locationImage: null, photoPosition: "50 50" }));
                             setPhotoPos({ x: 50, y: 50 });
                             if (onRefresh) onRefresh();
                             onToast("Photo removed");
@@ -813,7 +811,7 @@ export default function ShelfModals({
                             const countryFlag = c.flag;
                             setSavingCountry(true);
                             const visitedAt = y ? new Date(y, m ? m - 1 : 0, 1).toISOString() : new Date().toISOString();
-                            const photo = await fetchWikiImage(countryName);
+                            const photo = null;
                             const { error } = await supabase.from("countries").insert({
                               user_id: session.user.id,
                               country_code: countryCode,
@@ -854,7 +852,7 @@ export default function ShelfModals({
                             const countryCode = c.code;
                             const countryFlag = c.flag;
                             setSavingCountry(true);
-                            const photo = await fetchWikiImage(countryName);
+                            const photo = null;
                             const { error } = await supabase.from("countries").insert({
                               user_id: session.user.id,
                               country_code: countryCode,
@@ -897,17 +895,16 @@ export default function ShelfModals({
                     setBulkAdding(true);
                     const codes = [...multiSelectCountries];
                     const selected = codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean);
-                    // Fetch wiki images in parallel (batches of 5)
+                    // Insert in batches of 5
                     let added = 0;
                     for (let i = 0; i < selected.length; i += 5) {
                       const batch = selected.slice(i, i + 5);
-                      const photos = await Promise.all(batch.map(c => fetchWikiImage(c.name)));
-                      const rows = batch.map((c, j) => ({
+                      const rows = batch.map((c) => ({
                         user_id: session.user.id,
                         country_code: c.code,
                         country_name: c.name,
                         status: "been",
-                        photo_url: photos[j] || null,
+                        photo_url: null,
                         visited_at: new Date().toISOString(),
                       }));
                       const { error } = await supabase.from("countries").insert(rows);

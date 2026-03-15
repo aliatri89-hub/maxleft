@@ -3,10 +3,9 @@ import { supabase } from "./supabase";
 import "./styles/App.css";
 
 // Utils
-import { COUNTRIES } from "./utils/countries";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER, GROUP_TYPE_CONFIG, HABITS, SPORT_ICONS, generateInviteCode } from "./utils/constants";
 import { stravaApi, stravaAuth } from "./utils/strava";
-import { TMDB_IMG, fetchWikiImage, sb, wikiImageCache, fetchTMDBRaw, searchTMDBRaw } from "./utils/api";
+import { TMDB_IMG, sb, fetchTMDBRaw, searchTMDBRaw } from "./utils/api";
 import { tapLight, tapMedium, notifySuccess } from "./utils/haptics";
 
 // Screens
@@ -16,13 +15,15 @@ import ShelfHome from "./screens/ShelfHome";
 import FeedScreen from "./screens/FeedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import TrackScreen from "./screens/TrackScreen";
-import PublicProfile from "./screens/PublicProfile";
 import JoinGroupScreen from "./screens/JoinGroupScreen";
 import GroupViewScreen from "./screens/GroupViewScreen";
 import ExploreScreen from "./screens/ExploreScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 import NPPDashboard from "./components/community/now-playing/NPPDashboard";
 import BlankCheckDashboard from "./components/community/blank-check/BlankCheckDashboard";
+import TripleFeature from "./features/triple-feature/TripleFeature";
+import TripleFeaturePublic from "./features/triple-feature/TripleFeaturePublic";
+import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
@@ -34,6 +35,7 @@ import FlappyMantl from "./components/FlappyMantl";
 // import ComedyPointsToast from "./components/community/shared/ComedyPointsToast"; // DISABLED for launch
 import CreateGroupModal from "./components/CreateGroupModal";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
+import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
@@ -106,9 +108,17 @@ function CommunityLoadingSkeleton() {
 // ─── MAIN APP ────────────────────────────────────────────────
 
 export default function App() {
+  // Public routes — bypass auth entirely
+  if (window.location.pathname.replace(/\/+$/, "") === "/play") {
+    // Dismiss the HTML splash screen (it sits at z-index 9999)
+    const splash = document.getElementById("splash-screen");
+    if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
+    return <TripleFeaturePublic />;
+  }
+
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [screen, setScreen] = useState("loading"); // loading, landing, setup, app, public
+  const [screen, setScreen] = useState("loading"); // loading, landing, setup, app
   const [activeTab, setActiveTab] = useState("feed"); // feed, explore, shelf
   const [visitedTabs, setVisitedTabs] = useState(new Set(["feed"])); // only mount tabs after first visit
   const navTapCount = useRef(0);
@@ -124,9 +134,10 @@ export default function App() {
   const [syncComedyToast, setSyncComedyToast] = useState(null); // DISABLED for launch
   const feedTapCount = useRef(0);
   const feedTapTimer = useRef(null);
-  const [pendingFriendCount, setPendingFriendCount] = useState(0);
   const [profileInitView, setProfileInitView] = useState(null); // null or "challenge"
   const [showProfile, setShowProfile] = useState(false); // profile overlay
+  const [showTripleFeature, setShowTripleFeature] = useState(false); // Triple Feature game overlay
+  const [tfUnplayed, setTfUnplayed] = useState(false); // gold dot on dice icon
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [toast, setToast] = useState(null);
@@ -135,15 +146,6 @@ export default function App() {
   const toastTimer = useRef(null);
   const [syncBadgeToasts, setSyncBadgeToasts] = useState([]); // [{badge, current, total, visible}]
   const syncBadgeTimers = useRef([]);
-  const [publicData, setPublicData] = useState(null); // { profile, shelves } for public view
-  const [publicUsername, setPublicUsername] = useState(() => {
-    const host = window.location.hostname;
-    if (host === "npp.mymantl.app" || host === "bc.mymantl.app") return null; // subdomain dashboard, not a profile
-    const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-    if (path.startsWith("join/") || path === "join") return null;
-    if (path.startsWith("community/")) return null; // don't treat as username
-    return (path && path !== "" && !path.includes("/") && path !== "index.html") ? path : null;
-  });
 
   // Community dashboard: /community/{slug}/dashboard OR subdomain like npp.mymantl.app
   const [communityDashboard, setCommunityDashboard] = useState(() => {
@@ -179,89 +181,7 @@ export default function App() {
     }
   }, [activeCommunitySlug]);
 
-  // Notifications
-  const [notifications, setNotifications] = useState([]);
-  const [notifOpen, setNotifOpen] = useState(false);
   const [trackRefreshKey, setTrackRefreshKey] = useState(0);
-  const [notifCount, setNotifCount] = useState(0);
-  const notifLastRead = useRef("2000-01-01T00:00:00Z");
-  const notifReadBefore = useRef("2000-01-01T00:00:00Z"); // used to highlight unread items in panel
-
-  // Initialize notifLastRead from profile (DB) or per-user localStorage fallback
-  const initNotifLastRead = useCallback((userId, profileTimestamp) => {
-    const lsKey = `mantl_notif_read_${userId}`;
-    const fromDb = profileTimestamp || "";
-    const fromLs = localStorage.getItem(lsKey) || "";
-    // Use whichever is more recent
-    const best = fromDb > fromLs ? fromDb : fromLs;
-    notifLastRead.current = best || "2000-01-01T00:00:00Z";
-    notifReadBefore.current = notifLastRead.current;
-  }, []);
-
-  const loadNotifications = useCallback(async (userId) => {
-    if (!userId) return;
-    try {
-      // Get my activity IDs
-      const { data: myActivities } = await supabase.from("feed_activity")
-        .select("id, item_title, item_cover, activity_type")
-        .eq("user_id", userId).order("created_at", { ascending: false }).limit(100);
-      const myIds = (myActivities || []).map(a => a.id);
-      if (myIds.length === 0) { setNotifications([]); setNotifCount(0); return; }
-
-      // Get reactions and comments on my posts (not by me)
-      const [{ data: reactions }, { data: comments }] = await Promise.all([
-        supabase.from("feed_reactions").select("id, activity_id, user_id, reaction_type, created_at")
-          .in("activity_id", myIds).neq("user_id", userId).order("created_at", { ascending: false }).limit(50),
-        supabase.from("feed_comments").select("id, feed_activity_id, user_id, text, created_at")
-          .in("feed_activity_id", myIds).neq("user_id", userId).order("created_at", { ascending: false }).limit(50),
-      ]);
-
-      // Resolve user profiles
-      const userIds = [...new Set([...(reactions || []).map(r => r.user_id), ...(comments || []).map(c => c.user_id)])];
-      let profiles = {};
-      if (userIds.length > 0) {
-        const { data: profs } = await supabase.from("profiles").select("id, name, username, avatar_url, avatar_emoji").in("id", userIds);
-        (profs || []).forEach(p => { profiles[p.id] = p; });
-      }
-
-      const activityMap = {};
-      (myActivities || []).forEach(a => { activityMap[a.id] = a; });
-
-      // Build notification items
-      const items = [
-        ...(reactions || []).map(r => ({
-          id: `r-${r.id}`, type: "reaction", emoji: r.reaction_type,
-          user: profiles[r.user_id] || {}, activityId: r.activity_id,
-          itemTitle: activityMap[r.activity_id]?.item_title || "",
-          itemCover: activityMap[r.activity_id]?.item_cover || "",
-          created_at: r.created_at,
-        })),
-        ...(comments || []).map(c => ({
-          id: `c-${c.id}`, type: "comment", text: c.text,
-          user: profiles[c.user_id] || {}, activityId: c.feed_activity_id,
-          itemTitle: activityMap[c.feed_activity_id]?.item_title || "",
-          itemCover: activityMap[c.feed_activity_id]?.item_cover || "",
-          created_at: c.created_at,
-        })),
-      ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 30);
-
-      setNotifications(items);
-      setNotifCount(items.filter(n => n.created_at > notifLastRead.current).length);
-    } catch (e) { console.error("Notifications error:", e); }
-  }, []);
-
-  const openNotifications = () => {
-    notifReadBefore.current = notifLastRead.current; // preserve for unread highlighting
-    setNotifOpen(true);
-    const now = new Date().toISOString();
-    notifLastRead.current = now;
-    setNotifCount(0);
-    // Persist to per-user localStorage + DB
-    if (session?.user?.id) {
-      localStorage.setItem(`mantl_notif_read_${session.user.id}`, now);
-      supabase.from("profiles").update({ notif_last_read: now }).eq("id", session.user.id).then(() => {});
-    }
-  };
 
   // Mark tabs as visited when activated or preloaded (so component mounts)
   useEffect(() => {
@@ -273,76 +193,6 @@ export default function App() {
     });
   }, [activeTab, preloadTab]);
 
-  // Poll notifications every 60s
-  // ── Realtime notifications + 5-min fallback poll ──
-  useEffect(() => {
-    if (!session) return;
-
-    // Track user's activity IDs for filtering Realtime events
-    const myActivityIds = new Set();
-    const refreshActivityIds = async () => {
-      const { data } = await supabase.from("feed_activity")
-        .select("id").eq("user_id", session.user.id)
-        .order("created_at", { ascending: false }).limit(100);
-      myActivityIds.clear();
-      (data || []).forEach(a => myActivityIds.add(a.id));
-    };
-    refreshActivityIds();
-
-    // Debounce: don't reload notifications more than once every 5 seconds
-    let reloadTimer = null;
-    const debouncedReload = () => {
-      if (reloadTimer) return;
-      reloadTimer = setTimeout(() => {
-        reloadTimer = null;
-        loadNotifications(session.user.id);
-      }, 5000);
-    };
-
-    // Subscribe to new reactions on any post
-    const reactionsChannel = supabase
-      .channel("notif-reactions")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "feed_reactions",
-      }, (payload) => {
-        const row = payload.new;
-        // Only care about reactions on MY posts, not BY me
-        if (row.user_id !== session.user.id && myActivityIds.has(row.activity_id)) {
-          debouncedReload();
-        }
-      })
-      .subscribe();
-
-    // Subscribe to new comments on any post
-    const commentsChannel = supabase
-      .channel("notif-comments")
-      .on("postgres_changes", {
-        event: "INSERT",
-        schema: "public",
-        table: "feed_comments",
-      }, (payload) => {
-        const row = payload.new;
-        if (row.user_id !== session.user.id && myActivityIds.has(row.feed_activity_id)) {
-          debouncedReload();
-        }
-      })
-      .subscribe();
-
-    // Fallback poll every 5 minutes (covers edge cases where Realtime misses)
-    const fallback = setInterval(() => {
-      loadNotifications(session.user.id);
-      refreshActivityIds(); // keep activity ID set fresh
-    }, 5 * 60 * 1000);
-
-    return () => {
-      supabase.removeChannel(reactionsChannel);
-      supabase.removeChannel(commentsChannel);
-      clearInterval(fallback);
-      if (reloadTimer) clearTimeout(reloadTimer);
-    };
-  }, [session, loadNotifications]);
   const [pendingJoinCode, setPendingJoinCode] = useState(() => {
     const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
     if (path.startsWith("join/")) return path.replace("join/", "").toUpperCase();
@@ -354,7 +204,7 @@ export default function App() {
 
   // User data
   const [profile, setProfile] = useState({
-    name: "", username: "", avatar: "", bio: "", avatarUrl: "", mantlPins: [], homeCountry: "", mantlpieceTitle: "",
+    name: "", username: "", avatar: "", bio: "", avatarUrl: "", mantlPins: [], mantlpieceTitle: "",
     enabledShelves: { ...DEFAULT_ENABLED_SHELVES },
     shelfOrder: [...DEFAULT_SHELF_ORDER],
   });
@@ -362,7 +212,7 @@ export default function App() {
   // Shelf data
   const [shelves, setShelves] = useState({
     books: [], movies: [], shows: [], games: [], trophies: [], goals: [],
-    totalItems: 0, friends: 0,
+    totalItems: 0,
   });
   const [shelvesLoaded, setShelvesLoaded] = useState(false);
 
@@ -408,6 +258,12 @@ export default function App() {
       if (backfilled > 0) setAutoLogCompleteSignal(Date.now());
     }
   };
+
+  // Triple Feature — check if today's puzzle is unplayed (for gold dot)
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    hasPlayedToday(session.user.id).then((played) => setTfUnplayed(!played));
+  }, [session?.user?.id, showTripleFeature]); // re-check when game closes
 
   // Challenge shelf data
   const [challengeShelf, setChallengeShelf] = useState(null); // { habits, stats, overallPct, tier, activeDays, targetPerHabit }
@@ -507,153 +363,6 @@ export default function App() {
 
   // ── CHECK FOR PUBLIC PROFILE URL ──
 
-  useEffect(() => {
-    const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-    if (path.startsWith("join/") || path === "join") return; // handled by group join flow
-    if (path && path !== "" && !path.includes("/") && path !== "index.html") {
-      // Update the HTML splash to show who we're loading
-      const tagline = document.querySelector(".splash-tagline");
-      if (tagline) tagline.innerHTML = `Loading <strong>${path}</strong>'s shelf`;
-      // Looks like mymantl.app/username — load public profile
-      loadPublicProfile(path);
-    }
-  }, []);
-
-  const loadPublicProfile = async (username) => {
-    try {
-      // Look up profile by username (must be first — need userId for subsequent queries)
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("username", username.toLowerCase())
-        .maybeSingle();
-
-      if (!prof) {
-        setPublicUsername(null);
-        setScreen((prev) => prev === "loading" ? "landing" : prev);
-        return;
-      }
-
-      const userId = prof.id;
-
-      // Run ALL shelf queries in parallel (was sequential — 9 round trips → 1 round trip)
-      const [
-        { data: allBooks },
-        { data: activeBooks },
-        { data: allMovies },
-        { data: allShows },
-        { data: allGames },
-        { data: allTrophies },
-        { data: allGoals },
-        { data: allCountriesPub },
-        { data: feedData },
-      ] = await Promise.all([
-        supabase.from("books").select("id, title, author, cover_url, rating, total_pages, notes, finished_at")
-          .eq("user_id", userId).eq("is_active", false).neq("habit_id", 7).order("finished_at", { ascending: false, nullsFirst: false }),
-        supabase.from("books").select("id, title, author, cover_url, current_page, total_pages")
-          .eq("user_id", userId).eq("is_active", true).neq("habit_id", 7),
-        supabase.from("movies").select("id, title, poster_url, rating, year, director, notes, watched_at, source")
-          .eq("user_id", userId).order("watched_at", { ascending: false, nullsFirst: false }),
-        supabase.from("shows").select("id, title, poster_url, rating, status, current_season, current_episode, notes, created_at")
-          .eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("games").select("id, title, cover_url, platform, genre, status, rating, notes, source, external_id, api_source, created_at")
-          .eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("workout_goals").select("id, name, emoji, result, completed_at, location, photo_url, distance, photo_position")
-          .eq("user_id", userId).eq("is_active", false).gte("habit_id", 1).not("completed_at", "is", null).order("completed_at", { ascending: false }),
-        supabase.from("workout_goals").select("id, name, emoji, target_date, location, goal_text, photo_url, distance, photo_position")
-          .eq("user_id", userId).eq("is_active", true).gte("habit_id", 1).order("target_date", { ascending: true }),
-        supabase.from("countries").select("id, country_code, country_name, status, visit_month, visit_year, trip_month, trip_year, notes, photo_url")
-          .eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("feed_activity").select("*").eq("user_id", userId)
-          .order("created_at", { ascending: false }).limit(20),
-      ]);
-
-      const books = (allBooks || []).map((b) => ({ id: b.id, title: b.title, author: b.author, cover: b.cover_url, rating: b.rating, pages: b.total_pages, notes: b.notes, finishedAt: b.finished_at }));
-      const currentBooks = (activeBooks || []).map((b) => ({ id: b.id, title: b.title, author: b.author, cover: b.cover_url, currentPage: b.current_page, totalPages: b.total_pages, isReading: true }));
-      const allBooksCombined = [...currentBooks, ...books];
-
-      const movies = (allMovies || []).map((m) => ({ id: m.id, title: m.title, cover: m.poster_url, rating: m.rating, year: m.year, director: m.director, notes: m.notes, watchedAt: m.watched_at, source: m.source }));
-
-      const shows = (allShows || []).sort((a, b) => (a.status === "watching" ? -1 : 1) - (b.status === "watching" ? -1 : 1)).map((s) => ({
-        id: s.id, title: s.title, cover: s.poster_url, rating: s.rating, isWatching: s.status === "watching",
-        currentSeason: s.current_season, currentEpisode: s.current_episode, notes: s.notes, createdAt: s.created_at,
-      }));
-
-      const games = (allGames || []).sort((a, b) => {
-        if (a.status === "playing" && b.status !== "playing") return -1;
-        if (b.status === "playing" && a.status !== "playing") return 1;
-        const hoursA = parseFloat((a.notes || "").match(/^([\d.]+)h/)?.[1] || "0");
-        const hoursB = parseFloat((b.notes || "").match(/^([\d.]+)h/)?.[1] || "0");
-        if (hoursA !== hoursB) return hoursB - hoursA;
-        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-      }).map((g) => ({
-        id: g.id, title: g.title, cover: g.cover_url, platform: g.platform, genre: g.genre, isPlaying: g.status === "playing", isBeat: g.status === "beat", status: g.status, rating: g.rating, notes: g.notes, source: g.source, externalId: g.external_id, apiSource: g.api_source, createdAt: g.created_at,
-      }));
-
-      // Trophies + goals — use cached wiki images, defer fetches to background
-      const trophies = (allTrophies || []).map((t) => ({
-        id: t.id, title: t.name, emoji: t.emoji || "🏆", result: t.result, completedAt: t.completed_at, location: t.location,
-        photoUrl: t.photo_url || null, distance: t.distance || null, photoPosition: t.photo_position || "50 50",
-        locationImage: t.photo_url || wikiImageCache[t.location?.split(",")[0]?.trim()] || null,
-      }));
-
-      const goals = (allGoals || []).map((g) => ({
-        id: g.id, title: g.name, emoji: g.emoji || "🎯", targetDate: g.target_date, location: g.location, goal: g.goal_text || "",
-        photoUrl: g.photo_url || null, distance: g.distance || null, photoPosition: g.photo_position || "50 50",
-        locationImage: g.photo_url || wikiImageCache[g.location?.split(",")[0]?.trim()] || null,
-      }));
-
-      const totalItems = books.length + movies.length + shows.length + games.length + trophies.length;
-
-      const countriesPub = (allCountriesPub || []).map(c => {
-        const meta = COUNTRIES.find(cc => cc.code === c.country_code);
-        return { id: c.id, countryCode: c.country_code, countryName: c.country_name, flag: meta?.flag || "🏳️", status: c.status, visitMonth: c.visit_month, visitYear: c.visit_year, tripMonth: c.trip_month, tripYear: c.trip_year, notes: c.notes, photoUrl: c.photo_url };
-      });
-
-      const feedItems = (feedData || []).map(f => ({ ...f, userName: prof.name || prof.username, userAvatar: prof.avatar_url, userAvatarEmoji: prof.avatar_emoji }));
-
-      setPublicData({
-        profile: {
-          id: prof.id, name: prof.name || "", username: prof.username || "",
-          avatar: prof.avatar_emoji || "👤", avatarUrl: prof.avatar_url || "",
-          bio: prof.bio || "", mantlPins: prof.mantl_pins || [],
-          mantlpieceTitle: prof.mantlpiece_title || "",
-          location: prof.location || "", locationImage: prof.location_image || "",
-          homeCountry: prof.home_country || "",
-        },
-        shelves: { books: allBooksCombined, currentBooks, movies, shows, games, trophies, goals, countries: countriesPub, totalItems, friends: 0, feedItems },
-      });
-      setScreen("public");
-
-      // Fetch missing wiki images in background (don't block render)
-      const allLocations = [...new Set([
-        ...(allTrophies || []).map(t => t.location),
-        ...(allGoals || []).map(g => g.location),
-      ].filter(Boolean))];
-      const needWikiFetch = allLocations.filter(loc => !wikiImageCache[loc.split(",")[0].trim()]);
-      if (needWikiFetch.length > 0) {
-        Promise.all(needWikiFetch.map(loc => fetchWikiImage(loc))).then(() => {
-          setPublicData(prev => prev ? {
-            ...prev,
-            shelves: {
-              ...prev.shelves,
-              trophies: (prev.shelves.trophies || []).map(t => ({
-                ...t, locationImage: t.photoUrl || wikiImageCache[t.location?.split(",")[0]?.trim()] || null,
-              })),
-              goals: (prev.shelves.goals || []).map(g => ({
-                ...g, locationImage: g.photoUrl || wikiImageCache[g.location?.split(",")[0]?.trim()] || null,
-              })),
-            },
-          } : prev);
-        });
-      }
-    } catch (err) {
-      console.error("Public profile error:", err);
-      setPublicUsername(null);
-      setScreen((prev) => prev === "loading" ? "landing" : prev);
-    }
-  };
-
   // ── AUTH ──
 
   useEffect(() => {
@@ -666,15 +375,7 @@ export default function App() {
         loadUserData(s.user).finally(() => { loadingUserId = null; });
       } else if (!s) {
         setAuthLoading(false);
-        // Don't override public screen or public loading
-        const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-        const isPublicUrl = path && path !== "" && !path.includes("/") && path !== "index.html";
-        const isJoinUrl = path.startsWith("join/");
-        if (isJoinUrl) {
-          setScreen("landing");
-        } else if (!isPublicUrl) {
-          setScreen("landing");
-        }
+        setScreen("landing");
       }
     });
     return () => subscription.unsubscribe();
@@ -697,19 +398,15 @@ export default function App() {
     setSession(null);
     setScreen("landing");
     setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-    setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0, friends: 0 });
+    setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
     setShelvesLoaded(false);
     setStravaActivities([]);
     setStravaConnected(false);
     setChallengeShelf(null);
-    setPendingFriendCount(0);
     setUserGroups([]);
     setActiveGroup(null);
     setShowGroupView(false);
     setActiveTab("feed");
-    setNotifications([]);
-    setNotifCount(0);
-    notifLastRead.current = "2000-01-01T00:00:00Z";
   };
 
   const deleteAccount = async () => {
@@ -760,12 +457,11 @@ export default function App() {
       setSession(null);
       setScreen("landing");
       setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-      setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0, friends: 0 });
+      setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
       setShelvesLoaded(false);
       setStravaActivities([]);
       setStravaConnected(false);
       setChallengeShelf(null);
-      setPendingFriendCount(0);
       setActiveTab("feed");
     } catch (err) {
       console.error("Delete account error:", err);
@@ -823,9 +519,6 @@ export default function App() {
           avatarUrl: prof.avatar_url || "",
           mantlPins: prof.mantl_pins || [],
           mantlpieceTitle: prof.mantlpiece_title || "",
-          location: prof.location || "",
-          locationImage: prof.location_image || "",
-          homeCountry: prof.home_country || "",
           letterboxd_username: prof.letterboxd_username || null,
           goodreads_user_id: prof.goodreads_user_id || null,
           steam_id: prof.steam_id || null,
@@ -833,12 +526,6 @@ export default function App() {
           shelfOrder: prof.shelf_order || [...DEFAULT_SHELF_ORDER],
           nextUpBook: prof.next_up_book || null,
         });
-
-        // Preload hero background image
-        if (prof.location_image) {
-          const img = new Image();
-          img.src = prof.location_image;
-        }
       }
 
       // Load all shelf data + challenge shelf + groups in parallel
@@ -865,10 +552,6 @@ export default function App() {
       })();
 
       await Promise.all([shelvesPromise, challengePromise, stravaPromise, groupsPromise]);
-      // Initialize notification read timestamp from DB profile
-      initNotifLastRead(user.id, prof.notif_last_read || "");
-      // Load notifications (non-blocking)
-      loadNotifications(user.id);
 
       // Handle pending group join code (from /join/XXXXX URL)
       if (pendingJoinCode) {
@@ -905,27 +588,11 @@ export default function App() {
 
       // If we're on a public profile URL, check if it's ours
       const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-      if (path.startsWith("join/") || path === "join") {
-        // Join URL — already handled above, go to app
+      if (path && path !== "" && path !== "index.html" && !path.includes("/")) {
         window.history.replaceState(null, "", "/");
-        setAuthLoading(false);
-        setScreen("app");
-      } else if (path && path !== "" && !path.includes("/") && path !== "index.html") {
-        if (path.toLowerCase() === (prof.username || "").toLowerCase()) {
-          // Viewing our own public profile — go to app
-          window.history.replaceState(null, "", "/");
-          setAuthLoading(false);
-          setScreen("app");
-        } else {
-          // Viewing someone else's public profile — keep public view but have session ready
-          setAuthLoading(false);
-          // Screen stays "public" if loadPublicProfile already set it
-          return;
-        }
-      } else {
-        setAuthLoading(false);
-        setScreen("app");
       }
+      setAuthLoading(false);
+      setScreen("app");
     } catch (err) {
       console.error("Load user error:", err);
       setAuthLoading(false);
@@ -1033,8 +700,6 @@ export default function App() {
       { data: allGames },
       { data: allTrophies },
       { data: allGoals },
-      { count: friendCount },
-      { count: pendingCount },
       { data: allCountries },
     ] = await Promise.all([
       supabase.from("books").select("id, title, author, cover_url, rating, total_pages, notes, finished_at, source, current_page")
@@ -1051,15 +716,9 @@ export default function App() {
         .eq("user_id", userId).eq("is_active", false).gte("habit_id", 1).not("completed_at", "is", null).order("completed_at", { ascending: false }),
       supabase.from("workout_goals").select("id, name, emoji, target_date, location, goal_text, source, photo_url, distance, photo_position")
         .eq("user_id", userId).eq("is_active", true).gte("habit_id", 1).order("target_date", { ascending: true }),
-      supabase.from("friends").select("id", { count: "exact", head: true })
-        .eq("status", "accepted").or(`requester_id.eq.${userId},receiver_id.eq.${userId}`),
-      supabase.from("friends").select("id", { count: "exact", head: true })
-        .eq("receiver_id", userId).eq("status", "pending"),
       supabase.from("countries").select("id, country_code, country_name, status, visit_month, visit_year, trip_month, trip_year, notes, photo_url")
         .eq("user_id", userId).order("created_at", { ascending: false }),
     ]);
-
-    setPendingFriendCount(pendingCount || 0);
 
     const books = (allBooks || []).map((b) => ({
       id: b.id, title: b.title, author: b.author, cover: b.cover_url,
@@ -1098,61 +757,33 @@ export default function App() {
         rating: g.rating, notes: g.notes, source: g.source || null, externalId: g.external_id || null,
       }));
 
-    // Trophies — use cached location images, fetch missing ones in background
-    const trophyLocations = [...new Set((allTrophies || []).map(t => t.location).filter(Boolean))];
-    const goalLocations = [...new Set((allGoals || []).map(g => g.location).filter(Boolean))];
-    const allLocations = [...new Set([...trophyLocations, ...goalLocations])];
-    const needWikiFetch = allLocations.filter(loc => !wikiImageCache[loc.split(",")[0].trim()]);
-
     const trophies = (allTrophies || []).map((t) => ({
       id: t.id, title: t.name, emoji: t.emoji || "🏆", result: t.result,
       completedAt: t.completed_at, location: t.location, source: t.source || "fiveseven",
       photoUrl: t.photo_url || null, distance: t.distance || null, photoPosition: t.photo_position || "50 50",
-      locationImage: t.photo_url || wikiImageCache[t.location?.split(",")[0]?.trim()] || null,
     }));
 
     const goals = (allGoals || []).map((g) => ({
       id: g.id, title: g.name, emoji: g.emoji || "🎯", targetDate: g.target_date,
       location: g.location, goal: g.goal_text || "", source: g.source || "fiveseven",
       photoUrl: g.photo_url || null, distance: g.distance || null, photoPosition: g.photo_position || "50 50",
-      locationImage: g.photo_url || wikiImageCache[g.location?.split(",")[0]?.trim()] || null,
     }));
 
-    const countries = (allCountries || []).map(c => {
-      const meta = COUNTRIES.find(cc => cc.code === c.country_code);
-      return {
-        id: c.id, countryCode: c.country_code, countryName: c.country_name,
-        flag: meta?.flag || "🏳️", status: c.status,
-        visitMonth: c.visit_month, visitYear: c.visit_year,
-        tripMonth: c.trip_month, tripYear: c.trip_year,
-        notes: c.notes, photoUrl: c.photo_url,
-      };
-    });
+    const countries = (allCountries || []).map(c => ({
+      id: c.id, countryCode: c.country_code, countryName: c.country_name,
+      flag: "🏳️", status: c.status,
+      visitMonth: c.visit_month, visitYear: c.visit_year,
+      tripMonth: c.trip_month, tripYear: c.trip_year,
+      notes: c.notes, photoUrl: c.photo_url,
+    }));
 
     const totalItems = books.length + movies.length + shows.length + games.length + trophies.length;
 
     setShelves({
       books: allBooksCombined, currentBooks, movies, shows, games, trophies, goals, countries,
-      totalItems, friends: friendCount || 0,
+      totalItems,
     });
     setShelvesLoaded(true);
-
-    // Fetch missing wiki images in background, then update shelves with images
-    if (needWikiFetch.length > 0) {
-      Promise.all(needWikiFetch.map(loc => fetchWikiImage(loc))).then(() => {
-        setShelves(prev => ({
-          ...prev,
-          trophies: (prev.trophies || []).map(t => ({
-            ...t,
-            locationImage: t.photoUrl || t.locationImage || wikiImageCache[t.location?.split(",")[0]?.trim()] || null,
-          })),
-          goals: (prev.goals || []).map(g => ({
-            ...g,
-            locationImage: g.photoUrl || g.locationImage || wikiImageCache[g.location?.split(",")[0]?.trim()] || null,
-          })),
-        }));
-      });
-    }
 
     // Clean phantom pins (references to deleted items)
     if (profile?.mantlPins?.length > 0) {
@@ -1689,9 +1320,7 @@ if (!tmdbId) {
             rating: ratingFromTitle || null,
             metadata: { source: "letterboxd", letterboxd_username: username, watched_date: watchedDate },
             created_at: watchedDate
-              ? (new Date(watchedDate + "T12:00:00Z").getTime() > Date.now() + 86400000
-                  ? new Date().toISOString()                          // genuinely future — clamp to now
-                  : new Date(watchedDate + "T12:00:00Z").toISOString()) // trust it (today or past)
+              ? new Date(Math.min(new Date(watchedDate + "T12:00:00Z").getTime(), Date.now())).toISOString()
               : new Date().toISOString(),
           };
           if (year) feedRow.item_year = year;
@@ -1729,9 +1358,9 @@ if (!tmdbId) {
           .update({
             watch_count: newCount,
             watch_dates: newDates,
-            watched_at: new Date(rw.newDate + "T12:00:00Z").getTime() > Date.now() + 86400000
-              ? new Date().toISOString()
-              : new Date(rw.newDate + "T12:00:00Z").toISOString(),
+            watched_at: new Date(
+              Math.min(new Date(rw.newDate + "T12:00:00Z").getTime(), Date.now())
+            ).toISOString(),
           })
           .eq("user_id", userId)
           .eq("tmdb_id", rw.tmdb_id);
@@ -1762,14 +1391,19 @@ if (!tmdbId) {
 
             if (existingProgress && existingProgress.length > 0) {
               const progressItemIds = existingProgress.map(p => p.item_id);
+              // FIX: Also update completed_at so the rewatch floats to the top
+              // of the feed (feed_user_logs sorts by COALESCE(completed_at, created_at))
+              // Clamp to now — noon UTC on the same day can be hours in the future
+              const rewatchTimestamp = new Date(
+                Math.min(new Date(rw.newDate + "T12:00:00Z").getTime(), Date.now())
+              ).toISOString();
               await supabase
                 .from("community_user_progress")
                 .update({
                   rewatch_count: newCount - 1, // rewatch_count = total watches minus the first
                   rewatch_dates: rewatchDatesOnly,
-                  updated_at: new Date(rw.newDate + "T12:00:00Z").getTime() > Date.now() + 86400000
-                    ? new Date().toISOString()
-                    : new Date(rw.newDate + "T12:00:00Z").toISOString(),
+                  completed_at: rewatchTimestamp,
+                  updated_at: rewatchTimestamp,
                 })
                 .eq("user_id", userId)
                 .in("item_id", progressItemIds);
@@ -2432,61 +2066,6 @@ if (!tmdbId) {
           }
         `}</style>
 
-        {/* Notification Panel */}
-        {notifOpen && (
-          <>
-            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 299 }} onClick={() => setNotifOpen(false)} />
-            <div className="notif-panel">
-              <div className="notif-panel-header">
-                <div className="notif-panel-title">Notifications</div>
-                <div className="notif-panel-close" onClick={() => setNotifOpen(false)}>✕</div>
-              </div>
-              <div style={{ flex: 1, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-                {notifications.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "48px 20px" }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🔔</div>
-                    <div className="bb" style={{ fontSize: 14, marginBottom: 4 }}>No notifications yet</div>
-                    <div className="lr" style={{ fontSize: 12, color: "var(--text-dim)" }}>When friends react to your posts, add to their list, or leave comments, they'll show up here.</div>
-                  </div>
-                ) : (
-                  notifications.map(n => {
-                    const isUnread = n.created_at > notifReadBefore.current;
-                    const ago = (() => {
-                      const ms = Date.now() - new Date(n.created_at).getTime();
-                      const mins = Math.floor(ms / 60000);
-                      if (mins < 1) return "now";
-                      if (mins < 60) return `${mins}m`;
-                      const hrs = Math.floor(mins / 60);
-                      if (hrs < 24) return `${hrs}h`;
-                      const days = Math.floor(hrs / 24);
-                      return `${days}d`;
-                    })();
-                    const userName = n.user?.name || n.user?.username || "Someone";
-                    return (
-                      <div key={n.id} className={`notif-item${isUnread ? " unread" : ""}`}>
-                        <div className="notif-item-avatar">
-                          {n.user?.avatar_url ? <img src={n.user.avatar_url} alt="" /> : (n.user?.avatar_emoji || "👤")}
-                        </div>
-                        <div className="notif-item-text">
-                          {n.type === "reaction" && n.emoji === "wishlisted" ? (
-                            <><strong>{userName}</strong> added <em>{n.itemTitle || "your post"}</em> to their list from your diary</>
-                          ) : n.type === "reaction" ? (
-                            <><strong>{userName}</strong> reacted {n.emoji} to <em>{n.itemTitle || "your post"}</em></>
-                          ) : (
-                            <><strong>{userName}</strong> commented on <em>{n.itemTitle || "your post"}</em>{n.text ? `: "${n.text.slice(0, 60)}${n.text.length > 60 ? "..." : ""}"` : ""}</>
-                          )}
-                        </div>
-                        {n.itemCover && <img className="notif-item-cover" src={n.itemCover} alt="" />}
-                        <div className="notif-item-time">{ago}</div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
         {/* Loading — HTML splash screen covers this period visually */}
         {screen === "loading" && (
           <div className="loading-screen" />
@@ -2502,10 +2081,6 @@ if (!tmdbId) {
           <JoinGroupScreen code={pendingJoinCode} onSignIn={signIn} />
         )}
 
-        {/* Public Profile */}
-        {screen === "public" && publicData && (
-          <PublicProfile data={publicData} onSignIn={signIn} session={session} onToast={showToast} />
-        )}
 
         {/* Username Setup */}
         {screen === "setup" && (
@@ -2520,12 +2095,37 @@ if (!tmdbId) {
         {screen === "app" && (
           <div className="screen-fade">
             <div className="header">
-              <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
-                <div className="header-profile">
-                  {profile.avatarUrl
-                    ? <img src={profile.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
-                    : (profile.avatar || "👤")}
-                </div>
+              <div
+                onClick={() => {
+                  tapLight();
+                  setShowTripleFeature(true);
+                  pushNav("tripleFeature", () => setShowTripleFeature(false));
+                }}
+                style={{
+                  width: 32, height: 32, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  position: "relative",
+                }}
+              >
+                {tfUnplayed ? (
+                  <svg width="20" height="22" viewBox="0 0 22 22" fill="none" style={{ transform: "rotate(-12deg)", transition: "transform 0.3s ease" }}>
+                    <rect x="3" y="1" width="16" height="20" rx="2" stroke="#d4af37" strokeWidth="1" fill="none"/>
+                    <rect x="6" y="3.5" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/>
+                    <rect x="6" y="13" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/>
+                    <line x1="6" y1="11" x2="16" y2="11" stroke="#d4af37" strokeWidth="0.5" opacity="0.4"/>
+                    <circle cx="4.5" cy="4" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="7.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="11" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="14.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="18" r="0.7" fill="#d4af37" opacity="0.6"/>
+                    <circle cx="17.5" cy="4" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="7.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="11" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="14.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="18" r="0.7" fill="#d4af37" opacity="0.6"/>
+                  </svg>
+                ) : (
+                  <svg width="18" height="20" viewBox="0 0 18 22" fill="none" style={{ transition: "transform 0.3s ease" }}>
+                    <rect x="1" y="1" width="16" height="20" rx="2" stroke="#9a8ec2" strokeWidth="1" fill="none"/>
+                    <rect x="4.5" y="3.5" width="9" height="5" rx="1" fill="#9a8ec2" opacity="0.15"/>
+                    <rect x="4.5" y="13.5" width="9" height="5" rx="1" fill="#9a8ec2" opacity="0.15"/>
+                    <line x1="4.5" y1="11" x2="13.5" y2="11" stroke="#9a8ec2" strokeWidth="0.5" opacity="0.3"/>
+                    <circle cx="2.5" cy="3.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="7" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="10.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="14" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="17.5" r="0.7" fill="#9a8ec2" opacity="0.5"/>
+                    <circle cx="15.5" cy="3.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="7" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="10.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="14" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="17.5" r="0.7" fill="#9a8ec2" opacity="0.5"/>
+                  </svg>
+                )}
               </div>
               <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">
@@ -2534,9 +2134,12 @@ if (!tmdbId) {
                 </div>
                 <div className="header-tagline">Shelf what you're made of</div>
               </div>
-              <div className="notif-bell" onClick={openNotifications}>
-                <div className="notif-bell-icon"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
-                {notifCount > 0 && <div className="notif-bell-badge">{notifCount > 9 ? "9+" : notifCount}</div>}
+              <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
+                <div className="header-profile">
+                  {profile.avatarUrl
+                    ? <img src={profile.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
+                    : <InitialAvatar username={profile.username} size={32} />}
+                </div>
               </div>
             </div>
 
@@ -2733,12 +2336,30 @@ if (!tmdbId) {
           </div>
         )}
 
+        {/* Triple Feature Game */}
+        {showTripleFeature && (
+          <div className="overlay-slide-up" style={{
+            position: "fixed", inset: 0, zIndex: 200,
+            background: "#0a0a0f", overflow: "auto",
+            WebkitOverflowScrolling: "touch",
+          }}>
+            <TripleFeature
+              session={session}
+              onBack={() => {
+                removeNav("tripleFeature");
+                setShowTripleFeature(false);
+              }}
+              onToast={showToast}
+            />
+          </div>
+        )}
+
         {/* Community View */}
         {activeCommunitySlug && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0f1a", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             {/* Instant loading skeleton — visible behind CommunityRouter while it fetches */}
             <CommunityLoadingSkeleton />
-            <div style={{ position: "relative", zIndex: 1, minHeight: "100%" }}>
+            <div style={{ position: "relative", zIndex: 1, width: "100%", minHeight: "100%" }}>
               <CommunityRouter
                 slug={activeCommunitySlug}
                 session={session}
@@ -2782,8 +2403,6 @@ if (!tmdbId) {
               onUpdateAvatar={(url) => setProfile(prev => ({ ...prev, avatarUrl: url }))}
               onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
               onToast={showToast}
-              onOpenNotifications={openNotifications}
-              notifCount={notifCount}
               onLetterboxdConnect={connectLetterboxd}
               onLetterboxdDisconnect={disconnectLetterboxd}
               onLetterboxdSync={() => { if (session && profile.letterboxd_username) syncLetterboxd(profile.letterboxd_username, session.user.id, true); }}

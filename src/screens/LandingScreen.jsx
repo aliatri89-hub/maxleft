@@ -646,105 +646,6 @@ const featureStyles = `
     background: rgba(255,255,255,0.05);
   }
 
-  /* ── RECAP CARD DEMO ─────────────────────────────────────── */
-  .recap-demo {
-    background: linear-gradient(135deg, #1e1a17 0%, #2a2118 50%, #1e1a17 100%);
-    border-radius: 20px;
-    border: 1px solid rgba(199,91,63,0.15);
-    padding: 28px 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .recap-demo::before {
-    content: '';
-    position: absolute;
-    top: -40%;
-    right: -20%;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(199,91,63,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .recap-month {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    font-size: 0.65rem;
-    color: var(--terracotta, #C75B3F);
-    margin-bottom: 4px;
-  }
-  .recap-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #f5f0eb;
-    margin-bottom: 20px;
-  }
-  .recap-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .recap-stat {
-    text-align: center;
-  }
-  .recap-stat-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: #f5f0eb;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .recap-stat-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.55rem;
-    color: #9a938a;
-  }
-  .recap-badges-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .recap-badge-mini {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-  }
-  .recap-share {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  @keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-  .recap-stat-num.animated {
-    background: linear-gradient(90deg, #f5f0eb 40%, var(--terracotta, #C75B3F) 50%, #f5f0eb 60%);
-    background-size: 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: shimmer 2s ease-in-out infinite;
-  }
 
   /* ── BOTTOM CTA ──────────────────────────────────────────── */
   .mantl-bottom-cta {
@@ -813,7 +714,6 @@ function LandingScreen({ onSignIn }) {
   const [demoLogged, setDemoLogged] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [showPinBadge, setShowPinBadge] = useState(false);
-  const [recapAnimated, setRecapAnimated] = useState(false);
 
   // ── Intersection observer for scroll reveals ──────────────
   useEffect(() => {
@@ -830,13 +730,6 @@ function LandingScreen({ onSignIn }) {
     return () => observer.disconnect();
   }, []);
 
-  // ── Recap animation trigger ───────────────────────────────
-  useEffect(() => {
-    if (visibleBlocks.has('recap')) {
-      const t = setTimeout(() => setRecapAnimated(true), 400);
-      return () => clearTimeout(t);
-    }
-  }, [visibleBlocks]);
 
   const scrollToFeatures = () => {
     featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1151,7 +1044,7 @@ function LandingScreen({ onSignIn }) {
       <div className="mantl-features" ref={featuresRef}>
         <div className="mantl-features-header">
           <h2>More than a watchlist.</h2>
-          <p>Complete franchises.<br />Collect badges.<br />Discover what to watch,<br />read, and play next.</p>
+          <p>Discover what to watch, read, and play next<br />from the voices you trust.</p>
         </div>
 
         {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}
@@ -1312,47 +1205,6 @@ function LandingScreen({ onSignIn }) {
             </div>
           </div>
           <div className="tap-hint">Try it — rate and shelf</div>
-        </div>
-
-        {/* ── 4. MONTHLY RECAP ─────────────────────────────── */}
-        <div
-          className={`mantl-feature-block${visibleBlocks.has('recap') ? ' visible' : ''}`}
-          data-block="recap"
-          style={{ transitionDelay: '0.1s' }}
-        >
-          <div className="mantl-feature-label">Share</div>
-          <div className="mantl-feature-title">Monthly Recap Cards</div>
-          <div className="mantl-feature-desc">
-            Every month, get a shareable snapshot of what you
-            watched, read, and discovered.
-          </div>
-          <div className="recap-demo">
-            <div className="recap-month">March 2026</div>
-            <div className="recap-title">Your Month on MANTL</div>
-            <div className="recap-stats">
-              <div className="recap-stat">
-                <div className={`recap-stat-num${recapAnimated ? ' animated' : ''}`}>23</div>
-                <div className="recap-stat-label">Shelved</div>
-              </div>
-              <div className="recap-stat">
-                <div className={`recap-stat-num${recapAnimated ? ' animated' : ''}`}>14</div>
-                <div className="recap-stat-label">Discovered</div>
-              </div>
-              <div className="recap-stat">
-                <div className={`recap-stat-num${recapAnimated ? ' animated' : ''}`}>4</div>
-                <div className="recap-stat-label">Completed</div>
-              </div>
-            </div>
-            <div className="recap-badges-row">
-              <div className="recap-badge-mini" style={{ background: 'rgba(199,91,63,0.15)' }}>🎬</div>
-              <div className="recap-badge-mini" style={{ background: 'rgba(74,158,255,0.15)' }}>📚</div>
-              <div className="recap-badge-mini" style={{ background: 'rgba(155,89,182,0.15)' }}>🎮</div>
-            </div>
-            <div className="recap-share">
-              <span>📤</span>
-              <span>Share your recap</span>
-            </div>
-          </div>
         </div>
 
         {/* ── BOTTOM CTA ───────────────────────────────────── */}

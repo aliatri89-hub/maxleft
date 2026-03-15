@@ -48,6 +48,7 @@ export default function NowPlayingGenreTab({
   recentEpisodeItems = [],
   progressLoading = false,
   episodesLoading = false,
+  upcomingCount = 0,
 }) {
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -144,11 +145,15 @@ export default function NowPlayingGenreTab({
         // Media type filter
         items = items.filter((i) => isMediaVisible(i.media_type));
 
-        // Seen/unseen filter (apply here so empty series are pruned)
+        // Seen/unseen/upcoming filter (apply here so empty series are pruned)
         if (filter === "seen") {
           items = items.filter((i) => progress[i.id]);
         } else if (filter === "unseen") {
           items = items.filter((i) => !progress[i.id]);
+        } else if (filter === "upcoming") {
+          items = items
+            .filter((i) => i.extra_data?.coming_soon)
+            .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""));
         }
 
         // Search filter
@@ -449,7 +454,7 @@ export default function NowPlayingGenreTab({
         </div>
 
         {/* Filter pills — inline */}
-        {["all", "seen", "unseen"].map((f) => (
+        {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
           <button
             key={f}
             onClick={() => onFilterChange(f)}
@@ -471,7 +476,7 @@ export default function NowPlayingGenreTab({
               transition: "all 0.2s",
             }}
           >
-            {f}
+            {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
           </button>
         ))}
 
@@ -556,9 +561,9 @@ export default function NowPlayingGenreTab({
         </div>
       </div>
 
-      {/* ─── Dynamic shelves (All Genres + no active search) ── */}
-      {activeGenre === ALL_KEY && !searchQuery && renderDynamicShelf("Recently Logged", "🕐", recentItems, progressLoading)}
-      {activeGenre === ALL_KEY && !searchQuery && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
+      {/* ─── Dynamic shelves (All Genres + no active search + no filter) ── */}
+      {activeGenre === ALL_KEY && !searchQuery && filter === "all" && renderDynamicShelf("Recently Logged", "🕐", recentItems, progressLoading)}
+      {activeGenre === ALL_KEY && !searchQuery && filter === "all" && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
 
       {/* ─── Series shelves ─────────────────────────────── */}
       {visibleSeries.length === 0 ? (
@@ -585,11 +590,15 @@ export default function NowPlayingGenreTab({
                   // Media type filter
                   items = items.filter((i) => isMediaVisible(i.media_type));
 
-                  // Seen/unseen filter
+                  // Seen/unseen/upcoming filter
                   if (filter === "seen") {
                     items = items.filter((i) => progress[i.id]);
                   } else if (filter === "unseen") {
                     items = items.filter((i) => !progress[i.id]);
+                  } else if (filter === "upcoming") {
+                    items = items
+                      .filter((i) => i.extra_data?.coming_soon)
+                      .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""));
                   }
 
                   if (q.length >= 2) {

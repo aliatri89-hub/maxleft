@@ -7,6 +7,9 @@ import { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHand
  * direct DOM transforms during swipe (no React re-renders), CSS transitions
  * for snap-to animations, edge resistance, and lazy mounting via visitedTabs.
  *
+ * Uses ResizeObserver + pixel-based transforms (no percentage widths) to
+ * guarantee every pane fills the container regardless of its content.
+ *
  * Props:
  *   tabs        – [{ key, label, icon }]
  *   activeTab   – current tab key (controlled)
@@ -22,10 +25,30 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
   ref
 ) {
   const sliderRef = useRef(null);
+  const containerRef = useRef(null);
   const touchRef = useRef(null);
   const deltaRef = useRef(0);
+  const widthRef = useRef(0);
+  const [containerWidth, setContainerWidth] = useState(0);
   const [visitedTabs, setVisitedTabs] = useState(() => new Set([activeTab]));
   const [preloadTab, setPreloadTab] = useState(null);
+
+  // ── Measure container width (bulletproof pane sizing) ───
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect?.width;
+      if (w && w > 0) {
+        widthRef.current = w;
+        setContainerWidth(w);
+      }
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  // ── Pixel offset helper (reads ref, safe in callbacks) ──
+  const pxOffset = useCallback((idx) => idx * widthRef.current, []);
 
   // ── Track visited tabs (lazy mount) ─────────────────────
   useEffect(() => {
@@ -39,22 +62,20 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
 
   // ── Position slider when activeTab changes (non-animated) ─
   useEffect(() => {
-    if (!sliderRef.current) return;
+    if (!sliderRef.current || !widthRef.current) return;
     const idx = tabs.findIndex((t) => t.key === activeTab);
     if (idx < 0) return;
-    // Don't stomp an in-progress animation
     if (!sliderRef.current.classList.contains("csl-animating")) {
-      sliderRef.current.style.transform = `translateX(-${idx * 100}%)`;
+      sliderRef.current.style.transform = `translateX(-${pxOffset(idx)}px)`;
     }
-  }, [activeTab, tabs]);
+  }, [activeTab, tabs, containerWidth, pxOffset]);
 
   // ── Imperative: animated slide to tab (for bottom nav taps) ─
   const animateToTab = useCallback(
     (tabKey) => {
-      if (!sliderRef.current) return;
+      if (!sliderRef.current || !widthRef.current) return;
       const idx = tabs.findIndex((t) => t.key === tabKey);
       if (idx < 0) return;
-      // Pre-mount the target pane
       setVisitedTabs((prev) => {
         const next = new Set(prev);
         next.add(tabKey);
@@ -62,7 +83,7 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       });
       sliderRef.current.classList.remove("csl-swiping");
       sliderRef.current.classList.add("csl-animating");
-      sliderRef.current.style.transform = `translateX(-${idx * 100}%)`;
+      sliderRef.current.style.transform = `translateX(-${pxOffset(idx)}px)`;
       const onEnd = () => {
         requestAnimationFrame(() => {
           sliderRef.current?.classList.remove("csl-animating");
@@ -70,14 +91,13 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       };
       sliderRef.current.addEventListener("transitionend", onEnd, { once: true });
     },
-    [tabs]
+    [tabs, pxOffset]
   );
 
   useImperativeHandle(ref, () => ({ animateToTab }), [animateToTab]);
 
   // ── Touch: start ────────────────────────────────────────
   const handleTouchStart = useCallback((e) => {
-    // Skip if touching a horizontally scrollable child (shelf scrollers, etc.)
     let el = e.target;
     while (el && el !== e.currentTarget) {
       if (el.scrollWidth > el.clientWidth + 4) {
@@ -111,7 +131,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       const dx = e.touches[0].clientX - touchRef.current.x;
       const dy = e.touches[0].clientY - touchRef.current.y;
 
-      // Vertical scroll detected — cancel horizontal swipe
       if (
         !touchRef.current.locked &&
         Math.abs(dy) > Math.abs(dx) &&
@@ -128,7 +147,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
 
         const idx = tabs.findIndex((t) => t.key === activeTab);
 
-        // Preload adjacent tab so it's mounted before we get there
         const targetIdx =
           dx < 0
             ? Math.min(idx + 1, tabs.length - 1)
@@ -138,19 +156,17 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           setPreloadTab(target);
         }
 
-        // Edge resistance at first/last tab
         const atLeft = idx === 0 && dx > 0;
         const atRight = idx === tabs.length - 1 && dx < 0;
         const resist = atLeft || atRight ? 0.15 : 1;
         const offset = dx * resist;
 
-        // Direct DOM manipulation — zero React re-renders
         if (sliderRef.current) {
-          sliderRef.current.style.transform = `translateX(calc(-${idx * 100}% + ${offset}px))`;
+          sliderRef.current.style.transform = `translateX(${-pxOffset(idx) + offset}px)`;
         }
       }
     },
-    [tabs, activeTab, preloadTab]
+    [tabs, activeTab, preloadTab, pxOffset]
   );
 
   // ── Touch: end ──────────────────────────────────────────
@@ -158,7 +174,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     if (!touchRef.current) return;
     const dx = deltaRef.current;
 
-    // Tap (no real swipe) — bail cleanly so onClick can fire
     if (Math.abs(dx) < 5) {
       if (sliderRef.current) sliderRef.current.classList.remove("csl-swiping");
       touchRef.current = null;
@@ -178,16 +193,14 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       nextIdx = idx - 1;
     }
 
-    // Notify parent of tab change
     if (nextIdx !== idx) {
       onTabChange(tabs[nextIdx].key);
     }
 
-    // Animate to final position (snap)
     if (sliderRef.current) {
       sliderRef.current.classList.remove("csl-swiping");
       sliderRef.current.classList.add("csl-animating");
-      sliderRef.current.style.transform = `translateX(-${nextIdx * 100}%)`;
+      sliderRef.current.style.transform = `translateX(-${pxOffset(nextIdx)}px)`;
       const onEnd = () => {
         requestAnimationFrame(() => {
           sliderRef.current?.classList.remove("csl-animating");
@@ -201,7 +214,7 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     touchRef.current = null;
     deltaRef.current = 0;
     setPreloadTab(null);
-  }, [tabs, activeTab, onTabChange]);
+  }, [tabs, activeTab, onTabChange, pxOffset]);
 
   // ── Render ──────────────────────────────────────────────
   return (
@@ -222,8 +235,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .csl-pane {
-          width: 100%;
-          min-width: 100%;
           height: 100%;
           min-height: 0;
           flex-shrink: 0;
@@ -234,8 +245,10 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
         }
       `}</style>
       <div
+        ref={containerRef}
         style={{
           flex: 1,
+          width: "100%",
           minHeight: 0,
           overflow: "hidden",
           position: "relative",
@@ -250,7 +263,11 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
             <div
               className="csl-pane"
               key={tab.key}
-              style={{ paddingBottom: bottomPad }}
+              style={{
+                width: containerWidth || "100vw",
+                minWidth: containerWidth || "100vw",
+                paddingBottom: bottomPad,
+              }}
             >
               {visitedTabs.has(tab.key)
                 ? children(tab.key, tab.key === activeTab)
