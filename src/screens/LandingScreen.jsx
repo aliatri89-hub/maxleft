@@ -256,7 +256,7 @@ const featureStyles = `
     border: 1px solid rgba(255,255,255,0.06);
   }
   .badge-slot {
-    aspect-ratio: 1;
+    aspect-ratio: 4 / 5;
     border-radius: 12px;
     position: relative;
     cursor: pointer;
@@ -289,22 +289,24 @@ const featureStyles = `
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
   }
   .badge-front {
     background: rgba(255,255,255,0.04);
     border: 1px dashed rgba(255,255,255,0.12);
     backdrop-filter: blur(8px);
   }
-  .badge-front-icon {
-    font-size: 1.8rem;
-    filter: blur(4px) saturate(0);
-    opacity: 0.4;
+  .badge-front-art {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    filter: blur(5px) saturate(0) brightness(0.7);
+    opacity: 0.35;
     transition: filter 0.3s, opacity 0.3s;
   }
-  .badge-slot:hover .badge-front-icon {
-    filter: blur(2px) saturate(0.3);
-    opacity: 0.6;
+  .badge-slot:hover .badge-front-art {
+    filter: blur(3px) saturate(0.3) brightness(0.8);
+    opacity: 0.5;
   }
   .badge-front-q {
     font-family: 'Barlow Condensed', sans-serif;
@@ -318,10 +320,33 @@ const featureStyles = `
     border: 1px solid;
     padding: 10px;
     text-align: center;
+    overflow: hidden;
   }
-  .badge-back-icon {
-    font-size: 2rem;
-    line-height: 1;
+  .badge-back > img,
+  .badge-back > span {
+    position: relative;
+    z-index: 2;
+  }
+  .badge-back-backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  .badge-back-backdrop-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .badge-back-art {
+    width: 78px;
+    height: 78px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 2px solid;
+    padding: 2px;
+    background: rgba(0,0,0,0.4);
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
@@ -330,12 +355,14 @@ const featureStyles = `
     letter-spacing: 0.08em;
     font-weight: 600;
     line-height: 1.2;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   }
   .badge-back-flair {
     font-family: 'Lora', serif;
     font-style: italic;
     font-size: 0.62rem;
     opacity: 0.7;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   }
   @keyframes badgeRevealPulse {
     0% { box-shadow: 0 0 0 0 var(--badge-color); }
@@ -355,20 +382,19 @@ const featureStyles = `
     position: relative;
   }
   .log-demo-backdrop {
-    height: 120px;
+    position: absolute;
+    inset: 0;
     background-size: cover;
     background-position: center top;
-    position: relative;
   }
   .log-demo-backdrop::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(15,13,11,0.3) 0%, #0f0d0b 100%);
+    background: linear-gradient(180deg, rgba(15,13,11,0.45) 0%, rgba(15,13,11,0.75) 35%, rgba(15,13,11,0.92) 60%, #0f0d0b 85%);
   }
   .log-demo-content {
-    padding: 0 16px 16px;
-    margin-top: -20px;
+    padding: 100px 16px 16px;
     position: relative;
     z-index: 1;
   }
@@ -596,6 +622,23 @@ const featureStyles = `
     position: relative;
     overflow: hidden;
   }
+  .community-backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  .community-backdrop-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(15,13,11,0.85) 0%, rgba(15,13,11,0.6) 50%, rgba(15,13,11,0.4) 100%);
+    z-index: 0;
+  }
+  .community-row > :not(.community-backdrop):not(.community-backdrop-overlay) {
+    position: relative;
+    z-index: 1;
+  }
   .community-row:hover {
     background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.1);
@@ -610,13 +653,10 @@ const featureStyles = `
     border-radius: 0 2px 2px 0;
   }
   .community-avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    object-fit: cover;
     flex-shrink: 0;
   }
   .community-info {
@@ -637,13 +677,25 @@ const featureStyles = `
     color: #9a938a;
     font-style: italic;
   }
-  .community-count {
+  .community-donut {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .community-donut svg {
+    position: absolute;
+    inset: 0;
+  }
+  .community-donut-pct {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.58rem;
     font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.05);
+    position: relative;
+    z-index: 1;
   }
 
 
@@ -677,19 +729,116 @@ const featureStyles = `
   .tap-hint {
     animation: tapPulse 2.5s ease-in-out infinite;
   }
+
+  /* ── GROWING COMMUNITIES ──────────────────────────────────── */
+  .growing-section {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .growing-divider {
+    width: 48px;
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--terracotta, #C75B3F), transparent);
+    opacity: 0.4;
+  }
+  /* ── PODCAST HORIZONTAL MARQUEE ─────────────────────────── */
+  .podcast-marquee {
+    position: relative;
+    overflow: hidden;
+    margin: 24px -18px 28px;
+  }
+  .podcast-marquee-row {
+    overflow: hidden;
+  }
+  .podcast-marquee-track {
+    display: flex;
+    gap: 28px;
+    width: max-content;
+  }
+  .podcast-marquee-track.track-left {
+    animation: marquee-left 40s linear infinite;
+  }
+  @keyframes marquee-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .podcast-marquee-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .podcast-marquee-thumb {
+    width: 86px;
+    height: 86px;
+    border-radius: 18px;
+    object-fit: cover;
+    flex-shrink: 0;
+    opacity: 0.6;
+    filter: saturate(0.5);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: opacity 0.3s, filter 0.3s;
+  }
+  .podcast-marquee-item:hover .podcast-marquee-thumb {
+    opacity: 0.9;
+    filter: saturate(0.9);
+  }
+  .podcast-marquee-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .podcast-marquee-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, #0f0d0b 0%, transparent 15%, transparent 85%, #0f0d0b 100%);
+  }
+  .growing-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f5f0eb;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .growing-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: #9a938a;
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
 `;
+
+// ── Podcast art for horizontal marquee ──
+const PODCAST_ART = [
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
+];
 
 /* ── Badge data for the demo ────────────────────────────── */
 const DEMO_BADGES = [
-  { icon: "🎃", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
-  { icon: "👽", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
-  { icon: "🔥", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
-  { icon: "🔪", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Backgroundhalloweenhero.jpg", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundAlienHero.jpg", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundMadMaxHero.jpg", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundChucky.jpg", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
 ];
 
 const DEMO_COMMUNITIES = [
-  { name: "Now Playing Podcast", emoji: "🎬", color: "#C75B3F", stat: "Over 1000 movies, books, and games", count: "312" },
-  { name: "Blank Check with Griffin & David", emoji: "✅", color: "#4a9eff", stat: "Over 40 director filmographies, franchise commentary", count: "186" },
+  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Infinityhero.jpeg" },
+  { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Fargoherodrop.jpg" },
 ];
 
 function LandingScreen({ onSignIn }) {
@@ -998,7 +1147,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">From the Podcast to Your Shelf</div>
+          <div className="landing-eyebrow">The <strong>shelf</strong> for what<br />your <strong>podcasts</strong><br />recommend</div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
@@ -1032,7 +1181,7 @@ function LandingScreen({ onSignIn }) {
             renderEmailAuth()
           )}
           <div className="landing-learn-more" onClick={scrollToFeatures}>
-            <span>See what's on the shelf</span>
+            <span>Another reason to press play</span>
             <span className="landing-learn-more-arrow">↓</span>
           </div>
         </div>
@@ -1057,25 +1206,52 @@ function LandingScreen({ onSignIn }) {
             leaderboards, and listeners tracking right alongside you.
           </div>
           <div className="community-demo">
-            {DEMO_COMMUNITIES.map((c, i) => (
-              <div
-                key={i}
-                className="community-row"
-                style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
-              >
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
-                <div className="community-avatar" style={{ background: c.color + '20' }}>
-                  {c.emoji}
+            {DEMO_COMMUNITIES.map((c, i) => {
+              const pct = Math.round((c.done / c.total) * 100);
+              const r = 18;
+              const circ = 2 * Math.PI * r;
+              const offset = circ - (pct / 100) * circ;
+              return (
+                <div
+                  key={i}
+                  className="community-row"
+                  style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
+                >
+                  {c.backdrop && (
+                    <>
+                      <div className="community-backdrop" style={{ backgroundImage: `url(${c.backdrop})` }} />
+                      <div className="community-backdrop-overlay" />
+                    </>
+                  )}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, borderRadius: '0 2px 2px 0', background: c.color }} />
+                  <img
+                    className="community-avatar"
+                    src={c.art}
+                    alt={c.name}
+                    style={{ background: c.color + '20' }}
+                  />
+                  <div className="community-info">
+                    <div className="community-name">{c.name}</div>
+                    <div className="community-stat">{c.stat}</div>
+                  </div>
+                  <div className="community-donut">
+                    <svg width="44" height="44" viewBox="0 0 44 44">
+                      <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3.5" />
+                      <circle
+                        cx="22" cy="22" r={r} fill="none"
+                        stroke={c.color} strokeWidth="3.5"
+                        strokeLinecap="round"
+                        strokeDasharray={circ}
+                        strokeDashoffset={offset}
+                        transform="rotate(-90 22 22)"
+                        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)' }}
+                      />
+                    </svg>
+                    <span className="community-donut-pct" style={{ color: c.color }}>{pct}%</span>
+                  </div>
                 </div>
-                <div className="community-info">
-                  <div className="community-name">{c.name}</div>
-                  <div className="community-stat">{c.stat}</div>
-                </div>
-                <div className="community-count" style={{ color: c.color }}>
-                  {c.count}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div style={{
             fontFamily: "'Lora', serif",
@@ -1097,8 +1273,11 @@ function LandingScreen({ onSignIn }) {
         >
           <div className="mantl-feature-label">Collect</div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <div className="mantl-feature-title" style={{ marginBottom: 12 }}>Earn the Badge</div>
+            <div className="mantl-feature-title" style={{ marginBottom: 4 }}>Earn the Badge</div>
             <div className="tap-hint" style={{ animation: 'none', margin: 0 }}>tap to reveal</div>
+          </div>
+          <div className="mantl-feature-desc" style={{ marginBottom: 14 }}>
+            Complete franchises and collect badges along the way.
           </div>
           <div className="badge-grid">
             {DEMO_BADGES.map((badge, i) => (
@@ -1110,11 +1289,13 @@ function LandingScreen({ onSignIn }) {
               >
                 <div className="badge-inner">
                   <div className="badge-front">
-                    <span className="badge-front-icon">{badge.icon}</span>
+                    <img className="badge-front-art" src={badge.art} alt="" />
                     <span className="badge-front-q">?</span>
                   </div>
-                  <div className="badge-back" style={{ background: badge.bg, borderColor: badge.color + '44' }}>
-                    <span className="badge-back-icon">{badge.icon}</span>
+                  <div className="badge-back" style={{ borderColor: badge.color + '44' }}>
+                    <div className="badge-back-backdrop" style={{ backgroundImage: `url(${badge.backdrop})` }} />
+                    <div className="badge-back-backdrop-overlay" style={{ background: `radial-gradient(circle at center, ${badge.bg} 0%, rgba(15,13,11,0.85) 100%)` }} />
+                    <img className="badge-back-art" src={badge.art} alt={badge.name} style={{ borderColor: badge.color + '66' }} />
                     <span className="badge-back-name" style={{ color: badge.color }}>{badge.name}</span>
                     <span className="badge-back-flair" style={{ color: badge.color }}>{badge.sub}</span>
                   </div>
@@ -1205,14 +1386,40 @@ function LandingScreen({ onSignIn }) {
           <div className="tap-hint">Try it — rate and shelf</div>
         </div>
 
+        {/* ── 4. GROWING COMMUNITIES ────────────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('growing') ? ' visible' : ''}`}
+          data-block="growing"
+          style={{ transitionDelay: '0.3s' }}
+        >
+          <div className="growing-section">
+            <div className="growing-divider" />
+            <div className="podcast-marquee">
+              <div className="podcast-marquee-row">
+                <div className="podcast-marquee-track track-left">
+                  {[...PODCAST_ART, ...PODCAST_ART].map((p, i) => (
+                    <div key={i} className="podcast-marquee-item">
+                      <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                      <span className="podcast-marquee-label">{p.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="podcast-marquee-overlay" />
+            </div>
+            <div className="growing-headline">New communities<br />added regularly</div>
+            <div className="growing-sub">
+              If your podcast has a shelf, we're building it.
+            </div>
+            <div className="growing-divider" />
+          </div>
+        </div>
+
         {/* ── BOTTOM CTA ───────────────────────────────────── */}
         <div className="mantl-bottom-cta">
           <button className="btn-primary" onClick={onSignIn}>
-            Start shelving
+            Press Play
           </button>
-          <div className="mantl-bottom-tagline">
-            The best recommendations come from reviews, not algorithms.
-          </div>
         </div>
       </div>
     </div>
