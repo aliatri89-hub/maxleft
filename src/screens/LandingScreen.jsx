@@ -325,7 +325,7 @@ const featureStyles = `
     width: 56px;
     height: 56px;
     object-fit: contain;
-    border-radius: 10px;
+    border-radius: 50%;
     border: 2px solid;
     padding: 2px;
     background: rgba(0,0,0,0.3);
