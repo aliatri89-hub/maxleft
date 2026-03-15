@@ -1181,7 +1181,7 @@ function LandingScreen({ onSignIn }) {
             renderEmailAuth()
           )}
           <div className="landing-learn-more" onClick={scrollToFeatures}>
-            <span>Learn more</span>
+            <span>Another reason to press play</span>
             <span className="landing-learn-more-arrow">↓</span>
           </div>
         </div>

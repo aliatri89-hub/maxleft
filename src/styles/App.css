@@ -235,15 +235,16 @@
 
   .landing-learn-more {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 28px;
     opacity: 0;
     animation: fadeUp 0.7s ease 0.8s forwards;
   }
   .landing-learn-more span {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.15em;
-    color: #6a635a;
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: #a89e93;
     cursor: pointer;
     transition: color 0.2s;
   }
