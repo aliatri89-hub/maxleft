@@ -104,7 +104,7 @@ export default function NowPlayingHero({
         });
       });
 
-      return { completed: filmWatched, total: 0, pages: 0, gamesBeat, playingGame };
+      return { completed: filmWatched, total: seenFilms.size + seenGames.size, pages: 0, gamesBeat, gamesTotal: seenGames.size, filmsTotal: seenFilms.size, playingGame };
     }
 
     // Default: film stats
@@ -226,6 +226,21 @@ export default function NowPlayingHero({
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>
                   Watched
+                </div>
+              </div>
+              <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ textAlign: "center" }}>
+                <div style={{
+                  fontSize: 30, fontWeight: 800, color: "#a78bfa",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                }}>
+                  {stats.gamesBeat || 0}
+                </div>
+                <div style={{
+                  fontSize: 9, color: "rgba(255,255,255,0.35)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>
+                  Beat
                 </div>
               </div>
               <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
