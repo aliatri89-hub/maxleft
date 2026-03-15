@@ -297,8 +297,8 @@ const featureStyles = `
     backdrop-filter: blur(8px);
   }
   .badge-front-art {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     filter: blur(5px) saturate(0) brightness(0.7);
     opacity: 0.35;
@@ -320,15 +320,34 @@ const featureStyles = `
     border: 1px solid;
     padding: 10px;
     text-align: center;
+    overflow: hidden;
+    position: relative;
+  }
+  .badge-back > img,
+  .badge-back > span {
+    position: relative;
+    z-index: 2;
+  }
+  .badge-back-backdrop {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 0;
+  }
+  .badge-back-backdrop-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
   }
   .badge-back-art {
-    width: 56px;
-    height: 56px;
+    width: 66px;
+    height: 66px;
     object-fit: contain;
     border-radius: 50%;
     border: 2px solid;
     padding: 2px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.4);
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
@@ -337,12 +356,14 @@ const featureStyles = `
     letter-spacing: 0.08em;
     font-weight: 600;
     line-height: 1.2;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
   }
   .badge-back-flair {
     font-family: 'Lora', serif;
     font-style: italic;
     font-size: 0.62rem;
     opacity: 0.7;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
   }
   @keyframes badgeRevealPulse {
     0% { box-shadow: 0 0 0 0 var(--badge-color); }
@@ -762,10 +783,10 @@ const featureStyles = `
 
 /* ── Badge data for the demo ────────────────────────────── */
 const DEMO_BADGES = [
-  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
-  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
-  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
-  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Backgroundhalloweenhero.jpg", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundAlienHero.jpg", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundMadMaxHero.jpg", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundChucky.jpg", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
 ];
 
 const DEMO_COMMUNITIES = [
@@ -1224,7 +1245,9 @@ function LandingScreen({ onSignIn }) {
                     <img className="badge-front-art" src={badge.art} alt="" />
                     <span className="badge-front-q">?</span>
                   </div>
-                  <div className="badge-back" style={{ background: badge.bg, borderColor: badge.color + '44' }}>
+                  <div className="badge-back" style={{ borderColor: badge.color + '44' }}>
+                    <div className="badge-back-backdrop" style={{ backgroundImage: `url(${badge.backdrop})` }} />
+                    <div className="badge-back-backdrop-overlay" style={{ background: `radial-gradient(circle at center, ${badge.bg} 0%, rgba(15,13,11,0.85) 100%)` }} />
                     <img className="badge-back-art" src={badge.art} alt={badge.name} style={{ borderColor: badge.color + '66' }} />
                     <span className="badge-back-name" style={{ color: badge.color }}>{badge.name}</span>
                     <span className="badge-back-flair" style={{ color: badge.color }}>{badge.sub}</span>
