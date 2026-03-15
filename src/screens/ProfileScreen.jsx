@@ -307,7 +307,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#40BCF4" }} />
                           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF8000" }} />
                         </div>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--charcoal)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
                           letterboxd.com/<strong>{profile.letterboxd_username}</strong>
                         </span>
                       </div>
@@ -326,11 +326,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
                         Auto-sync your Letterboxd diary. Films, ratings, and watch dates flow into your shelf and feed.
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input, rgba(0,0,0,0.03))", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
+                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
                         <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>letterboxd.com/</span>
                         <input value={lbUsernameInput} onChange={e => setLbUsernameInput(e.target.value)}
                           placeholder="username"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 2px", background: "transparent", color: "var(--charcoal)" }} />
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 2px", background: "transparent", color: "var(--text-primary)" }} />
                       </div>
                       <button className="profile-connect-btn" disabled={!lbUsernameInput.trim() || letterboxdSyncing}
                         onClick={() => onLetterboxdConnect(lbUsernameInput.trim())}>
@@ -358,7 +358,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                         <span style={{ fontSize: 16 }}>📚</span>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--charcoal)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
                           User ID: <strong>{profile.goodreads_user_id}</strong>
                         </span>
                       </div>
@@ -377,11 +377,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
                         Auto-sync your Goodreads read shelf. Books, ratings, and read dates flow into your shelf and feed.
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input, rgba(0,0,0,0.03))", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden", marginBottom: 4 }}>
+                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 4 }}>
                         <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>User ID:</span>
                         <input value={grUserIdInput} onChange={e => setGrUserIdInput(e.target.value)}
                           placeholder="e.g. 127753855"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 6px", background: "transparent", color: "var(--charcoal)" }} />
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 6px", background: "transparent", color: "var(--text-primary)" }} />
                       </div>
                       <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", marginBottom: 10, lineHeight: 1.5 }}>
                         Find your ID in your Goodreads profile URL: goodreads.com/user/show/<strong>127753855</strong>
@@ -412,7 +412,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                         <span style={{ fontSize: 16 }}>🎮</span>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--charcoal)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
                           Steam ID: <strong>{profile.steam_id}</strong>
                         </span>
                       </div>
@@ -433,7 +433,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       </div>
                       <input value={steamIdInput} onChange={e => setSteamIdInput(e.target.value)}
                         placeholder="Steam ID or custom URL name"
-                        style={{ width: "100%", border: "1px solid var(--border)", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px", background: "var(--bg-input, rgba(0,0,0,0.03))", borderRadius: 10, color: "var(--charcoal)", marginBottom: 10, boxSizing: "border-box" }} />
+                        style={{ width: "100%", border: "1px solid var(--border-medium)", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px", background: "var(--bg-input)", borderRadius: 10, color: "var(--text-primary)", marginBottom: 10, boxSizing: "border-box" }} />
                       <button className="profile-connect-btn" disabled={!steamIdInput.trim() || steamSyncing}
                         onClick={() => onSteamConnect(steamIdInput.trim())}>
                         {steamSyncing ? "Connecting..." : "Connect & Sync"}
@@ -481,17 +481,17 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                           return (
                           <div key={item.id} style={{
                             display: "flex", alignItems: "center", gap: 10,
-                            padding: "8px 10px", background: isNextUp ? "rgba(196,115,79,0.06)" : "rgba(0,0,0,0.02)", border: `1px solid ${isNextUp ? "var(--terracotta)" : "var(--border)"}`, borderRadius: 10,
+                            padding: "8px 10px", background: isNextUp ? "rgba(196,115,79,0.08)" : "var(--bg-elevated)", border: `1px solid ${isNextUp ? "var(--accent-terra)" : "var(--border-subtle)"}`, borderRadius: 10,
                           }}>
                             {item.cover_url ? (
                               <img src={item.cover_url} alt="" style={{ width: 30, height: 44, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />
                             ) : (
-                              <div style={{ width: 30, height: 44, borderRadius: 4, background: "rgba(0,0,0,0.04)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>
+                              <div style={{ width: 30, height: 44, borderRadius: 4, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0 }}>
                                 {type === "book" ? "📖" : type === "movie" ? "🎬" : type === "show" ? "📺" : "🎮"}
                               </div>
                             )}
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, color: "var(--charcoal)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
+                              <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
                               {item.author && <div style={{ fontFamily: "'Lora', serif", fontSize: 10, color: "var(--text-faint)" }}>{item.author}</div>}
                               {isNextUp && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", color: "var(--terracotta)", marginTop: 2 }}>UP NEXT</div>}
                             </div>

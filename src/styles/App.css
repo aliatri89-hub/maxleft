@@ -3078,15 +3078,15 @@
   .profile-back {
     background: none;
     border: none;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 0.15em;
-    color: var(--text-dim);
+    color: var(--text-muted);
     cursor: pointer;
     text-transform: uppercase;
     padding: 8px 0;
   }
-  .profile-back:hover { color: var(--charcoal); }
+  .profile-back:hover { color: var(--text-primary); }
 
   .profile-big-avatar {
     width: 80px;
@@ -3097,7 +3097,7 @@
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    border: 3px solid var(--border-med);
+    border: 3px solid var(--border-medium);
     margin-bottom: 16px;
     overflow: hidden;
     position: relative;
@@ -3141,26 +3141,26 @@
   }
 
   .profile-big-name {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: var(--font-display);
     font-weight: 900;
     font-size: 32px;
     text-transform: uppercase;
-    color: var(--charcoal);
+    color: var(--text-primary);
     margin-bottom: 4px;
   }
 
   .profile-big-handle {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: 20px;
   }
 
   .profile-bio {
-    font-family: 'Lora', serif;
+    font-family: var(--font-serif);
     font-style: italic;
     font-size: 14px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     line-height: 1.5;
     margin-bottom: 24px;
   }
@@ -3205,18 +3205,18 @@
     margin-top: 28px;
   }
   .profile-group-label {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: var(--font-display);
     font-weight: 700;
     font-size: 11px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--terracotta);
+    color: var(--accent-terra);
     margin-bottom: 10px;
     padding-left: 2px;
   }
   .profile-group-card {
-    background: linear-gradient(180deg, rgba(0,0,0,0.015) 0%, rgba(0,0,0,0.03) 100%);
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-end) 100%);
+    border: 1px solid var(--border-medium);
     border-radius: 14px;
     overflow: hidden;
   }
@@ -3229,12 +3229,12 @@
     transition: background 0.12s;
   }
   .profile-group-row:active {
-    background: rgba(196,115,79,0.04);
+    background: var(--bg-hover);
   }
   .profile-group-row-text {
-    font-family: 'Lora', serif;
+    font-family: var(--font-serif);
     font-size: 15px;
-    color: var(--charcoal);
+    color: var(--text-secondary);
   }
   .profile-group-row-chevron {
     font-size: 18px;
@@ -3243,7 +3243,7 @@
   }
   .profile-group-divider {
     height: 1px;
-    background: var(--border);
+    background: var(--border-subtle);
     margin: 0 18px;
   }
   .profile-group-sub-row {
@@ -3255,7 +3255,7 @@
     transition: background 0.12s;
   }
   .profile-group-sub-row:active {
-    background: rgba(196,115,79,0.04);
+    background: var(--bg-hover);
   }
   .profile-group-expand {
     display: flex;
@@ -3269,21 +3269,21 @@
   }
   .profile-sync-btn {
     flex: 1;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     padding: 9px 12px;
-    background: rgba(0,0,0,0.03);
-    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-medium);
     border-radius: 10px;
     cursor: pointer;
-    color: var(--charcoal);
+    color: var(--text-secondary);
     letter-spacing: 0.04em;
     transition: background 0.12s;
   }
-  .profile-sync-btn:hover { background: rgba(0,0,0,0.06); }
+  .profile-sync-btn:hover { background: var(--bg-hover); }
   .profile-sync-btn:disabled { opacity: 0.5; cursor: default; }
   .profile-disconnect-btn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 10px;
     padding: 9px 12px;
     background: none;
@@ -3297,10 +3297,10 @@
   .profile-disconnect-btn:hover { border-color: rgba(248,113,113,0.5); }
   .profile-connect-btn {
     width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 11px;
     padding: 10px;
-    background: var(--terracotta);
+    background: var(--accent-terra);
     color: white;
     border: none;
     border-radius: 10px;
@@ -3311,7 +3311,7 @@
   .profile-connect-btn:hover { opacity: 0.9; }
   .profile-connect-btn:disabled { opacity: 0.5; cursor: default; }
   .profile-delete-link {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 11px;
     letter-spacing: 0.04em;
     color: var(--text-faint);
@@ -3333,18 +3333,18 @@
     padding: 14px;
     background: transparent;
     color: #C45043;
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: var(--font-display);
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    border: 1px solid rgba(196,80,67,0.2);
+    border: 1px solid rgba(196,80,67,0.25);
     border-radius: 10px;
     cursor: pointer;
-    margin-top: 16px;
+    margin-top: 12px;
     transition: background 0.15s;
   }
-  .btn-signout:hover { background: rgba(196,80,67,0.05); }
+  .btn-signout:hover { background: rgba(196,80,67,0.08); }
 
   /* Recap Screen */
   .recap-screen {
