@@ -9,10 +9,10 @@
 const COMMUNITY_BRANDS = {
   "nowplaying":    { name: "Now Playing Podcast", accent: "#F5C518" },
   "blankcheck":    { name: "Blank Check",         accent: "#8B5CF6" },
-  "bigpicture":    { name: "The Big Picture",     accent: "#e94560" },
+  "bigpicture":    { name: "The Big Picture",     accent: "#00A86B" },
   "filmjunk":      { name: "Film Junk",           accent: "#78C044" },
   "hdtgm":         { name: "HDTGM",               accent: "#4A9BB5" },
-  "filmspotting":  { name: "Filmspotting",        accent: "#4ade80" },
+  "filmspotting":  { name: "Filmspotting",        accent: "#475569" },
   "rewatchables":  { name: "The Rewatchables",    accent: "#1DB954" },
   "chapo":         { name: "Movie Mindset",       accent: "#D32F2F" },
   "getplayed":     { name: "Get Played",          accent: "#e91e8c" },
