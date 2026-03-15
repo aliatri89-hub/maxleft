@@ -33,20 +33,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
   const [visitedTabs, setVisitedTabs] = useState(() => new Set([activeTab]));
   const [preloadTab, setPreloadTab] = useState(null);
 
-  // ── Preload adjacent tabs once container is measured ────
-  useEffect(() => {
-    if (!containerWidth || containerWidth <= 0) return;
-    const idx = tabs.findIndex((t) => t.key === activeTab);
-    if (idx < 0) return;
-    setVisitedTabs((prev) => {
-      const next = new Set(prev);
-      next.add(activeTab);
-      if (idx > 0) next.add(tabs[idx - 1].key);
-      if (idx < tabs.length - 1) next.add(tabs[idx + 1].key);
-      return next.size !== prev.size ? next : prev;
-    });
-  }, [containerWidth, tabs, activeTab]);
-
   // ── Measure container width (bulletproof pane sizing) ───
   useEffect(() => {
     if (!containerRef.current) return;
