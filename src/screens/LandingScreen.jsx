@@ -677,6 +677,55 @@ const featureStyles = `
   .tap-hint {
     animation: tapPulse 2.5s ease-in-out infinite;
   }
+
+  /* ── GROWING COMMUNITIES ──────────────────────────────────── */
+  .growing-section {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .growing-divider {
+    width: 48px;
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--terracotta, #C75B3F), transparent);
+    opacity: 0.4;
+  }
+  .growing-icon-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 24px 0 20px;
+  }
+  .growing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--terracotta, #C75B3F);
+    opacity: 0.3;
+    animation: growPulse 2s ease-in-out infinite;
+  }
+  @keyframes growPulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+  .growing-headline {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f5f0eb;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .growing-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 0.82rem;
+    color: #9a938a;
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
 `;
 
 /* ── Badge data for the demo ────────────────────────────── */
@@ -998,7 +1047,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">From the Podcast to Your Shelf</div>
+          <div className="landing-eyebrow">From the <strong>Podcast</strong> to Your <strong>Shelf</strong></div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
@@ -1032,7 +1081,7 @@ function LandingScreen({ onSignIn }) {
             renderEmailAuth()
           )}
           <div className="landing-learn-more" onClick={scrollToFeatures}>
-            <span>See what's on the shelf</span>
+            <span>Learn more</span>
             <span className="landing-learn-more-arrow">↓</span>
           </div>
         </div>
@@ -1097,8 +1146,11 @@ function LandingScreen({ onSignIn }) {
         >
           <div className="mantl-feature-label">Collect</div>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <div className="mantl-feature-title" style={{ marginBottom: 12 }}>Earn the Badge</div>
+            <div className="mantl-feature-title" style={{ marginBottom: 4 }}>Earn the Badge</div>
             <div className="tap-hint" style={{ animation: 'none', margin: 0 }}>tap to reveal</div>
+          </div>
+          <div className="mantl-feature-desc" style={{ marginBottom: 14 }}>
+            Complete franchises and collect badges along the way.
           </div>
           <div className="badge-grid">
             {DEMO_BADGES.map((badge, i) => (
@@ -1203,6 +1255,28 @@ function LandingScreen({ onSignIn }) {
             </div>
           </div>
           <div className="tap-hint">Try it — rate and shelf</div>
+        </div>
+
+        {/* ── 4. GROWING COMMUNITIES ────────────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('growing') ? ' visible' : ''}`}
+          data-block="growing"
+          style={{ transitionDelay: '0.3s' }}
+        >
+          <div className="growing-section">
+            <div className="growing-divider" />
+            <div className="growing-icon-row">
+              <span className="growing-dot" style={{ animationDelay: '0s' }} />
+              <span className="growing-dot" style={{ animationDelay: '0.3s' }} />
+              <span className="growing-dot" style={{ animationDelay: '0.6s' }} />
+            </div>
+            <div className="growing-headline">New communities<br />added regularly</div>
+            <div className="growing-sub">
+              Film Junk, Get Played, Filmspotting, HDTGM, and more —<br />
+              if your podcast has a shelf, we're building it.
+            </div>
+            <div className="growing-divider" />
+          </div>
         </div>
 
         {/* ── BOTTOM CTA ───────────────────────────────────── */}

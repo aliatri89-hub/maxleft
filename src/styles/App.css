@@ -123,6 +123,11 @@
     margin-bottom: 20px;
     opacity: 0;
     animation: fadeUp 0.6s ease 0.1s forwards;
+    font-weight: 300;
+  }
+  .landing-eyebrow strong {
+    font-weight: 600;
+    color: #f5f0eb;
   }
 
   .landing-wordmark {
