@@ -742,44 +742,49 @@ const featureStyles = `
     background: linear-gradient(90deg, transparent, var(--terracotta, #C75B3F), transparent);
     opacity: 0.4;
   }
-  .growing-art-row {
+  /* ── PODCAST HORIZONTAL MARQUEE ─────────────────────────── */
+  .podcast-marquee {
+    position: relative;
+    overflow: hidden;
+    margin: 20px -18px 24px;
+  }
+  .podcast-marquee-row {
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .podcast-marquee-track {
     display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin: 24px 0 22px;
+    gap: 10px;
+    width: max-content;
   }
-  .growing-art-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    opacity: 0;
-    animation: growArtIn 0.6s ease forwards;
+  .podcast-marquee-track.track-left {
+    animation: marquee-left 30s linear infinite;
   }
-  @keyframes growArtIn {
-    from { opacity: 0; transform: scale(0.8) translateY(8px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+  .podcast-marquee-track.track-right {
+    animation: marquee-right 35s linear infinite;
   }
-  .growing-art-img {
-    width: 56px;
-    height: 56px;
+  @keyframes marquee-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  @keyframes marquee-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+  .podcast-marquee-thumb {
+    width: 64px;
+    height: 64px;
     border-radius: 14px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,0.1);
-    opacity: 0.75;
-    transition: opacity 0.3s, transform 0.3s;
+    flex-shrink: 0;
+    opacity: 0.55;
+    filter: saturate(0.6);
   }
-  .growing-art-item:hover .growing-art-img {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-  .growing-art-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.58rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.35);
-    font-weight: 500;
+  .podcast-marquee-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(90deg, #0f0d0b 0%, transparent 20%, transparent 80%, #0f0d0b 100%);
   }
   .growing-headline {
     font-family: 'Barlow Condensed', sans-serif;
@@ -800,6 +805,24 @@ const featureStyles = `
     margin-bottom: 24px;
   }
 `;
+
+// ── Podcast art for horizontal marquee ──
+const PODCAST_ART = [
+  { src: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", name: "Now Playing" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
+  { src: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", name: "Blank Check" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
+];
+const PODCAST_ART_ROW2 = [
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
+  { src: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", name: "Blank Check" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
+  { src: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", name: "Now Playing" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
+];
 
 /* ── Badge data for the demo ────────────────────────────── */
 const DEMO_BADGES = [
@@ -1367,18 +1390,22 @@ function LandingScreen({ onSignIn }) {
         >
           <div className="growing-section">
             <div className="growing-divider" />
-            <div className="growing-art-row">
-              {[
-                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
-                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
-                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
-                { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
-              ].map((p, i) => (
-                <div key={i} className="growing-art-item" style={{ animationDelay: `${i * 0.15}s` }}>
-                  <img src={p.src} alt={p.name} className="growing-art-img" />
-                  <span className="growing-art-label">{p.name}</span>
+            <div className="podcast-marquee">
+              <div className="podcast-marquee-row">
+                <div className="podcast-marquee-track track-left">
+                  {[...PODCAST_ART, ...PODCAST_ART].map((p, i) => (
+                    <img key={i} className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div className="podcast-marquee-row">
+                <div className="podcast-marquee-track track-right">
+                  {[...PODCAST_ART_ROW2, ...PODCAST_ART_ROW2].map((p, i) => (
+                    <img key={i} className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                  ))}
+                </div>
+              </div>
+              <div className="podcast-marquee-overlay" />
             </div>
             <div className="growing-headline">New communities<br />added regularly</div>
             <div className="growing-sub">
