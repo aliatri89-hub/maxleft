@@ -1095,7 +1095,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
         position: "relative",
         cursor: "pointer",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.02)",
         perspective: 800,
       }}
     >
@@ -1117,15 +1117,24 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
           }}
           style={{
             backfaceVisibility: "hidden",
-            background: "#1a1612",
+            background: "linear-gradient(180deg, #2a2520 0%, #1a1612 12%, #1a1612 88%, #111 100%)",
+            borderRadius: 5,
           }}
         >
+          {/* Top edge sheen — light catching the plastic lip */}
           <div style={{
-            margin: 5,
+            position: "absolute", top: 0, left: 0, right: 0, height: 1,
+            background: "linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.06) 70%, transparent 90%)",
+            borderRadius: "5px 5px 0 0",
+            pointerEvents: "none",
+          }} />
+          <div style={{
+            margin: "6px 5px 7px",
             borderRadius: 3,
             overflow: "hidden",
             display: "flex",
             minHeight: 80,
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4), inset 0 -1px 1px rgba(0,0,0,0.2)",
           }}>
             {/* Left brand cap */}
             <BrandCap brand={brandLeft} side="left" />
@@ -1146,19 +1155,6 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
-              }} />
-
-              {/* Corner peek — community accent triangle */}
-              <div style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                width: 0,
-                height: 0,
-                borderLeft: `14px solid ${peekColor}`,
-                borderTop: "14px solid transparent",
-                opacity: 0.55,
-                pointerEvents: "none",
               }} />
 
               {/* Logo or title */}
@@ -1237,11 +1233,12 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             transform: "rotateX(180deg)",
             position: "absolute",
             inset: 0,
-            background: "#1a1612",
+            background: "linear-gradient(180deg, #2a2520 0%, #1a1612 12%, #1a1612 88%, #111 100%)",
+            borderRadius: 5,
           }}
         >
           <div style={{
-            margin: 5,
+            margin: "6px 5px 7px",
             borderRadius: 3,
             overflow: "hidden",
             background: "#f0ebe1",
