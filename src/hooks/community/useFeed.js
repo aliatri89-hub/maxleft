@@ -263,17 +263,52 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       }
 
       // Build tmdbSeen AFTER grouping + subscription filtering
-      const tmdbSeen = new Set();
+      // First: merge groups that share the same tmdb_id across different dates
+      const mergedGroups = new Map();
       for (const group of logGroups.values()) {
+        if (!group.tmdb_id) {
+          // No tmdb_id — keep as-is with original key
+          mergedGroups.set(`notmdb_${mergedGroups.size}`, group);
+          continue;
+        }
+        const mKey = `tmdb_${group.tmdb_id}`;
+        if (!mergedGroups.has(mKey)) {
+          mergedGroups.set(mKey, group);
+        } else {
+          const existing = mergedGroups.get(mKey);
+          // Keep the most recent date
+          if (new Date(group.logged_at) > new Date(existing.logged_at)) {
+            existing.logged_at = group.logged_at;
+          }
+          // Keep best rating
+          if (group.rating && (!existing.rating || group.rating > existing.rating)) {
+            existing.rating = group.rating;
+          }
+          // Merge communities
+          for (const c of group.communities) {
+            const dup = existing.communities.some(
+              ec => ec.community_slug === c.community_slug && ec.series_title === c.series_title
+            );
+            if (!dup) existing.communities.push(c);
+          }
+          // Fill missing backdrop
+          if (!existing.backdrop_path && group.backdrop_path) {
+            existing.backdrop_path = group.backdrop_path;
+          }
+        }
+      }
+
+      const tmdbSeen = new Set();
+      for (const group of mergedGroups.values()) {
         if (group.communities.length > 0 && group.tmdb_id) {
           tmdbSeen.add(group.tmdb_id);
         }
       }
 
       // Remove empty community groups
-      for (const [key, group] of logGroups) {
+      for (const [key, group] of mergedGroups) {
         if (group.communities.length === 0) {
-          logGroups.delete(key);
+          mergedGroups.delete(key);
         }
       }
 
@@ -284,8 +319,8 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           ? new Date(shelf.watched_at).toISOString().slice(0, 10)
           : "unknown";
         const groupKey = `shelf_${shelf.tmdb_id || shelf.log_id}_${dateKey}`;
-        if (!logGroups.has(groupKey)) {
-          logGroups.set(groupKey, {
+        if (!mergedGroups.has(groupKey)) {
+          mergedGroups.set(groupKey, {
             type: "log",
             title: shelf.title,
             year: shelf.year,
@@ -332,7 +367,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       ).filter(u => u.media_type !== "book" && !awardsMiniseriesIds.has(u.miniseries_id));
 
       // ── Build chronological stream ──
-      const logCards = [...logGroups.values()]
+      const logCards = [...mergedGroups.values()]
         .sort((a, b) => {
           const diff = new Date(b.logged_at || 0) - new Date(a.logged_at || 0);
           if (diff !== 0) return diff;
