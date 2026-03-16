@@ -13,9 +13,9 @@
 
 :root {
   /* ── Surfaces ── */
-  --bg-primary:       #0f0f1a;
-  --bg-card:          #1a1a2e;
-  --bg-card-end:      #12121f;
+  --bg-primary:       #0f0d0b;
+  --bg-card:          #1a1714;
+  --bg-card-end:      #12100e;
   --bg-elevated:      rgba(255,255,255,0.04);
   --bg-input:         rgba(255,255,255,0.06);
   --bg-hover:         rgba(255,255,255,0.08);

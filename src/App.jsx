@@ -2060,10 +2060,10 @@ if (!tmdbId) {
               </div>
               <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">
-                  MANTL
+                  M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL
                   <span className="header-brand-line" />
                 </div>
-                <div className="header-tagline">Shelf what you're made of</div>
+                <div className="header-tagline">Another reason to press play</div>
               </div>
               <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
                 <div className="header-profile">

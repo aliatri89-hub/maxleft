@@ -1784,7 +1784,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   if (loading && feedItems.length === 0) {
     return (
       <div style={{
-        minHeight: "100vh", background: "var(--bg-primary, #0a0e1a)",
+        minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)",
         paddingBottom: 100,
       }}>
         {/* Skeleton loader */}
@@ -1812,7 +1812,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-        minHeight: "100vh", background: "var(--bg-primary, #0a0e1a)",
+        minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)",
         paddingBottom: 100,
         overflowY: "auto", WebkitOverflowScrolling: "touch",
       }}
