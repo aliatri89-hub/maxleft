@@ -1076,13 +1076,16 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     ? getCommunityAccent(communities[0].community_slug)
     : "#8B5CF6";
 
-  // First-visit tooltip
+  // First-visit tooltip — truly once ever
   useEffect(() => {
     if (!isFirst) return;
     try {
       if (localStorage.getItem("mantl_flip_hint_seen")) return;
     } catch {}
-    const t = setTimeout(() => setShowHint(true), 800);
+    const t = setTimeout(() => {
+      setShowHint(true);
+      try { localStorage.setItem("mantl_flip_hint_seen", "1"); } catch {}
+    }, 800);
     return () => clearTimeout(t);
   }, [isFirst]);
 
@@ -1110,21 +1113,18 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         <div
           onClick={() => {
             setFlipped(true);
-            if (showHint) {
-              setShowHint(false);
-              try { localStorage.setItem("mantl_flip_hint_seen", "1"); } catch {}
-            }
+            setShowHint(false);
           }}
           style={{
             backfaceVisibility: "hidden",
-            background: "linear-gradient(180deg, #2a2520 0%, #1a1612 12%, #1a1612 88%, #111 100%)",
+            background: "linear-gradient(180deg, #332e28 0%, #1e1a15 15%, #1a1612 85%, #0e0c0a 100%)",
             borderRadius: 5,
           }}
         >
           {/* Top edge sheen — light catching the plastic lip */}
           <div style={{
             position: "absolute", top: 0, left: 0, right: 0, height: 1,
-            background: "linear-gradient(90deg, transparent 10%, rgba(255,255,255,0.06) 30%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.06) 70%, transparent 90%)",
+            background: "linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.1) 75%, transparent 95%)",
             borderRadius: "5px 5px 0 0",
             pointerEvents: "none",
           }} />
@@ -1134,7 +1134,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             overflow: "hidden",
             display: "flex",
             minHeight: 80,
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.4), inset 0 -1px 1px rgba(0,0,0,0.2)",
+            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5), inset 0 -1px 2px rgba(0,0,0,0.3)",
           }}>
             {/* Left brand cap */}
             <BrandCap brand={brandLeft} side="left" />
@@ -1233,7 +1233,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             transform: "rotateX(180deg)",
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(180deg, #2a2520 0%, #1a1612 12%, #1a1612 88%, #111 100%)",
+            background: "linear-gradient(180deg, #332e28 0%, #1e1a15 15%, #1a1612 85%, #0e0c0a 100%)",
             borderRadius: 5,
           }}
         >
