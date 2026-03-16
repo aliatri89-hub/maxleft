@@ -1192,8 +1192,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                     } catch { /* CORS fail — keep dark filter */ }
                   }}
                   style={{
-                    maxHeight: 48,
-                    minHeight: 28,
+                    height: 44,
                     maxWidth: "85%",
                     width: "auto",
                     objectFit: "contain",

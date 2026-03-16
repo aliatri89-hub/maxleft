@@ -281,7 +281,7 @@ export const fetchCoversForItems = async (items, onUpdate) => {
 // ═══════════════════════════════════════════════════════════
 
 const LOGO_CACHE_KEY = "mantl_logo_cache";
-const LOGO_CACHE_VERSION = 1;
+const LOGO_CACHE_VERSION = 2;
 
 let logoCache = {};
 try {
@@ -358,7 +358,7 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
       return null;
     }
 
-    const url = `${TMDB_IMG}/w300${best.file_path}`;
+    const url = `${TMDB_IMG}/w500${best.file_path}`;
     logoCache[key] = url;
     saveLogoCache();
     return url;
