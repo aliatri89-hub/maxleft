@@ -781,6 +781,13 @@ const featureStyles = `
   .podcast-marquee-row + .podcast-marquee-row {
     margin-top: 18px;
   }
+  .podcast-marquee-track.dragging {
+    animation-play-state: paused !important;
+    cursor: grabbing;
+  }
+  .podcast-marquee-track {
+    cursor: grab;
+  }
   .podcast-marquee-item {
     display: flex;
     flex-direction: column;
@@ -845,6 +852,7 @@ const PODCAST_ART_ROW1 = [
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
   { src: "https://i1.sndcdn.com/artworks-PVO0X1iIYkoyTfeK-8eSxuA-t500x500.png", name: "Movie Mindset" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/83/47/e2/8347e2b8-a5da-a3b0-d475-19288bdf855d/mza_1646255428613610425.jpeg/300x300bb.webp", name: "Films To Be Buried With" },
 ];
 const PODCAST_ART_ROW2 = [
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/300x300bb.webp", name: "Unspooled" },
@@ -852,6 +860,7 @@ const PODCAST_ART_ROW2 = [
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/97/02/d0/9702d058-288c-a931-f3b1-55f5697fad0e/mza_11250256298198911552.jpg/300x300bb.webp", name: "Video Archives" },
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/b3/f9/44b3f953-fbae-4e99-4d82-4c2cc83630e5/mza_1552332279859047099.jpg/300x300bb.webp", name: "Filmcast" },
   { src: "https://pbcdn1.podbean.com/imglogo/dir-logo/238399/238399_300x300.png", name: "Next Picture Show" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts112/v4/da/e9/e6/dae9e6d3-6b4e-b600-bb37-0ce7833c24d5/mza_9711243178432328693.jpg/300x300bb.webp", name: "You Must Remember This" },
 ];
 
 /* ── Badge data for the demo ────────────────────────────── */
@@ -903,6 +912,61 @@ function LandingScreen({ onSignIn }) {
     return () => observer.disconnect();
   }, []);
 
+  // ── Touch/drag scrub for podcast marquee ──────────────────
+  useEffect(() => {
+    const tracks = document.querySelectorAll('.podcast-marquee-track');
+    if (!tracks.length) return;
+
+    const state = new Map();
+
+    const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+    const onStart = (e) => {
+      const track = e.currentTarget;
+      const computedStyle = window.getComputedStyle(track);
+      const matrix = new DOMMatrix(computedStyle.transform);
+      track.classList.add('dragging');
+      state.set(track, { startX: getX(e), startTranslate: matrix.m41 });
+    };
+
+    const onMove = (e) => {
+      const track = e.currentTarget;
+      const s = state.get(track);
+      if (!s) return;
+      e.preventDefault();
+      const dx = getX(e) - s.startX;
+      track.style.transform = `translateX(${s.startTranslate + dx}px)`;
+    };
+
+    const onEnd = (e) => {
+      const track = e.currentTarget;
+      track.classList.remove('dragging');
+      track.style.transform = '';
+      state.delete(track);
+    };
+
+    tracks.forEach(track => {
+      track.addEventListener('touchstart', onStart, { passive: true });
+      track.addEventListener('touchmove', onMove, { passive: false });
+      track.addEventListener('touchend', onEnd);
+      track.addEventListener('mousedown', onStart);
+      track.addEventListener('mousemove', onMove);
+      track.addEventListener('mouseup', onEnd);
+      track.addEventListener('mouseleave', onEnd);
+    });
+
+    return () => {
+      tracks.forEach(track => {
+        track.removeEventListener('touchstart', onStart);
+        track.removeEventListener('touchmove', onMove);
+        track.removeEventListener('touchend', onEnd);
+        track.removeEventListener('mousedown', onStart);
+        track.removeEventListener('mousemove', onMove);
+        track.removeEventListener('mouseup', onEnd);
+        track.removeEventListener('mouseleave', onEnd);
+      });
+    };
+  }, []);
 
   const scrollToFeatures = () => {
     featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
