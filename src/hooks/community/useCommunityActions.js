@@ -157,11 +157,11 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Unlog an item ─────────────────────────────────────────
+  // ─── Unlog an item (cross-community by tmdb_id) ─────────────
   const unlogItem = useCallback(async (itemId) => {
     if (!userId) return;
 
-    // Optimistic update
+    // Optimistic update (current community only — other screens refresh on mount)
     setProgress((prev) => {
       const next = { ...prev };
       delete next[itemId];
@@ -175,6 +175,32 @@ export function useCommunityActions(userId, setProgress) {
         .update({ status: "skipped", rating: null, completed_at: null })
         .eq("user_id", userId)
         .eq("item_id", itemId);
+
+      // Cross-community: find same tmdb_id in other communities and unlog there too
+      const { data: itemRow } = await supabase
+        .from("community_items")
+        .select("tmdb_id, media_type")
+        .eq("id", itemId)
+        .single();
+
+      if (itemRow?.tmdb_id) {
+        // Find all other community_items with this tmdb_id
+        const { data: siblings } = await supabase
+          .from("community_items")
+          .select("id")
+          .eq("tmdb_id", itemRow.tmdb_id)
+          .neq("id", itemId);
+
+        if (siblings?.length > 0) {
+          const siblingIds = siblings.map(s => s.id);
+          await supabase
+            .from("community_user_progress")
+            .update({ status: "skipped", rating: null, completed_at: null })
+            .eq("user_id", userId)
+            .in("item_id", siblingIds)
+            .eq("status", "completed");
+        }
+      }
     } catch {
       // Rollback
       setProgress((prev) => ({ ...prev, [itemId]: { listened_with_commentary: false } }));
