@@ -961,8 +961,8 @@ const VHS_BRANDS = [
   { bg: "#f5c518", color: "#c41e1e", text: "Kodak", weight: 800 },
   { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", weight: 700 },
   { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", weight: 900 },
-  { bg: "#d4d0c8", color: "#222", text: "VHS", weight: 800, isVhs: true },
-  { bg: "#e8e4da", color: "#222", text: "VHS", weight: 800, isVhs: true },
+  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", weight: 800 },
+  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", weight: 800 },
 ];
 
 function getVhsBrands(title) {
@@ -1074,8 +1074,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                     objectFit: "contain",
                     objectPosition: "center",
                     position: "relative",
-                    filter: "brightness(0)",
-                    opacity: 0.8,
+                    filter: "brightness(0.2) contrast(1.8)",
+                    opacity: 0.85,
                   }}
                 />
               ) : (
