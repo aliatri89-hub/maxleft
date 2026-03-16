@@ -210,7 +210,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress, "film");
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(episodes, allItems, 10);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(episodes, allItems, 10, "nowplaying");
 
   // Stable fingerprint: only changes when the actual item set changes,
   // not when the parent re-provides miniseries with a new array reference.
@@ -351,6 +351,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
       <style>{`
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         @keyframes skeletonPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.15; } }
+        @keyframes shelfFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
       {/* Header */}

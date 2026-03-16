@@ -227,7 +227,9 @@ export default function NowPlayingGenreTab({
   // ── Render helpers ─────────────────────────────────────────
 
   // Dynamic shelf (Recently Logged / New Episodes) — no cap, no expand
-  // Shows skeleton placeholders while loading to reserve space and prevent pop-in
+  // Shows skeleton placeholders while loading to reserve space and prevent pop-in.
+  // Skeleton dimensions match ItemCard exactly: 120px wide, 2/3 poster + title row.
+  // Fade-in transition avoids jarring swap when data arrives.
   const renderDynamicShelf = (title, icon, items, isLoading) => {
     if (!isLoading && (!items || items.length === 0)) return null;
 
@@ -248,20 +250,35 @@ export default function NowPlayingGenreTab({
           paddingLeft: 16, paddingRight: 16,
         }}>
           {isLoading ? (
-            // Skeleton cards — match ItemCard dimensions, reserve space
+            // Skeleton cards — exact ItemCard dimensions (120w, 2/3 poster + title)
             Array.from({ length: 6 }).map((_, i) => (
-              <div key={`skel-${i}`} style={{
-                flexShrink: 0,
-                width: 110,
-                height: 165,
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                animation: "skeletonPulse 1.5s ease-in-out infinite",
-              }} />
+              <div key={`skel-${i}`} style={{ flexShrink: 0, width: 120 }}>
+                <div style={{
+                  width: 120,
+                  aspectRatio: "2/3",
+                  borderRadius: 8,
+                  background: "rgba(255,255,255,0.04)",
+                  animation: "skeletonPulse 1.5s ease-in-out infinite",
+                  animationDelay: `${i * 0.1}s`,
+                }} />
+                <div style={{
+                  width: 80 + (i % 3) * 12,
+                  height: 10,
+                  borderRadius: 4,
+                  background: "rgba(255,255,255,0.03)",
+                  marginTop: 6,
+                  animation: "skeletonPulse 1.5s ease-in-out infinite",
+                  animationDelay: `${i * 0.1}s`,
+                }} />
+              </div>
             ))
           ) : (
-            items.map((item) => (
-              <div key={`dyn-${item.id}`} style={{ flexShrink: 0 }}>
+            items.map((item, i) => (
+              <div key={`dyn-${item.id}`} style={{
+                flexShrink: 0,
+                animation: "shelfFadeIn 0.3s ease-out both",
+                animationDelay: `${i * 0.04}s`,
+              }}>
                 <NowPlayingItemCard
                   item={item}
                   isCompleted={!!progress[item.id]}
