@@ -953,33 +953,15 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // LOG CARD — cinematic backdrop + community context
 // ════════════════════════════════════════════════
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
-  const [expanded, setExpanded] = useState(false);
-  const contentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState(0);
+  const [flipped, setFlipped] = useState(false);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
-  const hasBackdrop = !!data.backdrop_path;
-  const accent = data.communities?.[0]?.community_slug
-    ? getCommunityAccent(data.communities[0].community_slug)
+  const communities = data.communities || [];
+  const accent = communities[0]?.community_slug
+    ? getCommunityAccent(communities[0].community_slug)
     : getCommunityAccent(data.community_slug);
-
-  // Measure real content height for smooth animation
-  useEffect(() => {
-    if (!contentRef.current) return;
-    const measure = () => setContentHeight(contentRef.current.offsetHeight);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(contentRef.current);
-    return () => observer.disconnect();
-  }, [data.communities]);
-
-  // Primary community for the tape brand
-  const primaryCommunity = data.communities?.[0] || {};
-  const communityImg = primaryCommunity.community_image || data.community_image;
-  const communitySlug = primaryCommunity.community_slug || data.community_slug;
 
   return (
     <div
-      onClick={() => onNavigateCommunity?.(communitySlug, data.tmdb_id)}
       style={{
         margin: "4px 16px",
         borderRadius: 5,
@@ -987,139 +969,275 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         position: "relative",
         cursor: "pointer",
         boxShadow: "0 2px 6px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)",
+        perspective: 800,
       }}
     >
-      {/* ── Dark plastic body ── */}
-      <div style={{ background: "#1a1612" }}>
+      <div style={{
+        position: "relative",
+        transformStyle: "preserve-3d",
+        transition: "transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+      }}>
 
-        {/* ── Tape label (cream inset) ── */}
-        <div style={{
-          margin: 5,
-          borderRadius: 3,
-          overflow: "hidden",
-          display: "flex",
-          minHeight: 68,
-          position: "relative",
-        }}>
-
-          {/* Podcast art — left side (like FUJI brand on tape spine) */}
-          <div
-            onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.(communitySlug); }}
-            style={{
-              width: 52, flexShrink: 0,
-              background: "#1a1612",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              cursor: "pointer",
-            }}
-          >
-            {communityImg ? (
-              <img src={communityImg} alt="" style={{
-                width: 38, height: 38, borderRadius: 8, objectFit: "cover",
-                border: `1.5px solid ${accent}44`,
-              }} />
-            ) : (
-              <div style={{
-                width: 38, height: 38, borderRadius: 8,
-                background: `${accent}20`,
-                border: `1.5px solid ${accent}44`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                fontSize: 11, color: accent,
-              }}>
-                {(primaryCommunity.community_name || "").split(" ").map(w => w[0]).join("")}
-              </div>
-            )}
-          </div>
-
-          {/* Label text area */}
+        {/* ═══ FRONT — The Tape ═══ */}
+        <div
+          onClick={() => setFlipped(true)}
+          style={{
+            backfaceVisibility: "hidden",
+            background: "#1a1612",
+          }}
+        >
           <div style={{
-            flex: 1,
+            margin: 5,
+            borderRadius: 3,
+            overflow: "hidden",
+            display: "flex",
+            minHeight: 68,
+          }}>
+            {/* Label text area — full width */}
+            <div style={{
+              flex: 1,
+              background: "#f0ebe1",
+              padding: "10px 14px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}>
+              {/* Grid lines */}
+              <div style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                backgroundImage: `
+                  repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px),
+                  repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px)
+                `,
+              }} />
+
+              {/* Logo or title */}
+              {data.logo_url ? (
+                <img
+                  src={data.logo_url}
+                  alt={data.title}
+                  style={{
+                    maxHeight: 36,
+                    maxWidth: "90%",
+                    objectFit: "contain",
+                    objectPosition: "center",
+                    marginBottom: 3,
+                    position: "relative",
+                    filter: "brightness(0)",
+                    opacity: 0.8,
+                  }}
+                />
+              ) : (
+                <div style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 800,
+                  fontSize: 20,
+                  lineHeight: 1.05,
+                  color: "#2C2824",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.01em",
+                  position: "relative",
+                  marginBottom: 3,
+                  textAlign: "center",
+                }}>
+                  {data.title}
+                </div>
+              )}
+
+              {/* Creator · Year + Stars */}
+              <div style={{
+                display: "flex", alignItems: "center", gap: 6, position: "relative",
+              }}>
+                {(data.creator || data.year) && (
+                  <span style={{
+                    fontFamily: "'Lora', serif", fontStyle: "italic",
+                    fontSize: 10, color: "rgba(44,40,36,0.45)",
+                  }}>
+                    {[data.creator, data.year].filter(Boolean).join(" · ")}
+                  </span>
+                )}
+                <Stars rating={data.rating} size={10} />
+              </div>
+
+              {/* Time — bottom right, sharpie */}
+              <div style={{
+                position: "absolute",
+                bottom: 4, right: 8,
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 10,
+                color: "rgba(44,40,36,0.35)",
+              }}>
+                {timeAgo}
+              </div>
+            </div>
+
+            {/* Community color band — split stripes for multiple communities */}
+            <div style={{
+              width: 18, flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}>
+              {communities.length > 0 ? communities.map((c, i) => (
+                <div key={i} style={{
+                  flex: 1,
+                  background: getCommunityAccent(c.community_slug),
+                }} />
+              )) : (
+                <div style={{ flex: 1, background: accent }} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══ BACK — Community Context ═══ */}
+        <div
+          onClick={() => setFlipped(false)}
+          style={{
+            backfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+            position: "absolute",
+            inset: 0,
+            background: "#1a1612",
+          }}
+        >
+          <div style={{
+            margin: 5,
+            borderRadius: 3,
+            overflow: "hidden",
             background: "#f0ebe1",
-            padding: "8px 12px",
+            minHeight: 68,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            alignItems: "center",
+            padding: "8px 10px",
             position: "relative",
-            overflow: "hidden",
           }}>
             {/* Grid lines */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `
-                repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px),
-                repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px)
+                repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)
               `,
             }} />
 
-            {/* Logo or title — centered */}
-            {data.logo_url ? (
-              <img
-                src={data.logo_url}
-                alt={data.title}
-                style={{
-                  maxHeight: 36,
-                  maxWidth: "90%",
-                  objectFit: "contain",
-                  objectPosition: "center",
-                  marginBottom: 3,
-                  position: "relative",
-                  filter: "brightness(0)",
-                  opacity: 0.8,
-                }}
-              />
-            ) : (
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800,
-                fontSize: 20,
-                lineHeight: 1.05,
-                color: "#2C2824",
-                textTransform: "uppercase",
-                letterSpacing: "0.01em",
-                position: "relative",
-                marginBottom: 3,
-                textAlign: "center",
-              }}>
-                {data.title}
-              </div>
-            )}
-
-            {/* Creator · Year + Stars */}
+            {/* "Covered by" label */}
             <div style={{
-              display: "flex", alignItems: "center", gap: 6, position: "relative",
-            }}>
-              {(data.creator || data.year) && (
-                <span style={{
-                  fontFamily: "'Lora', serif", fontStyle: "italic",
-                  fontSize: 10, color: "rgba(44,40,36,0.45)",
-                }}>
-                  {[data.creator, data.year].filter(Boolean).join(" · ")}
-                </span>
-              )}
-              <Stars rating={data.rating} size={10} />
-            </div>
-
-            {/* Time — bottom right, sharpie */}
-            <div style={{
-              position: "absolute",
-              bottom: 4, right: 8,
               fontFamily: "'Permanent Marker', cursive",
               fontSize: 10,
               color: "rgba(44,40,36,0.35)",
+              marginBottom: 6,
+              position: "relative",
+              textAlign: "center",
             }}>
-              {timeAgo}
+              Covered by
+            </div>
+
+            {/* Community rows */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, position: "relative" }}>
+              {communities.length > 0 ? communities.map((c, i) => {
+                const cAccent = getCommunityAccent(c.community_slug);
+                const img = c.community_image;
+                return (
+                  <div
+                    key={`${c.community_slug}-${i}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (c.badge?.badge_id && onViewBadgeDetail) {
+                        onViewBadgeDetail({
+                          id: c.badge.badge_id,
+                          name: c.badge.badge_name,
+                          image_url: c.badge.badge_image,
+                          accent_color: c.badge.accent_color,
+                          tagline: c.badge.tagline || null,
+                          progress_tagline: c.badge.progress_tagline || null,
+                          miniseries_id: c.badge.miniseries_id || null,
+                          media_type_filter: c.badge.media_type_filter || null,
+                        });
+                      } else {
+                        onNavigateCommunity?.(c.community_slug, data.tmdb_id);
+                      }
+                    }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      padding: "4px 6px",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      transition: "background 0.15s",
+                      borderLeft: `3px solid ${cAccent}`,
+                    }}
+                  >
+                    {img ? (
+                      <img src={img} alt="" style={{
+                        width: 28, height: 28, borderRadius: 6, objectFit: "cover",
+                        border: `1px solid ${cAccent}44`,
+                      }} />
+                    ) : (
+                      <div style={{
+                        width: 28, height: 28, borderRadius: 6,
+                        background: `${cAccent}15`,
+                        border: `1px solid ${cAccent}44`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
+                        fontSize: 9, color: cAccent,
+                      }}>
+                        {(c.community_name || "").split(" ").map(w => w[0]).join("")}
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
+                        fontSize: 12, color: "#2C2824", textTransform: "uppercase",
+                        letterSpacing: "0.02em", lineHeight: 1.2,
+                      }}>
+                        {c.community_name}
+                      </div>
+                      {c.series_title && (
+                        <div style={{
+                          fontFamily: "'Lora', serif", fontStyle: "italic",
+                          fontSize: 9, color: "rgba(44,40,36,0.45)",
+                        }}>
+                          {c.series_title}
+                        </div>
+                      )}
+                    </div>
+                    {c.series_total > 0 && (
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 9, fontWeight: 600,
+                        color: cAccent,
+                      }}>
+                        {c.series_watched}/{c.series_total}
+                      </span>
+                    )}
+                  </div>
+                );
+              }) : (
+                <div style={{
+                  fontFamily: "'Lora', serif", fontStyle: "italic",
+                  fontSize: 11, color: "rgba(44,40,36,0.4)",
+                  textAlign: "center",
+                }}>
+                  Personal log
+                </div>
+              )}
+            </div>
+
+            {/* Flip hint */}
+            <div style={{
+              position: "absolute",
+              bottom: 3, right: 8,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 7,
+              color: "rgba(44,40,36,0.2)",
+              letterSpacing: "0.06em",
+            }}>
+              TAP TO FLIP
             </div>
           </div>
-
-          {/* Community color band (right edge) */}
-          <div style={{
-            width: 18, flexShrink: 0,
-            background: accent,
-          }} />
         </div>
       </div>
     </div>
