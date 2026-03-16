@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "../supabase";
 
 /* ════════════════════════════════════════════════════════════
-   LANDING SCREEN  –  "Your next favorite is one episode away."
+   LANDING SCREEN  –  "Another reason to press play."
    ════════════════════════════════════════════════════════════ */
 
 // ── Poster marquee data (franchise films from MANTL communities) ──
@@ -1174,7 +1174,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">Your next <strong>favorite</strong> is one <strong>episode</strong> away.</div>
+          <div className="landing-eyebrow">Another reason to press <strong>play</strong></div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
