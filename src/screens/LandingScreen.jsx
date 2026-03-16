@@ -787,6 +787,8 @@ const featureStyles = `
   }
   .podcast-marquee-track {
     cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .podcast-marquee-item {
     display: flex;
@@ -914,57 +916,63 @@ function LandingScreen({ onSignIn }) {
 
   // ── Touch/drag scrub for podcast marquee ──────────────────
   useEffect(() => {
-    const tracks = document.querySelectorAll('.podcast-marquee-track');
-    if (!tracks.length) return;
-
-    const state = new Map();
+    let activeTrack = null;
+    let startX = 0;
+    let startTranslate = 0;
 
     const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
 
     const onStart = (e) => {
       const track = e.currentTarget;
-      const computedStyle = window.getComputedStyle(track);
-      const matrix = new DOMMatrix(computedStyle.transform);
+      const cs = window.getComputedStyle(track);
+      const matrix = new DOMMatrix(cs.transform);
+      activeTrack = track;
+      startX = getX(e);
+      startTranslate = matrix.m41;
       track.classList.add('dragging');
-      state.set(track, { startX: getX(e), startTranslate: matrix.m41 });
+      track.style.transform = `translateX(${startTranslate}px)`;
     };
 
     const onMove = (e) => {
-      const track = e.currentTarget;
-      const s = state.get(track);
-      if (!s) return;
+      if (!activeTrack) return;
       e.preventDefault();
-      const dx = getX(e) - s.startX;
-      track.style.transform = `translateX(${s.startTranslate + dx}px)`;
+      const dx = getX(e) - startX;
+      activeTrack.style.transform = `translateX(${startTranslate + dx}px)`;
     };
 
-    const onEnd = (e) => {
-      const track = e.currentTarget;
-      track.classList.remove('dragging');
-      track.style.transform = '';
-      state.delete(track);
+    const onEnd = () => {
+      if (!activeTrack) return;
+      activeTrack.classList.remove('dragging');
+      activeTrack.style.transform = '';
+      activeTrack = null;
     };
 
-    tracks.forEach(track => {
-      track.addEventListener('touchstart', onStart, { passive: true });
-      track.addEventListener('touchmove', onMove, { passive: false });
-      track.addEventListener('touchend', onEnd);
-      track.addEventListener('mousedown', onStart);
-      track.addEventListener('mousemove', onMove);
-      track.addEventListener('mouseup', onEnd);
-      track.addEventListener('mouseleave', onEnd);
-    });
+    // Delayed setup — tracks may not be in DOM yet (scroll-reveal)
+    const timer = setTimeout(() => {
+      const tracks = document.querySelectorAll('.podcast-marquee-track');
+      tracks.forEach(track => {
+        track.addEventListener('touchstart', onStart, { passive: true });
+        track.addEventListener('mousedown', onStart);
+      });
+    }, 1000);
+
+    // Move + end on document so finger/cursor can leave the element
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
 
     return () => {
+      clearTimeout(timer);
+      const tracks = document.querySelectorAll('.podcast-marquee-track');
       tracks.forEach(track => {
         track.removeEventListener('touchstart', onStart);
-        track.removeEventListener('touchmove', onMove);
-        track.removeEventListener('touchend', onEnd);
         track.removeEventListener('mousedown', onStart);
-        track.removeEventListener('mousemove', onMove);
-        track.removeEventListener('mouseup', onEnd);
-        track.removeEventListener('mouseleave', onEnd);
       });
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
     };
   }, []);
 
