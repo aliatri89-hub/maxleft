@@ -1076,7 +1076,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             borderRadius: 3,
             overflow: "hidden",
             display: "flex",
-            minHeight: 68,
+            minHeight: 80,
           }}>
             {/* Left brand cap */}
             <BrandCap brand={brandLeft} side="left" />
@@ -1105,8 +1105,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   src={data.logo_url}
                   alt={data.title}
                   style={{
-                    maxHeight: 36,
+                    maxHeight: 48,
+                    minHeight: 28,
                     maxWidth: "85%",
+                    width: "auto",
                     objectFit: "contain",
                     objectPosition: "center",
                     position: "relative",
@@ -1162,7 +1164,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             borderRadius: 3,
             overflow: "hidden",
             background: "#f0ebe1",
-            minHeight: 68,
+            minHeight: 80,
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
