@@ -277,33 +277,6 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         }
       }
 
-      // ── Merge groups with same tmdb_id (different dates) ──
-      // A movie logged on different days across different communities should
-      // appear as a single card with all communities combined.
-      const tmdbToKey = new Map();
-      for (const [key, group] of logGroups) {
-        if (!group.tmdb_id) continue;
-        if (tmdbToKey.has(group.tmdb_id)) {
-          const primaryKey = tmdbToKey.get(group.tmdb_id);
-          const primary = logGroups.get(primaryKey);
-          // Merge communities into the primary group
-          for (const c of group.communities) {
-            const alreadyExists = primary.communities.some(
-              pc => pc.community_slug === c.community_slug && pc.series_title === c.series_title
-            );
-            if (!alreadyExists) primary.communities.push(c);
-          }
-          // Keep the most recent logged_at
-          if (new Date(group.logged_at) > new Date(primary.logged_at)) {
-            primary.logged_at = group.logged_at;
-          }
-          // Remove the duplicate group
-          logGroups.delete(key);
-        } else {
-          tmdbToKey.set(group.tmdb_id, key);
-        }
-      }
-
       // ── Merge personal shelf logs ──
       for (const shelf of rawShelfLogs) {
         if (shelf.tmdb_id && tmdbSeen.has(shelf.tmdb_id)) continue;
@@ -391,9 +364,9 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       }
 
       // ════════════════════════════════════════════
-      // ACTIVITY FEED — pure chronological logs (tapes only)
+      // ACTIVITY FEED — pure chronological (no episodes, no discover cards)
       // ════════════════════════════════════════════
-      const ACTIVITY_TYPES = new Set(["log"]);
+      const ACTIVITY_TYPES = new Set(["log", "badge_complete"]);
       const activityCards = chronoStream
         .filter(item => ACTIVITY_TYPES.has(item.type))
         .map(item => ({ type: item.type, data: item.data }));
@@ -405,17 +378,11 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const discoverSeenTmdb = new Set();
 
       const pushUnique = (type, data) => {
-        const key = data.tmdb_id || data.item_id || data.title || data.badge_id || data.id;
+        const key = data.tmdb_id || data.item_id || data.title;
         if (key && discoverSeenTmdb.has(key)) return;
         if (key) discoverSeenTmdb.add(key);
         discoverCards.push({ type, data });
       };
-
-      // 0. Badge completions (recently earned)
-      const badgeCompleteCards = chronoStream.filter(item => item.type === "badge_complete");
-      for (const item of badgeCompleteCards) {
-        pushUnique("badge_complete", item.data);
-      }
 
       // 1. Upcoming episodes (homework — highest urgency)
       for (const ep of upcomingCards) {

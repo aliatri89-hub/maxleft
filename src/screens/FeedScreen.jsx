@@ -955,23 +955,35 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // VHS brand marks — rotated through for personality
 // VHS brand marks — rotated through for personality
 const VHS_BRANDS = [
-  { bg: "#e8e4da", color: "#1a6b3c", text: "FUJI", weight: 900 },
-  { bg: "#d4d0c8", color: "#333", text: "Memorex", weight: 700 },
-  { bg: "#2a2520", color: "#d4af37", text: "TDK", weight: 900, dark: true },
-  { bg: "#f5c518", color: "#c41e1e", text: "Kodak", weight: 800 },
-  { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", weight: 700 },
-  { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", weight: 900 },
-  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", weight: 800 },
-  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", weight: 800 },
+  { bg: "#e8e4da", color: "#1a6b3c", text: "FUJI", sub: "HQ", weight: 900 },
+  { bg: "#d4d0c8", color: "#333", text: "Memorex", sub: "HS", weight: 700 },
+  { bg: "#2a2520", color: "#d4af37", text: "TDK", sub: "SA", weight: 900, dark: true },
+  { bg: "#f5c518", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
+  { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", sub: "HGX", weight: 700 },
+  { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", sub: "E-180", weight: 900 },
+  { bg: "#d4d0c8", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#e8e4da", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
 ];
 
 function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const left = VHS_BRANDS[hash % VHS_BRANDS.length];
-  const rightIdx = left === VHS_BRANDS[(hash * 7 + 3) % VHS_BRANDS.length]
-    ? (hash * 7 + 4) % VHS_BRANDS.length
-    : (hash * 7 + 3) % VHS_BRANDS.length;
-  return { left, right: VHS_BRANDS[rightIdx] };
+  const right = VHS_BRANDS[(hash * 7 + 3) % VHS_BRANDS.length];
+  // Make sure left and right are different
+  const rightIdx = left === right ? (hash * 7 + 4) % VHS_BRANDS.length : (hash * 7 + 3) % VHS_BRANDS.length;
+  return { left: VHS_BRANDS[hash % VHS_BRANDS.length], right: VHS_BRANDS[rightIdx] };
+}
+
+// VHS logo SVG inline — the actual VHS brand mark
+function VhsLogoSvg({ color = "#222", size = 18 }) {
+  return (
+    <svg viewBox="0 0 100 50" width={size} height={size * 0.5} style={{ display: "block" }}>
+      <text x="50" y="38" textAnchor="middle" fontFamily="'Barlow Condensed', sans-serif"
+        fontWeight="900" fontSize="42" letterSpacing="3" fill={color}>
+        VHS
+      </text>
+    </svg>
+  );
 }
 
 function BrandCap({ brand, side = "right" }) {
@@ -980,24 +992,48 @@ function BrandCap({ brand, side = "right" }) {
       width: 26, flexShrink: 0,
       background: brand.bg,
       display: "flex",
+      flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
+      gap: 1,
       borderLeft: side === "right" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
       borderRight: side === "left" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
     }}>
-      <div style={{
-        writingMode: "vertical-rl",
-        fontFamily: "'Barlow Condensed', sans-serif",
-        fontWeight: brand.weight,
-        fontSize: brand.isVhs ? 11 : 9,
-        letterSpacing: brand.isVhs ? "0.12em" : "0.04em",
-        textTransform: "uppercase",
-        color: brand.color,
-        transform: "rotate(180deg)",
-        lineHeight: 1,
-      }}>
-        {brand.text}
-      </div>
+      {brand.isVhs ? (
+        <div style={{ transform: "rotate(90deg)" }}>
+          <VhsLogoSvg color={brand.color} size={22} />
+        </div>
+      ) : (
+        <>
+          <div style={{
+            writingMode: "vertical-rl",
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: brand.weight,
+            fontSize: 9,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            color: brand.color,
+            transform: "rotate(180deg)",
+            lineHeight: 1,
+          }}>
+            {brand.text}
+          </div>
+          {brand.sub && (
+            <div style={{
+              writingMode: "vertical-rl",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontWeight: 600,
+              fontSize: 5.5,
+              letterSpacing: "0.06em",
+              color: brand.color,
+              opacity: 0.5,
+              transform: "rotate(180deg)",
+            }}>
+              {brand.sub}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
@@ -1074,8 +1110,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                     objectFit: "contain",
                     objectPosition: "center",
                     position: "relative",
-                    filter: "brightness(0.2) contrast(1.8)",
-                    opacity: 0.85,
+                    filter: "brightness(0)",
+                    opacity: 0.8,
                   }}
                 />
               ) : (
@@ -1090,20 +1126,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 </div>
               )}
 
-              {/* Stars — sharpie style */}
-              {data.rating > 0 && (
-                <div style={{ marginTop: 2, position: "relative" }}>
-                  <span style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 12,
-                    color: "rgba(44,40,36,0.5)",
-                    letterSpacing: 1,
-                  }}>
-                    {"★".repeat(Math.floor(data.rating))}
-                    {data.rating % 1 >= 0.25 ? "½" : ""}
-                  </span>
-                </div>
-              )}
+              {/* Stars */}
+              <div style={{ marginTop: 3, position: "relative" }}>
+                <Stars rating={data.rating} size={10} />
+              </div>
 
               {/* Sharpie time */}
               <div style={{
