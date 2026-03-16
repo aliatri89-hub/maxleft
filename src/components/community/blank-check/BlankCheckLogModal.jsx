@@ -1,7 +1,7 @@
 import AdminItemEditor from "../shared/AdminItemEditor";
 import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
-import { useAudioPlayer } from "../shared/AudioPlayerProvider";
+import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
 import { useState, useEffect, useMemo } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
@@ -74,53 +74,8 @@ export default function BlankCheckLogModal({
     return null;
   }, [coverCacheVersion, coverCacheKey, coverUrl, fetchedCoverUrl, item.poster_path]);
 
-  // ── Episode matching — find the BC episode for this film ──
-  const { episodes: playerEpisodes, play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
-
-  const matchedEpisode = useMemo(() => {
-    // Priority 1: Seeded episode_url from extra_data (covers the full catalog)
-    const seeded = item?.extra_data?.episode_url;
-    if (seeded) {
-      return {
-        guid: `seeded-${item.id}`,
-        title: item.extra_data.episode_title || `Blank Check: ${item.title}`,
-        enclosureUrl: seeded,
-        community: "Blank Check",
-      };
-    }
-
-    // Priority 2: Fuzzy match against loaded RSS episodes (covers recent ~30)
-    if (!item?.title || playerEpisodes.length === 0) return null;
-
-    const normalize = (s) => (s || "").toLowerCase()
-      .replace(/['']/g, "")
-      .replace(/[:\-–—,.!?()[\]"]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    const filmTitle = normalize(item.title);
-    if (filmTitle.length < 2) return null;
-    const filmTitleNoYear = filmTitle.replace(/\b(19|20)\d{2}\b/g, "").replace(/\s+/g, " ").trim();
-
-    // Episode title contains the full film title
-    let match = playerEpisodes.find(ep => {
-      const epTitle = normalize(ep.title);
-      return epTitle.includes(filmTitleNoYear);
-    });
-    if (match) return { ...match, community: "Blank Check" };
-
-    // Word-boundary match
-    try {
-      const escaped = filmTitleNoYear.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`\\b${escaped}\\b`);
-      match = playerEpisodes.find(ep => re.test(normalize(ep.title)));
-      if (match) return { ...match, community: "Blank Check" };
-    } catch {}
-
-    return null;
-  }, [item?.title, item?.extra_data, item?.id, playerEpisodes]);
-
-  const isThisEpPlaying = currentEp && matchedEpisode && (currentEp.guid === matchedEpisode.guid || currentEp.enclosureUrl === matchedEpisode.enclosureUrl);
+  // ── Episode matching ──
+  const { matchedEpisode, isThisEpPlaying, playEpisode } = useEpisodeMatch(item, "Blank Check");
 
   // Fetch TMDB overview + watch providers + cover on mount
   useEffect(() => {

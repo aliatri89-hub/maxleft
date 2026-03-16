@@ -1,7 +1,7 @@
 import AdminItemEditor from "../shared/AdminItemEditor";
 import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
-import { useAudioPlayer } from "../shared/AudioPlayerProvider";
+import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
 import { useState, useEffect, useMemo } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
@@ -73,74 +73,8 @@ export default function NowPlayingLogModal({
 
   // Eager fetch: consolidated with overview fetch below
 
-  // ── Episode matching — find the NPP episode for this film ──
-  const { episodes: playerEpisodes, play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
-
-  const matchedEpisode = useMemo(() => {
-    // Priority 1: Seeded episode_url — check extra_data first, then the column
-    const seeded = item?.extra_data?.episode_url || item?.episode_url;
-    if (seeded) {
-      return {
-        guid: `seeded-${item.id}`,
-        title: item.extra_data?.episode_title || `Now Playing: ${item.title}`,
-        enclosureUrl: seeded,
-        community: "Now Playing",
-      };
-    }
-
-    // Priority 2: Fuzzy match against loaded RSS episodes (covers recent ~30)
-    if (!item?.title || playerEpisodes.length === 0) return null;
-
-    // Normalize: lowercase, strip punctuation, collapse whitespace
-    const normalize = (s) => (s || "").toLowerCase()
-      .replace(/['']/g, "")
-      .replace(/[:\-–—,.!?()[\]"]/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    // Extract franchise numbers (not years) from a string
-    const getNumbers = (s) => (s.match(/\d+/g) || []).map(Number).filter(n => n < 100);
-
-    // Check if franchise numbers are compatible:
-    // - If film has numbers (2, 3, 7 etc), episode must have same
-    // - If film has NO numbers, episode must also have none (prevents "Scream" → "Scream 7")
-    const numbersMatch = (filmNums, epNums) => {
-      if (filmNums.length === 0 && epNums.length === 0) return true;
-      if (filmNums.length === 0 && epNums.length > 0) return false;
-      return filmNums.every(n => epNums.includes(n));
-    };
-
-    const filmTitle = normalize(item.title);
-    if (filmTitle.length < 2) return null;
-    // Strip year from film title for matching
-    const filmTitleNoYear = filmTitle.replace(/\b(19|20)\d{2}\b/g, "").replace(/\s+/g, " ").trim();
-    const filmNums = getNumbers(filmTitleNoYear);
-
-    // Strategy 1: Episode title contains the full film title, numbers match
-    let match = playerEpisodes.find(ep => {
-      const epTitle = normalize(ep.title);
-      const epNums = getNumbers(epTitle);
-      return epTitle.includes(filmTitleNoYear) && numbersMatch(filmNums, epNums);
-    });
-    if (match) return { ...match, community: "Now Playing" };
-
-    // Strategy 2: Film title (without year) is a word-boundary match in episode
-    // Build a regex that checks the film title appears as complete words
-    try {
-      const escaped = filmTitleNoYear.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`\\b${escaped}\\b`);
-      match = playerEpisodes.find(ep => {
-        const epTitle = normalize(ep.title);
-        const epNums = getNumbers(epTitle);
-        return re.test(epTitle) && numbersMatch(filmNums, epNums);
-      });
-      if (match) return { ...match, community: "Now Playing" };
-    } catch {}
-
-    return null;
-  }, [item?.title, item?.extra_data, playerEpisodes]);
-
-  const isThisEpPlaying = currentEp && matchedEpisode && (currentEp.guid === matchedEpisode.guid || currentEp.enclosureUrl === matchedEpisode.enclosureUrl);
+  // ── Episode matching ──
+  const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(item, "Now Playing");
 
   // Fetch TMDB data on mount: overview, watch providers, and cover (if not cached)
   useEffect(() => {

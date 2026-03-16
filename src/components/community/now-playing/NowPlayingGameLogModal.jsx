@@ -1,8 +1,8 @@
 import AdminItemEditor from "../shared/AdminItemEditor";
 import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
-import { useAudioPlayer } from "../shared/AudioPlayerProvider";
-import { useState, useMemo } from "react";
+import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
+import { useState } from "react";
 import { toLogTimestamp } from "../../../utils/helpers";
 
 const PATREON_URL = "https://www.patreon.com/nowplayingpodcast";
@@ -63,77 +63,8 @@ export default function NowPlayingGameLogModal({
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [episodeToast, setEpisodeToast] = useState(false);
 
-  // ── Episode matching — find the NPP episode for this game ──
-  const { episodes: playerEpisodes, play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
-
-  const matchedEpisode = useMemo(() => {
-    // Priority 1: Seeded episode_url
-    const seeded = item?.extra_data?.episode_url;
-    if (seeded) {
-      return {
-        guid: `seeded-${item.id}`,
-        title: item.extra_data.episode_title || `Now Playing: ${item.title}`,
-        enclosureUrl: seeded,
-        community: "Now Playing",
-      };
-    }
-
-    // Priority 2: Fuzzy match against RSS
-    if (!item?.title || playerEpisodes.length === 0) return null;
-
-    const normalize = (s) =>
-      (s || "")
-        .toLowerCase()
-        .replace(/['']/g, "")
-        .replace(/[:\-–—,.!?()[\]"]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    const getNumbers = (s) =>
-      (s.match(/\d+/g) || [])
-        .map(Number)
-        .filter((n) => n < 100);
-
-    const numbersMatch = (filmNums, epNums) => {
-      if (filmNums.length === 0 && epNums.length === 0) return true;
-      if (filmNums.length === 0 && epNums.length > 0) return false;
-      return filmNums.every((n) => epNums.includes(n));
-    };
-
-    const gameTitle = normalize(item.title);
-    if (gameTitle.length < 2) return null;
-    const gameTitleNoYear = gameTitle
-      .replace(/\b(19|20)\d{2}\b/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-    const gameNums = getNumbers(gameTitleNoYear);
-
-    let match = playerEpisodes.find((ep) => {
-      const epTitle = normalize(ep.title);
-      const epNums = getNumbers(epTitle);
-      return epTitle.includes(gameTitleNoYear) && numbersMatch(gameNums, epNums);
-    });
-    if (match) return { ...match, community: "Now Playing" };
-
-    try {
-      const escaped = gameTitleNoYear.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`\\b${escaped}\\b`);
-      match = playerEpisodes.find((ep) => {
-        const epTitle = normalize(ep.title);
-        const epNums = getNumbers(epTitle);
-        return re.test(epTitle) && numbersMatch(gameNums, epNums);
-      });
-      if (match) return { ...match, community: "Now Playing" };
-    } catch {}
-
-    return null;
-  }, [item?.title, item?.extra_data, playerEpisodes]);
-
-  const isThisEpPlaying =
-    currentEp &&
-    matchedEpisode &&
-    (currentEp.guid === matchedEpisode.guid ||
-      currentEp.enclosureUrl === matchedEpisode.enclosureUrl);
+  // ── Episode matching ──
+  const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(item, "Now Playing");
 
   // ── Smart status tap: Beat = form, Playing/Backlog = instant save ──
   const handleStatusTap = async (key) => {
