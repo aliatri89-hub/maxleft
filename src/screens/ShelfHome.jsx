@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
 import LazyShelf from "../components/LazyShelf";
+import ShelfTicker from "../components/shelf/ShelfTicker";
 
 // Shelf sections (dark)
 // HIDDEN: Lifestyle shelves — focused on media (books/movies/shows/games)
@@ -95,6 +96,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
+      <ShelfTicker shelves={shelves} shelvesLoaded={shelvesLoaded} profile={profile} />
 
         {/* ── Ordered Shelves ── */}
         <div className="shelf-order-wrap">
