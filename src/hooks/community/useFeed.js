@@ -391,9 +391,9 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       }
 
       // ════════════════════════════════════════════
-      // ACTIVITY FEED — pure chronological (no episodes, no discover cards)
+      // ACTIVITY FEED — pure chronological logs (tapes only)
       // ════════════════════════════════════════════
-      const ACTIVITY_TYPES = new Set(["log", "badge_complete"]);
+      const ACTIVITY_TYPES = new Set(["log"]);
       const activityCards = chronoStream
         .filter(item => ACTIVITY_TYPES.has(item.type))
         .map(item => ({ type: item.type, data: item.data }));
@@ -405,11 +405,17 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const discoverSeenTmdb = new Set();
 
       const pushUnique = (type, data) => {
-        const key = data.tmdb_id || data.item_id || data.title;
+        const key = data.tmdb_id || data.item_id || data.title || data.badge_id || data.id;
         if (key && discoverSeenTmdb.has(key)) return;
         if (key) discoverSeenTmdb.add(key);
         discoverCards.push({ type, data });
       };
+
+      // 0. Badge completions (recently earned)
+      const badgeCompleteCards = chronoStream.filter(item => item.type === "badge_complete");
+      for (const item of badgeCompleteCards) {
+        pushUnique("badge_complete", item.data);
+      }
 
       // 1. Upcoming episodes (homework — highest urgency)
       for (const ep of upcomingCards) {
