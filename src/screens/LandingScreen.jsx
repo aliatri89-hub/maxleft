@@ -11,25 +11,31 @@ const POSTER_COLUMNS = [
   [
     '/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg', // Alien
     '/wijlZ3HaYMvlDTPqJoTCWKFkCPU.jpg', // Halloween (2018)
+    null, // skeleton gap
     '/tjbLSFwi0I3phZwh8zoHWNfbsEp.jpg', // Jaws
     '/hA2ple9q4qnwxp3hKVNhroipsir.jpg', // Mad Max Fury Road
     '/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg', // Scream
+    '/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg', // The Matrix
   ],
   // Column 2 — scrolls down
   [
     '/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg', // Die Hard
     '/uK46P78BvWGDW4dbq9C13LAwpmw.jpg', // Psycho
     '/ceG9VzoRAVGwivFU403Wc3AHRys.jpg', // Indiana Jones Raiders
+    null, // skeleton gap
     '/sNWdOLae80AdQkD1NpvcDN5f3PB.jpg', // The Shining
     '/gRPePRMct1ttp70sYx7RZG7igee.jpg', // The Fly
+    '/hEjK9A9BkNXejFW4tfacVAEHtkn.jpg', // Rocky
   ],
   // Column 3 — scrolls up faster
   [
     '/tzGY49kseSE9QAKk47uuDGwnSCu.jpg', // The Thing
     '/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg', // Blade Runner
+    null, // skeleton gap
     '/jFTVD4XoWQTcg7wdyJKa8PEds5q.jpg', // Terminator 2
     '/vN5B5WgYscRGcQpVhHl6p9DDTP0.jpg', // Back to the Future
     '/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg', // The Silence of the Lambs
+    '/dLlH4aNHdnmf62umnInL8xPlPzw.jpg', // The Handmaiden
   ],
   // Column 4 — scrolls down slowly
   [
@@ -37,14 +43,18 @@ const POSTER_COLUMNS = [
     '/5m0zjctrxy9HeSAtnGWNLlsnr8z.jpg', // Lord of the Rings Fellowship
     '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', // Spirited Away
     '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', // Avatar
+    null, // skeleton gap
     '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // The Shawshank Redemption
+    '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg', // Iron Man
   ],
   // Column 5 — scrolls up
   [
     '/7E8nLijS9AwwUEPu2oFYOVKhdFA.jpg', // Ghostbusters
+    null, // skeleton gap
     '/wdniP8NDaJIydi1hMxhpbJMUfr6.jpg', // Predator
     '/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg', // Pulp Fiction
     '/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', // Joker
+    '/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', // Parasite
     '/rY4odQzflLCWQLL17tzbt8TQkeV.jpg', // Alone in the Dark
   ],
 ];
@@ -117,6 +127,10 @@ const heroEnhancementStyles = `
     background-position: center;
     background-color: rgba(199,91,63,0.06);
     flex-shrink: 0;
+  }
+  .poster-skeleton {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 100%);
+    border: 1px solid rgba(255,255,255,0.04);
   }
 
   /* ── DARK OVERLAY (heavier on edges) ──────────────────── */
@@ -1131,8 +1145,8 @@ function LandingScreen({ onSignIn }) {
                   {[...col, ...col].map((path, pi) => (
                     <div
                       key={pi}
-                      className="poster-thumb"
-                      style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w185${path})` }}
+                      className={`poster-thumb${path ? '' : ' poster-skeleton'}`}
+                      style={path ? { backgroundImage: `url(https://image.tmdb.org/t/p/w185${path})` } : {}}
                     />
                   ))}
                 </div>
