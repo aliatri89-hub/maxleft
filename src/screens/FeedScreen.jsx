@@ -1119,6 +1119,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             backfaceVisibility: "hidden",
             background: "linear-gradient(180deg, #332e28 0%, #1e1a15 15%, #1a1612 85%, #0e0c0a 100%)",
             borderRadius: 5,
+            position: "relative",
           }}
         >
           {/* Top edge sheen — light catching the plastic lip */}
@@ -1127,9 +1128,17 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             background: "linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.1) 75%, transparent 95%)",
             borderRadius: "5px 5px 0 0",
             pointerEvents: "none",
+            zIndex: 1,
+          }} />
+          {/* Bottom edge shadow line */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
+            background: "rgba(0,0,0,0.3)",
+            borderRadius: "0 0 5px 5px",
+            pointerEvents: "none",
           }} />
           <div style={{
-            margin: "6px 5px 7px",
+            margin: "7px 6px 8px",
             borderRadius: 3,
             overflow: "hidden",
             display: "flex",
@@ -1238,7 +1247,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
           }}
         >
           <div style={{
-            margin: "6px 5px 7px",
+            margin: "7px 6px 8px",
             borderRadius: 3,
             overflow: "hidden",
             background: "#f0ebe1",
