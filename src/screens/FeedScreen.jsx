@@ -958,6 +958,9 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   const [contentHeight, setContentHeight] = useState(0);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const hasBackdrop = !!data.backdrop_path;
+  const accent = data.communities?.[0]?.community_slug
+    ? getCommunityAccent(data.communities[0].community_slug)
+    : getCommunityAccent(data.community_slug);
 
   // Measure real content height for smooth animation
   useEffect(() => {
