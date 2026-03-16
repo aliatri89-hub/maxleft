@@ -270,6 +270,7 @@ export default function CommunityLogModal({
       <div
         style={{
           width: "100%", maxWidth: 420,
+          position: "relative", overflow: "hidden",
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: 0,
           display: "flex", flexDirection: "column",
