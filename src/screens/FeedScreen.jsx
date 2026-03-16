@@ -1037,12 +1037,28 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 {timeAgo}
               </div>
             </div>
-            <div style={{
-              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
-              color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
-            }}>
-              {data.title}
-            </div>
+            {data.logo_url ? (
+              <img
+                src={data.logo_url}
+                alt={data.title}
+                style={{
+                  maxHeight: 28,
+                  maxWidth: "100%",
+                  objectFit: "contain",
+                  objectPosition: "left center",
+                  marginBottom: 4,
+                  filter: "brightness(0) invert(1)",
+                  opacity: 0.9,
+                }}
+              />
+            ) : (
+              <div style={{
+                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
+                color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
+              }}>
+                {data.title}
+              </div>
+            )}
             {(data.creator || data.year) && (
               <div style={{
                 fontFamily: "var(--font-body)", fontSize: 12,

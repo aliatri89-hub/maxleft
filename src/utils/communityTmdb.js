@@ -275,3 +275,117 @@ export const fetchCoversForItems = async (items, onUpdate) => {
 
   return { ...coverCache };
 };
+
+// ═══════════════════════════════════════════════════════════
+// LOGO FETCHING — TMDB movie/show logos for VHS tape cards
+// ═══════════════════════════════════════════════════════════
+
+const LOGO_CACHE_KEY = "mantl_logo_cache";
+const LOGO_CACHE_VERSION = 1;
+
+let logoCache = {};
+try {
+  const stored = localStorage.getItem(LOGO_CACHE_KEY);
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    if (parsed._v === LOGO_CACHE_VERSION) {
+      delete parsed._v;
+      logoCache = parsed;
+    }
+  }
+} catch {}
+
+const saveLogoCache = () => {
+  try {
+    const entries = Object.entries(logoCache);
+    if (entries.length > 2000) {
+      logoCache = Object.fromEntries(entries.slice(-2000));
+    }
+    localStorage.setItem(LOGO_CACHE_KEY, JSON.stringify({ ...logoCache, _v: LOGO_CACHE_VERSION }));
+  } catch {
+    try { localStorage.removeItem(LOGO_CACHE_KEY); } catch {}
+  }
+};
+
+// Public getter
+export const getLogoUrl = (tmdbId) => {
+  if (!tmdbId) return null;
+  const key = `logo:${tmdbId}`;
+  const val = logoCache[key];
+  // null means "no logo available" (already checked), undefined means "never checked"
+  return val || null;
+};
+
+// Returns true if we've already checked this tmdb_id (even if no logo found)
+export const isLogoChecked = (tmdbId) => {
+  if (!tmdbId) return true;
+  return `logo:${tmdbId}` in logoCache;
+};
+
+// Fetch a single logo — returns full URL or null
+export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
+  if (!tmdbId) return null;
+  const key = `logo:${tmdbId}`;
+  if (key in logoCache) return logoCache[key];
+
+  try {
+    const type = mediaType === "show" ? "tv" : "movie";
+    const data = await apiProxy("tmdb_details", {
+      tmdb_id: String(tmdbId),
+      type,
+      append: "images",
+    });
+
+    if (!data || data.error || !data.images?.logos) {
+      logoCache[key] = null; // Mark as checked, no logo
+      saveLogoCache();
+      return null;
+    }
+
+    // Prefer English logo, then no-language, sorted by vote_average
+    const logos = data.images.logos;
+    const english = logos
+      .filter(l => l.iso_639_1 === "en")
+      .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+    const noLang = logos
+      .filter(l => !l.iso_639_1)
+      .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+
+    const best = english[0] || noLang[0];
+    if (!best?.file_path) {
+      logoCache[key] = null;
+      saveLogoCache();
+      return null;
+    }
+
+    const url = `${TMDB_IMG}/w300${best.file_path}`;
+    logoCache[key] = url;
+    saveLogoCache();
+    return url;
+  } catch {
+    logoCache[key] = null;
+    saveLogoCache();
+    return null;
+  }
+};
+
+// Batch fetch logos for feed items — same pattern as fetchCoversForItems
+export const fetchLogosForItems = async (items, onUpdate) => {
+  const unchecked = items.filter(item => !isLogoChecked(item.tmdb_id));
+  if (unchecked.length === 0) return;
+
+  const BATCH = 4;
+  for (let i = 0; i < unchecked.length; i += BATCH) {
+    const batch = unchecked.slice(i, i + BATCH);
+    await Promise.all(batch.map(item =>
+      fetchMovieLogo(item.tmdb_id, item.media_type || "film")
+    ));
+
+    saveLogoCache();
+    onUpdate?.();
+
+    if (i + BATCH < unchecked.length) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
+};

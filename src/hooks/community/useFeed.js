@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
-import { fetchCoversForItems, getPosterUrl } from "../../utils/communityTmdb";
+import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
 
 /**
  * useFeed — Home feed data hook.
@@ -545,6 +545,44 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           // Bump tick — derivation effect re-slices from correct bucket
           setRenderTick(t => t + 1);
         }).catch(() => {});
+      }
+
+      // ── Background logo enrichment (VHS tape card titles) ──
+      {
+        const genAtStart = thisGen;
+        const logoItems = [];
+        const seenLogo = new Set();
+        for (const card of cards) {
+          const d = card.data;
+          if (!d?.tmdb_id || seenLogo.has(d.tmdb_id)) continue;
+          if (d.media_type === "book" || d.media_type === "game") continue;
+          seenLogo.add(d.tmdb_id);
+          logoItems.push({ tmdb_id: d.tmdb_id, media_type: d.media_type || "film" });
+        }
+
+        if (logoItems.length > 0) {
+          // Collect ALL data objects across all buckets
+          const allDataObjects = new Set();
+          for (const bucket of Object.values(feedBucketsRef.current)) {
+            for (const card of bucket) {
+              if (card.data) allDataObjects.add(card.data);
+            }
+          }
+
+          fetchLogosForItems(logoItems, () => {
+            if (!mountedRef.current) return;
+            if (fetchGenRef.current !== genAtStart) return;
+
+            // Patch logo_url on shared data objects
+            for (const d of allDataObjects) {
+              if (!d.tmdb_id) continue;
+              const url = getLogoUrl(d.tmdb_id);
+              if (url) d.logo_url = url;
+            }
+
+            setRenderTick(t => t + 1);
+          }).catch(() => {});
+        }
       }
     } catch (err) {
       console.error("[Feed] Error loading feed:", err);
