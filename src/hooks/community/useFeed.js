@@ -73,7 +73,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         supabase
           .from("feed_trending_weekly")
           .select("*")
-          .limit(10),
+          .limit(5),
 
         // 4. Badge → miniseries lookup
         supabase
@@ -106,7 +106,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           .from("feed_up_next")
           .select("*")
           .eq("user_id", userId)
-          .limit(8),
+          .limit(5),
 
         // 9. Random unwatched
         subscribedIds?.size > 0
@@ -363,41 +363,41 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         .map(item => ({ type: item.type, data: item.data }));
 
       // ════════════════════════════════════════════
-      // DISCOVER FEED — structured order with repeating pattern
+      // DISCOVER FEED — structured order, no duplicates
       // ════════════════════════════════════════════
       const discoverCards = [];
+      const discoverSeenTmdb = new Set();
+
+      const pushUnique = (type, data) => {
+        const key = data.tmdb_id || data.item_id || data.title;
+        if (key && discoverSeenTmdb.has(key)) return;
+        if (key) discoverSeenTmdb.add(key);
+        discoverCards.push({ type, data });
+      };
 
       // 1. Upcoming episodes (homework — highest urgency)
       for (const ep of upcomingCards) {
-        discoverCards.push({ type: "episode", data: ep });
+        pushUnique("episode", ep);
       }
 
       // 2. Dropped episodes (listen now)
       for (const ep of droppedEpisodes) {
-        discoverCards.push({ type: "episode", data: ep });
+        pushUnique("episode", ep);
       }
 
       // 3. Interleave remaining pools: random → badge → up_next → trending
-      let rIdx = 0, bIdx = 0, uIdx = 0, tIdx = 0;
-      const hasMore = () =>
-        rIdx < randomPicks.length ||
-        bIdx < sortedBadges.length ||
-        uIdx < filteredUpNext.length ||
-        tIdx < rawTrending.length;
+      //    Cap each to avoid one pool dominating
+      const capRandom = randomPicks.slice(0, 5);
+      const capBadges = sortedBadges.slice(0, 5);
+      const capUpNext = filteredUpNext.slice(0, 5);
+      const capTrending = rawTrending.slice(0, 5);
+      const maxLen = Math.max(capRandom.length, capBadges.length, capUpNext.length, capTrending.length);
 
-      while (hasMore()) {
-        if (rIdx < randomPicks.length) {
-          discoverCards.push({ type: "random_pick", data: randomPicks[rIdx++] });
-        }
-        if (bIdx < sortedBadges.length) {
-          discoverCards.push({ type: "badge", data: sortedBadges[bIdx++] });
-        }
-        if (uIdx < filteredUpNext.length) {
-          discoverCards.push({ type: "up_next", data: filteredUpNext[uIdx++] });
-        }
-        if (tIdx < rawTrending.length) {
-          discoverCards.push({ type: "trending", data: rawTrending[tIdx++] });
-        }
+      for (let i = 0; i < maxLen; i++) {
+        if (i < capRandom.length) pushUnique("random_pick", capRandom[i]);
+        if (i < capBadges.length) pushUnique("badge", capBadges[i]);
+        if (i < capUpNext.length) pushUnique("up_next", capUpNext[i]);
+        if (i < capTrending.length) pushUnique("trending", capTrending[i]);
       }
 
       // ════════════════════════════════════════════
