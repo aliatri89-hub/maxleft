@@ -1706,21 +1706,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
-  const latchedRandomPick = useRef(null);
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
 
-  // Stabilize random pick across refreshes — latch the first one we see,
-  // only clear on pull-to-refresh so swipe-back doesn't re-roll
+  // Random picks are stabilized by the module-level _randomPicksCache in useFeed,
+  // so they don't re-roll on tab switches — no additional latching needed.
   const ACTIVITY_ONLY_TYPES = new Set(["log", "badge_complete"]);
   const feedItems = rawFeedItems
-    .map((item) => {
-      if (item.type !== "random_pick") return item;
-      if (!latchedRandomPick.current) {
-        latchedRandomPick.current = item;
-      }
-      return latchedRandomPick.current;
-    })
     .filter((item) => feedMode !== "activity" || ACTIVITY_ONLY_TYPES.has(item.type));
 
   // ── Pull-to-refresh ──
@@ -1760,7 +1752,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (pullDistance >= PULL_THRESHOLD) {
       setRefreshing(true);
       setPullDistance(PULL_THRESHOLD); // Hold at threshold during refresh
-      latchedRandomPick.current = null; // Clear latch — user wants a fresh feed
       await refreshRef.current();
       setRefreshing(false);
     }
@@ -1979,7 +1970,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                 index={i}
                 dismissable={!!dismissKey}
                 onDismiss={dismissKey ? () => {
-                  if (dismissKey.type === "random_pick") latchedRandomPick.current = null;
                   dismiss(dismissKey.type, dismissKey.key);
                 } : undefined}
               >

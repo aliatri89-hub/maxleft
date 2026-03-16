@@ -162,13 +162,13 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const randomPicksRaw = (_randomPicksCache.get(userId) || [])
         .filter(r => !episodeTmdbIds.has(r.tmdb_id));
 
-      // Dedupe by tmdb_id — same film can appear across multiple communities
-      const seenRandomTmdb = new Set();
+      // Dedupe by tmdb_id + title — same film appears across multiple miniseries/communities
+      const seenRandomKeys = new Set();
       const randomPicks = [];
       for (const r of randomPicksRaw) {
-        const key = r.tmdb_id || r.item_id;
-        if (!seenRandomTmdb.has(key)) {
-          seenRandomTmdb.add(key);
+        const key = r.tmdb_id ? `tmdb_${r.tmdb_id}` : `title_${(r.title || "").toLowerCase().trim()}`;
+        if (!seenRandomKeys.has(key)) {
+          seenRandomKeys.add(key);
           randomPicks.push(r);
         }
       }
