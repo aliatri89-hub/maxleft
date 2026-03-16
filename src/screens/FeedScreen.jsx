@@ -974,163 +974,204 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
   return (
     <div
-      className="vhs-card"
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
-        "--vhs-accent": accent,
+        margin: "6px 16px",
+        borderRadius: 5,
+        overflow: "hidden",
+        position: "relative",
         cursor: "pointer",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.03)",
       }}
     >
-      {/* ── Cinematic top area — tappable to expand/collapse ── */}
-      <div
-        onClick={data.communities?.length > 0 ? () => setExpanded(!expanded) : undefined}
-        style={{ position: "relative", overflow: "hidden", cursor: data.communities?.length > 0 ? "pointer" : "default" }}
-      >
-        {/* Backdrop image — fades in from right */}
-        {hasBackdrop && (
-          <div style={{
-            position: "absolute", inset: 0,
-            backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center top",
-            opacity: 0.25,
-          }}>
-            <div style={{
-              position: "absolute", inset: 0,
-              background: `linear-gradient(
-                90deg,
-                #1a1714 35%,
-                rgba(26,23,20,0.6) 55%,
-                rgba(26,23,20,0.25) 80%
-              )`,
-            }} />
-            {/* Bottom fade so it doesn't bleed into community strips */}
-            <div style={{
-              position: "absolute", inset: 0,
-              background: `linear-gradient(
-                180deg,
-                transparent 50%,
-                #1a1714 100%
-              )`,
-            }} />
-          </div>
-        )}
+      {/* ── Dark plastic body ── */}
+      <div style={{ background: "#1a1612" }}>
 
-        {/* Main poster + info area */}
+        {/* ── Tape label (cream inset) ── */}
         <div style={{
-          display: "flex", gap: 12,
-          padding: data.communities?.length > 0 && !expanded ? "14px 16px 8px" : "14px 16px",
-          position: "relative", zIndex: 1,
+          margin: 5,
+          borderRadius: 3,
+          overflow: "hidden",
+          display: "flex",
+          minHeight: 72,
+          position: "relative",
         }}>
-          <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
-          <div style={{ flex: 1, paddingTop: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <span className={`vhs-label vhs-label--logged`}>
-                <span className="vhs-label-dot" />
-                {data.media_type === "book" ? "You read" : data.media_type === "game" ? "You played" : "You watched"}
-              </span>
-              <div style={{
-                fontFamily: "var(--font-mono)", fontSize: 9,
-                color: "rgba(255,255,255,0.25)",
-                letterSpacing: "0.06em",
+          {/* Poster in label */}
+          <div style={{
+            width: 50, flexShrink: 0,
+            borderRight: "1px solid rgba(44,40,36,0.1)",
+            overflow: "hidden",
+          }}>
+            <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={50} height={72} radius={0} />
+          </div>
+
+          {/* Label text area */}
+          <div style={{
+            flex: 1,
+            background: "#f0ebe1",
+            padding: "7px 10px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            position: "relative",
+            overflow: "hidden",
+          }}>
+            {/* Grid lines — like ruled tape labels */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              backgroundImage: `
+                repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px),
+                repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px)
+              `,
+            }} />
+
+            {/* Logged label + time */}
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              marginBottom: 2, position: "relative",
+            }}>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 7.5, fontWeight: 600,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                color: "rgba(44,40,36,0.35)",
               }}>
-                {timeAgo}
-              </div>
+                ● {data.media_type === "book" ? "READ" : data.media_type === "game" ? "PLAYED" : "LOGGED"} · {timeAgo}
+              </span>
             </div>
+
+            {/* Logo or title */}
             {data.logo_url ? (
               <img
                 src={data.logo_url}
                 alt={data.title}
                 style={{
-                  maxHeight: 28,
-                  maxWidth: "100%",
+                  maxHeight: 26,
+                  maxWidth: "90%",
                   objectFit: "contain",
                   objectPosition: "left center",
-                  marginBottom: 4,
-                  filter: "brightness(0) invert(1)",
-                  opacity: 0.9,
+                  marginBottom: 2,
+                  position: "relative",
                 }}
               />
             ) : (
               <div style={{
-                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
-                color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800,
+                fontSize: 17,
+                lineHeight: 1.05,
+                color: "#2C2824",
+                textTransform: "uppercase",
+                letterSpacing: "0.01em",
+                position: "relative",
+                marginBottom: 2,
               }}>
                 {data.title}
               </div>
             )}
-            {(data.creator || data.year) && (
-              <div style={{
-                fontFamily: "var(--font-body)", fontSize: 12,
-                color: "var(--text-muted, #8892a8)", marginBottom: 6,
-              }}>
-                {[data.creator, data.year].filter(Boolean).join(" · ")}
-              </div>
-            )}
-            <Stars rating={data.rating} />
+
+            {/* Creator · Year + Stars */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6, position: "relative",
+            }}>
+              {(data.creator || data.year) && (
+                <span style={{
+                  fontFamily: "'Lora', serif", fontStyle: "italic",
+                  fontSize: 10, color: "rgba(44,40,36,0.5)",
+                }}>
+                  {[data.creator, data.year].filter(Boolean).join(" · ")}
+                </span>
+              )}
+              <Stars rating={data.rating} size={10} />
+            </div>
+          </div>
+
+          {/* Community color band (right edge — like FUJI / Memorex) */}
+          <div style={{
+            width: 22, flexShrink: 0,
+            background: accent,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              writingMode: "vertical-rl",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 800,
+              fontSize: 7.5,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              color: "rgba(0,0,0,0.5)",
+              transform: "rotate(180deg)",
+            }}>
+              {(data.communities?.[0]?.community_name || data.community_name || "").split(" ").map(w => w[0]).join("")}
+            </div>
           </div>
         </div>
 
-        {/* Collapsed: community avatars inline below poster area */}
-        {data.communities?.length > 0 && !expanded && (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 5,
-            padding: "0 16px 10px",
-            position: "relative", zIndex: 1,
-          }}>
-            {data.communities.map((c, i) => {
-              const img = c.badge?.badge_image || c.community_image;
-              const isBadge = !!c.badge;
-              return img ? (
-                <img key={i} src={img} alt="" style={{
-                  width: 22, height: 22,
-                  borderRadius: isBadge ? "50%" : 6,
-                  objectFit: "cover",
-                  border: isBadge
-                    ? `1.5px solid ${c.badge.accent_color || "#f5c542"}55`
-                    : "1px solid rgba(255,255,255,0.1)",
+        {/* ── Community context (below tape label, stays dark) ── */}
+        {data.communities?.length > 0 && (
+          <div>
+            {/* Collapsed: community avatars */}
+            {!expanded && (
+              <div
+                onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 5,
+                  padding: "4px 10px 6px",
+                  cursor: "pointer",
+                }}
+              >
+                {data.communities.map((c, i) => {
+                  const img = c.badge?.badge_image || c.community_image;
+                  const isBadge = !!c.badge;
+                  return img ? (
+                    <img key={i} src={img} alt="" style={{
+                      width: 20, height: 20,
+                      borderRadius: isBadge ? "50%" : 5,
+                      objectFit: "cover",
+                      border: isBadge
+                        ? `1.5px solid ${c.badge.accent_color || "#f5c542"}55`
+                        : "1px solid rgba(255,255,255,0.1)",
+                    }} />
+                  ) : (
+                    <div key={i} style={{
+                      width: 20, height: 20, borderRadius: 5,
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "var(--font-display)", fontWeight: 700,
+                      fontSize: 7, color: "rgba(255,255,255,0.3)",
+                    }}>
+                      {getSlugAbbrev(c.community_slug)}
+                    </div>
+                  );
+                })}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            )}
+
+            {/* Expanded: drawer handle */}
+            {expanded && (
+              <div
+                onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                  padding: "4px 0",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{
+                  width: 32, height: 3, borderRadius: 3,
+                  background: "rgba(255,255,255,0.18)",
                 }} />
-              ) : (
-                <div key={i} style={{
-                  width: 22, height: 22, borderRadius: 6,
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "var(--font-display)", fontWeight: 700,
-                  fontSize: 8, color: "var(--text-muted, #8892a8)",
-                }}>
-                  {getSlugAbbrev(c.community_slug)}
-                </div>
-              );
-            })}
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-              stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </div>
-        )}
-
-        {/* Expanded: drawer handle to collapse */}
-        {data.communities?.length > 0 && expanded && (
-          <div style={{
-            width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
-            padding: "0 0 10px",
-            position: "relative", zIndex: 1,
-          }}>
-            <div style={{
-              width: 32, height: 3, borderRadius: 3,
-              background: "rgba(255,255,255,0.22)",
-              transition: "background 0.2s ease",
-            }} />
-          </div>
-        )}
-      </div>
-
-      {/* Community context — collapsed by default */}
-      {data.communities?.length > 0 && (
-        <div>
-          {/* Collapsible community rows */}
+              </div>
+            )}
           <div
             style={{
               maxHeight: expanded ? contentHeight : 0,
@@ -1301,6 +1342,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
