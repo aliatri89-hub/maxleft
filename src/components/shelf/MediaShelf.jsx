@@ -110,28 +110,81 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
   const cfg = SHELF_CONFIG[shelfKey];
   if (!cfg) return null;
 
+  const syncIndicator = shelfKey === "movies" && profile.letterboxd_username ? (
+    <span style={S.syncDot(letterboxdSyncing)}>
+      <span style={S.syncIndicator(letterboxdSyncing)} />
+      <span style={{ fontFamily: "var(--font-mono)" }}>{letterboxdSyncing ? "syncing" : "synced"}</span>
+    </span>
+  ) : shelfKey === "games" && profile.steam_id ? (
+    <span style={S.syncDot(steamSyncing)}>
+      <span style={S.syncIndicator(steamSyncing)} />
+      <span style={{ fontFamily: "var(--font-mono)" }}>{steamSyncing ? "syncing" : "synced"}</span>
+    </span>
+  ) : null;
+
   return (
-    <div style={isHero ? { ...S.section, paddingTop: 10 } : S.section}>
-      {/* Header row */}
-      <div style={isHero ? { ...S.labelRow, padding: "0 0 16px" } : S.labelRow}>
-        <div style={isHero ? { ...S.label, fontSize: 26, gap: 10 } : S.label}>
-          {cfg.icon} {cfg.label}
-          {items.length > 0 && <span style={isHero ? { ...S.count, fontSize: 14 } : S.count}>{items.length}</span>}
-          {shelfKey === "movies" && profile.letterboxd_username && (
-            <span style={S.syncDot(letterboxdSyncing)}>
-              <span style={S.syncIndicator(letterboxdSyncing)} />
-              <span style={{ fontFamily: "var(--font-mono)" }}>{letterboxdSyncing ? "syncing" : "synced"}</span>
-            </span>
-          )}
-          {shelfKey === "games" && profile.steam_id && (
-            <span style={S.syncDot(steamSyncing)}>
-              <span style={S.syncIndicator(steamSyncing)} />
-              <span style={{ fontFamily: "var(--font-mono)" }}>{steamSyncing ? "syncing" : "synced"}</span>
-            </span>
-          )}
+    <div style={isHero ? { ...S.section, paddingTop: 14 } : S.section}>
+
+      {isHero ? (
+        <>
+          {/* ── Hero header: centered, decorative ── */}
+          <div style={{
+            textAlign: "center",
+            padding: "6px 0 18px",
+          }}>
+            {/* Decorative line + title + line */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 14,
+              marginBottom: 8,
+            }}>
+              <div style={{
+                flex: 1, height: 1,
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1))",
+              }} />
+              <div style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                fontSize: 28,
+                color: "var(--text-primary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+              }}>
+                {cfg.label}
+              </div>
+              <div style={{
+                flex: 1, height: 1,
+                background: "linear-gradient(90deg, rgba(255,255,255,0.1), transparent)",
+              }} />
+            </div>
+
+            {/* Count + sync + add — compact row under title */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+            }}>
+              {items.length > 0 && (
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 11,
+                  color: "var(--text-faint)", letterSpacing: "0.06em",
+                }}>
+                  {items.length} logged
+                </span>
+              )}
+              {syncIndicator}
+              <span style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</span>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* ── Standard header ── */
+        <div style={S.labelRow}>
+          <div style={S.label}>
+            {cfg.icon} {cfg.label}
+            {items.length > 0 && <span style={S.count}>{items.length}</span>}
+            {syncIndicator}
+          </div>
+          <div style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</div>
         </div>
-        <div style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</div>
-      </div>
+      )}
 
       {/* Posters — no container card, just posters on the page */}
       {items.length === 0 ? (
