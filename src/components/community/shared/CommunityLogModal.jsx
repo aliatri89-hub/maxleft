@@ -228,13 +228,13 @@ export default function CommunityLogModal({
           to { opacity: 1; transform: translateY(0); }
         }
         .clm-star-btn {
-          font-size: 28px;
+          font-size: 36px;
           position: relative;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 36px;
-          height: 36px;
+          width: 44px;
+          height: 44px;
           cursor: pointer;
           user-select: none;
           -webkit-tap-highlight-color: transparent;
@@ -518,46 +518,6 @@ export default function CommunityLogModal({
           </div>
         )}
 
-        {/* Rating */}
-        <div style={{ marginBottom: 14 }}>
-          <div style={{
-            fontSize: 10, fontWeight: 600, color: "#888",
-            textTransform: "uppercase", letterSpacing: "0.08em",
-            marginBottom: 6,
-          }}>Your Rating</div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-              {[1, 2, 3, 4, 5].map((n) => {
-                const isFull = rating >= n;
-                const isHalf = !isFull && rating >= n - 0.5;
-                return (
-                  <div key={n} className="clm-star-btn"
-                    style={{ color: isFull ? "#facc15" : isHalf ? "#facc15" : "#444" }}>
-                    <div className="clm-star-zone left" onClick={() => handleStarClick(n, true)} />
-                    <div className="clm-star-zone right" onClick={() => handleStarClick(n, false)} />
-                    {isFull ? "★" : isHalf ? (
-                      <span style={{ position: "relative", display: "inline-block" }}>
-                        <span style={{ color: "#444" }}>★</span>
-                        <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: "#facc15" }}>★</span>
-                      </span>
-                    ) : "☆"}
-                  </div>
-                );
-              })}
-              {rating > 0 && (
-                <span style={{ fontSize: 12, color: "#facc15", marginLeft: 8, fontWeight: 600 }}>
-                  {rating} / 5
-                </span>
-              )}
-            </div>
-            {/* Rating extra slot (e.g. NPP brown arrow toggle) */}
-            {renderRatingExtra?.()}
-          </div>
-        </div>
-
-        {/* Custom section slot (e.g. BC commentary toggle) */}
-        {renderCustomSection?.({ saving })}
-
         </div>{/* end scroll content area */}
 
         {/* Action buttons — fixed footer, never moves */}
@@ -567,6 +527,46 @@ export default function CommunityLogModal({
           background: "#12121f",
           flexShrink: 0,
         }}>
+
+          {/* Rating */}
+          <div style={{ marginBottom: 4 }}>
+            <div style={{
+              fontSize: 10, fontWeight: 600, color: "#888",
+              textTransform: "uppercase", letterSpacing: "0.08em",
+              marginBottom: 6,
+            }}>Your Rating</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+                {[1, 2, 3, 4, 5].map((n) => {
+                  const isFull = rating >= n;
+                  const isHalf = !isFull && rating >= n - 0.5;
+                  return (
+                    <div key={n} className="clm-star-btn"
+                      style={{ color: isFull ? "#facc15" : isHalf ? "#facc15" : "#444" }}>
+                      <div className="clm-star-zone left" onClick={() => handleStarClick(n, true)} />
+                      <div className="clm-star-zone right" onClick={() => handleStarClick(n, false)} />
+                      {isFull ? "★" : isHalf ? (
+                        <span style={{ position: "relative", display: "inline-block" }}>
+                          <span style={{ color: "#444" }}>★</span>
+                          <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: "#facc15" }}>★</span>
+                        </span>
+                      ) : "☆"}
+                    </div>
+                  );
+                })}
+                {rating > 0 && (
+                  <span style={{ fontSize: 14, color: "#facc15", marginLeft: 8, fontWeight: 600 }}>
+                    {rating} / 5
+                  </span>
+                )}
+              </div>
+              {/* Rating extra slot (e.g. NPP brown arrow toggle) */}
+              {renderRatingExtra?.()}
+            </div>
+          </div>
+
+          {/* Custom section slot (e.g. BC commentary toggle) */}
+          {renderCustomSection?.({ saving })}
 
           {/* === NOT YET LOGGED === */}
           {!isCompleted && (
