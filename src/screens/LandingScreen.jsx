@@ -1428,6 +1428,7 @@ function LandingScreen({ onSignIn }) {
               Press Play
             </span>
           </button>
+          <div className="mantl-bottom-tagline">New communities coming soon</div>
         </div>
       </div>
     </div>
