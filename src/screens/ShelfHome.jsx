@@ -5,7 +5,6 @@ import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants
 import LazyShelf from "../components/LazyShelf";
 
 // Shelf sections (dark)
-import MantlPiece from "../components/shelf/MantlPiece";
 // HIDDEN: Lifestyle shelves — focused on media (books/movies/shows/games)
 // import TrainingShelf from "../components/shelf/TrainingShelf";
 // import TrophyShelf from "../components/shelf/TrophyShelf";
@@ -45,7 +44,7 @@ const skelCompact = (
   </div>
 );
 
-function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onPin, onUnpin, onUpdateProfile, stravaActivities, stravaConnected, stravaLoading, stravaDismissed, setStravaDismissed, onStravaConnect, onStravaDisconnect, onToast, challengeShelf, onOpenChallenge, letterboxdSyncing, steamSyncing, userGroups, onOpenGroup, onAutoComplete, isActive }) {
+function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, stravaActivities, stravaConnected, stravaLoading, stravaDismissed, setStravaDismissed, onStravaConnect, onStravaDisconnect, onToast, challengeShelf, onOpenChallenge, letterboxdSyncing, steamSyncing, userGroups, onOpenGroup, onAutoComplete, isActive }) {
 
   // ── Trigger state (controls which modal/overlay is open) ──
   const [viewingItem, setViewingItem] = useState(null);
@@ -57,7 +56,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   const [viewingCountry, setViewingCountry] = useState(null);
   const [showPassportMap, setShowPassportMap] = useState(false);
   const [diaryShelf, setDiaryShelf] = useState(null);
-  const [showPinPicker, setShowPinPicker] = useState(false);
 
   // ── UI state ──
   const [beatAnimId, setBeatAnimId] = useState(null);
@@ -97,20 +95,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
-      {/* My Mantl */}
-      <MantlPiece
-          profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
-          session={session} onUpdateProfile={onUpdateProfile} onToast={onToast}
-          onViewItem={(item) => {
-            if (item._pinType === "trophy" || item._pinType === "goal") {
-              setViewingEvent(item);
-            } else {
-              setViewingItem(item);
-            }
-          }}
-          onViewCountry={(c) => setViewingCountry(c)}
-          onOpenPinPicker={() => { setShowPinPicker(true); }}
-        />
 
         {/* ── Ordered Shelves ── */}
         <div className="shelf-order-wrap">
@@ -184,9 +168,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
           showPassportMap={showPassportMap} setShowPassportMap={setShowPassportMap}
           diaryShelf={diaryShelf} setDiaryShelf={setDiaryShelf}
           viewingItem={viewingItem} setViewingItem={setViewingItem}
-          showPinPicker={showPinPicker} setShowPinPicker={setShowPinPicker}
           shelves={shelves} profile={profile} session={session}
-          onRefresh={onRefresh} onToast={onToast} onPin={onPin} onUnpin={onUnpin}
+          onRefresh={onRefresh} onToast={onToast}
           onShelfIt={onShelfIt} onUpdateProfile={onUpdateProfile} onAutoComplete={onAutoComplete}
         />,
         document.body

@@ -1,5 +1,4 @@
 import AdminItemEditor from "../shared/AdminItemEditor";
-import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
 import { useState } from "react";
@@ -319,18 +318,6 @@ export default function NowPlayingGameLogModal({
                 🎮
               </div>
             )}
-            <PinToMantl
-              compact
-              userId={userId}
-              isCompleted={isCompleted}
-              itemType="game"
-              itemTitle={item.title}
-              tmdbId={item.tmdb_id}
-              coverUrl={coverUrl}
-              communitySlug="nowplaying"
-              onViewMantl={onViewMantl}
-              onClose={onClose}
-            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div

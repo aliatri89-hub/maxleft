@@ -25,11 +25,10 @@ export default function ShelfModals({
   showPassportMap, setShowPassportMap,
   diaryShelf, setDiaryShelf,
   viewingItem, setViewingItem,
-  showPinPicker, setShowPinPicker,
   // Data
   shelves, profile, session,
   // Callbacks
-  onRefresh, onToast, onPin, onUnpin, onShelfIt, onUpdateProfile, onAutoComplete,
+  onRefresh, onToast, onShelfIt, onUpdateProfile, onAutoComplete,
 }) {
   // ── Internal modal state ──
   const [eventForm, setEventForm] = useState({ name: "", location: "", date: "", goal: "" });
@@ -65,10 +64,6 @@ export default function ShelfModals({
   const [diaryView, setDiaryView] = useState("diary");
   const [diarySort, setDiarySort] = useState("date-desc");
   const [beatAnimId, setBeatAnimId] = useState(null);
-  const [pinSearch, setPinSearch] = useState("");
-  const [pinCategory, setPinCategory] = useState(null); // null = show category tiles, "book"/"movie"/etc = filtered
-  const [pendingPin, setPendingPin] = useState(null);
-  const [pinNote, setPinNote] = useState("");
 
   const toggleBeat = async (gameId, currentStatus) => {
     const newStatus = currentStatus === "beat" ? "playing" : "beat";
@@ -119,9 +114,6 @@ export default function ShelfModals({
   useEffect(() => {
     if (addingCountry) { setCountrySearch(""); setPendingCountry(null); setMultiSelectCountries(new Set()); }
   }, [addingCountry]);
-  useEffect(() => {
-    if (showPinPicker) { setPinSearch(""); setPinCategory(null); setPendingPin(null); setPinNote(""); }
-  }, [showPinPicker]);
 
   // Load world map data
   useEffect(() => {
@@ -605,13 +597,6 @@ export default function ShelfModals({
                               result: eventResult.trim() || null,
                               }).eq("id", viewingEvent.id), onToast, "Couldn't update");
 
-                            // Update pin type from goal to trophy if pinned
-                            if ((profile.mantlPins || []).some(p => p.type === "goal" && String(p.id) === String(viewingEvent.id))) {
-                              const updatedPins = (profile.mantlPins || []).map(p =>
-                                p.type === "goal" && String(p.id) === String(viewingEvent.id) ? { ...p, type: "trophy" } : p
-                              );
-                              await sb(supabase.from("profiles").update({ mantl_pins: updatedPins }).eq("id", session.user.id), onToast, "Couldn't update");
-                            }
                             setSavingEvent(false);
                             setCompletingEvent(false);
                             setEventResult("");
@@ -667,10 +652,6 @@ export default function ShelfModals({
                       <div className="confirm-delete-btns">
                         <button className="btn-confirm-yes" onClick={async () => {
                           await sb(supabase.from("workout_goals").delete().eq("id", viewingEvent.id), onToast, "Couldn't delete");
-                          // Auto-unpin if pinned
-                          if ((profile.mantlPins || []).some(p => p.type === "goal" && String(p.id) === String(viewingEvent.id))) {
-                            onUnpin("goal", viewingEvent.id);
-                          }
                           setViewingEvent(null);
                           setConfirmDeleteEvent(false);
                           if (onRefresh) onRefresh();
@@ -1461,203 +1442,9 @@ export default function ShelfModals({
           profile={profile}
           onClose={() => setViewingItem(null)}
           onRefresh={onRefresh}
-          onPin={onPin}
-          onUnpin={onUnpin}
           onToast={onToast}
           onAutoComplete={onAutoComplete}
         />
-      )}
-
-      {/* ══ Pin Picker ══ */}
-      {showPinPicker && (
-        <div className="overlay" onClick={() => setShowPinPicker(false)}>
-          <div className="pin-picker" onClick={e => e.stopPropagation()}>
-            <div className="pin-picker-header">
-              <div className="pin-picker-title">Pin to Mantl</div>
-              <div className="pin-picker-close" onClick={() => setShowPinPicker(false)}>✕</div>
-            </div>
-            {(() => {
-              const pins = profile.mantlPins || [];
-              const isPinned = (type, id) => pins.some(p => p.type === type && String(p.id) === String(id));
-              const categories = [
-                { key: "book", label: "Books", emoji: "📖", items: (shelves.books || []).map(b => ({ ...b, _pinType: "book" })) },
-                { key: "movie", label: "Films", emoji: "🎬", items: (shelves.movies || []).map(m => ({ ...m, _pinType: "movie" })) },
-                { key: "show", label: "Shows", emoji: "📺", items: (shelves.shows || []).map(s => ({ ...s, _pinType: "show" })) },
-                { key: "game", label: "Games", emoji: "🎮", items: (shelves.games || []).map(g => ({ ...g, _pinType: "game" })) },
-                { key: "trophy", label: "Trophies", emoji: "🏆", items: (shelves.trophies || []).map(t => ({ ...t, _pinType: "trophy" })) },
-                { key: "goal", label: "Training", emoji: "🏁", items: (shelves.goals || []).map(g => ({ ...g, _pinType: "goal" })) },
-                { key: "country", label: "Countries", emoji: "🌍", items: (shelves.countries || []).map(c => ({ ...c, _pinType: "country", title: c.countryName, cover: c.photoUrl })) },
-              ].filter(cat => cat.items.length > 0);
-
-              // ── Category tiles (no category selected & no search) ──
-              if (!pinCategory && !pinSearch) {
-                return (
-                  <div style={{ padding: "12px 12px 8px" }}>
-                    <div style={{
-                      fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-faint)",
-                      textAlign: "center", marginBottom: 12, letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>Pick a shelf ({pins.length}/4 pinned)</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      {categories.map(cat => (
-                        <div key={cat.key} onClick={() => setPinCategory(cat.key)} style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "14px 14px", borderRadius: 10, cursor: "pointer",
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.06)",
-                          transition: "background 0.15s",
-                        }}>
-                          <span style={{ fontSize: 22 }}>{cat.emoji}</span>
-                          <div>
-                            <div style={{
-                              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
-                              color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.03em",
-                            }}>{cat.label}</div>
-                            <div style={{
-                              fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-faint)",
-                            }}>{cat.items.length} item{cat.items.length !== 1 ? "s" : ""}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {categories.length === 0 && (
-                      <div className="pin-picker-empty">No items on your shelves yet. Shelf something first!</div>
-                    )}
-                  </div>
-                );
-              }
-
-              // ── Filtered item list (category selected or searching) ──
-              const activeCat = categories.find(c => c.key === pinCategory);
-              const q = pinSearch.toLowerCase();
-              const itemsToShow = (activeCat ? activeCat.items : categories.flatMap(c => c.items))
-                .filter(it => !q || it.title.toLowerCase().includes(q));
-
-              return (
-                <>
-                  {/* Back + search bar */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px 4px" }}>
-                    <div onClick={() => { setPinCategory(null); setPinSearch(""); }} style={{
-                      fontFamily: "var(--font-display)", fontSize: 13, fontWeight: 700,
-                      color: "var(--text-muted)", cursor: "pointer", padding: "4px 8px",
-                      flexShrink: 0,
-                    }}>← Back</div>
-                    <input
-                      className="pin-picker-search"
-                      placeholder={`Search ${activeCat ? activeCat.label.toLowerCase() : "all"}...`}
-                      value={pinSearch}
-                      onChange={e => setPinSearch(e.target.value)}
-                      style={{ margin: 0, flex: 1 }}
-                      autoFocus
-                    />
-                  </div>
-
-                  {/* Category tabs (when coming from a category) */}
-                  {!pinSearch && (
-                    <div style={{
-                      display: "flex", gap: 6, padding: "6px 12px", overflowX: "auto",
-                      WebkitOverflowScrolling: "touch",
-                    }}>
-                      {categories.map(cat => (
-                        <div key={cat.key} onClick={() => setPinCategory(cat.key)} style={{
-                          padding: "5px 12px", borderRadius: 100, cursor: "pointer", whiteSpace: "nowrap",
-                          fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 700,
-                          letterSpacing: "0.03em", textTransform: "uppercase",
-                          background: pinCategory === cat.key ? "rgba(255,255,255,0.1)" : "transparent",
-                          color: pinCategory === cat.key ? "var(--text-primary)" : "var(--text-faint)",
-                          border: `1px solid ${pinCategory === cat.key ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)"}`,
-                          transition: "all 0.15s",
-                        }}>{cat.emoji} {cat.label}</div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Item list */}
-                  <div className="pin-picker-list">
-                    {itemsToShow.length === 0 ? (
-                      <div className="pin-picker-empty">No matches found</div>
-                    ) : (
-                      itemsToShow.map(item => {
-                        const pinned = isPinned(item._pinType, item.id);
-                        const full = pins.length >= 4 && !pinned;
-                        const isPending = pendingPin && pendingPin.type === item._pinType && String(pendingPin.id) === String(item.id);
-                        return (
-                          <div key={`${item._pinType}-${item.id}`}>
-                            <div
-                              className={`pin-picker-item${pinned ? " pinned" : ""}${full ? " disabled" : ""}`}
-                              onClick={() => {
-                                if (full) return;
-                                if (pinned) { onUnpin(item._pinType, item.id); }
-                                else {
-                                  setPendingPin({ type: item._pinType, id: item.id, title: item.title });
-                                  setPinNote("");
-                                }
-                              }}
-                            >
-                              <div className="pin-picker-item-cover">
-                                {(item.cover || item.locationImage) ? (
-                                  <img src={item.cover || item.locationImage} alt="" />
-                                ) : (
-                                  <span>{item.emoji || ({ book: "📖", movie: "🎬", show: "📺", game: "🎮", trophy: "🏆", goal: "🎯" })[item._pinType]}</span>
-                                )}
-                              </div>
-                              <div className="pin-picker-item-info">
-                                <div className="pin-picker-item-title">{item.title}</div>
-                                {item.rating && <div className="pin-picker-item-meta">{renderStars(item.rating)}</div>}
-                                {item.isReading && <div className="pin-picker-item-meta">Currently reading</div>}
-                                {item.isWatching && <div className="pin-picker-item-meta">Currently watching</div>}
-                                {item.isPlaying && <div className="pin-picker-item-meta">Currently playing</div>}
-                              </div>
-                              <div className="pin-picker-item-action">
-                                {pinned ? "📌" : full ? "" : isPending ? "▾" : "+"}
-                              </div>
-                            </div>
-                            {isPending && (
-                              <div style={{ padding: "8px 12px 12px", display: "flex", gap: 8, alignItems: "center", background: "rgba(255,255,255,0.02)" }}>
-                                <input
-                                  style={{
-                                    flex: 1, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-                                    borderRadius: 8, padding: "8px 10px", color: "var(--text-primary)",
-                                    fontFamily: "var(--font-serif)", fontStyle: "italic", fontSize: 13,
-                                    outline: "none",
-                                  }}
-                                  placeholder="Add a note (optional)..."
-                                  value={pinNote}
-                                  onChange={e => setPinNote(e.target.value.slice(0, 120))}
-                                  maxLength={120}
-                                  autoFocus
-                                  onKeyDown={e => {
-                                    if (e.key === "Enter") {
-                                      onPin(pendingPin.type, pendingPin.id, pinNote.trim());
-                                      setPendingPin(null);
-                                      setPinNote("");
-                                    }
-                                  }}
-                                />
-                                <div
-                                  style={{
-                                    fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 700,
-                                    color: "var(--accent-green)", cursor: "pointer", whiteSpace: "nowrap",
-                                    padding: "8px 12px", background: "rgba(74,222,128,0.1)",
-                                    borderRadius: 8, textTransform: "uppercase", letterSpacing: "0.04em",
-                                  }}
-                                  onClick={() => {
-                                    onPin(pendingPin.type, pendingPin.id, pinNote.trim());
-                                    setPendingPin(null);
-                                    setPinNote("");
-                                  }}
-                                >📌 Pin</div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-        </div>
       )}
 
     </>

@@ -257,14 +257,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
               onMouseMove={shelfDragIdx !== null ? onShelfDragMove : undefined}
               onMouseUp={shelfDragIdx !== null ? onShelfDragEnd : undefined}
               onMouseLeave={shelfDragIdx !== null ? onShelfDragCancel : undefined}>
-              <div className="shelf-toggle-row">
-                <div className="shelf-drag-handle" style={{ opacity: 0.15 }}>⠿</div>
-                <div className="shelf-toggle-info">
-                  <div className="shelf-toggle-icon">📌</div>
-                  <div className="shelf-toggle-label">My Mantl</div>
-                </div>
-                <div className="shelf-toggle-permanent">Always on</div>
-              </div>
               {shelfToggles.map(({ key, icon, label }, idx) => {
                 const isDragging = shelfDragIdx === idx;
                 const isDragOver = shelfDragIdx !== null && shelfDragOverIdx === idx && shelfDragIdx !== idx;

@@ -1,5 +1,4 @@
 import AdminGameEditor from "../shared/AdminGameEditor";
-import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState } from "react";
 import { toLogTimestamp } from "../../../utils/helpers";
@@ -230,18 +229,6 @@ export default function GetPlayedLogModal({
                 fontSize: 32,
               }}>🎮</div>
             )}
-            <PinToMantl
-              compact
-              userId={userId}
-              isCompleted={isCompleted}
-              itemType={"game"}
-              itemTitle={item.title}
-              tmdbId={item.tmdb_id}
-              coverUrl={coverUrl}
-              communitySlug="getplayed"
-              onViewMantl={onViewMantl}
-              onClose={onClose}
-            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{

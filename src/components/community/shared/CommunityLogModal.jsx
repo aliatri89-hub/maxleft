@@ -1,5 +1,4 @@
 import AdminItemEditor from "./AdminItemEditor";
-import PinToMantl from "./PinToMantl";
 import CrossCommunityChips from "./CrossCommunityChips";
 import WatchProviders from "./WatchProviders";
 import ListenOnBadges from "./ListenOnBadges";
@@ -18,7 +17,7 @@ import { toLogTimestamp } from "../../../utils/helpers";
  *   - Poster + hero layout (100px), star rating (half-star), date picker
  *   - Log / Already Seen / Watchlist / Update / Unlog button group
  *   - Post-log episode toast ("Listen on MANTL", auto-dismiss 5s)
- *   - CrossCommunityChips, WatchProviders, ListenOnBadges, PinToMantl
+ *   - CrossCommunityChips, WatchProviders, ListenOnBadges
  *
  * Community-specific behavior is injected via config + render slots:
  *   config             — { communitySlug, pinSlug?, communityName, platforms, isPatreon }
@@ -356,18 +355,6 @@ export default function CommunityLogModal({
                 fontSize: 32,
               }}>{typeEmoji}</div>
             )}
-            <PinToMantl
-              compact
-              userId={userId}
-              isCompleted={isCompleted}
-              itemType={isFilm ? "movie" : isShow ? "show" : isBook ? "book" : "game"}
-              itemTitle={item.title}
-              tmdbId={item.tmdb_id}
-              coverUrl={resolvedCoverUrl}
-              communitySlug={config.pinSlug || config.communitySlug}
-              onViewMantl={onViewMantl}
-              onClose={onClose}
-            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import AdminItemEditor from "../shared/AdminItemEditor";
-import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 
 /**
@@ -62,18 +61,6 @@ export default function FilmspottingLogModal({
                 width: 60, height: 90, borderRadius: 6, objectFit: "cover", display: "block",
               }} />
             )}
-            <PinToMantl
-              compact
-              userId={userId}
-              isCompleted={isCompleted}
-              itemType={"movie"}
-              itemTitle={item.title}
-              tmdbId={item.tmdb_id}
-              coverUrl={coverUrl}
-              communitySlug="filmspotting"
-              onViewMantl={onViewMantl}
-              onClose={onClose}
-            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{

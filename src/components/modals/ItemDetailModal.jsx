@@ -11,11 +11,9 @@ import StarRating from "../shared/StarRating";
  * Props:
  *   item       — shelf item object (with .shelfType added)
  *   session    — auth session
- *   profile    — user profile (for mantlPins)
+ *   profile    — user profile
  *   onClose    — () => void
  *   onRefresh  — () => void — reload shelf data after changes
- *   onPin      — (type, id) => void
- *   onUnpin    — (type, id) => void
  *   onToast    — (msg) => void
  *   onAutoComplete — (habit, ...) => void (optional)
  */
@@ -25,8 +23,6 @@ export default function ItemDetailModal({
   profile,
   onClose,
   onRefresh,
-  onPin,
-  onUnpin,
   onToast,
   onAutoComplete,
 }) {
@@ -95,9 +91,6 @@ export default function ItemDetailModal({
     if (!table) return;
     const { error } = await supabase.from(table).delete().eq("id", item.id);
     if (!error) {
-      // Also remove from mantl pins if pinned
-      const pinType = ({ books: "book", movies: "movie", shows: "show", games: "game" })[shelfType];
-      if (onUnpin && pinType) onUnpin(pinType, item.id);
       if (onRefresh) onRefresh();
       onClose();
     } else {
@@ -189,11 +182,6 @@ export default function ItemDetailModal({
       if (onRefresh) onRefresh();
     }
   };
-
-  // ── Pin logic ──
-  const pinType = ({ books: "book", movies: "movie", shows: "show", games: "game" })[shelfType];
-  const isPinned = (profile?.mantlPins || []).some(p => p.type === pinType && String(p.id) === String(item.id));
-  const pinsFull = (profile?.mantlPins || []).length >= 4 && !isPinned;
 
   // ── Render helpers ──
   const renderStars = (rating) => {
@@ -333,26 +321,6 @@ export default function ItemDetailModal({
         ) : null;
       })()}
 
-      {/* ── Pin to Mantl ── */}
-      <div style={{ marginBottom: 12 }}>
-        <button
-          disabled={pinsFull}
-          onClick={() => { if (isPinned) onUnpin(pinType, item.id); else onPin(pinType, item.id); }}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 16px", borderRadius: 8, cursor: pinsFull ? "not-allowed" : "pointer",
-            fontFamily: "var(--font-display, 'Barlow Condensed', sans-serif)",
-            fontWeight: 600, fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase",
-            border: "none",
-            opacity: pinsFull ? 0.4 : 1,
-            background: isPinned ? "#C4734F" : "rgba(196,115,79,0.12)",
-            color: isPinned ? "white" : "#C4734F",
-            transition: "all 0.15s",
-          }}
-        >
-          {isPinned ? "📌 Unpin from Mantl" : pinsFull ? "Mantl Full (4/4)" : "📌 Pin to Mantl"}
-        </button>
-      </div>
 
       {/* ── Game status selector ── */}
       {shelfType === "games" && (

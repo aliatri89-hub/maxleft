@@ -205,7 +205,7 @@ export default function App() {
 
   // User data
   const [profile, setProfile] = useState({
-    name: "", username: "", avatar: "", bio: "", avatarUrl: "", mantlPins: [], mantlpieceTitle: "",
+    name: "", username: "", avatar: "", bio: "", avatarUrl: "",
     enabledShelves: { ...DEFAULT_ENABLED_SHELVES },
     shelfOrder: [...DEFAULT_SHELF_ORDER],
   });
@@ -336,19 +336,6 @@ export default function App() {
       sliderRef.current.style.setProperty("--active-index", idx);
     }
   }, [activeTab]); // track tab disabled, profile moved to overlay
-
-  // Listen for "View my shelf" from PinToMantl toast (community → shelf tab)
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.detail?.tab === "shelf") {
-        setActiveCommunitySlug(null); // close community overlay
-        animateSlider("shelf");
-        setActiveTab("shelf");
-      }
-    };
-    window.addEventListener("mantl:navigate", handler);
-    return () => window.removeEventListener("mantl:navigate", handler);
-  }, []);
 
   const showToast = (msg, duration = 2200) => {
     clearTimeout(toastTimer.current);
@@ -518,8 +505,6 @@ export default function App() {
           avatar: prof.avatar_emoji || "👤",
           bio: prof.bio || "",
           avatarUrl: prof.avatar_url || "",
-          mantlPins: prof.mantl_pins || [],
-          mantlpieceTitle: prof.mantlpiece_title || "",
           letterboxd_username: prof.letterboxd_username || null,
           goodreads_user_id: prof.goodreads_user_id || null,
           steam_id: prof.steam_id || null,
@@ -785,25 +770,6 @@ export default function App() {
       totalItems,
     });
     setShelvesLoaded(true);
-
-    // Clean phantom pins (references to deleted items)
-    if (profile?.mantlPins?.length > 0) {
-      const allIds = new Set([
-        ...(allBooksCombined || []).map(b => "book:" + b.id),
-        ...(movies || []).map(m => "movie:" + m.id),
-        ...(shows || []).map(s => "show:" + s.id),
-        ...(games || []).map(g => "game:" + g.id),
-        ...(trophies || []).map(t => "trophy:" + t.id),
-        ...(goals || []).map(g => "goal:" + g.id),
-        ...(countries || []).map(c => "country:" + c.id),
-      ]);
-      const cleaned = profile.mantlPins.filter(p => allIds.has(p.type + ":" + p.id));
-      if (cleaned.length !== profile.mantlPins.length) {
-        supabase.from("profiles").update({ mantl_pins: cleaned }).eq("id", userId).then(() => {
-          setProfile(prev => ({ ...prev, mantlPins: cleaned }));
-        });
-      }
-    }
   };
 
   // ── STRAVA ──
@@ -1982,42 +1948,6 @@ if (!tmdbId) {
     showToast(`Welcome to Mantl, @${username}`);
   };
 
-  // ── MANTL PINS ──
-
-  const pinToMantl = async (itemType, itemId, note = "") => {
-    if (!session) return;
-    // Clean phantom pins (references to deleted items)
-    const allItems = [
-      ...(shelves.books || []), ...(shelves.movies || []), ...(shelves.shows || []),
-      ...(shelves.games || []), ...(shelves.trophies || []), ...(shelves.goals || []),
-      ...(shelves.countries || []).map(c => ({ ...c, _pinType: "country" })),
-    ];
-    const itemExists = (type, id) => {
-      if (type === "country") return (shelves.countries || []).some(c => String(c.id) === String(id));
-      const list = { book: shelves.books, movie: shelves.movies, show: shelves.shows, game: shelves.games, trophy: shelves.trophies, goal: shelves.goals }[type] || [];
-      return list.some(it => String(it.id) === String(id));
-    };
-    const pins = (profile.mantlPins || []).filter(p => itemExists(p.type, p.id));
-    if (pins.length >= 4) return;
-    if (pins.find(p => p.type === itemType && String(p.id) === String(itemId))) return;
-    pins.push({ type: itemType, id: String(itemId), ...(note ? { note: note.slice(0, 120) } : {}) });
-    const { error } = await supabase.from("profiles").update({ mantl_pins: pins }).eq("id", session.user.id);
-    if (!error) {
-      setProfile(prev => ({ ...prev, mantlPins: pins }));
-      showToast("Pinned to Mantl! 📌");
-    }
-  };
-
-  const unpinFromMantl = async (itemType, itemId) => {
-    if (!session) return;
-    const pins = (profile.mantlPins || []).filter(p => !(p.type === itemType && String(p.id) === String(itemId)));
-    const { error } = await supabase.from("profiles").update({ mantl_pins: pins }).eq("id", session.user.id);
-    if (!error) {
-      setProfile(prev => ({ ...prev, mantlPins: pins }));
-      showToast("Unpinned from Mantl");
-    }
-  };
-
   // ── SHELF IT ──
 
   const openShelfIt = (category) => {
@@ -2287,8 +2217,6 @@ if (!tmdbId) {
                   pushNav={pushNav}
                   removeNav={removeNav}
                   onRefresh={async () => { if (session) await Promise.all([loadShelves(session.user.id), loadChallengeShelf(session.user.id)]); }}
-                  onPin={pinToMantl}
-                  onUnpin={unpinFromMantl}
                   onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                   stravaActivities={stravaActivities}
                   stravaConnected={stravaConnected}

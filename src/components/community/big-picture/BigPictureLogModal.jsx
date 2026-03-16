@@ -1,4 +1,3 @@
-import PinToMantl from "../shared/PinToMantl";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState, useEffect } from "react";
 
@@ -235,18 +234,6 @@ fetchTMDBWatchProviders(item.tmdb_id)
                 fontSize: 32,
               }}>{`🎬`}</div>
             )}
-            <PinToMantl
-              compact
-              userId={userId}
-              isCompleted={isCompleted}
-              itemType={"movie"}
-              itemTitle={item.title}
-              tmdbId={item.tmdb_id}
-              coverUrl={coverUrl}
-              communitySlug="bigpicture"
-              onViewMantl={onViewMantl}
-              onClose={onClose}
-            />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
