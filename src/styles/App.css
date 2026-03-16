@@ -195,6 +195,11 @@
     opacity: 0;
     animation: fadeUp 0.7s ease 0.4s forwards;
   }
+  .landing-tagline strong {
+    font-weight: 600;
+    color: #e8c4a0;
+    font-style: italic;
+  }
 
   .landing-bottom {
     padding: 0 24px 56px;

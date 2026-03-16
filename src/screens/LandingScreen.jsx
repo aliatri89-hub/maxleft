@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "../supabase";
 
 /* ════════════════════════════════════════════════════════════
-   LANDING SCREEN  –  "From the podcast to your shelf."
+   LANDING SCREEN  –  "Your next favorite is one episode away."
    ════════════════════════════════════════════════════════════ */
 
 // ── Poster marquee data (franchise films from MANTL communities) ──
@@ -1174,7 +1174,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">From the <strong>podcast</strong> to your <strong>shelf</strong></div>
+          <div className="landing-eyebrow">Your next favorite is one <strong>episode</strong> away.</div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
@@ -1188,7 +1188,7 @@ function LandingScreen({ onSignIn }) {
           <div className="landing-tagline">
             Discover what to watch,<br />
             read, and play from<br />
-            voices you trust.
+            <strong>voices you trust.</strong>
           </div>
         </div>
         <div className="landing-bottom">
@@ -1218,7 +1218,7 @@ function LandingScreen({ onSignIn }) {
       <div className="mantl-features" ref={featuresRef}>
         <div className="mantl-features-header">
           <h2>More than a watchlist.</h2>
-          <p>Discover what to watch, read, and play next<br />from the voices you trust.</p>
+          <p>Track what to watch, read, and play next<br />from the <strong>voices you trust</strong>.</p>
         </div>
 
         {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}

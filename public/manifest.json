@@ -1,7 +1,7 @@
 {
-  "name": "Mantl — Shelf What You're Made Of",
+  "name": "MANTL — Your next favorite is one episode away",
   "short_name": "Mantl",
-  "description": "Track and share your books, films, shows, games, fitness, and travels. Shelf what you're made of.",
+  "description": "Discover what to watch, read, and play from voices you trust. Track your progress, earn badges, and explore podcast communities.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
