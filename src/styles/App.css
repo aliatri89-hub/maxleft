@@ -186,19 +186,19 @@
 
 
   .landing-tagline {
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-size: 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.03em;
     color: #9a938a;
     margin-top: 24px;
-    line-height: 1.5;
+    line-height: 1.45;
     opacity: 0;
     animation: fadeUp 0.7s ease 0.4s forwards;
   }
   .landing-tagline strong {
-    font-weight: 600;
+    font-weight: 700;
     color: #e8c4a0;
-    font-style: italic;
   }
 
   .landing-bottom {
