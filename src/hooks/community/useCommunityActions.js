@@ -45,6 +45,32 @@ export function useCommunityActions(userId, setProgress) {
           console.error("[Community] Progress update error:", updateErr.message);
           throw updateErr;
         }
+
+        // Propagate update to sibling communities
+        if (item?.tmdb_id) {
+          try {
+            const { data: siblings } = await supabase
+              .from("community_items")
+              .select("id")
+              .eq("tmdb_id", item.tmdb_id)
+              .neq("id", itemId);
+
+            if (siblings?.length > 0) {
+              const sibUpdateFields = { updated_at: new Date().toISOString() };
+              if (rating) sibUpdateFields.rating = Math.round(rating);
+              if (completed_at) sibUpdateFields.completed_at = completed_at;
+
+              await supabase
+                .from("community_user_progress")
+                .update(sibUpdateFields)
+                .eq("user_id", userId)
+                .in("item_id", siblings.map(s => s.id))
+                .eq("status", "completed");
+            }
+          } catch (e) {
+            console.warn("[Community] Cross-community update propagation failed:", e.message);
+          }
+        }
       } else {
         const { error: progressErr } = await supabase
           .from("community_user_progress")
@@ -65,7 +91,48 @@ export function useCommunityActions(userId, setProgress) {
         }
       }
 
-      // 2. Dual-write to shelf (only on first log, not updates)
+      // 2. Cross-community: propagate log to all communities with same tmdb_id
+      if (item?.tmdb_id) {
+        try {
+          const { data: siblings } = await supabase
+            .from("community_items")
+            .select("id")
+            .eq("tmdb_id", item.tmdb_id)
+            .neq("id", itemId);
+
+          if (siblings?.length > 0) {
+            const now = new Date().toISOString();
+            const siblingRows = siblings.map(s => ({
+              user_id: userId,
+              item_id: s.id,
+              status: "completed",
+              rating: rating ? Math.round(rating) : null,
+              completed_at: completed_at || null,
+              updated_at: now,
+            }));
+
+            // Upsert — won't overwrite if user already has a row with more data
+            // (listened_with_commentary, brown_arrow stay intact via onConflict merge)
+            const { error: sibErr } = await supabase
+              .from("community_user_progress")
+              .upsert(siblingRows, {
+                onConflict: "user_id,item_id",
+                ignoreDuplicates: false,
+              });
+
+            if (sibErr) {
+              console.warn("[Community] Cross-community log propagation error:", sibErr.message);
+            } else if (siblingRows.length > 0) {
+              console.log(`[Community] Propagated log to ${siblingRows.length} sibling community(ies) for tmdb_id ${item.tmdb_id}`);
+            }
+          }
+        } catch (e) {
+          // Non-fatal — primary community log succeeded
+          console.warn("[Community] Cross-community propagation failed:", e.message);
+        }
+      }
+
+      // 3. Dual-write to shelf (only on first log, not updates)
       if (!isUpdate && item) {
         const opts = { rating, completed_at };
         if (item.media_type === "film" && item.tmdb_id) {
