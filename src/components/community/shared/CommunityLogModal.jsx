@@ -55,7 +55,9 @@ export default function CommunityLogModal({
   const [overviewExpanded, setOverviewExpanded] = useState(false);
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [providers, setProviders] = useState(null);
-  const [backdropUrl, setBackdropUrl] = useState(null);
+  const [backdropUrl, setBackdropUrl] = useState(
+    item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : null
+  );
   const [confirmUnlog, setConfirmUnlog] = useState(false);
 
   // ── Reactive cover URL ────────────────────────────────────
