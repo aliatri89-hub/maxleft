@@ -952,13 +952,26 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 // LOG CARD — cinematic backdrop + community context
 // ════════════════════════════════════════════════
+// VHS brand marks — rotated through for personality
+const VHS_BRANDS = [
+  { bg: "#e8e4da", color: "#1a6b3c", text: "FUJI", sub: "HQ", weight: 900 },
+  { bg: "#d4d0c8", color: "#333", text: "Memorex", sub: "HS", weight: 700 },
+  { bg: "#2a2520", color: "#d4af37", text: "TDK", sub: "SA", weight: 900, dark: true },
+  { bg: "#f5c518", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
+  { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", sub: "HGX", weight: 700 },
+  { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", sub: "E-180", weight: 900 },
+];
+
+function getVhsBrand(title) {
+  const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return VHS_BRANDS[hash % VHS_BRANDS.length];
+}
+
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   const [flipped, setFlipped] = useState(false);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
-  const accent = communities[0]?.community_slug
-    ? getCommunityAccent(communities[0].community_slug)
-    : getCommunityAccent(data.community_slug);
+  const brand = getVhsBrand(data.title);
 
   return (
     <div
@@ -976,7 +989,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         position: "relative",
         transformStyle: "preserve-3d",
         transition: "transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
-        transform: flipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        transform: flipped ? "rotateX(-180deg)" : "rotateX(0deg)",
       }}>
 
         {/* ═══ FRONT — The Tape ═══ */}
@@ -994,7 +1007,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             display: "flex",
             minHeight: 68,
           }}>
-            {/* Label text area — full width */}
+            {/* Label — full width */}
             <div style={{
               flex: 1,
               background: "#f0ebe1",
@@ -1009,10 +1022,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               {/* Grid lines */}
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
-                backgroundImage: `
-                  repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px),
-                  repeating-linear-gradient(90deg, transparent, transparent 120px, rgba(0,0,0,0.015) 120px, rgba(0,0,0,0.015) 121px)
-                `,
+                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
               }} />
 
               {/* Logo or title */}
@@ -1022,10 +1032,9 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   alt={data.title}
                   style={{
                     maxHeight: 36,
-                    maxWidth: "90%",
+                    maxWidth: "85%",
                     objectFit: "contain",
                     objectPosition: "center",
-                    marginBottom: 3,
                     position: "relative",
                     filter: "brightness(0)",
                     opacity: 0.8,
@@ -1041,54 +1050,65 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   textTransform: "uppercase",
                   letterSpacing: "0.01em",
                   position: "relative",
-                  marginBottom: 3,
                   textAlign: "center",
                 }}>
                   {data.title}
                 </div>
               )}
 
-              {/* Creator · Year + Stars */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: 6, position: "relative",
-              }}>
-                {(data.creator || data.year) && (
-                  <span style={{
-                    fontFamily: "'Lora', serif", fontStyle: "italic",
-                    fontSize: 10, color: "rgba(44,40,36,0.45)",
-                  }}>
-                    {[data.creator, data.year].filter(Boolean).join(" · ")}
-                  </span>
-                )}
+              {/* Stars only */}
+              <div style={{ marginTop: 3, position: "relative" }}>
                 <Stars rating={data.rating} size={10} />
               </div>
 
-              {/* Time — bottom right, sharpie */}
+              {/* Sharpie time — bottom right */}
               <div style={{
                 position: "absolute",
                 bottom: 4, right: 8,
                 fontFamily: "'Permanent Marker', cursive",
-                fontSize: 10,
-                color: "rgba(44,40,36,0.35)",
+                fontSize: 9,
+                color: "rgba(44,40,36,0.3)",
               }}>
                 {timeAgo}
               </div>
             </div>
 
-            {/* Community color band — split stripes for multiple communities */}
+            {/* VHS brand end-cap */}
             <div style={{
-              width: 18, flexShrink: 0,
+              width: 28, flexShrink: 0,
+              background: brand.bg,
               display: "flex",
               flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 1,
+              borderLeft: brand.dark ? "none" : "1px solid rgba(44,40,36,0.08)",
             }}>
-              {communities.length > 0 ? communities.map((c, i) => (
-                <div key={i} style={{
-                  flex: 1,
-                  background: getCommunityAccent(c.community_slug),
-                }} />
-              )) : (
-                <div style={{ flex: 1, background: accent }} />
-              )}
+              <div style={{
+                writingMode: "vertical-rl",
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: brand.weight,
+                fontSize: 9,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                color: brand.color,
+                transform: "rotate(180deg)",
+                lineHeight: 1,
+              }}>
+                {brand.text}
+              </div>
+              <div style={{
+                writingMode: "vertical-rl",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontWeight: 600,
+                fontSize: 6,
+                letterSpacing: "0.06em",
+                color: brand.color,
+                opacity: 0.5,
+                transform: "rotate(180deg)",
+              }}>
+                {brand.sub}
+              </div>
             </div>
           </div>
         </div>
@@ -1098,7 +1118,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
           onClick={() => setFlipped(false)}
           style={{
             backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
+            transform: "rotateX(180deg)",
             position: "absolute",
             inset: 0,
             background: "#1a1612",
@@ -1119,70 +1139,55 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             {/* Grid lines */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
-              backgroundImage: `
-                repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)
-              `,
+              backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
             }} />
 
-            {/* "Covered by" label */}
+            {/* Title reminder */}
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 10,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700, fontSize: 10,
               color: "rgba(44,40,36,0.35)",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              textAlign: "center",
               marginBottom: 6,
               position: "relative",
-              textAlign: "center",
             }}>
-              Covered by
+              {data.title}
             </div>
 
             {/* Community rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, position: "relative" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, position: "relative" }}>
               {communities.length > 0 ? communities.map((c, i) => {
                 const cAccent = getCommunityAccent(c.community_slug);
                 const img = c.community_image;
                 return (
                   <div
-                    key={`${c.community_slug}-${i}`}
+                    key={`${c.community_slug}-${c.series_title || ""}-${i}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (c.badge?.badge_id && onViewBadgeDetail) {
-                        onViewBadgeDetail({
-                          id: c.badge.badge_id,
-                          name: c.badge.badge_name,
-                          image_url: c.badge.badge_image,
-                          accent_color: c.badge.accent_color,
-                          tagline: c.badge.tagline || null,
-                          progress_tagline: c.badge.progress_tagline || null,
-                          miniseries_id: c.badge.miniseries_id || null,
-                          media_type_filter: c.badge.media_type_filter || null,
-                        });
-                      } else {
-                        onNavigateCommunity?.(c.community_slug, data.tmdb_id);
-                      }
+                      onNavigateCommunity?.(c.community_slug, data.tmdb_id);
                     }}
                     style={{
                       display: "flex", alignItems: "center", gap: 8,
-                      padding: "4px 6px",
+                      padding: "3px 6px",
                       borderRadius: 4,
                       cursor: "pointer",
-                      transition: "background 0.15s",
                       borderLeft: `3px solid ${cAccent}`,
                     }}
                   >
                     {img ? (
                       <img src={img} alt="" style={{
-                        width: 28, height: 28, borderRadius: 6, objectFit: "cover",
+                        width: 26, height: 26, borderRadius: 6, objectFit: "cover",
                         border: `1px solid ${cAccent}44`,
                       }} />
                     ) : (
                       <div style={{
-                        width: 28, height: 28, borderRadius: 6,
-                        background: `${cAccent}15`,
-                        border: `1px solid ${cAccent}44`,
+                        width: 26, height: 26, borderRadius: 6,
+                        background: `${cAccent}15`, border: `1px solid ${cAccent}44`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                        fontSize: 9, color: cAccent,
+                        fontSize: 8, color: cAccent,
                       }}>
                         {(c.community_name || "").split(" ").map(w => w[0]).join("")}
                       </div>
@@ -1190,7 +1195,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
-                        fontSize: 12, color: "#2C2824", textTransform: "uppercase",
+                        fontSize: 11, color: "#2C2824", textTransform: "uppercase",
                         letterSpacing: "0.02em", lineHeight: 1.2,
                       }}>
                         {c.community_name}
@@ -1198,7 +1203,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                       {c.series_title && (
                         <div style={{
                           fontFamily: "'Lora', serif", fontStyle: "italic",
-                          fontSize: 9, color: "rgba(44,40,36,0.45)",
+                          fontSize: 8, color: "rgba(44,40,36,0.4)",
                         }}>
                           {c.series_title}
                         </div>
@@ -1207,8 +1212,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                     {c.series_total > 0 && (
                       <span style={{
                         fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 9, fontWeight: 600,
-                        color: cAccent,
+                        fontSize: 8, fontWeight: 600, color: cAccent,
                       }}>
                         {c.series_watched}/{c.series_total}
                       </span>
@@ -1218,8 +1222,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               }) : (
                 <div style={{
                   fontFamily: "'Lora', serif", fontStyle: "italic",
-                  fontSize: 11, color: "rgba(44,40,36,0.4)",
-                  textAlign: "center",
+                  fontSize: 10, color: "rgba(44,40,36,0.35)", textAlign: "center",
                 }}>
                   Personal log
                 </div>
@@ -1228,14 +1231,12 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
             {/* Flip hint */}
             <div style={{
-              position: "absolute",
-              bottom: 3, right: 8,
+              position: "absolute", bottom: 3, right: 8,
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 7,
-              color: "rgba(44,40,36,0.2)",
-              letterSpacing: "0.06em",
+              fontSize: 6, color: "rgba(44,40,36,0.18)",
+              letterSpacing: "0.06em", textTransform: "uppercase",
             }}>
-              TAP TO FLIP
+              tap to flip
             </div>
           </div>
         </div>
