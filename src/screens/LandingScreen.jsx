@@ -1229,8 +1229,8 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-label">Discover</div>
           <div className="mantl-feature-title">Your Podcast, Your Dashboard</div>
           <div className="mantl-feature-desc">
-            Each podcast gets its own home — franchise lists, episode guides,
-            leaderboards, and listeners tracking right alongside you.
+            Each podcast gets its own unique home — with miniseries,
+            badges, and your progress across everything they cover.
           </div>
           <div className="community-demo">
             {DEMO_COMMUNITIES.map((c, i) => {
