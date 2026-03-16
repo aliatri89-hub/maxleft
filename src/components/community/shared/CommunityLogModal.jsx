@@ -266,7 +266,7 @@ export default function CommunityLogModal({
           width: "100%", maxWidth: 420,
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: 0,
-          padding: "0 20px calc(20px + env(safe-area-inset-bottom, 0px))",
+          padding: "0 20px 8px",
           animation: "clmSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
@@ -544,8 +544,15 @@ export default function CommunityLogModal({
         {/* Custom section slot (e.g. BC commentary toggle) */}
         {renderCustomSection?.({ saving })}
 
-        {/* Action buttons */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {/* Action buttons — sticky so they don't shift as TMDB data loads */}
+        <div style={{
+          display: "flex", flexDirection: "column", gap: 8,
+          position: "sticky", bottom: 0, zIndex: 3,
+          background: "linear-gradient(180deg, transparent 0%, #12121f 12%)",
+          paddingTop: 16,
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          marginTop: "auto",
+        }}>
 
           {/* === NOT YET LOGGED === */}
           {!isCompleted && (
