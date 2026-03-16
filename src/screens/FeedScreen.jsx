@@ -988,8 +988,8 @@ const VHS_BRANDS = [
   { bg: "#f5c518", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", sub: "HGX", weight: 700 },
   { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", sub: "E-180", weight: 900 },
-  { bg: "#d4d0c8", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
-  { bg: "#e8e4da", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#f0ebe1", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#f0ebe1", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
 ];
 
 function getVhsBrands(title) {
@@ -1027,7 +1027,7 @@ function BrandCap({ brand, side = "right" }) {
       borderRight: side === "left" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
     }}>
       {brand.isVhs ? (
-        <div style={{ transform: "rotate(90deg)" }}>
+        <div style={{ transform: "rotate(90deg)", opacity: 0.25 }}>
           <VhsLogoSvg color={brand.color} size={22} />
         </div>
       ) : (
@@ -1067,6 +1067,7 @@ function BrandCap({ brand, side = "right" }) {
 
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   const [flipped, setFlipped] = useState(false);
+  const [isLightLogo, setIsLightLogo] = useState(true); // default dark until detected
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
@@ -1131,6 +1132,25 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 <img
                   src={data.logo_url}
                   alt={data.title}
+                  crossOrigin="anonymous"
+                  onLoad={(e) => {
+                    try {
+                      const img = e.target;
+                      const c = document.createElement("canvas");
+                      const s = 40;
+                      c.width = s; c.height = s;
+                      const ctx = c.getContext("2d");
+                      ctx.drawImage(img, 0, 0, s, s);
+                      const px = ctx.getImageData(0, 0, s, s).data;
+                      let light = 0, visible = 0;
+                      for (let i = 0; i < px.length; i += 4) {
+                        if (px[i + 3] < 50) continue;
+                        visible++;
+                        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
+                      }
+                      setIsLightLogo(visible > 0 && light / visible > 0.5);
+                    } catch { /* CORS fail — keep dark filter */ }
+                  }}
                   style={{
                     maxHeight: 48,
                     minHeight: 28,
@@ -1139,8 +1159,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                     objectFit: "contain",
                     objectPosition: "center",
                     position: "relative",
-                    filter: "brightness(0)",
-                    opacity: 0.8,
+                    filter: isLightLogo ? "brightness(0)" : "none",
+                    opacity: isLightLogo ? 0.8 : 0.85,
                   }}
                 />
               ) : (
