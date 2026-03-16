@@ -1090,10 +1090,20 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 </div>
               )}
 
-              {/* Stars */}
-              <div style={{ marginTop: 3, position: "relative" }}>
-                <Stars rating={data.rating} size={10} />
-              </div>
+              {/* Stars — sharpie style */}
+              {data.rating > 0 && (
+                <div style={{ marginTop: 2, position: "relative" }}>
+                  <span style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 12,
+                    color: "rgba(44,40,36,0.5)",
+                    letterSpacing: 1,
+                  }}>
+                    {"★".repeat(Math.floor(data.rating))}
+                    {data.rating % 1 >= 0.25 ? "½" : ""}
+                  </span>
+                </div>
+              )}
 
               {/* Sharpie time */}
               <div style={{
