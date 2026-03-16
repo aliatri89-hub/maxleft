@@ -1098,8 +1098,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
         position: "relative",
         cursor: "pointer",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)",
-        border: "1px solid rgba(90, 80, 68, 0.35)",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(120, 108, 90, 0.3), 0 0 12px rgba(30, 26, 20, 0.6)",
         perspective: 800,
       }}
     >
