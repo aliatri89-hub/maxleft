@@ -132,6 +132,7 @@ const heroEnhancementStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: flex-end;
     margin: 0 -2px;
     cursor: pointer;
     opacity: 0;
