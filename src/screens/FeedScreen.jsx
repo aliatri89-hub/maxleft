@@ -1065,14 +1065,29 @@ function BrandCap({ brand, side = "right" }) {
   );
 }
 
-function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
+function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false }) {
   const [flipped, setFlipped] = useState(false);
   const [isLightLogo, setIsLightLogo] = useState(true); // default dark until detected
+  const [showHint, setShowHint] = useState(false);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
+  const peekColor = communities[0]
+    ? getCommunityAccent(communities[0].community_slug)
+    : "#8B5CF6";
+
+  // First-visit tooltip
+  useEffect(() => {
+    if (!isFirst) return;
+    try {
+      if (localStorage.getItem("mantl_flip_hint_seen")) return;
+    } catch {}
+    const t = setTimeout(() => setShowHint(true), 800);
+    return () => clearTimeout(t);
+  }, [isFirst]);
 
   return (
+    <>
     <div
       style={{
         margin: "4px 16px",
@@ -1093,7 +1108,13 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
         {/* ═══ FRONT — The Tape ═══ */}
         <div
-          onClick={() => setFlipped(true)}
+          onClick={() => {
+            setFlipped(true);
+            if (showHint) {
+              setShowHint(false);
+              try { localStorage.setItem("mantl_flip_hint_seen", "1"); } catch {}
+            }
+          }}
           style={{
             backfaceVisibility: "hidden",
             background: "#1a1612",
@@ -1125,6 +1146,19 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
+              }} />
+
+              {/* Corner peek — community accent triangle */}
+              <div style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                width: 0,
+                height: 0,
+                borderLeft: `14px solid ${peekColor}`,
+                borderTop: "14px solid transparent",
+                opacity: 0.55,
+                pointerEvents: "none",
               }} />
 
               {/* Logo or title */}
@@ -1300,6 +1334,26 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         </div>
       </div>
     </div>
+    {/* First-visit flip tooltip */}
+    {showHint && (
+      <div style={{
+        textAlign: "center",
+        marginTop: 2,
+        padding: "3px 0",
+        animation: "fadeIn 0.4s ease",
+      }}>
+        <span style={{
+          fontFamily: "'Permanent Marker', cursive",
+          fontSize: 11,
+          color: peekColor,
+          opacity: 0.7,
+          letterSpacing: "0.02em",
+        }}>
+          ↕ tap a tape to flip it
+        </span>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -1899,7 +1953,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </div>
           )}
 
-          {feedItems.map((item, i) => {
+          {(() => { let firstLogSeen = false; return feedItems.map((item, i) => {
             // ── Derive dismiss identity for filterable card types ──
             const dismissKey = item.type === "badge"
               ? { type: "badge", key: item.data.badge_id || item.data.id }
@@ -1932,8 +1986,11 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
             const card = (() => {
               switch (item.type) {
-                case "log":
-                  return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} />;
+                case "log": {
+                  const isFirst = !firstLogSeen;
+                  firstLogSeen = true;
+                  return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirst} />;
+                }
                 case "badge":
                   return <BadgeCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} />;
                 case "badge_complete":
@@ -1962,7 +2019,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                 {card}
               </FeedCard>
             );
-          })}
+          }); })()}
 
           {/* Load More */}
           {hasMore && (
