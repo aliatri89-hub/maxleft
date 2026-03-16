@@ -1,7 +1,7 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
-import { useCommunityProgress, useCommunityActions, useBadges } from "../../../hooks/community";
+import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
 import BadgeCelebration from "../shared/BadgeCelebration";
 import BadgeProgressToast from "../shared/BadgeProgressToast";
 import BadgeDetailScreen from "../shared/BadgeDetailScreen";
@@ -84,107 +84,15 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   // ── Badge system ──────────────────────────────────────────
   const {
     badges, earnedBadgeIds, badgeProgress, checkForBadge, checkAllBadges,
-    getBadgeForItem, revokeBadgeIfNeeded, loading: badgesLoading,
-  } = useBadges(community?.id, userId);
-
-  const [celebrationBadge, setCelebrationBadge] = useState(null);
-  const [detailBadge, setDetailBadge] = useState(null);
-  const [badgeToasts, setBadgeToasts] = useState([]);
-  const badgeToastTimers = useRef([]);
-  const [showBadgePage, setShowBadgePage] = useState(false);
-
-  // Count only badges earned in THIS community (earnedBadgeIds may include other communities)
-  const earnedCount = useMemo(() => badges.filter(b => earnedBadgeIds.has(b.id)).length, [badges, earnedBadgeIds]);
+    getBadgeForItem, revokeBadgeIfNeeded,
+    celebrationBadge, setCelebrationBadge,
+    detailBadge, setDetailBadge,
+    badgeToasts, showBadgePage, setShowBadgePage,
+    earnedCount, showSingleBadgeToast, showBadgeProgressToasts,
+  } = useBadgeOrchestrator(community?.id, userId, letterboxdSyncSignal);
 
   // ── Comedy Points (Blank Check exclusive) ──────────────────
   const { checkAndAward: checkComedyPoints, comedyToast, dismissToast: dismissComedyToast } = useComedyPoints(userId);
-
-  const clearBadgeToastTimers = () => {
-    badgeToastTimers.current.forEach(t => clearTimeout(t));
-    badgeToastTimers.current = [];
-  };
-
-  const showSingleBadgeToast = useCallback((toastData, { delayToCelebration, celebrationBadge: celBadge } = {}) => {
-    clearBadgeToastTimers();
-    setBadgeToasts([{ ...toastData, visible: false }]);
-
-    const t0 = setTimeout(() => {
-      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: true })));
-    }, 50);
-    badgeToastTimers.current.push(t0);
-
-    const displayTime = delayToCelebration ? 2000 : 3000;
-    const t1 = setTimeout(() => {
-      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: false })));
-    }, displayTime);
-    badgeToastTimers.current.push(t1);
-
-    const t2 = setTimeout(() => {
-      setBadgeToasts([]);
-      if (delayToCelebration && celBadge) setCelebrationBadge(celBadge);
-    }, displayTime + 500);
-    badgeToastTimers.current.push(t2);
-  }, []);
-
-  const showBadgeProgressToasts = useCallback(() => {
-    const toasts = [];
-    for (const b of badges) {
-      if (earnedBadgeIds.has(b.id)) continue;
-      const bp = badgeProgress[b.id];
-      if (!bp || bp.current === 0) continue;
-      toasts.push({ badge: b, current: bp.current, total: bp.total, isComplete: false });
-    }
-    if (!toasts.length) return;
-
-    toasts.sort((a, b) => (b.current / b.total) - (a.current / a.total));
-    const capped = toasts.slice(0, 3);
-
-    clearBadgeToastTimers();
-    setBadgeToasts(capped.map(t => ({ ...t, visible: false })));
-
-    capped.forEach((_, i) => {
-      const tid = setTimeout(() => {
-        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: true } : t));
-      }, i * 350);
-      badgeToastTimers.current.push(tid);
-    });
-
-    capped.forEach((_, i) => {
-      const tid = setTimeout(() => {
-        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: false } : t));
-      }, 4000 + i * 250);
-      badgeToastTimers.current.push(tid);
-    });
-
-    const tidClear = setTimeout(() => setBadgeToasts([]), 4000 + capped.length * 250 + 600);
-    badgeToastTimers.current.push(tidClear);
-  }, [badges, earnedBadgeIds, badgeProgress]);
-
-  // Auto-check badges on load
-  const badgeAutoChecked = useRef(false);
-  useEffect(() => {
-    if (badgeAutoChecked.current || badgesLoading || badges.length === 0) return;
-    badgeAutoChecked.current = true;
-    checkAllBadges().then(earned => {
-      if (earned.length > 0) {
-        setCelebrationBadge(earned[0]);
-      }
-    });
-  }, [badgesLoading, badges.length, checkAllBadges]);
-
-  // Re-check badges when Letterboxd sync completes
-  const prevSyncSignal = useRef(letterboxdSyncSignal);
-  useEffect(() => {
-    if (!letterboxdSyncSignal || letterboxdSyncSignal === prevSyncSignal.current) return;
-    prevSyncSignal.current = letterboxdSyncSignal;
-    checkAllBadges().then(earned => {
-      if (earned.length > 0) {
-        setCelebrationBadge(earned[0]);
-      } else {
-        showBadgeProgressToasts();
-      }
-    });
-  }, [letterboxdSyncSignal, checkAllBadges, showBadgeProgressToasts]);
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
