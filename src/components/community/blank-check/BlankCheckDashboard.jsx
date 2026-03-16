@@ -23,7 +23,7 @@ const C = {
   border: "rgba(255,255,255,0.07)",
 };
 
-const SUPABASE_URL = "https://gfjobhkofftvmluocxyw.supabase.co";
+const SUPABASE_URL = "https://api.mymantl.app";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const ADMIN_IDS = ["19410e64-d610-4fab-9c26-d24fafc94696"];
 import { searchTMDBRaw } from "../../../utils/api";

@@ -3,7 +3,7 @@ import { supabase } from "../../../supabase";
 
 import { searchTMDBRaw } from "../../../utils/api";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
-const SUPABASE_URL = "https://gfjobhkofftvmluocxyw.supabase.co";
+const SUPABASE_URL = "https://api.mymantl.app";
 
 /**
  * RSSSyncTool — One-tap podcast RSS sync.

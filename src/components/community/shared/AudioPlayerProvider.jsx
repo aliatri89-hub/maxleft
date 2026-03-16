@@ -9,7 +9,7 @@ export function useAudioPlayer() {
 }
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
-const SUPABASE_URL = "https://gfjobhkofftvmluocxyw.supabase.co";
+const SUPABASE_URL = "https://api.mymantl.app";
 const STORAGE_KEY = "mantl_audio_state";
 const RECENTS_KEY = "mantl_audio_recents";
 const NUDGE_DISMISSED_KEY = "mantl_audio_nudge_dismissed";

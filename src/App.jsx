@@ -1137,7 +1137,7 @@ export default function App() {
 
     try {
       // Fetch RSS via Supabase Edge Function (server-side, no CORS issues)
-      const edgeUrl = `https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/letterboxd-rss?username=${encodeURIComponent(username)}${manual ? `&t=${Date.now()}` : ""}`;
+      const edgeUrl = `https://api.mymantl.app/functions/v1/letterboxd-rss?username=${encodeURIComponent(username)}${manual ? `&t=${Date.now()}` : ""}`;
       const res = await fetch(edgeUrl);
       const data = await res.json();
 
@@ -1478,7 +1478,7 @@ if (!tmdbId) {
     setGoodreadsSyncing(true);
 
     try {
-      const edgeUrl = `https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/goodreads-rss?user_id=${encodeURIComponent(grUserId)}&shelf=read${manual ? `&t=${Date.now()}` : ""}`;
+      const edgeUrl = `https://api.mymantl.app/functions/v1/goodreads-rss?user_id=${encodeURIComponent(grUserId)}&shelf=read${manual ? `&t=${Date.now()}` : ""}`;
       const res = await fetch(edgeUrl);
       const data = await res.json();
 
@@ -1661,7 +1661,7 @@ if (!tmdbId) {
   };
 
   // ── Steam Integration ──
-  const STEAM_EDGE = "https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/steam";
+  const STEAM_EDGE = "https://api.mymantl.app/functions/v1/steam";
 
   const syncSteam = async (steamId, userId, manual = false) => {
     if (!steamId || !userId || steamLock.current) return;
