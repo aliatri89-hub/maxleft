@@ -106,17 +106,17 @@ const S = {
   },
 };
 
-export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onViewItem, onOpenDiary, letterboxdSyncing, steamSyncing }) {
+export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onViewItem, onOpenDiary, letterboxdSyncing, steamSyncing, isHero }) {
   const cfg = SHELF_CONFIG[shelfKey];
   if (!cfg) return null;
 
   return (
-    <div style={S.section}>
+    <div style={isHero ? { ...S.section, paddingTop: 10 } : S.section}>
       {/* Header row */}
-      <div style={S.labelRow}>
-        <div style={S.label}>
+      <div style={isHero ? { ...S.labelRow, padding: "0 0 16px" } : S.labelRow}>
+        <div style={isHero ? { ...S.label, fontSize: 26, gap: 10 } : S.label}>
           {cfg.icon} {cfg.label}
-          {items.length > 0 && <span style={S.count}>{items.length}</span>}
+          {items.length > 0 && <span style={isHero ? { ...S.count, fontSize: 14 } : S.count}>{items.length}</span>}
           {shelfKey === "movies" && profile.letterboxd_username && (
             <span style={S.syncDot(letterboxdSyncing)}>
               <span style={S.syncIndicator(letterboxdSyncing)} />

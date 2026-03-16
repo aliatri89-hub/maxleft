@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
 import LazyShelf from "../components/LazyShelf";
-import ShelfTicker from "../components/shelf/ShelfTicker";
 
 // Shelf sections (dark)
 // HIDDEN: Lifestyle shelves — focused on media (books/movies/shows/games)
@@ -96,51 +95,23 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
-      <ShelfTicker shelves={shelves} shelvesLoaded={shelvesLoaded} profile={profile} />
+      {/* ── Movies shelf: always first, hero treatment ── */}
+      {isShelfOn("movies") && (
+        <MediaShelf
+          shelfKey="movies" items={shelves.movies || []} profile={profile}
+          onShelfIt={onShelfIt}
+          onViewItem={(item) => setViewingItem(item)}
+          onOpenDiary={(k) => setDiaryShelf(k)}
+          letterboxdSyncing={letterboxdSyncing} steamSyncing={steamSyncing}
+          isHero
+        />
+      )}
 
-        {/* ── Ordered Shelves ── */}
+        {/* ── Remaining Shelves ── */}
         <div className="shelf-order-wrap">
 
-          {/* Training For + Strava — HIDDEN: focused on media */}
-          {/* {isShelfOn("training") && (
-            <LazyShelf style={{ order: getShelfPos("training") }} skeleton={skelTraining}>
-              <TrainingShelf
-                goals={shelves.goals} stravaActivities={stravaActivities}
-                stravaConnected={stravaConnected} stravaLoading={stravaLoading}
-                stravaDismissed={stravaDismissed} setStravaDismissed={setStravaDismissed}
-                onAddEvent={() => setAddingEvent(true)}
-                onViewEvent={(item) => setViewingEvent(item)}
-                onStravaConnect={onStravaConnect} onStravaDisconnect={onStravaDisconnect}
-              />
-            </LazyShelf>
-          )} */}
-
-          {/* Trophy Case — HIDDEN: focused on media */}
-          {/* {isShelfOn("trophies") && (
-            <LazyShelf style={{ order: getShelfPos("trophies") }} skeleton={skelCompact}>
-              <TrophyShelf
-                trophies={shelves.trophies}
-                onViewEvent={(item) => setViewingEvent(item)}
-                onAddTrophy={() => setAddingTrophy(true)}
-                onOpenTrophyCase={() => setTrophyCaseOpen(true)}
-              />
-            </LazyShelf>
-          )} */}
-
-          {/* Passport — HIDDEN: focused on media */}
-          {/* {isShelfOn("passport") && (
-            <LazyShelf style={{ order: getShelfPos("passport") }} skeleton={skelCompact}>
-              <PassportShelf
-                countries={shelves.countries} profile={profile}
-                onAddCountry={() => setAddingCountry(true)}
-                onViewCountry={(c) => setViewingCountry(c)}
-                onOpenMap={() => setShowPassportMap(true)}
-              />
-            </LazyShelf>
-          )} */}
-
-          {/* Media Shelves */}
-          {["books", "movies", "shows", "games"].filter(key => isShelfOn(key)).map(key => (
+          {/* Media Shelves (minus movies) */}
+          {["books", "shows", "games"].filter(key => isShelfOn(key)).map(key => (
             <LazyShelf key={key} style={{ order: getShelfPos(key) }} skeleton={skelCovers}>
               <MediaShelf
                 shelfKey={key} items={shelves[key] || []} profile={profile}
