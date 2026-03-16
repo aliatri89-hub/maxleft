@@ -601,6 +601,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 function RandomPickCard({ data, onNavigateCommunity }) {
   const hasBackdrop = !!data.backdrop_url;
+  const accent = getCommunityAccent(data.community_slug);
 
   return (
     <div
@@ -642,11 +643,11 @@ function RandomPickCard({ data, onNavigateCommunity }) {
         </div>
       )}
 
-      {/* Ambient glow — warm purple for discovery feel */}
+      {/* Ambient glow — community colored */}
       <div style={{
         position: "absolute", top: -30, right: 40, width: 180, height: 100,
         borderRadius: "50%",
-        background: "#a78bfa",
+        background: accent,
         opacity: 0.05, filter: "blur(40px)",
         pointerEvents: "none",
       }} />
@@ -691,20 +692,20 @@ function RandomPickCard({ data, onNavigateCommunity }) {
       }}>
         <div style={{
           fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600,
-          color: "#a78bfa",
+          color: accent,
           display: "flex", alignItems: "center", gap: 6,
         }}>
           {data.community_image && (
             <img src={data.community_image} alt=""
               style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
-                border: "1px solid rgba(167,139,250,0.2)" }}
+                border: `1px solid ${accent}33` }}
             />
           )}
           {data.community_name}
         </div>
         {/* Shuffle icon — signals this is a random pick */}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           style={{ opacity: 0.5 }}
         >
           <polyline points="16 3 21 3 21 8" />
