@@ -1052,6 +1052,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   objectPosition: "left center",
                   marginBottom: 2,
                   position: "relative",
+                  filter: "brightness(0)",
+                  opacity: 0.8,
                 }}
               />
             ) : (
