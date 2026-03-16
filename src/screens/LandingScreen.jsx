@@ -14,7 +14,6 @@ const POSTER_COLUMNS = [
     '/tjbLSFwi0I3phZwh8zoHWNfbsEp.jpg', // Jaws
     '/hA2ple9q4qnwxp3hKVNhroipsir.jpg', // Mad Max Fury Road
     '/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg', // Scream
-    '/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg', // The Matrix
   ],
   // Column 2 — scrolls down
   [
@@ -23,7 +22,6 @@ const POSTER_COLUMNS = [
     '/ceG9VzoRAVGwivFU403Wc3AHRys.jpg', // Indiana Jones Raiders
     '/sNWdOLae80AdQkD1NpvcDN5f3PB.jpg', // The Shining
     '/gRPePRMct1ttp70sYx7RZG7igee.jpg', // The Fly
-    '/hEjK9A9BkNXejFW4tfacVAEHtkn.jpg', // Rocky
   ],
   // Column 3 — scrolls up faster
   [
@@ -32,7 +30,6 @@ const POSTER_COLUMNS = [
     '/jFTVD4XoWQTcg7wdyJKa8PEds5q.jpg', // Terminator 2
     '/vN5B5WgYscRGcQpVhHl6p9DDTP0.jpg', // Back to the Future
     '/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg', // The Silence of the Lambs
-    '/dLlH4aNHdnmf62umnInL8xPlPzw.jpg', // The Handmaiden
   ],
   // Column 4 — scrolls down slowly
   [
@@ -41,7 +38,6 @@ const POSTER_COLUMNS = [
     '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', // Spirited Away
     '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', // Avatar
     '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // The Shawshank Redemption
-    '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg', // Iron Man
   ],
   // Column 5 — scrolls up
   [
@@ -49,7 +45,6 @@ const POSTER_COLUMNS = [
     '/wdniP8NDaJIydi1hMxhpbJMUfr6.jpg', // Predator
     '/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg', // Pulp Fiction
     '/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', // Joker
-    '/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', // Parasite
     '/rY4odQzflLCWQLL17tzbt8TQkeV.jpg', // Alone in the Dark
   ],
 ];
