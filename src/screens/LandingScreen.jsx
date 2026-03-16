@@ -781,15 +781,6 @@ const featureStyles = `
   .podcast-marquee-row + .podcast-marquee-row {
     margin-top: 18px;
   }
-  .podcast-marquee-track.dragging {
-    animation-play-state: paused !important;
-    cursor: grabbing;
-  }
-  .podcast-marquee-track {
-    cursor: grab;
-    user-select: none;
-    -webkit-user-select: none;
-  }
   .podcast-marquee-item {
     display: flex;
     flex-direction: column;
@@ -912,68 +903,6 @@ function LandingScreen({ onSignIn }) {
     const blocks = document.querySelectorAll('.mantl-feature-block');
     blocks.forEach(block => observer.observe(block));
     return () => observer.disconnect();
-  }, []);
-
-  // ── Touch/drag scrub for podcast marquee ──────────────────
-  useEffect(() => {
-    let activeTrack = null;
-    let startX = 0;
-    let startTranslate = 0;
-
-    const getX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
-
-    const onStart = (e) => {
-      const track = e.currentTarget;
-      const cs = window.getComputedStyle(track);
-      const matrix = new DOMMatrix(cs.transform);
-      activeTrack = track;
-      startX = getX(e);
-      startTranslate = matrix.m41;
-      track.classList.add('dragging');
-      track.style.transform = `translateX(${startTranslate}px)`;
-    };
-
-    const onMove = (e) => {
-      if (!activeTrack) return;
-      e.preventDefault();
-      const dx = getX(e) - startX;
-      activeTrack.style.transform = `translateX(${startTranslate + dx}px)`;
-    };
-
-    const onEnd = () => {
-      if (!activeTrack) return;
-      activeTrack.classList.remove('dragging');
-      activeTrack.style.transform = '';
-      activeTrack = null;
-    };
-
-    // Delayed setup — tracks may not be in DOM yet (scroll-reveal)
-    const timer = setTimeout(() => {
-      const tracks = document.querySelectorAll('.podcast-marquee-track');
-      tracks.forEach(track => {
-        track.addEventListener('touchstart', onStart, { passive: true });
-        track.addEventListener('mousedown', onStart);
-      });
-    }, 1000);
-
-    // Move + end on document so finger/cursor can leave the element
-    document.addEventListener('touchmove', onMove, { passive: false });
-    document.addEventListener('touchend', onEnd);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onEnd);
-
-    return () => {
-      clearTimeout(timer);
-      const tracks = document.querySelectorAll('.podcast-marquee-track');
-      tracks.forEach(track => {
-        track.removeEventListener('touchstart', onStart);
-        track.removeEventListener('mousedown', onStart);
-      });
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onEnd);
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onEnd);
-    };
   }, []);
 
   const scrollToFeatures = () => {
