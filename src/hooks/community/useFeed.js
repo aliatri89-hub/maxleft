@@ -73,7 +73,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         supabase
           .from("feed_trending_weekly")
           .select("*")
-          .limit(5),
+          .limit(10),
 
         // 4. Badge → miniseries lookup
         supabase
@@ -106,7 +106,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           .from("feed_up_next")
           .select("*")
           .eq("user_id", userId)
-          .limit(3),
+          .limit(8),
 
         // 9. Random unwatched
         subscribedIds?.size > 0
@@ -352,7 +352,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         .map(item => ({ type: item.type, data: item.data }));
 
       // ════════════════════════════════════════════
-      // DISCOVER FEED — structured order
+      // DISCOVER FEED — structured order with repeating pattern
       // ════════════════════════════════════════════
       const discoverCards = [];
 
@@ -366,24 +366,27 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         discoverCards.push({ type: "episode", data: ep });
       }
 
-      // 3. One random pick
-      if (randomPicks.length > 0) {
-        discoverCards.push({ type: "random_pick", data: randomPicks[0] });
-      }
+      // 3. Interleave remaining pools: random → badge → up_next → trending
+      let rIdx = 0, bIdx = 0, uIdx = 0, tIdx = 0;
+      const hasMore = () =>
+        rIdx < randomPicks.length ||
+        bIdx < sortedBadges.length ||
+        uIdx < filteredUpNext.length ||
+        tIdx < rawTrending.length;
 
-      // 4. Badge nudges (top 2)
-      for (let i = 0; i < Math.min(2, sortedBadges.length); i++) {
-        discoverCards.push({ type: "badge", data: sortedBadges[i] });
-      }
-
-      // 5. Up next
-      for (const u of filteredUpNext) {
-        discoverCards.push({ type: "up_next", data: u });
-      }
-
-      // 6. Trending
-      if (rawTrending.length > 0) {
-        discoverCards.push({ type: "trending", data: rawTrending[0] });
+      while (hasMore()) {
+        if (rIdx < randomPicks.length) {
+          discoverCards.push({ type: "random_pick", data: randomPicks[rIdx++] });
+        }
+        if (bIdx < sortedBadges.length) {
+          discoverCards.push({ type: "badge", data: sortedBadges[bIdx++] });
+        }
+        if (uIdx < filteredUpNext.length) {
+          discoverCards.push({ type: "up_next", data: filteredUpNext[uIdx++] });
+        }
+        if (tIdx < rawTrending.length) {
+          discoverCards.push({ type: "trending", data: rawTrending[tIdx++] });
+        }
       }
 
       // ════════════════════════════════════════════
