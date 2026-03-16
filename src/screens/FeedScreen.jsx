@@ -1863,7 +1863,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }}>
               {[
                 { key: "discover", label: "Discover" },
-                { key: "activity", label: "My Activity" },
+                { key: "activity", label: "Activity" },
               ].map(tab => {
                 const active = feedMode === tab.key;
                 return (

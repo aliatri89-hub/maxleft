@@ -73,7 +73,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         supabase
           .from("feed_trending_weekly")
           .select("*")
-          .limit(5),
+          .limit(8),
 
         // 4. Badge → miniseries lookup
         supabase
@@ -106,7 +106,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           .from("feed_up_next")
           .select("*")
           .eq("user_id", userId)
-          .limit(5),
+          .limit(8),
 
         // 9. Random unwatched
         subscribedIds?.size > 0
@@ -396,10 +396,10 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
 
       // 3. Interleave remaining pools: random → badge → up_next → trending
       //    Cap each to avoid one pool dominating
-      const capRandom = randomPicks.slice(0, 5);
-      const capBadges = sortedBadges.slice(0, 5);
-      const capUpNext = filteredUpNext.slice(0, 5);
-      const capTrending = rawTrending.slice(0, 5);
+      const capRandom = randomPicks.slice(0, 8);
+      const capBadges = sortedBadges.slice(0, 8);
+      const capUpNext = filteredUpNext.slice(0, 8);
+      const capTrending = rawTrending.slice(0, 8);
       const maxLen = Math.max(capRandom.length, capBadges.length, capUpNext.length, capTrending.length);
 
       for (let i = 0; i < maxLen; i++) {
