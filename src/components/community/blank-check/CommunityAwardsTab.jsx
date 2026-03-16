@@ -35,7 +35,7 @@ export default function CommunityAwardsTab({
   const communityId = community?.id;
   const userId = session?.user?.id;
   const { picks, years, getYear, loading, error } = useCommunityAwards(communityId);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedYear, setSelectedYear] = useState("all");
   const [filter, setFilter] = useState("all");
   const [selectedHost, setSelectedHost] = useState(null); // null = all hosts
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,26 +70,24 @@ export default function CommunityAwardsTab({
     return tmdbId ? tmdbToItemId[tmdbId] : null;
   }, [tmdbToItemId]);
 
-  // Auto-select most recent year
-  useEffect(() => {
-    if (years.length > 0 && selectedYear === null) setSelectedYear(years[0]);
-  }, [years, selectedYear]);
+  // Build structured data — single year or all years
+  const allYearsData = useMemo(() => {
+    const targetYears = selectedYear === "all" ? years : [selectedYear];
+    return targetYears.map(y => ({
+      year: y,
+      ...getYear(y),
+    }));
+  }, [selectedYear, years, getYear]);
 
-  const yearData = useMemo(() => {
-    if (!selectedYear) return { standard: [], ben: [] };
-    return getYear(selectedYear);
-  }, [selectedYear, getYear]);
-
-  // ─── Per-host seen % for this year ────────────────────────
+  // ─── Per-host seen % (scoped to selected year or all) ───
   const hostStats = useMemo(() => {
-    if (!selectedYear) return {};
-    const yearPicks = picks.filter(p => p.year === selectedYear);
+    const relevantPicks = selectedYear === "all" ? picks : picks.filter(p => p.year === selectedYear);
 
     const stats = {};
 
     // Standard hosts
     HOSTS.forEach(host => {
-      const hostPicks = yearPicks.filter(p => p.host === host.key);
+      const hostPicks = relevantPicks.filter(p => p.host === host.key);
       const unique = new Map();
       hostPicks.forEach(p => { if (!unique.has(p.title)) unique.set(p.title, p.tmdb_id); });
       const total = unique.size;
@@ -98,7 +96,7 @@ export default function CommunityAwardsTab({
     });
 
     // Ben
-    const benPicks = yearPicks.filter(p => p.host === "ben");
+    const benPicks = relevantPicks.filter(p => p.host === "ben");
     const benUnique = new Map();
     benPicks.forEach(p => { if (!benUnique.has(p.title)) benUnique.set(p.title, p.tmdb_id); });
     const benTotal = benUnique.size;
@@ -106,7 +104,7 @@ export default function CommunityAwardsTab({
     stats["ben"] = { total: benTotal, seen: benSeen, pct: benTotal > 0 ? Math.round((benSeen / benTotal) * 100) : 0 };
 
     return stats;
-  }, [selectedYear, picks, isSeen]);
+  }, [selectedYear, picks, isSeen, years]);
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
@@ -253,72 +251,103 @@ export default function CommunityAwardsTab({
         )}
       </div>
 
-      {/* ─── Standard Categories ────────────────────────────── */}
-      {yearData.standard.length > 0 && (
-        <div style={{ padding: "0 12px" }}>
-          {yearData.standard.map((cat, ci) => (
-            <CategorySection
-              key={cat.category}
-              category={cat}
-              hosts={HOSTS}
-              isSeen={isSeen}
-              getItemId={getItemId}
-              onToggle={userId ? onToggle : null}
-              isLast={ci === yearData.standard.length - 1}
-              filter={filter}
-              selectedHost={selectedHost}
-              searchQuery={searchQuery}
-            />
-          ))}
-        </div>
-      )}
+      {/* ─── Year sections (all years or single year) ────────── */}
+      {allYearsData.map((yd, yi) => {
+        const hasStandard = yd.standard.length > 0;
+        const hasBen = yd.ben.length > 0 && (!selectedHost || selectedHost === "ben");
+        if (!hasStandard && !hasBen) return null;
 
-      {/* ─── Ben's Categories ───────────────────────────────── */}
-      {yearData.ben.length > 0 && (!selectedHost || selectedHost === "ben") && (
-        <div style={{ padding: "0 0", marginTop: 28 }}>
-          {/* Section header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, padding: "0 16px" }}>
-            <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
-            <div style={{
-              fontSize: 16, fontWeight: 800, color: BEN_COLOR,
-              fontFamily: "'Barlow Condensed', sans-serif",
-              textTransform: "uppercase", letterSpacing: "0.08em",
-            }}>🎲 Ben's Awards</div>
-            <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
+        return (
+          <div key={yd.year}>
+            {/* Year divider — only show in "all" mode */}
+            {selectedYear === "all" && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 12,
+                padding: yi === 0 ? "4px 16px 10px" : "28px 16px 10px",
+              }}>
+                <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }} />
+                <div style={{
+                  fontSize: 20, fontWeight: 800, color: accent,
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  letterSpacing: "0.06em",
+                }}>
+                  {yd.year}
+                </div>
+                <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }} />
+              </div>
+            )}
+
+            {/* Standard Categories */}
+            {hasStandard && (
+              <div style={{ padding: "0 12px" }}>
+                {yd.standard.map((cat, ci) => (
+                  <CategorySection
+                    key={`${yd.year}-${cat.category}`}
+                    category={cat}
+                    hosts={HOSTS}
+                    isSeen={isSeen}
+                    getItemId={getItemId}
+                    onToggle={userId ? onToggle : null}
+                    isLast={ci === yd.standard.length - 1}
+                    filter={filter}
+                    selectedHost={selectedHost}
+                    searchQuery={searchQuery}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Ben's Categories */}
+            {hasBen && (
+              <div style={{ padding: "0 0", marginTop: 28 }}>
+                {/* Section header */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6, padding: "0 16px" }}>
+                  <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
+                  <div style={{
+                    fontSize: 16, fontWeight: 800, color: BEN_COLOR,
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    textTransform: "uppercase", letterSpacing: "0.08em",
+                  }}>🎲 Ben's Awards{selectedYear === "all" ? ` ${yd.year}` : ""}</div>
+                  <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
+                </div>
+
+                {/* Editorial note — only on first occurrence */}
+                {yi === 0 && (
+                  <div style={{
+                    margin: "0 16px 16px", padding: "10px 14px",
+                    background: "rgba(74,222,128,0.04)",
+                    border: "1px solid rgba(74,222,128,0.08)",
+                    borderRadius: 8, textAlign: "center",
+                  }}>
+                    <div style={{
+                      fontSize: 11, color: "rgba(74,222,128,0.5)",
+                      fontStyle: "italic", lineHeight: 1.5,
+                    }}>No typed-out description can do justice to Ben. Listen to the episode.</div>
+                  </div>
+                )}
+
+                {yd.ben.map((cat) => (
+                  <BenCategoryShelf
+                    key={`${yd.year}-ben-${cat.category}`}
+                    category={cat}
+                    isSeen={isSeen}
+                    getItemId={getItemId}
+                    onToggle={userId ? onToggle : null}
+                    filter={filter}
+                    searchQuery={searchQuery}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+        );
+      })}
 
-          {/* Editorial note */}
-          <div style={{
-            margin: "0 16px 16px", padding: "10px 14px",
-            background: "rgba(74,222,128,0.04)",
-            border: "1px solid rgba(74,222,128,0.08)",
-            borderRadius: 8, textAlign: "center",
-          }}>
-            <div style={{
-              fontSize: 11, color: "rgba(74,222,128,0.5)",
-              fontStyle: "italic", lineHeight: 1.5,
-            }}>No typed-out description can do justice to Ben. Listen to the episode.</div>
-          </div>
-
-          {yearData.ben.map((cat) => (
-            <BenCategoryShelf
-              key={cat.category}
-              category={cat}
-              isSeen={isSeen}
-              getItemId={getItemId}
-              onToggle={userId ? onToggle : null}
-              filter={filter}
-              searchQuery={searchQuery}
-            />
-          ))}
-        </div>
-      )}
-
-      {yearData.standard.length === 0 && yearData.ben.length === 0 && (
+      {allYearsData.every(yd => yd.standard.length === 0 && yd.ben.length === 0) && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
           fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic",
-        }}>No picks added for {selectedYear} yet</div>
+        }}>No picks added{selectedYear !== "all" ? ` for ${selectedYear}` : ""} yet</div>
       )}
     </div>
   );
@@ -794,8 +823,11 @@ function YearDropdown({ years, selectedYear, onChange, accent }) {
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       <select
-        value={selectedYear || ""}
-        onChange={(e) => onChange(Number(e.target.value))}
+        value={selectedYear || "all"}
+        onChange={(e) => {
+          const val = e.target.value;
+          onChange(val === "all" ? "all" : Number(val));
+        }}
         style={{
           appearance: "none",
           WebkitAppearance: "none",
@@ -812,6 +844,9 @@ function YearDropdown({ years, selectedYear, onChange, accent }) {
           outline: "none",
         }}
       >
+        <option value="all" style={{ background: "#1a1a2e", color: "#fff" }}>
+          All Years
+        </option>
         {years.map((year) => (
           <option key={year} value={year} style={{ background: "#1a1a2e", color: "#fff" }}>
             {year}
