@@ -61,6 +61,126 @@ const POSTER_COLUMNS = [
 
 // ── Hero enhancement styles ──────────────────────────────────
 const heroEnhancementStyles = `
+  /* ── VHS SCANLINES OVERLAY ─────────────────────────────── */
+  .vhs-scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 6;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.12) 2px,
+      rgba(0,0,0,0.12) 4px
+    );
+  }
+
+  /* ── M▶NTL LOGO ────────────────────────────────────────── */
+  .vhs-logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .vhs-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: #e8c4a0;
+    margin-bottom: 10px;
+    display: block;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+    line-height: 1.6;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .vhs-eyebrow strong {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.22em;
+    color: #f5f0eb;
+    margin-top: 4px;
+    padding-left: 68px;
+  }
+  .vhs-logo {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    opacity: 0;
+    animation: fadeIn 0.01s ease 0.2s forwards;
+  }
+  .vhs-logo-letter {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 105px;
+    line-height: 0.85;
+    letter-spacing: 0.02em;
+    color: #f5f0eb;
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(110%);
+    animation: shelfRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .vhs-play-btn {
+    position: relative;
+    width: 75px;
+    height: 89px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 -2px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(110%);
+    animation: shelfRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .vhs-play-btn-bg {
+    position: absolute;
+    inset: 0px 0px;
+    background: rgba(15,13,11,0.85);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.06),
+      0 2px 6px rgba(0,0,0,0.3);
+  }
+  .vhs-play-btn:hover .vhs-play-btn-bg {
+    background: rgba(15,13,11,0.9);
+    border-color: rgba(255,255,255,0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      0 4px 16px rgba(0,0,0,0.4),
+      0 0 30px rgba(240, 236, 224, 0.06);
+  }
+  .vhs-play-triangle {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 21px 0 21px 35px;
+    border-color: transparent transparent transparent #f5f0eb;
+    position: relative;
+    z-index: 2;
+    margin-left: 5px;
+    filter: drop-shadow(0 0 8px rgba(240, 236, 224, 0.15));
+    transition: filter 0.3s ease;
+  }
+  .vhs-play-btn:hover .vhs-play-triangle {
+    filter: drop-shadow(0 0 16px rgba(240, 236, 224, 0.3));
+  }
+  .vhs-wordmark-line {
+    display: block;
+    width: 100%;
+    height: 4px;
+    background: var(--terracotta, #C75B3F);
+    border-radius: 2px;
+    margin-top: 6px;
+  }
+
   /* ── POSTER MARQUEE BACKGROUND ─────────────────────────── */
   .poster-marquee {
     position: absolute;
@@ -177,7 +297,7 @@ const featureStyles = `
   /* ── FEATURES SECTION OVERHAUL ───────────────────────────── */
   .mantl-features {
     background: linear-gradient(180deg, #1a1714 0%, #0f0d0b 100%);
-    padding: 60px 12px 80px;
+    padding: 60px 12px 48px;
     overflow: hidden;
     position: relative;
   }
@@ -193,7 +313,7 @@ const featureStyles = `
   }
   .mantl-features-header {
     text-align: center;
-    margin-bottom: 56px;
+    margin-bottom: 40px;
   }
   .mantl-features-header h2 {
     font-family: 'Barlow Condensed', sans-serif;
@@ -216,7 +336,7 @@ const featureStyles = `
   /* ── FEATURE BLOCKS ──────────────────────────────────────── */
   .mantl-feature-block {
     max-width: 420px;
-    margin: 0 auto 64px;
+    margin: 0 auto 44px;
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.7s ease, transform 0.7s ease;
@@ -707,6 +827,69 @@ const featureStyles = `
   }
 
 
+  /* ── SYNC DEMO ─────────────────────────────────────────── */
+  .sync-demo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .sync-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s ease;
+  }
+  .sync-row:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .sync-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .sync-logo-rounded {
+    border-radius: 12px;
+  }
+  .sync-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .sync-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #f5f0eb;
+  }
+  .sync-stat {
+    font-family: 'Lora', serif;
+    font-size: 0.68rem;
+    color: #9a938a;
+    font-style: italic;
+  }
+  .sync-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(0,200,100,0.7);
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(0,200,100,0.08);
+    border: 1px solid rgba(0,200,100,0.15);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
   /* ── BOTTOM CTA ──────────────────────────────────────────── */
   .mantl-bottom-cta {
     text-align: center;
@@ -725,14 +908,14 @@ const featureStyles = `
   .tap-hint {
     font-family: 'Lora', serif;
     font-style: italic;
-    font-size: 0.68rem;
-    color: rgba(255,255,255,0.25);
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
     text-align: center;
     margin-top: 10px;
   }
   @keyframes tapPulse {
-    0%, 100% { opacity: 0.25; }
-    50% { opacity: 0.5; }
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
   }
   .tap-hint {
     animation: tapPulse 2.5s ease-in-out infinite;
@@ -741,7 +924,7 @@ const featureStyles = `
   /* ── GROWING COMMUNITIES ──────────────────────────────────── */
   .growing-section {
     text-align: center;
-    padding: 20px 0;
+    padding: 8px 0;
   }
   .growing-divider {
     width: 48px;
@@ -754,7 +937,7 @@ const featureStyles = `
   .podcast-marquee {
     position: relative;
     overflow: hidden;
-    margin: 24px -18px 28px;
+    margin: 16px -18px 20px;
   }
   .podcast-marquee-row {
     overflow: hidden;
@@ -834,7 +1017,7 @@ const featureStyles = `
     font-size: 0.82rem;
     color: #9a938a;
     line-height: 1.65;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
   }
 `;
 
@@ -1172,18 +1355,24 @@ function LandingScreen({ onSignIn }) {
         <div className="poster-overlay" />
         <div className="film-grain" />
 
+        {/* ── VHS scanlines ──────────────────────────────── */}
+
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">Another reason to <strong>press play</strong></div>
-          <div className="landing-wordmark">
-            <span className="landing-shelf-letters">
-              {"MANTL".split("").map((letter, i) => (
-                <span key={i} className="shelf-letter" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
-                  {letter}
-                </span>
-              ))}
-            </span>
-            <span className="landing-wordmark-line" />
+          <div className="vhs-scanlines" />
+          <div className="vhs-logo-wrap">
+            <span className="vhs-eyebrow">Another reason to<br /><strong>press play</strong></span>
+            <div className="vhs-logo">
+              <span className="vhs-logo-letter" style={{ animationDelay: '0.3s' }}>M</span>
+              <div className="vhs-play-btn" style={{ animationDelay: '0.4s' }} onClick={scrollToFeatures}>
+                <div className="vhs-play-btn-bg" />
+                <div className="vhs-play-triangle" />
+              </div>
+              <span className="vhs-logo-letter" style={{ animationDelay: '0.5s' }}>N</span>
+              <span className="vhs-logo-letter" style={{ animationDelay: '0.6s' }}>T</span>
+              <span className="vhs-logo-letter" style={{ animationDelay: '0.7s' }}>L</span>
+            </div>
+            <span className="vhs-wordmark-line" />
           </div>
           <div className="landing-tagline">
             Discover what to watch,<br />
@@ -1383,7 +1572,7 @@ function LandingScreen({ onSignIn }) {
                 disabled={demoLogged}
                 style={{ opacity: demoLogged ? 1 : 1 }}
               >
-                {demoLogged ? '✓ Shelved' : 'Shelf It'}
+                {demoLogged ? '✓ Logged' : 'Log'}
               </button>
               <div className="demo-progress-wrap">
                 <div className="demo-progress-label">
@@ -1405,12 +1594,52 @@ function LandingScreen({ onSignIn }) {
             <div className={`demo-toast${showToast ? ' show' : ''}`}>
               <span className="demo-toast-icon">👽</span>
               <div>
-                <div className="demo-toast-text">Alien Shelved!</div>
+                <div className="demo-toast-text">Alien Logged!</div>
                 <div className="demo-toast-sub">5 of 8 toward Weyland-Yutani Employee</div>
               </div>
             </div>
           </div>
-          <div className="tap-hint">Try it — rate and shelf</div>
+          <div className="tap-hint">Try it — rate and log</div>
+        </div>
+
+        {/* ── 3.5 SYNC IMPORTS ──────────────────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('sync') ? ' visible' : ''}`}
+          data-block="sync"
+          style={{ transitionDelay: '0.25s' }}
+        >
+          <div className="mantl-feature-label">Sync</div>
+          <div className="mantl-feature-title">Already Tracking? Import It.</div>
+          <div className="mantl-feature-desc">
+            Connect your Letterboxd, Goodreads, Storygraph, and Steam accounts.
+            Your logs sync automatically.
+          </div>
+          <div className="sync-demo">
+            <div className="sync-row">
+              <img className="sync-logo" src="https://a.ltrbxd.com/logos/letterboxd-mac-icon.png" alt="Letterboxd" />
+              <div className="sync-info">
+                <div className="sync-name">Letterboxd</div>
+                <div className="sync-stat">Films & ratings</div>
+              </div>
+              <div className="sync-badge">Auto-sync</div>
+            </div>
+            <div className="sync-row">
+              <img className="sync-logo sync-logo-rounded" src="https://play-lh.googleusercontent.com/bOOrAMR_IOv0jyKJU2MstONEBGzAEQmEoNmaRPl-V4CY4uvFNmrI2aBoXmnhGxhsxdo=w240-h480-rw" alt="Storygraph" />
+              <div className="sync-info">
+                <div className="sync-name">Goodreads / Storygraph</div>
+                <div className="sync-stat">Books & shelves</div>
+              </div>
+              <div className="sync-badge">Auto-sync</div>
+            </div>
+            <div className="sync-row">
+              <img className="sync-logo" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Steam_Logo.png" alt="Steam" />
+              <div className="sync-info">
+                <div className="sync-name">Steam</div>
+                <div className="sync-stat">Games & playtime</div>
+              </div>
+              <div className="sync-badge">Auto-sync</div>
+            </div>
+          </div>
         </div>
 
         {/* ── 4. GROWING COMMUNITIES ────────────────────────── */}
@@ -1462,7 +1691,6 @@ function LandingScreen({ onSignIn }) {
               Press Play
             </span>
           </button>
-          <div className="mantl-bottom-tagline">New communities coming soon</div>
         </div>
       </div>
     </div>

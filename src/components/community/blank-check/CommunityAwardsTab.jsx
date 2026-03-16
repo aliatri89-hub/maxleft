@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
+import { useAudioPlayer } from "../shared/AudioPlayerProvider";
 import CommunityFilter from "../shared/CommunityFilter";
 
 /**
@@ -25,6 +26,25 @@ const HOSTS = [
 
 const BEN_COLOR = "#4ade80";
 
+/**
+ * Blankies episode audio URLs by year.
+ * Key = award year, value = RSS enclosureUrl for that year's Blankies episode.
+ * Ali: paste the direct MP3/audio URLs from the Blank Check RSS feed here.
+ */
+const BLANKIES_EPISODES = {
+  2015: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI3437146431.mp3?updated=1758761671",
+  2016: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI1984554342.mp3?updated=1753936816",
+  2017: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI9137105735.mp3?updated=1727732298",
+  2018: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI5714019187.mp3?updated=1753932410",
+  2019: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI8111548608.mp3?updated=1752598889",
+  2020: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI7109119913.mp3?updated=1752174231",
+  2021: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI1540242421.mp3?updated=1752169287",
+  2022: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI8860981683.mp3?updated=1752001184",
+  2023: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI2494893427.mp3?updated=1751927527",
+  2024: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI6150389641.mp3?updated=1742581984",
+  2025: "https://pscrb.fm/rss/p/mgln.ai/e/441/tracking.swap.fm/track/8fvJdZ1Y8SQ0SkCuaYDp/traffic.megaphone.fm/THI5651141249.mp3?updated=1772309624",
+};
+
 export default function CommunityAwardsTab({
   community,
   session,
@@ -35,6 +55,7 @@ export default function CommunityAwardsTab({
   const communityId = community?.id;
   const userId = session?.user?.id;
   const { picks, years, getYear, loading, error } = useCommunityAwards(communityId);
+  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
   const [selectedYear, setSelectedYear] = useState("all");
   const [filter, setFilter] = useState("all");
   const [selectedHost, setSelectedHost] = useState(null); // null = all hosts
@@ -95,8 +116,8 @@ export default function CommunityAwardsTab({
       stats[host.key] = { total, seen, pct: total > 0 ? Math.round((seen / total) * 100) : 0 };
     });
 
-    // Ben
-    const benPicks = relevantPicks.filter(p => p.host === "ben");
+    // Ben — exclude "No Thank You" picks (films Ben says to skip)
+    const benPicks = relevantPicks.filter(p => p.host === "ben" && !p.category.toLowerCase().includes("no thank"));
     const benUnique = new Map();
     benPicks.forEach(p => { if (!benUnique.has(p.title)) benUnique.set(p.title, p.tmdb_id); });
     const benTotal = benUnique.size;
@@ -160,12 +181,19 @@ export default function CommunityAwardsTab({
           selectedHost={selectedHost}
           onSelectHost={(key) => setSelectedHost(selectedHost === key ? null : key)}
         />
-        <div style={{ padding: "0 16px 14px", textAlign: "center" }}>
+        <div style={{ padding: "0 16px 14px", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
           <YearDropdown
             years={years}
             selectedYear={selectedYear}
             onChange={setSelectedYear}
             accent={accent}
+          />
+          <BlankiesListenPill
+            selectedYear={selectedYear}
+            accent={accent}
+            playEpisode={playEpisode}
+            currentEp={currentEp}
+            isPlaying={isPlaying}
           />
         </div>
       </AwardsHeroBanner>
@@ -1019,5 +1047,72 @@ function HostDonutGrid({ hostStats, selectedHost, onSelectHost }) {
         );
       })}
     </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   BlankiesListenPill — play the Blankies episode for the selected year
+   Shows next to the year dropdown, only when a URL is available.
+   ═══════════════════════════════════════════════════════════════ */
+
+function BlankiesListenPill({ selectedYear, accent, playEpisode, currentEp, isPlaying }) {
+  if (selectedYear === "all") return null;
+  const url = BLANKIES_EPISODES[selectedYear];
+  if (!url) return null;
+
+  const isThisEp = currentEp && currentEp.enclosureUrl === url;
+  const playing = isThisEp && isPlaying;
+
+  const handlePlay = () => {
+    const ordinals = {
+      2015: "First", 2016: "Second", 2017: "Third", 2018: "Fourth",
+      2019: "Fifth", 2020: "Sixth", 2021: "Seventh", 2022: "Eighth",
+      2023: "Ninth", 2024: "Tenth", 2025: "Eleventh",
+    };
+    const ord = ordinals[selectedYear] || selectedYear;
+    playEpisode({
+      enclosureUrl: url,
+      title: `The ${ord} Annual Blank Check Awards`,
+      guid: `blankies-${selectedYear}`,
+      community: "Blank Check",
+      artwork: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/bc_podcast_art.jpg",
+    });
+  };
+
+  return (
+    <button
+      onClick={handlePlay}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "8px 14px 8px 11px",
+        background: playing ? `${accent}20` : `${accent}12`,
+        border: `1px solid ${playing ? accent : `${accent}40`}`,
+        borderRadius: 10,
+        color: playing ? accent : "#fff",
+        fontSize: 14,
+        fontWeight: 700,
+        fontFamily: "'Barlow Condensed', sans-serif",
+        letterSpacing: "0.04em",
+        cursor: "pointer",
+        outline: "none",
+        transition: "all 0.2s ease",
+        WebkitTapHighlightColor: "transparent",
+      }}
+    >
+      {playing ? (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill={accent}>
+          <rect x="5" y="4" width="5" height="16" rx="1" />
+          <rect x="14" y="4" width="5" height="16" rx="1" />
+        </svg>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill={accent}>
+          <path d="M6 4l15 8-15 8V4z" />
+        </svg>
+      )}
+      <span>{playing ? "Playing" : "Listen"}</span>
+    </button>
   );
 }
