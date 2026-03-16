@@ -972,9 +972,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
     return () => observer.disconnect();
   }, [data.communities]);
 
+  // Primary community for the tape brand
+  const primaryCommunity = data.communities?.[0] || {};
+  const communityImg = primaryCommunity.community_image || data.community_image;
+  const communitySlug = primaryCommunity.community_slug || data.community_slug;
+
   return (
     <div
-      onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
+      onClick={() => onNavigateCommunity?.(communitySlug, data.tmdb_id)}
       style={{
         margin: "4px 16px",
         borderRadius: 5,
@@ -997,11 +1002,43 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
           position: "relative",
         }}>
 
-          {/* Label text area — full width */}
+          {/* Podcast art — left side (like FUJI brand on tape spine) */}
+          <div
+            onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.(communitySlug); }}
+            style={{
+              width: 52, flexShrink: 0,
+              background: "#1a1612",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+              cursor: "pointer",
+            }}
+          >
+            {communityImg ? (
+              <img src={communityImg} alt="" style={{
+                width: 38, height: 38, borderRadius: 8, objectFit: "cover",
+                border: `1.5px solid ${accent}44`,
+              }} />
+            ) : (
+              <div style={{
+                width: 38, height: 38, borderRadius: 8,
+                background: `${accent}20`,
+                border: `1.5px solid ${accent}44`,
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
+                fontSize: 11, color: accent,
+              }}>
+                {(primaryCommunity.community_name || "").split(" ").map(w => w[0]).join("")}
+              </div>
+            )}
+          </div>
+
+          {/* Label text area */}
           <div style={{
             flex: 1,
             background: "#f0ebe1",
-            padding: "8px 14px",
+            padding: "8px 12px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
@@ -1018,41 +1055,17 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               `,
             }} />
 
-            {/* "Watched" in sharpie + time in typewriter */}
-            <div style={{
-              display: "flex", alignItems: "baseline", gap: 8,
-              marginBottom: 4, position: "relative",
-            }}>
-              <span style={{
-                fontFamily: "'Permanent Marker', cursive",
-                fontSize: 13,
-                color: "rgba(44,40,36,0.6)",
-                textTransform: "uppercase",
-              }}>
-                {data.media_type === "book" ? "Read" : data.media_type === "game" ? "Played" : "Watched"}
-              </span>
-              <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 8,
-                fontWeight: 500,
-                color: "rgba(44,40,36,0.3)",
-                letterSpacing: "0.06em",
-              }}>
-                {timeAgo}
-              </span>
-            </div>
-
-            {/* Logo or title — centered, bigger */}
+            {/* Logo or title — centered */}
             {data.logo_url ? (
               <img
                 src={data.logo_url}
                 alt={data.title}
                 style={{
                   maxHeight: 36,
-                  maxWidth: "85%",
+                  maxWidth: "90%",
                   objectFit: "contain",
                   objectPosition: "center",
-                  marginBottom: 4,
+                  marginBottom: 3,
                   position: "relative",
                   filter: "brightness(0)",
                   opacity: 0.8,
@@ -1068,7 +1081,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                 textTransform: "uppercase",
                 letterSpacing: "0.01em",
                 position: "relative",
-                marginBottom: 4,
+                marginBottom: 3,
                 textAlign: "center",
               }}>
                 {data.title}
@@ -1089,262 +1102,25 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               )}
               <Stars rating={data.rating} size={10} />
             </div>
-          </div>
 
-          {/* Community color band (right edge — like FUJI / Memorex) */}
-          <div style={{
-            width: 22, flexShrink: 0,
-            background: accent,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
+            {/* Time — bottom right, sharpie */}
             <div style={{
-              writingMode: "vertical-rl",
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 800,
-              fontSize: 7.5,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              color: "rgba(0,0,0,0.5)",
-              transform: "rotate(180deg)",
+              position: "absolute",
+              bottom: 4, right: 8,
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 10,
+              color: "rgba(44,40,36,0.35)",
             }}>
-              {(data.communities?.[0]?.community_name || data.community_name || "").split(" ").map(w => w[0]).join("")}
+              {timeAgo}
             </div>
           </div>
+
+          {/* Community color band (right edge) */}
+          <div style={{
+            width: 18, flexShrink: 0,
+            background: accent,
+          }} />
         </div>
-
-        {/* ── Community context — compact row on plastic ── */}
-        {data.communities?.length > 0 && (
-          <div>
-            {!expanded && (
-              <div
-                onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 4,
-                  padding: "2px 10px 4px",
-                  cursor: "pointer",
-                }}
-              >
-                {data.communities.map((c, i) => {
-                  const img = c.badge?.badge_image || c.community_image;
-                  const isBadge = !!c.badge;
-                  return img ? (
-                    <img key={i} src={img} alt="" style={{
-                      width: 16, height: 16,
-                      borderRadius: isBadge ? "50%" : 4,
-                      objectFit: "cover",
-                      border: isBadge
-                        ? `1px solid ${c.badge.accent_color || "#f5c542"}55`
-                        : "1px solid rgba(255,255,255,0.08)",
-                    }} />
-                  ) : (
-                    <div key={i} style={{
-                      width: 16, height: 16, borderRadius: 4,
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontFamily: "var(--font-display)", fontWeight: 700,
-                      fontSize: 6, color: "rgba(255,255,255,0.25)",
-                    }}>
-                      {getSlugAbbrev(c.community_slug)}
-                    </div>
-                  );
-                })}
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none"
-                  stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" strokeLinecap="round"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
-            )}
-
-            {expanded && (
-              <div
-                onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
-                style={{
-                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
-                  padding: "2px 0 4px",
-                  cursor: "pointer",
-                }}
-              >
-                <div style={{
-                  width: 28, height: 2.5, borderRadius: 3,
-                  background: "rgba(255,255,255,0.15)",
-                }} />
-              </div>
-            )}
-          <div
-            style={{
-              maxHeight: expanded ? contentHeight : 0,
-              overflow: "hidden",
-              opacity: expanded ? 1 : 0,
-              transition: "max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease",
-            }}
-          >
-          <div ref={contentRef}>
-          {data.communities.map((c, i) => {
-            const hasBadge = !!c.badge;
-            const accentColor = c.badge?.accent_color || "var(--accent-gold, #f5c542)";
-            const isComplete = c.series_total > 0 && c.series_watched >= c.series_total;
-            const badgeBlur = isComplete ? 0 : Math.max(1, Math.round(3 * (1 - (c.series_watched / (c.series_total || 1)))));
-
-            return (
-              <div
-                key={`${c.community_slug}-${c.series_title}-${i}`}
-                onClick={() => {
-                  if (hasBadge && c.badge.badge_id && onViewBadgeDetail) {
-                    onViewBadgeDetail({
-                      id: c.badge.badge_id,
-                      name: c.badge.badge_name,
-                      image_url: c.badge.badge_image,
-                      accent_color: c.badge.accent_color,
-                      tagline: c.badge.tagline || null,
-                      progress_tagline: c.badge.progress_tagline || null,
-                      miniseries_id: c.badge.miniseries_id || null,
-                      media_type_filter: c.badge.media_type_filter || null,
-                    });
-                  } else {
-                    onNavigateCommunity?.(c.community_slug, data.tmdb_id);
-                  }
-                }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12, padding: "10px 16px",
-                  borderBottom: i < data.communities.length - 1
-                    ? "1px solid var(--border-subtle, rgba(255,255,255,0.06))" : "none",
-                  cursor: "pointer",
-                  transition: "background 0.15s",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {/* Subtle badge accent wash */}
-                {hasBadge && (
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: `linear-gradient(90deg, ${accentColor}08, transparent 60%)`,
-                    pointerEvents: "none",
-                  }} />
-                )}
-
-                {/* Artwork — blurred badge image if badge, else community logo */}
-                {hasBadge ? (
-                  <div style={{
-                    width: 34, height: 34, borderRadius: "50%",
-                    background: `${accentColor}15`,
-                    border: `1.5px solid ${accentColor}44`,
-                    flexShrink: 0, overflow: "hidden",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    {c.badge.badge_image ? (
-                      <img
-                        src={c.badge.badge_image}
-                        alt=""
-                        style={{
-                          width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%",
-                          filter: `blur(${badgeBlur}px)`,
-                        }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: 14, filter: `blur(${badgeBlur}px)` }}>🏆</span>
-                    )}
-                  </div>
-                ) : c.community_image ? (
-                  <img
-                    src={c.community_image}
-                    alt={c.community_name}
-                    style={{
-                      width: 34, height: 34, borderRadius: 9, objectFit: "cover",
-                      flexShrink: 0, border: "1px solid rgba(255,255,255,0.1)",
-                    }}
-                  />
-                ) : (
-                  <div style={{
-                    width: 34, height: 34, borderRadius: 9,
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontFamily: "var(--font-display)", fontWeight: 700,
-                    fontSize: 11, color: "var(--text-muted, #8892a8)", flexShrink: 0,
-                  }}>
-                    {getSlugAbbrev(c.community_slug)}
-                  </div>
-                )}
-
-                {/* Series info — badge-aware */}
-                <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
-                  {hasBadge ? (
-                    <>
-                      <div style={{
-                        fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
-                        color: accentColor, marginBottom: 1, lineHeight: 1.2,
-                      }}>
-                        {c.badge.badge_name}
-                      </div>
-                      <div style={{
-                        fontFamily: "var(--font-body)", fontSize: 11,
-                        color: "var(--text-muted, #8892a8)", lineHeight: 1.2,
-                      }}>
-                        {c.community_name}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{
-                        fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 13,
-                        color: "var(--text-primary, #e8ecf4)", marginBottom: 1,
-                      }}>
-                        {c.community_name}
-                      </div>
-                      {c.series_title && (
-                        <div style={{
-                          fontFamily: "var(--font-body)", fontSize: 12,
-                          color: "var(--text-muted, #8892a8)",
-                        }}>
-                          {c.series_title}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Progress */}
-                {c.series_total > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                    <ProgressBar
-                      current={c.series_watched}
-                      total={c.series_total}
-                      color={hasBadge ? accentColor : "var(--accent-green, #34d399)"}
-                    />
-                    <span style={{
-                      fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-                      color: hasBadge ? accentColor : "var(--text-muted, #8892a8)",
-                      minWidth: 32, textAlign: "right",
-                    }}>
-                      {c.series_watched}/{c.series_total}
-                    </span>
-                  </div>
-                )}
-
-                {/* Play episode — only if audio available */}
-                {c.episode_url && (
-                  <FeedPlayButton
-                    episodeUrl={c.episode_url}
-                    episodeTitle={c.episode_title || data.title}
-                    communityName={c.community_name}
-                    communityImage={c.community_image}
-                  />
-                )}
-
-
-              </div>
-            );
-          })}
-          </div>
-          </div>
-        </div>
-      )}
       </div>
     </div>
   );
