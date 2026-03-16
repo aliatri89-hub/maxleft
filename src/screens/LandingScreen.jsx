@@ -127,8 +127,8 @@ const heroEnhancementStyles = `
   }
   .vhs-play-btn {
     position: relative;
-    width: 72px;
-    height: 80px;
+    width: 68px;
+    height: 74px;
     display: flex;
     align-items: center;
     justify-content: center;
