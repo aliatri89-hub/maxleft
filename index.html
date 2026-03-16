@@ -30,69 +30,72 @@
         transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
       }
       #splash-screen.hidden { opacity: 0; transform: scale(1.02); visibility: hidden; pointer-events: none; }
-      .splash-logo {
-        font-family: 'Barlow Condensed', sans-serif;
-        font-weight: 900; font-size: 44px;
-        letter-spacing: 0.08em; text-transform: uppercase;
-        color: #f5f0eb;
+      .splash-scanlines {
+        position: absolute; inset: 0; pointer-events: none;
+        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+        z-index: 0;
+      }
+      .splash-wordmark {
+        display: flex; align-items: center; position: relative; z-index: 1;
         animation: splashUp 0.6s ease both;
+      }
+      .splash-letter {
+        font-family: 'Barlow Condensed', sans-serif;
+        font-weight: 900; font-size: 52px;
+        line-height: 0.85; letter-spacing: 0.02em;
+        color: #f5f0eb; text-transform: uppercase;
+      }
+      .splash-play-btn {
+        position: relative; width: 38px; height: 44px;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 -1px;
+      }
+      .splash-play-bg {
+        position: absolute; inset: 0;
+        background: rgba(15,13,11,0.85);
+        border: 1.5px solid rgba(255,255,255,0.12);
+        border-radius: 4px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 6px rgba(0,0,0,0.3);
+      }
+      .splash-play-tri {
+        width: 0; height: 0; position: relative; z-index: 1;
+        border-style: solid; border-width: 10px 0 10px 17px;
+        border-color: transparent transparent transparent #f5f0eb;
+        margin-left: 3px;
+        animation: splashTriGlow 2.5s ease-in-out 1s infinite;
       }
       .splash-line {
         height: 3px; background: #C4734F;
-        border-radius: 2px; margin-top: 6px;
+        border-radius: 2px; margin-top: 8px;
+        position: relative; z-index: 1;
         animation: splashLine 0.8s ease 0.3s both;
-      }
-      .splash-play-wrap {
-        position: relative; width: 56px; height: 56px;
-        margin-top: 36px;
-        animation: splashUp 0.6s ease 0.6s both;
-      }
-      .splash-play-ring {
-        position: absolute; inset: 0; border-radius: 50%;
-        border: 2px solid rgba(196,115,79,0.35);
-        animation: splashRingPulse 2s ease-in-out 1.2s infinite;
-      }
-      .splash-play-ripple {
-        position: absolute; inset: 0; border-radius: 50%;
-        border: 1.5px solid rgba(196,115,79,0.25);
-        animation: splashRipple 2s ease-out 1.2s infinite;
-      }
-      .splash-play-btn {
-        position: absolute; inset: 0; border-radius: 50%;
-        background: rgba(196,115,79,0.12);
-        display: flex; align-items: center; justify-content: center;
-      }
-      .splash-play-tri {
-        width: 0; height: 0;
-        border-style: solid; border-width: 9px 0 9px 16px;
-        border-color: transparent transparent transparent #C4734F;
-        margin-left: 3px; opacity: 0.85;
-        animation: splashTriGlow 2s ease-in-out 1.2s infinite;
       }
       .splash-tagline {
         font-family: 'Lora', serif; font-style: italic;
         font-size: 13px; color: #8a7e72;
-        margin-top: 24px; letter-spacing: 0.02em;
-        animation: splashUp 0.8s ease 0.9s both;
+        margin-top: 20px; letter-spacing: 0.02em;
+        position: relative; z-index: 1;
+        animation: splashUp 0.8s ease 0.6s both;
       }
       @keyframes splashUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes splashLine { from { width: 0; } to { width: 52px; } }
-      @keyframes splashRingPulse { 0%,100% { border-color: rgba(196,115,79,0.2); transform: scale(1); } 50% { border-color: rgba(196,115,79,0.5); transform: scale(1.06); } }
-      @keyframes splashRipple { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.7); opacity: 0; } }
-      @keyframes splashTriGlow { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+      @keyframes splashTriGlow { 0%,100% { opacity: 0.6; filter: drop-shadow(0 0 4px rgba(240,236,224,0.1)); } 50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(240,236,224,0.25)); } }
     </style>
   </head>
   <body>
     <div id="splash-screen">
-      <div class="splash-logo">MANTL</div>
-      <div class="splash-line"></div>
-      <div class="splash-play-wrap">
-        <div class="splash-play-ripple"></div>
-        <div class="splash-play-ring"></div>
+      <div class="splash-scanlines"></div>
+      <div class="splash-wordmark">
+        <span class="splash-letter">M</span>
         <div class="splash-play-btn">
+          <div class="splash-play-bg"></div>
           <div class="splash-play-tri"></div>
         </div>
+        <span class="splash-letter">N</span>
+        <span class="splash-letter">T</span>
+        <span class="splash-letter">L</span>
       </div>
+      <div class="splash-line"></div>
       <div class="splash-tagline">Another reason to press play</div>
     </div>
     <div id="root"></div>
