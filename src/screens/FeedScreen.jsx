@@ -332,7 +332,7 @@ function BadgeCompleteCard({ data, onCelebrate }) {
       onClick={() => onCelebrate(data)}
       style={{
         margin: "6px 16px",
-        background: "var(--bg-card, #131828)",
+        background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: `1px solid ${accent}30`,
         cursor: "pointer",
@@ -398,13 +398,10 @@ function BadgeCompleteCard({ data, onCelebrate }) {
 
         <div style={{ flex: 1 }}>
           {/* Label */}
-          <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-            letterSpacing: "0.1em", textTransform: "uppercase",
-            color: accent, marginBottom: 4,
-          }}>
+          <span className="vhs-label vhs-label--badge" style={{ marginBottom: 6 }}>
+            <span className="vhs-label-dot" />
             Badge Unlocked
-          </div>
+          </span>
 
           {/* Badge name */}
           <div style={{
@@ -460,7 +457,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
     <div
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
-        margin: "6px 16px", background: "var(--bg-card, #131828)",
+        margin: "6px 16px", background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
         cursor: "pointer",
@@ -480,7 +477,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
             position: "absolute", inset: 0,
             background: `linear-gradient(
               90deg,
-              var(--bg-card, #131828) 35%,
+              var(--bg-card, #1a1714) 35%,
               rgba(19,24,40,0.5) 60%,
               transparent 85%
             )`,
@@ -490,7 +487,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
             background: `linear-gradient(
               180deg,
               transparent 40%,
-              var(--bg-card, #131828) 100%
+              var(--bg-card, #1a1714) 100%
             )`,
           }} />
         </div>
@@ -607,7 +604,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
     <div
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
-        margin: "6px 16px", background: "var(--bg-card, #131828)",
+        margin: "6px 16px", background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
         cursor: "pointer",
@@ -627,7 +624,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
             position: "absolute", inset: 0,
             background: `linear-gradient(
               90deg,
-              var(--bg-card, #131828) 30%,
+              var(--bg-card, #1a1714) 30%,
               rgba(19,24,40,0.4) 55%,
               transparent 80%
             )`,
@@ -637,7 +634,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
             background: `linear-gradient(
               180deg,
               transparent 50%,
-              var(--bg-card, #131828) 100%
+              var(--bg-card, #1a1714) 100%
             )`,
           }} />
         </div>
@@ -659,13 +656,10 @@ function RandomPickCard({ data, onNavigateCommunity }) {
       }}>
         <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
         <div style={{ flex: 1, paddingTop: 2 }}>
-          <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-            letterSpacing: "0.08em", textTransform: "uppercase",
-            color: "var(--accent-green, #34d399)", marginBottom: 4,
-          }}>
+          <span className="vhs-label" style={{ marginBottom: 6, color: "rgba(52,211,153,0.7)", borderColor: "rgba(52,211,153,0.1)", background: "rgba(52,211,153,0.04)" }}>
+            <span className="vhs-label-dot" style={{ background: "#34d399", boxShadow: "0 0 4px rgba(52,211,153,0.4)" }} />
             Have you seen...?
-          </div>
+          </span>
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
             color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 2,
@@ -775,7 +769,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
         margin: "6px 16px",
-        background: "var(--bg-card, #131828)",
+        background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: isDropped
           ? `1px solid ${accent}18`
@@ -793,11 +787,11 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         }}>
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(90deg, var(--bg-card, #131828) 30%, transparent 80%)",
+            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 30%, transparent 80%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, transparent 40%, var(--bg-card, #131828) 100%)",
+            background: "linear-gradient(180deg, transparent 40%, var(--bg-card, #1a1714) 100%)",
           }} />
         </div>
       )}
@@ -976,11 +970,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   }, [data.communities]);
 
   return (
-    <div style={{
-      margin: "6px 16px", background: "var(--bg-card, #131828)",
-      borderRadius: 16, overflow: "hidden",
-      border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
-    }}>
+    <div
+      className="vhs-card"
+      onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
+      style={{
+        "--vhs-accent": accent,
+        cursor: "pointer",
+      }}
+    >
       {/* ── Cinematic top area — tappable to expand/collapse ── */}
       <div
         onClick={data.communities?.length > 0 ? () => setExpanded(!expanded) : undefined}
@@ -993,15 +990,15 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
             backgroundSize: "cover",
             backgroundPosition: "center top",
-            opacity: 0.30,
+            opacity: 0.25,
           }}>
             <div style={{
               position: "absolute", inset: 0,
               background: `linear-gradient(
                 90deg,
-                var(--bg-card, #131828) 35%,
-                rgba(19,24,40,0.6) 55%,
-                rgba(19,24,40,0.25) 80%
+                #1a1714 35%,
+                rgba(26,23,20,0.6) 55%,
+                rgba(26,23,20,0.25) 80%
               )`,
             }} />
             {/* Bottom fade so it doesn't bleed into community strips */}
@@ -1010,7 +1007,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               background: `linear-gradient(
                 180deg,
                 transparent 50%,
-                var(--bg-card, #131828) 100%
+                #1a1714 100%
               )`,
             }} />
           </div>
@@ -1024,17 +1021,15 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         }}>
           <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
           <div style={{ flex: 1, paddingTop: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-              <div style={{
-                fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-                color: "var(--text-muted, #8892a8)",
-              }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span className={`vhs-label vhs-label--logged`}>
+                <span className="vhs-label-dot" />
                 {data.media_type === "book" ? "You read" : data.media_type === "game" ? "You played" : "You watched"}
-              </div>
+              </span>
               <div style={{
-                fontFamily: "var(--font-mono)", fontSize: 10,
-                color: "var(--text-faint, #5a6480)",
+                fontFamily: "var(--font-mono)", fontSize: 9,
+                color: "rgba(255,255,255,0.25)",
+                letterSpacing: "0.06em",
               }}>
                 {timeAgo}
               </div>
@@ -1320,7 +1315,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         onNavigateCommunity?.(data.community_slug);
       }
     }} style={{
-      margin: "6px 16px", background: "var(--bg-card, #131828)",
+      margin: "6px 16px", background: "var(--bg-card, #1a1714)",
       borderRadius: 16, overflow: "hidden",
       border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
       cursor: "pointer",
@@ -1455,7 +1450,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
 
   return (
     <div style={{
-      margin: "6px 16px", background: "var(--bg-card, #131828)",
+      margin: "6px 16px", background: "var(--bg-card, #1a1714)",
       borderRadius: 16, overflow: "hidden",
       border: "1px solid rgba(52,211,153,0.12)",
       position: "relative",
@@ -1473,7 +1468,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
             position: "absolute", inset: 0,
             background: `linear-gradient(
               90deg,
-              var(--bg-card, #131828) 35%,
+              var(--bg-card, #1a1714) 35%,
               rgba(19,24,40,0.6) 55%,
               rgba(19,24,40,0.25) 80%
             )`,
@@ -1483,7 +1478,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
             background: `linear-gradient(
               180deg,
               transparent 50%,
-              var(--bg-card, #131828) 100%
+              var(--bg-card, #1a1714) 100%
             )`,
           }} />
         </div>
@@ -1641,7 +1636,7 @@ function EmptyFeed({ onNavigateCommunity }) {
             style={{
               display: "flex", alignItems: "center", gap: 14,
               padding: "16px 18px",
-              background: "var(--bg-card, #131828)",
+              background: "var(--bg-card, #1a1714)",
               borderRadius: 14,
               border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
               cursor: s.action ? "pointer" : "default",
@@ -1794,7 +1789,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "6px 0",
               height: i === 1 ? 120 : 180,
               borderRadius: 16,
-              background: "var(--bg-card, #131828)",
+              background: "var(--bg-card, #1a1714)",
               opacity: 0.6 - i * 0.15,
               animation: "skeleton-pulse 1.5s ease infinite",
               animationDelay: `${i * 0.2}s`,
@@ -1854,46 +1849,19 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             display: "flex", justifyContent: "center",
             padding: "6px 16px 4px",
           }}>
-            <div style={{
-              display: "inline-flex",
-              background: "rgba(255,255,255,0.04)",
-              borderRadius: 8,
-              border: "1px solid rgba(255,255,255,0.06)",
-              padding: 2,
-              gap: 2,
-            }}>
+            <div className="vhs-toggle">
               {[
-                { key: "discover", label: "Discover" },
-                { key: "activity", label: "Activity" },
-              ].map(tab => {
-                const active = feedMode === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setFeedMode(tab.key)}
-                    style={{
-                      padding: "6px 16px",
-                      borderRadius: 6,
-                      border: "none",
-                      background: active
-                        ? "rgba(255,255,255,0.08)"
-                        : "transparent",
-                      color: active
-                        ? "var(--text-primary, #e2e6f0)"
-                        : "var(--text-faint, #5a6480)",
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
+                { key: "discover", label: "▶ Discover" },
+                { key: "activity", label: "● Activity" },
+              ].map(tab => (
+                <button
+                  key={tab.key}
+                  className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
+                  onClick={() => setFeedMode(tab.key)}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
 
