@@ -159,8 +159,19 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       // Build tmdb set for random pick suppression
       const episodeTmdbIds = new Set(rawEpisodesAll.map(e => e.tmdb_id).filter(Boolean));
 
-      const randomPicks = (_randomPicksCache.get(userId) || [])
+      const randomPicksRaw = (_randomPicksCache.get(userId) || [])
         .filter(r => !episodeTmdbIds.has(r.tmdb_id));
+
+      // Dedupe by tmdb_id — same film can appear across multiple communities
+      const seenRandomTmdb = new Set();
+      const randomPicks = [];
+      for (const r of randomPicksRaw) {
+        const key = r.tmdb_id || r.item_id;
+        if (!seenRandomTmdb.has(key)) {
+          seenRandomTmdb.add(key);
+          randomPicks.push(r);
+        }
+      }
 
       // ── Build subscription-aware slug set ──
       const slugToId = new Map();
