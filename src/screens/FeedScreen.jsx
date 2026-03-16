@@ -508,7 +508,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
       {/* Poster + info + donut */}
       <div style={{
         display: "flex", gap: 12, padding: "14px 16px",
-        position: "relative", zIndex: 1, alignItems: "center",
+        position: "relative", zIndex: 1, alignItems: "flex-start",
       }}>
         <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
         <div style={{ flex: 1, paddingTop: 2 }}>

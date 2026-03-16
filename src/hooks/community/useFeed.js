@@ -53,7 +53,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const [
         logsRes, badgesRes, trendingRes, badgeLookupRes, shelfRes,
         completionsRes, communityPagesRes, upNextRes, randomRes,
-        episodesRes,
+        episodesRes, awardsMiniseriesRes,
       ] = await Promise.all([
         // 1. Recent logs — with community context
         supabase
@@ -118,6 +118,12 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
 
         // 10. UNIFIED episode cards (replaces feed_episode_cards + feed_upcoming_episodes)
         supabase.rpc("feed_episodes_v2", { p_user_id: userId }),
+
+        // 11. Awards miniseries IDs — excluded from Up Next
+        supabase
+          .from("community_miniseries")
+          .select("id")
+          .eq("tab_key", "awards"),
       ]);
 
       if (!mountedRef.current) return;
@@ -316,11 +322,14 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         ? rawCompletions.filter(c => !c.community_id || subscribedIds.has(c.community_id))
         : rawCompletions;
 
-      // ── Filter Up Next (exclude books) ──
+      // ── Filter Up Next (exclude books + awards miniseries) ──
+      const awardsMiniseriesIds = new Set(
+        (awardsMiniseriesRes.data || []).map(m => m.id)
+      );
       const filteredUpNext = (subscribedIds
         ? rawUpNext.filter(u => !u.community_id || subscribedIds.has(u.community_id))
         : rawUpNext
-      ).filter(u => u.media_type !== "book");
+      ).filter(u => u.media_type !== "book" && !awardsMiniseriesIds.has(u.miniseries_id));
 
       // ── Build chronological stream ──
       const logCards = [...logGroups.values()]
