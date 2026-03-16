@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
+import SearchInput from "../shared/SearchInput";
 import BlankCheckItemCard from "./BlankCheckItemCard";
 
 export default function BlankCheckPatreonTab({ community, progress, onToggle, onToggleCommentary, miniseries = [], coverCacheVersion, searchQuery, onSearchChange, mediaFilter }) {
@@ -47,47 +48,12 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
       </div>
 
       {/* Search bar */}
-      <div style={{ padding: "12px 16px 0" }}>
-        <style>{`
-          .cs-search-pat::placeholder { color: rgba(255,255,255,0.25); }
-          .cs-search-pat:focus { border-color: rgba(233,69,96,0.4); outline: none; }
-        `}</style>
-        <div style={{ position: "relative" }}>
-          <input
-            className="cs-search-pat"
-            type="text"
-            placeholder="Search commentaries..."
-            value={searchQuery || ""}
-            onChange={(e) => onSearchChange(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 14px 10px 36px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 10,
-              color: "#e0e0e0",
-              fontSize: 14,
-              fontFamily: "inherit",
-              WebkitAppearance: "none",
-            }}
-          />
-          <div style={{
-            position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-            fontSize: 14, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
-          }}>🔍</div>
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange("")}
-              style={{
-                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-                background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
-                width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#888", fontSize: 12, cursor: "pointer",
-              }}
-            >✕</button>
-          )}
-        </div>
-      </div>
+      <SearchInput
+        value={searchQuery}
+        onChange={onSearchChange}
+        placeholder="Search commentaries..."
+        accent={accent}
+      />
 
       {patreonSeries.length === 0 ? (
         <div style={{
