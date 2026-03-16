@@ -223,6 +223,10 @@ export default function CommunityLogModal({
           0% { height: 3px; }
           100% { height: 10px; }
         }
+        @keyframes clmContentFadeIn {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
         .clm-star-btn {
           font-size: 28px;
           position: relative;
@@ -266,11 +270,8 @@ export default function CommunityLogModal({
           width: "100%", maxWidth: 420,
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: 0,
-          padding: "0 20px 8px",
+          display: "flex", flexDirection: "column",
           animation: "clmSlideUp 0.25s ease",
-          overflowY: "auto",
-          WebkitOverflowScrolling: "touch",
-          position: "relative",
         }}
       >
         {/* Backdrop image — fades out before description */}
@@ -283,6 +284,7 @@ export default function CommunityLogModal({
             backgroundSize: "cover",
             backgroundPosition: "center top",
             filter: "saturate(0.6)",
+            animation: "clmContentFadeIn 0.4s ease",
             maskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
             WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
             maskComposite: "intersect",
@@ -292,10 +294,11 @@ export default function CommunityLogModal({
 
         {/* Close button + Admin gear */}
         <div style={{
-          position: "sticky", top: 0, zIndex: 2,
+          zIndex: 2,
           background: "linear-gradient(180deg, rgba(26,26,46,0.5) 0%, rgba(26,26,46,0.3) 60%, transparent 100%)",
-          padding: "12px 0 16px",
+          padding: "12px 20px 16px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
+          flexShrink: 0,
         }}>
           <AdminItemEditor
             item={item}
@@ -321,6 +324,15 @@ export default function CommunityLogModal({
             }}
           >✕</button>
         </div>
+
+        {/* ── Scrollable content area ── */}
+        <div style={{
+          flex: 1, minHeight: 0,
+          overflowY: "auto",
+          WebkitOverflowScrolling: "touch",
+          padding: "0 20px",
+          position: "relative",
+        }}>
 
         {/* Hero: poster + info */}
         <div style={{ display: "flex", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
@@ -474,7 +486,7 @@ export default function CommunityLogModal({
 
         {/* TMDB Overview */}
         {overview && (
-          <div style={{ marginBottom: 16, position: "relative", zIndex: 1 }}>
+          <div style={{ marginBottom: 16, position: "relative", zIndex: 1, animation: "clmContentFadeIn 0.3s ease" }}>
             <div
               onClick={() => setOverviewExpanded(!overviewExpanded)}
               style={{
@@ -501,7 +513,9 @@ export default function CommunityLogModal({
 
         {/* Streaming Providers */}
         {providers && (providers.stream.length > 0 || providers.rent.length > 0) && (
-          <WatchProviders providers={providers} />
+          <div style={{ animation: "clmContentFadeIn 0.3s ease" }}>
+            <WatchProviders providers={providers} />
+          </div>
         )}
 
         {/* Rating */}
@@ -544,14 +558,14 @@ export default function CommunityLogModal({
         {/* Custom section slot (e.g. BC commentary toggle) */}
         {renderCustomSection?.({ saving })}
 
-        {/* Action buttons — sticky so they don't shift as TMDB data loads */}
+        </div>{/* end scroll content area */}
+
+        {/* Action buttons — fixed footer, never moves */}
         <div style={{
           display: "flex", flexDirection: "column", gap: 8,
-          position: "sticky", bottom: 0, zIndex: 3,
-          background: "linear-gradient(180deg, transparent 0%, #12121f 12%)",
-          paddingTop: 16,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
-          marginTop: "auto",
+          padding: "12px 20px calc(12px + env(safe-area-inset-bottom, 0px))",
+          background: "#12121f",
+          flexShrink: 0,
         }}>
 
           {/* === NOT YET LOGGED === */}
