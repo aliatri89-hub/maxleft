@@ -1188,7 +1188,7 @@ function LandingScreen({ onSignIn }) {
           <div className="landing-tagline">
             Discover what to watch,<br />
             read, and play from<br />
-            <strong>voices you trust.</strong>
+            the <strong>podcasts you love.</strong>
           </div>
         </div>
         <div className="landing-bottom">
@@ -1218,7 +1218,7 @@ function LandingScreen({ onSignIn }) {
       <div className="mantl-features" ref={featuresRef}>
         <div className="mantl-features-header">
           <h2>More than a watchlist.</h2>
-          <p>Track what to watch, read, and play next<br />from the <strong>voices you trust</strong>.</p>
+          <p>Track what to watch, read, and play next<br />from the <strong>podcasts you love</strong>.</p>
         </div>
 
         {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}
