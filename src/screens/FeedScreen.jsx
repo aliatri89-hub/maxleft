@@ -1712,13 +1712,16 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   // Stabilize random pick across refreshes — latch the first one we see,
   // only clear on pull-to-refresh so swipe-back doesn't re-roll
-  const feedItems = rawFeedItems.map((item) => {
-    if (item.type !== "random_pick") return item;
-    if (!latchedRandomPick.current) {
-      latchedRandomPick.current = item;
-    }
-    return latchedRandomPick.current;
-  });
+  const ACTIVITY_ONLY_TYPES = new Set(["log", "badge_complete"]);
+  const feedItems = rawFeedItems
+    .map((item) => {
+      if (item.type !== "random_pick") return item;
+      if (!latchedRandomPick.current) {
+        latchedRandomPick.current = item;
+      }
+      return latchedRandomPick.current;
+    })
+    .filter((item) => feedMode !== "activity" || ACTIVITY_ONLY_TYPES.has(item.type));
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
