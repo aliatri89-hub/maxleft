@@ -1,8 +1,8 @@
 const SHELF_CONFIG = {
-  books: { icon: "📖", label: "Bookshelf", emptyText: "No books yet", modalCat: "book" },
-  movies: { icon: "🎬", label: "Movies", emptyText: "No films yet", modalCat: "movie" },
-  shows: { icon: "📺", label: "Shows", emptyText: "No shows yet", modalCat: "show" },
-  games: { icon: "🎮", label: "Games", emptyText: "No games yet", modalCat: "game" },
+  books: { label: "Bookshelf", emptyText: "No books yet", modalCat: "book" },
+  movies: { label: "Movies", emptyText: "No films yet", modalCat: "movie" },
+  shows: { label: "Shows", emptyText: "No shows yet", modalCat: "show" },
+  games: { label: "Games", emptyText: "No games yet", modalCat: "game" },
 };
 
 function renderStars(rating) {
@@ -175,21 +175,51 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
           </div>
         </>
       ) : (
-        /* ── Standard header ── */
-        <div style={S.labelRow}>
-          <div style={S.label}>
-            {cfg.icon} {cfg.label}
-            {items.length > 0 && <span style={S.count}>{items.length}</span>}
-            {syncIndicator}
+        /* ── Standard header: centered, same pattern, smaller ── */
+        <div style={{ textAlign: "center", padding: "0 0 14px" }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: 12,
+            marginBottom: 6,
+          }}>
+            <div style={{
+              flex: 1, height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08))",
+            }} />
+            <div style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 800,
+              fontSize: 20,
+              color: "var(--text-primary)",
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+            }}>
+              {cfg.label}
+            </div>
+            <div style={{
+              flex: 1, height: 1,
+              background: "linear-gradient(90deg, rgba(255,255,255,0.08), transparent)",
+            }} />
           </div>
-          <div style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</div>
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+          }}>
+            {items.length > 0 && (
+              <span style={{
+                fontFamily: "var(--font-mono)", fontSize: 11,
+                color: "var(--text-faint)", letterSpacing: "0.06em",
+              }}>
+                {items.length} logged
+              </span>
+            )}
+            {syncIndicator}
+            <span style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</span>
+          </div>
         </div>
       )}
 
       {/* Posters — no container card, just posters on the page */}
       {items.length === 0 ? (
         <div style={S.empty}>
-          <div style={S.emptyIcon}>{cfg.icon}</div>
           <div style={S.emptyText}>{cfg.emptyText}</div>
         </div>
       ) : (
