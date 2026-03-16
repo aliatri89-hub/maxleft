@@ -118,13 +118,14 @@
     font-family: 'IBM Plex Mono', monospace;
     font-size: 11px;
     letter-spacing: 0.25em;
-    color: var(--terracotta);
+    color: #e8c4a0;
     text-transform: uppercase;
     margin-bottom: 20px;
     opacity: 0;
     animation: fadeUp 0.6s ease 0.1s forwards;
-    font-weight: 300;
+    font-weight: 500;
     line-height: 1.8;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
   }
   .landing-eyebrow strong {
     font-weight: 600;

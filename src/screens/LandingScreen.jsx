@@ -10,47 +10,47 @@ const POSTER_COLUMNS = [
   // Column 1 — scrolls up slowly
   [
     '/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg', // Alien
-    '/qVpCaBcnjRzGL3nOPHi6Sn9cIIu.jpg', // Halloween (2018)
-    '/lOSdUkGQmbAl5JQ3QoHqBZUbZhC.jpg', // Jaws
+    '/wijlZ3HaYMvlDTPqJoTCWKFkCPU.jpg', // Halloween (2018)
+    '/tjbLSFwi0I3phZwh8zoHWNfbsEp.jpg', // Jaws
     '/hA2ple9q4qnwxp3hKVNhroipsir.jpg', // Mad Max Fury Road
-    '/3O3klyyYimSMEhRh1OJJSe0jock.jpg', // Scream
-    '/sKCr78MXSLixwmZ8DyJLrpMsd15.jpg', // The Matrix
+    '/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg', // Scream
+    '/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg', // The Matrix
   ],
   // Column 2 — scrolls down
   [
     '/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg', // Die Hard
-    '/w46Vw536HwNnEzOa7J24YH9DPRS.jpg', // Psycho
-    '/6FfCtHuEdYJNaGYh8S5VGv3mYaT.jpg', // Indiana Jones Raiders
-    '/gPbM0MK8CP8A174rmUwGsAB5Po.jpg',  // The Shining
-    '/yw8DB8SNA3hLM3GHU5tAGjNTivo.jpg', // The Fly
-    '/cqFM7aCFj33EDdRSrcCfXsKCWMu.jpg', // Rocky
+    '/uK46P78BvWGDW4dbq9C13LAwpmw.jpg', // Psycho
+    '/ceG9VzoRAVGwivFU403Wc3AHRys.jpg', // Indiana Jones Raiders
+    '/sNWdOLae80AdQkD1NpvcDN5f3PB.jpg', // The Shining
+    '/gRPePRMct1ttp70sYx7RZG7igee.jpg', // The Fly
+    '/hEjK9A9BkNXejFW4tfacVAEHtkn.jpg', // Rocky
   ],
   // Column 3 — scrolls up faster
   [
-    '/b4gYVcl8pParX8AjkN90iQrWrWO.jpg', // The Thing
-    '/aQPeznSu7XDTrrdCtT5eLiu52Yu.jpg', // Blade Runner
-    '/wF6SNPcUrTKFA4fOFfukm7zQ3ob.jpg', // Terminator 2
-    '/vBBqxnELXFpab3gfHuNeFiZcOtR.jpg', // Back to the Future
-    '/mDMCET9Ens5ANCALyG5KBrFpIFj.jpg', // The Silence of the Lambs
-    '/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg', // Fight Club
+    '/tzGY49kseSE9QAKk47uuDGwnSCu.jpg', // The Thing
+    '/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg', // Blade Runner
+    '/jFTVD4XoWQTcg7wdyJKa8PEds5q.jpg', // Terminator 2
+    '/vN5B5WgYscRGcQpVhHl6p9DDTP0.jpg', // Back to the Future
+    '/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg', // The Silence of the Lambs
+    '/dLlH4aNHdnmf62umnInL8xPlPzw.jpg', // The Handmaiden
   ],
   // Column 4 — scrolls down slowly
   [
-    '/rCzpDGFKGnVEL0nhyBn7d582MQ8.jpg', // Jurassic Park
-    '/qJ2tW6WMUDux911Ma1zuJjRKMKG.jpg', // Lord of the Rings Fellowship
+    '/maFjKnJ62hDQ9E66dKqDZgbUy0H.jpg', // Jurassic Park
+    '/5m0zjctrxy9HeSAtnGWNLlsnr8z.jpg', // Lord of the Rings Fellowship
     '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', // Spirited Away
     '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', // Avatar
     '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // The Shawshank Redemption
-    '/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg', // Interstellar
+    '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg', // Iron Man
   ],
   // Column 5 — scrolls up
   [
-    '/bOGkgRGdhrBYJSLpXaxhXVstddV.jpg', // Ghostbusters
-    '/ewUqXnwiRLhgmGhooksNHCb0EQy.jpg', // Predator
+    '/7E8nLijS9AwwUEPu2oFYOVKhdFA.jpg', // Ghostbusters
+    '/wdniP8NDaJIydi1hMxhpbJMUfr6.jpg', // Predator
     '/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg', // Pulp Fiction
     '/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', // Joker
     '/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg', // Parasite
-    '/qNBAXBIQlnOThrVvhSyE7aSYCAc.jpg', // Blade Runner 2049
+    '/rY4odQzflLCWQLL17tzbt8TQkeV.jpg', // Alone in the Dark
   ],
 ];
 
@@ -355,14 +355,16 @@ const featureStyles = `
     letter-spacing: 0.08em;
     font-weight: 600;
     line-height: 1.2;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+    text-shadow: 0 1px 6px rgba(0,0,0,0.85), 0 0 12px rgba(0,0,0,0.6);
+    filter: brightness(1.3);
   }
   .badge-back-flair {
     font-family: 'Lora', serif;
     font-style: italic;
     font-size: 0.62rem;
-    opacity: 0.7;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    opacity: 0.85;
+    text-shadow: 0 1px 5px rgba(0,0,0,0.85), 0 0 10px rgba(0,0,0,0.5);
+    filter: brightness(1.2);
   }
   @keyframes badgeRevealPulse {
     0% { box-shadow: 0 0 0 0 var(--badge-color); }
@@ -496,7 +498,7 @@ const featureStyles = `
     overflow: hidden;
   }
   .log-demo-btn.ready {
-    background: var(--terracotta, #C75B3F);
+    background: #3A8F5C;
     color: #fff;
   }
   .log-demo-btn.ready:hover {
@@ -679,8 +681,8 @@ const featureStyles = `
   }
   .community-donut {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -692,10 +694,11 @@ const featureStyles = `
   }
   .community-donut-pct {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.58rem;
-    font-weight: 600;
+    font-size: 0.68rem;
+    font-weight: 700;
     position: relative;
     z-index: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
 
@@ -1147,7 +1150,7 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="landing-eyebrow">The <strong>shelf</strong> for what<br />your <strong>podcasts</strong><br />recommend</div>
+          <div className="landing-eyebrow">From the <strong>podcast</strong> to your <strong>shelf</strong></div>
           <div className="landing-wordmark">
             <span className="landing-shelf-letters">
               {"MANTL".split("").map((letter, i) => (
@@ -1208,7 +1211,7 @@ function LandingScreen({ onSignIn }) {
           <div className="community-demo">
             {DEMO_COMMUNITIES.map((c, i) => {
               const pct = Math.round((c.done / c.total) * 100);
-              const r = 18;
+              const r = 21;
               const circ = 2 * Math.PI * r;
               const offset = circ - (pct / 100) * circ;
               return (
@@ -1235,15 +1238,15 @@ function LandingScreen({ onSignIn }) {
                     <div className="community-stat">{c.stat}</div>
                   </div>
                   <div className="community-donut">
-                    <svg width="44" height="44" viewBox="0 0 44 44">
-                      <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3.5" />
+                    <svg width="52" height="52" viewBox="0 0 52 52">
+                      <circle cx="26" cy="26" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="4.5" />
                       <circle
-                        cx="22" cy="22" r={r} fill="none"
-                        stroke={c.color} strokeWidth="3.5"
+                        cx="26" cy="26" r={r} fill="none"
+                        stroke={c.color} strokeWidth="4.5"
                         strokeLinecap="round"
                         strokeDasharray={circ}
                         strokeDashoffset={offset}
-                        transform="rotate(-90 22 22)"
+                        transform="rotate(-90 26 26)"
                         style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.22,1,0.36,1)' }}
                       />
                     </svg>
@@ -1418,7 +1421,12 @@ function LandingScreen({ onSignIn }) {
         {/* ── BOTTOM CTA ───────────────────────────────────── */}
         <div className="mantl-bottom-cta">
           <button className="btn-primary" onClick={onSignIn}>
-            Press Play
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <svg width="16" height="18" viewBox="0 0 16 18" fill="none" style={{ marginTop: -1 }}>
+                <path d="M2 1.5L14.5 9L2 16.5V1.5Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+              </svg>
+              Press Play
+            </span>
           </button>
         </div>
       </div>
