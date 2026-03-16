@@ -1,22 +1,6 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { HeroBanner } from "../primitives";
-
-// ── Slide-up reveal: hides until value loads, then slides up smoothly ──
-function useSlideReveal(value) {
-  const [revealed, setRevealed] = useState(false);
-  const hasTriggered = useRef(false);
-
-  useEffect(() => {
-    if (!hasTriggered.current && value > 0) {
-      hasTriggered.current = true;
-      // Brief delay so the 0 state is never visible — goes straight to reveal
-      const t = setTimeout(() => setRevealed(true), 50);
-      return () => clearTimeout(t);
-    }
-  }, [value]);
-
-  return revealed;
-}
+import { useSlideReveal } from "../../../hooks/useSlideReveal";
 
 /**
  * NowPlayingHero — Hero section for the Now Playing Podcast community page.

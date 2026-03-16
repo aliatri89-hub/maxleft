@@ -1,22 +1,7 @@
 import { useMemo, useEffect, useRef, useState } from "react";
 import { HeroBanner, StatPill, CyclePill } from "../primitives";
 import { useMediaFilter } from "../../../hooks/useMediaFilter";
-
-// ── Slide-up reveal: hides until value loads, then slides up smoothly ──
-function useSlideReveal(value) {
-  const [revealed, setRevealed] = useState(false);
-  const hasTriggered = useRef(false);
-
-  useEffect(() => {
-    if (!hasTriggered.current && value > 0) {
-      hasTriggered.current = true;
-      const t = setTimeout(() => setRevealed(true), 50);
-      return () => clearTimeout(t);
-    }
-  }, [value]);
-
-  return revealed;
-}
+import { useSlideReveal } from "../../../hooks/useSlideReveal";
 
 // ── Easy swap when the inside joke lands ────────────────────
 const BANK_NAME = "The Two Friends Bank";
