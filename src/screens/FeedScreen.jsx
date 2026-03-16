@@ -17,10 +17,37 @@ const resolveImg = (path, base) => {
 };
 
 // ── Star rating display ──
-function Stars({ rating, size = 14 }) {
+function Stars({ rating, size = 14, sharpie = false }) {
   if (!rating || rating <= 0) return null;
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.25;
+
+  // Sharpie mode — Permanent Marker ★ on cream VHS labels
+  if (sharpie) {
+    const sharpieSize = size || 14;
+    return (
+      <div style={{ display: "flex", gap: 1, alignItems: "center", position: "relative" }}>
+        {Array.from({ length: full }, (_, i) => (
+          <span key={i} style={{
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: sharpieSize,
+            lineHeight: 1,
+            color: "#c8a415",
+          }}>★</span>
+        ))}
+        {half && (
+          <span style={{
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: sharpieSize,
+            lineHeight: 1,
+            color: "#c8a415",
+            opacity: 0.45,
+          }}>★</span>
+        )}
+      </div>
+    );
+  }
+
   const gold = "var(--accent-gold, #f5c542)";
   const empty = "rgba(255,255,255,0.12)";
 
@@ -1130,7 +1157,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
               {/* Stars */}
               <div style={{ marginTop: 3, position: "relative" }}>
-                <Stars rating={data.rating} size={10} />
+                <Stars rating={data.rating} size={14} sharpie />
               </div>
 
               {/* Sharpie time */}
