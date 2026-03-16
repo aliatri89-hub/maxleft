@@ -767,9 +767,19 @@ const featureStyles = `
   .podcast-marquee-track.track-left {
     animation: marquee-left 40s linear infinite;
   }
+  .podcast-marquee-track.track-right {
+    animation: marquee-right 36s linear infinite;
+  }
   @keyframes marquee-left {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
+  }
+  @keyframes marquee-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+  .podcast-marquee-row + .podcast-marquee-row {
+    margin-top: 18px;
   }
   .podcast-marquee-item {
     display: flex;
@@ -828,12 +838,18 @@ const featureStyles = `
   }
 `;
 
-// ── Podcast art for horizontal marquee ──
-const PODCAST_ART = [
+// ── Podcast art for horizontal marquee (two rows) ──
+const PODCAST_ART_ROW1 = [
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
+];
+const PODCAST_ART_ROW2 = [
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/300x300bb.webp", name: "Unspooled" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts125/v4/12/c8/45/12c8453e-02cd-8526-1415-22f2ddc7f864/mza_16416337016232027675.jpg/300x300bb.webp", name: "The Flop House" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/97/02/d0/9702d058-288c-a931-f3b1-55f5697fad0e/mza_11250256298198911552.jpg/300x300bb.webp", name: "Video Archives" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/b3/f9/44b3f953-fbae-4e99-4d82-4c2cc83630e5/mza_1552332279859047099.jpg/300x300bb.webp", name: "Filmcast" },
 ];
 
 /* ── Badge data for the demo ────────────────────────────── */
@@ -1405,8 +1421,18 @@ function LandingScreen({ onSignIn }) {
             <div className="podcast-marquee">
               <div className="podcast-marquee-row">
                 <div className="podcast-marquee-track track-left">
-                  {[...PODCAST_ART, ...PODCAST_ART].map((p, i) => (
+                  {[...PODCAST_ART_ROW1, ...PODCAST_ART_ROW1].map((p, i) => (
                     <div key={i} className="podcast-marquee-item">
+                      <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                      <span className="podcast-marquee-label">{p.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="podcast-marquee-row">
+                <div className="podcast-marquee-track track-right">
+                  {[...PODCAST_ART_ROW2, ...PODCAST_ART_ROW2].map((p, i) => (
+                    <div key={`r2-${i}`} className="podcast-marquee-item">
                       <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
                       <span className="podcast-marquee-label">{p.name}</span>
                     </div>
