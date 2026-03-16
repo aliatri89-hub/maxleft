@@ -90,7 +90,7 @@ export default function CommunityLoadingScreen({ slug }) {
         {/* VHS play button */}
         <div style={{
           position: "relative",
-          width: 35, height: 41,
+          width: 33, height: 37,
           display: "flex", alignItems: "center", justifyContent: "center",
           margin: "0 -1px",
         }}>
