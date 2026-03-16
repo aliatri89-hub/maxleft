@@ -21,7 +21,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
   const mountedRef = useRef(true);
   const feedBucketsRef = useRef({ all: [], activity: [], discover: [] });
   const fetchGenRef = useRef(0);
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 15;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // ── Render tick — bumped whenever bucket data changes (fetch complete, poster resolve).
@@ -73,7 +73,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         supabase
           .from("feed_trending_weekly")
           .select("*")
-          .limit(5),
+          .limit(10),
 
         // 4. Badge → miniseries lookup
         supabase
@@ -106,7 +106,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           .from("feed_up_next")
           .select("*")
           .eq("user_id", userId)
-          .limit(3),
+          .limit(8),
 
         // 9. Random unwatched
         subscribedIds?.size > 0
@@ -352,7 +352,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         .map(item => ({ type: item.type, data: item.data }));
 
       // ════════════════════════════════════════════
-      // DISCOVER FEED — structured order
+      // DISCOVER FEED — structured order with repeating pattern
       // ════════════════════════════════════════════
       const discoverCards = [];
 
@@ -366,24 +366,29 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         discoverCards.push({ type: "episode", data: ep });
       }
 
-      // 3. One random pick
-      if (randomPicks.length > 0) {
-        discoverCards.push({ type: "random_pick", data: randomPicks[0] });
-      }
+      // 3. Repeating discovery pattern: random → badge → up_next → trending
+      //    Cycles through each pool until all are exhausted.
+      let rIdx = 0, bIdx = 0, uIdx = 0, tIdx = 0;
+      const maxCycles = Math.max(
+        randomPicks.length,
+        sortedBadges.length,
+        filteredUpNext.length,
+        rawTrending.length,
+      );
 
-      // 4. Badge nudges (top 2)
-      for (let i = 0; i < Math.min(2, sortedBadges.length); i++) {
-        discoverCards.push({ type: "badge", data: sortedBadges[i] });
-      }
-
-      // 5. Up next
-      for (const u of filteredUpNext) {
-        discoverCards.push({ type: "up_next", data: u });
-      }
-
-      // 6. Trending
-      if (rawTrending.length > 0) {
-        discoverCards.push({ type: "trending", data: rawTrending[0] });
+      for (let cycle = 0; cycle < maxCycles; cycle++) {
+        if (rIdx < randomPicks.length) {
+          discoverCards.push({ type: "random_pick", data: randomPicks[rIdx++] });
+        }
+        if (bIdx < sortedBadges.length) {
+          discoverCards.push({ type: "badge", data: sortedBadges[bIdx++] });
+        }
+        if (uIdx < filteredUpNext.length) {
+          discoverCards.push({ type: "up_next", data: filteredUpNext[uIdx++] });
+        }
+        if (tIdx < rawTrending.length) {
+          discoverCards.push({ type: "trending", data: rawTrending[tIdx++] });
+        }
       }
 
       // ════════════════════════════════════════════
@@ -393,8 +398,8 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       let upNextIdx = 0;
       let badgeIdx = 0;
       let trendingIdx = 0;
+      let randomIdx = 0;
       let episodesInserted = false;
-      let randomInserted = false;
       let logCount = 0;
 
       // Combine all episodes into one list for interleaving
@@ -421,9 +426,8 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           }
 
           // After 2nd log: random pick
-          if (logCount === 2 && !randomInserted && randomPicks.length > 0) {
-            cards.push({ type: "random_pick", data: randomPicks[0] });
-            randomInserted = true;
+          if (logCount === 2 && randomIdx < randomPicks.length) {
+            cards.push({ type: "random_pick", data: randomPicks[randomIdx++] });
           }
 
           // After 3rd log: badge nudge
@@ -445,26 +449,36 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           if (logCount === 9 && upNextIdx < filteredUpNext.length) {
             cards.push({ type: "up_next", data: filteredUpNext[upNextIdx++] });
           }
+
+          // Repeating pattern beyond log 9: every 3 logs, cycle through remaining pools
+          if (logCount > 9 && logCount % 3 === 0) {
+            // Rotate: random → badge → trending → up_next
+            if (randomIdx < randomPicks.length) {
+              cards.push({ type: "random_pick", data: randomPicks[randomIdx++] });
+            } else if (badgeIdx < sortedBadges.length) {
+              cards.push({ type: "badge", data: sortedBadges[badgeIdx++] });
+            } else if (trendingIdx < rawTrending.length) {
+              cards.push({ type: "trending", data: rawTrending[trendingIdx++] });
+            } else if (upNextIdx < filteredUpNext.length) {
+              cards.push({ type: "up_next", data: filteredUpNext[upNextIdx++] });
+            }
+          }
         }
       }
+
+      // Append remaining discovery cards after all logs
+      const remaining = [];
+      while (randomIdx < randomPicks.length) remaining.push({ type: "random_pick", data: randomPicks[randomIdx++] });
+      while (badgeIdx < sortedBadges.length) remaining.push({ type: "badge", data: sortedBadges[badgeIdx++] });
+      while (upNextIdx < filteredUpNext.length) remaining.push({ type: "up_next", data: filteredUpNext[upNextIdx++] });
+      while (trendingIdx < rawTrending.length) remaining.push({ type: "trending", data: rawTrending[trendingIdx++] });
+      for (const card of remaining) cards.push(card);
 
       // Fallback: if too few logs to trigger interleave slots
       if (!episodesInserted && allEpisodes.length > 0) {
         for (const ep of allEpisodes) {
           cards.push({ type: "episode", data: ep });
         }
-      }
-      if (upNextIdx === 0 && filteredUpNext.length > 0) {
-        cards.push({ type: "up_next", data: filteredUpNext[0] });
-      }
-      if (!randomInserted && randomPicks.length > 0) {
-        cards.push({ type: "random_pick", data: randomPicks[0] });
-      }
-      if (badgeIdx === 0 && sortedBadges.length > 0) {
-        cards.push({ type: "badge", data: sortedBadges[0] });
-      }
-      if (trendingIdx === 0 && rawTrending.length > 0) {
-        cards.push({ type: "trending", data: rawTrending[0] });
       }
 
       // ════════════════════════════════════════════
