@@ -976,7 +976,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
     <div
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
-        margin: "6px 16px",
+        margin: "4px 16px",
         borderRadius: 5,
         overflow: "hidden",
         position: "relative",
@@ -993,30 +993,23 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
           borderRadius: 3,
           overflow: "hidden",
           display: "flex",
-          minHeight: 72,
+          minHeight: 68,
           position: "relative",
         }}>
-          {/* Poster in label */}
-          <div style={{
-            width: 50, flexShrink: 0,
-            borderRight: "1px solid rgba(44,40,36,0.1)",
-            overflow: "hidden",
-          }}>
-            <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={50} height={72} radius={0} />
-          </div>
 
-          {/* Label text area */}
+          {/* Label text area — full width */}
           <div style={{
             flex: 1,
             background: "#f0ebe1",
-            padding: "7px 10px",
+            padding: "8px 14px",
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
             position: "relative",
             overflow: "hidden",
           }}>
-            {/* Grid lines — like ruled tape labels */}
+            {/* Grid lines */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
               backgroundImage: `
@@ -1025,32 +1018,41 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               `,
             }} />
 
-            {/* Logged label + time */}
+            {/* "Watched" in sharpie + time in typewriter */}
             <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              marginBottom: 2, position: "relative",
+              display: "flex", alignItems: "baseline", gap: 8,
+              marginBottom: 4, position: "relative",
             }}>
               <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 7.5, fontWeight: 600,
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                color: "rgba(44,40,36,0.35)",
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 13,
+                color: "rgba(44,40,36,0.6)",
+                textTransform: "uppercase",
               }}>
-                ● {data.media_type === "book" ? "READ" : data.media_type === "game" ? "PLAYED" : "LOGGED"} · {timeAgo}
+                {data.media_type === "book" ? "Read" : data.media_type === "game" ? "Played" : "Watched"}
+              </span>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8,
+                fontWeight: 500,
+                color: "rgba(44,40,36,0.3)",
+                letterSpacing: "0.06em",
+              }}>
+                {timeAgo}
               </span>
             </div>
 
-            {/* Logo or title */}
+            {/* Logo or title — centered, bigger */}
             {data.logo_url ? (
               <img
                 src={data.logo_url}
                 alt={data.title}
                 style={{
-                  maxHeight: 26,
-                  maxWidth: "90%",
+                  maxHeight: 36,
+                  maxWidth: "85%",
                   objectFit: "contain",
-                  objectPosition: "left center",
-                  marginBottom: 2,
+                  objectPosition: "center",
+                  marginBottom: 4,
                   position: "relative",
                   filter: "brightness(0)",
                   opacity: 0.8,
@@ -1060,13 +1062,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               <div style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 800,
-                fontSize: 17,
+                fontSize: 20,
                 lineHeight: 1.05,
                 color: "#2C2824",
                 textTransform: "uppercase",
                 letterSpacing: "0.01em",
                 position: "relative",
-                marginBottom: 2,
+                marginBottom: 4,
+                textAlign: "center",
               }}>
                 {data.title}
               </div>
@@ -1079,7 +1082,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               {(data.creator || data.year) && (
                 <span style={{
                   fontFamily: "'Lora', serif", fontStyle: "italic",
-                  fontSize: 10, color: "rgba(44,40,36,0.5)",
+                  fontSize: 10, color: "rgba(44,40,36,0.45)",
                 }}>
                   {[data.creator, data.year].filter(Boolean).join(" · ")}
                 </span>
@@ -1112,16 +1115,15 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
           </div>
         </div>
 
-        {/* ── Community context (below tape label, stays dark) ── */}
+        {/* ── Community context — compact row on plastic ── */}
         {data.communities?.length > 0 && (
           <div>
-            {/* Collapsed: community avatars */}
             {!expanded && (
               <div
                 onClick={(e) => { e.stopPropagation(); setExpanded(true); }}
                 style={{
-                  display: "flex", alignItems: "center", gap: 5,
-                  padding: "4px 10px 6px",
+                  display: "flex", alignItems: "center", gap: 4,
+                  padding: "2px 10px 4px",
                   cursor: "pointer",
                 }}
               >
@@ -1130,47 +1132,46 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                   const isBadge = !!c.badge;
                   return img ? (
                     <img key={i} src={img} alt="" style={{
-                      width: 20, height: 20,
-                      borderRadius: isBadge ? "50%" : 5,
+                      width: 16, height: 16,
+                      borderRadius: isBadge ? "50%" : 4,
                       objectFit: "cover",
                       border: isBadge
-                        ? `1.5px solid ${c.badge.accent_color || "#f5c542"}55`
-                        : "1px solid rgba(255,255,255,0.1)",
+                        ? `1px solid ${c.badge.accent_color || "#f5c542"}55`
+                        : "1px solid rgba(255,255,255,0.08)",
                     }} />
                   ) : (
                     <div key={i} style={{
-                      width: 20, height: 20, borderRadius: 5,
+                      width: 16, height: 16, borderRadius: 4,
                       background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.1)",
+                      border: "1px solid rgba(255,255,255,0.08)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontFamily: "var(--font-display)", fontWeight: 700,
-                      fontSize: 7, color: "rgba(255,255,255,0.3)",
+                      fontSize: 6, color: "rgba(255,255,255,0.25)",
                     }}>
                       {getSlugAbbrev(c.community_slug)}
                     </div>
                   );
                 })}
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                  stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round"
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none"
+                  stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" strokeLinecap="round"
                 >
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
               </div>
             )}
 
-            {/* Expanded: drawer handle */}
             {expanded && (
               <div
                 onClick={(e) => { e.stopPropagation(); setExpanded(false); }}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
-                  padding: "4px 0",
+                  padding: "2px 0 4px",
                   cursor: "pointer",
                 }}
               >
                 <div style={{
-                  width: 32, height: 3, borderRadius: 3,
-                  background: "rgba(255,255,255,0.18)",
+                  width: 28, height: 2.5, borderRadius: 3,
+                  background: "rgba(255,255,255,0.15)",
                 }} />
               </div>
             )}
