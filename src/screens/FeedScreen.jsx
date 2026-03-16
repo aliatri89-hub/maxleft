@@ -953,6 +953,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // LOG CARD — cinematic backdrop + community context
 // ════════════════════════════════════════════════
 // VHS brand marks — rotated through for personality
+// VHS brand marks — rotated through for personality
 const VHS_BRANDS = [
   { bg: "#e8e4da", color: "#1a6b3c", text: "FUJI", sub: "HQ", weight: 900 },
   { bg: "#d4d0c8", color: "#333", text: "Memorex", sub: "HS", weight: 700 },
@@ -960,18 +961,88 @@ const VHS_BRANDS = [
   { bg: "#f5c518", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", sub: "HGX", weight: 700 },
   { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", sub: "E-180", weight: 900 },
+  { bg: "#d4d0c8", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#e8e4da", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
 ];
 
-function getVhsBrand(title) {
+function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  return VHS_BRANDS[hash % VHS_BRANDS.length];
+  const left = VHS_BRANDS[hash % VHS_BRANDS.length];
+  const right = VHS_BRANDS[(hash * 7 + 3) % VHS_BRANDS.length];
+  // Make sure left and right are different
+  const rightIdx = left === right ? (hash * 7 + 4) % VHS_BRANDS.length : (hash * 7 + 3) % VHS_BRANDS.length;
+  return { left: VHS_BRANDS[hash % VHS_BRANDS.length], right: VHS_BRANDS[rightIdx] };
+}
+
+// VHS logo SVG inline — the actual VHS brand mark
+function VhsLogoSvg({ color = "#222", size = 18 }) {
+  return (
+    <svg viewBox="0 0 100 50" width={size} height={size * 0.5} style={{ display: "block" }}>
+      <text x="50" y="38" textAnchor="middle" fontFamily="'Barlow Condensed', sans-serif"
+        fontWeight="900" fontSize="42" letterSpacing="3" fill={color}>
+        VHS
+      </text>
+    </svg>
+  );
+}
+
+function BrandCap({ brand, side = "right" }) {
+  return (
+    <div style={{
+      width: 26, flexShrink: 0,
+      background: brand.bg,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 1,
+      borderLeft: side === "right" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
+      borderRight: side === "left" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
+    }}>
+      {brand.isVhs ? (
+        <div style={{ transform: "rotate(90deg)" }}>
+          <VhsLogoSvg color={brand.color} size={22} />
+        </div>
+      ) : (
+        <>
+          <div style={{
+            writingMode: "vertical-rl",
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: brand.weight,
+            fontSize: 9,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            color: brand.color,
+            transform: "rotate(180deg)",
+            lineHeight: 1,
+          }}>
+            {brand.text}
+          </div>
+          {brand.sub && (
+            <div style={{
+              writingMode: "vertical-rl",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontWeight: 600,
+              fontSize: 5.5,
+              letterSpacing: "0.06em",
+              color: brand.color,
+              opacity: 0.5,
+              transform: "rotate(180deg)",
+            }}>
+              {brand.sub}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
   const [flipped, setFlipped] = useState(false);
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
-  const brand = getVhsBrand(data.title);
+  const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
 
   return (
     <div
@@ -1007,11 +1078,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             display: "flex",
             minHeight: 68,
           }}>
-            {/* Label — full width */}
+            {/* Left brand cap */}
+            <BrandCap brand={brandLeft} side="left" />
+
+            {/* Label — center */}
             <div style={{
               flex: 1,
               background: "#f0ebe1",
-              padding: "10px 14px",
+              padding: "10px 12px",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -1043,73 +1117,32 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
               ) : (
                 <div style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800,
-                  fontSize: 20,
-                  lineHeight: 1.05,
-                  color: "#2C2824",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.01em",
-                  position: "relative",
+                  fontWeight: 800, fontSize: 20, lineHeight: 1.05,
+                  color: "#2C2824", textTransform: "uppercase",
+                  letterSpacing: "0.01em", position: "relative",
                   textAlign: "center",
                 }}>
                   {data.title}
                 </div>
               )}
 
-              {/* Stars only */}
+              {/* Stars */}
               <div style={{ marginTop: 3, position: "relative" }}>
                 <Stars rating={data.rating} size={10} />
               </div>
 
-              {/* Sharpie time — bottom right */}
+              {/* Sharpie time */}
               <div style={{
-                position: "absolute",
-                bottom: 4, right: 8,
+                position: "absolute", bottom: 4, right: 8,
                 fontFamily: "'Permanent Marker', cursive",
-                fontSize: 9,
-                color: "rgba(44,40,36,0.3)",
+                fontSize: 9, color: "rgba(44,40,36,0.3)",
               }}>
                 {timeAgo}
               </div>
             </div>
 
-            {/* VHS brand end-cap */}
-            <div style={{
-              width: 28, flexShrink: 0,
-              background: brand.bg,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 1,
-              borderLeft: brand.dark ? "none" : "1px solid rgba(44,40,36,0.08)",
-            }}>
-              <div style={{
-                writingMode: "vertical-rl",
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: brand.weight,
-                fontSize: 9,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                color: brand.color,
-                transform: "rotate(180deg)",
-                lineHeight: 1,
-              }}>
-                {brand.text}
-              </div>
-              <div style={{
-                writingMode: "vertical-rl",
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontWeight: 600,
-                fontSize: 6,
-                letterSpacing: "0.06em",
-                color: brand.color,
-                opacity: 0.5,
-                transform: "rotate(180deg)",
-              }}>
-                {brand.sub}
-              </div>
-            </div>
+            {/* Right brand cap */}
+            <BrandCap brand={brandRight} side="right" />
           </div>
         </div>
 
@@ -1133,6 +1166,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            alignItems: "center",
             padding: "8px 10px",
             position: "relative",
           }}>
@@ -1146,18 +1180,22 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700, fontSize: 10,
-              color: "rgba(44,40,36,0.35)",
+              color: "rgba(44,40,36,0.3)",
               textTransform: "uppercase",
               letterSpacing: "0.04em",
               textAlign: "center",
-              marginBottom: 6,
+              marginBottom: 8,
               position: "relative",
             }}>
               {data.title}
             </div>
 
-            {/* Community rows */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 5, position: "relative" }}>
+            {/* Podcast logos — just icons, tappable */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 10, flexWrap: "wrap",
+              position: "relative",
+            }}>
               {communities.length > 0 ? communities.map((c, i) => {
                 const cAccent = getCommunityAccent(c.community_slug);
                 const img = c.community_image;
@@ -1168,61 +1206,32 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
                       e.stopPropagation();
                       onNavigateCommunity?.(c.community_slug, data.tmdb_id);
                     }}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "3px 6px",
-                      borderRadius: 4,
-                      cursor: "pointer",
-                      borderLeft: `3px solid ${cAccent}`,
-                    }}
+                    style={{ cursor: "pointer", position: "relative" }}
+                    title={c.community_name}
                   >
                     {img ? (
-                      <img src={img} alt="" style={{
-                        width: 26, height: 26, borderRadius: 6, objectFit: "cover",
-                        border: `1px solid ${cAccent}44`,
+                      <img src={img} alt={c.community_name} style={{
+                        width: 36, height: 36, borderRadius: 8, objectFit: "cover",
+                        border: `2px solid ${cAccent}55`,
+                        transition: "transform 0.15s",
                       }} />
                     ) : (
                       <div style={{
-                        width: 26, height: 26, borderRadius: 6,
-                        background: `${cAccent}15`, border: `1px solid ${cAccent}44`,
+                        width: 36, height: 36, borderRadius: 8,
+                        background: `${cAccent}15`, border: `2px solid ${cAccent}55`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                        fontSize: 8, color: cAccent,
+                        fontSize: 10, color: cAccent,
                       }}>
                         {(c.community_name || "").split(" ").map(w => w[0]).join("")}
                       </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
-                        fontSize: 11, color: "#2C2824", textTransform: "uppercase",
-                        letterSpacing: "0.02em", lineHeight: 1.2,
-                      }}>
-                        {c.community_name}
-                      </div>
-                      {c.series_title && (
-                        <div style={{
-                          fontFamily: "'Lora', serif", fontStyle: "italic",
-                          fontSize: 8, color: "rgba(44,40,36,0.4)",
-                        }}>
-                          {c.series_title}
-                        </div>
-                      )}
-                    </div>
-                    {c.series_total > 0 && (
-                      <span style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 8, fontWeight: 600, color: cAccent,
-                      }}>
-                        {c.series_watched}/{c.series_total}
-                      </span>
                     )}
                   </div>
                 );
               }) : (
                 <div style={{
                   fontFamily: "'Lora', serif", fontStyle: "italic",
-                  fontSize: 10, color: "rgba(44,40,36,0.35)", textAlign: "center",
+                  fontSize: 10, color: "rgba(44,40,36,0.35)",
                 }}>
                   Personal log
                 </div>
