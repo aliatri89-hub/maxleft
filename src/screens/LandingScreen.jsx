@@ -129,9 +129,30 @@ const heroEnhancementStyles = `
     flex-shrink: 0;
   }
   .poster-skeleton {
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 100%);
-    border: 1px solid rgba(255,255,255,0.04);
+    background: linear-gradient(180deg, rgba(30,28,25,0.9) 0%, rgba(20,18,15,0.95) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    overflow: hidden;
   }
+  .poster-skeleton::before,
+  .poster-skeleton::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    width: 6px;
+    background: repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.08) 0px,
+      rgba(255,255,255,0.08) 8px,
+      transparent 8px,
+      transparent 14px
+    );
+    border-radius: 1px;
+  }
+  .poster-skeleton::before { left: 3px; }
+  .poster-skeleton::after { right: 3px; }
+  
 
   /* ── DARK OVERLAY (heavier on edges) ──────────────────── */
   .poster-overlay {
