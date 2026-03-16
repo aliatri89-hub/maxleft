@@ -538,6 +538,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
             onOpenCommunity?.(slug, tmdbId);
           }}
           onToast={onToast}
+          onShelvesChanged={onShelvesChanged}
         />
       )}
 
