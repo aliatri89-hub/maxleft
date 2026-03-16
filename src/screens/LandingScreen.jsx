@@ -11,7 +11,7 @@ const POSTER_COLUMNS = [
   [
     '/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg', // Alien
     '/wijlZ3HaYMvlDTPqJoTCWKFkCPU.jpg', // Halloween (2018)
-    null, // skeleton gap
+    '/gap_placeholder_1a.jpg', // intentional 404
     '/tjbLSFwi0I3phZwh8zoHWNfbsEp.jpg', // Jaws
     '/hA2ple9q4qnwxp3hKVNhroipsir.jpg', // Mad Max Fury Road
     '/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg', // Scream
@@ -22,7 +22,7 @@ const POSTER_COLUMNS = [
     '/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg', // Die Hard
     '/uK46P78BvWGDW4dbq9C13LAwpmw.jpg', // Psycho
     '/ceG9VzoRAVGwivFU403Wc3AHRys.jpg', // Indiana Jones Raiders
-    null, // skeleton gap
+    '/gap_placeholder_2a.jpg', // intentional 404
     '/sNWdOLae80AdQkD1NpvcDN5f3PB.jpg', // The Shining
     '/gRPePRMct1ttp70sYx7RZG7igee.jpg', // The Fly
     '/hEjK9A9BkNXejFW4tfacVAEHtkn.jpg', // Rocky
@@ -31,7 +31,7 @@ const POSTER_COLUMNS = [
   [
     '/tzGY49kseSE9QAKk47uuDGwnSCu.jpg', // The Thing
     '/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg', // Blade Runner
-    null, // skeleton gap
+    '/gap_placeholder_3a.jpg', // intentional 404
     '/jFTVD4XoWQTcg7wdyJKa8PEds5q.jpg', // Terminator 2
     '/vN5B5WgYscRGcQpVhHl6p9DDTP0.jpg', // Back to the Future
     '/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg', // The Silence of the Lambs
@@ -43,14 +43,14 @@ const POSTER_COLUMNS = [
     '/5m0zjctrxy9HeSAtnGWNLlsnr8z.jpg', // Lord of the Rings Fellowship
     '/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', // Spirited Away
     '/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', // Avatar
-    null, // skeleton gap
+    '/gap_placeholder_4a.jpg', // intentional 404
     '/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // The Shawshank Redemption
     '/78lPtwv72eTNqFW9COBYI0dWDJa.jpg', // Iron Man
   ],
   // Column 5 — scrolls up
   [
     '/7E8nLijS9AwwUEPu2oFYOVKhdFA.jpg', // Ghostbusters
-    null, // skeleton gap
+    '/gap_placeholder_5a.jpg', // intentional 404
     '/wdniP8NDaJIydi1hMxhpbJMUfr6.jpg', // Predator
     '/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg', // Pulp Fiction
     '/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg', // Joker
@@ -128,31 +128,6 @@ const heroEnhancementStyles = `
     background-color: rgba(199,91,63,0.06);
     flex-shrink: 0;
   }
-  .poster-skeleton {
-    background: linear-gradient(180deg, rgba(30,28,25,0.9) 0%, rgba(20,18,15,0.95) 100%);
-    border: 1px solid rgba(255,255,255,0.06);
-    position: relative;
-    overflow: hidden;
-  }
-  .poster-skeleton::before,
-  .poster-skeleton::after {
-    content: '';
-    position: absolute;
-    top: 6px;
-    bottom: 6px;
-    width: 6px;
-    background: repeating-linear-gradient(
-      180deg,
-      rgba(255,255,255,0.08) 0px,
-      rgba(255,255,255,0.08) 8px,
-      transparent 8px,
-      transparent 14px
-    );
-    border-radius: 1px;
-  }
-  .poster-skeleton::before { left: 3px; }
-  .poster-skeleton::after { right: 3px; }
-  
 
   /* ── DARK OVERLAY (heavier on edges) ──────────────────── */
   .poster-overlay {
@@ -1166,8 +1141,8 @@ function LandingScreen({ onSignIn }) {
                   {[...col, ...col].map((path, pi) => (
                     <div
                       key={pi}
-                      className={`poster-thumb${path ? '' : ' poster-skeleton'}`}
-                      style={path ? { backgroundImage: `url(https://image.tmdb.org/t/p/w185${path})` } : {}}
+                      className="poster-thumb"
+                      style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w185${path})` }}
                     />
                   ))}
                 </div>
