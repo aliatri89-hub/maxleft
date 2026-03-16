@@ -3,7 +3,7 @@ import { useRef, useId } from "react";
 /**
  * SearchInput — always-visible search bar with 🔍 icon and clear button.
  *
- * Used in tab sub-components (PatreonTab, BooksTab, PatronTab, etc.)
+ * Used in tab sub-components (PatreonTab, BooksTab, etc.)
  * where search is always visible (not collapsible).
  *
  * Props:
