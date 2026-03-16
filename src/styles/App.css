@@ -251,9 +251,10 @@
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #b8ada2;
+    color: #d4cbc0;
     cursor: pointer;
     transition: color 0.2s;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   }
   .landing-learn-more span:hover { color: var(--terracotta); }
   .landing-learn-more-arrow {
