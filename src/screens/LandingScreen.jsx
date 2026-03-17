@@ -1657,7 +1657,6 @@ function LandingScreen({ onSignIn }) {
                   {[...PODCAST_ART_ROW1, ...PODCAST_ART_ROW1].map((p, i) => (
                     <div key={i} className="podcast-marquee-item">
                       <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
-                      <span className="podcast-marquee-label">{p.name}</span>
                     </div>
                   ))}
                 </div>
@@ -1667,7 +1666,6 @@ function LandingScreen({ onSignIn }) {
                   {[...PODCAST_ART_ROW2, ...PODCAST_ART_ROW2].map((p, i) => (
                     <div key={`r2-${i}`} className="podcast-marquee-item">
                       <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
-                      <span className="podcast-marquee-label">{p.name}</span>
                     </div>
                   ))}
                 </div>

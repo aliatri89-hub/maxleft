@@ -142,8 +142,9 @@ function ProgressBar({ current, total, color = "var(--accent-green, #34d399)", h
 }
 
 // ── Fade-in wrapper with optional swipe-to-dismiss ──
-function FeedCard({ children, index, style = {}, dismissable = false, onDismiss }) {
+function FeedCard({ children, index, style = {}, dismissable = false, onDismiss, eject = false }) {
   const [visible, setVisible] = useState(false);
+  const [ejecting, setEjecting] = useState(eject);
   const [swipeX, setSwipeX] = useState(0);
   const [phase, setPhase] = useState("idle"); // idle | swiping | sliding-out | collapsing | gone
   const cardRef = useRef(null);
@@ -156,9 +157,16 @@ function FeedCard({ children, index, style = {}, dismissable = false, onDismiss 
   const DISMISS_THRESHOLD = 120;
 
   useEffect(() => {
+    if (eject) {
+      // VHS eject: show immediately with eject animation
+      setVisible(true);
+      setEjecting(true);
+      const t = setTimeout(() => setEjecting(false), 900);
+      return () => clearTimeout(t);
+    }
     const timer = setTimeout(() => setVisible(true), 60 * Math.min(index, 8));
     return () => clearTimeout(timer);
-  }, [index]);
+  }, [index, eject]);
 
   // ── Native touch listeners — captures events before tab swiper sees them ──
   useEffect(() => {
@@ -276,15 +284,22 @@ function FeedCard({ children, index, style = {}, dismissable = false, onDismiss 
       <div
         style={{
           ...style,
-          opacity: visible ? (isSwiping ? 1 - swipePct * 0.3 : 1) : 0,
-          transform: visible
-            ? swipeX > 0 ? `translateX(${swipeX}px)` : "translateY(0)"
-            : "translateY(16px)",
-          transition: isSwiping
-            ? "none"
-            : isSlidingOut
-            ? "transform 0.25s ease-in, opacity 0.2s ease"
-            : "opacity 0.45s ease, transform 0.45s ease",
+          ...(ejecting
+            ? {
+                animation: "vhs-eject 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.15) forwards",
+                opacity: 1,
+              }
+            : {
+                opacity: visible ? (isSwiping ? 1 - swipePct * 0.3 : 1) : 0,
+                transform: visible
+                  ? swipeX > 0 ? `translateX(${swipeX}px)` : "translateY(0)"
+                  : "translateY(16px)",
+                transition: isSwiping
+                  ? "none"
+                  : isSlidingOut
+                  ? "transform 0.25s ease-in, opacity 0.2s ease"
+                  : "opacity 0.45s ease, transform 0.45s ease",
+              }),
         }}
       >
         {children}
@@ -1765,6 +1780,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   refreshRef.current = refresh;
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
+  const [ejectKeys, setEjectKeys] = useState(new Set());
+  const preSyncKeysRef = useRef(null);
 
   // Random picks are stabilized by the module-level _randomPicksCache in useFeed,
   // so they don't re-roll on tab switches — no additional latching needed.
@@ -1831,11 +1848,39 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   }, [autoLogCompleteSignal]);
 
   // Refresh feed after Letterboxd sync completes — new movie appears at top
+  // Snapshot current feed keys before refresh so we can detect new items
   useEffect(() => {
     if (letterboxdSyncSignal) {
+      // Snapshot current log keys before the refresh brings in new ones
+      const currentKeys = new Set(
+        rawFeedItems
+          .filter(item => item.type === "log")
+          .map(item => `log-${item.data.tmdb_id || item.data.title}-${(item.data.logged_at || "").slice(0, 10)}`)
+      );
+      preSyncKeysRef.current = currentKeys;
       refreshRef.current();
     }
   }, [letterboxdSyncSignal]);
+
+  // After feed items update, detect new log cards from sync and trigger eject animation
+  useEffect(() => {
+    if (!preSyncKeysRef.current) return;
+    const preKeys = preSyncKeysRef.current;
+    const newEjectKeys = new Set();
+    for (const item of rawFeedItems) {
+      if (item.type !== "log") continue;
+      const key = `log-${item.data.tmdb_id || item.data.title}-${(item.data.logged_at || "").slice(0, 10)}`;
+      if (!preKeys.has(key)) {
+        newEjectKeys.add(key);
+      }
+    }
+    if (newEjectKeys.size > 0) {
+      setEjectKeys(newEjectKeys);
+      // Clear eject state after animation completes
+      setTimeout(() => setEjectKeys(new Set()), 1500);
+    }
+    preSyncKeysRef.current = null;
+  }, [rawFeedItems]);
 
   if (loading && feedItems.length === 0) {
     return (
@@ -2001,6 +2046,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               <FeedCard
                 key={stableKey}
                 index={i}
+                eject={ejectKeys.has(stableKey)}
                 dismissable={!!dismissKey}
                 onDismiss={dismissKey ? () => {
                   dismiss(dismissKey.type, dismissKey.key);
@@ -2037,6 +2083,25 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {/* Animations */}
       <style>{`
+        @keyframes vhs-eject {
+          0% {
+            opacity: 0;
+            transform: translateY(80px) scale(0.97);
+          }
+          35% {
+            opacity: 1;
+          }
+          65% {
+            transform: translateY(-8px) scale(1.005);
+          }
+          80% {
+            transform: translateY(2px) scale(1);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
           50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
