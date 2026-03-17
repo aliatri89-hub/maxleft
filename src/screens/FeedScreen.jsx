@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useDismissedCards } from "../hooks/community/useDismissedCards";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
+import { useEpisodeMatch } from "../hooks/community/useEpisodeMatch";
 import { getPosterUrl, fetchSinglePoster, isLogoChecked } from "../utils/communityTmdb";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
@@ -757,22 +758,19 @@ const EPISODE_LABELS = [
 ];
 
 function EpisodeCard({ data, onNavigateCommunity }) {
-  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(
+    { ...data, id: data.item_id },
+    data.community_name || ""
+  );
   const hasBackdrop = !!data.backdrop_path;
   const isDropped = data.status === "dropped" || data.status === "published";
-  const isThisPlaying = isDropped && currentEp?.enclosureUrl === data.episode_url && isPlaying;
+  const isThisPlaying = isThisEpPlaying;
   const seen = !!data.user_has_watched;
 
   const handlePlay = (e) => {
     e.stopPropagation();
-    if (!data.episode_url) return;
-    playEpisode({
-      guid: `episode-${data.item_id}`,
-      title: data.episode_title || data.title,
-      enclosureUrl: data.episode_url,
-      community: data.community_name || null,
-      artwork: data.community_image || null,
-    });
+    if (!matchedEpisode) return;
+    playEpisode(matchedEpisode);
   };
 
   // Stable label for dropped episodes
@@ -920,45 +918,13 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         </div>
       </div>
 
-      {/* Bottom bar — Listen + optional Watched badge */}
+      {/* Bottom-right stack: Listen (if available) above Watched badge */}
       <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "6px 16px 12px", position: "relative", zIndex: 1,
+        display: "flex", flexDirection: "column", alignItems: "flex-end",
+        gap: 6, padding: "6px 16px 12px", position: "relative", zIndex: 1,
       }}>
-        {/* Watched badge — always show on dropped/published */}
-        {isDropped && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{
-              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
-              letterSpacing: "0.04em",
-              color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
-              transition: "color 0.3s ease",
-            }}>
-              Watched
-            </span>
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-              border: seen
-                ? "2px solid rgba(52,211,153,0.5)"
-                : "2px dashed rgba(255,255,255,0.12)",
-              transition: "all 0.3s ease",
-            }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                strokeWidth={seen ? "3" : "2"}
-                strokeLinecap="round" strokeLinejoin="round"
-                style={{ transition: "all 0.3s ease" }}
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-          </div>
-        )}
-
-        {/* Play button — show whenever audio is available */}
-        {data.episode_url ? (
+        {/* Listen button — stacked above badge when present */}
+        {matchedEpisode && (
           <button
             onClick={handlePlay}
             style={{
@@ -969,7 +935,6 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               color: accent, fontSize: 11, fontWeight: 600,
               cursor: "pointer", fontFamily: "var(--font-body)",
               transition: "all 0.2s",
-              marginLeft: "auto",
             }}
           >
             <svg width="9" height="9" viewBox="0 0 24 24" fill={accent}>
@@ -980,8 +945,11 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </svg>
             {isThisPlaying ? "Playing…" : "Listen"}
           </button>
-        ) : !isDropped && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto" }}>
+        )}
+
+        {/* Watched badge — always in the corner for dropped/published */}
+        {isDropped && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{
               fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
               letterSpacing: "0.04em",
