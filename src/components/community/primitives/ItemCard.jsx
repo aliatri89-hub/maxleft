@@ -150,6 +150,7 @@ export default function ItemCard({
             position: "absolute", inset: 0, zIndex: 5,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
             background: "rgba(0,0,0,0.35)",
+            pointerEvents: "none",
           }}>
             <div style={{
               background: "rgba(250,204,21,0.15)",

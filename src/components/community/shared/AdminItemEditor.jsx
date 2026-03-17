@@ -93,13 +93,9 @@ export default function AdminItemEditor({
   const [commentaryOnly, setCommentaryOnly] = useState(
     item.extra_data?.commentary_only || false
   );
-  // coming_soon is now computed from air_date — no manual flag needed
-  const comingSoon = (() => {
-    if (!airDate) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(airDate + "T00:00:00") > today;
-  })();
+  const [comingSoon, setComingSoon] = useState(
+    item.extra_data?.coming_soon || false
+  );
 
   // ─── UI state ───
   const [saving, setSaving] = useState(false);
@@ -119,6 +115,12 @@ export default function AdminItemEditor({
   const [rssError, setRssError] = useState("");
   const audioRef = useRef(null);
   const [previewingUrl, setPreviewingUrl] = useState("");
+
+  // ─── Quick Match (auto-load top 3 RSS episodes, fuzzy rank) ───
+  const [quickMatchEps, setQuickMatchEps] = useState([]);
+  const [quickMatchLoading, setQuickMatchLoading] = useState(false);
+  const [quickMatchDone, setQuickMatchDone] = useState(false);
+  const [quickSaving, setQuickSaving] = useState(false);
 
   // ─── Book cover search ───
   const [coverSearching, setCoverSearching] = useState(false);
@@ -174,6 +176,10 @@ export default function AdminItemEditor({
 
     setSearchResults([]);
     setSearchQuery("");
+
+    // Auto-fetch details (director, backdrop) — pass ID + type directly
+    // since state won't have updated yet
+    handleTmdbFetch(result.id, isTV ? "tv" : "movie");
   };
 
   // ─── RSS Feed Browser ───
@@ -244,6 +250,102 @@ export default function AdminItemEditor({
     setPreviewingUrl(ep.audioUrl);
   };
 
+  // ─── Quick Match — auto-load top 3 RSS eps, fuzzy rank, one-tap save ───
+  const quickMatchNormalize = (s) => (s || "").toLowerCase()
+    .replace(/['']/g, "")
+    .replace(/[:\-–—,.!?()[\]"]/g, " ")
+    .replace(/\s+/g, " ").trim();
+
+  const quickMatchScore = (filmTitle, epTitle) => {
+    const ft = quickMatchNormalize(filmTitle);
+    const et = quickMatchNormalize(epTitle);
+    if (!ft || !et) return 0;
+    // Exact substring match = high score
+    if (et.includes(ft)) return 100;
+    // Word overlap scoring
+    const fWords = ft.split(" ").filter(w => w.length > 2);
+    if (fWords.length === 0) return 0;
+    const hits = fWords.filter(w => et.includes(w)).length;
+    return Math.round((hits / fWords.length) * 80);
+  };
+
+  const loadQuickMatch = async () => {
+    if (!feedUrl || quickMatchDone) return;
+    setQuickMatchLoading(true);
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`;
+      const resp = await fetch(proxyUrl);
+      if (!resp.ok) throw new Error(`Feed fetch failed: ${resp.status}`);
+      const text = await resp.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, "text/xml");
+      const items = xml.querySelectorAll("item");
+      const eps = [];
+      for (let i = 0; i < Math.min(items.length, 5); i++) {
+        const node = items[i];
+        const epTitle = node.querySelector("title")?.textContent || "";
+        const enclosure = node.querySelector("enclosure");
+        const audioUrl = enclosure?.getAttribute("url") || "";
+        const guid = node.querySelector("guid")?.textContent || "";
+        const pubDate = node.querySelector("pubDate")?.textContent || "";
+        if (audioUrl) {
+          eps.push({
+            title: epTitle, audioUrl, guid, pubDate,
+            score: quickMatchScore(title, epTitle),
+          });
+        }
+      }
+      // Sort by fuzzy score descending
+      eps.sort((a, b) => b.score - a.score);
+      setQuickMatchEps(eps);
+      setQuickMatchDone(true);
+    } catch (e) {
+      console.error("[AdminEdit] Quick match error:", e);
+    }
+    setQuickMatchLoading(false);
+  };
+
+  const handleQuickMatch = async (ep) => {
+    setQuickSaving(true);
+    try {
+      // Build the update — episode_url + extra_data merge
+      const existingExtra = item.extra_data || {};
+      const newExtra = { ...existingExtra };
+      newExtra.episode_url = ep.audioUrl;
+      newExtra.episode_title = ep.title;
+
+      const { error } = await supabase
+        .from("community_items")
+        .update({
+          episode_url: ep.audioUrl,
+          rss_guid: ep.guid,
+          extra_data: newExtra,
+        })
+        .eq("id", item.id);
+
+      if (error) throw error;
+
+      // Update local state to reflect the match
+      setEpisodeUrl(ep.audioUrl);
+      setEpisodeTitle(ep.title);
+      setRssGuid(ep.guid);
+      if (onToast) onToast(`Linked: ${ep.title} ✓`);
+      if (onSaved) onSaved();
+    } catch (e) {
+      console.error("[AdminEdit] Quick match save error:", e);
+      if (onToast) onToast(`Error: ${e.message}`);
+    }
+    setQuickSaving(false);
+  };
+
+  // Auto-load Quick Match when Audio tab opens on unmatched item
+  useEffect(() => {
+    if (activeTab === "audio" && !episodeUrl && feedUrl && !quickMatchDone && !quickMatchLoading) {
+      loadQuickMatch();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
   const toggleAudioPreview = (url) => {
     if (previewingUrl === url && audioRef.current && !audioRef.current.paused) {
       audioRef.current.pause();
@@ -290,13 +392,13 @@ export default function AdminItemEditor({
   };
 
   // ─── Fetch poster + backdrop from TMDB by ID ───
-  const handleTmdbFetch = async () => {
-    const id = mediaType === "show" ? (tmdbTvId || tmdbId) : tmdbId;
+  const handleTmdbFetch = async (overrideId, overrideType) => {
+    const type = overrideType || (mediaType === "show" ? "tv" : "movie");
+    const id = overrideId || (mediaType === "show" ? (tmdbTvId || tmdbId) : tmdbId);
     if (!id) return;
     setTmdbFetching(true);
     try {
-      const endpoint = mediaType === "show" ? "tv" : "movie";
-      const data = await apiProxy("tmdb", { endpoint: `${endpoint}/${id}` });
+      const data = await apiProxy("tmdb_details", { tmdb_id: String(id), type });
       if (data) {
         if (data.poster_path) {
           setPosterPreview({
@@ -308,16 +410,15 @@ export default function AdminItemEditor({
         if (data.backdrop_path) {
           setBackdropPath(data.backdrop_path);
         }
-        if (data.overview && !creator.trim()) {
-          // Optionally fill creator from TMDB
-          const dir = data.credits?.crew?.find(c => c.job === "Director");
-          if (dir) setCreator(dir.name);
+        // Auto-fill director/creator from credits
+        const dir = data.credits?.crew?.find(c => c.job === "Director");
+        if (dir && !creator.trim()) {
+          setCreator(dir.name);
         }
         if (onToast) onToast(`Fetched TMDB data for ${data.title || data.name || id}`);
       }
     } catch (e) {
       console.error("[AdminEdit] TMDB fetch error:", e);
-      alert("TMDB fetch failed: " + e.message);
     }
     setTmdbFetching(false);
   };
@@ -392,8 +493,12 @@ export default function AdminItemEditor({
         delete newExtra.commentary_only;
       }
 
-      // Coming soon is now computed from air_date — always strip the legacy flag
-      delete newExtra.coming_soon;
+      // Coming soon flag
+      if (comingSoon) {
+        newExtra.coming_soon = true;
+      } else {
+        delete newExtra.coming_soon;
+      }
 
       // Cover image for books/games
       if (coverImage.trim() && !isTmdbMedia) {
@@ -918,6 +1023,86 @@ export default function AdminItemEditor({
           ═══════════════════════════════════════════ */}
       {activeTab === "audio" && (
         <div style={S.tabContent}>
+          {/* ─── Quick Match (shown when no audio linked) ─── */}
+          {!episodeUrl && feedUrl && (
+            <div style={{
+              marginBottom: 14, padding: 12, borderRadius: 10,
+              background: "rgba(250,204,21,0.04)",
+              border: "1px solid rgba(250,204,21,0.12)",
+            }}>
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                marginBottom: 8,
+              }}>
+                <label style={{ ...S.label, marginBottom: 0, color: "#facc15" }}>
+                  Quick Match
+                </label>
+                {quickMatchDone && (
+                  <button
+                    onClick={() => { setQuickMatchDone(false); setTimeout(loadQuickMatch, 50); }}
+                    style={{ ...S.smallBtn, fontSize: 9, padding: "2px 8px" }}
+                  >Reload</button>
+                )}
+              </div>
+
+              {quickMatchLoading && (
+                <div style={{ fontSize: 11, color: "#888", padding: "8px 0" }}>
+                  Loading latest episodes…
+                </div>
+              )}
+
+              {quickMatchDone && quickMatchEps.length === 0 && (
+                <div style={{ fontSize: 11, color: "#666", padding: "4px 0" }}>
+                  No recent episodes found in feed.
+                </div>
+              )}
+
+              {quickMatchDone && quickMatchEps.map((ep, i) => {
+                const isBest = i === 0 && ep.score >= 50;
+                return (
+                  <div key={ep.guid || i} style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "8px 10px", borderRadius: 8, marginBottom: 4,
+                    background: isBest ? "rgba(250,204,21,0.08)" : "rgba(255,255,255,0.02)",
+                    border: isBest ? "1px solid rgba(250,204,21,0.25)" : "1px solid rgba(255,255,255,0.04)",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                    onClick={() => !quickSaving && handleQuickMatch(ep)}
+                  >
+                    <button
+                      onClick={(e) => { e.stopPropagation(); toggleAudioPreview(ep.audioUrl); }}
+                      style={S.playBtn}
+                      title="Preview audio"
+                    >
+                      {previewingUrl === ep.audioUrl ? "⏸" : "▶"}
+                    </button>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: isBest ? 700 : 500,
+                        color: isBest ? "#facc15" : "#ccc",
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>{ep.title}</div>
+                      <div style={{ fontSize: 9, color: "#666" }}>
+                        {ep.pubDate ? new Date(ep.pubDate).toLocaleDateString() : ""}
+                        {ep.score > 0 && <span style={{ marginLeft: 6, color: ep.score >= 50 ? "#facc15" : "#555" }}>
+                          {ep.score}% match
+                        </span>}
+                      </div>
+                    </div>
+                    <div style={{
+                      fontSize: 9, fontWeight: 700, textTransform: "uppercase",
+                      letterSpacing: "0.06em", flexShrink: 0,
+                      color: isBest ? "#facc15" : "#888",
+                    }}>
+                      {quickSaving ? "…" : "Link"}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* Current episode info */}
           <div style={{ marginBottom: 10 }}>
             <label style={S.label}>
@@ -1225,22 +1410,28 @@ export default function AdminItemEditor({
                 (Patreon tab — no green card frame)
               </span>
             </label>
-            <div
+            <label
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: comingSoon ? "#facc15" : "#555",
+                color: "#ccc",
+                cursor: "pointer",
                 padding: "6px 0",
               }}
             >
-              <span style={{ fontSize: 14 }}>{comingSoon ? "📅" : "✓"}</span>
-              {comingSoon ? "Coming Soon" : "Aired"}
+              <input
+                type="checkbox"
+                checked={comingSoon}
+                onChange={(e) => setComingSoon(e.target.checked)}
+                style={{ accentColor: "#facc15" }}
+              />
+              Coming Soon
               <span style={{ fontSize: 9, color: "#666" }}>
-                (auto from air date)
+                (episode seeded but not yet aired)
               </span>
-            </div>
+            </label>
           </div>
 
           {/* Debug info */}

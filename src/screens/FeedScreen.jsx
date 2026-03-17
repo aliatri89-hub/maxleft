@@ -920,12 +920,45 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         </div>
       </div>
 
-      {/* Bottom bar — Listen (has audio) or Watched badge (upcoming/published) */}
+      {/* Bottom bar — Listen + optional Watched badge */}
       <div style={{
-        display: "flex", justifyContent: "flex-end", alignItems: "center",
+        display: "flex", justifyContent: "space-between", alignItems: "center",
         padding: "6px 16px 12px", position: "relative", zIndex: 1,
       }}>
-        {isDropped && data.episode_url ? (
+        {/* Watched badge — always show on dropped/published */}
+        {isDropped && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{
+              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
+              letterSpacing: "0.04em",
+              color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
+              transition: "color 0.3s ease",
+            }}>
+              Watched
+            </span>
+            <div style={{
+              width: 22, height: 22, borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+              border: seen
+                ? "2px solid rgba(52,211,153,0.5)"
+                : "2px dashed rgba(255,255,255,0.12)",
+              transition: "all 0.3s ease",
+            }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
+                stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                strokeWidth={seen ? "3" : "2"}
+                strokeLinecap="round" strokeLinejoin="round"
+                style={{ transition: "all 0.3s ease" }}
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {/* Play button — show whenever audio is available */}
+        {data.episode_url ? (
           <button
             onClick={handlePlay}
             style={{
@@ -936,6 +969,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               color: accent, fontSize: 11, fontWeight: 600,
               cursor: "pointer", fontFamily: "var(--font-body)",
               transition: "all 0.2s",
+              marginLeft: "auto",
             }}
           >
             <svg width="9" height="9" viewBox="0 0 24 24" fill={accent}>
@@ -946,8 +980,8 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </svg>
             {isThisPlaying ? "Playing…" : "Listen"}
           </button>
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        ) : !isDropped && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto" }}>
             <span style={{
               fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
               letterSpacing: "0.04em",
@@ -1263,12 +1297,18 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 );
               })()}
 
-              {/* Stars */}
-              <div style={{ marginTop: 3, position: "relative" }}>
-                <Stars rating={data.rating} size={14} sharpie />
-              </div>
+              {/* Sharpie year — under title */}
+              {data.year && (
+                <div style={{
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 10, color: "rgba(44,40,36,0.5)",
+                  marginTop: 2, position: "relative",
+                  textAlign: "center",
+                }}>
+                  {data.year}
+                </div>
+              )}
 
-              {/* Sharpie year — bottom left */}
               {/* Sharpie time — bottom left */}
               <div style={{
                 position: "absolute", bottom: 4, left: 28,
@@ -1278,14 +1318,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 {timeAgo}
               </div>
 
-              {/* Sharpie year — bottom right */}
-              {data.year && (
-                <div style={{
-                  position: "absolute", bottom: 4, right: 28,
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 10, color: "#2C2824",
-                }}>
-                  {data.year}
+              {/* Stars — bottom right */}
+              {data.rating > 0 && (
+                <div style={{ position: "absolute", bottom: 4, right: 28 }}>
+                  <Stars rating={data.rating} size={14} sharpie />
                 </div>
               )}
 
@@ -1465,16 +1501,74 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                   );
                 })}
               </div>
-            ) : (
-              <div style={{
-                fontFamily: "'Permanent Marker', cursive",
-                fontSize: 11, color: "rgba(44,40,36,0.3)",
-                textAlign: "center", padding: "8px 0",
-                position: "relative",
-              }}>
-                Personal log
-              </div>
-            )}
+            ) : (() => {
+              // Deterministic barcode — EAN/UPC style, uniform height, varying widths
+              const seed = data.tmdb_id
+                ? Number(data.tmdb_id)
+                : (data.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+
+              // Generate sequence of bar+space widths (1–3px each), alternating black/white
+              // Guard bars at start/end (always narrow-wide-narrow)
+              const pseudoRand = (i) => {
+                const x = Math.sin(seed * 9301 + i * 49297 + 233) * 0.5 + 0.5;
+                return Math.floor(x * 3) + 1; // 1, 2, or 3
+              };
+              const stripes = [];
+              // Left guard
+              stripes.push({ w: 1, dark: true });
+              stripes.push({ w: 1, dark: false });
+              stripes.push({ w: 1, dark: true });
+              // Data bars — 30 alternating stripes
+              for (let i = 0; i < 30; i++) {
+                stripes.push({ w: pseudoRand(i), dark: i % 2 === 0 });
+              }
+              // Right guard
+              stripes.push({ w: 1, dark: true });
+              stripes.push({ w: 1, dark: false });
+              stripes.push({ w: 1, dark: true });
+
+              return (
+                <div style={{
+                  display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center",
+                  gap: 10, padding: "2px 0", width: "100%",
+                }}>
+                  {/* HOME VIDEO stamp */}
+                  <div style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 900, fontSize: 7,
+                    color: "rgba(44,40,36,0.22)",
+                    letterSpacing: "0.22em", textTransform: "uppercase",
+                    border: "1px solid rgba(44,40,36,0.14)",
+                    borderRadius: 2, padding: "2px 7px",
+                  }}>
+                    Home Video
+                  </div>
+
+                  {/* Barcode */}
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                    <div style={{ display: "flex", alignItems: "stretch", height: 32 }}>
+                      {stripes.map((s, i) => (
+                        <div key={i} style={{
+                          width: s.w * 2,
+                          height: "100%",
+                          background: s.dark ? "rgba(44,40,36,0.55)" : "transparent",
+                          flexShrink: 0,
+                        }} />
+                      ))}
+                    </div>
+                    {/* Numeric digits below — purely decorative */}
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 6, color: "rgba(44,40,36,0.3)",
+                      letterSpacing: "0.15em",
+                    }}>
+                      {String(seed).padStart(12, "0").slice(0, 12)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Flip hint */}
             <div style={{
