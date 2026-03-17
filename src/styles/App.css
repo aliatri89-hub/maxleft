@@ -3686,6 +3686,14 @@
 
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes ledPulse {
+    0%, 100% { opacity: 0.9; box-shadow: 0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3); }
+    50% { opacity: 1; box-shadow: 0 0 6px #34d399, 0 0 12px rgba(52,211,153,0.5); }
+  }
+  @keyframes tapeFlip {
+    from { opacity: 0; transform: rotateX(90deg); }
+    to { opacity: 1; transform: rotateX(0deg); }
+  }
 
   .modal-handle {
     width: 36px;

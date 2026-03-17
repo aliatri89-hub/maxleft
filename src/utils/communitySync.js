@@ -51,12 +51,17 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
       const rewatchCount = Math.max(0, (movieData.watch_count || 1) - 1);
       // rewatch_dates = all dates after the first (the "rewatches")
       const rewatchDates = (movieData.watch_dates || []).slice(1);
+      // Use the original watch date (not "now") so it doesn't bubble to top of feed
+      const firstWatchDate = (movieData.watch_dates || [])[0];
+      const completedAt = firstWatchDate
+        ? new Date(firstWatchDate + "T12:00:00Z").toISOString()
+        : new Date().toISOString();
 
       return {
         user_id: userId,
         item_id: item.id,
         status: "completed",
-        completed_at: new Date().toISOString(),
+        completed_at: completedAt,
         listened_with_commentary: false,
         rating: movieData.rating || null,
         rewatch_count: rewatchCount,
@@ -74,6 +79,7 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
       toSync.forEach((item) => {
         const movieData = watchedMovies.get(item.tmdb_id);
         map[item.id] = {
+          status: "completed",
           listened_with_commentary: false,
           rating: movieData.rating || null,
           rewatch_count: Math.max(0, (movieData.watch_count || 1) - 1),
@@ -121,7 +127,7 @@ export async function syncShowsFromShelf(userId, communityItems, map, skippedIds
   const tmdbIds = showItems.map((i) => i.tmdb_id);
   const { data: userShows } = await supabase
     .from("shows")
-    .select("tmdb_id, rating, status")
+    .select("tmdb_id, rating, status, finished_at")
     .eq("user_id", userId)
     .in("tmdb_id", tmdbIds);
 
@@ -131,7 +137,7 @@ export async function syncShowsFromShelf(userId, communityItems, map, skippedIds
   const watchedShows = new Map(
     userShows
       .filter((s) => s.status === "watched" || s.status === "completed")
-      .map((s) => [s.tmdb_id, { rating: s.rating }])
+      .map((s) => [s.tmdb_id, { rating: s.rating, finished_at: s.finished_at }])
   );
 
   const toSync = showItems.filter(
@@ -146,7 +152,7 @@ export async function syncShowsFromShelf(userId, communityItems, map, skippedIds
       user_id: userId,
       item_id: item.id,
       status: "completed",
-      completed_at: new Date().toISOString(),
+      completed_at: showData.finished_at || new Date().toISOString(),
       listened_with_commentary: false,
       rating: showData.rating || null,
     };
@@ -164,6 +170,7 @@ export async function syncShowsFromShelf(userId, communityItems, map, skippedIds
   toSync.forEach((item) => {
     const showData = watchedShows.get(item.tmdb_id);
     map[item.id] = {
+      status: "completed",
       listened_with_commentary: false,
       rating: showData.rating || null,
     };
@@ -198,7 +205,7 @@ export async function syncBooksFromShelf(userId, communityItems, map, skippedIds
   // Fetch ALL user's shelf books (no filter — Goodreads imports have inconsistent finished_at/is_active)
   const { data: userBooks, error: fetchErr } = await supabase
     .from("books")
-    .select("id,title,author,rating")
+    .select("id,title,author,rating,finished_at")
     .eq("user_id", userId);
 
   if (fetchErr) {
@@ -211,6 +218,7 @@ export async function syncBooksFromShelf(userId, communityItems, map, skippedIds
   const shelfLookup = userBooks.map((b) => ({
     norm: normalizeBookTitle(b.title),
     rating: b.rating,
+    finished_at: b.finished_at,
   }));
 
   // Match: exact normalized title only (prevents "Dune" matching "Dune Messiah")
@@ -228,7 +236,7 @@ export async function syncBooksFromShelf(userId, communityItems, map, skippedIds
       user_id: userId,
       item_id: item.id,
       status: "completed",
-      completed_at: new Date().toISOString(),
+      completed_at: match?.finished_at || new Date().toISOString(),
       listened_with_commentary: false,
       rating: match?.rating ? Math.round(match.rating) : null,
     };

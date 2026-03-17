@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import ItemCard from "../primitives/ItemCard";
+import { isComingSoon } from "../../../utils/comingSoon";
 
 export default function MiniseriesShelf({ series, progress, onToggle, onToggleCommentary, CardComponent, cardProps = {}, coverCacheVersion, filter, hideTitle = false, hideTracker = false, shelfCap, accent = "#e94560" }) {
   const [expanded, setExpanded] = useState(false);
@@ -36,7 +37,7 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
   // Apply seen/unseen/upcoming filter
   const filteredItems = filter === "upcoming"
     ? currentItems
-        .filter((i) => i.extra_data?.coming_soon)
+        .filter((i) => isComingSoon(i))
         .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""))
     : filter && filter !== "all"
     ? currentItems.filter((i) =>

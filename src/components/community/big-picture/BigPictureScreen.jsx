@@ -1,4 +1,5 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
@@ -28,7 +29,7 @@ const DEFAULT_TABS = [{ key: "filmography", label: "Filmography", icon: "🎬" }
  *   onToast          — (msg) => void
  *   onShelvesChanged — () => void
  */
-export default function BigPictureScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId }) {
+export default function BigPictureScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -45,6 +46,12 @@ export default function BigPictureScreen({ community, miniseries, session, onBac
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Android back gesture → close modals ─────────────────
+  useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
+  useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("communityTab", activeTab !== (tabs[0]?.key || "filmography"), () => setActiveTab(tabs[0]?.key || "filmography"), pushNav, removeNav);
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);

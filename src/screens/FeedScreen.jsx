@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useDismissedCards } from "../hooks/community/useDismissedCards";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
-import { getPosterUrl, fetchSinglePoster } from "../utils/communityTmdb";
+import { getPosterUrl, fetchSinglePoster, isLogoChecked } from "../utils/communityTmdb";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 
@@ -22,27 +22,33 @@ function Stars({ rating, size = 14, sharpie = false }) {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.25;
 
-  // Sharpie mode — Permanent Marker ★ on cream VHS labels
+  // Sharpie mode — hand-drawn outline stars like scribbled on a VHS label
   if (sharpie) {
-    const sharpieSize = size || 14;
+    const s = size || 14;
+    // Outline-only stars with thick rough strokes — looks hand-drawn at any size
+    const starPaths = [
+      "M12 1 L14.5 8 L22 9.5 L16.5 14.5 L18 22 L12 18 L6 22 L7.5 14.5 L2 9.5 L9.5 8 Z",
+      "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
+      "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
+    ];
     return (
-      <div style={{ display: "flex", gap: 1, alignItems: "center", position: "relative" }}>
+      <div style={{ display: "flex", gap: 0, alignItems: "center", position: "relative" }}>
         {Array.from({ length: full }, (_, i) => (
-          <span key={i} style={{
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: sharpieSize,
-            lineHeight: 1,
-            color: "#c8a415",
-          }}>★</span>
+          <svg key={i} width={s} height={s} viewBox="0 0 24 24" style={{ display: "block" }}>
+            <path d={starPaths[i % starPaths.length]}
+              fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
+              style={{ transform: `rotate(${[-3, 2, -1][i % 3]}deg)`, transformOrigin: "center" }} />
+          </svg>
         ))}
         {half && (
-          <span style={{
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: sharpieSize,
-            lineHeight: 1,
-            color: "#c8a415",
-            opacity: 0.45,
-          }}>★</span>
+          <svg width={s} height={s} viewBox="0 0 24 24" style={{ display: "block" }}>
+            <defs>
+              <clipPath id="halfClip"><rect x="0" y="0" width="12" height="24" /></clipPath>
+            </defs>
+            <path d={starPaths[full % starPaths.length]}
+              fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
+              clipPath="url(#halfClip)" />
+          </svg>
         )}
       </div>
     );
@@ -742,8 +748,8 @@ function RandomPickCard({ data, onNavigateCommunity }) {
 
 
 // ════════════════════════════════════════════════
-// EPISODE CARD — unified (dropped + upcoming)
-// Reads data.status: 'dropped' → Listen button, 'upcoming' → Watched badge
+// EPISODE CARD — unified (dropped + published + upcoming)
+// Reads data.status: 'dropped'/'published' → New Episode card, 'upcoming' → Coming Soon card
 // ════════════════════════════════════════════════
 const EPISODE_LABELS = [
   "New Episode", "Just Dropped", "Now Streaming",
@@ -753,7 +759,7 @@ const EPISODE_LABELS = [
 function EpisodeCard({ data, onNavigateCommunity }) {
   const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
   const hasBackdrop = !!data.backdrop_path;
-  const isDropped = data.status === "dropped";
+  const isDropped = data.status === "dropped" || data.status === "published";
   const isThisPlaying = isDropped && currentEp?.enclosureUrl === data.episode_url && isPlaying;
   const seen = !!data.user_has_watched;
 
@@ -914,7 +920,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         </div>
       </div>
 
-      {/* Bottom bar — Listen (dropped) or Watched badge (upcoming) */}
+      {/* Bottom bar — Listen (has audio) or Watched badge (upcoming/published) */}
       <div style={{
         display: "flex", justifyContent: "flex-end", alignItems: "center",
         padding: "6px 16px 12px", position: "relative", zIndex: 1,
@@ -940,7 +946,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </svg>
             {isThisPlaying ? "Playing…" : "Listen"}
           </button>
-        ) : !isDropped ? (
+        ) : (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{
               fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
@@ -969,7 +975,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               </svg>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
@@ -982,14 +988,14 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // VHS brand marks — rotated through for personality
 // VHS brand marks — rotated through for personality
 const VHS_BRANDS = [
-  { bg: "#e8e4da", color: "#1a6b3c", text: "FUJI", sub: "HQ", weight: 900 },
-  { bg: "#d4d0c8", color: "#333", text: "Memorex", sub: "HS", weight: 700 },
-  { bg: "#2a2520", color: "#d4af37", text: "TDK", sub: "SA", weight: 900, dark: true },
-  { bg: "#f5c518", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
-  { bg: "#d4d0c8", color: "#1a4a8a", text: "Maxell", sub: "HGX", weight: 700 },
-  { bg: "#e8e4da", color: "#8b1a1a", text: "BASF", sub: "E-180", weight: 900 },
-  { bg: "#f0ebe1", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
-  { bg: "#f0ebe1", color: "#222", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#f0ebe1", color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
+  { bg: "#f0ebe1", color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
+  { bg: "#f0ebe1", color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
+  { bg: "#f0ebe1", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
+  { bg: "#f0ebe1", color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
+  { bg: "#f0ebe1", color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
+  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true },
+  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true },
 ];
 
 function getVhsBrands(title) {
@@ -1013,22 +1019,23 @@ function VhsLogoSvg({ color = "#222", size = 18 }) {
   );
 }
 
-function BrandCap({ brand, side = "right" }) {
+function BrandStamp({ brand, side = "right" }) {
+  const brandFontSize = brand.text && brand.text.length > 4 ? 7 : 9;
   return (
     <div style={{
-      width: 26, flexShrink: 0,
-      background: brand.bg,
+      position: "absolute",
+      top: 0, bottom: 0,
+      [side]: 4,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       gap: 1,
-      borderLeft: side === "right" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
-      borderRight: side === "left" && !brand.dark ? "1px solid rgba(44,40,36,0.08)" : "none",
+      zIndex: 1,
     }}>
       {brand.isVhs ? (
-        <div style={{ transform: "rotate(90deg)", opacity: 0.25 }}>
-          <VhsLogoSvg color={brand.color} size={22} />
+        <div style={{ transform: "rotate(90deg)", opacity: 0.6 }}>
+          <VhsLogoSvg color={brand.color} size={20} />
         </div>
       ) : (
         <>
@@ -1036,8 +1043,8 @@ function BrandCap({ brand, side = "right" }) {
             writingMode: "vertical-rl",
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: brand.weight,
-            fontSize: 9,
-            letterSpacing: "0.04em",
+            fontSize: brandFontSize,
+            letterSpacing: "0.05em",
             textTransform: "uppercase",
             color: brand.color,
             transform: "rotate(180deg)",
@@ -1050,10 +1057,10 @@ function BrandCap({ brand, side = "right" }) {
               writingMode: "vertical-rl",
               fontFamily: "'IBM Plex Mono', monospace",
               fontWeight: 600,
-              fontSize: 5.5,
+              fontSize: 5,
               letterSpacing: "0.06em",
               color: brand.color,
-              opacity: 0.5,
+              opacity: 0.6,
               transform: "rotate(180deg)",
             }}>
               {brand.sub}
@@ -1067,14 +1074,37 @@ function BrandCap({ brand, side = "right" }) {
 
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false }) {
   const [flipped, setFlipped] = useState(false);
+  const hasFlipped = useRef(false);
   const [isLightLogo, setIsLightLogo] = useState(true); // default dark until detected
+  const [logoReady, setLogoReady] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
   const peekColor = communities[0]
     ? getCommunityAccent(communities[0].community_slug)
     : "#8B5CF6";
+
+  // ── Audio source derivation ──
+  const playableSources = communities.filter(c => c.episode_url && c.episode_url.includes(".mp3"));
+  const externalSources = communities.filter(c => c.episode_url && !c.episode_url.includes(".mp3"));
+  const hasPlayableAudio = playableSources.length > 0;
+  const hasExternalOnly = !hasPlayableAudio && externalSources.length > 0;
+  const hasAnyCoverage = communities.length > 0;
+
+  const handlePlay = (e, source) => {
+    e.stopPropagation();
+    if (!source) return;
+    playEpisode({
+      guid: `feed-${source.episode_url}`,
+      title: source.episode_title || data.title || "Episode",
+      enclosureUrl: source.episode_url,
+      community: source.community_name || null,
+      artwork: source.community_image || null,
+    });
+  };
 
   // First-visit tooltip — truly once ever
   useEffect(() => {
@@ -1094,32 +1124,32 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     <div
       style={{
         margin: "4px 16px",
-        borderRadius: 5,
-        overflow: "hidden",
+        borderRadius: 6,
         position: "relative",
         cursor: "pointer",
+        background: "#302c28",
+        padding: "1px 1px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
-        perspective: 800,
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
       }}
     >
       <div style={{
-        position: "relative",
-        transformStyle: "preserve-3d",
-        transition: "transform 0.45s cubic-bezier(0.4, 0, 0.2, 1)",
-        transform: flipped ? "rotateX(-180deg)" : "rotateX(0deg)",
+        borderRadius: 4,
+        overflow: "hidden",
       }}>
-
-        {/* ═══ FRONT — The Tape ═══ */}
+      {!flipped ? (
         <div
+          key="front"
           onClick={() => {
+            hasFlipped.current = true;
             setFlipped(true);
             setShowHint(false);
           }}
           style={{
-            backfaceVisibility: "hidden",
             background: "#1a1612",
             borderRadius: 5,
             position: "relative",
+            animation: hasFlipped.current ? "tapeFlip 0.3s ease-out" : "none",
           }}
         >
           <div style={{
@@ -1128,10 +1158,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             display: "flex",
             minHeight: 80,
           }}>
-            {/* Left brand cap */}
-            <BrandCap brand={brandLeft} side="left" />
+            {/* Left dark tape end */}
+            <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
 
-            {/* Label — center */}
+            {/* Label — cream center with brand stamps */}
             <div style={{
               flex: 1,
               background: "#f0ebe1",
@@ -1143,89 +1173,163 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
               position: "relative",
               overflow: "hidden",
             }}>
+              {/* Brand stamps on label edges */}
+              <BrandStamp brand={brandLeft} side="left" />
+              <BrandStamp brand={brandRight} side="right" />
+
               {/* Grid lines */}
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
               }} />
 
-              {/* Logo or title */}
-              {data.logo_url ? (
-                <img
-                  src={data.logo_url}
-                  alt={data.title}
-                  crossOrigin="anonymous"
-                  onLoad={(e) => {
-                    try {
-                      const img = e.target;
-                      const c = document.createElement("canvas");
-                      const s = 40;
-                      c.width = s; c.height = s;
-                      const ctx = c.getContext("2d");
-                      ctx.drawImage(img, 0, 0, s, s);
-                      const px = ctx.getImageData(0, 0, s, s).data;
-                      let light = 0, visible = 0;
-                      for (let i = 0; i < px.length; i += 4) {
-                        if (px[i + 3] < 50) continue;
-                        visible++;
-                        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
-                      }
-                      setIsLightLogo(visible > 0 && light / visible > 0.5);
-                    } catch { /* CORS fail — keep dark filter */ }
-                  }}
-                  style={{
-                    height: 44,
-                    maxWidth: "85%",
-                    width: "auto",
-                    objectFit: "contain",
-                    objectPosition: "center",
-                    position: "relative",
-                    filter: isLightLogo ? "brightness(0)" : "none",
-                    opacity: isLightLogo ? 0.8 : 0.85,
-                  }}
-                />
-              ) : (
-                <div style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800, fontSize: 20, lineHeight: 1.05,
-                  color: "#2C2824", textTransform: "uppercase",
-                  letterSpacing: "0.01em", position: "relative",
-                  textAlign: "center",
-                }}>
-                  {data.title}
-                </div>
-              )}
+              {/* Logo / skeleton / title — 3-state to prevent text flash */}
+              {(() => {
+                const expectsLogo = data.tmdb_id && data.media_type !== "book" && data.media_type !== "game";
+                const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
+
+                return (
+                  <>
+                    {/* Logo img — hidden until loaded, then fades in */}
+                    {data.logo_url && (
+                      <img
+                        src={data.logo_url}
+                        alt={data.title}
+                        crossOrigin="anonymous"
+                        onLoad={(e) => {
+                          setLogoReady(true);
+                          // Aspect-ratio-aware scaling — compact logos scale more aggressively
+                          const nw = e.target.naturalWidth;
+                          const nh = e.target.naturalHeight;
+                          const aspect = nw / (nh || 1);
+                          if (nw > 0 && nw < 300) {
+                            const scale = aspect < 2 ? 1.6 : 1.3;
+                            e.target.style.transform = `scale(${scale})`;
+                          }
+                          try {
+                            const img = e.target;
+                            const c = document.createElement("canvas");
+                            const s = 40;
+                            c.width = s; c.height = s;
+                            const ctx = c.getContext("2d");
+                            ctx.drawImage(img, 0, 0, s, s);
+                            const px = ctx.getImageData(0, 0, s, s).data;
+                            let light = 0, visible = 0;
+                            for (let i = 0; i < px.length; i += 4) {
+                              if (px[i + 3] < 50) continue;
+                              visible++;
+                              if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
+                            }
+                            setIsLightLogo(visible > 0 && light / visible > 0.5);
+                          } catch { /* CORS fail — keep dark filter */ }
+                        }}
+                        style={{
+                          maxHeight: 54,
+                          minHeight: 36,
+                          maxWidth: "90%",
+                          width: "auto",
+                          objectFit: "contain",
+                          objectPosition: "center",
+                          position: "relative",
+                          filter: isLightLogo ? "brightness(0)" : "none",
+                          opacity: logoReady ? (isLightLogo ? 0.8 : 0.85) : 0,
+                          transition: "opacity 0.2s ease-in",
+                        }}
+                      />
+                    )}
+
+                    {/* Skeleton — while logo is being fetched or img is loading */}
+                    {(logoLoading || (data.logo_url && !logoReady)) && (
+                      <div style={{
+                        height: 20, width: "55%", borderRadius: 3,
+                        background: "rgba(44,40,36,0.06)",
+                        position: data.logo_url ? "absolute" : "relative",
+                      }} />
+                    )}
+
+                    {/* Text fallback — only when no logo is available */}
+                    {!data.logo_url && !logoLoading && (
+                      <div style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 800, fontSize: 20, lineHeight: 1.05,
+                        color: "#2C2824", textTransform: "uppercase",
+                        letterSpacing: "0.01em", position: "relative",
+                        textAlign: "center",
+                      }}>
+                        {data.title}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               {/* Stars */}
               <div style={{ marginTop: 3, position: "relative" }}>
                 <Stars rating={data.rating} size={14} sharpie />
               </div>
 
-              {/* Sharpie time */}
+              {/* Sharpie year — bottom left */}
+              {/* Sharpie time — bottom left */}
               <div style={{
-                position: "absolute", bottom: 4, right: 8,
+                position: "absolute", bottom: 4, left: 28,
                 fontFamily: "'Permanent Marker', cursive",
-                fontSize: 9, color: "rgba(44,40,36,0.3)",
+                fontSize: 10, color: "#2C2824",
               }}>
                 {timeAgo}
               </div>
+
+              {/* Sharpie year — bottom right */}
+              {data.year && (
+                <div style={{
+                  position: "absolute", bottom: 4, right: 28,
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 10, color: "#2C2824",
+                }}>
+                  {data.year}
+                </div>
+              )}
+
+              {/* 🎧 Headphones sticker — audio exists but not playable on MANTL */}
+              {hasExternalOnly && (
+                <div style={{
+                  position: "absolute", bottom: 18, right: 26,
+                  opacity: 0.3,
+                }} title="Audio available externally">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
+                </div>
+              )}
+
+              {/* 🎧 Headphones sticker — playable audio on MANTL (visual hint on label) */}
+              {hasPlayableAudio && (
+                <div style={{
+                  position: "absolute", bottom: 18, right: 26,
+                  opacity: 0.4,
+                }} title="Listen on MANTL">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
+                </div>
+              )}
             </div>
 
-            {/* Right brand cap */}
-            <BrandCap brand={brandRight} side="right" />
+            {/* Right dark tape end */}
+            <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
           </div>
         </div>
-
-        {/* ═══ BACK — Community Context ═══ */}
+      ) : (
         <div
+          key="back"
           onClick={() => setFlipped(false)}
           style={{
-            backfaceVisibility: "hidden",
-            transform: "rotateX(180deg)",
-            position: "absolute",
-            inset: 0,
             background: "#1a1612",
             borderRadius: 5,
+            position: "relative",
+            animation: "tapeFlip 0.3s ease-out",
+            cursor: "pointer",
           }}
         >
           <div style={{
@@ -1233,11 +1337,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             overflow: "hidden",
             background: "#f0ebe1",
             minHeight: 80,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "8px 10px",
+            padding: "10px 14px 14px",
             position: "relative",
           }}>
             {/* Grid lines */}
@@ -1246,67 +1346,135 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
               backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
             }} />
 
-            {/* Title reminder */}
+            {/* Title — underlined sharpie */}
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700, fontSize: 10,
-              color: "rgba(44,40,36,0.3)",
-              textTransform: "uppercase",
-              letterSpacing: "0.04em",
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 11, color: "rgba(44,40,36,0.45)",
               textAlign: "center",
-              marginBottom: 8,
+              marginBottom: 10,
+              paddingBottom: 6,
+              borderBottom: "1px solid rgba(44,40,36,0.1)",
               position: "relative",
             }}>
               {data.title}
             </div>
 
-            {/* Podcast logos — just icons, tappable */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 10, flexWrap: "wrap",
-              position: "relative",
-            }}>
-              {communities.length > 0 ? communities.map((c, i) => {
-                const cAccent = getCommunityAccent(c.community_slug);
-                const img = c.community_image;
-                return (
-                  <div
-                    key={`${c.community_slug}-${c.series_title || ""}-${i}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigateCommunity?.(c.community_slug, data.tmdb_id);
-                    }}
-                    style={{ cursor: "pointer", position: "relative" }}
-                    title={c.community_name}
-                  >
-                    {img ? (
-                      <img src={img} alt={c.community_name} style={{
-                        width: 36, height: 36, borderRadius: 8, objectFit: "cover",
-                        border: `2px solid ${cAccent}55`,
-                        transition: "transform 0.15s",
-                      }} />
-                    ) : (
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 8,
-                        background: `${cAccent}15`, border: `2px solid ${cAccent}55`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                        fontSize: 10, color: cAccent,
-                      }}>
-                        {(c.community_name || "").split(" ").map(w => w[0]).join("")}
+            {/* Podcast tracking rows */}
+            {communities.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
+                {communities.map((c, i) => {
+                  const cAccent = getCommunityAccent(c.community_slug);
+                  const img = c.community_image;
+                  return (
+                    <div
+                      key={`back-${c.community_slug}-${c.series_title || ""}-${i}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigateCommunity?.(c.community_slug, data.tmdb_id);
+                      }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        cursor: "pointer",
+                        padding: "3px 4px",
+                        borderRadius: 4,
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      {/* Community avatar */}
+                      {img ? (
+                        <img src={img} alt={c.community_name} style={{
+                          width: 26, height: 26, borderRadius: 6, objectFit: "cover",
+                          border: `1.5px solid ${cAccent}44`,
+                          flexShrink: 0,
+                        }} />
+                      ) : (
+                        <div style={{
+                          width: 26, height: 26, borderRadius: 6, flexShrink: 0,
+                          background: `${cAccent}15`, border: `1.5px solid ${cAccent}44`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
+                          fontSize: 8, color: cAccent,
+                        }}>
+                          {(c.community_name || "").split(" ").map(w => w[0]).join("")}
+                        </div>
+                      )}
+
+                      {/* Info + progress */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontFamily: "'Permanent Marker', cursive",
+                          fontSize: 10, color: "#2C2824",
+                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                        }}>
+                          {c.community_name}
+                        </div>
+                        {(c.series_title || c.episode_title) && (
+                          <div style={{
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 7, color: "rgba(44,40,36,0.4)",
+                            textTransform: "uppercase", letterSpacing: "0.04em",
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                            marginTop: 1,
+                            display: "flex", alignItems: "center", gap: 4,
+                          }}>
+                            <span>{c.series_title || c.episode_title}</span>
+                            {c.series_total > 0 && (
+                              <span style={{ color: "rgba(44,40,36,0.55)", fontWeight: 600 }}>
+                                {c.series_watched || 0}/{c.series_total}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {/* Progress bar */}
+                        {c.series_total > 0 && (
+                          <div style={{
+                            marginTop: 3, height: 3, borderRadius: 2,
+                            background: "rgba(44,40,36,0.08)",
+                            overflow: "hidden",
+                          }}>
+                            <div style={{
+                              height: "100%", borderRadius: 2,
+                              width: `${Math.min(100, Math.round(((c.series_watched || 0) / c.series_total) * 100))}%`,
+                              background: cAccent,
+                              opacity: (c.series_watched || 0) >= c.series_total ? 0.7 : 0.5,
+                              transition: "width 0.3s ease",
+                            }} />
+                          </div>
+                        )}
+                        {/* Badge name */}
+                        {c.badge?.badge_name && (
+                          <div style={{
+                            fontFamily: "'Permanent Marker', cursive",
+                            fontSize: 7, color: c.badge.accent_color || cAccent,
+                            opacity: (c.series_watched || 0) >= (c.series_total || 999) ? 1 : 0.5,
+                            marginTop: 2,
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                          }}>
+                            {(c.series_watched || 0) >= (c.series_total || 999) ? "🏆 " : "🔒 "}{c.badge.badge_name}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              }) : (
-                <div style={{
-                  fontFamily: "'Lora', serif", fontStyle: "italic",
-                  fontSize: 10, color: "rgba(44,40,36,0.35)",
-                }}>
-                  Personal log
-                </div>
-              )}
-            </div>
+
+                      {/* Navigate arrow */}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke={cAccent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                        style={{ flexShrink: 0, opacity: 0.6 }}>
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 11, color: "rgba(44,40,36,0.3)",
+                textAlign: "center", padding: "8px 0",
+                position: "relative",
+              }}>
+                Personal log
+              </div>
+            )}
 
             {/* Flip hint */}
             <div style={{
@@ -1319,9 +1487,162 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             </div>
           </div>
         </div>
+      )}
       </div>
+
+      {/* ═══ VCR DECK — playable audio on MANTL ═══ */}
+      {hasPlayableAudio && (() => {
+        const activeSrc = playableSources.find(s =>
+          currentEp && currentEp.enclosureUrl === s.episode_url
+        );
+        const isThisPlaying = activeSrc && isPlaying;
+        return (
+        <div style={{
+          background: "linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%)",
+          borderTop: "1px solid rgba(255,255,255,0.04)",
+          padding: "8px 16px 7px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 16,
+          position: "relative",
+          borderRadius: showPicker ? "0" : "0 0 4px 4px",
+        }}>
+          {/* Top highlight edge */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, height: 1,
+            background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent)",
+          }} />
+          {/* Bottom shadow edge */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
+            background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.3) 85%, transparent)",
+            borderRadius: showPicker ? 0 : "0 0 4px 4px",
+          }} />
+
+          {/* Left speaker grille — perforated metal */}
+          <div style={{
+            flex: 1, height: 20, borderRadius: 3,
+            background: "radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)",
+            backgroundSize: "5px 5px",
+            border: "1px solid rgba(255,255,255,0.04)",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)",
+          }} />
+
+          {/* ▶ VCR Play button — beveled, opens picker */}
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPicker(p => !p);
+              }}
+              style={{
+                background: "linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderBottomColor: "rgba(0,0,0,0.4)",
+                borderTopColor: "rgba(255,255,255,0.12)",
+                borderRadius: 4,
+                cursor: "pointer",
+                padding: "5px 24px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4)",
+                transition: "all 0.1s ease",
+              }}
+            >
+              {isThisPlaying ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                  <rect x="6" y="4" width="4" height="16" rx="1" />
+                  <rect x="14" y="4" width="4" height="16" rx="1" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
+            {/* Green LED — pulses when playing, dim when idle */}
+            <div style={{
+              position: "absolute", top: -1, right: -1,
+              width: 5, height: 5, borderRadius: "50%",
+              background: isThisPlaying ? "#34d399" : "rgba(52,211,153,0.2)",
+              border: isThisPlaying ? "none" : "0.5px solid rgba(52,211,153,0.15)",
+              boxShadow: isThisPlaying ? "0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3)" : "none",
+              animation: isThisPlaying ? "ledPulse 2s ease infinite" : "none",
+              transition: "all 0.3s ease",
+            }} />
+          </div>
+
+          {/* Right speaker grille — perforated metal */}
+          <div style={{
+            flex: 1, height: 20, borderRadius: 3,
+            background: "radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)",
+            backgroundSize: "5px 5px",
+            border: "1px solid rgba(255,255,255,0.04)",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)",
+          }} />
+        </div>
+        );
+      })()}
+
+      {/* ═══ PICKER — podcast episode sources ═══ */}
+      {showPicker && hasPlayableAudio && (
+        <div style={{
+          background: "#1a1612",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          padding: "6px 12px",
+          borderRadius: "0 0 4px 4px",
+        }}>
+          {playableSources.map((src, i) => {
+            const isActive = currentEp && currentEp.enclosureUrl === src.episode_url;
+            const accent = getCommunityAccent(src.community_slug);
+            return (
+              <div
+                key={i}
+                onClick={(e) => { handlePlay(e, src); setShowPicker(false); }}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "5px 4px",
+                  cursor: "pointer",
+                  borderRadius: 4,
+                  background: isActive ? "rgba(255,255,255,0.04)" : "transparent",
+                }}
+              >
+                {src.community_image && (
+                  <img src={src.community_image} alt={src.community_name} style={{
+                    width: 22, height: 22, borderRadius: 5, objectFit: "cover",
+                    border: `1.5px solid ${accent}44`,
+                  }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700, fontSize: 11,
+                    color: "rgba(255,255,255,0.7)",
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>
+                    {src.episode_title || src.series_title || src.community_name}
+                  </div>
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 7, color: "rgba(255,255,255,0.25)",
+                    textTransform: "uppercase", letterSpacing: "0.04em",
+                  }}>
+                    {src.community_name}{src.series_title ? ` · ${src.series_title}` : ""}
+                  </div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={isActive && isPlaying ? accent : "rgba(255,255,255,0.4)"}>
+                  {isActive && isPlaying
+                    ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                    : <path d="M8 5v14l11-7z" />
+                  }
+                </svg>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
     </div>
-    {/* First-visit flip tooltip */}
     {showHint && (
       <div style={{
         textAlign: "center",
@@ -1754,7 +2075,7 @@ function EmptyFeed({ onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions }) {
   const userId = session?.user?.id;
-  const [feedMode, setFeedMode] = useState("discover"); // "all" | "activity" | "discover"
+  const [feedMode, setFeedMode] = useState("activity"); // "all" | "activity" | "discover"
   const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
   const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
@@ -1765,7 +2086,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   // Random picks are stabilized by the module-level _randomPicksCache in useFeed,
   // so they don't re-roll on tab switches — no additional latching needed.
-  const ACTIVITY_ONLY_TYPES = new Set(["log", "badge_complete"]);
+  const ACTIVITY_ONLY_TYPES = new Set(["log"]);
   const feedItems = rawFeedItems
     .filter((item) => feedMode !== "activity" || ACTIVITY_ONLY_TYPES.has(item.type));
 
@@ -1893,7 +2214,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       )}
 
       {(() => {
-        const hasUserActivity = feedItems.some(item => item.type === "log" || item.type === "badge_complete");
+        const hasUserActivity = feedItems.some(item => item.type === "log");
         const showWelcome = feedMode !== "discover" && (feedItems.length === 0 || !hasUserActivity);
 
         if (feedItems.length === 0 && feedMode === "activity") {
@@ -1909,8 +2230,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           }}>
             <div className="vhs-toggle">
               {[
-                { key: "discover", label: "▶ Discover" },
                 { key: "activity", label: "● Activity" },
+                { key: "discover", label: "▶ Discover" },
               ].map(tab => (
                 <button
                   key={tab.key}
@@ -2140,8 +2461,7 @@ function getTimeAgo(dateStr) {
   if (diffMins < 60) return `${diffMins}m ago`;
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return then.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  // 1+ days: sharpie-style written date like you'd label a tape
+  const monthNames = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+  return `${monthNames[then.getMonth()]} ${then.getDate()}`;
 }

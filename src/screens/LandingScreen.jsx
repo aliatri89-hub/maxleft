@@ -312,27 +312,6 @@ const featureStyles = `
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--terracotta, #C75B3F) 50%, transparent);
   }
-  .mantl-features-header {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  .mantl-features-header h2 {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #f5f0eb;
-    margin: 0 0 10px;
-  }
-  .mantl-features-header p {
-    font-family: 'Lora', serif;
-    font-style: italic;
-    font-size: 0.92rem;
-    color: #9a938a;
-    margin: 0;
-    line-height: 1.6;
-  }
 
   /* ── FEATURE BLOCKS ──────────────────────────────────────── */
   .mantl-feature-block {
@@ -1406,10 +1385,6 @@ function LandingScreen({ onSignIn }) {
 
       {/* ═══════ FEATURES – INTERACTIVE ═════════════════════ */}
       <div className="mantl-features" ref={featuresRef}>
-        <div className="mantl-features-header">
-          <h2>MORE THAN A WATCHLIST.</h2>
-        </div>
-
         {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}
         <div
           className={`mantl-feature-block${visibleBlocks.has('communities') ? ' visible' : ''}`}

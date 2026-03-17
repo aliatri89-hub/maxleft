@@ -31,6 +31,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
   const [approved, setApproved] = useState({});
   const [selectedShelves, setSelectedShelves] = useState([]);
   const [shelfSearch, setShelfSearch] = useState("");
+  const [syncLimit, setSyncLimit] = useState(3);
 
   const toggleShelf = useCallback((id) => {
     setSelectedShelves((prev) =>
@@ -106,7 +107,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           "Content-Type": "application/json",
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ rss_url: url, limit: 80 }),
+        body: JSON.stringify({ rss_url: url, limit: syncLimit }),
       });
 
       if (!res.ok) {
@@ -138,11 +139,11 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
 
       // 3. TMDB match each new episode
       const staged = [];
-      for (let i = 0; i < Math.min(newEpisodes.length, 30); i++) {
+      for (let i = 0; i < Math.min(newEpisodes.length, syncLimit); i++) {
         const ep = newEpisodes[i];
         const filmTitle = extractFilmTitle(ep.title, community?.name);
 
-        setSyncProgress(`TMDB: "${filmTitle}" (${i + 1}/${Math.min(newEpisodes.length, 30)})`);
+        setSyncProgress(`TMDB: "${filmTitle}" (${i + 1}/${Math.min(newEpisodes.length, syncLimit)})`);
 
         const tmdbResults = await searchTMDB(filmTitle);
         const bestMatch = tmdbResults[0] || null;
@@ -377,6 +378,37 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                 opacity: syncing ? 0.5 : 1, whiteSpace: "nowrap",
               }}
             >{syncing ? "Syncing…" : "Sync"}</button>
+          </div>
+
+          {/* Fetch limit picker */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8, marginBottom: 12,
+          }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, textTransform: "uppercase",
+              letterSpacing: "0.06em", color: "#71717a",
+              fontFamily: "'Barlow Condensed', sans-serif",
+            }}>Fetch latest</span>
+            {[3, 5, 10, 30].map(n => (
+              <button
+                key={n}
+                onClick={() => setSyncLimit(n)}
+                style={{
+                  padding: "4px 10px", borderRadius: 6,
+                  fontSize: 11, fontWeight: 700,
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  border: `1.5px solid ${syncLimit === n ? accent : "rgba(255,255,255,0.08)"}`,
+                  background: syncLimit === n ? `${accent}20` : "rgba(255,255,255,0.03)",
+                  color: syncLimit === n ? accent : "rgba(255,255,255,0.45)",
+                  cursor: "pointer", transition: "all 0.15s",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >{n}</button>
+            ))}
+            <span style={{
+              fontSize: 10, color: "#52525b",
+              fontFamily: "'Barlow Condensed', sans-serif",
+            }}>episodes</span>
           </div>
 
           {/* Progress text */}

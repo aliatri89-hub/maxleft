@@ -35,7 +35,7 @@ import GetPlayedScreen from "../components/community/getplayed/GetPlayedScreen";
  *   onToast          — (msg) => void
  *   onShelvesChanged — () => void
  */
-export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal }) {
+export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const { community, miniseries, loading, error } = useCommunityPage(slug);
 
   if (loading) {
@@ -60,7 +60,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   }
 
   const communityType = community.theme_config?.community_type;
-  const sharedProps = { community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal };
+  const sharedProps = { community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav };
 
   switch (communityType) {
     case "nowplaying":

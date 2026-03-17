@@ -1,4 +1,5 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
@@ -25,7 +26,7 @@ import RSSSyncTool from "../dashboard/RSSSyncTool";
  *   onToast          — (msg) => void
  *   onShelvesChanged — () => void
  */
-export default function HDTGMScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId }) {
+export default function HDTGMScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#4A9BB5";
   // Scroll to shelf when deep-linked from another community
@@ -38,6 +39,11 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Android back gesture → close modals ─────────────────
+  useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
+  useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);

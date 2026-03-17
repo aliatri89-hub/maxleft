@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
 import { fetchCoversForItems, getCoverUrl, getCoverCacheSnapshot } from "../../../utils/communityTmdb";
+import { isComingSoon } from "../../../utils/comingSoon";
 import NowPlayingHero from "./NowPlayingHero";
 import NowPlayingGenreTab from "./NowPlayingGenreTab";
 import NowPlayingArcadeTab from "./NowPlayingArcadeTab";
@@ -33,7 +35,7 @@ import { useRecentEpisodes } from "../../../hooks/community/useRecentEpisodes";
  * Props passed from CommunityRouter:
  *   community, miniseries, session, onBack, onToast, onShelvesChanged
  */
-export default function NowPlayingScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal }) {
+export default function NowPlayingScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
   const rssUrl = community?.theme_config?.rss_url || "https://www.nowplayingpodcast.com/NPP.xml";
@@ -72,6 +74,12 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
 
+  // ── Android back gesture → close modals ─────────────────
+  useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
+  useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("communityTab", activeTab !== (tabs[0]?.key || "filmography"), () => setActiveTab(tabs[0]?.key || "filmography"), pushNav, removeNav);
+
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
 
@@ -88,13 +96,15 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     badgeToasts, showBadgePage, setShowBadgePage,
     earnedCount, showSingleBadgeToast, showBadgeProgressToasts,
   } = useBadgeOrchestrator(community?.id, userId, letterboxdSyncSignal);
+  useBackGesture("badgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
+  useBackGesture("badgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
 
   // ── Tab slider ref (for animated nav taps) ──────────────
   const sliderRef = useRef(null);
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
-  const upcomingCount = useMemo(() => allItems.filter(i => i.extra_data?.coming_soon).length, [allItems]);
+  const upcomingCount = useMemo(() => allItems.filter(i => isComingSoon(i)).length, [allItems]);
 
 
   const { progress, setProgress } = useCommunityProgress(community?.id, userId, allItems);

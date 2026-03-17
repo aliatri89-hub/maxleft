@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import NowPlayingItemCard from "./NowPlayingItemCard";
+import { isComingSoon } from "../../../utils/comingSoon";
 
 /**
  * NowPlayingGenreTab — Genre-bucketed filmography for ~1000 movies.
@@ -152,18 +153,21 @@ export default function NowPlayingGenreTab({
           items = items.filter((i) => !progress[i.id]);
         } else if (filter === "upcoming") {
           items = items
-            .filter((i) => i.extra_data?.coming_soon)
+            .filter((i) => isComingSoon(i))
             .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""));
         }
 
-        // Search filter
+        // Search filter — match item title/creator/year OR parent shelf title
         if (isSearching) {
-          items = items.filter(
-            (i) =>
-              i.title.toLowerCase().includes(q) ||
-              (i.creator || "").toLowerCase().includes(q) ||
-              String(i.year || "").includes(q)
-          );
+          const shelfMatch = (s.title || "").toLowerCase().includes(q);
+          if (!shelfMatch) {
+            items = items.filter(
+              (i) =>
+                i.title.toLowerCase().includes(q) ||
+                (i.creator || "").toLowerCase().includes(q) ||
+                String(i.year || "").includes(q)
+            );
+          }
         }
 
         // Dedup within this series only (same title+year in one row)
@@ -223,6 +227,23 @@ export default function NowPlayingGenreTab({
     });
     return map;
   }, [genreKeys, genreGroups, progress]);
+
+  // ── Flat upcoming schedule (all items sorted by air_date) ───
+  const upcomingSchedule = useMemo(() => {
+    if (filter !== "upcoming") return [];
+    const all = filmSeries.flatMap((s) =>
+      (s.items || []).filter((i) => isComingSoon(i)).map((i) => ({ ...i, _shelfTitle: s.title }))
+    );
+    // Dedup
+    const seen = new Set();
+    const deduped = all.filter((i) => {
+      const key = `${i.title}::${i.year || ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return deduped.sort((a, b) => (a.air_date || "").localeCompare(b.air_date || ""));
+  }, [filter, filmSeries]);
 
   // ── Render helpers ─────────────────────────────────────────
 
@@ -583,7 +604,52 @@ export default function NowPlayingGenreTab({
       {activeGenre === ALL_KEY && !searchQuery && filter === "all" && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
 
       {/* ─── Series shelves ─────────────────────────────── */}
-      {visibleSeries.length === 0 ? (
+      {filter === "upcoming" ? (
+        /* Flat date-sorted schedule for upcoming */
+        upcomingSchedule.length === 0 ? (
+          <div style={{
+            textAlign: "center", padding: "40px 0",
+            fontFamily: "'Lora', serif", fontSize: 13,
+            color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          }}>No upcoming items</div>
+        ) : (
+          <div style={{ padding: "16px 0", overflow: "hidden" }}>
+            <div className="hide-scrollbar" style={{
+              display: "flex", overflowX: "auto", gap: 12,
+              paddingLeft: 16, paddingRight: 16,
+            }}>
+              {upcomingSchedule.map((item) => {
+                const Card = NowPlayingItemCard;
+                return (
+                  <div key={item.id} style={{ flexShrink: 0, width: 120 }}>
+                    <Card
+                      item={item}
+                      isCompleted={!!progress[item.id]?.status}
+                      onToggle={() => onToggle?.(item)}
+                      coverCacheVersion={coverCacheVersion}
+                    />
+                    <div style={{
+                      fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                      marginTop: 4,
+                    }}>
+                      {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </div>
+                    <div style={{
+                      fontSize: 9, color: "#666", marginTop: 1,
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {item._shelfTitle}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )
+      ) : visibleSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 0",
           fontFamily: "'Lora', serif", fontSize: 13,
@@ -614,17 +680,20 @@ export default function NowPlayingGenreTab({
                     items = items.filter((i) => !progress[i.id]);
                   } else if (filter === "upcoming") {
                     items = items
-                      .filter((i) => i.extra_data?.coming_soon)
+                      .filter((i) => isComingSoon(i))
                       .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""));
                   }
 
                   if (q.length >= 2) {
-                    items = items.filter(
-                      (i) =>
-                        i.title.toLowerCase().includes(q) ||
-                        (i.creator || "").toLowerCase().includes(q) ||
-                        String(i.year || "").includes(q)
-                    );
+                    const shelfMatch = (s.title || "").toLowerCase().includes(q);
+                    if (!shelfMatch) {
+                      items = items.filter(
+                        (i) =>
+                          i.title.toLowerCase().includes(q) ||
+                          (i.creator || "").toLowerCase().includes(q) ||
+                          String(i.year || "").includes(q)
+                      );
+                    }
                   }
 
                   // Dedup within this series only

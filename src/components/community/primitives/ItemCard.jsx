@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getCoverUrl } from "../../../utils/communityTmdb";
+import { isComingSoon } from "../../../utils/comingSoon";
 
 const MEDIA_ICONS = { film: "🎬", book: "📚", game: "🎮" };
 const MEDIA_GRADIENTS = {
@@ -41,8 +42,8 @@ export default function ItemCard({
   useEffect(() => {
     // 1. Reactive TMDB cache (keyed by tmdb_id — always correct, matches modal)
     let cacheKey = null;
-    if ((item.media_type === "film" || item.media_type === "show") && item.tmdb_id) {
-      cacheKey = item.media_type === "show" ? `tmdb_tv:${item.tmdb_id}` : `tmdb:${item.tmdb_id}`;
+    if ((item.media_type === "film" || item.media_type === "show") && (item.tmdb_id || item.tmdb_tv_id)) {
+      cacheKey = item.media_type === "show" ? `tmdb_tv:${item.tmdb_tv_id || item.tmdb_id}` : `tmdb:${item.tmdb_id}`;
     } else if (item.media_type === "book") {
       cacheKey = `book:${item.isbn || item.title}`;
     } else if (item.media_type === "game") {
@@ -74,7 +75,7 @@ export default function ItemCard({
 
   const isBook = item.media_type === "book";
   const isGame = item.media_type === "game";
-  const comingSoon = item.extra_data?.coming_soon;
+  const comingSoon = isComingSoon(item);
   const borderColor = comingSoon ? "rgba(250,204,21,0.3)" : isCompleted ? "#4ade80" : "transparent";
 
   return (

@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 
+// Podcast artwork by community slug
+// TODO: move to community_pages.image_url column when ready
+const PODCAST_ART = {
+  "blankcheck": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bb/82/cf/bb82cfa4-0bf8-bbe8-b5a6-407702ab1764/mza_4979053321172937662.jpeg/540x540bb.webp",
+  "nowplaying": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/30/57/26/305726f4-a910-986d-af15-9d9630b96722/mza_632554795848485854.jpg/540x540bb.webp",
+};
+
 export default function ExploreScreen({
   session,
   onOpenCommunity,
@@ -12,6 +19,7 @@ export default function ExploreScreen({
 }) {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const isDev = new URLSearchParams(window.location.search).has("dev");
 
   useEffect(() => {
     if (!isActive) return;
@@ -20,11 +28,15 @@ export default function ExploreScreen({
 
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const query = supabase
         .from("community_pages")
         .select("*")
         .order("sort_order", { ascending: true });
 
+      // In dev mode, show everything; otherwise only launched communities
+      if (!isDev) query.eq("launched", true);
+
+      const { data, error } = await query;
       if (!cancelled && !error) setCommunities(data || []);
       if (!cancelled) setLoading(false);
     })();
@@ -33,12 +45,14 @@ export default function ExploreScreen({
   }, [isActive]);
 
   // Only show communities the user is following
-  const isDev = new URLSearchParams(window.location.search).has("dev");
-
-  // Only show followed communities (or all in dev mode)
+  // Split launched communities into followed and unfollowed
   const followedCommunities = isDev
     ? communities
     : communities.filter(c => communitySubscriptions?.has(c.id));
+
+  const unfollowedCommunities = isDev
+    ? []
+    : communities.filter(c => !communitySubscriptions?.has(c.id));
 
   return (
     <div style={{
@@ -48,10 +62,17 @@ export default function ExploreScreen({
     }}>
       {/* Header */}
       <div style={{ padding: "0 20px 16px" }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "var(--text-primary)" }}>
+        <div style={{
+          fontSize: 26, color: "var(--text-primary)",
+          fontFamily: "'Permanent Marker', cursive",
+        }}>
           Explore
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 4 }}>
+        <div style={{
+          fontSize: 11, color: "var(--text-faint)", marginTop: 4,
+          fontFamily: "'IBM Plex Mono', monospace",
+          letterSpacing: "0.04em", textTransform: "uppercase",
+        }}>
           Podcast communities &amp; watchlists
         </div>
       </div>
@@ -75,6 +96,33 @@ export default function ExploreScreen({
               />
             ))}
 
+            {/* Unfollowed but launched communities */}
+            {unfollowedCommunities.length > 0 && (
+              <>
+                <div style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontWeight: 500,
+                  fontSize: 9,
+                  color: "var(--text-faint)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  padding: "16px 4px 8px",
+                }}>
+                  More communities
+                </div>
+                {unfollowedCommunities.map((c) => (
+                  <CommunityCard
+                    key={c.id}
+                    community={c}
+                    onOpen={() => onOpenCommunity(c.slug)}
+                    isSubscribed={false}
+                    subscriptionsLoaded={subscriptionsLoaded}
+                    onToggleSubscription={() => onSubscribe?.(c.id)}
+                  />
+                ))}
+              </>
+            )}
+
             {/* Coming Soon teaser */}
             <div style={{
               background: "var(--bg-card)",
@@ -84,19 +132,18 @@ export default function ExploreScreen({
               marginTop: 8,
               border: "1px solid var(--border-subtle)",
             }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>🎙️</div>
               <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800, fontSize: 18, color: "var(--text-primary)",
-                letterSpacing: "0.02em", textTransform: "uppercase",
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 18, color: "var(--text-primary)",
                 marginBottom: 8,
               }}>
                 More communities coming soon
               </div>
               <div style={{
-                fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5,
+                fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
+                fontFamily: "'IBM Plex Mono', monospace",
               }}>
-                New podcast communities are added regularly. Stay tuned.
+                New podcast communities are added regularly.
               </div>
             </div>
           </>
@@ -111,6 +158,7 @@ export default function ExploreScreen({
 function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, onToggleSubscription }) {
   const theme = community.theme_config || {};
   const accent = theme.accent || "#e94560";
+  const artworkUrl = PODCAST_ART[community.slug] || null;
 
   return (
     <div style={{
@@ -121,14 +169,25 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
       marginBottom: 12,
       textAlign: "left",
       boxShadow: "var(--shadow-card)",
+      position: "relative",
+      opacity: isSubscribed ? 1 : 0.55,
+      transition: "opacity 0.3s ease",
     }}>
-      {/* Gradient bar */}
+      {/* Accent line */}
       <div style={{
-        height: 4,
-        background: `linear-gradient(90deg, ${accent}, ${theme.secondary || "#C4734F"})`,
+        height: 3,
+        background: accent,
       }} />
 
-      <div style={{ padding: "16px 18px 18px" }}>
+      {/* Subtle ruled-line texture */}
+      <div style={{
+        position: "absolute", top: 3, left: 0, right: 0, bottom: 0,
+        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 22px, rgba(255,255,255,0.015) 22px, rgba(255,255,255,0.015) 23px)",
+        pointerEvents: "none",
+        borderRadius: "0 0 16px 16px",
+      }} />
+
+      <div style={{ padding: "16px 18px 18px", position: "relative" }}>
         {/* Title row with subscription toggle */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
           <button
@@ -140,14 +199,16 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
             }}
           >
             <div style={{
-              fontSize: 18, fontWeight: 800, color: "#fff",
-              fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
-              letterSpacing: "0.02em", lineHeight: 1.2,
+              fontSize: 20, color: "#fff",
+              fontFamily: "'Permanent Marker', cursive",
+              lineHeight: 1.15,
             }}>
               {community.name}
             </div>
             <div style={{
-              fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 6, lineHeight: 1.4,
+              fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 6, lineHeight: 1.5,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.02em",
               whiteSpace: "pre-line",
             }}>
               {community.description}
@@ -158,8 +219,8 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
             <button
               onClick={(e) => { e.stopPropagation(); onToggleSubscription(); }}
               style={{
-                background: `${accent}22`,
-                border: `1.5px solid ${accent}`,
+                background: isSubscribed ? `${accent}22` : "rgba(255,255,255,0.06)",
+                border: `1.5px solid ${isSubscribed ? accent : "rgba(255,255,255,0.15)"}`,
                 borderRadius: 8,
                 padding: "6px 10px",
                 cursor: "pointer",
@@ -169,31 +230,51 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
               }}
             >
               <span style={{
-                fontSize: 11, fontWeight: 700, color: accent,
+                fontSize: 11, fontWeight: 700,
+                color: isSubscribed ? accent : "rgba(255,255,255,0.6)",
                 fontFamily: "'Barlow Condensed', sans-serif",
                 letterSpacing: "0.03em", textTransform: "uppercase",
               }}>
-                Following
+                {isSubscribed ? "Following" : "+ Follow"}
               </span>
             </button>
           )}
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={onOpen}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            marginTop: 14, padding: "7px 16px",
-            background: accent,
-            borderRadius: 20, fontSize: 13, fontWeight: 700,
-            color: "#fff",
-            border: "none", cursor: "pointer",
-            WebkitTapHighlightColor: "transparent",
-          }}
-        >
-          Explore →
-        </button>
+        {/* Bottom row: CTA + podcast artwork (followed only) */}
+        {isSubscribed && (
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginTop: 14 }}>
+          <button
+            onClick={onOpen}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              padding: "7px 16px",
+              background: accent,
+              borderRadius: 20, fontSize: 13,
+              color: "#fff",
+              fontFamily: "'Permanent Marker', cursive",
+              border: "none", cursor: "pointer",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            Explore →
+          </button>
+
+          {artworkUrl && (
+            <img
+              src={artworkUrl}
+              alt={community.name}
+              style={{
+                width: 52, height: 52,
+                borderRadius: 10,
+                objectFit: "cover",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                border: `1.5px solid ${accent}33`,
+              }}
+            />
+          )}
+        </div>
+        )}
       </div>
     </div>
   );

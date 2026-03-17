@@ -93,9 +93,13 @@ export default function AdminItemEditor({
   const [commentaryOnly, setCommentaryOnly] = useState(
     item.extra_data?.commentary_only || false
   );
-  const [comingSoon, setComingSoon] = useState(
-    item.extra_data?.coming_soon || false
-  );
+  // coming_soon is now computed from air_date — no manual flag needed
+  const comingSoon = (() => {
+    if (!airDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return new Date(airDate + "T00:00:00") > today;
+  })();
 
   // ─── UI state ───
   const [saving, setSaving] = useState(false);
@@ -388,12 +392,8 @@ export default function AdminItemEditor({
         delete newExtra.commentary_only;
       }
 
-      // Coming soon flag
-      if (comingSoon) {
-        newExtra.coming_soon = true;
-      } else {
-        delete newExtra.coming_soon;
-      }
+      // Coming soon is now computed from air_date — always strip the legacy flag
+      delete newExtra.coming_soon;
 
       // Cover image for books/games
       if (coverImage.trim() && !isTmdbMedia) {
@@ -1225,28 +1225,22 @@ export default function AdminItemEditor({
                 (Patreon tab — no green card frame)
               </span>
             </label>
-            <label
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: "#ccc",
-                cursor: "pointer",
+                color: comingSoon ? "#facc15" : "#555",
                 padding: "6px 0",
               }}
             >
-              <input
-                type="checkbox"
-                checked={comingSoon}
-                onChange={(e) => setComingSoon(e.target.checked)}
-                style={{ accentColor: "#facc15" }}
-              />
-              Coming Soon
+              <span style={{ fontSize: 14 }}>{comingSoon ? "📅" : "✓"}</span>
+              {comingSoon ? "Coming Soon" : "Aired"}
               <span style={{ fontSize: 9, color: "#666" }}>
-                (episode seeded but not yet aired)
+                (auto from air date)
               </span>
-            </label>
+            </div>
           </div>
 
           {/* Debug info */}

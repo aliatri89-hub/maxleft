@@ -1,4 +1,5 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useGetPlayedBridge } from "./useGetPlayedBridge";
@@ -17,7 +18,7 @@ const DEFAULT_TABS = [
   { key: "gameslop", label: "Game Slop", icon: "🪣" },
 ];
 
-export default function GetPlayedScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId }) {
+export default function GetPlayedScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e91e8c";
   // Scroll to shelf when deep-linked from another community
@@ -35,6 +36,12 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Android back gesture → close modals ─────────────────
+  useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
+  useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("communityTab", activeTab !== (tabs[0]?.key || "lists"), () => setActiveTab(tabs[0]?.key || "lists"), pushNav, removeNav);
 
   useEffect(() => { setSearchQuery(""); setFilter("all"); }, [activeTab]);
 

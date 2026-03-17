@@ -144,14 +144,17 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
 
       // ════════════════════════════════════════════
       // EPISODE PIPELINE (unified — single card type "episode")
-      // SQL returns DISTINCT ON tmdb_id with status ('dropped' | 'upcoming').
+      // SQL returns DISTINCT ON tmdb_id with status:
+      //   'dropped'   — aired + has audio
+      //   'published' — aired, no audio yet (coming_soon just stripped)
+      //   'upcoming'  — coming_soon still set
       // ════════════════════════════════════════════
       const rawEpisodesAll = (episodesRes.data || []).filter(e =>
         !subscribedIds || subscribedIds.size === 0 || subscribedIds.has(e.community_id)
       );
 
-      // Split by status — SQL guarantees one row per tmdb_id
-      const droppedEpisodes = rawEpisodesAll.filter(e => e.status === "dropped");
+      // Split by status — 'published' shows alongside 'dropped' (aired episodes)
+      const droppedEpisodes = rawEpisodesAll.filter(e => e.status === "dropped" || e.status === "published");
       const upcomingEpisodes = rawEpisodesAll.filter(e => e.status === "upcoming");
 
       // Dedupe upcoming to one per miniseries (nearest air_date wins)
@@ -595,20 +598,29 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
           logoItems.push({ tmdb_id: d.tmdb_id, media_type: d.media_type || "film" });
         }
 
-        if (logoItems.length > 0) {
-          // Collect ALL data objects across all buckets
-          const allDataObjects = new Set();
-          for (const bucket of Object.values(feedBucketsRef.current)) {
-            for (const card of bucket) {
-              if (card.data) allDataObjects.add(card.data);
-            }
+        // Collect ALL data objects across all buckets
+        const allDataObjects = new Set();
+        for (const bucket of Object.values(feedBucketsRef.current)) {
+          for (const card of bucket) {
+            if (card.data) allDataObjects.add(card.data);
           }
+        }
 
+        // Immediately patch any already-cached logos (prevents flash on repeat visits)
+        let patchedCached = false;
+        for (const d of allDataObjects) {
+          if (!d.tmdb_id || d.logo_url) continue;
+          const url = getLogoUrl(d.tmdb_id);
+          if (url) { d.logo_url = url; patchedCached = true; }
+        }
+        if (patchedCached) setRenderTick(t => t + 1);
+
+        if (logoItems.length > 0) {
           fetchLogosForItems(logoItems, () => {
             if (!mountedRef.current) return;
             if (fetchGenRef.current !== genAtStart) return;
 
-            // Patch logo_url on shared data objects
+            // Patch logo_url on shared data objects (including newly fetched)
             for (const d of allDataObjects) {
               if (!d.tmdb_id) continue;
               const url = getLogoUrl(d.tmdb_id);

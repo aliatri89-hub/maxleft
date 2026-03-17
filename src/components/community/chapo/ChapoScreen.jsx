@@ -1,4 +1,5 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
@@ -15,7 +16,7 @@ import RSSSyncTool from "../dashboard/RSSSyncTool";
  * 2 episodes per row, each showing 2-3 posters as a compact card.
  * Season tabs at the bottom. Episode descriptions in log modal.
  */
-export default function ChapoScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId }) {
+export default function ChapoScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#D32F2F";
   const tabs = community?.theme_config?.tabs || [];
@@ -26,6 +27,12 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Android back gesture → close modals ─────────────────
+  useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
+  useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("communityTab", activeTab !== (tabs[0]?.key || "ms1"), () => setActiveTab(tabs[0]?.key || "ms1"), pushNav, removeNav);
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);

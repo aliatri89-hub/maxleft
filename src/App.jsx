@@ -182,6 +182,15 @@ export default function App() {
     }
   }, [activeCommunitySlug]);
 
+  // Push nav entry when entering a community so back gesture returns to feed
+  useEffect(() => {
+    if (activeCommunitySlug) {
+      pushNav("community", () => { setScrollToTmdbId(null); setActiveCommunitySlug(null); });
+    } else {
+      removeNav("community");
+    }
+  }, [activeCommunitySlug]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [trackRefreshKey, setTrackRefreshKey] = useState(0);
 
   // Mark tabs as visited when activated or preloaded (so component mounts)
@@ -2063,7 +2072,7 @@ if (!tmdbId) {
                   M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL
                   <span className="header-brand-line" />
                 </div>
-                <div className="header-tagline">Another reason to press play</div>
+                <div className="header-tagline">press play</div>
               </div>
               <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
                 <div className="header-profile">
@@ -2292,13 +2301,15 @@ if (!tmdbId) {
               <CommunityRouter
                 slug={activeCommunitySlug}
                 session={session}
-                onBack={() => { setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
+                onBack={() => { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
                 onToast={showToast}
                 onShelvesChanged={() => { if (session) loadShelves(session.user.id); }}
                 communitySubscriptions={communitySubscriptions}
                 onOpenCommunity={(slug, tmdbId) => { setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                 scrollToTmdbId={scrollToTmdbId}
                 letterboxdSyncSignal={letterboxdSyncSignal}
+                pushNav={pushNav}
+                removeNav={removeNav}
               />
             </div>
           </div>

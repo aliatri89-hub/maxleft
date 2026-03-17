@@ -2,6 +2,7 @@ import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
+import { isComingSoon } from "../../../utils/comingSoon";
 import BadgeCelebration from "../shared/BadgeCelebration";
 import BadgeProgressToast from "../shared/BadgeProgressToast";
 import BadgeDetailScreen from "../shared/BadgeDetailScreen";
@@ -106,7 +107,24 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
-  const upcomingCount = useMemo(() => allItems.filter(i => i.extra_data?.coming_soon).length, [allItems]);
+  const upcomingCount = useMemo(() => allItems.filter(i => isComingSoon(i)).length, [allItems]);
+
+  // ── Flat upcoming schedule (all items sorted by air_date) ───
+  const upcomingSchedule = useMemo(() => {
+    if (filter !== "upcoming") return [];
+    const filmSeries = miniseries.filter(s => !s.tab_key || s.tab_key === "filmography");
+    const all = filmSeries.flatMap((s) =>
+      (s.items || []).filter((i) => isComingSoon(i)).map((i) => ({ ...i, _shelfTitle: s.title }))
+    );
+    const seen = new Set();
+    const deduped = all.filter((i) => {
+      const key = `${i.title}::${i.year || ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return deduped.sort((a, b) => (a.air_date || "").localeCompare(b.air_date || ""));
+  }, [filter, miniseries]);
 
   const patreonItemIds = useMemo(() => {
     const ids = new Set();
@@ -449,6 +467,49 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   </>
                 )}
 
+                {filter === "upcoming" ? (
+                  /* Flat date-sorted schedule for upcoming */
+                  upcomingSchedule.length === 0 ? (
+                    <div style={{
+                      textAlign: "center", padding: "40px 0",
+                      fontFamily: "'Lora', serif", fontSize: 13,
+                      color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+                    }}>No upcoming items</div>
+                  ) : (
+                    <div style={{ padding: "16px 0", overflow: "hidden" }}>
+                      <div className="hide-scrollbar" style={{
+                        display: "flex", overflowX: "auto", gap: 12,
+                        paddingLeft: 16, paddingRight: 16,
+                      }}>
+                        {upcomingSchedule.map((item) => (
+                          <div key={item.id} style={{ flexShrink: 0, width: 120 }}>
+                            <BlankCheckItemCard
+                              item={item}
+                              isCompleted={!!progress[item.id]?.status}
+                              onToggle={() => handleItemTap(item)}
+                              coverCacheVersion={coverCache}
+                            />
+                            <div style={{
+                              fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              letterSpacing: "0.04em", textTransform: "uppercase",
+                              marginTop: 4,
+                            }}>
+                              {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                            </div>
+                            <div style={{
+                              fontSize: 9, color: "#666", marginTop: 1,
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            }}>
+                              {item._shelfTitle}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                ) : (
                 <div style={{ paddingTop: 8 }}>
                   {miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").map((s) => {
                     const q = searchQuery.trim().toLowerCase();
@@ -482,6 +543,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                     );
                   })}
                 </div>
+                )}
                 {searchQuery.trim().length >= 2 &&
                   miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").every((s) => {
                     const q = searchQuery.trim().toLowerCase();

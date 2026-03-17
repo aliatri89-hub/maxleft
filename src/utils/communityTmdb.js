@@ -342,14 +342,14 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
       return null;
     }
 
-    // Prefer English logo, then no-language, sorted by vote_average
+    // Prefer English logo, then no-language, sorted by width (largest first)
     const logos = data.images.logos;
     const english = logos
       .filter(l => l.iso_639_1 === "en")
-      .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+      .sort((a, b) => (b.width || 0) - (a.width || 0) || (b.vote_average || 0) - (a.vote_average || 0));
     const noLang = logos
       .filter(l => !l.iso_639_1)
-      .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+      .sort((a, b) => (b.width || 0) - (a.width || 0) || (b.vote_average || 0) - (a.vote_average || 0));
 
     const best = english[0] || noLang[0];
     if (!best?.file_path) {
