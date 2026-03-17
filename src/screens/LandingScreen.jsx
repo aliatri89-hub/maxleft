@@ -1407,8 +1407,7 @@ function LandingScreen({ onSignIn }) {
       {/* ═══════ FEATURES – INTERACTIVE ═════════════════════ */}
       <div className="mantl-features" ref={featuresRef}>
         <div className="mantl-features-header">
-          <h2>More than a watchlist.</h2>
-          <p>Track what to watch, read, and play next<br />from the <strong>podcasts you love</strong>.</p>
+          <h2>MORE THAN A WATCHLIST.</h2>
         </div>
 
         {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}
