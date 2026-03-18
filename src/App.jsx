@@ -3,7 +3,7 @@ import { supabase } from "./supabase";
 import "./styles/App.css";
 
 // Utils
-import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER, GROUP_TYPE_CONFIG, HABITS, SPORT_ICONS, generateInviteCode } from "./utils/constants";
+import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
 import { TMDB_IMG, sb, fetchTMDBRaw, searchTMDBRaw } from "./utils/api";
 import { tapLight, tapMedium, notifySuccess } from "./utils/haptics";
 
@@ -13,7 +13,6 @@ import UsernameSetup from "./screens/UsernameSetup";
 import ShelfHome from "./screens/ShelfHome";
 import FeedScreen from "./screens/FeedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-import JoinGroupScreen from "./screens/JoinGroupScreen";
 import ExploreScreen from "./screens/ExploreScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 import NPPDashboard from "./components/community/now-playing/NPPDashboard";
@@ -158,11 +157,6 @@ export default function App() {
     return match ? match[1] : null;
   });
 
-  // Groups
-  const [userGroups, setUserGroups] = useState([]); // [{id, name, emoji, type, invite_code, role, memberCount}]
-  const [activeGroup, setActiveGroup] = useState(null); // full group data when viewing
-  const [showGroupView, setShowGroupView] = useState(false);
-  const [showCreateGroup, setShowCreateGroup] = useState(false);
 
   // Communities
   const [activeCommunitySlug, setActiveCommunitySlug] = useState(
@@ -188,8 +182,6 @@ export default function App() {
     }
   }, [activeCommunitySlug]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [trackRefreshKey, setTrackRefreshKey] = useState(0);
-
   // Mark tabs as visited when activated or preloaded (so component mounts)
   useEffect(() => {
     setVisitedTabs(prev => {
@@ -200,14 +192,6 @@ export default function App() {
     });
   }, [activeTab, preloadTab]);
 
-  const [pendingJoinCode, setPendingJoinCode] = useState(() => {
-    const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
-    if (path.startsWith("join/")) return path.replace("join/", "").toUpperCase();
-    // Recover join code stashed before OAuth redirect
-    const stored = sessionStorage.getItem("mantl_pending_join");
-    if (stored) return stored;
-    return null;
-  });
 
   // User data
   const [profile, setProfile] = useState({
@@ -223,11 +207,6 @@ export default function App() {
   });
   const [shelvesLoaded, setShelvesLoaded] = useState(false);
 
-  // Strava
-  const [stravaActivities, setStravaActivities] = useState([]);
-  const [stravaConnected, setStravaConnected] = useState(false);
-  const [stravaLoading, setStravaLoading] = useState(false);
-  const [stravaDismissed, setStravaDismissed] = useState(() => { try { return localStorage.getItem("mantl_strava_dismissed") === "1"; } catch { return false; } });
 
   // Letterboxd
   const [letterboxdSyncing, setLetterboxdSyncing] = useState(false);
@@ -268,8 +247,6 @@ export default function App() {
     hasPlayedToday(session.user.id).then((played) => setTfUnplayed(!played));
   }, [session?.user?.id, showTripleFeature]); // re-check when game closes
 
-  // Challenge shelf data
-  const [challengeShelf, setChallengeShelf] = useState(null); // { habits, stats, overallPct, tier, activeDays, targetPerHabit }
 
   // ── Android back gesture / browser back button navigation ──
   // Components register close callbacks; popstate fires the deepest one
@@ -372,10 +349,6 @@ export default function App() {
   }, []);
 
   const signIn = async () => {
-    // Preserve join code across OAuth redirect
-    if (pendingJoinCode) {
-      sessionStorage.setItem("mantl_pending_join", pendingJoinCode);
-    }
     await sb(supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: window.location.origin },
@@ -390,12 +363,6 @@ export default function App() {
     setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
     setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
     setShelvesLoaded(false);
-    setStravaActivities([]);
-    setStravaConnected(false);
-    setChallengeShelf(null);
-    setUserGroups([]);
-    setActiveGroup(null);
-    setShowGroupView(false);
     setActiveTab("feed");
   };
 
@@ -422,9 +389,6 @@ export default function App() {
       setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
       setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
       setShelvesLoaded(false);
-      setStravaActivities([]);
-      setStravaConnected(false);
-      setChallengeShelf(null);
       setActiveTab("feed");
     } catch (err) {
       console.error("Delete account error:", err);
@@ -489,33 +453,8 @@ export default function App() {
         });
       }
 
-      // Load all shelf data + challenge shelf + groups in parallel
-      const shelvesPromise = loadShelves(user.id);
-      const challengePromise = loadChallengeShelf(user.id);
-      const groupsPromise = loadUserGroups(user.id);
-
-      // ── Strava: DISABLED (strava.js removed) ──
-
-      await Promise.all([shelvesPromise, challengePromise, groupsPromise]);
-
-      // Handle pending group join code (from /join/XXXXX URL)
-      if (pendingJoinCode) {
-        sessionStorage.removeItem("mantl_pending_join");
-        const joined = await joinGroupByCode(pendingJoinCode, user.id);
-        setPendingJoinCode(null);
-        window.history.replaceState(null, "", "/");
-        if (joined) {
-          // Auto-enable relevant shelves
-          const config = GROUP_TYPE_CONFIG[joined.type];
-          if (config?.shelves) {
-            const current = prof.enabled_shelves || {};
-            const updated = { ...current };
-            config.shelves.forEach(s => { updated[s] = true; });
-            await supabase.from("profiles").update({ enabled_shelves: updated }).eq("id", user.id);
-            setProfile(prev => ({ ...prev, enabledShelves: { ...DEFAULT_ENABLED_SHELVES, ...updated } }));
-          }
-        }
-      }
+      // Load shelf data
+      await loadShelves(user.id);
 
       // Sync integrations (non-blocking, once per session — dedup prevents duplicates)
       if (!hasSyncedThisSession.current) {
@@ -544,14 +483,6 @@ export default function App() {
       setScreen("landing");
     }
   };
-
-  // ── GROUPS ──
-
-  // ── Groups: DISABLED (groups/group_members tables dropped) ──
-  const loadUserGroups = async () => {};
-  const joinGroupByCode = async () => null;
-  const createGroup = async () => null;
-  const loadGroupView = async () => {};
 
   // ── LOAD SHELVES ──
 
@@ -646,17 +577,6 @@ export default function App() {
     });
     setShelvesLoaded(true);
   };
-
-  // ── STRAVA ──
-
-  // ── Strava: DISABLED (strava.js removed) ──
-  const loadStravaActivities = async () => false;
-  const syncStravaToFeed = async () => {};
-  const disconnectStrava = async () => {};
-
-  // ── Letterboxd Integration ──
-  // ── Auto-complete habit: DISABLED (monthly_challenges/daily_logs dropped) ──
-  const autoCompleteHabit = async () => {};
 
   // ── Letterboxd Integration ──
 
@@ -1496,9 +1416,6 @@ if (!tmdbId) {
     showToast("Steam disconnected");
   };
 
-  // ── Challenge shelf: DISABLED (monthly_challenges/daily_logs dropped) ──
-  const loadChallengeShelf = async () => {};
-
   // ── USERNAME SETUP COMPLETE ──
 
   const handleUsernameComplete = async (username, enabledShelves, communityIds) => {
@@ -1524,23 +1441,6 @@ if (!tmdbId) {
 
     setProfile((prev) => ({ ...prev, username, enabledShelves }));
     await loadShelves(session.user.id);
-
-    // Handle pending group join for new users
-    if (pendingJoinCode) {
-      sessionStorage.removeItem("mantl_pending_join");
-      const joined = await joinGroupByCode(pendingJoinCode, session.user.id);
-      setPendingJoinCode(null);
-      window.history.replaceState(null, "", "/");
-      if (joined) {
-        const config = GROUP_TYPE_CONFIG[joined.type];
-        if (config?.shelves) {
-          const updated = { ...enabledShelves };
-          config.shelves.forEach(s => { updated[s] = true; });
-          await supabase.from("profiles").update({ enabled_shelves: updated }).eq("id", session.user.id);
-          setProfile(prev => ({ ...prev, enabledShelves: { ...DEFAULT_ENABLED_SHELVES, ...updated } }));
-        }
-      }
-    }
 
     setScreen("app");
     showToast(`Welcome to Mantl, @${username}`);
@@ -1601,13 +1501,8 @@ if (!tmdbId) {
         )}
 
         {/* Landing */}
-        {screen === "landing" && !pendingJoinCode && (
+        {screen === "landing" && (
           <LandingScreen onSignIn={signIn} />
-        )}
-
-        {/* Join Group (unauthenticated) */}
-        {screen === "landing" && pendingJoinCode && (
-          <JoinGroupScreen code={pendingJoinCode} onSignIn={signIn} />
         )}
 
 
@@ -1814,23 +1709,12 @@ if (!tmdbId) {
                   session={session}
                   pushNav={pushNav}
                   removeNav={removeNav}
-                  onRefresh={async () => { if (session) await Promise.all([loadShelves(session.user.id), loadChallengeShelf(session.user.id)]); }}
+                  onRefresh={async () => { if (session) await loadShelves(session.user.id); }}
                   onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
-                  stravaActivities={stravaActivities}
-                  stravaConnected={stravaConnected}
-                  stravaLoading={stravaLoading}
-                  stravaDismissed={stravaDismissed}
-                  setStravaDismissed={setStravaDismissed}
-                  onStravaConnect={() => {}}
-                  onStravaDisconnect={() => {}}
                   onToast={showToast}
-                  /* challengeShelf + onOpenChallenge DISABLED — habits shelf removed */
                   letterboxdSyncing={letterboxdSyncing}
                   goodreadsSyncing={goodreadsSyncing}
                   steamSyncing={steamSyncing}
-                  userGroups={userGroups}
-                  onOpenGroup={(groupId) => loadGroupView(groupId)}
-                  onAutoComplete={autoCompleteHabit}
                   isActive={activeTab === "shelf"}
                 />}
               </div>
@@ -1919,10 +1803,6 @@ if (!tmdbId) {
               onSteamDisconnect={disconnectSteam}
               onSteamSync={() => { if (session && profile.steam_id) syncSteam(profile.steam_id, session.user.id, true); }}
               steamSyncing={steamSyncing}
-              userGroups={userGroups}
-              onOpenGroup={(id) => loadGroupView(id)}
-              onCreateGroup={() => setShowCreateGroup(true)}
-              onJoinCode={(code) => session ? joinGroupByCode(code, session.user.id) : null}
               onImportComplete={() => { if (session) loadShelves(session.user.id); }}
             />
           </div>
@@ -2045,19 +1925,6 @@ if (!tmdbId) {
                   (type === "tv" && status === "watching") ? `Watching! ${emoji}` :
                   (type === "game" && status === "playing") ? `Playing! ${emoji}` : `Shelf'd! ${emoji}`;
                 showToast(msg);
-
-                // Auto-complete watching habit when a movie is logged
-                if (type === "movie") {
-                  autoCompleteHabit("watching", null, "film");
-                }
-                // Auto-complete watching habit when a show is shelved as finished
-                if (type === "tv") {
-                  autoCompleteHabit("watching", null, "show");
-                }
-                // Auto-complete reading habit when a book is shelved as finished
-                if (type === "book" && status === "finished") {
-                  autoCompleteHabit("reading");
-                }
               }
             }}
           />

@@ -44,14 +44,10 @@ const skelCompact = (
   </div>
 );
 
-function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, stravaActivities, stravaConnected, stravaLoading, stravaDismissed, setStravaDismissed, onStravaConnect, onStravaDisconnect, onToast, challengeShelf, onOpenChallenge, letterboxdSyncing, steamSyncing, userGroups, onOpenGroup, onAutoComplete, isActive }) {
+function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
 
   // ── Trigger state (controls which modal/overlay is open) ──
   const [viewingItem, setViewingItem] = useState(null);
-  const [viewingEvent, setViewingEvent] = useState(null);
-  const [addingEvent, setAddingEvent] = useState(false);
-  const [trophyCaseOpen, setTrophyCaseOpen] = useState(false);
-  const [addingTrophy, setAddingTrophy] = useState(false);
   const [addingCountry, setAddingCountry] = useState(false);
   const [viewingCountry, setViewingCountry] = useState(null);
   const [showPassportMap, setShowPassportMap] = useState(false);
@@ -69,10 +65,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
     if (diaryShelf && pushNav) pushNav("diary", () => setDiaryShelf(null));
     else if (!diaryShelf && removeNav) removeNav("diary");
   }, [!!diaryShelf]);
-  useEffect(() => {
-    if (trophyCaseOpen && pushNav) pushNav("trophyCase", () => setTrophyCaseOpen(false));
-    else if (!trophyCaseOpen && removeNav) removeNav("trophyCase");
-  }, [trophyCaseOpen]);
 
   // ── Beat toggle (games) ──
   const toggleBeat = async (gameId, currentStatus) => {
@@ -132,10 +124,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(
         <ShelfModals
-          addingEvent={addingEvent} setAddingEvent={setAddingEvent}
-          viewingEvent={viewingEvent} setViewingEvent={setViewingEvent}
-          trophyCaseOpen={trophyCaseOpen} setTrophyCaseOpen={setTrophyCaseOpen}
-          addingTrophy={addingTrophy} setAddingTrophy={setAddingTrophy}
           addingCountry={addingCountry} setAddingCountry={setAddingCountry}
           viewingCountry={viewingCountry} setViewingCountry={setViewingCountry}
           showPassportMap={showPassportMap} setShowPassportMap={setShowPassportMap}
@@ -143,7 +131,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
           viewingItem={viewingItem} setViewingItem={setViewingItem}
           shelves={shelves} profile={profile} session={session}
           onRefresh={onRefresh} onToast={onToast}
-          onShelfIt={onShelfIt} onUpdateProfile={onUpdateProfile} onAutoComplete={onAutoComplete}
+          onShelfIt={onShelfIt} onUpdateProfile={onUpdateProfile}
         />,
         document.body
       )}

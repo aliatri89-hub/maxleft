@@ -16,7 +16,6 @@ import StarRating from "../shared/StarRating";
  *   onClose    — () => void
  *   onRefresh  — () => void — reload shelf data after changes
  *   onToast    — (msg) => void
- *   onAutoComplete — (habit, ...) => void (optional)
  */
 export default function ItemDetailModal({
   item,
@@ -25,7 +24,6 @@ export default function ItemDetailModal({
   onClose,
   onRefresh,
   onToast,
-  onAutoComplete,
 }) {
   if (!item) return null;
 
@@ -113,7 +111,6 @@ export default function ItemDetailModal({
       }));
       setFinishRating(0);
       if (onRefresh) onRefresh();
-      if (onAutoComplete) onAutoComplete("reading", null, "book");
       flash("saved");
     } catch (err) {
       console.error("Book save error:", err);
@@ -139,7 +136,6 @@ export default function ItemDetailModal({
       }));
       setFinishRating(0);
       if (onRefresh) onRefresh();
-      if (onAutoComplete) onAutoComplete("watching", null, "show");
       flash("saved");
     } catch (err) {
       console.error("Show save error:", err);
