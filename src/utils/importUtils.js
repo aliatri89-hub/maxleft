@@ -162,31 +162,17 @@ export async function deduplicateItems(items, format, userId) {
     }
   }
 
-  // Check against user_media_logs (unified) with fallback to movies (legacy)
+  // Check against user_media_logs (unified)
   let existingMap = new Map();
-  try {
-    const { data: existing } = await supabase
-      .from("user_media_logs")
-      .select("media:media_id(title, year), watch_dates")
-      .eq("user_id", userId);
+  const { data: existing } = await supabase
+    .from("user_media_logs")
+    .select("media:media_id(title, year), watch_dates")
+    .eq("user_id", userId);
 
-    for (const row of (existing || [])) {
-      if (row.media) {
-        existingMap.set(`${row.media.title}::${row.media.year}`, {
-          watch_dates: row.watch_dates || [],
-        });
-      }
-    }
-  } catch {
-    // Fallback to movies table during transition
-    const { data: existing } = await supabase
-      .from("movies")
-      .select("title, year, watch_dates")
-      .eq("user_id", userId);
-
-    for (const m of (existing || [])) {
-      existingMap.set(`${m.title}::${m.year}`, {
-        watch_dates: m.watch_dates || [],
+  for (const row of (existing || [])) {
+    if (row.media) {
+      existingMap.set(`${row.media.title}::${row.media.year}`, {
+        watch_dates: row.watch_dates || [],
       });
     }
   }

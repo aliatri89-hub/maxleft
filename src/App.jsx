@@ -4,7 +4,6 @@ import "./styles/App.css";
 
 // Utils
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER, GROUP_TYPE_CONFIG, HABITS, SPORT_ICONS, generateInviteCode } from "./utils/constants";
-import { stravaApi, stravaAuth } from "./utils/strava";
 import { TMDB_IMG, sb, fetchTMDBRaw, searchTMDBRaw } from "./utils/api";
 import { tapLight, tapMedium, notifySuccess } from "./utils/haptics";
 
@@ -14,9 +13,7 @@ import UsernameSetup from "./screens/UsernameSetup";
 import ShelfHome from "./screens/ShelfHome";
 import FeedScreen from "./screens/FeedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
-import TrackScreen from "./screens/TrackScreen";
 import JoinGroupScreen from "./screens/JoinGroupScreen";
-import GroupViewScreen from "./screens/GroupViewScreen";
 import ExploreScreen from "./screens/ExploreScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 import NPPDashboard from "./components/community/now-playing/NPPDashboard";
@@ -33,7 +30,6 @@ import ShelfItModal from "./components/ShelfItModal";
 import FlappyMantl from "./components/FlappyMantl";
 // import ComedyPointsReveal from "./components/community/shared/ComedyPointsReveal"; // DISABLED for launch
 // import ComedyPointsToast from "./components/community/shared/ComedyPointsToast"; // DISABLED for launch
-import CreateGroupModal from "./components/CreateGroupModal";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
@@ -415,38 +411,11 @@ export default function App() {
       await supabase.from("feed_activity").delete().eq("user_id", userId);
       await supabase.from("feed_reactions").delete().eq("user_id", userId);
       await supabase.from("feed_comments").delete().eq("user_id", userId);
-      // Get challenge IDs to clean daily_logs
-      const { data: challenges } = await supabase.from("monthly_challenges").select("id").eq("user_id", userId);
-      if (challenges?.length > 0) {
-        for (const c of challenges) {
-          await supabase.from("daily_logs").delete().eq("challenge_id", c.id);
-        }
-      }
-      await supabase.from("monthly_challenges").delete().eq("user_id", userId);
-      // Get book IDs to clean reading_log
-      const { data: userBooks } = await supabase.from("books").select("id").eq("user_id", userId);
-      if (userBooks?.length > 0) {
-        for (const b of userBooks) {
-          await supabase.from("reading_log").delete().eq("book_id", b.id);
-        }
-      }
-      // Get show IDs to clean season_ratings and watching_log
-      const { data: userShows } = await supabase.from("shows").select("id").eq("user_id", userId);
-      if (userShows?.length > 0) {
-        for (const s of userShows) {
-          await supabase.from("season_ratings").delete().eq("show_id", s.id);
-          await supabase.from("watching_log").delete().eq("show_id", s.id);
-        }
-      }
-      await supabase.from("books").delete().eq("user_id", userId);
+      await supabase.from("community_user_progress").delete().eq("user_id", userId);
       await supabase.from("user_media_logs").delete().eq("user_id", userId);
-      await supabase.from("movies").delete().eq("user_id", userId);  // legacy cleanup
-      await supabase.from("shows").delete().eq("user_id", userId);
       await supabase.from("games").delete().eq("user_id", userId);
-      await supabase.from("workout_goals").delete().eq("user_id", userId);
       await supabase.from("countries").delete().eq("user_id", userId);
       await supabase.from("wishlist").delete().eq("user_id", userId);
-      await supabase.from("strava_tokens").delete().eq("user_id", userId);
       await supabase.from("blocked_users").delete().eq("user_id", userId);
       await supabase.from("reports").delete().eq("reporter_id", userId);
       await supabase.from("friends").delete().or(`requester_id.eq.${userId},receiver_id.eq.${userId}`);
@@ -530,25 +499,9 @@ export default function App() {
       const challengePromise = loadChallengeShelf(user.id);
       const groupsPromise = loadUserGroups(user.id);
 
-      // ── Strava: exchange first if needed, then load ──
-      const stravaPromise = (async () => {
-        const stravaCode = sessionStorage.getItem("strava_code");
-        let exchangeOk = false;
-        if (stravaCode) {
-          sessionStorage.removeItem("strava_code");
-          setStravaLoading(true);
-          const exchangeResult = await stravaApi("exchange", null, { code: stravaCode });
-          exchangeOk = !!exchangeResult?.success;
-          if (!exchangeOk) console.error("[Strava] Exchange failed — code may be expired or already used");
-          setStravaLoading(false);
-        }
-        const stravaResult = await loadStravaActivities();
-        if (stravaCode && exchangeOk && stravaResult) {
-          showToast("Strava connected! 🏃");
-        }
-      })();
+      // ── Strava: DISABLED (strava.js removed) ──
 
-      await Promise.all([shelvesPromise, challengePromise, stravaPromise, groupsPromise]);
+      await Promise.all([shelvesPromise, challengePromise, groupsPromise]);
 
       // Handle pending group join code (from /join/XXXXX URL)
       if (pendingJoinCode) {
@@ -599,91 +552,11 @@ export default function App() {
 
   // ── GROUPS ──
 
-  const loadUserGroups = async (userId) => {
-    try {
-      const { data: memberships } = await supabase
-        .from("group_members").select("group_id, role")
-        .eq("user_id", userId);
-      if (!memberships || memberships.length === 0) { setUserGroups([]); return; }
-      const groupIds = memberships.map(m => m.group_id);
-      const { data: groups } = await supabase
-        .from("groups").select("id, name, emoji, type, invite_code, description, settings, created_by")
-        .in("id", groupIds);
-      if (!groups) { setUserGroups([]); return; }
-      // Get member counts
-      const { data: allMembers } = await supabase
-        .from("group_members").select("group_id")
-        .in("group_id", groupIds);
-      const counts = {};
-      (allMembers || []).forEach(m => { counts[m.group_id] = (counts[m.group_id] || 0) + 1; });
-      const enriched = groups.map(g => ({
-        ...g,
-        role: memberships.find(m => m.group_id === g.id)?.role || "member",
-        memberCount: counts[g.id] || 0,
-      }));
-      setUserGroups(enriched);
-    } catch (e) { console.error("Load groups error:", e); }
-  };
-
-  const joinGroupByCode = async (code, userId) => {
-    try {
-      const { data: group } = await supabase
-        .from("groups").select("*")
-        .eq("invite_code", code.toUpperCase()).maybeSingle();
-      if (!group) { showToast("Invalid invite code"); return null; }
-      // Check if already a member
-      const { data: existing } = await supabase
-        .from("group_members").select("id")
-        .eq("group_id", group.id).eq("user_id", userId).maybeSingle();
-      if (!existing) {
-        await supabase.from("group_members").insert({
-          group_id: group.id, user_id: userId, role: "member",
-        });
-      }
-      await loadUserGroups(userId);
-      showToast(`Joined ${group.name}! ${group.emoji}`);
-      return group;
-    } catch (e) { console.error("Join group error:", e); showToast("Couldn't join group"); return null; }
-  };
-
-  const createGroup = async (name, type, description) => {
-    if (!session) return null;
-    try {
-      const code = generateInviteCode();
-      const config = GROUP_TYPE_CONFIG[type] || GROUP_TYPE_CONFIG.training;
-      const { data: group, error } = await supabase.from("groups").insert({
-        name, type, description: description || null,
-        emoji: config.emoji, invite_code: code,
-        path: "friends",
-        created_by: session.user.id,
-        settings: {},
-      }).select().single();
-      if (error) throw error;
-      // Add creator as admin
-      await supabase.from("group_members").insert({
-        group_id: group.id, user_id: session.user.id, role: "admin",
-      });
-      await loadUserGroups(session.user.id);
-      showToast(`${config.emoji} ${name} created!`);
-      return group;
-    } catch (e) { console.error("Create group error:", e); showToast("Couldn't create group"); return null; }
-  };
-
-  const loadGroupView = async (groupId) => {
-    try {
-      const { data: group } = await supabase.from("groups").select("*").eq("id", groupId).single();
-      const { data: members } = await supabase.from("group_members").select("user_id, role, joined_at").eq("group_id", groupId);
-      if (!members || members.length === 0) { setActiveGroup({ ...group, members: [] }); setShowGroupView(true); return; }
-      const memberIds = members.map(m => m.user_id);
-      const { data: profiles } = await supabase.from("profiles").select("id, username, name, avatar_emoji, avatar_url").in("id", memberIds);
-      const enrichedMembers = members.map(m => {
-        const prof = (profiles || []).find(p => p.id === m.user_id) || {};
-        return { ...m, username: prof.username, name: prof.name, avatar: prof.avatar_emoji || "👤", avatarUrl: prof.avatar_url };
-      });
-      setActiveGroup({ ...group, members: enrichedMembers });
-      setShowGroupView(true);
-    } catch (e) { console.error("Load group error:", e); }
-  };
+  // ── Groups: DISABLED (groups/group_members tables dropped) ──
+  const loadUserGroups = async () => {};
+  const joinGroupByCode = async () => null;
+  const createGroup = async () => null;
+  const loadGroupView = async () => {};
 
   // ── LOAD SHELVES ──
 
@@ -709,10 +582,8 @@ export default function App() {
         .eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("games").select("id, title, cover_url, platform, genre, status, rating, notes, source, external_id, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
-      supabase.from("workout_goals").select("id, name, emoji, result, completed_at, location, source, photo_url, distance, photo_position")
-        .eq("user_id", userId).eq("is_active", false).gte("habit_id", 1).not("completed_at", "is", null).order("completed_at", { ascending: false }),
-      supabase.from("workout_goals").select("id, name, emoji, target_date, location, goal_text, source, photo_url, distance, photo_position")
-        .eq("user_id", userId).eq("is_active", true).gte("habit_id", 1).order("target_date", { ascending: true }),
+      Promise.resolve({ data: [] }),  // trophies (workout_goals dropped)
+      Promise.resolve({ data: [] }),  // goals (workout_goals dropped)
       supabase.from("countries").select("id, country_code, country_name, status, visit_month, visit_year, trip_month, trip_year, notes, photo_url")
         .eq("user_id", userId).order("created_at", { ascending: false }),
     ]);
@@ -782,148 +653,14 @@ export default function App() {
 
   // ── STRAVA ──
 
-  const loadStravaActivities = async () => {
-    try {
-      const result = await stravaApi("latest");
-      if (result?.activities && Array.isArray(result.activities) && result.activities.length > 0) {
-        setStravaActivities(result.activities);
-        setStravaConnected(true);
+  // ── Strava: DISABLED (strava.js removed) ──
+  const loadStravaActivities = async () => false;
+  const syncStravaToFeed = async () => {};
+  const disconnectStrava = async () => {};
 
-        // Sync new activities to feed_activity (fire and forget)
-        // Get fresh session directly since state may not be set yet
-        const { data: { session: freshSession } } = await supabase.auth.getSession();
-        syncStravaToFeed(result.activities, freshSession);
-
-        return true;
-      } else {
-        setStravaConnected(false);
-        return false;
-      }
-    } catch (e) {
-      console.error("[Strava] loadStravaActivities error:", e);
-      return false;
-    }
-  };
-
-  // ── Auto-complete habit helper (used by shelf actions + Strava + backfill) ──
-  const autoCompleteHabit = async (category, dateOverride = null, nameHint = null) => {
-    if (!session) return;
-    try {
-      const d = dateOverride ? new Date(dateOverride) : new Date();
-      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
-      // Find active tracker (try challenges first, then monthly_challenges)
-      let tracker = null;
-      const { data: mc, error: mcErr } = await supabase.from("monthly_challenges")
-        .select("id, habits").eq("user_id", session.user.id)
-        .eq("month", d.getMonth() + 1).eq("year", d.getFullYear()).maybeSingle();
-      if (mcErr) console.error("[AutoComplete] Tracker query error:", mcErr);
-      if (mc) tracker = mc;
-
-      if (!tracker?.habits) return;
-
-      // Find matching habit — use nameHint for specificity (e.g. "film" vs "show")
-      let habit;
-      if (nameHint) {
-        const hint = new RegExp(nameHint, "i");
-        habit = tracker.habits.find(h => h.category === category && hint.test(h.name))
-          || tracker.habits.find(h => h.category === category);
-      } else {
-        habit = tracker.habits.find(h => h.category === category);
-      }
-      if (!habit) return;
-
-      const { error: upsertErr } = await supabase.from("daily_logs").upsert(
-        { challenge_id: tracker.id, user_id: session.user.id, date: dateStr, habit_id: habit.id, status: "complete" },
-        { onConflict: "challenge_id,date,habit_id" }
-      );
-      if (upsertErr) console.error("[AutoComplete] Upsert error:", upsertErr);
-      else setTrackRefreshKey(k => k + 1);
-    } catch (e) { console.error(`Auto-complete ${category} habit error:`, e); }
-  };
-
-  const syncStravaToFeed = async (activities, activeSession) => {
-    const sess = activeSession || session;
-    if (!sess) { return; }
-    try {
-      // Get existing Strava feed entries to avoid duplicates (last 30 days)
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: existing, error: existErr } = await supabase
-        .from("feed_activity")
-        .select("title")
-        .eq("user_id", sess.user.id)
-        .eq("activity_type", "strava")
-        .gte("created_at", thirtyDaysAgo);
-
-
-      const existingKeys = new Set((existing || []).map(e => e.title));
-
-      // Post new activities (last 5 max to avoid spam on first connect)
-      const newActivities = activities
-        .filter(act => !existingKeys.has(`strava_${act.strava_id || act.id}`))
-        .slice(0, 5);
-
-      if (newActivities.length > 0) {
-      }
-
-      for (const act of newActivities) {
-        const icon = SPORT_ICONS[act.sport_type] || SPORT_ICONS[act.type] || "💪";
-        const sportLabel = (act.sport_type || act.type || "Workout").replace(/([A-Z])/g, " $1").trim();
-        const photoUrl = act.photos?.primary?.urls?.['600'] || act.photos?.primary?.urls?.['100'] || null;
-
-
-        const { error: insertErr } = await supabase.from("feed_activity").insert({
-          user_id: sess.user.id,
-          activity_type: "strava",
-          action: sportLabel.toLowerCase(),
-          title: `strava_${act.strava_id || act.id}`,
-          item_title: act.name || sportLabel,
-          item_cover: photoUrl,
-          metadata: {
-            strava_id: act.strava_id || act.id,
-            sport_type: act.sport_type || act.type,
-            sport_icon: icon,
-            distance: act.distance || 0,
-            moving_time: act.moving_time || 0,
-            elapsed_time: act.elapsed_time || 0,
-            total_elevation_gain: act.total_elevation_gain || 0,
-            average_speed: act.average_speed || 0,
-            average_heartrate: act.average_heartrate || 0,
-            max_heartrate: act.max_heartrate || 0,
-            start_date: act.start_date,
-            polyline: act.map?.summary_polyline || null,
-            photo_url: photoUrl,
-          },
-          created_at: act.start_date || new Date().toISOString(),
-        });
-
-        if (insertErr) console.error("[Strava sync] Insert error:", insertErr.message, insertErr.code, insertErr.details);
-      }
-
-      // Auto-complete training habits for new Strava activities
-      if (newActivities.length > 0) {
-        const activityDates = new Set();
-        for (const act of newActivities) {
-          const d = act.start_date ? new Date(act.start_date) : new Date();
-          const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-          activityDates.add(dateStr);
-        }
-        for (const dateStr of activityDates) {
-          autoCompleteHabit("training", dateStr);
-        }
-      }
-
-    } catch (err) {
-      console.error("[Strava sync] Exception:", err);
-    }
-  };
-
-  const disconnectStrava = async () => {
-    await stravaApi("disconnect", null, {});
-    setStravaActivities([]);
-    setStravaConnected(false);
-    showToast("Strava disconnected");
-  };
+  // ── Letterboxd Integration ──
+  // ── Auto-complete habit: DISABLED (monthly_challenges/daily_logs dropped) ──
+  const autoCompleteHabit = async () => {};
 
   // ── Letterboxd Integration ──
 
@@ -1788,79 +1525,8 @@ if (!tmdbId) {
     showToast("Steam disconnected");
   };
 
-  const loadChallengeShelf = async (userId) => {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-    const dayOfMonth = now.getDate();
-
-    const { data: challenge } = await supabase
-      .from("monthly_challenges")
-      .select("id, habits, start_day")
-      .eq("user_id", userId)
-      .eq("month", month)
-      .eq("year", year)
-      .maybeSingle();
-
-    if (!challenge) { setChallengeShelf(null); return; }
-
-    const isNewStyle = challenge.habits && typeof challenge.habits[0] === "object";
-
-    const { data: logs } = await supabase
-      .from("daily_logs")
-      .select("date, habit_id, status")
-      .eq("challenge_id", challenge.id);
-
-    const startDay = challenge.start_day || 1;
-    const activeDays = dayOfMonth - startDay + 1;
-
-    // Build per-day history
-    const hist = {};
-    (logs || []).forEach(log => {
-      const day = new Date(log.date + "T12:00:00").getDate();
-      if (!hist[day]) hist[day] = { checked: [], rested: [], missed: [] };
-      if (log.status === "complete") hist[day].checked.push(log.habit_id);
-      else if (log.status === "rest") hist[day].rested.push(log.habit_id);
-      else hist[day].missed.push(log.habit_id);
-    });
-
-    const habitList = isNewStyle ? challenge.habits : challenge.habits.map(hId => ({ id: hId, name: (HABITS.find(h => h.id === hId) || {}).name || "Habit", emoji: (HABITS.find(h => h.id === hId) || {}).icon || "📌" }));
-
-    // Per-habit streaks and stats
-    const habitStats = habitList.map(h => {
-      const hId = h.id;
-      let streak = 0;
-      for (let d = dayOfMonth; d >= 1; d--) {
-        const dd = hist[d] || { checked: [], rested: [], missed: [] };
-        if (dd.checked.includes(hId) || dd.rested.includes(hId)) streak++;
-        else break;
-      }
-      let totalCompleted = 0;
-      for (let d = startDay; d <= dayOfMonth; d++) {
-        const dd = hist[d] || { checked: [], rested: [], missed: [] };
-        if (dd.checked.includes(hId)) totalCompleted++;
-      }
-      // Last 7 days dot status: "done" | "rest" | "missed" | "future"
-      const weekDots = [];
-      for (let i = 6; i >= 0; i--) {
-        const d = dayOfMonth - i;
-        if (d < 1 || d < startDay) { weekDots.push("future"); continue; }
-        const dd = hist[d] || { checked: [], rested: [], missed: [] };
-        if (dd.checked.includes(hId)) weekDots.push("done");
-        else if (dd.rested.includes(hId)) weekDots.push("rest");
-        else if (d === dayOfMonth) weekDots.push("today"); // not yet logged today
-        else weekDots.push("missed");
-      }
-      return { ...h, streak, totalCompleted, weekDots };
-    });
-
-    // Today's status
-    const todayData = hist[dayOfMonth] || { checked: [], rested: [], missed: [] };
-    const todayDone = todayData.checked.length;
-    const bestStreak = Math.max(0, ...habitStats.map(h => h.streak));
-
-    setChallengeShelf({ habits: habitStats, todayDone, activeDays, startDay, bestStreak, isNewStyle });
-  };
+  // ── Challenge shelf: DISABLED (monthly_challenges/daily_logs dropped) ──
+  const loadChallengeShelf = async () => {};
 
   // ── USERNAME SETUP COMPLETE ──
 
@@ -2184,8 +1850,8 @@ if (!tmdbId) {
                   stravaLoading={stravaLoading}
                   stravaDismissed={stravaDismissed}
                   setStravaDismissed={setStravaDismissed}
-                  onStravaConnect={stravaAuth}
-                  onStravaDisconnect={disconnectStrava}
+                  onStravaConnect={() => {}}
+                  onStravaDisconnect={() => {}}
                   onToast={showToast}
                   /* challengeShelf + onOpenChallenge DISABLED — habits shelf removed */
                   letterboxdSyncing={letterboxdSyncing}
@@ -2197,19 +1863,6 @@ if (!tmdbId) {
                   isActive={activeTab === "shelf"}
                 />}
               </div>
-
-              {/* Track Tab */}
-              {false && ( // DISABLED: habits/track tab
-              <div className="tab-pane" key="track-tab">
-                {visitedTabs.has("track") && <TrackScreen
-                  session={session}
-                  onToast={showToast}
-                  onRefreshShelf={() => { if (session) loadChallengeShelf(session.user.id); }}
-                  onAutoComplete={autoCompleteHabit}
-                  refreshKey={trackRefreshKey}
-                />}
-              </div>
-              )}
 
               </div>{/* end tab-slider */}
             </div>
@@ -2267,18 +1920,6 @@ if (!tmdbId) {
           </div>
         )}
 
-        {/* Group View */}
-        {showGroupView && activeGroup && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)" }}>
-            <GroupViewScreen
-              group={activeGroup}
-              session={session}
-              onBack={() => { setShowGroupView(false); setActiveGroup(null); }}
-              onToast={showToast}
-            />
-          </div>
-        )}
-
         {/* Profile Overlay */}
         {showProfile && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -2314,17 +1955,6 @@ if (!tmdbId) {
               onImportComplete={() => { if (session) loadShelves(session.user.id); }}
             />
           </div>
-        )}
-
-        {/* Create Group Modal */}
-        {showCreateGroup && (
-          <CreateGroupModal
-            onClose={(group) => {
-              setShowCreateGroup(false);
-              if (group?.id) loadGroupView(group.id);
-            }}
-            onCreate={createGroup}
-          />
         )}
 
         {/* Bottom Nav */}

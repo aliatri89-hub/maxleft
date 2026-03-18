@@ -74,7 +74,7 @@ export async function upsertMediaLog(userId, {
     p_watched_at: watchedAt || null,
     p_source: source,
     p_watch_count: watchCount,
-    p_watch_dates: JSON.stringify(watchDates),
+    p_watch_dates: watchDates,
     p_status: status,
   });
 
