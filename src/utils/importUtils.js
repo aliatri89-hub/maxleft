@@ -277,6 +277,7 @@ export async function importMovies(items, userId, onProgress) {
         genre,
         rating: m.ratingHalf || m.rating || null,
         watchedAt,
+        watchedDate: m.watchedDate || null,  // raw "YYYY-MM-DD" — timezone-safe
         source: "letterboxd",
         watchCount: watchDates.length,
         watchDates,

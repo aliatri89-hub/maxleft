@@ -1008,14 +1008,6 @@ if (!tmdbId) {
 
         // Upsert movie
         const watchDateStr = watchedDate ? new Date(watchedDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
-        const movieRow = {
-          user_id: userId, title, year, rating: ratingFromTitle || null,
-          director, poster_url: poster, backdrop_url: backdrop, genre, runtime, tmdb_id: tmdbId,
-          watched_at: watchedDate ? toLogTimestamp(watchedDate) : new Date().toISOString(),
-          source: "letterboxd",
-          watch_count: 1,
-          watch_dates: [watchDateStr],
-        };
         // Write to media + user_media_logs (unified) — also handles feed + wishlist
         const mediaId = await upsertMediaLog(userId, {
           mediaType: "film",
@@ -1027,6 +1019,7 @@ if (!tmdbId) {
           runtime, genre,
           rating: ratingFromTitle || null,
           watchedAt: watchedDate ? toLogTimestamp(watchedDate) : new Date().toISOString(),
+          watchedDate: watchDateStr,  // timezone-safe display date
           source: "letterboxd",
           watchCount: 1,
           watchDates: [watchDateStr],

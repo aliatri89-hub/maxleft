@@ -49,6 +49,7 @@ export async function upsertMediaLog(userId, {
   rating = null,
   notes = null,
   watchedAt = null,
+  watchedDate = null, // "YYYY-MM-DD" string — timezone-safe display date
   source = "mantl",
   watchCount = 1,
   watchDates = [],
@@ -76,6 +77,7 @@ export async function upsertMediaLog(userId, {
     p_watch_count: watchCount,
     p_watch_dates: watchDates,
     p_status: status,
+    p_watched_date: watchedDate || null,
   });
 
   if (error) {
