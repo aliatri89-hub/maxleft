@@ -369,6 +369,7 @@ function BadgeCompleteCard({ data, onCelebrate }) {
         background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: `1px solid ${accent}30`,
+        borderTop: `3px solid ${accent}`,
         cursor: "pointer",
         position: "relative",
       }}
@@ -432,10 +433,13 @@ function BadgeCompleteCard({ data, onCelebrate }) {
 
         <div style={{ flex: 1 }}>
           {/* Label */}
-          <span className="vhs-label vhs-label--badge" style={{ marginBottom: 6 }}>
-            <span className="vhs-label-dot" />
+          <div style={{
+            fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+            letterSpacing: "0.04em", textTransform: "uppercase",
+            color: accent, marginBottom: 8,
+          }}>
             Badge Unlocked
-          </span>
+          </div>
 
           {/* Badge name */}
           <div style={{
@@ -494,6 +498,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
         margin: "6px 16px", background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+        borderTop: "3px solid #60a5fa",
         cursor: "pointer",
         position: "relative",
       }}
@@ -541,12 +546,12 @@ function UpNextCard({ data, onNavigateCommunity }) {
         display: "flex", gap: 12, padding: "14px 16px",
         position: "relative", zIndex: 1, alignItems: "flex-start",
       }}>
-        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
-        <div style={{ flex: 1, paddingTop: 2 }}>
+        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
+        <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column", minHeight: 104 }}>
           <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-            letterSpacing: "0.08em", textTransform: "uppercase",
-            color: "#60a5fa", marginBottom: 4,
+            fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+            letterSpacing: "0.04em", textTransform: "uppercase",
+            color: "#60a5fa", marginBottom: 8,
           }}>
             On deck
           </div>
@@ -564,36 +569,46 @@ function UpNextCard({ data, onNavigateCommunity }) {
               {[data.creator, data.year].filter(Boolean).join(" · ")}
             </div>
           )}
-          {/* Community context */}
-          <div style={{
-            fontFamily: "var(--font-body)", fontSize: 12,
-            color: "var(--text-muted, #8892a8)",
-            display: "flex", alignItems: "center", gap: 6,
-          }}>
-            {data.community_image && (
-              <img src={data.community_image} alt=""
-                style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
-                  border: "1px solid rgba(255,255,255,0.08)" }}
-              />
-            )}
-            {data.series_title}
+          {data.series_title && (
+            <div style={{
+              fontFamily: "var(--font-body)", fontSize: 12,
+              color: "var(--text-muted, #8892a8)", marginBottom: 2,
+            }}>
+              {data.series_title}
+            </div>
+          )}
+
+          {/* Pod pill — bottom of content column */}
+          <div style={{ marginTop: "auto", paddingTop: 4 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              padding: "3px 8px 3px 3px",
+            }}>
+              {data.community_image && (
+                <img src={data.community_image} alt=""
+                  style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
+                />
+              )}
+              <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+                {data.community_name || data.series_title}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Donut tracker */}
+        {/* Donut tracker — right column */}
         <div style={{
           flexShrink: 0, display: "flex", flexDirection: "column",
-          alignItems: "center", gap: 4,
+          alignItems: "center", gap: 4, alignSelf: "center",
         }}>
           <div style={{ position: "relative", width: donutSize, height: donutSize }}>
             <svg width={donutSize} height={donutSize} style={{ transform: "rotate(-90deg)" }}>
-              {/* Background ring */}
               <circle
                 cx={donutSize / 2} cy={donutSize / 2} r={radius}
                 fill="none" stroke="rgba(255,255,255,0.06)"
                 strokeWidth={strokeWidth}
               />
-              {/* Progress ring */}
               <circle
                 cx={donutSize / 2} cy={donutSize / 2} r={radius}
                 fill="none" stroke="#60a5fa"
@@ -604,7 +619,6 @@ function UpNextCard({ data, onNavigateCommunity }) {
                 style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}
               />
             </svg>
-            {/* Percentage text centered */}
             <div style={{
               position: "absolute", inset: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -632,7 +646,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 function RandomPickCard({ data, onNavigateCommunity }) {
   const hasBackdrop = !!data.backdrop_url;
-  const accent = getCommunityAccent(data.community_slug);
+  const accent = "#a78bfa";
 
   return (
     <div
@@ -641,6 +655,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
         margin: "6px 16px", background: "var(--bg-card, #1a1714)",
         borderRadius: 16, overflow: "hidden",
         border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+        borderTop: `3px solid ${accent}`,
         cursor: "pointer",
         position: "relative",
       }}
@@ -685,22 +700,24 @@ function RandomPickCard({ data, onNavigateCommunity }) {
 
       {/* Poster + info */}
       <div style={{
-        display: "flex", gap: 12, padding: "14px 16px 4px",
+        display: "flex", gap: 12, padding: "14px 16px",
         position: "relative", zIndex: 1,
       }}>
-        <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
-        <div style={{ flex: 1, paddingTop: 2 }}>
-          <span className="vhs-label" style={{ marginBottom: 6, color: "rgba(52,211,153,0.7)", borderColor: "rgba(52,211,153,0.1)", background: "rgba(52,211,153,0.04)" }}>
-            <span className="vhs-label-dot" style={{ background: "#34d399", boxShadow: "0 0 4px rgba(52,211,153,0.4)" }} />
+        <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
+        <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column" }}>
+          <div style={{
+            fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+            letterSpacing: "0.04em", textTransform: "uppercase",
+            color: accent, marginBottom: 8,
+          }}>
             Have you seen...?
-          </span>
+          </div>
           <div style={{
             fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
             color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 2,
           }}>
             {data.title}
           </div>
-          {/* Series context — moved up from bottom bar */}
           {data.series_title && (
             <div style={{
               fontFamily: "var(--font-body)", fontSize: 12,
@@ -709,39 +726,40 @@ function RandomPickCard({ data, onNavigateCommunity }) {
               {data.series_title}
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Bottom bar — podcast name + shuffle icon */}
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "center",
-        padding: "6px 16px 12px",
-        position: "relative", zIndex: 1,
-      }}>
-        <div style={{
-          fontFamily: "var(--font-body)", fontSize: 11, fontWeight: 600,
-          color: accent,
-          display: "flex", alignItems: "center", gap: 6,
-        }}>
-          {data.community_image && (
-            <img src={data.community_image} alt=""
-              style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
-                border: `1px solid ${accent}33` }}
-            />
-          )}
-          {data.community_name}
+          {/* Bottom row — pod pill left, watched check + dismiss right */}
+          <div style={{
+            display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+            marginTop: "auto", paddingTop: 6,
+          }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              padding: "3px 8px 3px 3px",
+            }}>
+              {data.community_image && (
+                <img src={data.community_image} alt=""
+                  style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
+                />
+              )}
+              <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+                {data.community_name}
+              </span>
+            </div>
+
+            {/* Shuffle icon */}
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ opacity: 0.5 }}
+            >
+              <polyline points="16 3 21 3 21 8" />
+              <line x1="4" y1="20" x2="21" y2="3" />
+              <polyline points="21 16 21 21 16 21" />
+              <line x1="15" y1="15" x2="21" y2="21" />
+              <line x1="4" y1="4" x2="9" y2="9" />
+            </svg>
+          </div>
         </div>
-        {/* Shuffle icon — signals this is a random pick */}
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          style={{ opacity: 0.5 }}
-        >
-          <polyline points="16 3 21 3 21 8" />
-          <line x1="4" y1="20" x2="21" y2="3" />
-          <polyline points="21 16 21 21 16 21" />
-          <line x1="15" y1="15" x2="21" y2="21" />
-          <line x1="4" y1="4" x2="9" y2="9" />
-        </svg>
       </div>
     </div>
   );
@@ -793,7 +811,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
   })();
 
   const podName = (data.community_name || "").split(" with")[0];
-  const accent = getCommunityAccent(data.community_slug);
+  const accent = "#EF9F27";
 
   return (
     <div
@@ -805,6 +823,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         border: isDropped
           ? `1px solid ${accent}18`
           : `1px dashed ${accent}40`,
+        borderTop: `3px solid ${accent}`,
         cursor: "pointer", position: "relative",
       }}
     >
@@ -844,25 +863,24 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         <Poster
           path={data.poster_path} tmdbId={data.tmdb_id}
           title={data.title} mediaType={data.media_type || "film"}
-          width={64} height={96} radius={8}
+          width={72} height={108} radius={8}
         />
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           {/* Top row — label + optional stars */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isDropped ? 4 : 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             {isDropped ? (
               <div style={{
-                fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-                letterSpacing: "0.08em", textTransform: "uppercase",
+                fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+                letterSpacing: "0.04em", textTransform: "uppercase",
                 color: accent,
               }}>
                 {droppedLabel}
               </div>
             ) : (
               <div style={{
-                fontFamily: "var(--font-display)", fontWeight: 800,
-                fontSize: 15, lineHeight: 1,
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 18, lineHeight: 1,
                 color: accent,
-                letterSpacing: "-0.02em",
               }}>
                 {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
               </div>
@@ -874,7 +892,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 
           {/* Movie title */}
           <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 19,
+            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
             color: "var(--text-primary, #e8ecf4)",
             lineHeight: 1.2, marginBottom: 2,
           }}>
@@ -900,24 +918,28 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
           ) : null}
 
-          {/* Podcast name + Listen/Watched stacked on right */}
+          {/* Bottom row — pod pill left, listen + watched inline right */}
           <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            marginTop: "auto",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            marginTop: "auto", paddingTop: 6,
           }}>
-            {/* Podcast logo + name */}
-            {data.community_image && (
-              <img src={data.community_image} alt=""
-                style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
-                  border: "1px solid rgba(255,255,255,0.08)" }}
-              />
-            )}
-            {isDropped && (
-            <span style={{ flex: 1, fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted, #8892a8)" }}>{podName}</span>
-            )}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              padding: "3px 8px 3px 3px",
+            }}>
+              {data.community_image && (
+                <img src={data.community_image} alt=""
+                  style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
+                />
+              )}
+              <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+                {podName}
+              </span>
+            </div>
 
-            {/* Right stack: Listen above Watched */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+            {/* Listen + Watched inline */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {matchedEpisode && (
                 <button
                   onClick={handlePlay}
@@ -941,31 +963,21 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 </button>
               )}
 
-              <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600,
-                  letterSpacing: "0.04em",
-                  color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
-                  transition: "color 0.3s ease",
-                }}>
-                  Watched
-                </span>
-                <div style={{
-                  width: 20, height: 20, borderRadius: "50%",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-                  border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
-                  transition: "all 0.3s ease", flexShrink: 0,
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                    strokeWidth={seen ? "3" : "2"}
-                    strokeLinecap="round" strokeLinejoin="round"
-                    style={{ transition: "all 0.3s ease" }}
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
+              <div style={{
+                width: 22, height: 22, borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
+                transition: "all 0.3s ease", flexShrink: 0,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                  strokeWidth={seen ? "3" : "2"}
+                  strokeLinecap="round" strokeLinejoin="round"
+                  style={{ transition: "all 0.3s ease" }}
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
             </div>
           </div>
@@ -1791,6 +1803,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
       margin: "6px 16px", background: "var(--bg-card, #1a1714)",
       borderRadius: 16, overflow: "hidden",
       border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+      borderTop: `3px solid ${accentColor}`,
       cursor: "pointer",
       position: "relative",
     }}>
@@ -1848,10 +1861,10 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
           <div style={{ flex: 1 }}>
             <div style={{
-              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-              letterSpacing: "0.1em", textTransform: "uppercase",
+              fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+              letterSpacing: "0.04em", textTransform: "uppercase",
               color: pct >= 75 ? accentColor : "var(--text-faint, #5a6480)",
-              marginBottom: 3,
+              marginBottom: 8,
               transition: "color 0.4s ease",
             }}>
               {remaining === 0 ? "Complete!" : `${remaining} more to unlock`}
@@ -1893,20 +1906,25 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         </div>
         <div style={{
           display: "flex", justifyContent: "space-between", marginTop: 7,
-          fontFamily: "var(--font-mono)", fontSize: 10,
-          color: "var(--text-faint, #5a6480)",
+          fontSize: 10, alignItems: "center",
         }}>
-          <span>
-            <span style={{ color: "var(--text-muted, #8892a8)", fontWeight: 600 }}>{data.watched_count}</span>
-            {" "}of {data.total_items}
-          </span>
-          <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 4,
+            background: "rgba(255,255,255,0.04)", borderRadius: 10,
+            padding: "3px 8px 3px 3px",
+          }}>
             {data.community_image && (
               <img src={data.community_image} alt="" style={{
-                width: 14, height: 14, borderRadius: 4, objectFit: "cover",
+                width: 16, height: 16, borderRadius: "50%", objectFit: "cover",
               }} />
             )}
-            {data.community_name}
+            <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+              {data.community_name}
+            </span>
+          </div>
+          <span style={{ fontFamily: "var(--font-mono)", color: "var(--text-faint, #5a6480)" }}>
+            <span style={{ color: "var(--text-muted, #8892a8)", fontWeight: 600 }}>{data.watched_count}</span>
+            {" "}of {data.total_items}
           </span>
         </div>
       </div>
@@ -1930,6 +1948,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
       borderRadius: 16,
       overflow: "hidden",
       border: "1px solid rgba(52,211,153,0.12)",
+      borderTop: "3px solid var(--accent-green, #34d399)",
       position: "relative",
       cursor: "pointer",
     }}>
@@ -1973,23 +1992,16 @@ function TrendingCard({ data, onNavigateCommunity }) {
           }} />
 
           {/* Poster + info + watch count */}
-          <div style={{ display: "flex", gap: 12, padding: "14px 16px 14px", position: "relative", zIndex: 1, alignItems: "center" }}>
-            <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
-            <div style={{ flex: 1, paddingTop: 2 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                <div style={{
-                  width: 6, height: 6, borderRadius: "50%",
-                  background: "var(--accent-green, #34d399)",
-                  boxShadow: "0 0 8px rgba(52,211,153,0.5)",
-                  animation: "pulse-dot 2s ease infinite",
-                }} />
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-                  letterSpacing: "0.08em", textTransform: "uppercase",
-                  color: "var(--accent-green, #34d399)",
-                }}>
-                  Popular this week
-                </span>
+          <div style={{ display: "flex", gap: 12, padding: "14px 16px 14px", position: "relative", zIndex: 1, alignItems: "flex-start" }}>
+            <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
+            <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column", minHeight: 104 }}>
+              <div style={{
+                fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+                letterSpacing: "0.04em", textTransform: "uppercase",
+                color: "var(--accent-green, #34d399)",
+                marginBottom: 8,
+              }}>
+                Popular this week
               </div>
               <div style={{
                 fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
@@ -2000,31 +2012,58 @@ function TrendingCard({ data, onNavigateCommunity }) {
               {(data.creator || data.year) && (
                 <div style={{
                   fontFamily: "var(--font-body)", fontSize: 12,
-                  color: "var(--text-muted, #8892a8)",
+                  color: "var(--text-muted, #8892a8)", marginBottom: 2,
                 }}>
                   {[data.creator, data.year].filter(Boolean).join(" · ")}
                 </div>
               )}
-            </div>
 
-            {/* Watch count — far right, vertically centered */}
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center",
-              flexShrink: 0, gap: 2,
-            }}>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 22,
-                color: "var(--accent-green, #34d399)", lineHeight: 1,
+              {/* Bottom row — pod pills left, watch count right */}
+              <div style={{
+                display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+                marginTop: "auto", paddingTop: 6,
               }}>
-                {data.watch_count}
-              </span>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 8,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-                color: "var(--text-faint, #5a6480)",
-              }}>
-                watched
-              </span>
+                {communities.length > 0 ? (
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {communities.slice(0, 3).map((c, i) => (
+                      <div key={i} style={{
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        background: "rgba(255,255,255,0.04)", borderRadius: 10,
+                        padding: "3px 8px 3px 3px",
+                      }}>
+                        {c.community_image && (
+                          <img src={c.community_image} alt=""
+                            style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
+                          />
+                        )}
+                        <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+                          {getSlugAbbrev(c.community_slug)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <div />}
+
+                {/* Watch count */}
+                <div style={{
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  flexShrink: 0, gap: 2,
+                }}>
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 22,
+                    color: "var(--accent-green, #34d399)", lineHeight: 1,
+                  }}>
+                    {data.watch_count}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontSize: 8,
+                    letterSpacing: "0.08em", textTransform: "uppercase",
+                    color: "var(--text-faint, #5a6480)",
+                  }}>
+                    watched
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
