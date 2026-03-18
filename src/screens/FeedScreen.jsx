@@ -858,14 +858,14 @@ function EpisodeCard({ data, onNavigateCommunity }) {
       {/* Poster + info stack */}
       <div style={{
         display: "flex", gap: 12, padding: "14px 16px 14px",
-        position: "relative", zIndex: 1, alignItems: "flex-start",
+        position: "relative", zIndex: 1, alignItems: "stretch",
       }}>
         <Poster
           path={data.poster_path} tmdbId={data.tmdb_id}
           title={data.title} mediaType={data.media_type || "film"}
           width={72} height={108} radius={8}
         />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", height: 108 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 108 }}>
           {/* Top row — label + optional stars */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             {isDropped ? (
