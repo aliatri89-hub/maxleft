@@ -24,13 +24,12 @@ function Expandable({ open, children }) {
 
 function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete }) {
   const [uploading, setUploading] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editingName, setEditingName] = useState(false);
   const [managingShelves, setManagingShelves] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [expandedListType, setExpandedListType] = useState(null);
   const [editName, setEditName] = useState(profile.name || "");
-  const [editBio, setEditBio] = useState(profile.bio || "");
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [showImportCSV, setShowImportCSV] = useState(false);
@@ -137,19 +136,16 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
     await sb(supabase.from("profiles").update({ enabled_shelves: updated }).eq("id", session.user.id), onToast, "Couldn't update");
   };
 
-  const handleSaveProfile = async () => {
-    if (!session) return;
+  const handleSaveName = async () => {
+    if (!session || !editName.trim()) return;
     setSavingProfile(true);
     try {
-      await supabase.from("profiles").update({
-        name: editName,
-        bio: editBio,
-      }).eq("id", session.user.id);
-      if (onUpdateProfile) onUpdateProfile({ name: editName, bio: editBio });
-      setEditing(false);
-      onToast("Profile updated!");
+      await supabase.from("profiles").update({ name: editName.trim() }).eq("id", session.user.id);
+      if (onUpdateProfile) onUpdateProfile({ name: editName.trim() });
+      setEditingName(false);
+      onToast("Name updated!");
     } catch (e) {
-      console.error("Save profile error:", e);
+      console.error("Save name error:", e);
     }
     setSavingProfile(false);
   };
@@ -214,37 +210,54 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           <div className="avatar-upload-overlay" style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em" }}>Edit</div>
           <input ref={fileRef} className="avatar-upload-input" type="file" accept="image/*" onChange={handleUpload} />
         </div>
-        <div className="profile-big-name bb">{profile.name}</div>
+
+        {/* Tap-to-edit name */}
+        {editingName ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+            <input
+              autoFocus
+              value={editName}
+              onChange={e => setEditName(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") { setEditingName(false); setEditName(profile.name || ""); } }}
+              style={{
+                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20,
+                color: "var(--text-primary)", background: "rgba(255,255,255,0.06)",
+                border: "1px solid #EF9F2740", borderRadius: 8,
+                padding: "6px 12px", outline: "none", textAlign: "center",
+                width: 180,
+              }}
+            />
+            <button
+              onClick={handleSaveName}
+              disabled={savingProfile}
+              style={{
+                padding: "6px 12px", border: "none", borderRadius: 6,
+                background: "#EF9F27", color: "var(--bg-card, #0f0d0b)",
+                fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+                cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.04em",
+              }}
+            >
+              {savingProfile ? "..." : "Save"}
+            </button>
+          </div>
+        ) : (
+          <div
+            className="profile-big-name bb"
+            onClick={() => setEditingName(true)}
+            style={{ cursor: "pointer" }}
+            title="Tap to edit name"
+          >
+            {profile.name}
+          </div>
+        )}
+
         <div className="profile-big-handle">@{profile.username}</div>
-        {profile.bio && <div className="profile-bio">"{profile.bio}"</div>}
       </div>
 
       {/* ── PROFILE GROUP ── */}
       <div className="profile-group">
         <div className="profile-group-label">Profile</div>
         <div className="profile-group-card">
-          <div className="profile-group-row" onClick={() => setEditing(!editing)}>
-            <span className="profile-group-row-text">Edit Profile</span>
-            <span className="profile-group-row-chevron">{editing ? "▾" : "›"}</span>
-          </div>
-          <Expandable open={editing}>
-            <div className="profile-group-expand">
-              <div>
-                <div className="event-form-label">Name</div>
-                <input className="event-form-input" value={editName} onChange={e => setEditName(e.target.value)} />
-              </div>
-              <div>
-                <div className="event-form-label">Bio</div>
-                <input className="event-form-input" placeholder="A short bio..." value={editBio} onChange={e => setEditBio(e.target.value)} />
-              </div>
-              <button className="btn-save-profile" onClick={handleSaveProfile} disabled={savingProfile}>
-                {savingProfile ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </Expandable>
-
-          <div className="profile-group-divider" />
-
           <div className="profile-group-row" onClick={() => setManagingShelves(!managingShelves)}>
             <span className="profile-group-row-text">Manage Shelves</span>
             <span className="profile-group-row-chevron">{managingShelves ? "▾" : "›"}</span>
