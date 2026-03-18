@@ -143,6 +143,7 @@ export default function App() {
   const [toastDuration, setToastDuration] = useState(2200);
   const toastTimer = useRef(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null); // { synced, rewatches }
+  const [requestActivityMode, setRequestActivityMode] = useState(0); // bump to switch feed to activity tab
   const [syncBadgeToasts, setSyncBadgeToasts] = useState([]); // [{badge, current, total, visible}]
   const syncBadgeTimers = useRef([]);
 
@@ -1464,6 +1465,7 @@ if (!tmdbId) {
             rewatches={letterboxdToast.rewatches}
             duration={3600}
             onDone={() => setLetterboxdToast(null)}
+            onTap={() => { setActiveTab("feed"); setRequestActivityMode(prev => prev + 1); }}
           />
         )}
         {toast && (() => {
@@ -1680,6 +1682,7 @@ if (!tmdbId) {
                   letterboxdSyncSignal={letterboxdSyncSignal}
                   autoLogCompleteSignal={autoLogCompleteSignal}
                   communitySubscriptions={communitySubscriptions}
+                  requestActivityMode={requestActivityMode}
                 />
               </div>
 

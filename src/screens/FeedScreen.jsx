@@ -857,7 +857,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 
       {/* Poster + info stack */}
       <div style={{
-        display: "flex", gap: 12, padding: "14px 16px 14px",
+        display: "flex", gap: 12, padding: "14px 16px 18px",
         position: "relative", zIndex: 1, alignItems: "stretch",
       }}>
         <Poster
@@ -2282,7 +2282,7 @@ function EmptyFeed({ onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 // FEED SCREEN (main export)
 // ════════════════════════════════════════════════
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, requestActivityMode }) {
   const userId = session?.user?.id;
   const [feedMode, setFeedMode] = useState("discover"); // "all" | "activity" | "discover"
   const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
@@ -2363,6 +2363,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       refreshRef.current();
     }
   }, [letterboxdSyncSignal]);
+
+  // Switch to Activity tab when requested (e.g. tapping Letterboxd toast)
+  useEffect(() => {
+    if (requestActivityMode) {
+      setFeedMode("activity");
+    }
+  }, [requestActivityMode]);
 
   if (loading && feedItems.length === 0) {
     return (

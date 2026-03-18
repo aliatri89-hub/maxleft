@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
  * VHS tape-label style toast for Letterboxd sync events.
  * Slides down from the top. Tap to dismiss, or auto-dismisses after `duration` ms.
  */
-export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duration = 3600, onDone }) {
+export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duration = 3600, onDone, onTap }) {
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
@@ -18,6 +18,12 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
     if (exiting) return;
     setExiting(true);
     setTimeout(() => onDone?.(), 320);
+  };
+
+  const handleTap = () => {
+    if (exiting) return;
+    onTap?.();
+    dismiss();
   };
 
   // Build label text
@@ -136,7 +142,7 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
 
       <div
         className={`lbd-toast-wrap${exiting ? " exiting" : ""}`}
-        onClick={dismiss}
+        onClick={handleTap}
       >
         <div className="lbd-toast-card">
           <div className="lbd-stripe" />
@@ -154,7 +160,7 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
               </div>
               <div className="lbd-main-text">{mainText}</div>
               <div className="lbd-sub-text">{subText}</div>
-              <div className="lbd-dismiss-hint">tap to dismiss ×</div>
+              <div className="lbd-dismiss-hint">tap to view activity →</div>
             </div>
             <div className="lbd-brand-r">VHS · SP</div>
           </div>
