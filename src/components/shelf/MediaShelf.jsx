@@ -143,7 +143,6 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
             <span style={S.counter}>{items.length} logged</span>
           )}
           {syncIndicator}
-          <button style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</button>
         </div>
       </div>
 
@@ -151,6 +150,7 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
       {items.length === 0 ? (
         <div style={S.empty}>
           <div style={S.emptyText}>{cfg.emptyText}</div>
+          <button style={{ ...S.addBtn, marginTop: 16 }} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</button>
         </div>
       ) : (
         <>
@@ -194,10 +194,64 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
                 ) : null}
               </div>
             ))}
+
+            {/* + Add as last card in the scroll row */}
+            <div
+              style={{
+                flexShrink: 0, width: PW, cursor: "pointer",
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+              }}
+              onClick={() => onShelfIt(cfg.modalCat)}
+            >
+              <div style={{
+                width: PW, height: PH, borderRadius: 6,
+                border: `1.5px dashed ${accent}30`,
+                background: `${accent}06`,
+                display: "flex", flexDirection: "column",
+                alignItems: "center", justifyContent: "center",
+                gap: 8, transition: "border-color 0.2s, background 0.2s",
+              }}>
+                <div style={{
+                  width: 36, height: 36, borderRadius: "50%",
+                  background: accent, display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                }}>
+                  <span style={{ fontSize: 20, lineHeight: 1, color: "var(--bg-card, #0f0d0b)", fontWeight: 700 }}>+</span>
+                </div>
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 10,
+                  color: `${accent}90`, fontWeight: 600,
+                  letterSpacing: "0.06em", textTransform: "uppercase",
+                }}>Add</span>
+              </div>
+            </div>
           </div>
+
+          {/* ── See all / Diary — modern pill row ── */}
           {items.length > 0 && (
-            <div style={S.seeAll} onClick={() => onOpenDiary(shelfKey)}>
-              {items.length > 8 ? `See all ${items.length} →` : "Diary →"}
+            <div style={{
+              display: "flex", justifyContent: "flex-end",
+              paddingTop: 14, paddingRight: 2,
+            }}>
+              <div
+                onClick={() => onOpenDiary(shelfKey)}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  fontFamily: "var(--font-mono)", fontSize: 11,
+                  fontWeight: 500, letterSpacing: "0.04em",
+                  color: `${accent}cc`,
+                  background: `${accent}0a`,
+                  border: `1px solid ${accent}20`,
+                  borderRadius: 20, padding: "6px 14px",
+                  cursor: "pointer", transition: "all 0.2s",
+                }}
+              >
+                <span>{items.length > 8 ? `See all ${items.length}` : "Diary"}</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
             </div>
           )}
         </>
