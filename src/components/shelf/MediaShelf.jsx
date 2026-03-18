@@ -132,14 +132,17 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
   return (
     <div style={isHero ? { ...S.section, paddingTop: 14 } : S.section}>
 
-      {/* ── Shelf header — sharpie label + centered count ── */}
+      {/* ── Shelf header — sharpie label + centered count + sync ── */}
       <div style={S.headerWrap}>
         <div style={isHero ? S.sharpieLabelHero : S.sharpieLabel}>
           {cfg.label}
         </div>
         <div style={S.shelfEdge} />
         {items.length > 0 && (
-          <span style={S.counter}>{items.length} logged</span>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <span style={S.counter}>{items.length} logged</span>
+            {syncIndicator}
+          </div>
         )}
       </div>
 
@@ -192,22 +195,17 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
               </div>
             ))}
 
-            {/* Sync indicator + Add as last card in the scroll row */}
+            {/* + Add as last card in the scroll row */}
             <div
               style={{
                 flexShrink: 0, width: PW, cursor: "pointer",
                 display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "flex-end",
-                gap: 8,
+                alignItems: "center", justifyContent: "center",
               }}
               onClick={() => onShelfIt(cfg.modalCat)}
             >
-              {/* Sync status sits above the add card */}
-              {syncIndicator && (
-                <div style={{ marginBottom: 2 }}>{syncIndicator}</div>
-              )}
               <div style={{
-                width: PW, height: syncIndicator ? PH - 24 : PH, borderRadius: 6,
+                width: PW, height: PH, borderRadius: 6,
                 border: `1.5px dashed ${accent}30`,
                 background: `${accent}06`,
                 display: "flex", flexDirection: "column",
