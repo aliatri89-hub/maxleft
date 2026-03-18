@@ -519,13 +519,12 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       <Expandable open={isExpanded}>
                         <div style={{ padding: "0 18px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
                           {items.slice(0, MAX_PREVIEW).map(item => {
-                            const isNextUp = type === "book" && profile.nextUpBook?.id === item.id;
                             return (
                               <div key={item.id} style={{
                                 display: "flex", alignItems: "center", gap: 10,
                                 padding: "10px 12px",
-                                background: isNextUp ? `${accent}08` : "rgba(255,255,255,0.02)",
-                                border: `1px solid ${isNextUp ? `${accent}30` : `${accent}10`}`,
+                                background: "rgba(255,255,255,0.02)",
+                                border: `1px solid ${accent}10`,
                                 borderRadius: 8,
                                 transition: "all 0.2s",
                               }}>
@@ -539,34 +538,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
                                   {item.author && <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-faint)", marginTop: 1 }}>{item.author}</div>}
-                                  {isNextUp && <div style={{
-                                    fontFamily: "var(--font-mono)", fontSize: 8, fontWeight: 600,
-                                    letterSpacing: "0.1em", color: accent, marginTop: 3,
-                                  }}>UP NEXT</div>}
                                 </div>
-                                {type === "book" && (
-                                  <div
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      const nextUp = isNextUp ? null : { id: item.id, title: item.title, author: item.author, cover: item.cover_url };
-                                      await supabase.from("profiles").update({ next_up_book: nextUp }).eq("id", session.user.id);
-                                      onUpdateProfile({ nextUpBook: nextUp });
-                                      onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title}`);
-                                    }}
-                                    title={isNextUp ? "Remove next up" : "Set as next up"}
-                                    style={{
-                                      width: 28, height: 28, borderRadius: 6, cursor: "pointer",
-                                      display: "flex", alignItems: "center", justifyContent: "center",
-                                      background: isNextUp ? `${accent}20` : "rgba(255,255,255,0.04)",
-                                      border: `1px solid ${isNextUp ? `${accent}40` : "rgba(255,255,255,0.06)"}`,
-                                      transition: "all 0.2s",
-                                    }}
-                                  >
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                      <path d="M3 2h8v11l-4-2.5L3 13V2z" stroke={isNextUp ? accent : "var(--text-faint)"} strokeWidth="1.2" fill={isNextUp ? `${accent}30` : "none"} strokeLinejoin="round"/>
-                                    </svg>
-                                  </div>
-                                )}
                                 <div
                                   onClick={() => removeFromWishlist(item.id)}
                                   style={{
