@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { isComingSoon } from "../../utils/comingSoon";
 
 /**
  * useRecentEpisodes — Maps recent podcast episodes to community items.
@@ -45,16 +46,30 @@ function writeCache(key, matched) {
   } catch {}
 }
 
-export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, communitySlug = "") {
+export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, communitySlug = "", episodeSource = "") {
   // Community-specific cache key prevents NPP/BC/etc from stomping each other
   const cacheKey = communitySlug ? `${CACHE_KEY}_${communitySlug}` : CACHE_KEY;
 
   // Initialize from cache
   const [cachedItems, setCachedItems] = useState(() => readCache(cacheKey));
 
-  // Derive fresh matches (same fuzzy logic as before)
+  // Derive fresh matches — air_date fast path or RSS fuzzy matching
   const freshMatched = useMemo(() => {
-    if (episodes.length === 0 || allItems.length === 0) return null;
+    if (allItems.length === 0) return null;
+
+    // ── Air-date fast path ──────────────────────────────────────
+    // Communities with episode_source: "air_date" skip RSS entirely.
+    // "New Episodes" = items where air_date <= today, newest first.
+    if (episodeSource === "air_date") {
+      const aired = allItems
+        .filter(item => item.air_date && !isComingSoon(item))
+        .sort((a, b) => b.air_date.localeCompare(a.air_date))
+        .slice(0, limit);
+      return aired.length > 0 ? aired.map(item => ({ item, episode: null })) : null;
+    }
+
+    // ── RSS fuzzy matching (fallback for communities without air_dates) ──
+    if (episodes.length === 0) return null;
 
     const normalize = (str) =>
       (str || "")
@@ -174,7 +189,7 @@ export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, comm
     }
 
     return matched.length > 0 ? matched : null;
-  }, [episodes, allItems, limit]);
+  }, [episodes, allItems, limit, episodeSource]);
 
   // When fresh data arrives, update cache
   const prevFresh = useRef(null);
@@ -207,7 +222,9 @@ export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, comm
     return cachedItems.map((c) => ({ item: c.item, episode: { title: c.episodeTitle } }));
   }, [freshMatched, cachedItems, allItems]);
 
-  const loading = recentEpisodeItems.length === 0 && allItems.length > 0 && episodes.length === 0;
+  const loading = episodeSource === "air_date"
+    ? recentEpisodeItems.length === 0 && allItems.length === 0
+    : recentEpisodeItems.length === 0 && allItems.length > 0 && episodes.length === 0;
 
   return { recentEpisodeItems, loading };
 }

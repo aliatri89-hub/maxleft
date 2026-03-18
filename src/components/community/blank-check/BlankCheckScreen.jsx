@@ -146,7 +146,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress);
   const bcEpisodes = useMemo(() => episodes.filter(e => e.feedUrl === rssUrl || e.community === "Blank Check"), [episodes, rssUrl]);
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(bcEpisodes, allItems, 10, "blankcheck");
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(bcEpisodes, allItems, 10, "blankcheck", community?.theme_config?.episode_source);
 
   useEffect(() => {
     if (allItems.length === 0) return;
