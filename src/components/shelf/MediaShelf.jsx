@@ -18,79 +18,86 @@ function renderStars(rating) {
 }
 
 // ── Poster width drives everything ──
-const PW = 140;
-const PH = 200;
+const PW = 130;
+const PH = 190;
+const accent = "#EF9F27";
 
 const S = {
-  section: { padding: "0 16px", marginBottom: 28 },
-  labelRow: {
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    padding: "4px 0 14px",
+  section: { padding: "0 16px", marginBottom: 36 },
+  headerWrap: { textAlign: "center", padding: "0 0 18px" },
+  sharpieLabel: {
+    fontFamily: "'Permanent Marker', cursive",
+    fontSize: 22, color: accent,
+    letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
-  label: {
-    fontFamily: "var(--font-display)", fontWeight: 800,
-    fontSize: 20, color: "var(--text-primary)",
-    textTransform: "uppercase", letterSpacing: "0.06em",
-    display: "flex", alignItems: "center", gap: 8,
+  sharpieLabelHero: {
+    fontFamily: "'Permanent Marker', cursive",
+    fontSize: 28, color: accent,
+    letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
-  count: {
-    fontFamily: "var(--font-mono)", fontSize: 12,
-    color: "var(--text-faint)", fontWeight: 400,
-    letterSpacing: "0.04em",
+  shelfEdge: {
+    height: 1, margin: "10px 0 12px",
+    background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
+  },
+  countRow: {
+    display: "flex", alignItems: "center", justifyContent: "center",
+    gap: 14, flexWrap: "wrap",
+  },
+  counter: {
+    fontFamily: "var(--font-mono)", fontSize: 11,
+    color: "var(--text-faint)", letterSpacing: "0.08em", fontWeight: 400,
   },
   addBtn: {
-    fontFamily: "var(--font-mono)", fontSize: 13,
-    color: "var(--accent-green)", fontWeight: 600,
-    cursor: "pointer", letterSpacing: "0.02em",
+    display: "inline-flex", alignItems: "center", gap: 5,
+    fontFamily: "var(--font-mono)", fontSize: 11,
+    fontWeight: 600, letterSpacing: "0.04em",
+    color: "var(--bg-card, #0f0d0b)", background: accent,
+    border: "none", borderRadius: 5,
+    padding: "5px 12px", cursor: "pointer",
+    transition: "opacity 0.15s",
   },
-  empty: {
-    textAlign: "center", padding: "40px 16px",
-  },
-  emptyIcon: { fontSize: 36, marginBottom: 10, opacity: 0.5 },
+  empty: { textAlign: "center", padding: "40px 16px" },
   emptyText: {
     fontFamily: "var(--font-serif)", fontSize: 14,
     color: "var(--text-muted)", fontStyle: "italic",
   },
   itemsRow: {
-    display: "flex", gap: 16, overflowX: "auto",
-    paddingBottom: 6,
+    display: "flex", gap: 14, overflowX: "auto",
+    paddingBottom: 8, paddingTop: 4,
     scrollbarWidth: "none", msOverflowStyle: "none",
   },
-  item: {
-    flexShrink: 0, width: PW, cursor: "pointer",
+  item: { flexShrink: 0, width: PW, cursor: "pointer" },
+  coverFrame: {
+    width: PW, height: PH, borderRadius: 6,
+    border: `1px solid ${accent}22`, background: "rgba(255,255,255,0.02)",
+    overflow: "hidden", position: "relative",
+    transition: "border-color 0.25s, transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94)",
   },
-  cover: {
-    width: PW, height: PH, borderRadius: 10,
+  coverImg: { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+  coverPlaceholder: {
+    width: "100%", height: "100%",
     background: "rgba(255,255,255,0.04)",
-    backgroundSize: "cover", backgroundPosition: "center",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.2)",
-    transition: "transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.25s",
+    display: "flex", alignItems: "center", justifyContent: "center",
   },
   title: {
     fontFamily: "var(--font-display)", fontSize: 13,
     fontWeight: 600, color: "rgba(255,255,255,0.75)",
-    marginTop: 10, lineHeight: 1.25,
-    overflow: "hidden", textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
+    marginTop: 8, lineHeight: 1.25,
+    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
   },
-  stars: {
-    fontSize: 12, color: "var(--accent-gold)", marginTop: 3,
-    letterSpacing: 1,
-  },
+  stars: { fontSize: 12, color: "var(--accent-gold)", marginTop: 4, letterSpacing: 1 },
   tag: {
     fontFamily: "var(--font-mono)", fontSize: 9,
-    fontWeight: 600, padding: "2px 7px",
+    fontWeight: 600, padding: "3px 8px",
     borderRadius: "var(--radius-full)",
-    marginTop: 5, display: "inline-block",
-    letterSpacing: "0.04em",
+    marginTop: 6, display: "inline-block", letterSpacing: "0.04em",
   },
   progress: {
-    width: PW, height: 3, borderRadius: 2, marginTop: 5,
+    width: PW, height: 3, borderRadius: 2, marginTop: 6,
     background: "rgba(255,255,255,0.08)", overflow: "hidden",
   },
   syncDot: (active) => ({
-    display: "inline-flex", alignItems: "center", gap: 4,
-    marginLeft: 8, fontSize: 10,
+    display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10,
     color: active ? "var(--accent-terra)" : "var(--accent-green)",
   }),
   syncIndicator: (active) => ({
@@ -99,10 +106,10 @@ const S = {
     boxShadow: active ? "none" : "0 0 6px rgba(74,222,128,0.35)",
   }),
   seeAll: {
-    textAlign: "center", paddingTop: 14,
-    fontFamily: "var(--font-display)", fontSize: 14,
-    fontWeight: 600, letterSpacing: "0.06em",
-    color: "rgba(255,255,255,0.35)", cursor: "pointer",
+    textAlign: "center", paddingTop: 16,
+    fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+    letterSpacing: "0.04em",
+    color: `${accent}80`, cursor: "pointer",
   },
 };
 
@@ -125,99 +132,22 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
   return (
     <div style={isHero ? { ...S.section, paddingTop: 14 } : S.section}>
 
-      {isHero ? (
-        <>
-          {/* ── Hero header: centered, decorative ── */}
-          <div style={{
-            textAlign: "center",
-            padding: "6px 0 18px",
-          }}>
-            {/* Decorative line + title + line */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: 14,
-              marginBottom: 8,
-            }}>
-              <div style={{
-                flex: 1, height: 1,
-                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1))",
-              }} />
-              <div style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 900,
-                fontSize: 28,
-                color: "var(--text-primary)",
-                textTransform: "uppercase",
-                letterSpacing: "0.14em",
-              }}>
-                {cfg.label}
-              </div>
-              <div style={{
-                flex: 1, height: 1,
-                background: "linear-gradient(90deg, rgba(255,255,255,0.1), transparent)",
-              }} />
-            </div>
-
-            {/* Count + sync + add — compact row under title */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-            }}>
-              {items.length > 0 && (
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  color: "var(--text-faint)", letterSpacing: "0.06em",
-                }}>
-                  {items.length} logged
-                </span>
-              )}
-              {syncIndicator}
-              <span style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</span>
-            </div>
-          </div>
-        </>
-      ) : (
-        /* ── Standard header: centered, same pattern, smaller ── */
-        <div style={{ textAlign: "center", padding: "0 0 14px" }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: 12,
-            marginBottom: 6,
-          }}>
-            <div style={{
-              flex: 1, height: 1,
-              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08))",
-            }} />
-            <div style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 800,
-              fontSize: 20,
-              color: "var(--text-primary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}>
-              {cfg.label}
-            </div>
-            <div style={{
-              flex: 1, height: 1,
-              background: "linear-gradient(90deg, rgba(255,255,255,0.08), transparent)",
-            }} />
-          </div>
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-          }}>
-            {items.length > 0 && (
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 11,
-                color: "var(--text-faint)", letterSpacing: "0.06em",
-              }}>
-                {items.length} logged
-              </span>
-            )}
-            {syncIndicator}
-            <span style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</span>
-          </div>
+      {/* ── Shelf header — sharpie label + shelf edge ── */}
+      <div style={S.headerWrap}>
+        <div style={isHero ? S.sharpieLabelHero : S.sharpieLabel}>
+          {cfg.label}
         </div>
-      )}
+        <div style={S.shelfEdge} />
+        <div style={S.countRow}>
+          {items.length > 0 && (
+            <span style={S.counter}>{items.length} logged</span>
+          )}
+          {syncIndicator}
+          <button style={S.addBtn} onClick={() => onShelfIt(cfg.modalCat)}>+ Add</button>
+        </div>
+      </div>
 
-      {/* Posters — no container card, just posters on the page */}
+      {/* ── Poster row — tape-sleeve frames ── */}
       {items.length === 0 ? (
         <div style={S.empty}>
           <div style={S.emptyText}>{cfg.emptyText}</div>
@@ -227,7 +157,13 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
           <div style={S.itemsRow} className="hide-scrollbar">
             {items.slice(0, 8).map((item, i) => (
               <div style={S.item} key={i} onClick={() => onViewItem({ ...item, shelfType: shelfKey })}>
-                <div style={item.cover ? { ...S.cover, backgroundImage: `url(${item.cover})` } : S.cover} />
+                <div style={S.coverFrame}>
+                  {item.cover ? (
+                    <img src={item.cover} alt="" style={S.coverImg} loading="lazy" />
+                  ) : (
+                    <div style={S.coverPlaceholder} />
+                  )}
+                </div>
                 <div style={S.title}>{item.title}</div>
                 {item.isReading ? (
                   <>
@@ -248,9 +184,9 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
                     )}
                   </>
                 ) : item.isPlaying ? (
-                  <div style={{ ...S.tag, background: "var(--accent-cyan-dim)", color: "var(--accent-cyan)" }}>🎮 Playing</div>
+                  <div style={{ ...S.tag, background: "var(--accent-cyan-dim)", color: "var(--accent-cyan)" }}>Playing</div>
                 ) : item.isBeat ? (
-                  <div style={{ ...S.tag, background: "var(--accent-green-dim)", color: "var(--accent-green)" }}>✓ Beat</div>
+                  <div style={{ ...S.tag, background: "var(--accent-green-dim)", color: "var(--accent-green)" }}>Beat</div>
                 ) : item.status === "completed" ? (
                   <div style={{ ...S.tag, background: "rgba(255,255,255,0.04)", color: "var(--text-faint)" }}>Backlog</div>
                 ) : item.rating ? (
@@ -261,7 +197,7 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
           </div>
           {items.length > 0 && (
             <div style={S.seeAll} onClick={() => onOpenDiary(shelfKey)}>
-              {items.length > 8 ? `See all ${items.length}` : "Diary"} →
+              {items.length > 8 ? `See all ${items.length} →` : "Diary →"}
             </div>
           )}
         </>
