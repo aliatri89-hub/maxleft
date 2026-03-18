@@ -57,99 +57,40 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
         .lbd-toast-wrap.exiting {
           animation: lbd-toast-out 0.3s cubic-bezier(0.4, 0, 0.8, 0.6) forwards;
         }
-        .lbd-toast-card {
-          background: #f0ead8;
-          border-radius: 7px;
-          overflow: hidden;
-          box-shadow: 0 6px 28px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
-        }
-        .lbd-stripe {
-          height: 5px;
-          background: linear-gradient(to right, #f7a13a 33%, #42c75a 33% 66%, #5ab5ef 66%);
-        }
-        .lbd-body {
-          display: flex;
-          align-items: stretch;
-          padding: 10px 0 11px 0;
-        }
-        .lbd-brand-l {
-          writing-mode: vertical-rl;
-          transform: rotate(180deg);
-          font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
-          font-size: 7px;
-          letter-spacing: 2.5px;
-          color: #8a7a60;
-          text-transform: uppercase;
-          padding: 0 7px 0 9px;
-          border-right: 1px solid #d8cfb8;
-          flex-shrink: 0;
-          white-space: nowrap;
-          display: flex;
-          align-items: center;
-        }
-        .lbd-content {
-          flex: 1;
-          padding: 2px 12px 0;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-        }
-        .lbd-logo {
-          margin-bottom: 6px;
-        }
-        .lbd-main-text {
-          font-family: 'Permanent Marker', cursive;
-          font-size: 22px;
-          color: #1a100a;
-          line-height: 1.1;
-          margin-bottom: 2px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-        .lbd-sub-text {
-          font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
-          font-size: 8px;
-          letter-spacing: 1.5px;
-          color: #7a6a50;
-          text-transform: uppercase;
-        }
-        .lbd-dismiss-hint {
-          font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
-          font-size: 7px;
-          letter-spacing: 1px;
-          color: #b0a080;
-          text-transform: uppercase;
-          margin-top: 5px;
-        }
-        .lbd-brand-r {
-          writing-mode: vertical-rl;
-          font-family: 'IBM Plex Mono', 'Share Tech Mono', monospace;
-          font-size: 7px;
-          letter-spacing: 2px;
-          color: #b0a080;
-          text-transform: uppercase;
-          padding: 0 9px;
-          border-left: 1px solid #d8cfb8;
-          flex-shrink: 0;
-          white-space: nowrap;
-          display: flex;
-          align-items: center;
-        }
       `}</style>
 
       <div
         className={`lbd-toast-wrap${exiting ? " exiting" : ""}`}
         onClick={handleTap}
       >
-        <div className="lbd-toast-card">
-          <div className="lbd-stripe" />
-          <div className="lbd-body">
-            <div className="lbd-brand-l">Synced</div>
-            <div className="lbd-content">
-              <div className="lbd-logo">
+        <div style={{
+          background: "#f0ead8",
+          borderRadius: 7,
+          overflow: "hidden",
+          boxShadow: "0 6px 28px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3)",
+        }}>
+          <div style={{
+            height: 5,
+            background: "linear-gradient(to right, #f7a13a 33%, #42c75a 33% 66%, #5ab5ef 66%)",
+          }} />
+          <div style={{
+            display: "flex", alignItems: "stretch",
+            padding: "10px 0 11px 0",
+          }}>
+            <div style={{
+              writingMode: "vertical-rl", transform: "rotate(180deg)",
+              fontFamily: "'IBM Plex Mono', 'Share Tech Mono', monospace",
+              fontSize: 7, letterSpacing: "2.5px", color: "#8a7a60",
+              textTransform: "uppercase", padding: "0 7px 0 9px",
+              borderRight: "1px solid #d8cfb8", flexShrink: 0,
+              whiteSpace: "nowrap", display: "flex", alignItems: "center",
+            }}>Synced</div>
+            <div style={{
+              flex: 1, padding: "2px 12px 0", minWidth: 0,
+              display: "flex", flexDirection: "column",
+              alignItems: "center", textAlign: "center",
+            }}>
+              <div style={{ marginBottom: 6 }}>
                 <svg width="36" height="14" viewBox="0 0 54 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="10.5" cy="10.5" r="10.5" fill="#F7A13A"/>
                   <circle cx="27"   cy="10.5" r="10.5" fill="#42C75A"/>
@@ -158,11 +99,31 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
                   <ellipse cx="35.25" cy="10.5" rx="2.25" ry="10.5" fill="#2da048" opacity="0.5"/>
                 </svg>
               </div>
-              <div className="lbd-main-text">{mainText}</div>
-              <div className="lbd-sub-text">{subText}</div>
-              <div className="lbd-dismiss-hint">tap to view activity →</div>
+              <div style={{
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 22, color: "#1a100a", lineHeight: 1.1,
+                marginBottom: 2, whiteSpace: "nowrap",
+                overflow: "hidden", textOverflow: "ellipsis",
+              }}>{mainText}</div>
+              <div style={{
+                fontFamily: "'IBM Plex Mono', 'Share Tech Mono', monospace",
+                fontSize: 8, letterSpacing: "1.5px", color: "#7a6a50",
+                textTransform: "uppercase",
+              }}>{subText}</div>
+              <div style={{
+                fontFamily: "'IBM Plex Mono', 'Share Tech Mono', monospace",
+                fontSize: 7, letterSpacing: "1px", color: "#b0a080",
+                textTransform: "uppercase", marginTop: 5,
+              }}>tap to view activity →</div>
             </div>
-            <div className="lbd-brand-r">VHS · SP</div>
+            <div style={{
+              writingMode: "vertical-rl",
+              fontFamily: "'IBM Plex Mono', 'Share Tech Mono', monospace",
+              fontSize: 7, letterSpacing: "2px", color: "#b0a080",
+              textTransform: "uppercase", padding: "0 9px",
+              borderLeft: "1px solid #d8cfb8", flexShrink: 0,
+              whiteSpace: "nowrap", display: "flex", alignItems: "center",
+            }}>VHS · SP</div>
           </div>
         </div>
       </div>
