@@ -153,6 +153,7 @@ export default function NowPlayingArcadeTab({
       background: arcadeBg,
       minHeight: "60vh",
       position: "relative",
+      width: "100%",
     }}>
       {/* CRT scanline overlay */}
       <div style={{

@@ -39,8 +39,16 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     const ro = new ResizeObserver((entries) => {
       const w = entries[0]?.contentRect?.width;
       if (w && w > 0) {
+        console.log(`[CSL] ResizeObserver fired — new width: ${w}, old widthRef: ${widthRef.current}, animating: ${sliderRef.current?.classList.contains("csl-animating")}`);
         widthRef.current = w;
-        setContainerWidth(w);
+        setContainerWidth(prev => {
+          if (prev === 0 && sliderRef.current) {
+            // First measurement — position immediately without animation
+            const idx = tabs.findIndex(t => t.key === activeTab);
+            if (idx > 0) sliderRef.current.style.transform = `translateX(-${idx * w}px)`;
+          }
+          return w;
+        });
       }
     });
     ro.observe(containerRef.current);
@@ -65,17 +73,29 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     if (!sliderRef.current || !widthRef.current) return;
     const idx = tabs.findIndex((t) => t.key === activeTab);
     if (idx < 0) return;
-    if (!sliderRef.current.classList.contains("csl-animating")) {
-      sliderRef.current.style.transform = `translateX(-${pxOffset(idx)}px)`;
+    const isAnimating = sliderRef.current.classList.contains("csl-animating");
+    console.log(`[CSL] position effect — activeTab: ${activeTab}, idx: ${idx}, widthRef: ${widthRef.current}, animating: ${isAnimating}`);
+    if (!isAnimating) {
+      const newTransform = `translateX(-${pxOffset(idx)}px)`;
+      console.log(`[CSL] position effect WRITING transform: ${newTransform}`);
+      sliderRef.current.style.transform = newTransform;
+    } else {
+      console.log(`[CSL] position effect SKIPPED (animating)`);
     }
-  }, [activeTab, tabs, containerWidth, pxOffset]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, tabs, pxOffset]); // intentionally excludes containerWidth
 
   // ── Imperative: animated slide to tab (for bottom nav taps) ─
   const animateToTab = useCallback(
     (tabKey) => {
-      if (!sliderRef.current || !widthRef.current) return;
+      if (!sliderRef.current || !containerRef.current) return;
       const idx = tabs.findIndex((t) => t.key === tabKey);
       if (idx < 0) return;
+      // Read width fresh from DOM — avoids stale widthRef from ResizeObserver race
+      const liveWidth = containerRef.current.offsetWidth;
+      if (!liveWidth) return;
+      console.log(`[CSL] animateToTab(${tabKey}) — liveWidth: ${liveWidth}, widthRef was: ${widthRef.current}, idx: ${idx}`);
+      widthRef.current = liveWidth;
       setVisitedTabs((prev) => {
         const next = new Set(prev);
         next.add(tabKey);
@@ -85,6 +105,7 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       sliderRef.current.classList.add("csl-animating");
       sliderRef.current.style.transform = `translateX(-${pxOffset(idx)}px)`;
       const onEnd = () => {
+        console.log(`[CSL] transitionend (animateToTab) — removing csl-animating, transform: ${sliderRef.current?.style.transform}`);
         requestAnimationFrame(() => {
           sliderRef.current?.classList.remove("csl-animating");
         });
@@ -239,7 +260,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           min-height: 0;
           flex-shrink: 0;
           overflow-y: auto;
-          overflow-x: hidden;
           overscroll-behavior: contain;
           -webkit-overflow-scrolling: touch;
         }
@@ -259,13 +279,13 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
         onTouchEnd={tabs.length > 1 ? handleTouchEnd : undefined}
       >
         <div className="csl-slider" ref={sliderRef}>
-          {tabs.map((tab) => (
+          {containerWidth > 0 && tabs.map((tab) => (
             <div
               className="csl-pane"
               key={tab.key}
               style={{
-                width: containerWidth || "100vw",
-                minWidth: containerWidth || "100vw",
+                width: containerWidth,
+                minWidth: containerWidth,
                 paddingBottom: bottomPad,
               }}
             >

@@ -437,7 +437,16 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const capRandom = randomPicks.slice(0, 8);
       const capBadges = sortedBadges.slice(0, 8);
       const capUpNext = filteredUpNext.slice(0, 8);
-      const capTrending = rawTrending.slice(0, 8);
+      // Filter trending community lists to subscribed slugs only
+      const filteredTrending = rawTrending
+        .map(t => ({
+          ...t,
+          communities: (t.communities || []).filter(c =>
+            !subscribedSlugs || subscribedSlugs.has(c.community_slug)
+          ),
+        }))
+        .filter(t => t.communities.length > 0);
+      const capTrending = filteredTrending.slice(0, 8);
       const maxLen = Math.max(capRandom.length, capBadges.length, capUpNext.length, capTrending.length);
 
       for (let i = 0; i < maxLen; i++) {
@@ -494,7 +503,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
 
           // After 5th log: trending
           if (logCount === 5 && trendingIdx < rawTrending.length) {
-            cards.push({ type: "trending", data: rawTrending[trendingIdx++] });
+            cards.push({ type: "trending", data: filteredTrending[trendingIdx++] });
           }
 
           // After 7th log: second badge
@@ -525,7 +534,7 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
         cards.push({ type: "badge", data: sortedBadges[0] });
       }
       if (trendingIdx === 0 && rawTrending.length > 0) {
-        cards.push({ type: "trending", data: rawTrending[0] });
+        cards.push({ type: "trending", data: filteredTrending[0] });
       }
 
       // ════════════════════════════════════════════

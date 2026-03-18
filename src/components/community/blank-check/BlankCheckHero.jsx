@@ -199,8 +199,11 @@ export default function BlankCheckHero({ community, miniseries, progress, active
               totalSeries={filmoStats.totalSeries}
               accent={accent}
             />
-            {filmoStats.topDirector && (
+            {filmoStats.topDirector ? (
               <BlankCheck director={filmoStats.topDirector} />
+            ) : (
+              /* Invisible spacer — holds layout height while progress loads */
+              <div style={{ marginTop: 16, height: 110 }} />
             )}
           </>
         )}

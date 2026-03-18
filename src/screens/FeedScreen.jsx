@@ -838,7 +838,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 
       {/* Poster + info stack */}
       <div style={{
-        display: "flex", gap: 12, padding: "14px 16px 0",
+        display: "flex", gap: 12, padding: "14px 16px 14px",
         position: "relative", zIndex: 1,
       }}>
         <Poster
@@ -846,7 +846,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
           title={data.title} mediaType={data.media_type || "film"}
           width={64} height={96} radius={8}
         />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 96 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
           {/* Top row — label + optional stars */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: isDropped ? 4 : 6 }}>
             {isDropped ? (
@@ -900,84 +900,74 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
           ) : null}
 
-          {/* Podcast name */}
+          {/* Podcast name + Listen/Watched stacked on right */}
           <div style={{
-            fontFamily: "var(--font-body)", fontSize: 12,
-            color: "var(--text-muted, #8892a8)",
             display: "flex", alignItems: "center", gap: 6,
             marginTop: "auto",
           }}>
+            {/* Podcast logo + name */}
             {data.community_image && (
               <img src={data.community_image} alt=""
                 style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
                   border: "1px solid rgba(255,255,255,0.08)" }}
               />
             )}
-            {podName}
-          </div>
-        </div>
-      </div>
+            <span style={{ flex: 1, fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted, #8892a8)" }}>{podName}</span>
 
-      {/* Bottom-right stack: Listen (if available) above Watched badge */}
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "flex-end",
-        gap: 6, padding: "6px 16px 12px", position: "relative", zIndex: 1,
-      }}>
-        {/* Listen button — stacked above badge when present */}
-        {matchedEpisode && (
-          <button
-            onClick={handlePlay}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "5px 12px", borderRadius: 16,
-              background: isThisPlaying ? `${accent}25` : `${accent}14`,
-              border: `1px solid ${isThisPlaying ? `${accent}66` : `${accent}33`}`,
-              color: accent, fontSize: 11, fontWeight: 600,
-              cursor: "pointer", fontFamily: "var(--font-body)",
-              transition: "all 0.2s",
-            }}
-          >
-            <svg width="9" height="9" viewBox="0 0 24 24" fill={accent}>
-              {isThisPlaying
-                ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
-                : <path d="M8 5v14l11-7z"/>
-              }
-            </svg>
-            {isThisPlaying ? "Playing…" : "Listen"}
-          </button>
-        )}
+            {/* Right stack: Listen above Watched */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
+              {matchedEpisode && (
+                <button
+                  onClick={handlePlay}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    padding: "4px 10px", borderRadius: 12,
+                    background: isThisPlaying ? `${accent}25` : `${accent}14`,
+                    border: `1px solid ${isThisPlaying ? `${accent}66` : `${accent}33`}`,
+                    color: accent, fontSize: 10, fontWeight: 600,
+                    cursor: "pointer", fontFamily: "var(--font-body)",
+                    transition: "all 0.2s", flexShrink: 0,
+                  }}
+                >
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill={accent}>
+                    {isThisPlaying
+                      ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
+                      : <path d="M8 5v14l11-7z"/>
+                    }
+                  </svg>
+                  {isThisPlaying ? "Playing…" : "Listen"}
+                </button>
+              )}
 
-        {/* Watched badge — always in the corner for dropped/published */}
-        {isDropped && (
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <span style={{
-              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600,
-              letterSpacing: "0.04em",
-              color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
-              transition: "color 0.3s ease",
-            }}>
-              Watched
-            </span>
-            <div style={{
-              width: 22, height: 22, borderRadius: "50%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-              border: seen
-                ? "2px solid rgba(52,211,153,0.5)"
-                : "2px dashed rgba(255,255,255,0.12)",
-              transition: "all 0.3s ease",
-            }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                strokeWidth={seen ? "3" : "2"}
-                strokeLinecap="round" strokeLinejoin="round"
-                style={{ transition: "all 0.3s ease" }}
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  color: seen ? "#34d399" : "rgba(255,255,255,0.15)",
+                  transition: "color 0.3s ease",
+                }}>
+                  Watched
+                </span>
+                <div style={{
+                  width: 20, height: 20, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                  border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
+                  transition: "all 0.3s ease", flexShrink: 0,
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                    strokeWidth={seen ? "3" : "2"}
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transition: "all 0.3s ease" }}
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -1559,17 +1549,20 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         );
         const isThisPlaying = activeSrc && isPlaying;
         return (
-        <div style={{
-          background: "linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%)",
-          borderTop: "1px solid rgba(255,255,255,0.04)",
-          padding: "8px 16px 7px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 16,
-          position: "relative",
-          borderRadius: showPicker ? "0" : "0 0 4px 4px",
-        }}>
+        <div
+          onClick={(e) => { e.stopPropagation(); setShowPicker(p => !p); }}
+          style={{
+            background: "linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%)",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
+            padding: "8px 16px 7px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 16,
+            position: "relative",
+            borderRadius: showPicker ? "0" : "0 0 4px 4px",
+            cursor: "pointer",
+          }}>
           {/* Top highlight edge */}
           <div style={{
             position: "absolute", top: 0, left: 0, right: 0, height: 1,
@@ -1591,13 +1584,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)",
           }} />
 
-          {/* ▶ VCR Play button — beveled, opens picker */}
+          {/* ▶ VCR Play button — beveled */}
           <div style={{ position: "relative", flexShrink: 0 }}>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowPicker(p => !p);
-              }}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 background: "linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%)",
                 border: "1px solid rgba(255,255,255,0.1)",
@@ -1609,6 +1599,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4)",
                 transition: "all 0.1s ease",
+                pointerEvents: "none",
               }}
             >
               {isThisPlaying ? (
@@ -1622,7 +1613,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 </svg>
               )}
             </button>
-            {/* Green LED — pulses when playing, dim when idle */}
+            {/* Green LED */}
             <div style={{
               position: "absolute", top: -1, right: -1,
               width: 5, height: 5, borderRadius: "50%",
@@ -1631,6 +1622,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
               boxShadow: isThisPlaying ? "0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3)" : "none",
               animation: isThisPlaying ? "ledPulse 2s ease infinite" : "none",
               transition: "all 0.3s ease",
+              pointerEvents: "none",
             }} />
           </div>
 
@@ -1646,13 +1638,20 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         );
       })()}
 
-      {/* ═══ PICKER — podcast episode sources ═══ */}
-      {showPicker && hasPlayableAudio && (
+      {/* ═══ PICKER — animated slide down ═══ */}
+      <div style={{
+        maxHeight: showPicker && hasPlayableAudio ? 200 : 0,
+        overflow: "hidden",
+        transition: "max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
+      }}>
         <div style={{
           background: "#1a1612",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           padding: "6px 12px",
           borderRadius: "0 0 4px 4px",
+          opacity: showPicker ? 1 : 0,
+          transform: showPicker ? "translateY(0)" : "translateY(-6px)",
+          transition: "opacity 0.2s ease, transform 0.25s ease",
         }}>
           {playableSources.map((src, i) => {
             const isActive = currentEp && currentEp.enclosureUrl === src.episode_url;
@@ -1702,7 +1701,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             );
           })}
         </div>
-      )}
+      </div>
 
     </div>
     {showHint && (
@@ -1886,137 +1885,204 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 // TRENDING CARD — dynamic, energetic, cinematic
 // ════════════════════════════════════════════════
 function TrendingCard({ data, onNavigateCommunity }) {
+  const [flipCount, setFlipCount] = useState(0);
+  const flipped = flipCount % 2 === 1;
   const avgRating = data.avg_rating ? parseFloat(data.avg_rating).toFixed(1) : null;
   const hasBackdrop = !!data.backdrop_path;
+  const communities = data.communities || [];
 
   return (
     <div style={{
-      margin: "6px 16px", background: "var(--bg-card, #1a1714)",
-      borderRadius: 16, overflow: "hidden",
+      margin: "6px 16px",
+      borderRadius: 16,
+      overflow: "hidden",
       border: "1px solid rgba(52,211,153,0.12)",
       position: "relative",
+      cursor: "pointer",
     }}>
-      {/* Backdrop — fades in from right */}
-      {hasBackdrop && (
-        <div style={{
-          position: "absolute", inset: 0,
-          backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center top",
-          opacity: 0.30,
-        }}>
-          <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(
-              90deg,
-              var(--bg-card, #1a1714) 35%,
-              rgba(19,24,40,0.6) 55%,
-              rgba(19,24,40,0.25) 80%
-            )`,
-          }} />
-          <div style={{
-            position: "absolute", inset: 0,
-            background: `linear-gradient(
-              180deg,
-              transparent 50%,
-              var(--bg-card, #1a1714) 100%
-            )`,
-          }} />
-        </div>
-      )}
-
-      {/* Subtle green ambient glow */}
-      <div style={{
-        position: "absolute", top: -20, left: "50%", transform: "translateX(-50%)",
-        width: 200, height: 80, borderRadius: "50%",
-        background: "var(--accent-green, #34d399)",
-        opacity: 0.04, filter: "blur(40px)",
-        pointerEvents: "none",
-      }} />
-
-      {/* Poster + info */}
-      <div style={{ display: "flex", gap: 12, padding: "14px 16px 14px", position: "relative", zIndex: 1 }}>
-        <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
-        <div style={{ flex: 1, paddingTop: 2 }}>
-          {/* Label with pulse dot */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 6, marginBottom: 4,
-          }}>
+      {!flipped ? (
+        <div
+          key={flipCount}
+          onClick={() => setFlipCount(c => c + 1)}
+          style={{
+            background: "var(--bg-card, #1a1714)",
+            position: "relative",
+            animation: flipCount > 0 ? "tapeFlip 0.3s ease-out" : "none",
+          }}
+        >
+          {/* Backdrop — fades in from right */}
+          {hasBackdrop && (
             <div style={{
-              width: 6, height: 6, borderRadius: "50%",
-              background: "var(--accent-green, #34d399)",
-              boxShadow: "0 0 8px rgba(52,211,153,0.5)",
-              animation: "pulse-dot 2s ease infinite",
-            }} />
-            <span style={{
-              fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
-              letterSpacing: "0.08em", textTransform: "uppercase",
-              color: "var(--accent-green, #34d399)",
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center top",
+              opacity: 0.30,
             }}>
-              Popular this week
-            </span>
-          </div>
-          <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
-            color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
-          }}>
-            {data.title}
-          </div>
-          {(data.creator || data.year) && (
-            <div style={{
-              fontFamily: "var(--font-body)", fontSize: 12,
-              color: "var(--text-muted, #8892a8)", marginBottom: 8,
-            }}>
-              {[data.creator, data.year].filter(Boolean).join(" · ")}
+              <div style={{
+                position: "absolute", inset: 0,
+                background: `linear-gradient(90deg, var(--bg-card, #1a1714) 35%, rgba(19,24,40,0.6) 55%, rgba(19,24,40,0.25) 80%)`,
+              }} />
+              <div style={{
+                position: "absolute", inset: 0,
+                background: `linear-gradient(180deg, transparent 50%, var(--bg-card, #1a1714) 100%)`,
+              }} />
             </div>
           )}
 
-          {/* Stats row — pill style */}
-          <div style={{ display: "flex", gap: 10 }}>
+          {/* Subtle green ambient glow */}
+          <div style={{
+            position: "absolute", top: -20, left: "50%", transform: "translateX(-50%)",
+            width: 200, height: 80, borderRadius: "50%",
+            background: "var(--accent-green, #34d399)",
+            opacity: 0.04, filter: "blur(40px)",
+            pointerEvents: "none",
+          }} />
+
+          {/* Poster + info + watch count */}
+          <div style={{ display: "flex", gap: 12, padding: "14px 16px 14px", position: "relative", zIndex: 1, alignItems: "center" }}>
+            <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={64} height={96} radius={8} />
+            <div style={{ flex: 1, paddingTop: 2 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                <div style={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  background: "var(--accent-green, #34d399)",
+                  boxShadow: "0 0 8px rgba(52,211,153,0.5)",
+                  animation: "pulse-dot 2s ease infinite",
+                }} />
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
+                  letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: "var(--accent-green, #34d399)",
+                }}>
+                  Popular this week
+                </span>
+              </div>
+              <div style={{
+                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
+                color: "var(--text-primary, #e8ecf4)", lineHeight: 1.2, marginBottom: 3,
+              }}>
+                {data.title}
+              </div>
+              {(data.creator || data.year) && (
+                <div style={{
+                  fontFamily: "var(--font-body)", fontSize: 12,
+                  color: "var(--text-muted, #8892a8)",
+                }}>
+                  {[data.creator, data.year].filter(Boolean).join(" · ")}
+                </div>
+              )}
+            </div>
+
+            {/* Watch count — far right, vertically centered */}
             <div style={{
-              padding: "4px 9px", borderRadius: 8,
-              background: "rgba(52,211,153,0.08)",
-              border: "1px solid rgba(52,211,153,0.15)",
-              display: "flex", alignItems: "center", gap: 5,
+              display: "flex", flexDirection: "column", alignItems: "center",
+              flexShrink: 0, gap: 2,
             }}>
               <span style={{
-                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 14,
-                color: "var(--text-primary, #e8ecf4)",
+                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 22,
+                color: "var(--accent-green, #34d399)", lineHeight: 1,
               }}>
                 {data.watch_count}
               </span>
               <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.06em",
-                color: "var(--text-faint, #5a6480)", textTransform: "uppercase",
+                fontFamily: "var(--font-mono)", fontSize: 8,
+                letterSpacing: "0.08em", textTransform: "uppercase",
+                color: "var(--text-faint, #5a6480)",
               }}>
                 watched
               </span>
             </div>
-            {avgRating && (
-              <div style={{
-                padding: "4px 9px", borderRadius: 8,
-                background: "rgba(245,197,66,0.08)",
-                border: "1px solid rgba(245,197,66,0.15)",
-                display: "flex", alignItems: "center", gap: 5,
-              }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 14,
-                  color: "var(--accent-gold, #f5c542)",
-                }}>
-                  {avgRating}
-                </span>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 9,
-                  color: "var(--text-faint, #5a6480)",
-                }}>
-                  ★
-                </span>
-              </div>
-            )}
+          </div>
+
+          {/* Flip hint */}
+          {communities.length > 0 && (
+            <div style={{
+              position: "absolute", bottom: 6, right: 12,
+              fontFamily: "var(--font-mono)", fontSize: 6,
+              color: "rgba(52,211,153,0.25)", letterSpacing: "0.06em", textTransform: "uppercase",
+            }}>
+              tap to see where
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          key={flipCount}
+          onClick={() => setFlipCount(c => c + 1)}
+          style={{
+            background: "var(--bg-card, #1a1714)",
+            position: "relative",
+            animation: "tapeFlip 0.3s ease-out",
+            minHeight: 124,
+            padding: "14px 16px",
+          }}
+        >
+          {/* Grid lines */}
+          <div style={{
+            position: "absolute", inset: 0, pointerEvents: "none",
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(255,255,255,0.015) 17px, rgba(255,255,255,0.015) 18px)",
+          }} />
+
+          {/* Title */}
+          <div style={{
+            fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700,
+            color: "rgba(52,211,153,0.4)", letterSpacing: "0.1em", textTransform: "uppercase",
+            textAlign: "center", marginBottom: 10,
+            paddingBottom: 6, borderBottom: "1px solid rgba(255,255,255,0.06)",
+            position: "relative",
+          }}>
+            {data.title}
+          </div>
+
+          {/* Community logo grid */}
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 10,
+            justifyContent: "center", alignItems: "center",
+          }}>
+            {communities.map((c, i) => {
+              const cAccent = getCommunityAccent(c.community_slug);
+              return (
+                <div
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigateCommunity?.(c.community_slug, data.tmdb_id);
+                  }}
+                  style={{ cursor: "pointer", flexShrink: 0 }}
+                  title={c.community_name}
+                >
+                  {c.community_image ? (
+                    <img src={c.community_image} alt={c.community_name} style={{
+                      width: 40, height: 40, borderRadius: 10, objectFit: "cover",
+                      border: `2px solid ${cAccent}44`,
+                    }} />
+                  ) : (
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 10,
+                      background: `${cAccent}15`, border: `2px solid ${cAccent}44`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "var(--font-display)", fontWeight: 800,
+                      fontSize: 10, color: cAccent,
+                    }}>
+                      {(c.community_name || "").split(" ").map(w => w[0]).join("").slice(0, 3)}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Flip back hint */}
+          <div style={{
+            position: "absolute", bottom: 6, right: 12,
+            fontFamily: "var(--font-mono)", fontSize: 6,
+            color: "rgba(255,255,255,0.12)", letterSpacing: "0.06em", textTransform: "uppercase",
+          }}>
+            tap to flip back
           </div>
         </div>
-      </div>
-
+      )}
     </div>
   );
 }
@@ -2137,7 +2203,7 @@ function EmptyFeed({ onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions }) {
   const userId = session?.user?.id;
-  const [feedMode, setFeedMode] = useState("activity"); // "all" | "activity" | "discover"
+  const [feedMode, setFeedMode] = useState("discover"); // "all" | "activity" | "discover"
   const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
   const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
@@ -2292,8 +2358,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           }}>
             <div className="vhs-toggle">
               {[
-                { key: "activity", label: "● Activity" },
                 { key: "discover", label: "▶ Discover" },
+                { key: "activity", label: "● Activity" },
               ].map(tab => (
                 <button
                   key={tab.key}
