@@ -30,6 +30,7 @@ import FlappyMantl from "./components/FlappyMantl";
 // import ComedyPointsReveal from "./components/community/shared/ComedyPointsReveal"; // DISABLED for launch
 // import ComedyPointsToast from "./components/community/shared/ComedyPointsToast"; // DISABLED for launch
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
+import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
 import { toLogTimestamp } from "./utils/helpers";
@@ -141,6 +142,7 @@ export default function App() {
   const [toastExiting, setToastExiting] = useState(false);
   const [toastDuration, setToastDuration] = useState(2200);
   const toastTimer = useRef(null);
+  const [letterboxdToast, setLetterboxdToast] = useState(null); // { synced, rewatches }
   const [syncBadgeToasts, setSyncBadgeToasts] = useState([]); // [{badge, current, total, visible}]
   const syncBadgeTimers = useRef([]);
 
@@ -1012,7 +1014,7 @@ if (!tmdbId) {
         const parts = [];
         if (synced > 0) parts.push(`${synced} new film${synced !== 1 ? "s" : ""}`);
         if (rewatchCount > 0) parts.push(`${rewatchCount} rewatch${rewatchCount !== 1 ? "es" : ""}`);
-        showToast(`🎬 Synced ${parts.join(" + ")} from Letterboxd`, 3200);
+        setLetterboxdToast({ synced, rewatches: rewatchCount });
         setLetterboxdSyncSignal(Date.now()); // notify community screens to re-check badges
         await loadShelves(userId);
         // Auto-log into communities + show badge progress toasts after sync toast has its moment
@@ -1472,6 +1474,14 @@ if (!tmdbId) {
           />
         )}
         */}
+        {letterboxdToast && (
+          <LetterboxdSyncToast
+            synced={letterboxdToast.synced}
+            rewatches={letterboxdToast.rewatches}
+            duration={3600}
+            onDone={() => setLetterboxdToast(null)}
+          />
+        )}
         {toast && (
           <div className={`toast${toastExiting ? " toast-exit" : ""}`} style={{ overflow: "hidden" }}>
             {toast}
