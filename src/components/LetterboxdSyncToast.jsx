@@ -85,6 +85,10 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
           flex: 1;
           padding: 2px 12px 0;
           min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
         }
         .lbd-logo {
           margin-bottom: 6px;
