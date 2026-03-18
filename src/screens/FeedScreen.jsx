@@ -2474,12 +2474,16 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             // ── Derive dismiss identity for filterable card types ──
             const dismissKey = item.type === "badge"
               ? { type: "badge", key: item.data.badge_id || item.data.id }
+              : item.type === "badge_complete"
+              ? { type: "badge_complete", key: item.data.badge_id || item.data.id }
               : item.type === "up_next"
               ? { type: "up_next", key: item.data.miniseries_id }
               : item.type === "random_pick"
               ? { type: "random_pick", key: item.data.item_id }
-              : item.type === "episode" && item.data.status === "upcoming"
-              ? { type: "episode", key: item.data.item_id }
+              : item.type === "trending"
+              ? { type: "trending", key: item.data.tmdb_id || item.data.title }
+              : item.type === "episode"
+              ? { type: "episode", key: `${item.data.status}-${item.data.item_id}` }
               : null;
 
             // Skip dismissed cards
