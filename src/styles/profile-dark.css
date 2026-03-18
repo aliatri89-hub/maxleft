@@ -69,14 +69,10 @@
 /* ── Name / Handle / Bio ── */
 
 .profile-big-name.profile-big-name {
-  color: var(--text-primary);
+  color: #EF9F27;
 }
 
 .profile-big-handle.profile-big-handle {
-  color: var(--text-muted);
-}
-
-.profile-bio.profile-bio {
   color: var(--text-muted);
 }
 
@@ -149,8 +145,8 @@
 }
 
 .btn-save-profile.btn-save-profile {
-  background: var(--accent-green);
-  color: #0a0a0a;
+  background: #EF9F27;
+  color: #0f0d0b;
 }
 
 /* ── Manage Shelves ── */
@@ -180,7 +176,7 @@
 }
 
 .shelf-toggle-switch.on {
-  background: var(--accent-green) !important;
+  background: #EF9F27 !important;
 }
 
 .shelf-toggle-permanent.shelf-toggle-permanent {
@@ -226,7 +222,7 @@
 }
 
 .profile-screen .event-form-input:focus {
-  border-color: var(--accent-green);
+  border-color: #EF9F27;
 }
 
 .profile-screen .event-form-input::placeholder {
@@ -244,6 +240,6 @@
 /* ── Shelf-It Button (used in groups join) ── */
 
 .profile-screen .btn-shelf-it {
-  background: var(--accent-green);
-  color: #0a0a0a;
+  background: #EF9F27;
+  color: #0f0d0b;
 }

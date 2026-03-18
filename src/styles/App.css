@@ -2970,11 +2970,10 @@
   }
 
   .profile-big-name {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 32px;
-    text-transform: uppercase;
-    color: var(--text-primary);
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+    font-size: 28px;
+    color: #EF9F27;
     margin-bottom: 4px;
   }
 
@@ -2983,15 +2982,6 @@
     font-size: 13px;
     color: var(--text-muted);
     margin-bottom: 20px;
-  }
-
-  .profile-bio {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin-bottom: 24px;
   }
 
   .settings-section {
@@ -3034,18 +3024,18 @@
     margin-top: 28px;
   }
   .profile-group-label {
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: 11px;
-    letter-spacing: 0.14em;
+    font-family: 'Permanent Marker', cursive;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--accent-terra);
+    color: #EF9F27;
     margin-bottom: 10px;
     padding-left: 2px;
   }
   .profile-group-card {
     background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-card-end) 100%);
-    border: 1px solid var(--border-medium);
+    border: 1px solid #EF9F2718;
     border-radius: 14px;
     overflow: hidden;
   }
@@ -3061,13 +3051,14 @@
     background: var(--bg-hover);
   }
   .profile-group-row-text {
-    font-family: var(--font-serif);
+    font-family: var(--font-body);
     font-size: 15px;
-    color: var(--text-secondary);
+    font-weight: 500;
+    color: var(--text-primary);
   }
   .profile-group-row-chevron {
     font-size: 18px;
-    color: var(--text-muted);
+    color: #EF9F2760;
     font-weight: 300;
   }
   .profile-group-divider {
@@ -3128,13 +3119,15 @@
     width: 100%;
     font-family: var(--font-mono);
     font-size: 11px;
+    font-weight: 700;
     padding: 10px;
-    background: var(--accent-terra);
-    color: white;
+    background: #EF9F27;
+    color: var(--bg-card, #0f0d0b);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
     transition: opacity 0.12s;
   }
   .profile-connect-btn:hover { opacity: 0.9; }
