@@ -118,16 +118,14 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   };
 
   const shelfToggleMap = {
-    // training, trophies, passport — HIDDEN: focused on media
-    books: { icon: "📖", label: "Bookshelf" },
-    movies: { icon: "🎬", label: "Film Shelf" },
-    shows: { icon: "📺", label: "Show Shelf" },
-    games: { icon: "🎮", label: "Game Shelf" },
-    // challenge (Habits) + groups DISABLED for launch
+    books: { label: "Bookshelf" },
+    movies: { label: "Film Shelf" },
+    shows: { label: "Show Shelf" },
+    games: { label: "Game Shelf" },
   };
 
   const currentOrder = profile.shelfOrder || DEFAULT_SHELF_ORDER;
-  const shelfToggles = currentOrder.map(key => ({ key, ...shelfToggleMap[key] })).filter(t => t.icon);
+  const shelfToggles = currentOrder.map(key => ({ key, ...shelfToggleMap[key] })).filter(t => t.label);
 
   const enabledShelves = { ...DEFAULT_ENABLED_SHELVES, ...(profile.enabledShelves || {}) };
 
@@ -213,7 +211,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
               <div className="avatar-uploading"><div className="save-spinner" style={{ borderTopColor: "white" }} /></div>
             )}
           </div>
-          <div className="avatar-upload-overlay">📷</div>
+          <div className="avatar-upload-overlay" style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.06em" }}>Edit</div>
           <input ref={fileRef} className="avatar-upload-input" type="file" accept="image/*" onChange={handleUpload} />
         </div>
         <div className="profile-big-name bb">{profile.name}</div>
@@ -257,7 +255,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
               onMouseMove={shelfDragIdx !== null ? onShelfDragMove : undefined}
               onMouseUp={shelfDragIdx !== null ? onShelfDragEnd : undefined}
               onMouseLeave={shelfDragIdx !== null ? onShelfDragCancel : undefined}>
-              {shelfToggles.map(({ key, icon, label }, idx) => {
+              {shelfToggles.map(({ key, label }, idx) => {
                 const isDragging = shelfDragIdx === idx;
                 const isDragOver = shelfDragIdx !== null && shelfDragOverIdx === idx && shelfDragIdx !== idx;
                 return (
@@ -267,7 +265,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     onMouseDown={(e) => onShelfDragStart(idx, e)}>
                     <div className="shelf-drag-handle">⠿</div>
                     <div className="shelf-toggle-info">
-                      <div className="shelf-toggle-icon">{icon}</div>
                       <div className={`shelf-toggle-label${!enabledShelves[key] ? " disabled" : ""}`}>{label}</div>
                     </div>
                     <div
@@ -289,7 +286,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           <div className="profile-group-row" onClick={() => setSyncOpen(!syncOpen)}>
             <span className="profile-group-row-text">Sync</span>
             <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {(letterboxdSyncing || goodreadsSyncing || steamSyncing) && <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--terracotta)" }}>syncing...</span>}
+              {(letterboxdSyncing || goodreadsSyncing || steamSyncing) && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
               {(profile.letterboxd_username || profile.goodreads_user_id || profile.steam_id) && (
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.6 }} />
               )}
@@ -316,11 +313,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#40BCF4" }} />
                           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF8000" }} />
                         </div>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
                           letterboxd.com/<strong>{profile.letterboxd_username}</strong>
                         </span>
                       </div>
-                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
                         Your diary syncs automatically when you open the app.
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -332,20 +329,20 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
                         Auto-sync your Letterboxd diary. Films, ratings, and watch dates flow into your shelf and feed.
                       </div>
                       <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
-                        <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>letterboxd.com/</span>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>letterboxd.com/</span>
                         <input value={lbUsernameInput} onChange={e => setLbUsernameInput(e.target.value)}
                           placeholder="username"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 2px", background: "transparent", color: "var(--text-primary)" }} />
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px 10px 2px", background: "transparent", color: "var(--text-primary)" }} />
                       </div>
                       <button className="profile-connect-btn" disabled={!lbUsernameInput.trim() || letterboxdSyncing}
                         onClick={() => onLetterboxdConnect(lbUsernameInput.trim())}>
                         {letterboxdSyncing ? "Connecting..." : "Connect & Sync"}
                       </button>
-                      <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
+                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
                         Your Letterboxd profile must be public
                       </div>
                     </>
@@ -366,12 +363,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   {profile.goodreads_user_id ? (
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 16 }}>📚</span>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
                           User ID: <strong>{profile.goodreads_user_id}</strong>
                         </span>
                       </div>
-                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
                         Your read shelf syncs automatically when you open the app.
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -383,23 +379,23 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
                         Auto-sync your Goodreads read shelf. Books, ratings, and read dates flow into your shelf and feed.
                       </div>
                       <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 4 }}>
-                        <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>User ID:</span>
+                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>User ID:</span>
                         <input value={grUserIdInput} onChange={e => setGrUserIdInput(e.target.value)}
                           placeholder="e.g. 127753855"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px 10px 6px", background: "transparent", color: "var(--text-primary)" }} />
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px 10px 6px", background: "transparent", color: "var(--text-primary)" }} />
                       </div>
-                      <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", marginBottom: 10, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 10, lineHeight: 1.5 }}>
                         Find your ID in your Goodreads profile URL: goodreads.com/user/show/<strong>127753855</strong>
                       </div>
                       <button className="profile-connect-btn" disabled={!grUserIdInput.trim() || goodreadsSyncing}
                         onClick={() => onGoodreadsConnect(grUserIdInput.trim())}>
                         {goodreadsSyncing ? "Connecting..." : "Connect & Sync"}
                       </button>
-                      <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
+                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
                         Your Goodreads profile must be public
                       </div>
                     </>
@@ -420,12 +416,11 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   {profile.steam_id ? (
                     <>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 16 }}>🎮</span>
-                        <span style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-primary)", flex: 1 }}>
+                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
                           Steam ID: <strong>{profile.steam_id}</strong>
                         </span>
                       </div>
-                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
                         Recently played games sync automatically.
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
@@ -437,17 +432,17 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
                         Sync your recently played Steam games. Playtime and achievements flow into your shelf and feed.
                       </div>
                       <input value={steamIdInput} onChange={e => setSteamIdInput(e.target.value)}
                         placeholder="Steam ID or custom URL name"
-                        style={{ width: "100%", border: "1px solid var(--border-medium)", outline: "none", fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", padding: "10px 12px", background: "var(--bg-input)", borderRadius: 10, color: "var(--text-primary)", marginBottom: 10, boxSizing: "border-box" }} />
+                        style={{ width: "100%", border: "1px solid var(--border-medium)", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px", background: "var(--bg-input)", borderRadius: 10, color: "var(--text-primary)", marginBottom: 10, boxSizing: "border-box" }} />
                       <button className="profile-connect-btn" disabled={!steamIdInput.trim() || steamSyncing}
                         onClick={() => onSteamConnect(steamIdInput.trim())}>
                         {steamSyncing ? "Connecting..." : "Connect & Sync"}
                       </button>
-                      <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
+                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
                         Your Steam profile must be public · Find your ID at steamid.io
                       </div>
                     </>
@@ -459,7 +454,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
 
           <div className="profile-group-divider" />
 
-          <div className="profile-group-row" onClick={() => { console.log("[Import] Button clicked, setting showImportCSV=true"); setShowImportCSV(true); }}>
+          <div className="profile-group-row" onClick={() => setShowImportCSV(true)}>
             <span className="profile-group-row-text">Import Library</span>
             <span className="profile-group-row-chevron">›</span>
           </div>
@@ -594,8 +589,8 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           </div>
         ) : (
           <div className="profile-delete-confirm">
-            <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 15, color: "#f87171", marginBottom: 8 }}>Delete your account?</div>
-            <div style={{ fontFamily: "'Lora', serif", fontSize: 12, color: "var(--text-faint)", marginBottom: 16, lineHeight: 1.5, fontStyle: "italic" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "#f87171", marginBottom: 8 }}>Delete your account?</div>
+            <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-faint)", marginBottom: 16, lineHeight: 1.5 }}>
               This will permanently delete your profile, shelves, activity history, and all data. This cannot be undone.
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
@@ -607,11 +602,10 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
       </div>
 
       {/* Import CSV Modal — portaled to body to escape transform containing block */}
-      {showImportCSV && console.log("[Import] Rendering ImportCSVModal")}
       {showImportCSV && createPortal(
         <ImportCSVModal
           session={session}
-          onClose={() => { console.log("[Import] Modal onClose called"); setShowImportCSV(false); }}
+          onClose={() => setShowImportCSV(false)}
           onToast={onToast}
           onComplete={onImportComplete}
         />,
