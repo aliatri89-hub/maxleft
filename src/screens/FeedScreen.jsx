@@ -858,14 +858,14 @@ function EpisodeCard({ data, onNavigateCommunity }) {
       {/* Poster + info stack */}
       <div style={{
         display: "flex", gap: 12, padding: "14px 16px 14px",
-        position: "relative", zIndex: 1,
+        position: "relative", zIndex: 1, alignItems: "flex-start",
       }}>
         <Poster
           path={data.poster_path} tmdbId={data.tmdb_id}
           title={data.title} mediaType={data.media_type || "film"}
           width={72} height={108} radius={8}
         />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", height: 108 }}>
           {/* Top row — label + optional stars */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             {isDropped ? (
@@ -939,12 +939,12 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
 
             {/* Play button above watched badge — stacked */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
               {matchedEpisode && (
                 <button
                   onClick={handlePlay}
                   style={{
-                    width: 36, height: 36, borderRadius: "50%",
+                    width: 28, height: 28, borderRadius: "50%",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     background: isThisPlaying ? `${accent}25` : `${accent}18`,
                     border: `1.5px solid ${isThisPlaying ? `${accent}80` : `${accent}44`}`,
@@ -952,7 +952,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                     transition: "all 0.2s",
                   }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={accent}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill={accent}>
                     {isThisPlaying
                       ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
                       : <path d="M8 5v14l11-7z"/>
@@ -964,10 +964,10 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               {/* Watched badge + label */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                 <div style={{
-                  width: 22, height: 22, borderRadius: "50%",
+                  width: 28, height: 28, borderRadius: "50%",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-                  border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
+                  border: seen ? "1.5px solid rgba(52,211,153,0.5)" : "1.5px dashed rgba(255,255,255,0.12)",
                   transition: "all 0.3s ease", flexShrink: 0,
                 }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
