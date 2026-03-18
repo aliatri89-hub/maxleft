@@ -38,6 +38,7 @@ import BadgeProgressToast from "./components/community/shared/BadgeProgressToast
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
 import { toLogTimestamp } from "./utils/helpers";
+import { upsertMediaLog, toPosterPath } from "./utils/mediaWrite";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
 // Shown instantly when navigating to a community from feed cards.
@@ -698,13 +699,13 @@ export default function App() {
       { data: allGoals },
       { data: allCountries },
     ] = await Promise.all([
-      supabase.from("books").select("id, title, author, cover_url, rating, total_pages, notes, finished_at, source, current_page")
-        .eq("user_id", userId).eq("is_active", false).neq("habit_id", 7).order("finished_at", { ascending: false, nullsFirst: false }),
-      supabase.from("books").select("id, title, author, cover_url, current_page, total_pages, notes, source")
-        .eq("user_id", userId).eq("is_active", true).neq("habit_id", 7),
+      supabase.from("user_books_v").select("id, title, author, cover_url, rating, notes, finished_at, source")
+        .eq("user_id", userId).eq("status", "finished").order("finished_at", { ascending: false, nullsFirst: false }),
+      supabase.from("user_books_v").select("id, title, author, cover_url, notes, source")
+        .eq("user_id", userId).eq("status", "watching"),
       supabase.from("user_films_v").select("id, title, poster_url, rating, year, director, notes, watched_at")
         .eq("user_id", userId).order("watched_at", { ascending: false, nullsFirst: false }),
-      supabase.from("shows").select("id, title, poster_url, tmdb_id, status, current_season, current_episode, episodes_watched, total_episodes, total_seasons, rating, notes, created_at")
+      supabase.from("user_shows_v").select("id, title, poster_url, tmdb_id, show_status, rating, notes, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("games").select("id, title, cover_url, platform, genre, status, rating, notes, source, external_id, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
@@ -718,14 +719,13 @@ export default function App() {
 
     const books = (allBooks || []).map((b) => ({
       id: b.id, title: b.title, author: b.author, cover: b.cover_url,
-      rating: b.rating, pages: b.total_pages, notes: b.notes,
-      finishedAt: b.finished_at, source: b.source || "fiveseven",
+      rating: b.rating, notes: b.notes,
+      finishedAt: b.finished_at, source: b.source || "mantl",
     }));
 
     const currentBooks = (activeBooks || []).map((b) => ({
       id: b.id, title: b.title, author: b.author, cover: b.cover_url,
-      currentPage: b.current_page, totalPages: b.total_pages, notes: b.notes,
-      isReading: true, source: b.source || "fiveseven",
+      notes: b.notes, isReading: true, source: b.source || "mantl",
     }));
 
     const allBooksCombined = [...currentBooks, ...books];
@@ -736,13 +736,11 @@ export default function App() {
     }));
 
     const shows = (allShows || [])
-      .sort((a, b) => (a.status === "watching" ? -1 : 1) - (b.status === "watching" ? -1 : 1))
+      .sort((a, b) => (a.show_status === "watching" ? -1 : 1) - (b.show_status === "watching" ? -1 : 1))
       .map((s) => ({
         id: s.id, title: s.title, cover: s.poster_url, tmdbId: s.tmdb_id,
-        status: s.status, isWatching: s.status === "watching",
-        currentSeason: s.current_season, currentEpisode: s.current_episode,
-        episodesWatched: s.episodes_watched, totalEpisodes: s.total_episodes,
-        totalSeasons: s.total_seasons, rating: s.rating, notes: s.notes,
+        status: s.show_status, isWatching: s.show_status === "watching",
+        rating: s.rating, notes: s.notes,
       }));
 
     const games = (allGames || [])
@@ -1473,16 +1471,10 @@ if (!tmdbId) {
         return;
       }
 
-      // Get existing books to avoid duplicates (by goodreads_id and title+author)
-      const { data: existingBooks } = await supabase.from("books")
-        .select("title, author, goodreads_id").eq("user_id", userId);
-      const existingGrIds = new Set((existingBooks || []).map(b => b.goodreads_id).filter(Boolean));
+      // Get existing books to avoid duplicates (by title+author)
+      const { data: existingBooks } = await supabase.from("user_books_v")
+        .select("title, author").eq("user_id", userId);
       const existingTitleSet = new Set((existingBooks || []).map(b => `${b.title}::${b.author}`));
-
-      // Get existing feed entries for dedup
-      const { data: existingFeed } = await supabase.from("feed_activity")
-        .select("title, item_title").eq("user_id", userId).eq("activity_type", "book");
-      const feedSet = new Set((existingFeed || []).flatMap(f => [f.title, f.item_title].filter(Boolean)));
 
       const getTagText = (el, tagName) => {
         const nodes = el.getElementsByTagName(tagName);
@@ -1509,18 +1501,13 @@ if (!tmdbId) {
         const coverUrl = getTagText(item, "book_large_image_url") || getTagText(item, "book_medium_image_url") || getTagText(item, "book_image_url");
         const isbn = getTagText(item, "isbn");
 
-        // Skip if already exists (by goodreads_id or title+author)
-        if (bookId && existingGrIds.has(bookId)) {
-          if (manual) console.log(`[Goodreads] Skipping (exists by ID): ${title}`);
-          continue;
-        }
+        // Skip if already exists (by title+author)
         const dedupKey = `${title}::${authorName}`;
         if (existingTitleSet.has(dedupKey)) {
           if (manual) console.log(`[Goodreads] Skipping (exists by title+author): ${title}`);
           continue;
         }
 
-        existingGrIds.add(bookId);
         existingTitleSet.add(dedupKey);
         workQueue.push({ title, author: authorName, bookId, rating: rating || null, totalPages, userReadAt, coverUrl, isbn });
       }
@@ -1537,46 +1524,24 @@ if (!tmdbId) {
           try { finishedAt = new Date(userReadAt).toISOString(); } catch (e) { /* */ }
         }
 
-        const bookRow = {
-          user_id: userId,
+        const cleanCover = coverUrl && !coverUrl.includes("nophoto") ? coverUrl : null;
+
+        // Write to media + user_media_logs (unified) — also handles feed + wishlist
+        const mediaId = await upsertMediaLog(userId, {
+          mediaType: "book",
+          isbn: isbn || null,
           title,
-          author,
-          cover_url: coverUrl && !coverUrl.includes("nophoto") ? coverUrl : null,
-          rating,
-          total_pages: totalPages,
-          finished_at: finishedAt || new Date().toISOString(),
-          is_active: false,
-          habit_id: 0,
+          creator: author,
+          posterPath: cleanCover,
+          rating: rating || null,
+          watchedAt: finishedAt || new Date().toISOString(),
           source: "goodreads",
-          goodreads_id: bookId || null,
-        };
+          status: "finished",
+        });
 
-        const { error: bookErr } = bookId
-          ? await supabase.from("books").upsert(bookRow, { onConflict: "user_id,goodreads_id" })
-          : await supabase.from("books").insert(bookRow);
-        if (bookErr) {
-          console.error("[Goodreads] Book insert error:", bookErr.message, bookErr.code);
+        if (!mediaId) {
+          console.error("[Goodreads] upsert_media_log failed for", title);
           return null;
-        }
-
-        // Insert feed_activity if recent (14 days for auto, 90 for manual)
-        const feedKey = `gr_${title}_${author}`;
-        const maxAge = manual ? 90 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000;
-        const readDate = finishedAt ? new Date(finishedAt) : null;
-        const isRecent = readDate && (Date.now() - readDate.getTime()) < maxAge;
-        if (!feedSet.has(feedKey) && !feedSet.has(title) && isRecent) {
-          const feedRow = {
-            user_id: userId, activity_type: "book", action: "finished",
-            title: feedKey, item_title: title, item_cover: coverUrl,
-            rating,
-            metadata: { source: "goodreads", goodreads_user_id: grUserId, read_at: userReadAt },
-            created_at: finishedAt || new Date().toISOString(),
-          };
-          if (author) feedRow.item_author = author;
-          const { error: feedInsertErr } = await supabase.from("feed_activity").insert(feedRow);
-          if (feedInsertErr) console.error("[Goodreads] Feed insert error:", feedInsertErr.message, feedInsertErr.code);
-          feedSet.add(feedKey);
-          feedSet.add(title);
         }
 
         return title;

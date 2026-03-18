@@ -52,6 +52,7 @@ export async function upsertMediaLog(userId, {
   source = "mantl",
   watchCount = 1,
   watchDates = [],
+  status = "finished",
 } = {}) {
   if (!userId || !title) return null;
 
@@ -74,6 +75,7 @@ export async function upsertMediaLog(userId, {
     p_source: source,
     p_watch_count: watchCount,
     p_watch_dates: JSON.stringify(watchDates),
+    p_status: status,
   });
 
   if (error) {
@@ -101,7 +103,7 @@ export async function logFilm(userId, item, coverUrl, { rating, completed_at } =
   });
 }
 
-export async function logShow(userId, item, coverUrl, { rating, completed_at } = {}) {
+export async function logShow(userId, item, coverUrl, { rating, completed_at, status = "finished" } = {}) {
   if (!userId || !item?.tmdb_id) return null;
   return upsertMediaLog(userId, {
     mediaType: "show",
@@ -112,19 +114,21 @@ export async function logShow(userId, item, coverUrl, { rating, completed_at } =
     posterPath: coverUrl || item.poster_path || null,
     rating,
     watchedAt: completed_at || null,
+    status,
   });
 }
 
-export async function logBook(userId, item, coverUrl, { rating, completed_at } = {}) {
+export async function logBook(userId, item, coverUrl, { rating, completed_at, status = "finished" } = {}) {
   if (!userId || !item) return null;
   return upsertMediaLog(userId, {
     mediaType: "book",
     isbn: item.isbn || null,
     title: item.title,
-    creator: item.creator || null,
+    creator: item.creator || item.author || null,
     posterPath: coverUrl || null,
     rating,
     watchedAt: completed_at || null,
+    status,
   });
 }
 

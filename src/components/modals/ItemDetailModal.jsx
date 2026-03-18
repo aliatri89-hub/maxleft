@@ -105,10 +105,10 @@ export default function ItemDetailModal({
     setSaveStatus("saving");
 
     try {
-      await supabase.from("books").update({
-        is_active: false,
+      await supabase.from("user_media_logs").update({
+        status: "finished",
         rating: finishRating || null,
-        finished_at: new Date().toISOString(),
+        watched_at: new Date().toISOString(),
       }).eq("id", item.id);
 
       setLocalItem(prev => ({
@@ -131,9 +131,10 @@ export default function ItemDetailModal({
     setSaveStatus("saving");
 
     try {
-      await supabase.from("shows").update({
+      await supabase.from("user_media_logs").update({
         status: "finished",
         rating: finishRating || null,
+        watched_at: new Date().toISOString(),
       }).eq("id", item.id);
 
       setLocalItem(prev => ({

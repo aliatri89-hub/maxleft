@@ -154,38 +154,37 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
         if (!mediaId) throw new Error("upsert_media_log failed");
       } else if (selected.type === "tv") {
         const isWatching = showStatus === "watching";
-        const { error } = await supabase.from("shows").upsert({
-          user_id: session.user.id,
-          tmdb_id: selected.tmdbId,
+        const mediaId = await upsertMediaLog(session.user.id, {
+          mediaType: "show",
+          tmdbId: selected.tmdbId,
           title: selected.title,
           year: selected.year ? parseInt(selected.year) : null,
-          poster_url: selected.poster,
-          backdrop_url: selected.backdrop,
+          creator: details?.creator || null,
+          posterPath: selected.poster,
+          backdropPath: selected.backdrop,
           genre: details?.genre || null,
-          total_episodes: details?.totalEpisodes || null,
-          total_seasons: details?.totalSeasons || null,
-          status: isWatching ? "watching" : "finished",
           rating: isWatching ? null : (rating || null),
+          watchedAt: isWatching ? null : new Date().toISOString(),
           source: "mantl",
-        }, { onConflict: "user_id,tmdb_id" });
-
-        if (error) throw error;
-      } else if (selected.type === "book") {
-        const isReading = bookStatus === "reading";
-        const { error } = await supabase.from("books").insert({
-          user_id: session.user.id,
-          habit_id: 0,
-          title: selected.title,
-          author: selected.author || null,
-          cover_url: selected.cover || null,
-          is_active: isReading,
-          started_at: new Date().toISOString(),
-          finished_at: isReading ? null : (bookFinishDate === "today" ? new Date().toISOString() : new Date(bookFinishDate + "T12:00:00").toISOString()),
-          rating: isReading ? null : (rating || null),
-          source: "mantl",
+          status: isWatching ? "watching" : "finished",
         });
 
-        if (error) throw error;
+        if (!mediaId) throw new Error("upsert_media_log failed");
+      } else if (selected.type === "book") {
+        const isReading = bookStatus === "reading";
+        const finishedAt = isReading ? null : (bookFinishDate === "today" ? new Date().toISOString() : new Date(bookFinishDate + "T12:00:00").toISOString());
+        const mediaId = await upsertMediaLog(session.user.id, {
+          mediaType: "book",
+          title: selected.title,
+          creator: selected.author || null,
+          posterPath: selected.cover || null,
+          rating: isReading ? null : (rating || null),
+          watchedAt: finishedAt,
+          source: "mantl",
+          status: isReading ? "watching" : "finished",
+        });
+
+        if (!mediaId) throw new Error("upsert_media_log failed");
       } else if (selected.type === "game") {
         const isPlaying = gameStatus === "playing";
         const { error } = await supabase.from("games").upsert({

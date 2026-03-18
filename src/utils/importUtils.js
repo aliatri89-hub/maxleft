@@ -124,7 +124,7 @@ export function parseRows(rows, headers, format) {
 export async function deduplicateItems(items, format, userId) {
   // ── Books: unchanged — true dedup ──
   if (format !== "letterboxd") {
-    const { data } = await supabase.from("books").select("title, author").eq("user_id", userId);
+    const { data } = await supabase.from("user_books_v").select("title, author").eq("user_id", userId);
     const existingSet = new Set((data || []).map(b => `${b.title}::${b.author}`));
 
     let dupeCount = 0;
@@ -350,24 +350,23 @@ export async function importBooks(items, userId, onProgress) {
       await new Promise(r => setTimeout(r, 350));
     }
 
-    const batch = chunk.map((b, j) => ({
-      user_id: userId,
-      habit_id: 0,
-      title: b.title,
-      author: b.author,
-      total_pages: b.pages,
-      current_page: b.isReading ? 0 : (b.pages || 0),
-      cover_url: covers[j] || null,
-      is_active: b.isReading,
-      started_at: safeDate(b.dateAdded, new Date().toISOString()),
-      finished_at: b.isReading ? null : safeDate(b.dateRead),
-      rating: (b.rating && b.rating > 0) ? b.rating : null,
-      source: b.source,
-    }));
-
-    const { error } = await supabase.from("books").insert(batch);
-    if (error) { console.error("[Import] Book batch error:", error); errs += batch.length; }
-    else count += batch.length;
+    // Write each book via unified media log
+    for (let j = 0; j < chunk.length; j++) {
+      const b = chunk[j];
+      const isReading = !!b.isReading;
+      const mediaId = await upsertMediaLog(userId, {
+        mediaType: "book",
+        title: b.title,
+        creator: b.author || null,
+        posterPath: covers[j] || null,
+        rating: (b.rating && b.rating > 0) ? b.rating : null,
+        watchedAt: isReading ? null : safeDate(b.dateRead),
+        source: b.source || "import",
+        status: isReading ? "watching" : "finished",
+      });
+      if (!mediaId) { console.error("[Import] upsert_media_log failed for", b.title); errs++; }
+      else count++;
+    }
 
     if (onProgress) onProgress(Math.min(i + 10, items.length), items.length);
 
