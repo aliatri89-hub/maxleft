@@ -132,18 +132,15 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
   return (
     <div style={isHero ? { ...S.section, paddingTop: 14 } : S.section}>
 
-      {/* ── Shelf header — sharpie label + shelf edge ── */}
+      {/* ── Shelf header — sharpie label + centered count ── */}
       <div style={S.headerWrap}>
         <div style={isHero ? S.sharpieLabelHero : S.sharpieLabel}>
           {cfg.label}
         </div>
         <div style={S.shelfEdge} />
-        <div style={S.countRow}>
-          {items.length > 0 && (
-            <span style={S.counter}>{items.length} logged</span>
-          )}
-          {syncIndicator}
-        </div>
+        {items.length > 0 && (
+          <span style={S.counter}>{items.length} logged</span>
+        )}
       </div>
 
       {/* ── Poster row — tape-sleeve frames ── */}
@@ -195,17 +192,22 @@ export default function MediaShelf({ shelfKey, items, profile, onShelfIt, onView
               </div>
             ))}
 
-            {/* + Add as last card in the scroll row */}
+            {/* Sync indicator + Add as last card in the scroll row */}
             <div
               style={{
                 flexShrink: 0, width: PW, cursor: "pointer",
                 display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center",
+                alignItems: "center", justifyContent: "flex-end",
+                gap: 8,
               }}
               onClick={() => onShelfIt(cfg.modalCat)}
             >
+              {/* Sync status sits above the add card */}
+              {syncIndicator && (
+                <div style={{ marginBottom: 2 }}>{syncIndicator}</div>
+              )}
               <div style={{
-                width: PW, height: PH, borderRadius: 6,
+                width: PW, height: syncIndicator ? PH - 24 : PH, borderRadius: 6,
                 border: `1.5px dashed ${accent}30`,
                 background: `${accent}06`,
                 display: "flex", flexDirection: "column",

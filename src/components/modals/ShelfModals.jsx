@@ -53,6 +53,7 @@ export default function ShelfModals({
   const [diaryDecade, setDiaryDecade] = useState(null); // e.g. 2020, 2010, ...
   const [diaryRatingFilter, setDiaryRatingFilter] = useState(null); // null | "rated" | "unrated" | 5 | 4.5 | 4 ...
   const [diaryYear, setDiaryYear] = useState(null); // specific year within a decade
+  const [diaryLimit, setDiaryLimit] = useState(50); // pagination cap
 
   const toggleBeat = async (gameId, currentStatus) => {
     const newStatus = currentStatus === "beat" ? "playing" : "beat";
@@ -737,7 +738,7 @@ export default function ShelfModals({
           <div className="item-detail-overlay" onClick={(e) => e.target === e.currentTarget && setDiaryShelf(null)}>
             <div className="item-detail-sheet" style={{ maxHeight: "92vh" }}>
               <div className="modal-handle" />
-              <button className="item-detail-close" onClick={() => { setDiaryShelf(null); setDiarySearch(""); setDiaryDecade(null); setDiaryYear(null); setDiaryRatingFilter(null); }}>← Close</button>
+              <button className="item-detail-close" onClick={() => { setDiaryShelf(null); setDiarySearch(""); setDiaryDecade(null); setDiaryYear(null); setDiaryRatingFilter(null); setDiaryLimit(50); }}>← Close</button>
 
               {/* ── Header — sharpie label + count ── */}
               <div style={{ marginBottom: 16 }}>
@@ -945,39 +946,68 @@ export default function ShelfModals({
                     });
                   }
                 }
+                const totalGrid = gridItems.length;
+                const cappedGrid = gridItems.slice(0, diaryLimit);
                 return (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, paddingBottom: 20 }}>
-                  {gridItems.map((item, i) => (
-                    <div key={i} style={{ cursor: "pointer", position: "relative" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
-                      <div style={{
-                        aspectRatio: "2/3", borderRadius: 6, overflow: "hidden",
-                        border: `1px solid ${accent}12`,
-                        background: item.cover ? `url(${item.cover}) center/cover` : "rgba(255,255,255,0.06)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        opacity: diaryShelf === "games" && item.status === "beat" ? 0.5 : 1,
-                      }}>
-                        {!item.cover && <span style={{ fontSize: 24 }}>{cfg?.icon}</span>}
+                <div style={{ paddingBottom: 20 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+                    {cappedGrid.map((item, i) => (
+                      <div key={i} style={{ cursor: "pointer", position: "relative" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
+                        <div style={{
+                          aspectRatio: "2/3", borderRadius: 6, overflow: "hidden",
+                          border: `1px solid ${accent}12`,
+                          background: item.cover ? `url(${item.cover}) center/cover` : "rgba(255,255,255,0.06)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          opacity: diaryShelf === "games" && item.status === "beat" ? 0.5 : 1,
+                        }}>
+                          {!item.cover && <span style={{ fontSize: 24 }}>{cfg?.icon}</span>}
+                        </div>
+                        {diaryShelf === "games" && item.status === "beat" && (
+                          <div style={{ position: "absolute", top: 4, right: 4, width: 18, height: 18, borderRadius: "50%", background: "var(--accent-green)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: 10, color: "white" }}>✓</span>
+                          </div>
+                        )}
+                        {item.rating > 0 && (
+                          <div style={{ fontSize: 10, color: accent, marginTop: 3, letterSpacing: 1 }}>
+                            {renderStars(item.rating)}
+                          </div>
+                        )}
                       </div>
-                      {diaryShelf === "games" && item.status === "beat" && (
-                        <div style={{ position: "absolute", top: 4, right: 4, width: 18, height: 18, borderRadius: "50%", background: "var(--accent-green)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: 10, color: "white" }}>✓</span>
-                        </div>
-                      )}
-                      {item.rating > 0 && (
-                        <div style={{ fontSize: 10, color: accent, marginTop: 3, letterSpacing: 1 }}>
-                          {renderStars(item.rating)}
-                        </div>
-                      )}
+                    ))}
+                  </div>
+                  {totalGrid > diaryLimit && (
+                    <div style={{ textAlign: "center", paddingTop: 20 }}>
+                      <button className="mono" onClick={() => setDiaryLimit(prev => prev + 50)}
+                        style={{
+                          padding: "8px 20px", fontSize: 11, borderRadius: 20, cursor: "pointer",
+                          background: `${accent}12`, color: accent,
+                          border: `1px solid ${accent}30`, transition: "all 0.15s",
+                        }}>
+                        Show more ({totalGrid - diaryLimit} remaining)
+                      </button>
                     </div>
-                  ))}
+                  )}
                 </div>
                 );
               })()}
 
               {/* Diary View */}
-              {diaryView === "diary" && items.length > 0 && (
+              {diaryView === "diary" && items.length > 0 && (() => {
+                // Flatten all group items to apply a global cap
+                let runningCount = 0;
+                const cappedGroups = [];
+                for (const group of sortedGroups) {
+                  if (runningCount >= diaryLimit) break;
+                  const remaining = diaryLimit - runningCount;
+                  const slicedItems = group.items.slice(0, remaining);
+                  cappedGroups.push({ ...group, items: slicedItems });
+                  runningCount += slicedItems.length;
+                }
+                const totalDiary = sortedGroups.reduce((sum, g) => sum + g.items.length, 0);
+
+                return (
                 <div style={{ paddingBottom: 20 }}>
-                  {sortedGroups.map((group, gi) => (
+                  {cappedGroups.map((group, gi) => (
                     <div key={gi} style={{ marginBottom: 20 }}>
                       <div style={{
                         fontFamily: "'Permanent Marker', cursive", fontSize: 13,
@@ -996,7 +1026,6 @@ export default function ShelfModals({
                             borderBottom: "1px solid rgba(255,255,255,0.04)",
                             opacity: isGame && item.status === "beat" && beatAnimId !== item.id ? 0.65 : 1,
                           }}>
-                            {/* Left column: date for non-games, beat toggle for games */}
                             {isGame ? (
                               <div onClick={(e) => { e.stopPropagation(); toggleBeat(item.id, item.status); }}
                                 className={beatAnimId === item.id ? "beat-pop" : ""}
@@ -1013,7 +1042,6 @@ export default function ShelfModals({
                                 {day || "—"}
                               </div>
                             )}
-                            {/* Poster */}
                             <div style={{
                               width: 36, height: 54, borderRadius: 4, overflow: "hidden", flexShrink: 0,
                               border: `1px solid ${accent}10`,
@@ -1022,7 +1050,6 @@ export default function ShelfModals({
                             }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
                               {!item.cover && <span style={{ fontSize: 14 }}>{cfg?.icon}</span>}
                             </div>
-                            {/* Info */}
                             <div style={{ flex: 1, minWidth: 0, cursor: "pointer" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
                               <div className="bb" style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isGame && item.status === "beat" ? "line-through" : "none" }}>
                                 {item.title}
@@ -1035,7 +1062,6 @@ export default function ShelfModals({
                                 )}
                               </div>
                             </div>
-                            {/* Right: rating/source */}
                             <div style={{ flexShrink: 0, textAlign: "right" }}>
                               {item.rating > 0 && (
                                 <div style={{ fontSize: 11, color: accent, letterSpacing: 1 }}>
@@ -1061,8 +1087,21 @@ export default function ShelfModals({
                       })}
                     </div>
                   ))}
+                  {totalDiary > diaryLimit && (
+                    <div style={{ textAlign: "center", paddingTop: 10 }}>
+                      <button className="mono" onClick={() => setDiaryLimit(prev => prev + 50)}
+                        style={{
+                          padding: "8px 20px", fontSize: 11, borderRadius: 20, cursor: "pointer",
+                          background: `${accent}12`, color: accent,
+                          border: `1px solid ${accent}30`, transition: "all 0.15s",
+                        }}>
+                        Show more ({totalDiary - diaryLimit} remaining)
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
+                );
+              })()}
             </div>
           </div>
         );
