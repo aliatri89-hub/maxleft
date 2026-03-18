@@ -918,9 +918,9 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
           ) : null}
 
-          {/* Bottom row — pod pill left, listen + watched inline right */}
+          {/* Bottom row — pod pill left, play + watched stacked right */}
           <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
+            display: "flex", alignItems: "flex-end", justifyContent: "space-between",
             marginTop: "auto", paddingTop: 6,
           }}>
             <div style={{
@@ -938,46 +938,55 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               </span>
             </div>
 
-            {/* Listen + Watched inline */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* Play button above watched badge — stacked */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
               {matchedEpisode && (
                 <button
                   onClick={handlePlay}
                   style={{
-                    display: "inline-flex", alignItems: "center", gap: 5,
-                    padding: "4px 10px", borderRadius: 12,
-                    background: isThisPlaying ? `${accent}25` : `${accent}14`,
-                    border: `1px solid ${isThisPlaying ? `${accent}66` : `${accent}33`}`,
-                    color: accent, fontSize: 10, fontWeight: 600,
-                    cursor: "pointer", fontFamily: "var(--font-body)",
-                    transition: "all 0.2s", flexShrink: 0,
+                    width: 36, height: 36, borderRadius: "50%",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: isThisPlaying ? `${accent}25` : `${accent}18`,
+                    border: `1.5px solid ${isThisPlaying ? `${accent}80` : `${accent}44`}`,
+                    cursor: "pointer", flexShrink: 0,
+                    transition: "all 0.2s",
                   }}
                 >
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill={accent}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={accent}>
                     {isThisPlaying
                       ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
                       : <path d="M8 5v14l11-7z"/>
                     }
                   </svg>
-                  {isThisPlaying ? "Playing…" : "Listen"}
                 </button>
               )}
 
-              <div style={{
-                width: 22, height: 22, borderRadius: "50%",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-                border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
-                transition: "all 0.3s ease", flexShrink: 0,
-              }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                  stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                  strokeWidth={seen ? "3" : "2"}
-                  strokeLinecap="round" strokeLinejoin="round"
-                  style={{ transition: "all 0.3s ease" }}
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+              {/* Watched badge + label */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                <div style={{
+                  width: 22, height: 22, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                  border: seen ? "2px solid rgba(52,211,153,0.5)" : "2px dashed rgba(255,255,255,0.12)",
+                  transition: "all 0.3s ease", flexShrink: 0,
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
+                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                    strokeWidth={seen ? "3" : "2"}
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transition: "all 0.3s ease" }}
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <span style={{
+                  fontSize: 8, fontFamily: "var(--font-mono)",
+                  color: seen ? "rgba(52,211,153,0.6)" : "rgba(255,255,255,0.15)",
+                  letterSpacing: "0.05em", textTransform: "uppercase",
+                  transition: "color 0.3s ease",
+                }}>
+                  Watched
+                </span>
               </div>
             </div>
           </div>
