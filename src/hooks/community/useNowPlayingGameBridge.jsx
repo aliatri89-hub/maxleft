@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "../../supabase";
+import { logGame, gameStatusToInternal } from "../../utils/mediaWrite";
 
 /**
- * useNowPlayingGameBridge — Dual-write hook for game items in the
+ * useNowPlayingGameBridge — Bridge hook for game items in the
  * Now Playing Podcast community.
  *
  * NPP covers films, books, AND games. This hook handles the game
  * subset specifically, bridging `community_user_progress` with the
- * global `games` table so logged games appear on the user's My MANTL
- * game shelf.
+ * unified `media` + `user_media_logs` tables so logged games appear
+ * on the user's My MANTL game shelf.
  *
  * Steam integration:
  *   - Reads user's Steam profile (steam_id from profiles table)
@@ -18,17 +19,17 @@ import { supabase } from "../../supabase";
  *
  * On load:
  *   1. Fetches community_user_progress for game items only
- *   2. Fetches user's games table entries (by RAWG ID)
- *   3. Cross-references: if user has game in shelf → auto-mark in progress
+ *   2. Fetches user's user_games_v entries (by RAWG ID)
+ *   3. Cross-references: if user has game on shelf → auto-populate progress
  *   4. Fetches Steam owned games → cross-references with community items
  *
  * On log:
  *   1. Upserts community_user_progress
- *   2. Upserts games table row (dual-write)
+ *   2. Calls logGame() → upsert_media_log RPC (unified media tables)
  *
  * On unlog:
  *   1. Deletes community_user_progress
- *   2. Does NOT delete from games table (personal shelf stays)
+ *   2. Does NOT delete from user_media_logs (personal shelf stays)
  *
  * Props:
  *   communityId  — NPP community_pages uuid
@@ -109,30 +110,29 @@ export function useNowPlayingGameBridge(communityId, userId, gameItems) {
         };
       });
 
-      // 2. User's games table (cross-reference by RAWG ID)
+      // 2. User's game shelf (cross-reference by RAWG ID via unified media tables)
       const rawgIds = Object.keys(rawgToItemId).map(Number).filter(Boolean);
       let gamesRows = [];
       if (rawgIds.length > 0) {
         const { data } = await supabase
-          .from("games")
-          .select("*")
+          .from("user_games_v")
+          .select("id, external_id, rating, notes, game_status, steam_app_id, extra_data")
           .eq("user_id", userId)
-          .eq("api_source", "rawg")
           .in("external_id", rawgIds);
         gamesRows = data || [];
       }
       setUserGames(gamesRows);
 
-      // 3. Cross-reference: games table → auto-populate progress
+      // 3. Cross-reference: user_games_v → auto-populate progress
       gamesRows.forEach((game) => {
-        const itemId = rawgToItemId[game.external_id];
+        const itemId = rawgToItemId[Number(game.external_id)];
         if (itemId && !progressMap[itemId]) {
           progressMap[itemId] = {
             rating: game.rating ? Number(game.rating) : null,
             notes: game.notes,
-            completed_at: game.finished_at,
-            status: game.status || "completed",
-            platform: game.platform,
+            completed_at: null,
+            status: game.game_status || "beat",
+            platform: game.extra_data?.platform || null,
             played_along: false,
             _fromGamesTable: true,
           };
@@ -287,48 +287,23 @@ export function useNowPlayingGameBridge(communityId, userId, gameItems) {
           .upsert(progressRow, { onConflict: "user_id,item_id" });
       }
 
-      // 2. Dual-write to games table
+      // 2. Write to unified media tables via logGame()
       const rawgId = itemIdToRawg[itemId];
       if (rawgId && item) {
-        const gameRow = {
-          user_id: userId,
-          external_id: rawgId,
-          api_source: "rawg",
+        const displayStatus = status === "completed" ? "beat" : status;
+        await logGame(userId, {
+          rawg_id: Number(rawgId),
           title: item.title,
           year: item.year || null,
-          cover_url: coverUrl || item.poster_path || null,
-          platform: platform || null,
           genre: item.genre_bucket || null,
-          status: status,
-          rating: rating || null,
-          notes: notes || null,
-          started_at: null,
-          finished_at: completed_at || null,
-          source: "community_nowplaying",
-        };
-
-        const { data: existing } = await supabase
-          .from("games")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("external_id", rawgId)
-          .eq("api_source", "rawg")
-          .maybeSingle();
-
-        if (existing) {
-          await supabase
-            .from("games")
-            .update({
-              status: status,
-              rating: rating || null,
-              platform: platform || gameRow.platform,
-              finished_at: completed_at || null,
-              notes: notes || null,
-            })
-            .eq("id", existing.id);
-        } else {
-          await supabase.from("games").insert(gameRow);
-        }
+        }, item.poster_path || null, {
+          rating,
+          completed_at,
+          status: displayStatus,
+          platform,
+          notes,
+          steamAppId: item.extra_data?.steam_app_id || null,
+        });
       }
 
       // 3. Update local state
@@ -374,30 +349,15 @@ export function useNowPlayingGameBridge(communityId, userId, gameItems) {
 
       const rawgId = itemIdToRawg[item.id];
       if (rawgId) {
-        const { data: existing } = await supabase
-          .from("games")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("external_id", rawgId)
-          .eq("api_source", "rawg")
-          .maybeSingle();
-
-        if (!existing) {
-          await supabase.from("games").insert({
-            user_id: userId,
-            external_id: rawgId,
-            api_source: "rawg",
-            title: item.title,
-            year: item.year || null,
-            cover_url: coverUrl || item.poster_path || null,
-            platform: null,
-            genre: item.genre_bucket || null,
-            status: "backlog",
-            rating: null,
-            notes: null,
-            source: "community_nowplaying",
-          });
-        }
+        await logGame(userId, {
+          rawg_id: Number(rawgId),
+          title: item.title,
+          year: item.year || null,
+          genre: item.genre_bucket || null,
+        }, coverUrl || item.poster_path || null, {
+          status: "backlog",
+          steamAppId: item.extra_data?.steam_app_id || null,
+        });
       }
 
       // Also add to wishlist
@@ -423,8 +383,8 @@ export function useNowPlayingGameBridge(communityId, userId, gameItems) {
     (itemId) => {
       const rawgId = itemIdToRawg[itemId];
       if (!rawgId) return false;
-      // Check games table
-      if (userGames.some((g) => g.external_id === rawgId)) return true;
+      // Check user_games_v (unified media)
+      if (userGames.some((g) => Number(g.external_id) === Number(rawgId))) return true;
       // Check Steam
       const steamAppId = steamAppIdMap[itemId];
       if (steamAppId && steamGames.some((g) => g.appid === Number(steamAppId)))
