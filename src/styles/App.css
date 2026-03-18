@@ -5704,41 +5704,67 @@
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--charcoal);
-    color: var(--cream);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    padding: 12px 20px;
-    border-radius: 10px;
+    width: min(88vw, 300px);
+    background: #f0ead8;
+    border-radius: 7px;
     z-index: 500;
-    animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.06);
+    animation: toastIn 0.38s cubic-bezier(0.2, 0.9, 0.35, 1.05);
+    box-shadow: 0 6px 28px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.3);
     overflow: hidden;
+    padding: 0;
   }
-  .toast::after {
+  /* top stripe — colour set per toast type via JS inline style on the ::before pseudo */
+  .toast::before {
     content: '';
+    display: block;
+    height: 5px;
+    background: #34d399; /* default green — overridden per type */
+  }
+  .toast-inner {
+    padding: 10px 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .toast-msg {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 19px;
+    color: #1a100a;
+    text-align: center;
+    line-height: 1.15;
+  }
+  .toast-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: #7a6a50;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  /* countdown bar — bottom */
+  .toast-countdown {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--terracotta), rgba(212,168,67,0.6));
-    border-radius: 0 0 10px 10px;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(0,0,0,0.08);
+  }
+  .toast-countdown-bar {
+    height: 100%;
+    background: rgba(0,0,0,0.18);
+    border-radius: 0;
     animation: toastProgress 2.2s linear forwards;
   }
   .toast-exit {
-    animation: toastOut 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
-  }
-  .toast-exit::after {
-    animation: none;
-    width: 0;
+    animation: toastOut 0.28s cubic-bezier(0.4, 0, 0.8, 0.6) forwards;
   }
   @keyframes toastIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-16px) scale(0.95); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    from { opacity: 0; transform: translateX(-50%) translateY(-110%); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
   @keyframes toastOut {
-    from { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-    to { opacity: 0; transform: translateX(-50%) translateY(-12px) scale(0.95); }
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to   { opacity: 0; transform: translateX(-50%) translateY(-110%); }
   }
   @keyframes toastProgress {
     from { width: 100%; }

@@ -1466,22 +1466,25 @@ if (!tmdbId) {
             onDone={() => setLetterboxdToast(null)}
           />
         )}
-        {toast && (
-          <div className={`toast${toastExiting ? " toast-exit" : ""}`} style={{ overflow: "hidden" }}>
-            {toast}
-            <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: 3,
-              background: "rgba(255,255,255,0.1)",
-            }}>
-              <div style={{
-                height: "100%",
-                background: "var(--accent-green, #34d399)",
-                borderRadius: 2,
-                animation: `toast-countdown ${toastDuration}ms linear forwards`,
-              }} />
+        {toast && (() => {
+          const msg = typeof toast === "string" ? toast : "";
+          const isError = /couldn't|failed|error|check/i.test(msg);
+          const isInfo  = /up to date|syncing|connected|disconnected|welcome/i.test(msg);
+          const stripeColor = isError ? "#f87171" : isInfo ? "#EF9F27" : "#34d399";
+          // Strip emoji for Permanent Marker rendering — they look off in that font
+          const clean = msg.replace(/[\u{1F300}-\u{1FFFF}]/gu, "").replace(/[🎬🎮📚🔁🎧🌍✓]/g, "").trim();
+          return (
+            <div className={`toast${toastExiting ? " toast-exit" : ""}`}>
+              <div style={{ height: 5, background: stripeColor }} />
+              <div className="toast-inner">
+                <div className="toast-msg">{clean}</div>
+              </div>
+              <div className="toast-countdown">
+                <div className="toast-countdown-bar" style={{ animationDuration: `${toastDuration}ms` }} />
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
         <style>{`
           @keyframes toast-countdown {
             from { width: 100%; }
