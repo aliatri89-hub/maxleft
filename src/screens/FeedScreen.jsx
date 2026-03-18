@@ -857,7 +857,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 
       {/* Poster + info stack */}
       <div style={{
-        display: "flex", gap: 12, padding: "14px 16px 18px",
+        display: "flex", gap: 12, padding: "14px 16px",
         position: "relative", zIndex: 1, alignItems: "stretch",
       }}>
         <Poster
@@ -865,38 +865,82 @@ function EpisodeCard({ data, onNavigateCommunity }) {
           title={data.title} mediaType={data.media_type || "film"}
           width={72} height={108} radius={8}
         />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 108 }}>
-          {/* Top row — label + optional stars */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            {isDropped ? (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+          {/* Top row — label + watched pill (upper right) */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
+            <div>
+              {isDropped ? (
+                <div style={{
+                  fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                  color: accent,
+                }}>
+                  {droppedLabel}
+                </div>
+              ) : (
+                <div style={{
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 18, lineHeight: 1,
+                  color: accent,
+                }}>
+                  {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
+                </div>
+              )}
+            </div>
+
+            {/* Watched status pill — upper right */}
+            {isDropped && (
               <div style={{
-                fontFamily: "'Permanent Marker', cursive", fontSize: 18,
-                letterSpacing: "0.04em", textTransform: "uppercase",
-                color: accent,
+                display: "inline-flex", alignItems: "center", gap: 4, flexShrink: 0,
+                background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                border: seen ? "1px solid rgba(52,211,153,0.3)" : "1px dashed rgba(255,255,255,0.10)",
+                borderRadius: 20, padding: "4px 10px 4px 6px",
+                transition: "all 0.3s ease",
               }}>
-                {droppedLabel}
-              </div>
-            ) : (
-              <div style={{
-                fontFamily: "'Permanent Marker', cursive",
-                fontSize: 18, lineHeight: 1,
-                color: accent,
-              }}>
-                {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <circle cx="7" cy="7" r="5.5"
+                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                    strokeWidth="1.5"
+                  />
+                  <polyline points="4.5 7.2 6 8.7 9.5 5.3"
+                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                    strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                    fill="none"
+                  />
+                </svg>
+                <span style={{
+                  fontSize: 10, fontWeight: 600, textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: seen ? "rgba(52,211,153,0.7)" : "rgba(255,255,255,0.15)",
+                  fontFamily: "var(--font-mono, monospace)",
+                  transition: "color 0.3s ease",
+                }}>
+                  {seen ? "Watched" : "Unwatched"}
+                </span>
               </div>
             )}
-            {isDropped && seen && data.user_rating > 0 && (
+
+            {/* Stars for upcoming cards */}
+            {!isDropped && seen && data.user_rating > 0 && (
               <Stars rating={data.user_rating} size={12} />
             )}
           </div>
 
-          {/* Movie title */}
+          {/* Movie title + optional stars */}
           <div style={{
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
-            color: "var(--text-primary, #e8ecf4)",
-            lineHeight: 1.2, marginBottom: 2,
+            display: "flex", alignItems: "center", gap: 6,
+            marginBottom: 2,
           }}>
-            {data.title}
+            <div style={{
+              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16,
+              color: "var(--text-primary, #e8ecf4)",
+              lineHeight: 1.2,
+            }}>
+              {data.title}
+            </div>
+            {isDropped && seen && data.user_rating > 0 && (
+              <Stars rating={data.user_rating} size={12} />
+            )}
           </div>
 
           {/* Series context */}
@@ -918,10 +962,10 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
           ) : null}
 
-          {/* Bottom row — pod pill left, play + watched stacked right */}
+          {/* Bottom row — pod pill left, VCR play button right */}
           <div style={{
-            display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-            marginTop: "auto", paddingTop: 6,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            marginTop: "auto", paddingTop: 4,
           }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 4,
@@ -938,57 +982,36 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               </span>
             </div>
 
-            {/* Play button above watched badge — stacked */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              {matchedEpisode && (
-                <button
-                  onClick={handlePlay}
-                  style={{
-                    width: 28, height: 28, borderRadius: "50%",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    background: isThisPlaying ? `${accent}25` : `${accent}18`,
-                    border: `1.5px solid ${isThisPlaying ? `${accent}80` : `${accent}44`}`,
-                    cursor: "pointer", flexShrink: 0,
-                    transition: "all 0.2s",
-                  }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill={accent}>
-                    {isThisPlaying
-                      ? <><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></>
-                      : <path d="M8 5v14l11-7z"/>
-                    }
-                  </svg>
-                </button>
-              )}
-
-              {/* Watched badge + label */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-                  border: seen ? "1.5px solid rgba(52,211,153,0.5)" : "1.5px dashed rgba(255,255,255,0.12)",
-                  transition: "all 0.3s ease", flexShrink: 0,
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
-                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                    strokeWidth={seen ? "3" : "2"}
-                    strokeLinecap="round" strokeLinejoin="round"
-                    style={{ transition: "all 0.3s ease" }}
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
+            {/* VCR-style rectangular play button — bottom right */}
+            {matchedEpisode && (
+              <button
+                onClick={handlePlay}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  background: isThisPlaying ? `${accent}` : accent,
+                  borderRadius: 6, border: "none",
+                  padding: "7px 14px 7px 11px",
+                  cursor: "pointer", flexShrink: 0,
+                  opacity: isThisPlaying ? 0.85 : 1,
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="var(--bg-card, #0f0d0b)">
+                  {isThisPlaying
+                    ? <><rect x="3" y="2" width="4" height="12" rx="1"/><rect x="9" y="2" width="4" height="12" rx="1"/></>
+                    : <path d="M4 2.5L13 8L4 13.5V2.5Z"/>
+                  }
+                </svg>
                 <span style={{
-                  fontSize: 8, fontFamily: "var(--font-mono)",
-                  color: seen ? "rgba(52,211,153,0.6)" : "rgba(255,255,255,0.15)",
-                  letterSpacing: "0.05em", textTransform: "uppercase",
-                  transition: "color 0.3s ease",
+                  fontSize: 12, fontWeight: 700, letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--bg-card, #0f0d0b)",
+                  fontFamily: "var(--font-body, system-ui)",
                 }}>
-                  Watched
+                  {isThisPlaying ? "Pause" : "Play"}
                 </span>
-              </div>
-            </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
