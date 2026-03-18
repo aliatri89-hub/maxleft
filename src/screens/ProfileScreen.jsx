@@ -471,57 +471,81 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
             <span className="profile-group-row-chevron">{wishlistOpen ? "▾" : "›"}</span>
           </div>
           <Expandable open={wishlistOpen}>
-            <div style={{ padding: "4px 0 8px" }}>
+            <div style={{ padding: "8px 0 12px" }}>
               {wishlist.length === 0 ? (
-                <div style={{ fontFamily: "var(--font-serif)", fontSize: 12, color: "var(--text-faint)", fontStyle: "italic", padding: "8px 18px" }}>
+                <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-faint)", padding: "12px 18px", lineHeight: 1.5 }}>
                   No items yet. Tap "Want to read/watch/play" on a friend's activity to add items here.
                 </div>
               ) : (
                 ["book", "movie", "show", "game"].map(type => {
                   const items = wishlist.filter(w => w.item_type === type);
                   if (items.length === 0) return null;
-                  const emoji = type === "book" ? "📚" : type === "movie" ? "🎬" : type === "show" ? "📺" : "🎮";
                   const label = type === "book" ? "Reading List" : type === "movie" ? "Watch List" : type === "show" ? "Show List" : "Play List";
                   const isExpanded = expandedListType === type;
                   const MAX_PREVIEW = 5;
+                  const accent = "#EF9F27";
 
                   return (
-                    <div key={type}>
+                    <div key={type} style={{ marginBottom: 4 }}>
                       {/* Summary row */}
-                      <div className="profile-group-sub-row" onClick={() => setExpandedListType(isExpanded ? null : type)}>
-                        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 16 }}>{emoji}</span>
-                          <span className="profile-group-row-text" style={{ fontSize: 14 }}>{label}</span>
-                          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-terra)", marginLeft: 2 }}>{items.length}</span>
-                        </span>
-                        <span className="profile-group-row-chevron">{isExpanded ? "▾" : "›"}</span>
+                      <div
+                        onClick={() => setExpandedListType(isExpanded ? null : type)}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "10px 18px", cursor: "pointer",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{
+                            fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+                            color: accent, letterSpacing: "0.04em",
+                          }}>{label}</span>
+                          <span style={{
+                            fontFamily: "var(--font-mono)", fontSize: 10,
+                            color: `${accent}80`, fontWeight: 600,
+                            background: `${accent}12`, borderRadius: 10,
+                            padding: "2px 8px",
+                          }}>{items.length}</span>
+                        </div>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{
+                          transform: isExpanded ? "rotate(90deg)" : "none",
+                          transition: "transform 0.2s",
+                        }}>
+                          <path d="M4.5 2.5L8 6L4.5 9.5" stroke={`${accent}80`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
                       </div>
 
                       {/* Expanded items */}
                       <Expandable open={isExpanded}>
-                        <div style={{ padding: "0 18px 12px 38px", display: "flex", flexDirection: "column", gap: 4 }}>
+                        <div style={{ padding: "0 18px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
                           {items.slice(0, MAX_PREVIEW).map(item => {
                             const isNextUp = type === "book" && profile.nextUpBook?.id === item.id;
                             return (
                               <div key={item.id} style={{
                                 display: "flex", alignItems: "center", gap: 10,
-                                padding: "8px 10px", background: isNextUp ? "rgba(196,115,79,0.08)" : "var(--bg-elevated)", border: `1px solid ${isNextUp ? "var(--accent-terra)" : "var(--border-subtle)"}`, borderRadius: 10,
+                                padding: "10px 12px",
+                                background: isNextUp ? `${accent}08` : "rgba(255,255,255,0.02)",
+                                border: `1px solid ${isNextUp ? `${accent}30` : `${accent}10`}`,
+                                borderRadius: 8,
+                                transition: "all 0.2s",
                               }}>
                                 {item.cover_url ? (
-                                  <img src={item.cover_url} alt="" style={{ width: 28, height: 42, borderRadius: 4, objectFit: "cover", flexShrink: 0 }} />
+                                  <img src={item.cover_url} alt="" style={{ width: 32, height: 48, borderRadius: 4, objectFit: "cover", flexShrink: 0, border: `1px solid ${accent}12` }} />
                                 ) : (
-                                  <div style={{ width: 28, height: 42, borderRadius: 4, background: "var(--bg-elevated)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, flexShrink: 0 }}>
-                                    {emoji}
+                                  <div style={{ width: 32, height: 48, borderRadius: 4, background: `${accent}08`, border: `1px solid ${accent}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: `${accent}60` }}>?</span>
                                   </div>
                                 )}
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
-                                  {item.author && <div style={{ fontFamily: "var(--font-serif)", fontSize: 10, color: "var(--text-faint)" }}>{item.author}</div>}
-                                  {isNextUp && <div style={{ fontFamily: "var(--font-mono)", fontSize: 8, letterSpacing: "0.1em", color: "var(--accent-terra)", marginTop: 2 }}>UP NEXT</div>}
+                                  {item.author && <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-faint)", marginTop: 1 }}>{item.author}</div>}
+                                  {isNextUp && <div style={{
+                                    fontFamily: "var(--font-mono)", fontSize: 8, fontWeight: 600,
+                                    letterSpacing: "0.1em", color: accent, marginTop: 3,
+                                  }}>UP NEXT</div>}
                                 </div>
                                 {type === "book" && (
                                   <div
-                                    style={{ fontSize: 15, cursor: "pointer", padding: "4px 4px", color: isNextUp ? "var(--accent-terra)" : "var(--text-faint)", opacity: isNextUp ? 1 : 0.4 }}
                                     onClick={async (e) => {
                                       e.stopPropagation();
                                       const nextUp = isNextUp ? null : { id: item.id, title: item.title, author: item.author, cover: item.cover_url };
@@ -530,22 +554,48 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                                       onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title}`);
                                     }}
                                     title={isNextUp ? "Remove next up" : "Set as next up"}
-                                  >🔖</div>
+                                    style={{
+                                      width: 28, height: 28, borderRadius: 6, cursor: "pointer",
+                                      display: "flex", alignItems: "center", justifyContent: "center",
+                                      background: isNextUp ? `${accent}20` : "rgba(255,255,255,0.04)",
+                                      border: `1px solid ${isNextUp ? `${accent}40` : "rgba(255,255,255,0.06)"}`,
+                                      transition: "all 0.2s",
+                                    }}
+                                  >
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                      <path d="M3 2h8v11l-4-2.5L3 13V2z" stroke={isNextUp ? accent : "var(--text-faint)"} strokeWidth="1.2" fill={isNextUp ? `${accent}30` : "none"} strokeLinejoin="round"/>
+                                    </svg>
+                                  </div>
                                 )}
                                 <div
-                                  style={{ fontSize: 13, color: "var(--text-faint)", cursor: "pointer", padding: "4px 6px" }}
                                   onClick={() => removeFromWishlist(item.id)}
-                                >✕</div>
+                                  style={{
+                                    width: 28, height: 28, borderRadius: 6, cursor: "pointer",
+                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                    background: "rgba(255,255,255,0.02)",
+                                    border: "1px solid rgba(255,255,255,0.06)",
+                                    transition: "all 0.2s",
+                                  }}
+                                >
+                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                    <path d="M3 3l6 6M9 3l-6 6" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round"/>
+                                  </svg>
+                                </div>
                               </div>
                             );
                           })}
                           {items.length > MAX_PREVIEW && (
                             <div style={{
-                              textAlign: "center", padding: "8px 0 4px",
-                              fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--accent-terra)",
-                              letterSpacing: "0.04em", cursor: "pointer",
+                              textAlign: "center", padding: "10px 0 4px",
                             }}>
-                              + {items.length - MAX_PREVIEW} more
+                              <span style={{
+                                fontFamily: "var(--font-mono)", fontSize: 10,
+                                color: `${accent}90`, letterSpacing: "0.04em",
+                                background: `${accent}0a`, border: `1px solid ${accent}18`,
+                                borderRadius: 16, padding: "4px 12px", cursor: "pointer",
+                              }}>
+                                + {items.length - MAX_PREVIEW} more
+                              </span>
                             </div>
                           )}
                         </div>
