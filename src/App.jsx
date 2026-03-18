@@ -260,10 +260,6 @@ export default function App() {
   // Wrap subscribe to backfill shelf films into the newly subscribed community
   const handleSubscribeCommunity = async (communityId) => {
     await subscribeCommunity(communityId);
-    if (session?.user?.id) {
-      const backfilled = await reconcileShelfWithCommunities(session.user.id);
-      if (backfilled > 0) setAutoLogCompleteSignal(Date.now());
-    }
   };
 
   // Triple Feature — check if today's puzzle is unplayed (for gold dot)
@@ -814,25 +810,6 @@ export default function App() {
       console.warn("[AutoLog] Auto-log + badge check failed:", e);
     }
   };
-  // ── Reconcile: backfill shelf films → community_user_progress ──
-  // Catches films logged BEFORE a community added them or before user subscribed
-  const reconcileShelfWithCommunities = async (uid) => {
-    try {
-      const { data, error } = await supabase.rpc(
-        "reconcile_shelf_community_progress",
-        { p_user_id: uid }
-      );
-      if (error) {
-        console.error("[Reconcile] Shelf→community reconciliation failed:", error);
-      } else if (data > 0) {
-        console.log(`[Reconcile] Backfilled ${data} community progress row(s) from shelf`);
-      }
-      return data || 0;
-    } catch (e) {
-      console.warn("[Reconcile] Shelf reconciliation error:", e);
-      return 0;
-    }
-  };
 
   const parseLetterboxdRating = (ratingStr) => {
     if (!ratingStr) return null;
@@ -1052,7 +1029,7 @@ if (!tmdbId) {
         const { error: rwErr } = await supabase.rpc("update_rewatch_data", {
           p_user_id: userId,
           p_tmdb_id: rw.tmdb_id,
-          p_watch_dates: JSON.stringify(newDates),
+          p_watch_dates: newDates,
           p_watched_at: new Date(new Date(toLogTimestamp(rw.newDate)).getTime()).toISOString(),
         });
 
@@ -1122,13 +1099,11 @@ if (!tmdbId) {
         if (syncedFilms.length > 0) {
           setTimeout(async () => {
             await autoLogAndCheckBadges(syncedFilms, userId);
-            await reconcileShelfWithCommunities(userId);
-            setAutoLogCompleteSignal(Date.now()); // feed refresh — fires after progress rows are written
+            setAutoLogCompleteSignal(Date.now());
           }, 2800);
         } else {
-          // Rewatches only or shelf-only — still reconcile + refresh feed after toast
+          // Rewatches only — refresh feed after toast
           setTimeout(async () => {
-            await reconcileShelfWithCommunities(userId);
             setAutoLogCompleteSignal(Date.now());
           }, 3200);
         }

@@ -462,7 +462,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                           await supabase.rpc("update_rewatch_data", {
                             p_user_id: userId,
                             p_tmdb_id: item.tmdb_id,
-                            p_watch_dates: JSON.stringify(newDates),
+                            p_watch_dates: newDates,
                           });
                         }
                       }
@@ -539,7 +539,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                                   await supabase.rpc("update_rewatch_data", {
                                     p_user_id: userId,
                                     p_tmdb_id: item.tmdb_id,
-                                    p_watch_dates: JSON.stringify(newDates),
+                                    p_watch_dates: newDates,
                                   });
                                 }
                               }
