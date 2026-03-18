@@ -172,14 +172,15 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
         if (!mediaId) throw new Error("upsert_media_log failed");
       } else if (selected.type === "book") {
         const isReading = bookStatus === "reading";
-        const finishedAt = isReading ? null : (bookFinishDate === "today" ? new Date().toISOString() : new Date(bookFinishDate + "T12:00:00").toISOString());
+        const dateStr = bookFinishDate === "today" ? new Date().toISOString().slice(0, 10) : bookFinishDate;
         const mediaId = await upsertMediaLog(session.user.id, {
           mediaType: "book",
           title: selected.title,
           creator: selected.author || null,
           posterPath: selected.cover || null,
           rating: isReading ? null : (rating || null),
-          watchedAt: finishedAt,
+          watchedAt: isReading ? null : new Date().toISOString(),
+          watchedDate: isReading ? null : dateStr,
           source: "mantl",
           status: isReading ? "watching" : "finished",
         });

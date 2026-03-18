@@ -1300,11 +1300,18 @@ if (!tmdbId) {
     steamLock.current = true;
     setSteamSyncing(true);
 
+    // Auth header for edge function (verify_jwt: true)
+    const steamHeaders = {};
+    try {
+      const { data: { session: s } } = await supabase.auth.getSession();
+      if (s?.access_token) steamHeaders["Authorization"] = `Bearer ${s.access_token}`;
+    } catch {}
+
     try {
       // Fetch both recent and owned in parallel
       const [recentRes, ownedRes] = await Promise.all([
-        fetch(`${STEAM_EDGE}?action=recent&steam_id=${steamId}`),
-        fetch(`${STEAM_EDGE}?action=owned&steam_id=${steamId}`),
+        fetch(`${STEAM_EDGE}?action=recent&steam_id=${steamId}`, { headers: steamHeaders }),
+        fetch(`${STEAM_EDGE}?action=owned&steam_id=${steamId}`, { headers: steamHeaders }),
       ]);
       const recentData = await recentRes.json();
       const ownedData = await ownedRes.json();
@@ -1369,7 +1376,7 @@ if (!tmdbId) {
         // Fetch achievements for this game
         let achievementsEarned = null, achievementsTotal = null;
         try {
-          const achRes = await fetch(`${STEAM_EDGE}?action=achievements&steam_id=${steamId}&app_id=${appId}`);
+          const achRes = await fetch(`${STEAM_EDGE}?action=achievements&steam_id=${steamId}&app_id=${appId}`, { headers: steamHeaders });
           const achData = await achRes.json();
           if (achData.achievements) {
             achievementsTotal = achData.achievements.length;
@@ -1451,8 +1458,14 @@ if (!tmdbId) {
     let steamId = clean;
     if (!/^\d+$/.test(clean)) {
       // Resolve vanity URL
+      // Auth header for edge function
+      const headers = {};
       try {
-        const res = await fetch(`${STEAM_EDGE}?action=resolve&vanity=${encodeURIComponent(clean)}`);
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (s?.access_token) headers["Authorization"] = `Bearer ${s.access_token}`;
+      } catch {}
+      try {
+        const res = await fetch(`${STEAM_EDGE}?action=resolve&vanity=${encodeURIComponent(clean)}`, { headers });
         const data = await res.json();
         if (data.success === 1 && data.steamid) {
           steamId = data.steamid;
