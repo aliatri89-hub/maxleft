@@ -1,7 +1,7 @@
 // ─── STATIC DATA & CONSTANTS ─────────────────────────────────
 
-export const DEFAULT_ENABLED_SHELVES = { training: true, trophies: true, passport: true, books: true, movies: true, shows: true, games: true };
-export const DEFAULT_SHELF_ORDER = ["training", "trophies", "passport", "books", "movies", "shows", "games"];
+export const DEFAULT_ENABLED_SHELVES = { passport: true, books: true, movies: true, shows: true, games: true };
+export const DEFAULT_SHELF_ORDER = ["passport", "books", "movies", "shows", "games"];
 
 export const generateInviteCode = () => {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -11,19 +11,8 @@ export const generateInviteCode = () => {
 };
 
 export const GROUP_TYPE_CONFIG = {
-  training: { emoji: "🏃", label: "Training Club", shelves: ["training", "trophies"] },
   bookclub: { emoji: "📖", label: "Book Club", shelves: ["books"] },
   watchparty: { emoji: "🎬", label: "Watch Party", shelves: ["movies", "shows"] },
-};
-
-export const SPORT_ICONS = {
-  Run: "🏃", TrailRun: "🏃", VirtualRun: "🏃",
-  Ride: "🚴", MountainBikeRide: "🚵", VirtualRide: "🚴", GravelRide: "🚴", EBikeRide: "🚴",
-  Swim: "🏊", Walk: "🚶", Hike: "🥾",
-  WeightTraining: "🏋️", Workout: "💪", CrossFit: "💪", Elliptical: "💪",
-  Yoga: "🧘", Rowing: "🚣", Kayaking: "🛶", Skiing: "⛷️", Snowboard: "🏂",
-  IceSkate: "⛸️", Golf: "⛳", Soccer: "⚽", Tennis: "🎾", Pickleball: "🏓",
-  RockClimbing: "🧗", StairStepper: "🪜",
 };
 
 export const VISIT_MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];

@@ -204,7 +204,7 @@ export default function App() {
 
   // Shelf data
   const [shelves, setShelves] = useState({
-    books: [], movies: [], shows: [], games: [], trophies: [], goals: [],
+    books: [], movies: [], shows: [], games: [],
     totalItems: 0,
   });
   const [shelvesLoaded, setShelvesLoaded] = useState(false);
@@ -363,7 +363,7 @@ export default function App() {
     setSession(null);
     setScreen("landing");
     setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-    setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
+    setShelves({ books: [], movies: [], shows: [], games: [], totalItems: 0 });
     setShelvesLoaded(false);
     setActiveTab("feed");
   };
@@ -389,7 +389,7 @@ export default function App() {
       setSession(null);
       setScreen("landing");
       setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-      setShelves({ books: [], movies: [], shows: [], games: [], trophies: [], goals: [], totalItems: 0 });
+      setShelves({ books: [], movies: [], shows: [], games: [], totalItems: 0 });
       setShelvesLoaded(false);
       setActiveTab("feed");
     } catch (err) {
@@ -496,8 +496,6 @@ export default function App() {
       { data: allMovies },
       { data: allShows },
       { data: allGames },
-      { data: allTrophies },
-      { data: allGoals },
       { data: allCountries },
     ] = await Promise.all([
       supabase.from("user_books_v").select("id, title, author, cover_url, rating, notes, finished_at, source")
@@ -510,8 +508,6 @@ export default function App() {
         .eq("user_id", userId).order("created_at", { ascending: false }),
       supabase.from("user_games_v").select("id, title, cover_url, genre, game_status, rating, notes, source, external_id, steam_app_id, extra_data, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
-      Promise.resolve({ data: [] }),  // trophies (workout_goals dropped)
-      Promise.resolve({ data: [] }),  // goals (workout_goals dropped)
       supabase.from("countries").select("id, country_code, country_name, status, visit_month, visit_year, trip_month, trip_year, notes, photo_url")
         .eq("user_id", userId).order("created_at", { ascending: false }),
     ]);
@@ -551,18 +547,6 @@ export default function App() {
         externalId: g.external_id || null, steamAppId: g.steam_app_id || null,
       }));
 
-    const trophies = (allTrophies || []).map((t) => ({
-      id: t.id, title: t.name, emoji: t.emoji || "🏆", result: t.result,
-      completedAt: t.completed_at, location: t.location, source: t.source || "fiveseven",
-      photoUrl: t.photo_url || null, distance: t.distance || null, photoPosition: t.photo_position || "50 50",
-    }));
-
-    const goals = (allGoals || []).map((g) => ({
-      id: g.id, title: g.name, emoji: g.emoji || "🎯", targetDate: g.target_date,
-      location: g.location, goal: g.goal_text || "", source: g.source || "fiveseven",
-      photoUrl: g.photo_url || null, distance: g.distance || null, photoPosition: g.photo_position || "50 50",
-    }));
-
     const countries = (allCountries || []).map(c => ({
       id: c.id, countryCode: c.country_code, countryName: c.country_name,
       flag: "🏳️", status: c.status,
@@ -571,10 +555,10 @@ export default function App() {
       notes: c.notes, photoUrl: c.photo_url,
     }));
 
-    const totalItems = books.length + movies.length + shows.length + games.length + trophies.length;
+    const totalItems = books.length + movies.length + shows.length + games.length;
 
     setShelves({
-      books: allBooksCombined, currentBooks, movies, shows, games, trophies, goals, countries,
+      books: allBooksCombined, currentBooks, movies, shows, games, countries,
       totalItems,
     });
     setShelvesLoaded(true);

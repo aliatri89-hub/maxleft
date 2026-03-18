@@ -3,29 +3,10 @@ import { createPortal } from "react-dom";
 import { updateGameStatus } from "../utils/mediaWrite";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
 import LazyShelf from "../components/LazyShelf";
-
-// Shelf sections (dark)
-// HIDDEN: Lifestyle shelves — focused on media (books/movies/shows/games)
-// import TrainingShelf from "../components/shelf/TrainingShelf";
-// import TrophyShelf from "../components/shelf/TrophyShelf";
-// import PassportShelf from "../components/shelf/PassportShelf";
 import MediaShelf from "../components/shelf/MediaShelf";
-// import HabitsShelf from "../components/shelf/HabitsShelf"; // DISABLED for launch
-// import GroupsShelf from "../components/shelf/GroupsShelf"; // DISABLED for launch
-
-// Modals
 import ShelfModals from "../components/modals/ShelfModals";
 
-// ── Dark skeleton templates ──
-const skelTraining = (
-  <div style={{ padding: "0 16px" }}>
-    <div className="skeleton-dark" style={{ width: 130, height: 16, marginBottom: 10 }} />
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-      <div className="skeleton-dark" style={{ height: 90, borderRadius: "var(--radius-md)" }} />
-      <div className="skeleton-dark" style={{ height: 90, borderRadius: "var(--radius-md)" }} />
-    </div>
-  </div>
-);
+// ── Skeleton templates ──
 const skelCovers = (
   <div style={{ padding: "0 16px" }}>
     <div className="skeleton-dark" style={{ width: 120, height: 18, marginBottom: 14 }} />
@@ -115,9 +96,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             </LazyShelf>
           ))}
 
-          {/* Habits — DISABLED for launch */}
 
-          {/* Groups — DISABLED for launch */}
 
         </div>
 
