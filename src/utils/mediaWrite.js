@@ -3,7 +3,6 @@ import { supabase } from "../supabase";
 /**
  * mediaWrite.js
  * Single source of truth for all media logging.
- * Replaces communityDualWrite.js (dual_write_film/show/book RPCs).
  *
  * Every log action -- community, shelf, Letterboxd, Goodreads, Steam --
  * goes through upsertMediaLog(). It calls the server-side upsert_media_log RPC
@@ -33,12 +32,37 @@ export function toBackdropPath(url) {
   return match ? match[1] : url;
 }
 
+// --- Game status mapping ---
+// Client/display uses: playing, beat, backlog
+// DB internal uses:    watching, finished, backlog
+const GAME_STATUS_TO_INTERNAL = {
+  playing: "watching",
+  beat: "finished",
+  backlog: "backlog",
+  completed: "backlog", // legacy Steam status → backlog
+};
+
+const GAME_STATUS_TO_DISPLAY = {
+  watching: "playing",
+  finished: "beat",
+  backlog: "backlog",
+};
+
+export function gameStatusToInternal(displayStatus) {
+  return GAME_STATUS_TO_INTERNAL[displayStatus] || displayStatus;
+}
+
+export function gameStatusToDisplay(internalStatus) {
+  return GAME_STATUS_TO_DISPLAY[internalStatus] || internalStatus;
+}
+
 // --- Core: upsert a media log via RPC ---
 export async function upsertMediaLog(userId, {
   mediaType,
   tmdbId = null,
   isbn = null,
   rawgId = null,
+  steamAppId = null,
   title,
   year = null,
   creator = null,
@@ -54,6 +78,7 @@ export async function upsertMediaLog(userId, {
   watchCount = 1,
   watchDates = [],
   status = "finished",
+  extraData = {},
 } = {}) {
   if (!userId || !title) return null;
 
@@ -63,6 +88,7 @@ export async function upsertMediaLog(userId, {
     p_tmdb_id: tmdbId || null,
     p_isbn: isbn || null,
     p_rawg_id: rawgId || null,
+    p_steam_app_id: steamAppId || null,
     p_title: title,
     p_year: year || null,
     p_creator: creator || null,
@@ -78,6 +104,7 @@ export async function upsertMediaLog(userId, {
     p_watch_dates: watchDates,
     p_status: status,
     p_watched_date: watchedDate || null,
+    p_extra_data: extraData,
   });
 
   if (error) {
@@ -134,16 +161,106 @@ export async function logBook(userId, item, coverUrl, { rating, completed_at, st
   });
 }
 
-export async function logGame(userId, item, coverUrl, { rating, completed_at } = {}) {
+/**
+ * logGame — Log a game to the unified media tables.
+ *
+ * Accepts display statuses: "playing", "beat", "backlog"
+ * Translates to internal: "watching", "finished", "backlog"
+ */
+export async function logGame(userId, item, coverUrl, {
+  rating,
+  completed_at,
+  status = "beat",
+  platform = null,
+  steamAppId = null,
+  notes = null,
+} = {}) {
   if (!userId || !item) return null;
+
+  const internalStatus = gameStatusToInternal(status);
+  const resolvedSteamAppId = steamAppId || item.steam_app_id || null;
+  const resolvedRawgId = item.rawg_id
+    || (item.extra_data?.rawg_id ? parseInt(item.extra_data.rawg_id) : null)
+    || null;
+
   return upsertMediaLog(userId, {
     mediaType: "game",
-    rawgId: item.rawg_id || (item.extra_data?.rawg_id ? parseInt(item.extra_data.rawg_id) : null),
+    rawgId: resolvedRawgId,
+    steamAppId: resolvedSteamAppId,
     title: item.title,
     year: item.year || null,
     creator: item.creator || null,
     posterPath: coverUrl || null,
+    genre: item.genre || item.genre_bucket || null,
     rating,
+    notes,
     watchedAt: completed_at || null,
+    status: internalStatus,
+    source: resolvedSteamAppId ? "steam" : "mantl",
+    extraData: platform ? { platform } : {},
   });
+}
+
+// --- Game helpers: status update + delete ---
+
+/**
+ * updateGameStatus — Change a game's status in user_media_logs.
+ * Accepts display statuses: "playing", "beat", "backlog"
+ *
+ * @param {string} logId - user_media_logs.id (from user_games_v.id)
+ * @param {string} displayStatus - "playing", "beat", or "backlog"
+ * @param {object} extra - optional { rating, notes, finished_at }
+ */
+export async function updateGameStatus(logId, displayStatus, extra = {}) {
+  const internalStatus = gameStatusToInternal(displayStatus);
+  const updates = { status: internalStatus, updated_at: new Date().toISOString() };
+
+  if (extra.rating !== undefined) updates.rating = extra.rating;
+  if (extra.notes !== undefined) updates.notes = extra.notes;
+  if (extra.finished_at) updates.watched_at = extra.finished_at;
+
+  const { error } = await supabase
+    .from("user_media_logs")
+    .update(updates)
+    .eq("id", logId);
+
+  if (error) {
+    console.warn("[mediaWrite] updateGameStatus error:", error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * deleteMediaLog — Remove a user_media_logs row by ID.
+ * Works for any media type. The media catalog row stays.
+ */
+export async function deleteMediaLog(logId) {
+  const { error } = await supabase
+    .from("user_media_logs")
+    .delete()
+    .eq("id", logId);
+
+  if (error) {
+    console.warn("[mediaWrite] deleteMediaLog error:", error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * updateMediaRating — Update rating on a user_media_logs row.
+ * Works for any media type.
+ */
+export async function updateMediaRating(logId, rating) {
+  const { error } = await supabase
+    .from("user_media_logs")
+    .update({ rating: rating || null, updated_at: new Date().toISOString() })
+    .eq("id", logId);
+
+  if (error) {
+    console.warn("[mediaWrite] updateMediaRating error:", error.message);
+    return false;
+  }
+  return true;
 }

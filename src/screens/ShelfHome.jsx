@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { supabase } from "../supabase";
+import { updateGameStatus } from "../utils/mediaWrite";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
 import LazyShelf from "../components/LazyShelf";
 
@@ -76,11 +76,11 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
 
   // ── Beat toggle (games) ──
   const toggleBeat = async (gameId, currentStatus) => {
-    const newStatus = currentStatus === "beat" ? "completed" : "beat";
+    const newStatus = currentStatus === "beat" ? "backlog" : "beat";
     setBeatAnimId(gameId);
     setTimeout(() => setBeatAnimId(null), 500);
-    const { error } = await supabase.from("games").update({ status: newStatus }).eq("id", gameId);
-    if (!error && onRefresh) await onRefresh();
+    const ok = await updateGameStatus(gameId, newStatus);
+    if (ok && onRefresh) await onRefresh();
   };
 
   // ── Shelf ordering ──

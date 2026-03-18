@@ -13,7 +13,24 @@ import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } fro
  */
 
 // Module-level cache — survives tab switches (component unmount/remount).
+// localStorage layer underneath — survives page reloads / app restarts.
+// Once a "Have You Seen" pick is chosen, it stays forever (new picks come from 8h drops).
 const _randomPicksCache = new Map();
+
+const _PICKS_STORAGE_KEY = (uid) => `mantl_random_picks_${uid}`;
+
+function _getPersistedPicks(userId) {
+  try {
+    const raw = localStorage.getItem(_PICKS_STORAGE_KEY(userId));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function _persistPicks(userId, picks) {
+  try {
+    localStorage.setItem(_PICKS_STORAGE_KEY(userId), JSON.stringify(picks));
+  } catch {}
+}
 
 export function useFeed(userId, subscribedIds, feedMode = "all") {
   const [feedItems, setFeedItems] = useState([]);
@@ -138,8 +155,17 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
       const rawUpNext = upNextRes.data || [];
       const rawRandom = randomRes.data || [];
 
-      if (isExplicit || !_randomPicksCache.has(userId)) {
-        _randomPicksCache.set(userId, rawRandom.filter(r => r.media_type !== "book"));
+      // Stable picks: load from module cache → localStorage → server (first visit only).
+      // Once picks are set, they never re-roll. New "Have You Seen" cards come from 8h drops.
+      if (!_randomPicksCache.has(userId)) {
+        const persisted = _getPersistedPicks(userId);
+        if (persisted && persisted.length > 0) {
+          _randomPicksCache.set(userId, persisted);
+        } else {
+          const fresh = rawRandom.filter(r => r.media_type !== "book");
+          _randomPicksCache.set(userId, fresh);
+          _persistPicks(userId, fresh);
+        }
       }
 
       // ════════════════════════════════════════════

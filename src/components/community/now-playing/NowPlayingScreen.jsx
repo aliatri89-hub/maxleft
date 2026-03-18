@@ -343,7 +343,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
               progress={mergedProgress}
               activeTab={tabKey}
             />
-            {/* ── Filter bar (lives in screen, not hero — matches BlankCheck pattern) ── */}
+            {/* ── Filter bar — only for arcade & books (GenreTab has its own with genre dropdown) ── */}
+            {(tabKey === "arcade" || tabKey === "books") && (
             <div style={{
               padding: "8px 16px 10px",
               display: "flex", alignItems: "center", gap: 6,
@@ -360,13 +361,13 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                     textTransform: "uppercase",
                     borderRadius: 20,
                     border: filter === f
-                      ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : tabKey === "books" ? "#d4a574" : "#facc15"}`
+                      ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#d4a574"}`
                       : "1px solid rgba(255,255,255,0.1)",
                     background: filter === f
-                      ? `${tabKey === "arcade" ? "rgba(0,255,200,0.12)" : tabKey === "books" ? "rgba(212,165,116,0.12)" : "rgba(250,204,21,0.12)"}`
+                      ? `${tabKey === "arcade" ? "rgba(0,255,200,0.12)" : "rgba(212,165,116,0.12)"}`
                       : "rgba(255,255,255,0.04)",
                     color: filter === f
-                      ? (tabKey === "arcade" ? "#00ffc8" : tabKey === "books" ? "#d4a574" : "#facc15")
+                      ? (tabKey === "arcade" ? "#00ffc8" : "#d4a574")
                       : "rgba(255,255,255,0.4)",
                     cursor: "pointer",
                     flexShrink: 0,
@@ -384,7 +385,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 }}
                 style={{
                   width: 30, height: 30, borderRadius: "50%",
-                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#facc15"}` : "1px solid rgba(255,255,255,0.1)",
+                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#d4a574"}` : "1px solid rgba(255,255,255,0.1)",
                   background: searchQuery ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", marginLeft: "auto", flexShrink: 0,
@@ -392,13 +393,14 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke={searchQuery ? (tabKey === "arcade" ? "#00ffc8" : "#facc15") : "rgba(255,255,255,0.4)"}
+                  stroke={searchQuery ? (tabKey === "arcade" ? "#00ffc8" : "#d4a574") : "rgba(255,255,255,0.4)"}
                   strokeWidth="2" strokeLinecap="round"
                 >
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
               </button>
             </div>
+            )}
             {tabKey === "arcade" && (
               <NowPlayingArcadeTab
                 community={community}

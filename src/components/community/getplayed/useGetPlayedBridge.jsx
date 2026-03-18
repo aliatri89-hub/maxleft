@@ -1,36 +1,31 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "../../../supabase";
+import { logGame } from "../../../utils/mediaWrite";
 
 /**
- * useGetPlayedBridge — Dual-write hook for the Get Played community.
+ * useGetPlayedBridge — Bridge hook for the Get Played community.
  *
- * Bridges the existing `games` table (user's personal game shelf) with
- * `community_user_progress` (community tracking) so logging in either
- * place keeps both in sync.
+ * Bridges `community_user_progress` with the unified `user_media_logs`
+ * table (via `user_games_v` view) so logging in either place keeps
+ * both in sync.
  *
  * On load:
- *   1. Fetches community_user_progress (standard community pattern)
- *   2. Fetches user's games table entries
- *   3. Cross-references by RAWG ID to auto-mark community items as logged
- *      if the user already has them in their game shelf
+ *   1. Fetches community_user_progress (standard)
+ *   2. Fetches user's game shelf from user_games_v
+ *   3. Cross-references by RAWG ID to auto-mark community items
  *
- * On log (from Get Played log modal):
- *   1. Upserts community_user_progress (standard)
- *   2. Upserts games table row (so it appears on main game shelf)
+ * On log:
+ *   1. Upserts community_user_progress
+ *   2. Calls logGame() for unified media write
  *
  * On unlog:
- *   1. Deletes community_user_progress (standard)
- *   2. Does NOT delete from games — user's personal shelf stays intact
- *
- * Props:
- *   communityId  — uuid of the Get Played community_pages row
- *   userId       — current user's uuid
- *   allItems     — all community_items for this community
+ *   1. Deletes community_user_progress
+ *   2. Does NOT delete from user_media_logs — personal shelf stays
  */
 export function useGetPlayedBridge(communityId, userId, allItems) {
   const [progress, setProgress] = useState({});
-  const [userGames, setUserGames] = useState([]); // rows from `games` table
-  const [playingNow, setPlayingNow] = useState([]); // games with status='playing'
+  const [userGames, setUserGames] = useState([]);
+  const [playingNow, setPlayingNow] = useState([]);
 
   // ── Build RAWG ID → community_item_id map ─────────────────
   const rawgToItemId = useMemo(() => {
@@ -51,7 +46,7 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
     return map;
   }, [allItems]);
 
-  // ── Load community progress + games table ─────────────────
+  // ── Load community progress + user games ─────────────────
   useEffect(() => {
     if (!communityId || !userId || allItems.length === 0) return;
 
@@ -77,22 +72,20 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
         };
       });
 
-      // 2. User's games (for cross-reference)
+      // 2. User's game shelf from unified view
       const rawgIds = Object.keys(rawgToItemId).map(Number).filter(Boolean);
       let gamesRows = [];
       if (rawgIds.length > 0) {
         const { data } = await supabase
-          .from("games")
+          .from("user_games_v")
           .select("*")
           .eq("user_id", userId)
-          .eq("api_source", "rawg")
           .in("external_id", rawgIds);
         gamesRows = data || [];
       }
       setUserGames(gamesRows);
 
-      // 3. Cross-reference: if user has a game logged but NOT in community progress,
-      //    auto-populate the progress map so it shows as checked off
+      // 3. Cross-reference: if user has a game logged but NOT in community progress
       gamesRows.forEach((game) => {
         const itemId = rawgToItemId[game.external_id];
         if (itemId && !progressMap[itemId]) {
@@ -100,21 +93,21 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
             rating: game.rating ? Number(game.rating) : null,
             notes: game.notes,
             completed_at: game.finished_at,
-            status: game.status || "completed",
-            platform: game.platform,
-            played_along: false, // can't infer this from games table
-            _fromGamesTable: true, // flag so we know to create community_user_progress on next save
+            status: game.game_status || "beat",
+            platform: game.extra_data?.platform || null,
+            played_along: false,
+            _fromGamesTable: true,
           };
         }
       });
 
-      // 4. Fetch all games user is currently playing (for "What Are You Playing?")
+      // 4. Fetch all games user is currently playing
       const { data: playingGames } = await supabase
-        .from("games")
+        .from("user_games_v")
         .select("*")
         .eq("user_id", userId)
-        .eq("status", "playing")
-        .order("started_at", { ascending: false, nullsFirst: false });
+        .eq("game_status", "playing")
+        .order("created_at", { ascending: false });
       setPlayingNow(playingGames || []);
 
       setProgress(progressMap);
@@ -123,7 +116,7 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
     load();
   }, [communityId, userId, allItems, rawgToItemId]);
 
-  // ── Log: dual-write to community_user_progress + games ────
+  // ── Log: community_user_progress + unified media ──────────
   const logItem = useCallback(
     async (itemId, item, coverUrl, opts = {}) => {
       if (!userId) return;
@@ -163,60 +156,29 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
           .upsert(progressRow, { onConflict: "user_id,item_id" });
       }
 
-      // 2. Upsert into games table (dual-write)
+      // 2. Write to unified media tables via logGame()
       const rawgId = itemIdToRawg[itemId];
-      if (rawgId && item) {
-        const gameRow = {
-          user_id: userId,
-          external_id: rawgId,
-          api_source: "rawg",
+      if (item) {
+        const displayStatus = status === "completed" ? "beat" : status;
+        await logGame(userId, {
           title: item.title,
+          rawg_id: rawgId ? parseInt(rawgId) : null,
           year: item.year || null,
-          cover_url: coverUrl || item.poster_path || null,
-          platform: platform || null,
+          creator: item.creator || null,
           genre: item.genre_bucket || null,
-          status: status,
+        }, coverUrl || item.poster_path || null, {
+          status: displayStatus,
           rating: rating || null,
-          started_at: null,
-          finished_at: completed_at || null,
-          source: "community_getplayed",
-        };
-
-        // Check if game already exists in user's shelf
-        const { data: existing } = await supabase
-          .from("games")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("external_id", rawgId)
-          .eq("api_source", "rawg")
-          .maybeSingle();
-
-        if (existing) {
-          // Update existing — preserve fields user may have set elsewhere
-          await supabase
-            .from("games")
-            .update({
-              status: status,
-              rating: rating || null,
-              platform: platform || gameRow.platform,
-              finished_at: completed_at || null,
-            })
-            .eq("id", existing.id);
-        } else {
-          // Insert new
-          await supabase
-            .from("games")
-            .insert(gameRow);
-        }
+          completed_at: completed_at || null,
+          platform: platform || null,
+        });
       }
 
       // 3. Update local state
       setProgress((prev) => ({
         ...prev,
         [itemId]: {
-          rating,
-          completed_at,
-          status,
+          rating, completed_at, status,
           played_along: played_along || false,
           platform: platform || null,
         },
@@ -225,7 +187,7 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
     [userId, progress, itemIdToRawg]
   );
 
-  // ── Unlog: remove from community only, keep games table ───
+  // ── Unlog: remove from community only, keep shelf ─────────
   const unlogItem = useCallback(
     async (itemId) => {
       if (!userId) return;
@@ -236,10 +198,6 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
         .eq("user_id", userId)
         .eq("item_id", itemId);
 
-      // NOTE: We intentionally do NOT delete from the `games` table.
-      // The user's personal game shelf should persist even if they
-      // remove something from the community tracker.
-
       setProgress((prev) => {
         const next = { ...prev };
         delete next[itemId];
@@ -249,58 +207,30 @@ export function useGetPlayedBridge(communityId, userId, allItems) {
     [userId]
   );
 
-  // ── Add to wishlist (want to play) ────────────────────────
+  // ── Add to backlog (want to play) ────────────────────────
   const addToWatchlist = useCallback(
     async (item, coverUrl) => {
       if (!userId) return;
 
       const rawgId = itemIdToRawg[item.id];
-      if (rawgId) {
-        // Add to games table as "backlog"
-        const { data: existing } = await supabase
-          .from("games")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("external_id", rawgId)
-          .eq("api_source", "rawg")
-          .maybeSingle();
-
-        if (!existing) {
-          await supabase.from("games").insert({
-            user_id: userId,
-            external_id: rawgId,
-            api_source: "rawg",
-            title: item.title,
-            year: item.year || null,
-            cover_url: coverUrl || item.poster_path || null,
-            platform: null,
-            genre: item.genre_bucket || null,
-            status: "backlog",
-            rating: null,
-            notes: null,
-            source: "community_getplayed",
-          });
-        }
-      }
-
-      // Also add to wishlist table if it exists
-      await supabase.from("wishlist").upsert({
-        user_id: userId,
-        media_type: "game",
+      await logGame(userId, {
         title: item.title,
-        external_id: item.extra_data?.rawg_id || null,
-        cover_url: coverUrl || item.poster_path || null,
-      }, { onConflict: "user_id,title,media_type" }).catch(() => {});
+        rawg_id: rawgId ? parseInt(rawgId) : null,
+        year: item.year || null,
+        genre: item.genre_bucket || null,
+      }, coverUrl || item.poster_path || null, {
+        status: "backlog",
+      });
     },
     [userId, itemIdToRawg]
   );
 
-  // ── Helper: check if user owns game via Steam / games table ─
+  // ── Helper: check if user owns game via shelf ──────────────
   const userOwnsGame = useCallback(
     (itemId) => {
       const rawgId = itemIdToRawg[itemId];
       if (!rawgId) return false;
-      return userGames.some((g) => g.external_id === rawgId);
+      return userGames.some((g) => g.external_id === parseInt(rawgId));
     },
     [userGames, itemIdToRawg]
   );

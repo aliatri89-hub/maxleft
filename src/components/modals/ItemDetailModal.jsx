@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
+import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteMediaLog } from "../../utils/mediaWrite";
 import { formatDate } from "../../utils/helpers";
 import BottomSheet from "../shared/BottomSheet";
 import StarRating from "../shared/StarRating";
@@ -75,10 +76,8 @@ export default function ItemDetailModal({
   // ── Actions ──
 
   const updateRating = async () => {
-    const table = ({ movies: "movies", shows: "shows", games: "games", books: "books" })[shelfType];
-    if (!table) return;
-    const { error } = await supabase.from(table).update({ rating: editRatingVal || null }).eq("id", item.id);
-    if (!error) {
+    const ok = await updateMediaRating(item.id, editRatingVal);
+    if (ok) {
       setLocalItem(prev => ({ ...prev, rating: editRatingVal || null }));
       setEditingRating(false);
       if (onRefresh) onRefresh();
@@ -87,10 +86,8 @@ export default function ItemDetailModal({
 
   const removeItem = async () => {
     setDeleting(true);
-    const table = ({ movies: "movies", shows: "shows", games: "games", books: "books" })[shelfType];
-    if (!table) return;
-    const { error } = await supabase.from(table).delete().eq("id", item.id);
-    if (!error) {
+    const ok = await deleteMediaLog(item.id);
+    if (ok) {
       if (onRefresh) onRefresh();
       onClose();
     } else {
@@ -156,12 +153,11 @@ export default function ItemDetailModal({
     setSaving(true);
     setSaveStatus("saving");
     try {
-      await supabase.from("games").update({
-        status: "completed",
+      await updateGameStatusHelper(item.id, "beat", {
         rating: finishRating || null,
         finished_at: new Date().toISOString(),
-      }).eq("id", item.id);
-      setLocalItem(prev => ({ ...prev, isPlaying: false, rating: finishRating || null, status: "completed" }));
+      });
+      setLocalItem(prev => ({ ...prev, isPlaying: false, isBeat: true, rating: finishRating || null, status: "beat" }));
       setFinishRating(0);
       if (onRefresh) onRefresh();
       flash("saved");
@@ -172,13 +168,13 @@ export default function ItemDetailModal({
     setSaving(false);
   };
 
-  const setGameStatus = async (status) => {
-    const { error } = await supabase.from("games").update({ status }).eq("id", item.id);
-    if (!error) {
+  const setGameStatus = async (displayStatus) => {
+    const ok = await updateGameStatusHelper(item.id, displayStatus);
+    if (ok) {
       setLocalItem(prev => ({
-        ...prev, status,
-        isPlaying: status === "playing",
-        isBeat: status === "beat",
+        ...prev, status: displayStatus,
+        isPlaying: displayStatus === "playing",
+        isBeat: displayStatus === "beat",
       }));
       if (onRefresh) onRefresh();
     }
@@ -330,10 +326,10 @@ export default function ItemDetailModal({
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { key: "playing", label: "🎮 Playing", bg: "linear-gradient(135deg, #a78bfa, #7c5cc4)", color: "white" },
-              { key: "completed", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: "#888" },
+              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: "#888" },
               { key: "beat", label: "✓ Beat", bg: "#4ade80", color: "#0a0a0a" },
             ].map(opt => {
-              const isActive = (localItem.status || "completed") === opt.key;
+              const isActive = (localItem.status || "backlog") === opt.key;
               return (
                 <button key={opt.key} onClick={() => setGameStatus(opt.key)}
                   style={{

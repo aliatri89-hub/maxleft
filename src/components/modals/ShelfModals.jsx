@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../supabase";
+import { updateGameStatus } from "../../utils/mediaWrite";
 import { COUNTRIES } from "../../utils/countries";
 import { VISIT_MONTHS, formatVisitDate } from "../../utils/constants";
 import { compressImage, sb } from "../../utils/api";
@@ -68,8 +69,8 @@ export default function ShelfModals({
   const toggleBeat = async (gameId, currentStatus) => {
     const newStatus = currentStatus === "beat" ? "playing" : "beat";
     setBeatAnimId(gameId);
-    const { error } = await supabase.from("games").update({ status: newStatus }).eq("id", gameId).eq("user_id", session.user.id);
-    if (!error) onRefresh();
+    const ok = await updateGameStatus(gameId, newStatus);
+    if (ok) onRefresh();
     setTimeout(() => setBeatAnimId(null), 600);
   };
 
@@ -1187,7 +1188,7 @@ export default function ShelfModals({
         if (diaryShelf === "games") {
           // Games: group by status (Playing → Backlog → Beat)
           const playing = items.filter(i => i.status === "playing" || i.isPlaying);
-          const backlog = items.filter(i => i.status === "completed" || (!i.isPlaying && i.status !== "beat" && i.status !== "playing"));
+          const backlog = items.filter(i => i.status === "backlog" || (!i.isPlaying && i.status !== "beat" && i.status !== "playing"));
           const beat = items.filter(i => i.status === "beat");
           // Sort each group by playtime (parsed from notes)
           const byPlaytime = (a, b) => {

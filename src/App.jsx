@@ -34,7 +34,7 @@ import BadgeProgressToast from "./components/community/shared/BadgeProgressToast
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
 import { toLogTimestamp } from "./utils/helpers";
-import { upsertMediaLog, toPosterPath } from "./utils/mediaWrite";
+import { upsertMediaLog, toPosterPath, logGame } from "./utils/mediaWrite";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
 // Shown instantly when navigating to a community from feed cards.
@@ -413,7 +413,6 @@ export default function App() {
       await supabase.from("feed_comments").delete().eq("user_id", userId);
       await supabase.from("community_user_progress").delete().eq("user_id", userId);
       await supabase.from("user_media_logs").delete().eq("user_id", userId);
-      await supabase.from("games").delete().eq("user_id", userId);
       await supabase.from("countries").delete().eq("user_id", userId);
       await supabase.from("wishlist").delete().eq("user_id", userId);
       await supabase.from("blocked_users").delete().eq("user_id", userId);
@@ -580,7 +579,7 @@ export default function App() {
         .eq("user_id", userId).order("watched_at", { ascending: false, nullsFirst: false }),
       supabase.from("user_shows_v").select("id, title, poster_url, tmdb_id, show_status, rating, notes, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
-      supabase.from("games").select("id, title, cover_url, platform, genre, status, rating, notes, source, external_id, created_at")
+      supabase.from("user_games_v").select("id, title, cover_url, genre, game_status, rating, notes, source, external_id, steam_app_id, extra_data, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
       Promise.resolve({ data: [] }),  // trophies (workout_goals dropped)
       Promise.resolve({ data: [] }),  // goals (workout_goals dropped)
@@ -615,11 +614,12 @@ export default function App() {
       }));
 
     const games = (allGames || [])
-      .sort((a, b) => (a.status === "playing" ? -1 : 1) - (b.status === "playing" ? -1 : 1))
+      .sort((a, b) => (a.game_status === "playing" ? -1 : 1) - (b.game_status === "playing" ? -1 : 1))
       .map((g) => ({
-        id: g.id, title: g.title, cover: g.cover_url, platform: g.platform,
-        genre: g.genre, status: g.status, isPlaying: g.status === "playing", isBeat: g.status === "beat",
-        rating: g.rating, notes: g.notes, source: g.source || null, externalId: g.external_id || null,
+        id: g.id, title: g.title, cover: g.cover_url, platform: g.extra_data?.platform || null,
+        genre: g.genre, status: g.game_status, isPlaying: g.game_status === "playing", isBeat: g.game_status === "beat",
+        rating: g.rating, notes: g.notes, source: g.source || null,
+        externalId: g.external_id || null, steamAppId: g.steam_app_id || null,
       }));
 
     const trophies = (allTrophies || []).map((t) => ({
@@ -1362,10 +1362,11 @@ if (!tmdbId) {
         return;
       }
 
-      // Get existing games for dedup
-      const { data: existingGames } = await supabase.from("games")
-        .select("external_id").eq("user_id", userId).eq("api_source", "steam");
-      const existingSet = new Set((existingGames || []).map(g => String(g.external_id)));
+      // Get existing games for dedup (from unified view)
+      const { data: existingGames } = await supabase.from("user_games_v")
+        .select("steam_app_id, game_status").eq("user_id", userId).not("steam_app_id", "is", null);
+      const existingMap = {};
+      (existingGames || []).forEach(g => { existingMap[String(g.steam_app_id)] = g.game_status; });
 
       // Get existing feed entries for dedup
       const { data: existingFeed } = await supabase.from("feed_activity")
@@ -1407,36 +1408,25 @@ if (!tmdbId) {
         if (achievementsTotal > 0) noteParts.push(`${achievementsEarned}/${achievementsTotal} 🏆`);
         const notesStr = noteParts.length > 0 ? noteParts.join(" · ") : null;
 
-        // Determine status:
-        // - 100% achievements = "beat"
-        // - Recently played = "playing"
-        // - Otherwise = "completed" (in backlog)
-        // Don't overwrite if user already marked as "beat"
+        // Determine display status: beat > playing > backlog
         const isBeat = achievementsTotal > 0 && achievementsEarned === achievementsTotal;
-        const existingStatus = existingSet.has(appId) ? "keep" : null;
-        let status = isRecentlyPlayed ? "playing" : "completed";
+        let status = isRecentlyPlayed ? "playing" : "backlog";
         if (isBeat) status = "beat";
 
-        // Upsert into games table
-        const gameRow = {
-          user_id: userId, external_id: appId, api_source: "steam",
-          title, cover_url: coverUrl,
-          platform: "PC", source: "steam",
-          notes: notesStr,
-        };
-        // Only set status if it's a new game or auto-beat — don't downgrade "beat" to "playing"
-        if (!existingSet.has(appId)) {
-          gameRow.status = status;
-        } else if (isBeat) {
-          gameRow.status = "beat";
-        } else if (isRecentlyPlayed) {
-          gameRow.status = "playing";
-        }
-        const { error: gameErr } = await supabase.from("games").upsert(gameRow, { onConflict: "user_id,external_id,api_source" });
-        if (gameErr) console.error("[Steam] Game upsert error:", gameErr.message);
+        // Don't downgrade: if already "beat", skip unless this is also beat
+        const existingStatus = existingMap[appId];
+        if (existingStatus === "beat" && !isBeat) continue;
+        // If existing and no meaningful status change, skip
+        if (existingStatus && existingStatus === status) continue;
 
-        const isNew = !existingSet.has(appId);
-        existingSet.add(appId);
+        // Log via unified media path
+        await logGame(userId,
+          { title, steam_app_id: parseInt(appId) },
+          coverUrl,
+          { status, platform: "PC", steamAppId: parseInt(appId), notes: notesStr }
+        );
+
+        existingMap[appId] = status;
 
         // Post to feed only for recently played games (not entire library)
         if (isRecentlyPlayed && playtime2Weeks > 0) {

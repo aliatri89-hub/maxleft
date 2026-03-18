@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
-import { upsertMediaLog } from "../utils/mediaWrite";
+import { upsertMediaLog, logGame } from "../utils/mediaWrite";
 import { searchTMDB, searchGoogleBooks, searchRAWG, fetchTMDBDetails } from "../utils/api";
 
 function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
@@ -187,23 +187,19 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
         if (!mediaId) throw new Error("upsert_media_log failed");
       } else if (selected.type === "game") {
         const isPlaying = gameStatus === "playing";
-        const { error } = await supabase.from("games").upsert({
-          user_id: session.user.id,
-          external_id: selected.rawgId,
-          api_source: "rawg",
-          title: selected.title,
-          year: selected.year ? parseInt(selected.year) : null,
-          cover_url: selected.cover || null,
-          platform: selectedPlatform || null,
-          genre: selected.genres || null,
-          status: isPlaying ? "playing" : "completed",
-          rating: isPlaying ? null : (rating || null),
-          started_at: new Date().toISOString(),
-          finished_at: isPlaying ? null : new Date().toISOString(),
-          source: "mantl",
-        }, { onConflict: "user_id,external_id,api_source" });
+        const displayStatus = isPlaying ? "playing" : "beat";
+        const mediaId = await logGame(session.user.id,
+          { title: selected.title, rawg_id: selected.rawgId, year: selected.year ? parseInt(selected.year) : null, genre: selected.genres },
+          selected.cover || null,
+          {
+            status: displayStatus,
+            rating: isPlaying ? null : (rating || null),
+            completed_at: isPlaying ? null : new Date().toISOString(),
+            platform: selectedPlatform || null,
+          }
+        );
 
-        if (error) throw error;
+        if (!mediaId) throw new Error("logGame failed");
       }
 
       const status = selected.type === "book" ? bookStatus : selected.type === "tv" ? showStatus : selected.type === "game" ? gameStatus : null;
