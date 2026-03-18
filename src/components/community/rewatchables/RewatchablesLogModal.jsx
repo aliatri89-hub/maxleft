@@ -451,7 +451,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                       // 2. Update movies table (source of truth for all communities)
                       if (item.tmdb_id) {
                         const { data: movie } = await supabase.from("movies")
-                          .select("watch_count, watch_dates")
+                          .select("watch_dates")
                           .eq("user_id", userId)
                           .eq("tmdb_id", item.tmdb_id)
                           .maybeSingle();
@@ -462,7 +462,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                           const newDates = [...currentDates, dateStr].sort();
                           await supabase.from("movies")
                             .update({
-                              watch_count: (movie.watch_count || 1) + 1,
+                              watch_count: newDates.length,
                               watch_dates: newDates,
                             })
                             .eq("user_id", userId)
@@ -532,18 +532,18 @@ fetchTMDBWatchProviders(item.tmdb_id)
                               // 2. Update movies table (source of truth)
                               if (item.tmdb_id) {
                                 const { data: movie } = await supabase.from("movies")
-                                  .select("watch_count, watch_dates")
+                                  .select("watch_dates")
                                   .eq("user_id", userId)
                                   .eq("tmdb_id", item.tmdb_id)
                                   .maybeSingle();
 
-                                if (movie && (movie.watch_count || 1) > 1) {
+                                if (movie && (movie.watch_dates || []).length > 1) {
                                   const currentDates = movie.watch_dates || [];
                                   // Remove the last date (matches the rewatch being removed)
                                   const newDates = currentDates.slice(0, -1);
                                   await supabase.from("movies")
                                     .update({
-                                      watch_count: Math.max(1, (movie.watch_count || 1) - 1),
+                                      watch_count: newDates.length,
                                       watch_dates: newDates,
                                     })
                                     .eq("user_id", userId)

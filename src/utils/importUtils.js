@@ -164,13 +164,12 @@ export async function deduplicateItems(items, format, userId) {
   // Fetch existing movies with their current watch data
   const { data: existing } = await supabase
     .from("movies")
-    .select("title, year, watch_count, watch_dates")
+    .select("title, year, watch_dates")
     .eq("user_id", userId);
 
   const existingMap = new Map();
   for (const m of (existing || [])) {
     existingMap.set(`${m.title}::${m.year}`, {
-      watch_count: m.watch_count || 1,
       watch_dates: m.watch_dates || [],
     });
   }
@@ -182,7 +181,7 @@ export async function deduplicateItems(items, format, userId) {
     const ex = existingMap.get(key);
     if (ex) {
       // Movie exists — only include if CSV has more watches (new data)
-      if (group.watchCount > ex.watch_count) {
+      if (group.watchCount > (ex.watch_dates || []).length) {
         // Merge: CSV dates are authoritative for the full history
         consolidated.push(group);
       } else {
@@ -260,7 +259,7 @@ export async function importMovies(items, userId, onProgress) {
         watchDates.push(new Date().toISOString().slice(0, 10));
       }
 
-      const watchCount = m.watchCount || 1;
+      const watchCount = watchDates.length;
 
       const { error } = await supabase.from("movies").upsert({
         user_id: userId,

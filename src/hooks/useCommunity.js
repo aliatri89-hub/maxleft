@@ -317,6 +317,7 @@ export function useUserProgress(communityId, userId, communityItems = []) {
 
       // 2. Dual-write to shelf tables based on media type (only on first log, not updates)
       if (!isUpdate && item && item.media_type === "film" && item.tmdb_id) {
+        const watchDateStr = completed_at ? new Date(completed_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
         const { error: movieErr } = await supabase.from("movies").upsert({
           user_id: userId,
           tmdb_id: item.tmdb_id,
@@ -328,6 +329,8 @@ export function useUserProgress(communityId, userId, communityItems = []) {
           notes: notes || null,
           watched_at: completed_at || null,
           source: "community",
+          watch_count: 1,
+          watch_dates: [watchDateStr],
         }, { onConflict: "user_id,tmdb_id" });
 
         if (movieErr) console.warn("[Community] Movie dual-write error:", movieErr.message);

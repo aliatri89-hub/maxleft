@@ -16,7 +16,7 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
   const tmdbIds = filmItems.map((i) => i.tmdb_id);
   const { data: userMovies } = await supabase
     .from("movies")
-    .select("tmdb_id, rating, watch_count, watch_dates")
+    .select("tmdb_id, rating, watch_dates, watched_at")
     .eq("user_id", userId)
     .in("tmdb_id", tmdbIds);
 
@@ -24,8 +24,8 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
 
   const watchedMovies = new Map(userMovies.map((m) => [m.tmdb_id, {
     rating: m.rating,
-    watch_count: m.watch_count || 1,
     watch_dates: m.watch_dates || [],
+    watched_at: m.watched_at || null,
   }]));
 
   const toSync = filmItems.filter(
@@ -39,8 +39,8 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
     if (!existing) return false; // will be handled by toSync
     const movieData = watchedMovies.get(item.tmdb_id);
     const currentRewatch = existing.rewatch_count || 0;
-    const movieRewatch = Math.max(0, (movieData.watch_count || 1) - 1);
-    return movieRewatch > currentRewatch; // movies table has more watches
+    const movieRewatch = Math.max(0, (movieData.watch_dates || []).length - 1);
+    return movieRewatch > currentRewatch; // watch_dates has more watches
   });
 
   let syncCount = 0;
@@ -48,14 +48,14 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
   if (toSync.length > 0) {
     const rows = toSync.map((item) => {
       const movieData = watchedMovies.get(item.tmdb_id);
-      const rewatchCount = Math.max(0, (movieData.watch_count || 1) - 1);
+      const rewatchCount = Math.max(0, (movieData.watch_dates || []).length - 1);
       // rewatch_dates = all dates after the first (the "rewatches")
       const rewatchDates = (movieData.watch_dates || []).slice(1);
-      // Use the original watch date (not "now") so it doesn't bubble to top of feed
+      // Use the original watch date — never fall back to now()
       const firstWatchDate = (movieData.watch_dates || [])[0];
       const completedAt = firstWatchDate
         ? new Date(firstWatchDate + "T12:00:00Z").toISOString()
-        : new Date().toISOString();
+        : movieData.watched_at || null;
 
       return {
         user_id: userId,
@@ -82,7 +82,7 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
           status: "completed",
           listened_with_commentary: false,
           rating: movieData.rating || null,
-          rewatch_count: Math.max(0, (movieData.watch_count || 1) - 1),
+          rewatch_count: Math.max(0, (movieData.watch_dates || []).length - 1),
           rewatch_dates: (movieData.watch_dates || []).slice(1),
         };
       });
@@ -95,7 +95,7 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
   if (toUpdateRewatch.length > 0) {
     for (const item of toUpdateRewatch) {
       const movieData = watchedMovies.get(item.tmdb_id);
-      const rewatchCount = Math.max(0, (movieData.watch_count || 1) - 1);
+      const rewatchCount = Math.max(0, (movieData.watch_dates || []).length - 1);
       const rewatchDates = (movieData.watch_dates || []).slice(1);
 
       const { error } = await supabase
@@ -152,7 +152,7 @@ export async function syncShowsFromShelf(userId, communityItems, map, skippedIds
       user_id: userId,
       item_id: item.id,
       status: "completed",
-      completed_at: showData.finished_at || new Date().toISOString(),
+      completed_at: showData.finished_at || null,
       listened_with_commentary: false,
       rating: showData.rating || null,
     };
@@ -236,7 +236,7 @@ export async function syncBooksFromShelf(userId, communityItems, map, skippedIds
       user_id: userId,
       item_id: item.id,
       status: "completed",
-      completed_at: match?.finished_at || new Date().toISOString(),
+      completed_at: match?.finished_at || null,
       listened_with_commentary: false,
       rating: match?.rating ? Math.round(match.rating) : null,
     };

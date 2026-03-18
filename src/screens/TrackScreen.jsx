@@ -780,13 +780,16 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
           }, { onConflict: "user_id,tmdb_id" });
         } else {
           const details = await fetchTMDBDetails(watchSelected.tmdbId, "movie");
+          const now = new Date().toISOString();
+          const todayStr = now.slice(0, 10);
           await supabase.from("movies").upsert({
             user_id: session.user.id, tmdb_id: watchSelected.tmdbId,
             title: watchSelected.title, year: watchSelected.year ? parseInt(watchSelected.year) : null,
             director: details?.director || null, poster_url: watchSelected.poster,
             backdrop_url: watchSelected.backdrop, genre: details?.genre || null,
             runtime: details?.runtime || null, rating: watchRating || null,
-            watched_at: new Date().toISOString(), source: "mantl",
+            watched_at: now, source: "mantl",
+            watch_count: 1, watch_dates: [todayStr],
           }, { onConflict: "user_id,tmdb_id" });
         }
       } else if (watchRating) {

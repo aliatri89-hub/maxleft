@@ -131,6 +131,8 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
 
     try {
       if (selected.type === "movie") {
+        const now = new Date().toISOString();
+        const todayStr = now.slice(0, 10);
         const { error } = await supabase.from("movies").upsert({
           user_id: session.user.id,
           tmdb_id: selected.tmdbId,
@@ -142,8 +144,10 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
           genre: details?.genre || null,
           runtime: details?.runtime || null,
           rating: rating || null,
-          watched_at: new Date().toISOString(),
+          watched_at: now,
           source: "mantl",
+          watch_count: 1,
+          watch_dates: [todayStr],
         }, { onConflict: "user_id,tmdb_id" });
 
         if (error) throw error;

@@ -1149,7 +1149,7 @@ export default function App() {
 
       // Get existing movies with watch data (for rewatch detection)
       const { data: existingMovies } = await supabase.from("movies")
-        .select("title, year, tmdb_id, watch_count, watch_dates").eq("user_id", userId);
+        .select("title, year, tmdb_id, watch_dates").eq("user_id", userId);
       const existingSet = new Set((existingMovies || []).map(m => `${m.title}::${m.year}`));
       const existingMap = new Map((existingMovies || []).map(m => [`${m.title}::${m.year}`, m]));
 
@@ -1220,12 +1220,10 @@ export default function App() {
                 title,
                 year,
                 newDate: dateStr,
-                currentCount: existing.watch_count || 1,
                 currentDates: existing.watch_dates || [],
                 rating: ratingFromTitle || null,
               });
               // Update local map so subsequent RSS entries don't double-count
-              existing.watch_count = (existing.watch_count || 1) + 1;
               existing.watch_dates = [...(existing.watch_dates || []), dateStr].sort();
             }
           }
@@ -1326,7 +1324,7 @@ if (!tmdbId) {
       let rewatchCount = 0;
       for (const rw of rewatchQueue) {
         const newDates = [...(rw.currentDates || []), rw.newDate].sort();
-        const newCount = rw.currentCount + 1;
+        const newCount = newDates.length;
         const rewatchDatesOnly = newDates.slice(1); // all dates after the first watch
 
         // 1. Update movies table (source of truth) — bump watched_at so feed shows it
