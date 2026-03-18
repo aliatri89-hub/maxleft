@@ -438,7 +438,8 @@ export default function App() {
         }
       }
       await supabase.from("books").delete().eq("user_id", userId);
-      await supabase.from("movies").delete().eq("user_id", userId);
+      await supabase.from("user_media_logs").delete().eq("user_id", userId);
+      await supabase.from("movies").delete().eq("user_id", userId);  // legacy cleanup
       await supabase.from("shows").delete().eq("user_id", userId);
       await supabase.from("games").delete().eq("user_id", userId);
       await supabase.from("workout_goals").delete().eq("user_id", userId);
@@ -701,7 +702,7 @@ export default function App() {
         .eq("user_id", userId).eq("is_active", false).neq("habit_id", 7).order("finished_at", { ascending: false, nullsFirst: false }),
       supabase.from("books").select("id, title, author, cover_url, current_page, total_pages, notes, source")
         .eq("user_id", userId).eq("is_active", true).neq("habit_id", 7),
-      supabase.from("movies").select("id, title, poster_url, rating, year, director, notes, watched_at")
+      supabase.from("user_films_v").select("id, title, poster_url, rating, year, director, notes, watched_at")
         .eq("user_id", userId).order("watched_at", { ascending: false, nullsFirst: false }),
       supabase.from("shows").select("id, title, poster_url, tmdb_id, status, current_season, current_episode, episodes_watched, total_episodes, total_seasons, rating, notes, created_at")
         .eq("user_id", userId).order("created_at", { ascending: false }),
@@ -1148,7 +1149,7 @@ export default function App() {
       }
 
       // Get existing movies with watch data (for rewatch detection)
-      const { data: existingMovies } = await supabase.from("movies")
+      const { data: existingMovies } = await supabase.from("user_films_v")
         .select("title, year, tmdb_id, watch_dates").eq("user_id", userId);
       const existingSet = new Set((existingMovies || []).map(m => `${m.title}::${m.year}`));
       const existingMap = new Map((existingMovies || []).map(m => [`${m.title}::${m.year}`, m]));
@@ -1280,30 +1281,22 @@ if (!tmdbId) {
           watch_count: 1,
           watch_dates: [watchDateStr],
         };
-        const { error: movieErr } = await supabase.from("movies").upsert(movieRow, { onConflict: "user_id,tmdb_id" });
-        if (movieErr) console.error("[Letterboxd] Movie insert error:", movieErr);
-
-        // Insert feed_activity if recent
-        const feedKey = `lb_${title}_${year}`;
-        const maxAge = manual ? 90 * 24 * 60 * 60 * 1000 : 14 * 24 * 60 * 60 * 1000;
-        const isRecent = watchedDate && (Date.now() - new Date(watchedDate).getTime()) < maxAge;
-        if (!feedSet.has(feedKey) && !feedSet.has(title) && isRecent) {
-          const feedRow = {
-            user_id: userId, activity_type: "movie", action: "finished",
-            title: feedKey, item_title: title, item_cover: poster,
-            rating: ratingFromTitle || null,
-            metadata: { source: "letterboxd", letterboxd_username: username, watched_date: watchedDate },
-            created_at: watchedDate
-              ? toLogTimestamp(watchedDate)
-              : new Date().toISOString(),
-          };
-          if (year) feedRow.item_year = year;
-          if (director) feedRow.item_author = director;
-          const { error: feedInsertErr } = await supabase.from("feed_activity").insert(feedRow);
-          if (feedInsertErr) console.error("[Letterboxd] Feed insert error:", feedInsertErr.message, feedInsertErr.code);
-          feedSet.add(feedKey);
-          feedSet.add(title);
-        }
+        // Write to media + user_media_logs (unified) — also handles feed + wishlist
+        const mediaId = await upsertMediaLog(userId, {
+          mediaType: "film",
+          tmdbId: tmdbId,
+          title, year,
+          creator: director,
+          posterPath: poster ? toPosterPath(poster) : null,
+          backdropPath: backdrop ? toPosterPath(backdrop) : null,
+          runtime, genre,
+          rating: ratingFromTitle || null,
+          watchedAt: watchedDate ? toLogTimestamp(watchedDate) : new Date().toISOString(),
+          source: "letterboxd",
+          watchCount: 1,
+          watchDates: [watchDateStr],
+        });
+        if (!mediaId) console.error("[Letterboxd] upsert_media_log failed for", title);
 
         return { title, tmdbId, rating: ratingFromTitle || null, watchedDate, genreIds };
       };
@@ -1328,16 +1321,12 @@ if (!tmdbId) {
         const rewatchDatesOnly = newDates.slice(1); // all dates after the first watch
 
         // 1. Update movies table (source of truth) — bump watched_at so feed shows it
-        const { error: rwErr } = await supabase.from("movies")
-          .update({
-            watch_count: newCount,
-            watch_dates: newDates,
-            watched_at: new Date(
-              new Date(toLogTimestamp(rw.newDate)).getTime()
-            ).toISOString(),
-          })
-          .eq("user_id", userId)
-          .eq("tmdb_id", rw.tmdb_id);
+        const { error: rwErr } = await supabase.rpc("update_rewatch_data", {
+          p_user_id: userId,
+          p_tmdb_id: rw.tmdb_id,
+          p_watch_dates: JSON.stringify(newDates),
+          p_watched_at: new Date(new Date(toLogTimestamp(rw.newDate)).getTime()).toISOString(),
+        });
 
         if (rwErr) {
           console.warn(`[Letterboxd] Rewatch update failed for "${rw.title}":`, rwErr.message);

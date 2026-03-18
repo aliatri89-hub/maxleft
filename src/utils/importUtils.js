@@ -8,6 +8,7 @@
 
 import { supabase } from "../supabase";
 import { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw, searchGoogleBooksRaw } from "./api";
+import { upsertMediaLog, toPosterPath } from "./mediaWrite";
 
 // ═══════════════════════════════════════════════════════════
 //  CSV PARSING
@@ -161,17 +162,33 @@ export async function deduplicateItems(items, format, userId) {
     }
   }
 
-  // Fetch existing movies with their current watch data
-  const { data: existing } = await supabase
-    .from("movies")
-    .select("title, year, watch_dates")
-    .eq("user_id", userId);
+  // Check against user_media_logs (unified) with fallback to movies (legacy)
+  let existingMap = new Map();
+  try {
+    const { data: existing } = await supabase
+      .from("user_media_logs")
+      .select("media:media_id(title, year), watch_dates")
+      .eq("user_id", userId);
 
-  const existingMap = new Map();
-  for (const m of (existing || [])) {
-    existingMap.set(`${m.title}::${m.year}`, {
-      watch_dates: m.watch_dates || [],
-    });
+    for (const row of (existing || [])) {
+      if (row.media) {
+        existingMap.set(`${row.media.title}::${row.media.year}`, {
+          watch_dates: row.watch_dates || [],
+        });
+      }
+    }
+  } catch {
+    // Fallback to movies table during transition
+    const { data: existing } = await supabase
+      .from("movies")
+      .select("title, year, watch_dates")
+      .eq("user_id", userId);
+
+    for (const m of (existing || [])) {
+      existingMap.set(`${m.title}::${m.year}`, {
+        watch_dates: m.watch_dates || [],
+      });
+    }
   }
 
   const consolidated = [];
@@ -241,9 +258,6 @@ export async function importMovies(items, userId, onProgress) {
         }
       } catch (e) { /* skip detail fetch */ }
 
-      const poster = match.poster_path ? `${TMDB_IMG}/w342${match.poster_path}` : null;
-      const backdrop = match.backdrop_path ? `${TMDB_IMG}/w780${match.backdrop_path}` : null;
-
       // Build watch_dates array (sorted chronologically)
       const watchDates = (m.watchDates || [])
         .filter(Boolean)
@@ -259,22 +273,30 @@ export async function importMovies(items, userId, onProgress) {
         watchDates.push(new Date().toISOString().slice(0, 10));
       }
 
-      const watchCount = watchDates.length;
+      // Use the ACTUAL watched date from CSV -- fixes the watched_at = now() bug
+      const watchedAt = m.watchedDate
+        ? new Date(m.watchedDate + "T12:00:00Z").toISOString()
+        : new Date().toISOString();
 
-      const { error } = await supabase.from("movies").upsert({
-        user_id: userId,
+      // Write to media + user_media_logs (unified architecture)
+      const mediaId = await upsertMediaLog(userId, {
+        mediaType: "film",
+        tmdbId: match.id,
         title: m.title,
         year: m.year || (match.release_date ? parseInt(match.release_date) : null),
-        rating: m.rating,
-        director, poster_url: poster, backdrop_url: backdrop,
-        genre, runtime, tmdb_id: match.id,
-        watched_at: m.watchedDate ? new Date(m.watchedDate).toISOString() : new Date().toISOString(),
+        creator: director,
+        posterPath: match.poster_path || null,
+        backdropPath: match.backdrop_path || null,
+        runtime,
+        genre,
+        rating: m.ratingHalf || m.rating || null,
+        watchedAt,
         source: "letterboxd",
-        watch_count: watchCount,
-        watch_dates: watchDates,
-      }, { onConflict: "user_id,tmdb_id" });
+        watchCount: watchDates.length,
+        watchDates,
+      });
 
-      if (error) { console.error("[Import] Movie error:", error); errs++; }
+      if (!mediaId) { errs++; }
       else count++;
     } catch (e) { errs++; }
 

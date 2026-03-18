@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
+import { upsertMediaLog } from "../utils/mediaWrite";
 import { searchTMDB, searchGoogleBooks, searchRAWG, fetchTMDBDetails } from "../utils/api";
 
 function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
@@ -133,24 +134,24 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
       if (selected.type === "movie") {
         const now = new Date().toISOString();
         const todayStr = now.slice(0, 10);
-        const { error } = await supabase.from("movies").upsert({
-          user_id: session.user.id,
-          tmdb_id: selected.tmdbId,
+        const mediaId = await upsertMediaLog(session.user.id, {
+          mediaType: "film",
+          tmdbId: selected.tmdbId,
           title: selected.title,
           year: selected.year ? parseInt(selected.year) : null,
-          director: details?.director || null,
-          poster_url: selected.poster,
-          backdrop_url: selected.backdrop,
+          creator: details?.director || null,
+          posterPath: selected.poster,
+          backdropPath: selected.backdrop,
           genre: details?.genre || null,
           runtime: details?.runtime || null,
           rating: rating || null,
-          watched_at: now,
+          watchedAt: now,
           source: "mantl",
-          watch_count: 1,
-          watch_dates: [todayStr],
-        }, { onConflict: "user_id,tmdb_id" });
+          watchCount: 1,
+          watchDates: [todayStr],
+        });
 
-        if (error) throw error;
+        if (!mediaId) throw new Error("upsert_media_log failed");
       } else if (selected.type === "tv") {
         const isWatching = showStatus === "watching";
         const { error } = await supabase.from("shows").upsert({

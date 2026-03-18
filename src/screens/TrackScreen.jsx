@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "../supabase";
+import { upsertMediaLog } from "../utils/mediaWrite";
 import { getDaysInMonth } from "../utils/constants";
 import { searchTMDB, searchGoogleBooks, fetchTMDBDetails, sb } from "../utils/api";
 
@@ -219,7 +220,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
     }
     if (typesNeeded.includes("movies")) {
       queries.push(
-        supabase.from("movies").select("id", { count: "exact", head: true })
+        supabase.from("user_films_v").select("id", { count: "exact", head: true })
           .eq("user_id", session.user.id)
           .gte("watched_at", startDate).lte("watched_at", endDate)
           .then(r => { counts.movies = r.count || 0; })
@@ -297,7 +298,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
         .eq("user_id", session.user.id).eq("is_active", false).neq("habit_id", 7)
         .gte("finished_at", startDate).lte("finished_at", endDate)
         .then(r => { counts.books = r.count || 0; }),
-      supabase.from("movies").select("id", { count: "exact", head: true })
+      supabase.from("user_films_v").select("id", { count: "exact", head: true })
         .eq("user_id", session.user.id)
         .gte("watched_at", startDate).lte("watched_at", endDate)
         .then(r => { counts.movies = r.count || 0; }),
@@ -477,7 +478,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
             const today = new Date();
             const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
             // Check for movie logged today
-            const { data: todayMovies } = await supabase.from("movies")
+            const { data: todayMovies } = await supabase.from("user_films_v")
               .select("tmdb_id, title, year, poster_url, director, rating, source, watched_at")
               .eq("user_id", session.user.id)
               .gte("watched_at", todayStr + "T00:00:00")
@@ -508,7 +509,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
             }
             // Still load recent films for fallback search
             if (!isShowHabit) {
-              const { data: recent } = await supabase.from("movies")
+              const { data: recent } = await supabase.from("user_films_v")
                 .select("tmdb_id, title, year, poster_url, director, source, watched_at")
                 .eq("user_id", session.user.id)
                 .order("watched_at", { ascending: false, nullsFirst: false })
@@ -782,20 +783,30 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
           const details = await fetchTMDBDetails(watchSelected.tmdbId, "movie");
           const now = new Date().toISOString();
           const todayStr = now.slice(0, 10);
-          await supabase.from("movies").upsert({
-            user_id: session.user.id, tmdb_id: watchSelected.tmdbId,
-            title: watchSelected.title, year: watchSelected.year ? parseInt(watchSelected.year) : null,
-            director: details?.director || null, poster_url: watchSelected.poster,
-            backdrop_url: watchSelected.backdrop, genre: details?.genre || null,
-            runtime: details?.runtime || null, rating: watchRating || null,
-            watched_at: now, source: "mantl",
-            watch_count: 1, watch_dates: [todayStr],
-          }, { onConflict: "user_id,tmdb_id" });
+          await upsertMediaLog(session.user.id, {
+            mediaType: "film",
+            tmdbId: watchSelected.tmdbId,
+            title: watchSelected.title,
+            year: watchSelected.year ? parseInt(watchSelected.year) : null,
+            creator: details?.director || null,
+            posterPath: watchSelected.poster,
+            backdropPath: watchSelected.backdrop,
+            genre: details?.genre || null,
+            runtime: details?.runtime || null,
+            rating: watchRating || null,
+            watchedAt: now,
+            source: "mantl",
+            watchCount: 1,
+            watchDates: [todayStr],
+          });
         }
       } else if (watchRating) {
         // Quick-select but user added a rating — update existing movie
-        await supabase.from("movies").update({ rating: watchRating })
-          .eq("user_id", session.user.id).eq("tmdb_id", watchSelected.tmdbId);
+        await upsertMediaLog(session.user.id, {
+            mediaType: "film", tmdbId: watchSelected.tmdbId,
+            title: watchSelected.title, year: watchSelected.year ? parseInt(watchSelected.year) : null,
+            posterPath: watchSelected.poster, rating: watchRating,
+          });
       }
 
       // Post to feed — but check for existing entry first (dedup)
@@ -986,7 +997,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
         const habits = challenge.habits || [];
         // Check for movie logged today
         if (habits.some(h => h.category === "watching")) {
-          const { data: todayMovie } = await supabase.from("movies")
+          const { data: todayMovie } = await supabase.from("user_films_v")
             .select("id").eq("user_id", session.user.id)
             .gte("watched_at", todayStr + "T00:00:00")
             .lte("watched_at", todayStr + "T23:59:59").limit(1);
@@ -1080,7 +1091,7 @@ function TrackScreen({ session, onToast, onRefreshShelf, onAutoComplete, refresh
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
         const habits = challenge.habits || [];
         if (habits.some(h => h.category === "watching")) {
-          const { data: todayMovie } = await supabase.from("movies")
+          const { data: todayMovie } = await supabase.from("user_films_v")
             .select("id").eq("user_id", session.user.id)
             .gte("watched_at", todayStr + "T00:00:00")
             .lte("watched_at", todayStr + "T23:59:59").limit(1);

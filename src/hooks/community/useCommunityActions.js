@@ -1,16 +1,19 @@
 import { useCallback } from "react";
 import { supabase } from "../../supabase";
-import { dualWriteFilm, dualWriteShow, dualWriteBook } from "../../utils/communityDualWrite";
+import { logFilm, logShow, logBook, logGame } from "../../utils/mediaWrite";
 
 /**
- * useCommunityActions — Log, unlog, and watchlist actions.
- * Handles dual-write to movies/shows/books/feed_activity/wishlist.
+ * useCommunityActions -- Log, unlog, and watchlist actions.
  *
- * Requires setProgress from useCommunityProgress for optimistic updates.
+ * UNIFIED MEDIA ARCHITECTURE (v2):
+ *   - Cross-community propagation uses media_id (via get_sibling_item_ids RPC)
+ *     instead of scanning community_items by tmdb_id.
+ *   - Shelf write replaced by upsert into media + user_media_logs
+ *     via the mediaWrite utility.
  */
 export function useCommunityActions(userId, setProgress) {
 
-  // ─── Log an item (dual-write: community progress + shelf) ───
+  // --- Log an item (unified: community progress + media log) ---
   const logItem = useCallback(async (itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, brown_arrow, isUpdate } = {}) => {
     if (!userId) return;
 
@@ -46,30 +49,23 @@ export function useCommunityActions(userId, setProgress) {
           throw updateErr;
         }
 
-        // Propagate update to sibling communities
-        if (item?.tmdb_id) {
-          try {
-            const { data: siblings } = await supabase
-              .from("community_items")
-              .select("id")
-              .eq("tmdb_id", item.tmdb_id)
-              .neq("id", itemId);
+        // Propagate update to sibling communities via media_id
+        try {
+          const { data: siblingIds } = await supabase.rpc("get_sibling_item_ids", { p_item_id: itemId });
+          if (siblingIds?.length > 0) {
+            const sibUpdateFields = { updated_at: new Date().toISOString() };
+            if (rating) sibUpdateFields.rating = Math.round(rating);
+            if (completed_at) sibUpdateFields.completed_at = completed_at;
 
-            if (siblings?.length > 0) {
-              const sibUpdateFields = { updated_at: new Date().toISOString() };
-              if (rating) sibUpdateFields.rating = Math.round(rating);
-              if (completed_at) sibUpdateFields.completed_at = completed_at;
-
-              await supabase
-                .from("community_user_progress")
-                .update(sibUpdateFields)
-                .eq("user_id", userId)
-                .in("item_id", siblings.map(s => s.id))
-                .eq("status", "completed");
-            }
-          } catch (e) {
-            console.warn("[Community] Cross-community update propagation failed:", e.message);
+            await supabase
+              .from("community_user_progress")
+              .update(sibUpdateFields)
+              .eq("user_id", userId)
+              .in("item_id", siblingIds)
+              .eq("status", "completed");
           }
+        } catch (e) {
+          console.warn("[Community] Cross-community update propagation failed:", e.message);
         }
       } else {
         const { error: progressErr } = await supabase
@@ -91,61 +87,53 @@ export function useCommunityActions(userId, setProgress) {
         }
       }
 
-      // 2. Cross-community: propagate log to all communities with same tmdb_id
-      if (item?.tmdb_id) {
-        try {
-          const { data: siblings } = await supabase
-            .from("community_items")
-            .select("id")
-            .eq("tmdb_id", item.tmdb_id)
-            .neq("id", itemId);
+      // 2. Cross-community: propagate log via media_id
+      try {
+        const { data: siblingIds } = await supabase.rpc("get_sibling_item_ids", { p_item_id: itemId });
 
-          if (siblings?.length > 0) {
-            const now = new Date().toISOString();
-            const siblingRows = siblings.map(s => ({
-              user_id: userId,
-              item_id: s.id,
-              status: "completed",
-              rating: rating ? Math.round(rating) : null,
-              completed_at: completed_at || null,
-              updated_at: now,
-            }));
+        if (siblingIds?.length > 0) {
+          const now = new Date().toISOString();
+          const siblingRows = siblingIds.map(id => ({
+            user_id: userId,
+            item_id: id,
+            status: "completed",
+            rating: rating ? Math.round(rating) : null,
+            completed_at: completed_at || null,
+            updated_at: now,
+          }));
 
-            // Upsert — won't overwrite if user already has a row with more data
-            // (listened_with_commentary, brown_arrow stay intact via onConflict merge)
-            const { error: sibErr } = await supabase
-              .from("community_user_progress")
-              .upsert(siblingRows, {
-                onConflict: "user_id,item_id",
-                ignoreDuplicates: false,
-              });
+          const { error: sibErr } = await supabase
+            .from("community_user_progress")
+            .upsert(siblingRows, {
+              onConflict: "user_id,item_id",
+              ignoreDuplicates: false,
+            });
 
-            if (sibErr) {
-              console.warn("[Community] Cross-community log propagation error:", sibErr.message);
-            } else if (siblingRows.length > 0) {
-              console.log(`[Community] Propagated log to ${siblingRows.length} sibling community(ies) for tmdb_id ${item.tmdb_id}`);
-            }
+          if (sibErr) {
+            console.warn("[Community] Cross-community log propagation error:", sibErr.message);
+          } else {
+            console.log(`[Community] Propagated log to ${siblingRows.length} sibling(s) via media_id`);
           }
-        } catch (e) {
-          // Non-fatal — primary community log succeeded
-          console.warn("[Community] Cross-community propagation failed:", e.message);
         }
+      } catch (e) {
+        console.warn("[Community] Cross-community propagation failed:", e.message);
       }
 
-      // 3. Dual-write to shelf (only on first log, not updates)
+      // 3. Write to media + user_media_logs (single source of truth)
       if (!isUpdate && item) {
         const opts = { rating, completed_at };
         if (item.media_type === "film" && item.tmdb_id) {
-          await dualWriteFilm(userId, item, coverUrl, opts);
+          await logFilm(userId, item, coverUrl, opts);
         } else if (item.media_type === "show" && item.tmdb_id) {
-          await dualWriteShow(userId, item, coverUrl, opts);
+          await logShow(userId, item, coverUrl, opts);
         } else if (item.media_type === "book") {
-          await dualWriteBook(userId, item, coverUrl, opts);
+          await logBook(userId, item, coverUrl, opts);
+        } else if (item.media_type === "game") {
+          await logGame(userId, item, coverUrl, opts);
         }
       }
 
     } catch (e) {
-      // Rollback optimistic update
       setProgress((prev) => {
         const next = { ...prev };
         delete next[itemId];
@@ -155,21 +143,18 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Log commentary only (no film completion) ──────────────
+  // --- Log commentary only (no film completion) ---
   const logCommentaryOnly = useCallback(async (itemId, listened) => {
     if (!userId) return;
 
     setProgress((prev) => {
       const existing = prev[itemId];
-      // If already completed, just toggle the flag — don't downgrade status
       if (existing?.status === "completed") {
         return { ...prev, [itemId]: { ...existing, listened_with_commentary: listened } };
       }
-      // Otherwise create/update as commentary_only
       if (listened) {
         return { ...prev, [itemId]: { ...existing, status: "commentary_only", listened_with_commentary: true } };
       } else {
-        // Turning off commentary on a commentary_only row — remove it
         const next = { ...prev };
         delete next[itemId];
         return next;
@@ -187,14 +172,12 @@ export function useCommunityActions(userId, setProgress) {
       const currentStatus = existing?.data?.status;
 
       if (currentStatus === "completed") {
-        // Film is logged — just toggle the commentary flag
         await supabase
           .from("community_user_progress")
           .update({ listened_with_commentary: listened, updated_at: new Date().toISOString() })
           .eq("user_id", userId)
           .eq("item_id", itemId);
       } else if (listened) {
-        // No film log (or was commentary_only) — upsert as commentary_only
         await supabase
           .from("community_user_progress")
           .upsert({
@@ -205,7 +188,6 @@ export function useCommunityActions(userId, setProgress) {
             updated_at: new Date().toISOString(),
           }, { onConflict: "user_id,item_id" });
       } else if (currentStatus === "commentary_only") {
-        // Turning off commentary on a commentary_only row — delete it
         await supabase
           .from("community_user_progress")
           .delete()
@@ -214,7 +196,6 @@ export function useCommunityActions(userId, setProgress) {
       }
     } catch (e) {
       console.error("[Community] Commentary toggle error:", e);
-      // Rollback
       setProgress((prev) => {
         const next = { ...prev };
         delete next[itemId];
@@ -224,11 +205,10 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Unlog an item (cross-community by tmdb_id) ─────────────
+  // --- Unlog an item (cross-community via media_id) ---
   const unlogItem = useCallback(async (itemId) => {
     if (!userId) return;
 
-    // Optimistic update (current community only — other screens refresh on mount)
     setProgress((prev) => {
       const next = { ...prev };
       delete next[itemId];
@@ -236,45 +216,29 @@ export function useCommunityActions(userId, setProgress) {
     });
 
     try {
-      // Set status to "skipped" instead of deleting — prevents auto-sync from re-adding
       await supabase
         .from("community_user_progress")
         .update({ status: "skipped", rating: null, completed_at: null })
         .eq("user_id", userId)
         .eq("item_id", itemId);
 
-      // Cross-community: find same tmdb_id in other communities and unlog there too
-      const { data: itemRow } = await supabase
-        .from("community_items")
-        .select("tmdb_id, media_type")
-        .eq("id", itemId)
-        .single();
+      // Cross-community unlog via media_id
+      const { data: siblingIds } = await supabase.rpc("get_sibling_item_ids", { p_item_id: itemId });
 
-      if (itemRow?.tmdb_id) {
-        // Find all other community_items with this tmdb_id
-        const { data: siblings } = await supabase
-          .from("community_items")
-          .select("id")
-          .eq("tmdb_id", itemRow.tmdb_id)
-          .neq("id", itemId);
-
-        if (siblings?.length > 0) {
-          const siblingIds = siblings.map(s => s.id);
-          await supabase
-            .from("community_user_progress")
-            .update({ status: "skipped", rating: null, completed_at: null })
-            .eq("user_id", userId)
-            .in("item_id", siblingIds)
-            .eq("status", "completed");
-        }
+      if (siblingIds?.length > 0) {
+        await supabase
+          .from("community_user_progress")
+          .update({ status: "skipped", rating: null, completed_at: null })
+          .eq("user_id", userId)
+          .in("item_id", siblingIds)
+          .eq("status", "completed");
       }
     } catch {
-      // Rollback
       setProgress((prev) => ({ ...prev, [itemId]: { listened_with_commentary: false } }));
     }
   }, [userId, setProgress]);
 
-  // ─── Add to watchlist ──────────────────────────────────────
+  // --- Add to watchlist ---
   const addToWatchlist = useCallback(async (item, coverUrl) => {
     if (!userId || !item) return;
 

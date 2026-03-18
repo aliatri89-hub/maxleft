@@ -448,9 +448,9 @@ fetchTMDBWatchProviders(item.tmdb_id)
                       // 1. Update community_user_progress (existing behavior)
                       await onRewatch(item.id, rewatchDate);
 
-                      // 2. Update movies table (source of truth for all communities)
+                      // 2. Update user_media_logs (source of truth for all communities)
                       if (item.tmdb_id) {
-                        const { data: movie } = await supabase.from("movies")
+                        const { data: movie } = await supabase.from("user_films_v")
                           .select("watch_dates")
                           .eq("user_id", userId)
                           .eq("tmdb_id", item.tmdb_id)
@@ -458,15 +458,12 @@ fetchTMDBWatchProviders(item.tmdb_id)
 
                         if (movie) {
                           const dateStr = rewatchDate; // already YYYY-MM-DD
-                          const currentDates = movie.watch_dates || [];
-                          const newDates = [...currentDates, dateStr].sort();
-                          await supabase.from("movies")
-                            .update({
-                              watch_count: newDates.length,
-                              watch_dates: newDates,
-                            })
-                            .eq("user_id", userId)
-                            .eq("tmdb_id", item.tmdb_id);
+                          const newDates = [...(movie.watch_dates || []), dateStr].sort();
+                          await supabase.rpc("update_rewatch_data", {
+                            p_user_id: userId,
+                            p_tmdb_id: item.tmdb_id,
+                            p_watch_dates: JSON.stringify(newDates),
+                          });
                         }
                       }
 
@@ -529,25 +526,21 @@ fetchTMDBWatchProviders(item.tmdb_id)
                               // 1. Remove from community_user_progress (existing behavior)
                               await onRemoveRewatch(item.id);
 
-                              // 2. Update movies table (source of truth)
+                              // 2. Update user_media_logs (source of truth)
                               if (item.tmdb_id) {
-                                const { data: movie } = await supabase.from("movies")
+                                const { data: movie } = await supabase.from("user_films_v")
                                   .select("watch_dates")
                                   .eq("user_id", userId)
                                   .eq("tmdb_id", item.tmdb_id)
                                   .maybeSingle();
 
                                 if (movie && (movie.watch_dates || []).length > 1) {
-                                  const currentDates = movie.watch_dates || [];
-                                  // Remove the last date (matches the rewatch being removed)
-                                  const newDates = currentDates.slice(0, -1);
-                                  await supabase.from("movies")
-                                    .update({
-                                      watch_count: newDates.length,
-                                      watch_dates: newDates,
-                                    })
-                                    .eq("user_id", userId)
-                                    .eq("tmdb_id", item.tmdb_id);
+                                  const newDates = (movie.watch_dates || []).slice(0, -1);
+                                  await supabase.rpc("update_rewatch_data", {
+                                    p_user_id: userId,
+                                    p_tmdb_id: item.tmdb_id,
+                                    p_watch_dates: JSON.stringify(newDates),
+                                  });
                                 }
                               }
 

@@ -1,54 +1,52 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-MANTL — Unified Media Architecture: Phase 1 Code Refactor
+MANTL - Unified Media Architecture: Phase 1 Code Refactor
 ==========================================================
 Run from MANTL project root: python3 refactor_unified_media.py
 
 Creates/overwrites:
-  - src/utils/mediaWrite.js          (NEW — replaces communityDualWrite.js)
+  - src/utils/mediaWrite.js          (NEW - replaces communityDualWrite.js)
   - src/hooks/community/useCommunityActions.js  (REWRITTEN)
-  - src/hooks/community/useCommunityProgress.js (REWRITTEN — auto-sync removed)
-  - src/utils/importUtils.js          (PATCHED — Letterboxd writes to media)
+  - src/hooks/community/useCommunityProgress.js (REWRITTEN - auto-sync removed)
+  - src/utils/importUtils.js          (PATCHED - Letterboxd writes to media)
 
 Deletes:
   - src/utils/communityDualWrite.js   (replaced by mediaWrite.js)
-  - src/utils/communitySync.js        (no longer needed — single source of truth)
-
-Does NOT touch (Phase 2 — read paths):
-  - TrackScreen.jsx, ShelfItModal.jsx, FeedScreen.jsx, MediaShelf.jsx
-  - These still read from movies/shows/books tables for now.
-  - They'll be migrated in Phase 2 once the write paths are verified.
+  - src/utils/communitySync.js        (no longer needed)
 """
 
 import os, sys
 
 def write_file(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(content)
-    print(f"  ✓ {path}")
+    print("  [+] " + path)
 
 def delete_file(path):
     if os.path.exists(path):
         os.remove(path)
-        print(f"  ✗ {path} (deleted)")
+        print("  [-] " + path + " (deleted)")
     else:
-        print(f"  - {path} (already gone)")
+        print("  [ ] " + path + " (already gone)")
 
-# ═══════════════════════════════════════════════════════════════
-# Verify we're in the right directory
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
+# Verify we are in the right directory
+# ===================================================================
 if not os.path.exists("src/utils/communityDualWrite.js"):
     print("ERROR: Run this from the MANTL project root (where src/ lives).")
     sys.exit(1)
 
-print("\n🎬 MANTL Unified Media Architecture — Phase 1 Refactor")
+print("")
+print("MANTL Unified Media Architecture -- Phase 1 Refactor")
 print("=" * 55)
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # 1. NEW: src/utils/mediaWrite.js
-# ═══════════════════════════════════════════════════════════════
-print("\n📝 Creating new files...")
+# ===================================================================
+print("")
+print("[1/5] Creating src/utils/mediaWrite.js ...")
 
 write_file("src/utils/mediaWrite.js", r'''import { supabase } from "../supabase";
 
@@ -57,7 +55,7 @@ write_file("src/utils/mediaWrite.js", r'''import { supabase } from "../supabase"
  * Single source of truth for all media logging.
  * Replaces communityDualWrite.js (dual_write_film/show/book RPCs).
  *
- * Every log action — community, shelf, Letterboxd, Goodreads, Steam —
+ * Every log action -- community, shelf, Letterboxd, Goodreads, Steam --
  * goes through upsertMediaLog(). It calls the server-side upsert_media_log RPC
  * which atomically handles:
  *   1. Upsert into `media` (canonical record)
@@ -68,7 +66,9 @@ write_file("src/utils/mediaWrite.js", r'''import { supabase } from "../supabase"
  * Returns the media.id (uuid) on success, null on error.
  */
 
-// ─── Helper: extract TMDB poster path from full URL ─────────────────────────
+// --- Helper: extract TMDB poster path from full URL ---
+// "https://image.tmdb.org/t/p/w342/xxxxx.jpg" -> "/xxxxx.jpg"
+// Already a path like "/xxxxx.jpg" -> pass through unchanged
 export function toPosterPath(url) {
   if (!url) return null;
   if (url.startsWith("/")) return url;
@@ -83,7 +83,7 @@ export function toBackdropPath(url) {
   return match ? match[1] : url;
 }
 
-// ─── Core: upsert a media log via RPC ───────────────────────────────────────
+// --- Core: upsert a media log via RPC ---
 export async function upsertMediaLog(userId, {
   mediaType,
   tmdbId = null,
@@ -131,11 +131,11 @@ export async function upsertMediaLog(userId, {
     return null;
   }
 
-  console.log(`[mediaWrite] Logged "${title}" → media + user_media_logs + feed`);
+  console.log(`[mediaWrite] Logged "${title}" -> media + user_media_logs + feed`);
   return data;
 }
 
-// ─── Convenience wrappers ───────────────────────────────────────────────────
+// --- Convenience wrappers ---
 
 export async function logFilm(userId, item, coverUrl, { rating, completed_at } = {}) {
   if (!userId || !item?.tmdb_id) return null;
@@ -193,17 +193,17 @@ export async function logGame(userId, item, coverUrl, { rating, completed_at } =
 }
 ''')
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # 2. REWRITE: src/hooks/community/useCommunityActions.js
-# ═══════════════════════════════════════════════════════════════
-print("\n📝 Rewriting files...")
+# ===================================================================
+print("[2/5] Rewriting useCommunityActions.js ...")
 
 write_file("src/hooks/community/useCommunityActions.js", r'''import { useCallback } from "react";
 import { supabase } from "../../supabase";
 import { logFilm, logShow, logBook, logGame } from "../../utils/mediaWrite";
 
 /**
- * useCommunityActions — Log, unlog, and watchlist actions.
+ * useCommunityActions -- Log, unlog, and watchlist actions.
  *
  * UNIFIED MEDIA ARCHITECTURE (v2):
  *   - Cross-community propagation uses media_id (via get_sibling_item_ids RPC)
@@ -213,7 +213,7 @@ import { logFilm, logShow, logBook, logGame } from "../../utils/mediaWrite";
  */
 export function useCommunityActions(userId, setProgress) {
 
-  // ─── Log an item (unified: community progress + media log) ───
+  // --- Log an item (unified: community progress + media log) ---
   const logItem = useCallback(async (itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, brown_arrow, isUpdate } = {}) => {
     if (!userId) return;
 
@@ -343,7 +343,7 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Log commentary only (no film completion) ──────────────
+  // --- Log commentary only (no film completion) ---
   const logCommentaryOnly = useCallback(async (itemId, listened) => {
     if (!userId) return;
 
@@ -405,7 +405,7 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Unlog an item (cross-community via media_id) ─────────────
+  // --- Unlog an item (cross-community via media_id) ---
   const unlogItem = useCallback(async (itemId) => {
     if (!userId) return;
 
@@ -438,7 +438,7 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // ─── Add to watchlist ──────────────────────────────────────
+  // --- Add to watchlist ---
   const addToWatchlist = useCallback(async (item, coverUrl) => {
     if (!userId || !item) return;
 
@@ -465,16 +465,16 @@ export function useCommunityActions(userId, setProgress) {
 }
 ''')
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # 3. REWRITE: src/hooks/community/useCommunityProgress.js
-#    (auto-sync removed — single source of truth means no sync needed)
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
+print("[3/5] Rewriting useCommunityProgress.js ...")
 
 write_file("src/hooks/community/useCommunityProgress.js", r'''import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
 
 /**
- * useCommunityProgress — Loads user progress for community items.
+ * useCommunityProgress -- Loads user progress for community items.
  *
  * UNIFIED MEDIA ARCHITECTURE (v2):
  *   Auto-sync from shelf tables has been REMOVED. With the unified media
@@ -504,7 +504,7 @@ export function useCommunityProgress(communityId, userId, communityItems = []) {
 
       const allExisting = [];
 
-      // ── Strategy 1: RPC (single query, no batching) ──────
+      // -- Strategy 1: RPC (single query, no batching) --
       try {
         const { data, error } = await supabase.rpc("user_community_progress", {
           p_user_id: userId,
@@ -514,7 +514,7 @@ export function useCommunityProgress(communityId, userId, communityItems = []) {
         if (error) throw error;
         if (data) allExisting.push(...data);
       } catch (rpcErr) {
-        // ── Fallback: batched .in() queries ──
+        // -- Fallback: batched .in() queries --
         console.warn("[Community] RPC not available, using fallback:", rpcErr.message);
         const itemIds = communityItems.map((i) => i.id);
         const BATCH_SIZE = 200;
@@ -567,17 +567,16 @@ export function useCommunityProgress(communityId, userId, communityItems = []) {
 }
 ''')
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # 4. PATCH: src/utils/importUtils.js
-#    Letterboxd import now writes to media + user_media_logs via RPC
-# ═══════════════════════════════════════════════════════════════
-print("\n📝 Patching importUtils.js...")
+# ===================================================================
+print("[4/5] Patching importUtils.js ...")
 
 import_path = "src/utils/importUtils.js"
-with open(import_path, "r") as f:
+with open(import_path, "r", encoding="utf-8") as f:
     content = f.read()
 
-# Add mediaWrite import at the top (after the existing supabase import)
+# Add mediaWrite import at the top
 old_import = 'import { supabase } from "../supabase";\nimport { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw, searchGoogleBooksRaw } from "./api";'
 new_import = 'import { supabase } from "../supabase";\nimport { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw, searchGoogleBooksRaw } from "./api";\nimport { upsertMediaLog, toPosterPath } from "./mediaWrite";'
 content = content.replace(old_import, new_import)
@@ -686,7 +685,7 @@ new_import_movies = '''export async function importMovies(items, userId, onProgr
         watchDates.push(new Date().toISOString().slice(0, 10));
       }
 
-      // Use the ACTUAL watched date from CSV — fixes the watched_at = now() bug
+      // Use the ACTUAL watched date from CSV -- fixes the watched_at = now() bug
       const watchedAt = m.watchedDate
         ? new Date(m.watchedDate + "T12:00:00Z").toISOString()
         : new Date().toISOString();
@@ -722,11 +721,11 @@ new_import_movies = '''export async function importMovies(items, userId, onProgr
 
 if old_import_movies in content:
     content = content.replace(old_import_movies, new_import_movies)
-    print(f"  ✓ {import_path} (importMovies patched)")
+    print("  [+] importMovies patched")
 else:
-    print(f"  ⚠ {import_path} (importMovies not found — may need manual patch)")
+    print("  [!] importMovies not found -- may need manual patch")
 
-# Also patch deduplicateItems to check user_media_logs instead of movies
+# Patch deduplicateItems to check user_media_logs instead of movies
 old_dedup_letterboxd = '''  // Fetch existing movies with their current watch data
   const { data: existing } = await supabase
     .from("movies")
@@ -771,49 +770,36 @@ new_dedup_letterboxd = '''  // Check against user_media_logs (unified) with fall
 
 if old_dedup_letterboxd in content:
     content = content.replace(old_dedup_letterboxd, new_dedup_letterboxd)
-    print(f"  ✓ {import_path} (deduplicateItems patched)")
+    print("  [+] deduplicateItems patched")
 else:
-    print(f"  ⚠ {import_path} (deduplicateItems block not found — may need manual patch)")
+    print("  [!] deduplicateItems block not found -- may need manual patch")
 
-with open(import_path, "w") as f:
+with open(import_path, "w", encoding="utf-8") as f:
     f.write(content)
+print("  [+] " + import_path)
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # 5. DELETE: old files
-# ═══════════════════════════════════════════════════════════════
-print("\n🗑  Deleting replaced files...")
+# ===================================================================
+print("[5/5] Deleting replaced files ...")
 delete_file("src/utils/communityDualWrite.js")
 delete_file("src/utils/communitySync.js")
 
-# ═══════════════════════════════════════════════════════════════
+# ===================================================================
 # Summary
-# ═══════════════════════════════════════════════════════════════
-print("\n" + "=" * 55)
-print("✅ Phase 1 refactor complete!")
+# ===================================================================
+print("")
+print("=" * 55)
+print("Phase 1 refactor complete!")
 print("=" * 55)
 print("""
 WHAT CHANGED:
-  + src/utils/mediaWrite.js              (NEW — unified write utility)
-  ~ src/hooks/community/useCommunityActions.js  (media_id propagation + mediaWrite)
+  + src/utils/mediaWrite.js              (NEW)
+  ~ src/hooks/community/useCommunityActions.js  (media_id + mediaWrite)
   ~ src/hooks/community/useCommunityProgress.js (auto-sync removed)
-  ~ src/utils/importUtils.js             (Letterboxd → media + user_media_logs)
+  ~ src/utils/importUtils.js             (Letterboxd -> unified tables)
   - src/utils/communityDualWrite.js      (DELETED)
   - src/utils/communitySync.js           (DELETED)
 
-SERVER-SIDE (already applied via Supabase migration):
-  + upsert_media_log()       RPC — atomic media + user_media_logs + feed + wishlist
-  + get_sibling_item_ids()   RPC — cross-community lookup via media_id
-
-NEXT STEPS:
-  1. Run `npm run dev` and test:
-     - Log a film from a community → should appear in media + user_media_logs
-     - Log from a second community → should propagate cross-community
-     - Import from Letterboxd → should use actual dates (not now())
-  2. Phase 2: Migrate read paths (TrackScreen, ShelfItModal, FeedScreen)
-     to read from user_media_logs + media instead of movies/shows/books
-  3. Phase 3: Drop old tables (movies, shows shelf columns, dual_write RPCs)
-
-NOTE: The old `movies` table still exists and is still read by
-TrackScreen/ShelfItModal/FeedScreen. Phase 1 only migrates WRITES.
-Reads will be migrated in Phase 2.
+NEXT: run npm run dev and test logging from a community.
 """)
