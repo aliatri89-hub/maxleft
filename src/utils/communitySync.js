@@ -51,11 +51,8 @@ export async function syncFilmsFromShelf(userId, communityItems, map, skippedIds
       const rewatchCount = Math.max(0, (movieData.watch_dates || []).length - 1);
       // rewatch_dates = all dates after the first (the "rewatches")
       const rewatchDates = (movieData.watch_dates || []).slice(1);
-      // Use the original watch date — never fall back to now()
-      const firstWatchDate = (movieData.watch_dates || [])[0];
-      const completedAt = firstWatchDate
-        ? new Date(firstWatchDate + "T12:00:00Z").toISOString()
-        : movieData.watched_at || null;
+      // Use the actual watched_at timestamp — watch_dates is for counting, not timestamping
+      const completedAt = movieData.watched_at || null;
 
       return {
         user_id: userId,

@@ -342,12 +342,63 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
               miniseries={getHeroMiniseries(tabKey)}
               progress={mergedProgress}
               activeTab={tabKey}
-              filter={filter}
-              onFilterChange={setFilter}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              upcomingCount={upcomingCount}
             />
+            {/* ── Filter bar (lives in screen, not hero — matches BlankCheck pattern) ── */}
+            <div style={{
+              padding: "8px 16px 10px",
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setFilter(f)}
+                  style={{
+                    padding: "5px 10px",
+                    fontSize: 10, fontWeight: 600,
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    borderRadius: 20,
+                    border: filter === f
+                      ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : tabKey === "books" ? "#d4a574" : "#facc15"}`
+                      : "1px solid rgba(255,255,255,0.1)",
+                    background: filter === f
+                      ? `${tabKey === "arcade" ? "rgba(0,255,200,0.12)" : tabKey === "books" ? "rgba(212,165,116,0.12)" : "rgba(250,204,21,0.12)"}`
+                      : "rgba(255,255,255,0.04)",
+                    color: filter === f
+                      ? (tabKey === "arcade" ? "#00ffc8" : tabKey === "books" ? "#d4a574" : "#facc15")
+                      : "rgba(255,255,255,0.4)",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
+                </button>
+              ))}
+              <button
+                onClick={() => setSearchQuery(searchQuery ? "" : "")}
+                onClickCapture={() => {
+                  const el = document.querySelector(".npp-search-input");
+                  if (el) { el.focus(); } else { setSearchQuery(searchQuery ? "" : " "); }
+                }}
+                style={{
+                  width: 30, height: 30, borderRadius: "50%",
+                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#facc15"}` : "1px solid rgba(255,255,255,0.1)",
+                  background: searchQuery ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", marginLeft: "auto", flexShrink: 0,
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                  stroke={searchQuery ? (tabKey === "arcade" ? "#00ffc8" : "#facc15") : "rgba(255,255,255,0.4)"}
+                  strokeWidth="2" strokeLinecap="round"
+                >
+                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            </div>
             {tabKey === "arcade" && (
               <NowPlayingArcadeTab
                 community={community}

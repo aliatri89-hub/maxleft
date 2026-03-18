@@ -858,25 +858,13 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 {droppedLabel}
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <div style={{
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 11,
-                  color: "rgba(255,255,255,0.45)",
-                  lineHeight: 1.2,
-                }}>
-                  {podName}
-                </div>
-                <div style={{
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 13,
-                  color: accent,
-                  lineHeight: 1.2,
-                }}>
-                  {data.air_date
-                    ? new Date(data.air_date + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
-                    : "Coming Soon"}
-                </div>
+              <div style={{
+                fontFamily: "var(--font-display)", fontWeight: 800,
+                fontSize: 15, lineHeight: 1,
+                color: accent,
+                letterSpacing: "-0.02em",
+              }}>
+                {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
               </div>
             )}
             {isDropped && seen && data.user_rating > 0 && (
@@ -917,8 +905,8 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             display: "flex", alignItems: "center", gap: 6,
             marginTop: "auto",
           }}>
-            {/* Podcast logo + name — hidden for upcoming, shown in stamp instead */}
-            {data.community_image && isDropped && (
+            {/* Podcast logo + name */}
+            {data.community_image && (
               <img src={data.community_image} alt=""
                 style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
                   border: "1px solid rgba(255,255,255,0.08)" }}
