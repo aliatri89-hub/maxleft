@@ -44,7 +44,7 @@ export default function BlankCheckLogModal({
             border: "1px solid rgba(250,204,21,0.3)",
             borderRadius: 20, fontSize: 11, color: "#facc15", fontWeight: 600,
           }}>
-            🎧 Commentary
+            Commentary
           </div>
         ) : null
       }
@@ -114,7 +114,7 @@ export default function BlankCheckLogModal({
                   color: listenedWithCommentary ? "#facc15" : "#999",
                   transition: "color 0.2s",
                 }}>
-                  🎧 Listened to commentary
+                  Listened to commentary
                 </div>
                 <div style={{
                   fontSize: 10,

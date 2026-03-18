@@ -1306,7 +1306,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 </div>
               )}
 
-              {/* 🎧 Headphones sticker — audio exists but not playable on MANTL */}
+              {/* Headphones sticker — audio exists but not playable on MANTL */}
               {hasExternalOnly && (
                 <div style={{
                   position: "absolute", bottom: 18, right: 26,
@@ -1319,7 +1319,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 </div>
               )}
 
-              {/* 🎧 Headphones sticker — playable audio on MANTL (visual hint on label) */}
+              {/* Headphones sticker — playable audio on MANTL (visual hint on label) */}
               {hasPlayableAudio && (
                 <div style={{
                   position: "absolute", bottom: 18, right: 26,

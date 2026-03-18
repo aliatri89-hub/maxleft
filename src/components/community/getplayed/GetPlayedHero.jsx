@@ -111,7 +111,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
               textTransform: "uppercase", letterSpacing: "0.1em",
               marginBottom: 10, textAlign: "center",
             }}>
-              🎮 What Are You Playing?
+              What Are You Playing?
             </div>
             <div style={{
               display: "flex", gap: 10,

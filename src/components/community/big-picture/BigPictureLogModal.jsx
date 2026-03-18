@@ -416,7 +416,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                     transition: "background 0.2s",
                   }}
                 >
-                  👁 Watch List
+                  Watch List
                 </button>
               </div>
             </>

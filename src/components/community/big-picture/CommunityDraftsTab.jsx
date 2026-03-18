@@ -310,7 +310,7 @@ export default function CommunityDraftsTab({
               transition: "background 0.2s",
             }}
           >
-            🎧 Listen to this draft
+            Listen to this draft
           </a>
         </div>
       )}

@@ -541,7 +541,7 @@ export default function GetPlayedLogModal({
                   cursor: saving ? "wait" : "pointer",
                 }}
               >
-                🎮 Want to Play
+                Want to Play
               </button>
             </>
           )}

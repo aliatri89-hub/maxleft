@@ -375,7 +375,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
           color: dark.green, letterSpacing: "0.02em",
           display: "flex", alignItems: "center", gap: 5,
         }}>
-          🎬 Synced 47 films from Letterboxd
+          Synced 47 films from Letterboxd
         </div>
       </div>
 
@@ -469,7 +469,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
           color: "#c9a256", letterSpacing: "0.02em",
           display: "flex", alignItems: "center", gap: 5,
         }}>
-          📚 Imported 83 books from Goodreads
+          Imported 83 books from Goodreads
         </div>
       </div>
 
@@ -546,7 +546,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
           color: dark.indigo, letterSpacing: "0.02em",
           display: "flex", alignItems: "center", gap: 5,
         }}>
-          🎮 Connected Steam · 124 games synced
+          Connected Steam · 124 games synced
         </div>
       </div>
 

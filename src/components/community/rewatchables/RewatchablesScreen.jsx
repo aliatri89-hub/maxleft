@@ -57,7 +57,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, isUpdate });
-    if (onToast) onToast(isUpdate ? "Updated! 🎬" : "Shelf'd! 🎬");
+    if (onToast) onToast(isUpdate ? "Updated!" : "Logged!");
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
   }, [allItems, logItem, onToast, onShelvesChanged]);
 
@@ -68,7 +68,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
-    if (onToast) onToast("Added to watch list! 👁");
+    if (onToast) onToast("Added to watch list!");
   }, [addToWatchlist, onToast]);
 
   // ── Rewatch: append date, increment count ──
@@ -90,7 +90,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
         ...prev,
         [itemId]: { ...prev[itemId], rewatch_count: count, rewatch_dates: dates },
       }));
-      if (onToast) onToast(`Rewatch #${count + 1}! 🔁`);
+      if (onToast) onToast(`Rewatch #${count + 1}!`);
     } catch (e) {
       console.error("[Rewatchables] Rewatch error:", e);
     }

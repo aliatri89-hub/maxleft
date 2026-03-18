@@ -1167,7 +1167,7 @@ if (!tmdbId) {
 
       setGoodreadsLastSync(new Date());
       if (synced > 0) {
-        showToast(`📚 Synced ${synced} book${synced !== 1 ? "s" : ""} from Goodreads`);
+        showToast(`Synced ${synced} book${synced !== 1 ? "s" : ""} from Goodreads`);
         await loadShelves(userId);
       } else if (manual) {
         showToast("Goodreads up to date ✓");
@@ -1342,7 +1342,7 @@ if (!tmdbId) {
       }
 
       if (synced > 0) {
-        if (manual) showToast(`🎮 Synced ${synced} game${synced !== 1 ? "s" : ""} from Steam`);
+        if (manual) showToast(`Synced ${synced} game${synced !== 1 ? "s" : ""} from Steam`);
         await loadShelves(userId);
       } else if (manual) {
         showToast("Steam up to date ✓");
@@ -1917,10 +1917,9 @@ if (!tmdbId) {
             onSaved={async (type, status) => {
               if (session) {
                 await loadShelves(session.user.id);
-                const emoji = type === "book" ? "📖" : type === "tv" ? "📺" : type === "game" ? "🎮" : "🎬";
-                const msg = (type === "book" && status === "reading") ? `Reading! ${emoji}` :
-                  (type === "tv" && status === "watching") ? `Watching! ${emoji}` :
-                  (type === "game" && status === "playing") ? `Playing! ${emoji}` : `Shelf'd! ${emoji}`;
+                const msg = (type === "book" && status === "reading") ? "Reading!" :
+                  (type === "tv" && status === "watching") ? "Watching!" :
+                  (type === "game" && status === "playing") ? "Playing!" : "Logged!";
                 showToast(msg);
               }
             }}

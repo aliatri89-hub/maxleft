@@ -142,7 +142,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, played_along, platform, status, isUpdate });
-    if (onToast) onToast(isUpdate ? "Updated! 🎮" : "Shelf'd! 🎮");
+    if (onToast) onToast(isUpdate ? "Updated!" : "Logged!");
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
   }, [allItems, logItem, onToast, onShelvesChanged]);
 
@@ -153,7 +153,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
-    if (onToast) onToast("Added to play list! 🎮");
+    if (onToast) onToast("Added to play list!");
   }, [addToWatchlist, onToast]);
 
   // ── Tab content ───────────────────────────────────────────
@@ -181,7 +181,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                 textTransform: "uppercase", letterSpacing: "0.1em",
                 marginBottom: 4,
               }}>
-                🎮 We Play, You Play
+                We Play, You Play
               </div>
               <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 12 }}>
                 Games the hosts invited listeners to play along with

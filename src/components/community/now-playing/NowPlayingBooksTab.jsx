@@ -99,7 +99,7 @@ export default function NowPlayingBooksTab({
           letterSpacing: "0.05em",
           textTransform: "uppercase",
         }}>
-          📚 {stats.completed}/{stats.total} read · {stats.pct}%
+          {stats.completed}/{stats.total} read · {stats.pct}%
         </div>
       </div>
 

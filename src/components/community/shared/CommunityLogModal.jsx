@@ -692,7 +692,7 @@ export default function CommunityLogModal({
               fontSize: 11, color: "rgba(255,255,255,0.4)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase", letterSpacing: 1.5,
-            }}>Shelf'd! Now hear what the hosts thought</div>
+            }}>Logged! Now hear what the hosts thought</div>
 
             <button
               onClick={() => { playEpisode(matchedEpisode); setEpisodeToast(false); onClose(); }}

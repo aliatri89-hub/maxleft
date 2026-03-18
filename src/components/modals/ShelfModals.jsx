@@ -318,7 +318,7 @@ export default function ShelfModals({
                       if (!error) added += batch.length;
                     }
                     await onRefresh();
-                    onToast(`🌍 ${added} countr${added === 1 ? "y" : "ies"} added!`);
+                    onToast(`${added} countr${added === 1 ? "y" : "ies"} added!`);
                     setMultiSelectCountries(new Set());
                     setBulkAdding(false);
                     setAddingCountry(false);
@@ -471,7 +471,7 @@ export default function ShelfModals({
       {showPassportMap && (
         <div className="passport-map-overlay">
           <div className="passport-map-header">
-            <div className="passport-map-title">🌍 Your Passport</div>
+            <div className="passport-map-title">Your Passport</div>
             <div className="passport-map-close" onClick={() => { setShowPassportMap(false); setMapTooltip(null); }}>✕</div>
           </div>
           <div className="passport-map-body">

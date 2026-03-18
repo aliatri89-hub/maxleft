@@ -138,8 +138,8 @@ export default function BigPictureScreen({ community, miniseries, session, onBac
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, isUpdate });
-    const typeLabel = item?.media_type === "film" ? "🎬" : item?.media_type === "book" ? "📚" : "🎮";
-    if (onToast) onToast(isUpdate ? `Updated! ${typeLabel}` : `Shelf'd! ${typeLabel}`);
+    const typeLabel = item?.media_type === "film" ? "film" : item?.media_type === "book" ? "book" : "game";
+    if (onToast) onToast(isUpdate ? `Updated!` : `Logged!`);
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
   }, [allItems, logItem, onToast, onShelvesChanged]);
 
@@ -151,7 +151,7 @@ export default function BigPictureScreen({ community, miniseries, session, onBac
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
     const label = item.media_type === "film" ? "watch list" : item.media_type === "book" ? "reading list" : "play list";
-    if (onToast) onToast(`Added to ${label}! 👁`);
+    if (onToast) onToast(`Added to ${label}!`);
   }, [addToWatchlist, onToast]);
 
   // ── Tab content ───────────────────────────────────────────

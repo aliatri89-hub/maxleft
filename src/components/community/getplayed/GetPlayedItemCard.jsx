@@ -7,7 +7,7 @@ import ItemCard from "../primitives/ItemCard";
  *   - Beat/Completed: green checkmark (standard isCompleted behavior)
  *   - Playing: cyan ▶ badge
  *   - Backlog: yellow 📋 badge
- *   - WPYP: 🎮 controller badge (top-left)
+ *   - WPYP: controller badge (top-left)
  *
  * Props:
  *   item               — community_items row
@@ -56,7 +56,7 @@ export default function GetPlayedItemCard({
           border: playedAlong ? "none" : "1px solid rgba(255,255,255,0.2)",
           transition: "all 0.2s",
         }}>
-          🎮
+         
         </div>
       )}
 

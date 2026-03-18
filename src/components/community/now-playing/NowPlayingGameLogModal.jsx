@@ -315,7 +315,7 @@ export default function NowPlayingGameLogModal({
                   fontSize: 32,
                 }}
               >
-                🎮
+               
               </div>
             )}
           </div>
@@ -388,7 +388,7 @@ export default function NowPlayingGameLogModal({
                       fontWeight: 600,
                     }}
                   >
-                    🎮 Steam Sync
+                    Steam Sync
                   </div>
                 )}
               </div>
@@ -957,7 +957,7 @@ export default function NowPlayingGameLogModal({
                 letterSpacing: 1.5,
               }}
             >
-              Shelf'd! Now hear what the hosts thought
+              Logged! Now hear what the hosts thought
             </div>
 
             <button

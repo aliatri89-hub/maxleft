@@ -527,7 +527,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                                       const nextUp = isNextUp ? null : { id: item.id, title: item.title, author: item.author, cover: item.cover_url };
                                       await supabase.from("profiles").update({ next_up_book: nextUp }).eq("id", session.user.id);
                                       onUpdateProfile({ nextUpBook: nextUp });
-                                      onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title} 📖`);
+                                      onToast(isNextUp ? "Cleared next up" : `Up next: ${item.title}`);
                                     }}
                                     title={isNextUp ? "Remove next up" : "Set as next up"}
                                   >🔖</div>

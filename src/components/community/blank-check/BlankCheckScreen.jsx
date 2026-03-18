@@ -171,7 +171,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, isUpdate });
-    if (onToast) onToast(isUpdate ? "Updated! 🎬" : "Shelf'd! 🎬");
+    if (onToast) onToast(isUpdate ? "Updated!" : "Logged!");
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
 
     // ── Badge check (only on fresh logs, not updates) ──
@@ -217,13 +217,13 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
-    if (onToast) onToast("Added to watch list! 👁");
+    if (onToast) onToast("Added to watch list!");
   }, [addToWatchlist, onToast]);
 
   // Commentary toggle — BC-specific, decoupled from film logging
   const handleToggleCommentary = useCallback(async (itemId, newValue) => {
     await logCommentaryOnly(itemId, newValue);
-    if (onToast) onToast(newValue ? "🎧 Commentary logged!" : "Commentary removed");
+    if (onToast) onToast(newValue ? "Commentary logged!" : "Commentary removed");
   }, [logCommentaryOnly, onToast]);
 
   const isMediaVisible = useCallback((mediaType) => {

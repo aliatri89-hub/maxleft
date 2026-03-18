@@ -236,7 +236,7 @@ export default function ItemDetailModal({
           )}
           {localItem.isPlaying && (
             <div style={badgeStyle("#a78bfa")}>
-              🎮 Playing
+              Playing
               {localItem.source === "steam" && <span style={{ opacity: 0.5, fontSize: 10, marginLeft: 4 }}>· Steam</span>}
             </div>
           )}

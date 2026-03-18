@@ -117,7 +117,7 @@ export default function PassportShelf({ countries, profile, onAddCountry, onView
     <div style={S.section}>
       <div style={S.labelRow}>
         <div style={S.label} onClick={onOpenMap}>
-          🌍 Passport
+          Passport
           {(countries?.length || 0) > 0 && <span style={S.count}>{countries.length} {countries.length === 1 ? "country" : "countries"}</span>}
         </div>
         <div style={S.btnRow}>

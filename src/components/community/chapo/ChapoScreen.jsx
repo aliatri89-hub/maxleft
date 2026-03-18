@@ -85,7 +85,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
     const item = allItems.find(i => i.id === itemId);
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, opts);
-    if (onToast) onToast(opts.isUpdate ? "Updated! 🎬" : "Shelf'd! 🎬");
+    if (onToast) onToast(opts.isUpdate ? "Updated!" : "Logged!");
     if (!opts.isUpdate && onShelvesChanged) onShelvesChanged();
   }, [allItems, logItem, onToast, onShelvesChanged]);
 
@@ -96,7 +96,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
-    if (onToast) onToast("Added to watch list! 👁");
+    if (onToast) onToast("Added to watch list!");
   }, [addToWatchlist, onToast]);
 
   return (

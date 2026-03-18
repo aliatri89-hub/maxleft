@@ -308,7 +308,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                   onClick={() => {}}
                   style={{ cursor: "default" }}
                 >
-                  🎬 Watched
+                  Watched
                 </button>
                 <button
                   className={`book-status-btn${addedToWishlist ? " active" : ""}`}
@@ -399,7 +399,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                     className={`book-status-btn${gameStatus === "playing" ? " active" : ""}`}
                     onClick={() => setGameStatus("playing")}
                   >
-                    🎮 Currently Playing
+                    Currently Playing
                   </button>
                   <button
                     className={`book-status-btn${addedToWishlist ? " active" : ""}`}

@@ -145,8 +145,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, brown_arrow, isUpdate });
 
-    const typeLabel = item?.media_type === "film" ? "🎬" : item?.media_type === "book" ? "📚" : "🎮";
-    if (onToast) onToast(isUpdate ? `Updated! ${typeLabel}` : `Shelf'd! ${typeLabel}`);
+    const typeLabel = item?.media_type === "film" ? "film" : item?.media_type === "book" ? "book" : "game";
+    if (onToast) onToast(isUpdate ? `Updated!` : `Logged!`);
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
 
     // ── Badge check (only on fresh logs, not updates) ──
@@ -192,7 +192,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
     const label = item.media_type === "film" ? "watch list" : item.media_type === "book" ? "reading list" : "play list";
-    if (onToast) onToast(`Added to ${label}! 👁`);
+    if (onToast) onToast(`Added to ${label}!`);
   }, [addToWatchlist, onToast]);
 
   // ── Game-specific handlers (dual-write via bridge) ────────
@@ -201,7 +201,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     const coverUrl = item ? getCoverUrl(item) : null;
     await logGameItem(itemId, item, coverUrl, opts);
 
-    if (onToast) onToast(opts.isUpdate ? "Updated! 🎮" : "Shelf'd! 🎮");
+    if (onToast) onToast(opts.isUpdate ? "Updated!" : "Logged!");
     if (!opts.isUpdate && onShelvesChanged) onShelvesChanged();
 
     // Badge check on fresh game logs
@@ -243,7 +243,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   const handleGameWatchlist = useCallback(async (item, coverUrl) => {
     await addToBacklog(item, coverUrl);
-    if (onToast) onToast("Added to play list! 🎮");
+    if (onToast) onToast("Added to play list!");
   }, [addToBacklog, onToast]);
 
   // ── Compute hero miniseries per tab ─────────────────────

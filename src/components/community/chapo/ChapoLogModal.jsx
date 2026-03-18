@@ -264,7 +264,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                   border: "1px solid rgba(211,47,47,0.3)",
                   borderRadius: 20, fontSize: 10, color: "#ef5350", fontWeight: 600,
                 }}>
-                  🎬 {item._episodeTheme}
+                  {item._episodeTheme}
                 </div>
               )}
               {item._patreonUrl && (
@@ -454,7 +454,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                     transition: "background 0.2s",
                   }}
                 >
-                  👁 Watch List
+                  Watch List
                 </button>
               </div>
             </>

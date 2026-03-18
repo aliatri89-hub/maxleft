@@ -3,14 +3,14 @@ import ItemCard from "../primitives/ItemCard";
 /**
  * BlankCheckItemCard — Blank Check community card.
  *
- * Adds: 🎧 commentary toggle badge (top-left).
+ * Adds: commentary toggle badge (top-left).
  * That's it. No rating arrows, no host verdicts.
  *
  * Props:
  *   item                    — community_items row
  *   isCompleted             — whether item is logged
  *   listenedWithCommentary  — boolean
- *   showCommentaryBadge     — whether to show the 🎧 badge
+ *   showCommentaryBadge     — whether to show the badge
  *   onToggle                — click handler (opens log modal)
  *   onToggleCommentary      — (itemId, newValue) => void
  *   coverCacheVersion       — triggers cover URL re-resolve

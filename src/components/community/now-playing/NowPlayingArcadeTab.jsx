@@ -271,7 +271,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
               letterSpacing: "0.08em",
               textTransform: "uppercase",
             }}>
-              🎬 Films ({movies.length})
+              Films ({movies.length})
             </div>
           )}
           <div
@@ -311,7 +311,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
             letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}>
-            🎮 Games ({games.length})
+            Games ({games.length})
           </div>
           <div
             className="hide-scrollbar"
@@ -411,7 +411,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         </div>
       )}
 
-      {/* 🎮 badge */}
+      {/* badge */}
       <div style={{
         position: "absolute", top: 6, left: 6,
         fontSize: 10,
@@ -424,7 +424,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         fontFamily: "'Courier New', monospace",
         letterSpacing: "0.03em",
       }}>
-        🎮
+       
       </div>
 
       {/* Playing badge */}
