@@ -1,5 +1,5 @@
 const SHELF_CONFIG = {
-  books: { label: "Bookshelf", emptyText: "No books yet", modalCat: "book" },
+  books: { label: "Books", emptyText: "No books yet", modalCat: "book" },
   movies: { label: "Movies", emptyText: "No films yet", modalCat: "movie" },
   shows: { label: "Shows", emptyText: "No shows yet", modalCat: "show" },
   games: { label: "Games", emptyText: "No games yet", modalCat: "game" },

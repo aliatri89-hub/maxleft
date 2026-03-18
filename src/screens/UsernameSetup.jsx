@@ -622,7 +622,7 @@ function UsernameSetup({ name, session, onComplete }) {
       <div className="setup-screen">
         <style>{DARK_STYLES}</style>
         <StepDots total={allSteps.length} current={1} />
-        <div className="setup-title">Your Shelves</div>
+        <div className="setup-title">Your Library</div>
         <div className="setup-sub">
           What do you want to track? Pick what interests you — you can always change this later in settings.
         </div>
@@ -1155,7 +1155,7 @@ function UsernameSetup({ name, session, onComplete }) {
           {allDone ? "🎉" : "⚡"}
         </div>
         <div className="setup-title">
-          {allDone ? "You're all set!" : "Setting up your shelf"}
+          {allDone ? "You're all set!" : "Setting up your library"}
         </div>
         <div className="setup-sub">
           {allDone

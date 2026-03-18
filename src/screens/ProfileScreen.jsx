@@ -117,10 +117,10 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   };
 
   const shelfToggleMap = {
-    books: { label: "Bookshelf" },
-    movies: { label: "Film Shelf" },
-    shows: { label: "Show Shelf" },
-    games: { label: "Game Shelf" },
+    books: { label: "Books" },
+    movies: { label: "Films" },
+    shows: { label: "Shows" },
+    games: { label: "Games" },
   };
 
   const currentOrder = profile.shelfOrder || DEFAULT_SHELF_ORDER;
@@ -259,7 +259,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
         <div className="profile-group-label">Profile</div>
         <div className="profile-group-card">
           <div className="profile-group-row" onClick={() => setManagingShelves(!managingShelves)}>
-            <span className="profile-group-row-text">Manage Shelves</span>
+            <span className="profile-group-row-text">Manage Library</span>
             <span className="profile-group-row-chevron">{managingShelves ? "▾" : "›"}</span>
           </div>
           <Expandable open={managingShelves}>
@@ -604,7 +604,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           <div className="profile-delete-confirm">
             <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "#f87171", marginBottom: 8 }}>Delete your account?</div>
             <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-faint)", marginBottom: 16, lineHeight: 1.5 }}>
-              This will permanently delete your profile, shelves, activity history, and all data. This cannot be undone.
+              This will permanently delete your profile, library, activity history, and all data. This cannot be undone.
             </div>
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
               <button className="btn-confirm-yes" style={{ fontSize: 12, padding: "8px 20px" }} onClick={onDeleteAccount}>Yes, Delete Everything</button>

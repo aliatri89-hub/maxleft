@@ -449,7 +449,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
         color: dark.textMuted, textAlign: "center",
         letterSpacing: "0.04em",
       }}>
-        Your shelf fills up from day one
+        Your library fills up from day one
       </div>
     </div>
   );
@@ -644,7 +644,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
         textTransform: "uppercase", color: dark.terracotta,
         textAlign: "center", marginBottom: 6,
       }}>
-        From the podcast to your shelf
+        From the podcast to your library
       </div>
 
       {/* Heading */}
@@ -665,7 +665,7 @@ export default function OnboardingShowcase({ onContinue, onBack }) {
         marginLeft: "auto", marginRight: "auto",
       }}>
         Import what you've already watched, read, and played.
-        Badges unlock. Shelves fill. Progress starts on day one.
+        Badges unlock. Libraries grow. Progress starts on day one.
       </div>
 
       {/* Tab selector */}

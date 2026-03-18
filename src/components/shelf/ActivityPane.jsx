@@ -15,10 +15,10 @@ export default function ActivityPane({ items, loading }) {
   return (
     <div>
       {items.map((item, i) => {
-        const actionText = item.activity_type === "book" ? (item.action === "finished" ? "finished reading" : item.action === "started" ? "started reading" : "shelved")
-          : item.activity_type === "movie" ? (item.action === "finished" ? "finished watching" : "shelved")
-          : item.activity_type === "show" ? (item.action === "finished" ? "finished watching" : item.action === "started" ? "started watching" : item.action === "progress" ? "updated progress on" : "shelved")
-          : item.activity_type === "game" ? (item.action === "finished" ? "finished playing" : item.action === "beat" ? "beat" : "shelved")
+        const actionText = item.activity_type === "book" ? (item.action === "finished" ? "finished reading" : item.action === "started" ? "started reading" : "logged")
+          : item.activity_type === "movie" ? (item.action === "finished" ? "finished watching" : "logged")
+          : item.activity_type === "show" ? (item.action === "finished" ? "finished watching" : item.action === "started" ? "started watching" : item.action === "progress" ? "updated progress on" : "logged")
+          : item.activity_type === "game" ? (item.action === "finished" ? "finished playing" : item.action === "beat" ? "beat" : "logged")
           : item.activity_type === "event" ? (item.action === "completed" ? "completed" : item.action === "countdown_month" ? "is training for" : "added")
           : item.activity_type === "challenge" ? (item.action || "tracked")
           : item.activity_type === "country" ? "visited"

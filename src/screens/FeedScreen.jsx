@@ -2207,7 +2207,7 @@ function EmptyFeed({ onNavigateCommunity }) {
     {
       emoji: "📽️",
       label: "Log your first film",
-      desc: "Watched something recently? Shelf it, rate it, start building your collection.",
+      desc: "Watched something recently? Log it, rate it, start building your collection.",
       accent: "var(--accent-terra, #c97c5d)",
     },
     {

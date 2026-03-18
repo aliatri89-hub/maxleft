@@ -64,7 +64,7 @@ export default function ShelfModals({
   };
 
   const shelfConfig = {
-    books: { icon: "📖", label: "Bookshelf", modalCat: "book" },
+    books: { icon: "📖", label: "Books", modalCat: "book" },
     movies: { icon: "🎬", label: "Movies", modalCat: "movie" },
     shows: { icon: "📺", label: "Shows", modalCat: "show" },
     games: { icon: "🎮", label: "Games", modalCat: "game" },

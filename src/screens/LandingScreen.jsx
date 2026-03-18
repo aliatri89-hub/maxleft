@@ -1602,7 +1602,7 @@ function LandingScreen({ onSignIn }) {
               <img className="sync-logo sync-logo-rounded" src="https://play-lh.googleusercontent.com/bOOrAMR_IOv0jyKJU2MstONEBGzAEQmEoNmaRPl-V4CY4uvFNmrI2aBoXmnhGxhsxdo=w240-h480-rw" alt="Storygraph" />
               <div className="sync-info">
                 <div className="sync-name">Goodreads / Storygraph</div>
-                <div className="sync-stat">Books & shelves</div>
+                <div className="sync-stat">Books & ratings</div>
               </div>
               <div className="sync-badge">Auto-sync</div>
             </div>

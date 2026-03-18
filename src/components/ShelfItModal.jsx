@@ -452,11 +452,11 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? "Shelving..." :
-                selected.type === "tv" ? (showStatus === "watching" ? "Start Watching" : "Shelf This Show") :
-                selected.type === "book" ? (bookStatus === "reading" ? "Start Reading" : "Shelf This Book") :
-                selected.type === "game" ? (gameStatus === "playing" ? "Start Playing" : "Shelf This Game") :
-                "Shelf This Film"}
+              {saving ? "Logging..." :
+                selected.type === "tv" ? (showStatus === "watching" ? "Start Watching" : "Log This Show") :
+                selected.type === "book" ? (bookStatus === "reading" ? "Start Reading" : "Log This Book") :
+                selected.type === "game" ? (gameStatus === "playing" ? "Start Playing" : "Log This Game") :
+                "Log This Film"}
             </button>
           </div>
         </div>
@@ -469,8 +469,8 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal-sheet">
         <div className="modal-handle" />
-        <div className="modal-title bb">Shelf It</div>
-        <div className="modal-sub">Search for something to put on the mantl.</div>
+        <div className="modal-title bb">Log It</div>
+        <div className="modal-sub">Search for something to add to your library.</div>
 
         <input
           className="search-input"
