@@ -1285,14 +1285,23 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                       }} />
                     )}
 
-                    {/* Text fallback — only when no logo is available */}
+                    {/* Text fallback — sharpie-on-label when no TMDB logo */}
                     {!data.logo_url && !logoLoading && (
                       <div style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 800, fontSize: 20, lineHeight: 1.05,
-                        color: "#2C2824", textTransform: "uppercase",
-                        letterSpacing: "0.01em", position: "relative",
+                        fontFamily: "'Permanent Marker', cursive",
+                        fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
+                        lineHeight: 1.1,
+                        color: "#2C2824",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.02em",
+                        position: "relative",
                         textAlign: "center",
+                        transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
+                        textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
+                        padding: "0 8px",
+                        maxWidth: "85%",
+                        margin: "0 auto",
+                        wordBreak: "break-word",
                       }}>
                         {data.title}
                       </div>
