@@ -460,7 +460,7 @@ function CommunityCard({ community, stats, onOpen, isSubscribed, subscriptionsLo
                 {/* Progress bar */}
                 <div style={{
                   height: 12, borderRadius: 2,
-                  border: `1.5px solid ${accent}66`,
+                  border: "1.5px solid rgba(255,255,255,0.5)",
                   background: "rgba(255,255,255,0.04)",
                   marginTop: 10, overflow: "hidden",
                   padding: 2,

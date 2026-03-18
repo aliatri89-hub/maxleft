@@ -29,8 +29,12 @@ export function useBadges(communityId, userId) {
   const earnedRef = useRef(earnedBadgeIds);
   useEffect(() => { earnedRef.current = earnedBadgeIds; }, [earnedBadgeIds]);
 
+  // Cache: item_id → badge_id for item_set_completion badges (populated on load)
+  const itemBadgeMapRef = useRef({});
+
   // ─── Process raw data into progress map (shared by RPC + fallback) ──
-  const buildProgressMap = (badgeRows, earned, allItems, allCompleted) => {
+  // badgeItemsMap: { [badgeId]: [{ tmdb_id, ... }] } — for item_set_completion badges
+  const buildProgressMap = (badgeRows, earned, allItems, allCompleted, badgeItemsMap = {}) => {
     const progressMap = {};
 
     // Mark earned badges
@@ -40,11 +44,12 @@ export function useBadges(communityId, userId) {
       }
     });
 
-    const unearnedBadges = badgeRows.filter(
+    // ── Miniseries-completion badges ──
+    const unearnedMiniseries = badgeRows.filter(
       b => !earned.has(b.id) && b.badge_type === "miniseries_completion" && b.miniseries_id
     );
 
-    for (const badge of unearnedBadges) {
+    for (const badge of unearnedMiniseries) {
       const badgeItems = (allItems || []).filter(i =>
         i.miniseries_id === badge.miniseries_id
         && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
@@ -64,6 +69,30 @@ export function useBadges(communityId, userId) {
       progressMap[badge.id] = {
         current: completedTmdbIds.size,
         total: badgeItems.length,
+        complete: false,
+      };
+    }
+
+    // ── Item-set-completion badges (cross-miniseries) ──
+    const unearnedItemSet = badgeRows.filter(
+      b => !earned.has(b.id) && b.badge_type === "item_set_completion"
+    );
+
+    for (const badge of unearnedItemSet) {
+      const items = badgeItemsMap[badge.id] || [];
+      const requiredTmdbIds = new Set(items.map(i => i.tmdb_id).filter(Boolean));
+      const completedTmdbIds = new Set(
+        (allCompleted || [])
+          .filter(c => {
+            const tmdbId = c.tmdb_id || c.community_items?.tmdb_id;
+            return requiredTmdbIds.has(tmdbId);
+          })
+          .map(c => c.tmdb_id || c.community_items?.tmdb_id)
+      );
+
+      progressMap[badge.id] = {
+        current: completedTmdbIds.size,
+        total: items.length,
         complete: false,
       };
     }
@@ -93,10 +122,24 @@ export function useBadges(communityId, userId) {
         const earned = new Set(data.earned || []);
         const allItems = data.badge_items || [];
         const allCompleted = data.completed_tmdb || [];
+        const itemSetItems = data.item_set_items || [];
+
+        // Build badgeItemsMap + itemBadgeMapRef from item_set_items
+        const badgeItemsMap = {};
+        const ibMap = {};
+        for (const row of itemSetItems) {
+          ibMap[row.item_id] = row.badge_id;
+          if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
+          badgeItemsMap[row.badge_id].push({
+            tmdb_id: row.tmdb_id,
+            media_type: row.media_type,
+          });
+        }
+        itemBadgeMapRef.current = ibMap;
 
         setBadges(badgeRows);
         setEarnedBadgeIds(earned);
-        setBadgeProgress(buildProgressMap(badgeRows, earned, allItems, allCompleted));
+        setBadgeProgress(buildProgressMap(badgeRows, earned, allItems, allCompleted, badgeItemsMap));
         setLoading(false);
         return;
       } catch (rpcErr) {
@@ -132,15 +175,19 @@ export function useBadges(communityId, userId) {
       setEarnedBadgeIds(earned);
 
       // 3. Calculate progress — 2 bulk queries instead of 2 per badge
-      const unearnedBadges = badgeRows.filter(
+      const unearnedMiniseries = badgeRows.filter(
         b => !earned.has(b.id) && b.badge_type === "miniseries_completion" && b.miniseries_id
+      );
+      const unearnedItemSet = badgeRows.filter(
+        b => !earned.has(b.id) && b.badge_type === "item_set_completion"
       );
 
       let allItems = [];
       let allCompleted = [];
+      let badgeItemsMap = {};
 
-      if (unearnedBadges.length > 0) {
-        const miniseriesIds = [...new Set(unearnedBadges.map(b => b.miniseries_id))];
+      if (unearnedMiniseries.length > 0) {
+        const miniseriesIds = [...new Set(unearnedMiniseries.map(b => b.miniseries_id))];
 
         const { data: itemRows } = await supabase
           .from("community_items")
@@ -149,23 +196,59 @@ export function useBadges(communityId, userId) {
 
         if (cancelled) return;
         allItems = itemRows || [];
+      }
 
-        const badgeTmdbIds = [...new Set(allItems.map(i => i.tmdb_id).filter(Boolean))];
+      // Fetch badge_items for item_set_completion badges
+      // Fetch for ALL (not just unearned) so getBadgeForItem + revoke work for earned badges
+      const allItemSetBadges = badgeRows.filter(b => b.badge_type === "item_set_completion");
+      if (allItemSetBadges.length > 0) {
+        const allItemSetBadgeIds = allItemSetBadges.map(b => b.id);
 
-        const { data: completedRows } = badgeTmdbIds.length > 0
-          ? await supabase
-              .from("community_user_progress")
-              .select("item_id, community_items!inner(tmdb_id, media_type)")
-              .eq("user_id", userId)
-              .eq("status", "completed")
-              .in("community_items.tmdb_id", badgeTmdbIds)
-          : { data: [] };
+        const { data: biRows } = await supabase
+          .from("badge_items")
+          .select("badge_id, item_id, community_items!inner(tmdb_id, media_type)")
+          .in("badge_id", allItemSetBadgeIds);
+
+        if (cancelled) return;
+
+        // Build item_id → badge_id map for getBadgeForItem / revoke
+        const ibMap = {};
+        for (const row of (biRows || [])) {
+          ibMap[row.item_id] = row.badge_id;
+
+          // Also build badgeItemsMap for progress (unearned only)
+          if (unearnedItemSet.some(b => b.id === row.badge_id)) {
+            if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
+            badgeItemsMap[row.badge_id].push({
+              tmdb_id: row.community_items?.tmdb_id,
+              media_type: row.community_items?.media_type,
+            });
+          }
+        }
+        itemBadgeMapRef.current = ibMap;
+      }
+
+      // Collect all required tmdb_ids from both badge types
+      const miniseriesTmdbIds = allItems.map(i => i.tmdb_id).filter(Boolean);
+      const itemSetTmdbIds = Object.values(badgeItemsMap)
+        .flat()
+        .map(i => i.tmdb_id)
+        .filter(Boolean);
+      const allRequiredTmdbIds = [...new Set([...miniseriesTmdbIds, ...itemSetTmdbIds])];
+
+      if (allRequiredTmdbIds.length > 0) {
+        const { data: completedRows } = await supabase
+          .from("community_user_progress")
+          .select("item_id, community_items!inner(tmdb_id, media_type)")
+          .eq("user_id", userId)
+          .eq("status", "completed")
+          .in("community_items.tmdb_id", allRequiredTmdbIds);
 
         if (cancelled) return;
         allCompleted = completedRows || [];
       }
 
-      setBadgeProgress(buildProgressMap(badgeRows, earned, allItems, allCompleted));
+      setBadgeProgress(buildProgressMap(badgeRows, earned, allItems, allCompleted, badgeItemsMap));
       setLoading(false);
     })();
 
@@ -185,46 +268,11 @@ export function useBadges(communityId, userId) {
 
     if (!itemRow?.tmdb_id) return null;
 
-    // Find which badge miniseries contain an item with this tmdb_id
-    const unearnedBadges = badges.filter(
-      b => b.badge_type === "miniseries_completion"
-        && b.miniseries_id
-        && !earnedRef.current.has(b.id)
-    );
-    if (unearnedBadges.length === 0) return null;
-
-    const badgeMiniseriesIds = unearnedBadges.map(b => b.miniseries_id);
-
-    const { data: matchingItems } = await supabase
-      .from("community_items")
-      .select("miniseries_id")
-      .eq("tmdb_id", itemRow.tmdb_id)
-      .in("miniseries_id", badgeMiniseriesIds);
-
-    if (!matchingItems || matchingItems.length === 0) return null;
-
-    const matchedMiniseriesIds = new Set(matchingItems.map(i => i.miniseries_id));
-    const candidateBadges = unearnedBadges.filter(
-      b => matchedMiniseriesIds.has(b.miniseries_id)
-        && (!b.media_type_filter || b.media_type_filter === itemRow.media_type)
-    );
-
-    if (candidateBadges.length === 0) return null;
-
-    for (const badge of candidateBadges) {
-      // Get all items in this badge's miniseries (with tmdb_ids)
-      let totalQuery = supabase
-        .from("community_items")
-        .select("tmdb_id")
-        .eq("miniseries_id", badge.miniseries_id);
-      if (badge.media_type_filter) totalQuery = totalQuery.eq("media_type", badge.media_type_filter);
-      const { data: badgeItems } = await totalQuery;
-
-      const requiredTmdbIds = [...new Set((badgeItems || []).map(i => i.tmdb_id).filter(Boolean))];
+    // ── Helper: evaluate a single badge and return it if earned ──
+    const evaluateBadge = async (badge, requiredTmdbIds) => {
       const total = requiredTmdbIds.length;
 
-      // Count user's completed items by tmdb_id (cross-community)
-      const { data: completedRows } = requiredTmdbIds.length > 0
+      const { data: completedRows } = total > 0
         ? await supabase
             .from("community_user_progress")
             .select("community_items!inner(tmdb_id)")
@@ -238,33 +286,103 @@ export function useBadges(communityId, userId) {
       );
       const current = completedTmdbIds.size;
 
-      // Update progress
       setBadgeProgress(prev => ({
         ...prev,
         [badge.id]: { current, total, complete: current >= total },
       }));
 
       if (current >= total) {
-        // 🎉 Badge earned! Insert into user_badges
         const { error: insertErr } = await supabase
           .from("user_badges")
           .insert({ user_id: userId, badge_id: badge.id });
 
         if (insertErr) {
-          // Might already exist (race condition) — that's fine
           if (!insertErr.message.includes("duplicate")) {
             console.error("[Badges] Earn error:", insertErr.message);
           }
         }
 
-        // Update local state + ref immediately
         setEarnedBadgeIds(prev => {
           const next = new Set([...prev, badge.id]);
           earnedRef.current = next;
           return next;
         });
 
-        return badge; // Return the earned badge for celebration
+        return badge;
+      }
+      return null;
+    };
+
+    // ── Check miniseries_completion badges ──
+    const unearnedMiniseries = badges.filter(
+      b => b.badge_type === "miniseries_completion"
+        && b.miniseries_id
+        && !earnedRef.current.has(b.id)
+    );
+
+    if (unearnedMiniseries.length > 0) {
+      const badgeMiniseriesIds = unearnedMiniseries.map(b => b.miniseries_id);
+
+      const { data: matchingItems } = await supabase
+        .from("community_items")
+        .select("miniseries_id")
+        .eq("tmdb_id", itemRow.tmdb_id)
+        .in("miniseries_id", badgeMiniseriesIds);
+
+      if (matchingItems && matchingItems.length > 0) {
+        const matchedMiniseriesIds = new Set(matchingItems.map(i => i.miniseries_id));
+        const candidateBadges = unearnedMiniseries.filter(
+          b => matchedMiniseriesIds.has(b.miniseries_id)
+            && (!b.media_type_filter || b.media_type_filter === itemRow.media_type)
+        );
+
+        for (const badge of candidateBadges) {
+          let totalQuery = supabase
+            .from("community_items")
+            .select("tmdb_id")
+            .eq("miniseries_id", badge.miniseries_id);
+          if (badge.media_type_filter) totalQuery = totalQuery.eq("media_type", badge.media_type_filter);
+          const { data: badgeItems } = await totalQuery;
+
+          const requiredTmdbIds = [...new Set((badgeItems || []).map(i => i.tmdb_id).filter(Boolean))];
+          const result = await evaluateBadge(badge, requiredTmdbIds);
+          if (result) return result;
+        }
+      }
+    }
+
+    // ── Check item_set_completion badges ──
+    const unearnedItemSet = badges.filter(
+      b => b.badge_type === "item_set_completion" && !earnedRef.current.has(b.id)
+    );
+
+    if (unearnedItemSet.length > 0) {
+      const itemSetBadgeIds = unearnedItemSet.map(b => b.id);
+
+      // Check if this item (by tmdb_id) is in any item-set badge
+      const { data: biMatches } = await supabase
+        .from("badge_items")
+        .select("badge_id, community_items!inner(tmdb_id)")
+        .in("badge_id", itemSetBadgeIds)
+        .eq("community_items.tmdb_id", itemRow.tmdb_id);
+
+      if (biMatches && biMatches.length > 0) {
+        const matchedBadgeIds = new Set(biMatches.map(r => r.badge_id));
+        const candidateBadges = unearnedItemSet.filter(b => matchedBadgeIds.has(b.id));
+
+        for (const badge of candidateBadges) {
+          // Get all items for this badge
+          const { data: biRows } = await supabase
+            .from("badge_items")
+            .select("item_id, community_items!inner(tmdb_id)")
+            .eq("badge_id", badge.id);
+
+          const requiredTmdbIds = [...new Set(
+            (biRows || []).map(r => r.community_items?.tmdb_id).filter(Boolean)
+          )];
+          const result = await evaluateBadge(badge, requiredTmdbIds);
+          if (result) return result;
+        }
       }
     }
 
@@ -275,50 +393,61 @@ export function useBadges(communityId, userId) {
   const checkAllBadges = useCallback(async () => {
     if (!userId || badges.length === 0) return [];
 
-    const unearnedBadges = badges.filter(
+    const unearnedMiniseries = badges.filter(
       b => !earnedRef.current.has(b.id) && b.badge_type === "miniseries_completion" && b.miniseries_id
     );
-    if (unearnedBadges.length === 0) return [];
+    const unearnedItemSet = badges.filter(
+      b => !earnedRef.current.has(b.id) && b.badge_type === "item_set_completion"
+    );
+    if (unearnedMiniseries.length === 0 && unearnedItemSet.length === 0) return [];
 
-    const miniseriesIds = [...new Set(unearnedBadges.map(b => b.miniseries_id))];
+    // ── Fetch items for miniseries badges ──
+    let allItems = [];
+    if (unearnedMiniseries.length > 0) {
+      const miniseriesIds = [...new Set(unearnedMiniseries.map(b => b.miniseries_id))];
+      const { data: itemRows } = await supabase
+        .from("community_items")
+        .select("id, miniseries_id, media_type, tmdb_id")
+        .in("miniseries_id", miniseriesIds);
+      allItems = itemRows || [];
+    }
 
-    // 2 bulk queries — matched by tmdb_id for cross-community support
-    const { data: allItems } = await supabase
-      .from("community_items")
-      .select("id, miniseries_id, media_type, tmdb_id")
-      .in("miniseries_id", miniseriesIds);
+    // ── Fetch items for item-set badges ──
+    const badgeItemsMap = {};
+    if (unearnedItemSet.length > 0) {
+      const itemSetBadgeIds = unearnedItemSet.map(b => b.id);
+      const { data: biRows } = await supabase
+        .from("badge_items")
+        .select("badge_id, item_id, community_items!inner(tmdb_id, media_type)")
+        .in("badge_id", itemSetBadgeIds);
 
-    const badgeTmdbIds = [...new Set(
-      (allItems || []).map(i => i.tmdb_id).filter(Boolean)
-    )];
+      for (const row of (biRows || [])) {
+        if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
+        badgeItemsMap[row.badge_id].push({
+          tmdb_id: row.community_items?.tmdb_id,
+          media_type: row.community_items?.media_type,
+        });
+      }
+    }
 
-    const { data: allCompleted } = badgeTmdbIds.length > 0
+    // ── Single bulk completion query for all required tmdb_ids ──
+    const miniseriesTmdbIds = allItems.map(i => i.tmdb_id).filter(Boolean);
+    const itemSetTmdbIds = Object.values(badgeItemsMap).flat().map(i => i.tmdb_id).filter(Boolean);
+    const allRequiredTmdbIds = [...new Set([...miniseriesTmdbIds, ...itemSetTmdbIds])];
+
+    const { data: allCompleted } = allRequiredTmdbIds.length > 0
       ? await supabase
           .from("community_user_progress")
           .select("item_id, community_items!inner(tmdb_id, media_type)")
           .eq("user_id", userId)
           .eq("status", "completed")
-          .in("community_items.tmdb_id", badgeTmdbIds)
+          .in("community_items.tmdb_id", allRequiredTmdbIds)
       : { data: [] };
 
     const newlyEarned = [];
 
-    for (const badge of unearnedBadges) {
-      const badgeItems = (allItems || []).filter(i =>
-        i.miniseries_id === badge.miniseries_id
-        && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
-      );
-      const requiredTmdbIds = new Set(badgeItems.map(i => i.tmdb_id).filter(Boolean));
-      const completedTmdbIds = new Set(
-        (allCompleted || [])
-          .filter(c => requiredTmdbIds.has(c.community_items?.tmdb_id)
-            && (!badge.media_type_filter || c.community_items?.media_type === badge.media_type_filter))
-          .map(c => c.community_items.tmdb_id)
-      );
-
-      const current = completedTmdbIds.size;
-      const total = badgeItems.length;
-
+    // ── Helper to award a badge ──
+    const tryAward = async (badge, current, total) => {
       setBadgeProgress(prev => ({
         ...prev,
         [badge.id]: { current, total, complete: current >= total },
@@ -339,6 +468,34 @@ export function useBadges(communityId, userId) {
           console.log(`[Badges] Auto-earned "${badge.name}" via sync`);
         }
       }
+    };
+
+    // ── Evaluate miniseries badges ──
+    for (const badge of unearnedMiniseries) {
+      const badgeItems = allItems.filter(i =>
+        i.miniseries_id === badge.miniseries_id
+        && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
+      );
+      const requiredTmdbIds = new Set(badgeItems.map(i => i.tmdb_id).filter(Boolean));
+      const completedTmdbIds = new Set(
+        (allCompleted || [])
+          .filter(c => requiredTmdbIds.has(c.community_items?.tmdb_id)
+            && (!badge.media_type_filter || c.community_items?.media_type === badge.media_type_filter))
+          .map(c => c.community_items.tmdb_id)
+      );
+      await tryAward(badge, completedTmdbIds.size, badgeItems.length);
+    }
+
+    // ── Evaluate item-set badges ──
+    for (const badge of unearnedItemSet) {
+      const items = badgeItemsMap[badge.id] || [];
+      const requiredTmdbIds = new Set(items.map(i => i.tmdb_id).filter(Boolean));
+      const completedTmdbIds = new Set(
+        (allCompleted || [])
+          .filter(c => requiredTmdbIds.has(c.community_items?.tmdb_id))
+          .map(c => c.community_items.tmdb_id)
+      );
+      await tryAward(badge, completedTmdbIds.size, items.length);
     }
 
     return newlyEarned; // Array of badges earned — caller can queue celebrations
@@ -351,11 +508,21 @@ export function useBadges(communityId, userId) {
 
   // ─── Find which badge (if any) an item contributes to ──────
   const getBadgeForItem = useCallback((itemId, miniseriesId, mediaType) => {
-    return badges.find(
+    // Check miniseries_completion badges
+    const miniseriesBadge = badges.find(
       b => b.badge_type === "miniseries_completion"
         && b.miniseries_id === miniseriesId
         && (!b.media_type_filter || b.media_type_filter === mediaType)
-    ) || null;
+    );
+    if (miniseriesBadge) return miniseriesBadge;
+
+    // Check item_set_completion badges via cached map
+    const itemSetBadgeId = itemBadgeMapRef.current[itemId];
+    if (itemSetBadgeId) {
+      return badges.find(b => b.id === itemSetBadgeId) || null;
+    }
+
+    return null;
   }, [badges]);
 
   // ─── Revoke badge if unlogging breaks completion ───────────
@@ -371,35 +538,14 @@ export function useBadges(communityId, userId) {
 
     if (!itemRow?.tmdb_id) return;
 
-    // Find earned badges whose miniseries contains this tmdb_id
-    const earnedBadges = badges.filter(
-      b => b.badge_type === "miniseries_completion"
-        && b.miniseries_id
-        && earnedRef.current.has(b.id)
-        && (!b.media_type_filter || b.media_type_filter === itemRow.media_type)
-    );
-    if (earnedBadges.length === 0) return;
-
-    const { data: matchingItems } = await supabase
-      .from("community_items")
-      .select("miniseries_id")
-      .eq("tmdb_id", itemRow.tmdb_id)
-      .in("miniseries_id", earnedBadges.map(b => b.miniseries_id));
-
-    if (!matchingItems || matchingItems.length === 0) return;
-
-    const matchedMiniseriesIds = new Set(matchingItems.map(i => i.miniseries_id));
-    const affectedBadges = earnedBadges.filter(b => matchedMiniseriesIds.has(b.miniseries_id));
-
-    for (const badge of affectedBadges) {
-      // Delete from user_badges
+    // ── Helper: revoke a single badge ──
+    const doRevoke = async (badge) => {
       await supabase
         .from("user_badges")
         .delete()
         .eq("user_id", userId)
         .eq("badge_id", badge.id);
 
-      // Update local state + ref immediately
       setEarnedBadgeIds(prev => {
         const next = new Set(prev);
         next.delete(badge.id);
@@ -407,13 +553,62 @@ export function useBadges(communityId, userId) {
         return next;
       });
 
-      // Update progress
       setBadgeProgress(prev => ({
         ...prev,
         [badge.id]: { ...prev[badge.id], complete: false },
       }));
 
       console.log(`[Badges] Revoked "${badge.name}" — item unlogged`);
+    };
+
+    // ── Check miniseries_completion badges ──
+    const earnedMiniseries = badges.filter(
+      b => b.badge_type === "miniseries_completion"
+        && b.miniseries_id
+        && earnedRef.current.has(b.id)
+        && (!b.media_type_filter || b.media_type_filter === itemRow.media_type)
+    );
+
+    if (earnedMiniseries.length > 0) {
+      const { data: matchingItems } = await supabase
+        .from("community_items")
+        .select("miniseries_id")
+        .eq("tmdb_id", itemRow.tmdb_id)
+        .in("miniseries_id", earnedMiniseries.map(b => b.miniseries_id));
+
+      if (matchingItems && matchingItems.length > 0) {
+        const matchedMiniseriesIds = new Set(matchingItems.map(i => i.miniseries_id));
+        const affectedBadges = earnedMiniseries.filter(b => matchedMiniseriesIds.has(b.miniseries_id));
+
+        for (const badge of affectedBadges) {
+          await doRevoke(badge);
+        }
+      }
+    }
+
+    // ── Check item_set_completion badges ──
+    const earnedItemSet = badges.filter(
+      b => b.badge_type === "item_set_completion" && earnedRef.current.has(b.id)
+    );
+
+    if (earnedItemSet.length > 0) {
+      const itemSetBadgeIds = earnedItemSet.map(b => b.id);
+
+      // Check if this tmdb_id is in any earned item-set badge
+      const { data: biMatches } = await supabase
+        .from("badge_items")
+        .select("badge_id, community_items!inner(tmdb_id)")
+        .in("badge_id", itemSetBadgeIds)
+        .eq("community_items.tmdb_id", itemRow.tmdb_id);
+
+      if (biMatches && biMatches.length > 0) {
+        const matchedBadgeIds = new Set(biMatches.map(r => r.badge_id));
+        const affectedBadges = earnedItemSet.filter(b => matchedBadgeIds.has(b.id));
+
+        for (const badge of affectedBadges) {
+          await doRevoke(badge);
+        }
+      }
     }
   }, [userId, badges]);
 
