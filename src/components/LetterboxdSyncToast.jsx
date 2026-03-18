@@ -23,7 +23,8 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
   const handleTap = () => {
     if (exiting) return;
     onTap?.();
-    dismiss();
+    // Brief delay so the tab switch is visible before the toast exits
+    setTimeout(() => dismiss(), 120);
   };
 
   // Build label text
