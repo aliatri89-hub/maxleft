@@ -220,8 +220,8 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
               onChange={e => setEditName(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") { setEditingName(false); setEditName(profile.name || ""); } }}
               style={{
-                fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20,
-                color: "var(--text-primary)", background: "rgba(255,255,255,0.06)",
+                fontFamily: "'Permanent Marker', cursive", fontWeight: 400, fontSize: 20,
+                color: "#EF9F27", background: "rgba(255,255,255,0.06)",
                 border: "1px solid #EF9F2740", borderRadius: 8,
                 padding: "6px 12px", outline: "none", textAlign: "center",
                 width: 180,
@@ -242,9 +242,9 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           </div>
         ) : (
           <div
-            className="profile-big-name bb"
+            className="profile-big-name"
             onClick={() => setEditingName(true)}
-            style={{ cursor: "pointer" }}
+            style={{ cursor: "pointer", fontFamily: "'Permanent Marker', cursive", color: "#EF9F27" }}
             title="Tap to edit name"
           >
             {profile.name}
