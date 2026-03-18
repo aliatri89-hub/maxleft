@@ -858,13 +858,25 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 {droppedLabel}
               </div>
             ) : (
-              <div style={{
-                fontFamily: "var(--font-display)", fontWeight: 800,
-                fontSize: 15, lineHeight: 1,
-                color: accent,
-                letterSpacing: "-0.02em",
-              }}>
-                {dayLabel ? `Coming ${dayLabel}` : "Coming Soon"}
+              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <div style={{
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.45)",
+                  lineHeight: 1.2,
+                }}>
+                  {podName}
+                </div>
+                <div style={{
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 13,
+                  color: accent,
+                  lineHeight: 1.2,
+                }}>
+                  {data.air_date
+                    ? new Date(data.air_date + "T12:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                    : "Coming Soon"}
+                </div>
               </div>
             )}
             {isDropped && seen && data.user_rating > 0 && (
@@ -905,14 +917,16 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             display: "flex", alignItems: "center", gap: 6,
             marginTop: "auto",
           }}>
-            {/* Podcast logo + name */}
-            {data.community_image && (
+            {/* Podcast logo + name — hidden for upcoming, shown in stamp instead */}
+            {data.community_image && isDropped && (
               <img src={data.community_image} alt=""
                 style={{ width: 16, height: 16, borderRadius: 4, objectFit: "cover",
                   border: "1px solid rgba(255,255,255,0.08)" }}
               />
             )}
+            {isDropped && (
             <span style={{ flex: 1, fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted, #8892a8)" }}>{podName}</span>
+            )}
 
             {/* Right stack: Listen above Watched */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
@@ -977,8 +991,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
 // ════════════════════════════════════════════════
 // LOG CARD — cinematic backdrop + community context
 // ════════════════════════════════════════════════
-// VHS brand marks — rotated through for personality
-// VHS brand marks — rotated through for personality
+// VHS brand marks — one per tape (the other side always gets the VHS logo)
 const VHS_BRANDS = [
   { bg: "#f0ebe1", color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
   { bg: "#f0ebe1", color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
@@ -986,17 +999,18 @@ const VHS_BRANDS = [
   { bg: "#f0ebe1", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { bg: "#f0ebe1", color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
   { bg: "#f0ebe1", color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
-  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true },
-  { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true },
 ];
+const VHS_LOGO_BRAND = { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
 
 function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  const left = VHS_BRANDS[hash % VHS_BRANDS.length];
-  const right = VHS_BRANDS[(hash * 7 + 3) % VHS_BRANDS.length];
-  // Make sure left and right are different
-  const rightIdx = left === right ? (hash * 7 + 4) % VHS_BRANDS.length : (hash * 7 + 3) % VHS_BRANDS.length;
-  return { left: VHS_BRANDS[hash % VHS_BRANDS.length], right: VHS_BRANDS[rightIdx] };
+  const brand = VHS_BRANDS[hash % VHS_BRANDS.length];
+  // Alternate which side gets the VHS logo vs the real brand based on hash
+  const vhsOnLeft = hash % 2 === 0;
+  return {
+    left: vhsOnLeft ? VHS_LOGO_BRAND : brand,
+    right: vhsOnLeft ? brand : VHS_LOGO_BRAND,
+  };
 }
 
 // VHS logo SVG inline — the actual VHS brand mark
@@ -1026,7 +1040,7 @@ function BrandStamp({ brand, side = "right" }) {
       zIndex: 1,
     }}>
       {brand.isVhs ? (
-        <div style={{ transform: "rotate(90deg)", opacity: 0.6 }}>
+        <div style={{ transform: "rotate(-90deg)", opacity: 0.6 }}>
           <VhsLogoSvg color={brand.color} size={20} />
         </div>
       ) : (
@@ -1568,6 +1582,19 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             position: "absolute", top: 0, left: 0, right: 0, height: 1,
             background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent)",
           }} />
+
+          {/* Retro VCR panel corner brackets — top-left */}
+          <div style={{ position: "absolute", top: 5, left: 10, width: 10, height: 10, pointerEvents: "none",
+            borderTop: "2px solid rgba(255,255,255,0.75)", borderLeft: "2px solid rgba(255,255,255,0.75)" }} />
+          {/* top-right */}
+          <div style={{ position: "absolute", top: 5, right: 10, width: 10, height: 10, pointerEvents: "none",
+            borderTop: "2px solid rgba(255,255,255,0.75)", borderRight: "2px solid rgba(255,255,255,0.75)" }} />
+          {/* bottom-left */}
+          <div style={{ position: "absolute", bottom: 5, left: 10, width: 10, height: 10, pointerEvents: "none",
+            borderBottom: "2px solid rgba(255,255,255,0.75)", borderLeft: "2px solid rgba(255,255,255,0.75)" }} />
+          {/* bottom-right */}
+          <div style={{ position: "absolute", bottom: 5, right: 10, width: 10, height: 10, pointerEvents: "none",
+            borderBottom: "2px solid rgba(255,255,255,0.75)", borderRight: "2px solid rgba(255,255,255,0.75)" }} />
           {/* Bottom shadow edge */}
           <div style={{
             position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
@@ -1576,13 +1603,22 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
           }} />
 
           {/* Left speaker grille — perforated metal */}
-          <div style={{
-            flex: 1, height: 20, borderRadius: 3,
-            background: "radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)",
-            backgroundSize: "5px 5px",
-            border: "1px solid rgba(255,255,255,0.04)",
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)",
-          }} />
+          <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+            {/* Retro frame line behind grill */}
+            <div style={{
+              position: "absolute", top: "50%", left: 0, right: 0, height: 1,
+              transform: "translateY(-50%)",
+              background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              flex: 1, height: 20, borderRadius: 3,
+              background: "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
+              backgroundSize: "5px 5px",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2)",
+            }} />
+          </div>
 
           {/* ▶ VCR Play button — beveled */}
           <div style={{ position: "relative", flexShrink: 0 }}>
@@ -1627,13 +1663,22 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
           </div>
 
           {/* Right speaker grille — perforated metal */}
-          <div style={{
-            flex: 1, height: 20, borderRadius: 3,
-            background: "radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px)",
-            backgroundSize: "5px 5px",
-            border: "1px solid rgba(255,255,255,0.04)",
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.3)",
-          }} />
+          <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+            {/* Retro frame line behind grill */}
+            <div style={{
+              position: "absolute", top: "50%", left: 0, right: 0, height: 1,
+              transform: "translateY(-50%)",
+              background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              flex: 1, height: 20, borderRadius: 3,
+              background: "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
+              backgroundSize: "5px 5px",
+              border: "1px solid rgba(255,255,255,0.12)",
+              boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2)",
+            }} />
+          </div>
         </div>
         );
       })()}

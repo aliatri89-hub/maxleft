@@ -2292,7 +2292,7 @@ if (!tmdbId) {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0f1a", overflow: "hidden", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0f1a", overflow: "hidden", WebkitOverflowScrolling: "touch" }}>
             {/* Instant loading skeleton — visible behind CommunityRouter while it fetches */}
             <CommunityLoadingSkeleton />
             <div style={{ position: "relative", zIndex: 1, width: "100%", minHeight: "100%" }}>

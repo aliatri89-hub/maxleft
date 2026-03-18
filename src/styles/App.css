@@ -5753,6 +5753,13 @@
     from { transform: translateY(40px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+  .overlay-fade-in {
+    animation: overlayFadeIn 0.25s ease-out;
+  }
+  @keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 
   /* ── Pull to refresh ── */
   .ptr-indicator {

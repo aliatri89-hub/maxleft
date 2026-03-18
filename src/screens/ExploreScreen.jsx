@@ -241,9 +241,9 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
           )}
         </div>
 
-        {/* Bottom row: CTA + podcast artwork (followed only) */}
+        {/* Bottom row: CTA (followed only) */}
         {isSubscribed && (
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginTop: 14 }}>
+        <div style={{ marginTop: 14 }}>
           <button
             onClick={onOpen}
             style={{
@@ -259,21 +259,23 @@ function CommunityCard({ community, onOpen, isSubscribed, subscriptionsLoaded, o
           >
             Explore →
           </button>
-
-          {artworkUrl && (
-            <img
-              src={artworkUrl}
-              alt={community.name}
-              style={{
-                width: 52, height: 52,
-                borderRadius: 10,
-                objectFit: "cover",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
-                border: `1.5px solid ${accent}33`,
-              }}
-            />
-          )}
         </div>
+        )}
+
+        {/* Podcast artwork — absolutely positioned so it doesn't affect card height */}
+        {isSubscribed && artworkUrl && (
+          <img
+            src={artworkUrl}
+            alt={community.name}
+            style={{
+              position: "absolute", bottom: 14, right: 14,
+              width: 80, height: 80,
+              borderRadius: 14,
+              objectFit: "cover",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.5)",
+              border: `1.5px solid ${accent}44`,
+            }}
+          />
         )}
       </div>
     </div>

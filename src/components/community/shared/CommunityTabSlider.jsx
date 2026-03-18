@@ -52,7 +52,16 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       }
     });
     ro.observe(containerRef.current);
-    return () => ro.disconnect();
+    // Safety re-measure after entry animations settle (prevents stale width from transforms)
+    const timer = setTimeout(() => {
+      const w = containerRef.current?.offsetWidth;
+      if (w && w > 0 && w !== widthRef.current) {
+        console.log(`[CSL] Safety re-measure corrected width: ${widthRef.current} → ${w}`);
+        widthRef.current = w;
+        setContainerWidth(w);
+      }
+    }, 400);
+    return () => { clearTimeout(timer); ro.disconnect(); };
   }, []);
 
   // ── Pixel offset helper (reads ref, safe in callbacks) ──
