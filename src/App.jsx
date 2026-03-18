@@ -602,7 +602,7 @@ export default function App() {
             item_id: item.id,
             status: "completed",
             rating: filmData.rating ? Math.round(filmData.rating) : null,
-            completed_at: filmData.watchedDate || null,
+            completed_at: filmData.watchedDate ? toLogTimestamp(filmData.watchedDate) : new Date().toISOString(),
             listened_with_commentary: false,
             brown_arrow: false,
             updated_at: new Date().toISOString(),
