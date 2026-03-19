@@ -598,58 +598,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* Spacer — fills remaining VHS box space */}
           <div style={{ flex: 1 }} />
 
-          {/* ═══ BOTTOM SECTION — budget, studios, barcode, rating ═══ */}
+          {/* ═══ BOTTOM SECTION — studios, barcode row ═══ */}
           <div style={{
             borderTop: "2px solid rgba(240,235,225,0.15)",
             marginTop: 8,
             paddingTop: 12,
           }}>
-            {/* Budget / WW Gross */}
-            {(budgetStr || grossStr) && (
-              <div style={{
-                display: "flex", justifyContent: "center",
-                gap: 16, marginBottom: 12,
-              }}>
-                {budgetStr && (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.14em", textTransform: "uppercase",
-                    }}>Budget</div>
-                    <div style={{
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 14, color: "rgba(240,235,225,0.75)",
-                      lineHeight: 1.1,
-                    }}>{budgetStr}</div>
-                  </div>
-                )}
-                {budgetStr && grossStr && (
-                  <div style={{ width: 1, alignSelf: "stretch", background: "rgba(240,235,225,0.08)" }} />
-                )}
-                {grossStr && (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.14em", textTransform: "uppercase",
-                    }}>WW Gross</div>
-                    <div style={{
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 14, color: "rgba(240,235,225,0.75)",
-                      lineHeight: 1.1,
-                    }}>{grossStr}</div>
-                  </div>
-                )}
-              </div>
-            )}
             {/* Studio names + logos */}
             {studios.length > 0 && (
               <div style={{
                 display: "flex", justifyContent: "center", alignItems: "center",
-                gap: 16, marginBottom: 12, flexWrap: "wrap",
+                gap: 16, marginBottom: 10, flexWrap: "wrap",
               }}>
                 {studios.map((studio, i) => (
                   <div key={i} style={{
@@ -682,23 +641,53 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               </div>
             )}
 
-            {/* HOME VIDEO stamp — pure white */}
-            <div style={{ textAlign: "center", marginBottom: 6 }}>
-              <span style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 900, fontSize: 8,
-                color: "#f0ebe1",
-                letterSpacing: "0.22em", textTransform: "uppercase",
-                border: "1.5px solid rgba(240,235,225,0.4)",
-                borderRadius: 2, padding: "3px 8px",
-              }}>
-                Home Video
-              </span>
-            </div>
+            {/* Bottom row: Budget/Gross left · Barcode center · MPAA right */}
+            <div style={{
+              display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+            }}>
+              {/* Budget / Gross — bottom left */}
+              <div style={{ minWidth: 60 }}>
+                {(budgetStr || grossStr) && (
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {budgetStr && (
+                      <div>
+                        <div style={{
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontWeight: 800, fontSize: 6,
+                          color: "rgba(240,235,225,0.35)",
+                          letterSpacing: "0.12em", textTransform: "uppercase",
+                        }}>Budget</div>
+                        <div style={{
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontWeight: 700, fontSize: 13,
+                          color: "rgba(240,235,225,0.7)",
+                          letterSpacing: "0.02em",
+                          lineHeight: 1.1,
+                        }}>{budgetStr}</div>
+                      </div>
+                    )}
+                    {grossStr && (
+                      <div>
+                        <div style={{
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontWeight: 800, fontSize: 6,
+                          color: "rgba(240,235,225,0.35)",
+                          letterSpacing: "0.12em", textTransform: "uppercase",
+                        }}>WW Gross</div>
+                        <div style={{
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontWeight: 700, fontSize: 13,
+                          color: "rgba(240,235,225,0.7)",
+                          letterSpacing: "0.02em",
+                          lineHeight: 1.1,
+                        }}>{grossStr}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-            {/* Barcode + MPAA row */}
-            <div style={{ position: "relative" }}>
-              {/* Barcode — centered, pure white */}
+              {/* Barcode — center */}
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                 <div style={{ display: "flex", alignItems: "stretch", height: 26 }}>
                   {stripes.map((s, i) => (
@@ -718,22 +707,23 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 </div>
               </div>
 
-              {/* MPAA Rating — lower right, pure white */}
-              {data.certification && data.certification !== "NR" && (
-                <div style={{
-                  position: "absolute", bottom: 0, right: 0,
-                  border: "1.5px solid #f0ebe1",
-                  borderRadius: 2,
-                  padding: "2px 6px",
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 800, fontSize: 11,
-                  color: "#f0ebe1",
-                  letterSpacing: "0.06em",
-                  lineHeight: 1,
-                }}>
-                  {data.certification}
-                </div>
-              )}
+              {/* MPAA Rating — bottom right */}
+              <div style={{ minWidth: 60, display: "flex", justifyContent: "flex-end" }}>
+                {data.certification && data.certification !== "NR" && (
+                  <div style={{
+                    border: "1.5px solid #f0ebe1",
+                    borderRadius: 2,
+                    padding: "2px 6px",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 800, fontSize: 11,
+                    color: "#f0ebe1",
+                    letterSpacing: "0.06em",
+                    lineHeight: 1,
+                  }}>
+                    {data.certification}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
