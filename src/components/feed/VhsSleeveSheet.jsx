@@ -149,20 +149,23 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }
 
         if (cancelled || !backdrops?.length) return;
-        const clean = backdrops
-          .filter(b =>
-            b.file_path &&
-            b.file_path !== heroBdPath &&
-            // Only widescreen — reject anything portrait/square (poster-like)
-            (!b.aspect_ratio || b.aspect_ratio > 1.4)
-          )
-          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        const base = backdrops.filter(b =>
+          b.file_path &&
+          b.file_path !== heroBdPath &&
+          (!b.aspect_ratio || b.aspect_ratio > 1.4)
+        );
 
-        // Pick two visually distinct stills — skip the top (too similar to hero)
-        // and spread picks across the list for variety
+        // Prefer null-language stills (clean, no baked-in text/logos)
+        // Fall back to en-language only if not enough clean ones
+        const nullLang = base.filter(b => !b.iso_639_1)
+          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        const enLang = base.filter(b => b.iso_639_1 === "en")
+          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
+
+        // Pick two visually distinct stills — spread across the list
         const picks = [];
         if (clean.length >= 4) {
-          // Enough depth — grab from ~25% and ~65% through the sorted list
           const a = Math.max(1, Math.floor(clean.length * 0.25));
           const b = Math.min(clean.length - 1, Math.floor(clean.length * 0.65));
           picks.push(clean[a], clean[b]);
