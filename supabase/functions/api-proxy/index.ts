@@ -94,6 +94,24 @@ async function handleTmdbWatchProviders(params: Record<string, string>) {
   return data;
 }
 
+async function handleTmdbImages(params: Record<string, string>) {
+  const { tmdb_id, type = "movie" } = params;
+  if (!tmdb_id) return { error: "tmdb_id required" };
+
+  const cacheKey = `tmdb:images:${type}:${tmdb_id}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  // include_image_language=null returns ONLY clean no-language images
+  // (no promo art with baked-in text/logos)
+  const res = await fetch(
+    `${TMDB_BASE}/${type}/${tmdb_id}/images?api_key=${TMDB_KEY}&include_image_language=null`
+  );
+  const data = await res.json();
+  setCache(cacheKey, data);
+  return data;
+}
+
 async function handleRawgSearch(params: Record<string, string>) {
   const { query, page_size = "8" } = params;
   if (!query) return { error: "query required" };
@@ -155,6 +173,9 @@ serve(async (req) => {
         break;
       case "tmdb_watch_providers":
         result = await handleTmdbWatchProviders(params);
+        break;
+      case "tmdb_images":
+        result = await handleTmdbImages(params);
         break;
       case "rawg_search":
         result = await handleRawgSearch(params);
