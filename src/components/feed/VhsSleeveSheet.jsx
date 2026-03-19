@@ -1,7 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
-import { getExtraBackdrops } from "../../utils/communityTmdb";
+import { apiProxy } from "../../utils/api";
+
+const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
 // ════════════════════════════════════════════════
 // VHS SLEEVE SHEET — dark box-back slide-up
@@ -99,19 +101,49 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const director = data?.director || data?.creator || null;
   const cast = data?.cast_names || [];
   const studios = data?.studio_names || [];
-  const extraBackdrops = getExtraBackdrops(data?.tmdb_id);
+  const [extraBackdrops, setExtraBackdrops] = useState([]);
   const genreFont = getGenreFont(data?.genre);
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
     : (data?.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const stripes = makeBarcode(seed);
 
-  // Load genre font on demand when sheet opens
+  // Load genre font + Oswald (credits font) on demand when sheet opens
   useEffect(() => {
-    if (open && genreFont.family !== "Barlow Condensed") {
-      loadGoogleFont(genreFont.family);
+    if (open) {
+      loadGoogleFont("Oswald");
+      if (genreFont.family !== "Barlow Condensed") {
+        loadGoogleFont(genreFont.family);
+      }
     }
   }, [open, genreFont.family]);
+
+  // Fetch extra backdrops when sheet opens (lazy — only for tapped movies)
+  useEffect(() => {
+    setExtraBackdrops([]);
+    if (!open || !data?.tmdb_id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const type = (data.media_type === "show") ? "tv" : "movie";
+        const res = await apiProxy("tmdb_details", {
+          tmdb_id: String(data.tmdb_id), type, append: "images",
+        });
+        if (cancelled || !res?.images?.backdrops) return;
+        const bds = res.images.backdrops;
+        // Pick deep indices for variety — top results are duplicate hero crops
+        const pick = (...indices) => {
+          for (const i of indices) {
+            if (bds[i]?.file_path) return `${TMDB_IMG_BASE}/w780${bds[i].file_path}`;
+          }
+          return null;
+        };
+        const stills = [pick(5, 3, 1), pick(7, 4, 2)].filter(Boolean);
+        if (!cancelled && stills.length) setExtraBackdrops(stills);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [open, data?.tmdb_id]);
 
   // Lock body scroll when open — preserves scroll position on iOS/Capacitor
   useEffect(() => {
@@ -347,90 +379,90 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             )}
           </div>
 
-          {/* Director + Cast */}
+          {/* Director + Cast — VHS billing block */}
           {(director || cast.length > 0) && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               borderBottom: "1px solid rgba(240,235,225,0.06)",
-              padding: "10px 0", marginBottom: 14,
+              padding: "10px 0", marginBottom: 14, textAlign: "center",
             }}>
               {director && (
                 <div style={{
-                  display: "flex", gap: 6, marginBottom: cast.length > 0 ? 6 : 0,
+                  display: "flex", alignItems: "baseline", justifyContent: "center",
+                  gap: 6, marginBottom: cast.length > 0 ? 8 : 0,
                 }}>
                   <span style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 800, fontSize: 8,
-                    color: "rgba(240,235,225,0.45)",
-                    letterSpacing: "0.14em", textTransform: "uppercase",
-                    flexShrink: 0, paddingTop: 1,
-                  }}>DIRECTED BY</span>
+                    fontWeight: 400, fontSize: 8,
+                    color: "rgba(240,235,225,0.4)",
+                    letterSpacing: "0.1em", textTransform: "lowercase",
+                  }}>directed by</span>
                   <span style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 12, color: "rgba(240,235,225,0.9)",
+                    fontFamily: "'Oswald', sans-serif",
+                    fontWeight: 500, fontSize: 14,
+                    color: "rgba(240,235,225,0.9)",
+                    letterSpacing: "0.06em", textTransform: "uppercase",
                   }}>{director}</span>
                 </div>
               )}
-              {cast.length > 0 && (
-                <div style={{ textAlign: "center", marginTop: director ? 8 : 0 }}>
-                  {/* Top-billed actors with "and" / "with" connectors */}
-                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 6px" }}>
-                    {cast[0] && (
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 700, fontSize: 16,
-                        color: "rgba(240,235,225,0.9)",
-                        letterSpacing: "0.06em", textTransform: "uppercase",
-                      }}>{cast[0]}</span>
-                    )}
-                    {cast[1] && (<>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 400, fontSize: 9,
-                        color: "rgba(240,235,225,0.45)",
-                        letterSpacing: "0.08em",
-                      }}>and</span>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 700, fontSize: 13,
-                        color: "rgba(240,235,225,0.85)",
-                        letterSpacing: "0.06em", textTransform: "uppercase",
-                      }}>{cast[1]}</span>
-                    </>)}
-                    {cast[2] && (<>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 400, fontSize: 9,
-                        color: "rgba(240,235,225,0.45)",
-                        letterSpacing: "0.08em",
-                      }}>with</span>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 700, fontSize: 11,
-                        color: "rgba(240,235,225,0.75)",
-                        letterSpacing: "0.06em", textTransform: "uppercase",
-                      }}>{cast[2]}</span>
-                    </>)}
-                  </div>
-                  {/* Also starring — remaining cast */}
-                  {cast.length > 3 && (
-                    <div style={{ marginTop: 4 }}>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 400, fontSize: 8,
-                        color: "rgba(240,235,225,0.4)",
-                        letterSpacing: "0.1em",
-                      }}>also starring </span>
-                      <span style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 600, fontSize: 9,
-                        color: "rgba(240,235,225,0.55)",
-                        letterSpacing: "0.06em", textTransform: "uppercase",
-                      }}>{cast.slice(3).join(", ")}</span>
-                    </div>
+              {cast.length > 0 && (<>
+                {/* Top 3 billed — same size names, small connectors */}
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 6px" }}>
+                  {cast[0] && (
+                    <span style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 500, fontSize: 14,
+                      color: "rgba(240,235,225,0.9)",
+                      letterSpacing: "0.06em", textTransform: "uppercase",
+                    }}>{cast[0]}</span>
                   )}
+                  {cast[1] && (<>
+                    <span style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 400, fontSize: 8,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.08em",
+                    }}>and</span>
+                    <span style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 500, fontSize: 14,
+                      color: "rgba(240,235,225,0.9)",
+                      letterSpacing: "0.06em", textTransform: "uppercase",
+                    }}>{cast[1]}</span>
+                  </>)}
+                  {cast[2] && (<>
+                    <span style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 400, fontSize: 8,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.08em",
+                    }}>with</span>
+                    <span style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 500, fontSize: 14,
+                      color: "rgba(240,235,225,0.9)",
+                      letterSpacing: "0.06em", textTransform: "uppercase",
+                    }}>{cast[2]}</span>
+                  </>)}
                 </div>
-              )}
+                {/* Also starring — second line */}
+                {cast.length > 3 && (
+                  <div style={{ marginTop: 4, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
+                    <span style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 400, fontSize: 8,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.1em",
+                    }}>also starring</span>
+                    <span style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 400, fontSize: 11,
+                      color: "rgba(240,235,225,0.6)",
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                    }}>{cast.slice(3).join(", ")}</span>
+                  </div>
+                )}
+              </>)}
             </div>
           )}
 
