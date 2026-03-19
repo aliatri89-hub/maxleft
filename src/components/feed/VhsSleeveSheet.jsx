@@ -198,16 +198,26 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
 
-  // Lock body scroll when open — useLayoutEffect prevents snap-to-zero on iOS
+  // Lock scroll when open — target the actual scroll container (.tab-pane),
+  // not window (which is always scrollY=0 because .main has overflow:hidden)
   useLayoutEffect(() => {
     if (open) {
+      const pane = document.querySelector('.tab-pane');
+      if (pane) {
+        const savedScroll = pane.scrollTop;
+        pane.style.overflow = 'hidden';
+        return () => {
+          pane.style.overflow = '';
+          pane.scrollTop = savedScroll;
+        };
+      }
+      // Fallback: lock body if no .tab-pane (e.g. standalone route)
       const scrollY = window.scrollY;
       document.body.style.position = "fixed";
       document.body.style.top = `-${scrollY}px`;
       document.body.style.left = "0";
       document.body.style.right = "0";
       return () => {
-        // Read scroll position from body.style.top — immune to re-render/closure staleness
         const savedY = parseInt(document.body.style.top || "0", 10) * -1;
         document.body.style.position = "";
         document.body.style.top = "";
