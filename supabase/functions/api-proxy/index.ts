@@ -102,10 +102,10 @@ async function handleTmdbImages(params: Record<string, string>) {
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  // include_image_language=null returns ONLY clean no-language images
-  // (no promo art with baked-in text/logos)
+  // include_image_language=en,null — gets both English and clean no-language
+  // backdrops (real scene stills), excluding promo art in other languages
   const res = await fetch(
-    `${TMDB_BASE}/${type}/${tmdb_id}/images?api_key=${TMDB_KEY}&include_image_language=null`
+    `${TMDB_BASE}/${type}/${tmdb_id}/images?api_key=${TMDB_KEY}&include_image_language=en,null`
   );
   const data = await res.json();
   setCache(cacheKey, data);

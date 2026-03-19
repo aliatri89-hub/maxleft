@@ -131,26 +131,31 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         const heroMatch = rawHero.match(/\/[^/]+$/);
         const heroBdPath = heroMatch ? heroMatch[0] : rawHero;
 
-        // Try dedicated images endpoint first (clean null-language only)
+        // Try dedicated images endpoint first (en + null-language stills)
         let backdrops = null;
         const imgRes = await apiProxy("tmdb_images", {
           tmdb_id: String(data.tmdb_id), type,
         });
-        if (imgRes?.backdrops) {
+        if (imgRes?.backdrops?.length) {
           backdrops = imgRes.backdrops;
         } else {
-          // Fallback: piggyback on tmdb_details (may include promo art)
+          // Fallback: piggyback on tmdb_details
           const detailRes = await apiProxy("tmdb_details", {
             tmdb_id: String(data.tmdb_id), type, append: "images",
           });
-          if (detailRes?.images?.backdrops) {
+          if (detailRes?.images?.backdrops?.length) {
             backdrops = detailRes.images.backdrops;
           }
         }
 
         if (cancelled || !backdrops?.length) return;
         const clean = backdrops
-          .filter(b => b.file_path && b.file_path !== heroBdPath)
+          .filter(b =>
+            b.file_path &&
+            b.file_path !== heroBdPath &&
+            // Only widescreen — reject anything portrait/square (poster-like)
+            (!b.aspect_ratio || b.aspect_ratio > 1.4)
+          )
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const stills = clean
           .slice(0, 2)
