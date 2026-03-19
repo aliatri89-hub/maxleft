@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
 import { apiProxy } from "../../utils/api";
@@ -198,8 +198,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
 
-  // Lock body scroll when open — preserves scroll position on iOS/Capacitor
-  useEffect(() => {
+  // Lock body scroll when open — useLayoutEffect prevents snap-to-zero on iOS
+  useLayoutEffect(() => {
     if (open) {
       const scrollY = window.scrollY;
       document.body.style.position = "fixed";
@@ -518,10 +518,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               color: "rgba(240,235,225,0.65)",
               textAlign: "center",
               marginBottom: 14,
-              display: "-webkit-box",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
             }}>
               {data.overview}
             </div>

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
    MANTL Phase 5b — Dark Explore Screen
    
-   Import AFTER feed-dark.css in main.jsx:
+   Import AFTER shell-dark.css in main.jsx:
      @import './styles/explore-dark.css';
    
    Note: ExploreScreen uses mostly inline styles, so this file

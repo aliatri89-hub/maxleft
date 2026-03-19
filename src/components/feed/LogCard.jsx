@@ -415,21 +415,18 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             }} />
           </div>
 
-          {/* ▶ VCR Play button — beveled */}
+          {/* ▶ VCR Play button — beveled (visual only, deck div handles clicks) */}
           <div style={{ position: "relative", flexShrink: 0 }}>
-            <button
-              onClick={(e) => e.stopPropagation()}
+            <div
               style={{
                 background: "linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%)",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderBottomColor: "rgba(0,0,0,0.4)",
                 borderTopColor: "rgba(255,255,255,0.12)",
                 borderRadius: 4,
-                cursor: "pointer",
                 padding: "5px 24px",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4)",
-                transition: "all 0.1s ease",
                 pointerEvents: "none",
               }}
             >
@@ -443,7 +440,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                   <path d="M8 5v14l11-7z" />
                 </svg>
               )}
-            </button>
+            </div>
             {/* Green LED */}
             <div style={{
               position: "absolute", top: -1, right: -1,

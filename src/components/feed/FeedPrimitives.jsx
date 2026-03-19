@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { getPosterUrl, fetchSinglePoster } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 
 export const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
 export const TMDB_BACKDROP = "https://image.tmdb.org/t/p/w780";
+
+let _starsIdCounter = 0;
 
 // ── Resolve image URLs — shelf logs use full URLs, community logs use TMDB paths ──
 export function resolveImg(path, base) {
@@ -14,6 +16,7 @@ export function resolveImg(path, base) {
 
 // ── Star rating display ──
 export function Stars({ rating, size = 14, sharpie = false }) {
+  const uid = useMemo(() => `stars-${++_starsIdCounter}`, []);
   if (!rating || rating <= 0) return null;
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.25;
@@ -25,6 +28,7 @@ export function Stars({ rating, size = 14, sharpie = false }) {
       "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
       "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
     ];
+    const clipId = `${uid}-halfClip`;
     return (
       <div style={{ display: "flex", gap: 0, alignItems: "center", position: "relative" }}>
         {Array.from({ length: full }, (_, i) => (
@@ -37,11 +41,11 @@ export function Stars({ rating, size = 14, sharpie = false }) {
         {half && (
           <svg width={s} height={s} viewBox="0 0 24 24" style={{ display: "block" }}>
             <defs>
-              <clipPath id="halfClip"><rect x="0" y="0" width="12" height="24" /></clipPath>
+              <clipPath id={clipId}><rect x="0" y="0" width="12" height="24" /></clipPath>
             </defs>
             <path d={starPaths[full % starPaths.length]}
               fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
-              clipPath="url(#halfClip)" />
+              clipPath={`url(#${clipId})`} />
           </svg>
         )}
       </div>
@@ -50,12 +54,13 @@ export function Stars({ rating, size = 14, sharpie = false }) {
 
   const gold = "var(--accent-gold, #f5c542)";
   const empty = "rgba(255,255,255,0.12)";
+  const gradId = `${uid}-halfGrad`;
 
   const StarSVG = ({ fill = "full" }) => (
     <svg width={size} height={size} viewBox="0 0 24 24" style={{ display: "block" }}>
       {fill === "half" && (
         <defs>
-          <linearGradient id={`halfGrad-${size}`}>
+          <linearGradient id={gradId}>
             <stop offset="50%" stopColor={gold} />
             <stop offset="50%" stopColor={empty} />
           </linearGradient>
@@ -63,7 +68,7 @@ export function Stars({ rating, size = 14, sharpie = false }) {
       )}
       <path
         d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-        fill={fill === "full" ? gold : fill === "half" ? `url(#halfGrad-${size})` : empty}
+        fill={fill === "full" ? gold : fill === "half" ? `url(#${gradId})` : empty}
       />
     </svg>
   );
