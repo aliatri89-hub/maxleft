@@ -382,11 +382,52 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Scene stills — z2 (between hero and logo) ── */}
+        {/* ── No-backdrop fallback: standalone title ── */}
+        {!backdropUrl && (
+          <div style={{
+            padding: "8px 24px 12px",
+            textAlign: "center",
+          }}>
+            {data.logo_url ? (
+              <img
+                src={data.logo_url}
+                alt={data.title}
+                style={{
+                  height: 44,
+                  maxWidth: "75%",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6))",
+                  opacity: 0.95,
+                }}
+              />
+            ) : (
+              <div style={{
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 22, color: "#f0ebe1",
+                lineHeight: 1.2,
+              }}>
+                {data.title}
+              </div>
+            )}
+            {data.year && (
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 9, color: "rgba(240,235,225,0.35)",
+                letterSpacing: "0.1em", marginTop: 4,
+              }}>
+                {data.year}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Scene stills — overlap hero when present, sit naturally without ── */}
         {extraBackdrops.length > 0 && (
           <div style={{
             display: "flex", gap: 8, justifyContent: "center",
-            padding: "0 20px", marginTop: -28, marginBottom: 6,
+            padding: "0 20px",
+            marginTop: backdropUrl ? -28 : 0,
+            marginBottom: 6,
             position: "relative", zIndex: 2,
           }}>
             {extraBackdrops.map((url, i) => (
