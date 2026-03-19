@@ -2494,8 +2494,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               ))}
             </div>
 
-            {/* Share shelf button — Activity tab only, needs 1+ logs */}
-            {feedMode === "activity" && feedItems.some(item => item.type === "log") && (
+            {/* Share shelf button — hidden until share image is polished */}
+            {false && feedMode === "activity" && feedItems.some(item => item.type === "log") && (
               <div
                 onClick={() => setShowShareShelf(true)}
                 style={{
