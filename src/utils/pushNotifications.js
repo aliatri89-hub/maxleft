@@ -3,35 +3,17 @@
 // All functions are no-ops on web — safe to import everywhere.
 
 import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { supabase } from '../supabase';
-
-let _pushModule = null;
-
-// Lazy-load the plugin only on native (avoids web bundling issues)
-// @vite-ignore prevents Rolldown from trying to resolve this at build time
-async function getPush() {
-  if (!_pushModule) {
-    _pushModule = await import(/* @vite-ignore */ '@capacitor/push-notifications');
-  }
-  return _pushModule.PushNotifications;
-}
 
 /**
  * Initialize push notifications on native platforms.
  * Call once after the user is authenticated.
- *
- * Flow:
- * 1. Request permission
- * 2. Register with OS (APNs on iOS, FCM on Android)
- * 3. On success, upsert the device token to Supabase (via listener)
  */
 export async function initPushNotifications(showToast) {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
-    const PushNotifications = await getPush();
-
-    // Check current permission state
     let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
@@ -43,7 +25,6 @@ export async function initPushNotifications(showToast) {
       return;
     }
 
-    // Register with the OS push service
     await PushNotifications.register();
   } catch (err) {
     console.error('Push notification init failed:', err);
@@ -58,54 +39,46 @@ export async function initPushNotifications(showToast) {
 export function setupPushListeners(showToast, navigate) {
   if (!Capacitor.isNativePlatform()) return () => {};
 
-  let listeners = [];
-  let mounted = true;
+  const listeners = [];
 
-  (async () => {
-    const PushNotifications = await getPush();
+  // Fired when registration with the OS succeeds — save the token
+  listeners.push(
+    PushNotifications.addListener('registration', async (token) => {
+      console.log('Push token received:', token.value);
+      await upsertDeviceToken(token.value);
+    })
+  );
 
-    if (!mounted) return;
+  // Fired when registration fails
+  listeners.push(
+    PushNotifications.addListener('registrationError', (error) => {
+      console.error('Push registration error:', error);
+    })
+  );
 
-    // Fired when registration with the OS succeeds — save the token
-    listeners.push(
-      await PushNotifications.addListener('registration', async (token) => {
-        console.log('Push token received:', token.value);
-        await upsertDeviceToken(token.value);
-      })
-    );
+  // Fired when a push arrives while the app is in the foreground
+  listeners.push(
+    PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      console.log('Push received in foreground:', notification);
+      if (showToast && notification.body) {
+        showToast(notification.title || 'MANTL', notification.body);
+      }
+    })
+  );
 
-    // Fired when registration fails
-    listeners.push(
-      await PushNotifications.addListener('registrationError', (error) => {
-        console.error('Push registration error:', error);
-      })
-    );
-
-    // Fired when a push arrives while the app is in the foreground
-    listeners.push(
-      await PushNotifications.addListener('pushNotificationReceived', (notification) => {
-        console.log('Push received in foreground:', notification);
-        if (showToast && notification.body) {
-          showToast(notification.title || 'MANTL', notification.body);
-        }
-      })
-    );
-
-    // Fired when the user taps a push notification (app was in background/killed)
-    listeners.push(
-      await PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-        console.log('Push tapped:', action);
-        const data = action.notification.data;
-        if (data?.route && navigate) {
-          navigate(data.route);
-        }
-      })
-    );
-  })();
+  // Fired when the user taps a push notification (app was in background/killed)
+  listeners.push(
+    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+      console.log('Push tapped:', action);
+      const data = action.notification.data;
+      if (data?.route && navigate) {
+        navigate(data.route);
+      }
+    })
+  );
 
   // Return cleanup function
   return () => {
-    mounted = false;
     listeners.forEach((listener) => {
       if (listener && typeof listener.remove === 'function') {
         listener.remove();
@@ -116,7 +89,6 @@ export function setupPushListeners(showToast, navigate) {
 
 /**
  * Upsert the device's push token into Supabase.
- * Called automatically after successful registration.
  */
 async function upsertDeviceToken(token) {
   try {
@@ -130,7 +102,7 @@ async function upsertDeviceToken(token) {
       {
         user_id: user.id,
         token,
-        platform: Capacitor.getPlatform(), // 'ios' or 'android'
+        platform: Capacitor.getPlatform(),
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id,token' }

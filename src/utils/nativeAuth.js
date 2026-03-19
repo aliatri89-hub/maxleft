@@ -6,26 +6,11 @@
 //              deep link back to app://  → parse tokens → setSession
 
 import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
+import { App } from '@capacitor/app';
 import { supabase } from '../supabase';
 
-let _browserModule = null;
-let _appModule = null;
 let _listenerCleanup = null;
-
-// Lazy-load Capacitor plugins only on native (avoids web bundling issues)
-async function getBrowser() {
-  if (!_browserModule) {
-    _browserModule = await import('@capacitor/browser');
-  }
-  return _browserModule.Browser;
-}
-
-async function getApp() {
-  if (!_appModule) {
-    _appModule = await import('@capacitor/app');
-  }
-  return _appModule.App;
-}
 
 /**
  * Start listening for deep link callbacks (call once on app startup)
@@ -35,22 +20,19 @@ async function getApp() {
 export async function initDeepLinkListener() {
   if (!Capacitor.isNativePlatform()) return;
 
-  const App = await getApp();
-
   // Clean up any existing listener
   if (_listenerCleanup) {
     _listenerCleanup.remove();
     _listenerCleanup = null;
   }
 
-  _listenerCleanup = await App.addListener('appUrlOpen', async ({ url }) => {
+  _listenerCleanup = App.addListener('appUrlOpen', async ({ url }) => {
     // Only handle our auth callback
     if (!url.includes('login-callback')) return;
 
     // Close the system browser
     try {
-      const Browser = await getBrowser();
-      await Browser.close();
+      Browser.close();
     } catch (e) {
       // Browser might already be closed
     }
@@ -121,8 +103,7 @@ async function signInNative(showToast) {
     }
 
     // Open the OAuth URL in the system browser
-    const Browser = await getBrowser();
-    await Browser.open({ url: data.url });
+    Browser.open({ url: data.url });
   } catch (e) {
     console.error('Native sign in error:', e);
     if (showToast) showToast('Sign in failed — please try again');
