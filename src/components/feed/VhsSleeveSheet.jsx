@@ -108,8 +108,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         style={{
           position: "fixed",
           left: 0, right: 0, bottom: 0,
-          top: "10%",
           zIndex: 1000,
+          maxHeight: "92%",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
           background: "#0f0d0b",
@@ -133,28 +133,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }} />
         </div>
 
-        {/* ── Movie logo — fixed size, centered ── */}
-        {data.logo_url && (
-          <div style={{
-            display: "flex", justifyContent: "center", alignItems: "center",
-            padding: "4px 24px 0",
-            minHeight: 48,
-          }}>
-            <img
-              src={data.logo_url}
-              alt={data.title}
-              style={{
-                maxHeight: 44,
-                maxWidth: "75%",
-                objectFit: "contain",
-                filter: "brightness(0) invert(1)",
-                opacity: 0.85,
-              }}
-            />
-          </div>
-        )}
-
-        {/* ── Tagline — 90s VHS box style above the still ── */}
+        {/* ── Tagline — 90s VHS box style at top ── */}
         {data.tagline && (
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
@@ -164,7 +143,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             textTransform: "uppercase",
             letterSpacing: "0.14em",
             lineHeight: 1.4,
-            padding: "6px 24px 8px",
+            padding: "2px 24px 8px",
             maxWidth: "90%",
             margin: "0 auto",
           }}>
@@ -172,11 +151,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Backdrop still — retro framed ── */}
+        {/* ── Backdrop still — retro framed with logo overlay ── */}
         {backdropUrl && (
           <div style={{
             padding: "0 16px",
-            marginTop: -4,
             marginBottom: 4,
           }}>
             <div style={{
@@ -192,8 +170,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               }} />
               {/* Gradient to dark at bottom edge */}
               <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
-                background: "linear-gradient(transparent, rgba(15,13,11,0.8))",
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
+                background: "linear-gradient(transparent, rgba(15,13,11,0.85))",
                 pointerEvents: "none",
               }} />
               {/* Film grain */}
@@ -201,34 +179,51 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
               }} />
-              {/* Corner wear — subtle light corners like a printed photo */}
+              {/* Corner wear */}
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 borderRadius: 3,
                 boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.04)",
               }} />
+              {/* ── Movie logo — overlaying bottom of frame ── */}
+              {data.logo_url ? (
+                <div style={{
+                  position: "absolute", bottom: 10, left: 0, right: 0,
+                  display: "flex", justifyContent: "center",
+                  zIndex: 1,
+                }}>
+                  <img
+                    src={data.logo_url}
+                    alt={data.title}
+                    style={{
+                      maxHeight: 40,
+                      maxWidth: "65%",
+                      objectFit: "contain",
+                      filter: "brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.7))",
+                      opacity: 0.9,
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{
+                  position: "absolute", bottom: 8, left: 0, right: 0,
+                  textAlign: "center", zIndex: 1,
+                }}>
+                  <span style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 18, color: "#f0ebe1",
+                    textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+                  }}>
+                    {data.title}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
         {/* ── Content area ── */}
-        <div style={{
-          padding: "8px 20px 24px",
-          display: "flex", flexDirection: "column",
-          minHeight: backdropUrl ? "calc(100% - 230px)" : "calc(100% - 40px)",
-        }}>
-
-          {/* Title — hero when no logo, subtitle when logo present */}
-          <div style={{
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: data.logo_url ? 14 : 22,
-            color: data.logo_url ? "rgba(240,235,225,0.4)" : "#f0ebe1",
-            textAlign: "center",
-            lineHeight: 1.15,
-            marginBottom: 2,
-          }}>
-            {data.title}
-          </div>
+        <div style={{ padding: "6px 20px 20px" }}>
 
           {/* Year · Runtime · Rating — spec line */}
           <div style={{
@@ -493,9 +488,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               ))}
             </div>
           )}
-
-          {/* Spacer — pushes barcode to bottom */}
-          <div style={{ flex: 1, minHeight: 16 }} />
 
           {/* ── Bottom: HOME VIDEO + Barcode (anchored) ── */}
           <div style={{
