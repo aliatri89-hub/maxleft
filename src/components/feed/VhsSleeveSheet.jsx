@@ -130,17 +130,22 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           tmdb_id: String(data.tmdb_id), type, append: "images",
         });
         if (cancelled || !res?.images?.backdrops) return;
-        // Filter to clean scene stills only — language-tagged ones have baked-in text/logos
-        const bds = res.images.backdrops.filter(b => !b.iso_639_1);
-        // Pick deep indices for variety — top results are duplicate hero crops
+        const all = res.images.backdrops;
+        // Prefer clean scene stills (no language tag = no baked-in text/logos)
+        const clean = all.filter(b => !b.iso_639_1);
+        // Use clean if we have enough, otherwise fall back to all
+        const pool = clean.length >= 6 ? clean : all;
+        // Skip index 0 (same as hero), pick spread-out stills for variety
         const pick = (...indices) => {
           for (const i of indices) {
-            if (bds[i]?.file_path) return `${TMDB_IMG_BASE}/w780${bds[i].file_path}`;
+            if (pool[i]?.file_path) return `${TMDB_IMG_BASE}/w780${pool[i].file_path}`;
           }
           return null;
         };
-        const stills = [pick(5, 3, 1), pick(7, 4, 2)].filter(Boolean);
-        if (!cancelled && stills.length) setExtraBackdrops(stills);
+        const stills = [pick(5, 3, 2, 1), pick(7, 4, 3, 2)].filter(Boolean);
+        // Dedupe in case fallback indices overlap
+        const unique = [...new Set(stills)];
+        if (!cancelled && unique.length) setExtraBackdrops(unique);
       } catch {}
     })();
     return () => { cancelled = true; };
@@ -367,38 +372,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           display: "flex",
           flexDirection: "column",
         }}>
-
-          {/* Year · Runtime · Rating — spec line */}
-          <div style={{
-            display: "flex", justifyContent: "center", alignItems: "center",
-            gap: 8, marginBottom: 10,
-          }}>
-            {data.year && (
-              <span style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 700, fontSize: 11,
-                color: "rgba(240,235,225,0.8)",
-                letterSpacing: "0.06em",
-              }}>{data.year}</span>
-            )}
-            {runtimeStr && (
-              <>
-                <span style={{ color: "rgba(240,235,225,0.3)", fontSize: 10 }}>·</span>
-                <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 700, fontSize: 11,
-                  color: "rgba(240,235,225,0.8)",
-                  letterSpacing: "0.06em",
-                }}>{runtimeStr}</span>
-              </>
-            )}
-            {data.rating > 0 && (
-              <>
-                <span style={{ color: "rgba(240,235,225,0.3)", fontSize: 10 }}>·</span>
-                <Stars rating={data.rating} size={13} />
-              </>
-            )}
-          </div>
 
           {/* Director + Cast — VHS billing block */}
           {(director || cast.length > 0) && (
