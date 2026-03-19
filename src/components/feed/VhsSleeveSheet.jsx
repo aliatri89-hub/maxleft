@@ -198,6 +198,28 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           flexDirection: "column",
         }}
       >
+        {/* ── Matte cardboard texture — VHS box material feel ── */}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          borderRadius: "14px 14px 0 0",
+          overflow: "hidden",
+          zIndex: 0,
+        }}>
+          {/* Cardboard grain — fine noise */}
+          <div style={{
+            position: "absolute", inset: 0,
+            opacity: 0.035,
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            backgroundSize: "128px 128px",
+          }} />
+          {/* Scanlines — very subtle horizontal lines */}
+          <div style={{
+            position: "absolute", inset: 0,
+            opacity: 0.04,
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(240,235,225,0.15) 2px, rgba(240,235,225,0.15) 3px)",
+          }} />
+        </div>
+
         {/* ── Drag handle ── */}
         <div style={{
           position: "sticky", top: 0, zIndex: 2,
@@ -239,7 +261,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <div style={{
               position: "relative", width: "100%", height: 200, overflow: "hidden",
               borderRadius: 3,
-              border: "3px solid rgba(240,235,225,0.35)",
+              border: "2px solid rgba(240,235,225,0.15)",
               boxShadow: "inset 0 0 12px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
             }}>
               <img src={backdropUrl} alt="" style={{
@@ -262,7 +284,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 borderRadius: 3,
-                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.12)",
+                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.05)",
               }} />
               {/* ── Movie logo — overlaying bottom of frame ── */}
               {data.logo_url ? (
