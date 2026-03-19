@@ -32,7 +32,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
   const [showShareShelf, setShowShareShelf] = useState(false);
 
-  const ACTIVITY_ONLY_TYPES = new Set(["log", "badge_complete"]);
+  const ACTIVITY_ONLY_TYPES = new Set(["log"]);
   const feedItems = rawFeedItems
     .filter((item) => feedMode !== "activity" || ACTIVITY_ONLY_TYPES.has(item.type));
 

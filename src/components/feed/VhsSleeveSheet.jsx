@@ -198,49 +198,34 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
 
-  // Lock scroll when open — target the actual scroll container (.tab-pane),
-  // not window (which is always scrollY=0 because .main has overflow:hidden)
+  // Prevent background scroll while sheet is open
   useLayoutEffect(() => {
     if (open) {
       const pane = document.querySelector('.tab-pane');
       if (pane) {
-        const savedScroll = pane.scrollTop;
         pane.style.overflow = 'hidden';
-        return () => {
-          pane.style.overflow = '';
-          pane.scrollTop = savedScroll;
-        };
+        return () => { pane.style.overflow = ''; };
       }
-      // Fallback: lock body if no .tab-pane (e.g. standalone route)
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      return () => {
-        const savedY = parseInt(document.body.style.top || "0", 10) * -1;
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        window.scrollTo(0, savedY);
-      };
     }
   }, [open]);
 
-  // Swipe-to-dismiss
+  // Swipe-to-dismiss — stopPropagation prevents React portal event bubbling
+  // from reaching FeedScreen's pull-to-refresh handlers
   const handleTouchStart = (e) => {
+    e.stopPropagation();
     startY.current = e.touches[0].clientY;
     currentY.current = 0;
   };
   const handleTouchMove = (e) => {
+    e.stopPropagation();
     const dy = e.touches[0].clientY - startY.current;
     if (dy > 0 && sheetRef.current) {
       currentY.current = dy;
       sheetRef.current.style.transform = `translateY(${dy}px)`;
     }
   };
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e) => {
+    e.stopPropagation();
     if (currentY.current > 120) {
       onClose();
     } else if (sheetRef.current) {
