@@ -227,5 +227,4 @@ function TrendingCard({ data, onNavigateCommunity }) {
     </div>
   );
 }
--e 
 export default TrendingCard;

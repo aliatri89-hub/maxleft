@@ -108,5 +108,4 @@ function EmptyFeed({ onNavigateCommunity }) {
     </div>
   );
 }
--e 
 export default EmptyFeed;

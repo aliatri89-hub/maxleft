@@ -162,5 +162,4 @@ function UpNextCard({ data, onNavigateCommunity }) {
     </div>
   );
 }
--e 
 export default UpNextCard;

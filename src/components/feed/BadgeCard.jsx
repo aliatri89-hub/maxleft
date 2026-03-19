@@ -158,5 +158,5 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
     </div>
   );
 }
--e 
+
 export default BadgeCard;

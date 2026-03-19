@@ -121,5 +121,4 @@ function BadgeCompleteCard({ data, onCelebrate }) {
     </div>
   );
 }
--e 
 export default BadgeCompleteCard;

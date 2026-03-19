@@ -123,5 +123,4 @@ function RandomPickCard({ data, onNavigateCommunity }) {
     </div>
   );
 }
--e 
 export default RandomPickCard;
