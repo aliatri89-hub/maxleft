@@ -190,11 +190,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       document.body.style.left = "0";
       document.body.style.right = "0";
       return () => {
+        // Read scroll position from body.style.top — immune to re-render/closure staleness
+        const savedY = parseInt(document.body.style.top || "0", 10) * -1;
         document.body.style.position = "";
         document.body.style.top = "";
         document.body.style.left = "";
         document.body.style.right = "";
-        window.scrollTo(0, scrollY);
+        window.scrollTo(0, savedY);
       };
     }
   }, [open]);
