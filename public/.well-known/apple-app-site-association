@@ -1,0 +1,31 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAM_ID.app.mymantl"],
+        "components": [
+          {
+            "/": "/*",
+            "comment": "Match all paths on mymantl.app"
+          },
+          {
+            "/": "/privacy",
+            "exclude": true,
+            "comment": "Keep legal pages in the browser"
+          },
+          {
+            "/": "/terms",
+            "exclude": true,
+            "comment": "Keep legal pages in the browser"
+          },
+          {
+            "/": "/delete-account",
+            "exclude": true,
+            "comment": "Keep delete-account in the browser"
+          }
+        ]
+      }
+    ]
+  }
+}
