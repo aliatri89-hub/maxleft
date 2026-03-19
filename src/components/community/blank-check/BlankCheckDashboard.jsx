@@ -36,6 +36,11 @@ const BC_PATREON = "https://www.patreon.com/blankcheck";
 const BC_SPOTIFY = "https://open.spotify.com/show/4zmVd1CGeUCxAAMwGAwsFD";
 const BC_APPLE = "https://podcasts.apple.com/us/podcast/blank-check-with-griffin-david/id981330533";
 
+// ── Launch flag: hide community engagement stats until there's real activity ──
+const SHOW_COMMUNITY_STATS = false;
+// ── Launch flag: hide voting/rating UI until community features are live ──
+const SHOW_VOTING = false;
+
 // ── Star Rating Constants ────────────────────────────────────────────
 const STAR_COUNT = 5;
 const STAR_VALUES = [1, 2, 3, 4, 5];
@@ -366,7 +371,7 @@ const LoginModal = ({ onClose }) => {
               fontSize: 13, color: C.textMuted, lineHeight: 1.6, marginBottom: 20,
               fontFamily: "'Source Sans 3', sans-serif",
             }}>
-              Sign in to rate films, track your progress, and appear on the leaderboard.
+              Sign in to track your progress across every director.
             </p>
 
             <button
@@ -527,7 +532,7 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
         )}
 
         {/* Community avg rating — upper right */}
-        {avg > 0 && total > 0 && (
+        {SHOW_COMMUNITY_STATS && avg > 0 && total > 0 && (
           <div style={{
             position: "absolute", top: 7, right: 7,
             background: "rgba(0,0,0,0.65)", borderRadius: 4, padding: "3px 7px",
@@ -579,7 +584,7 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
         </div>
 
         {/* Community Favorite badge */}
-        {avg >= 4.5 && total >= 5 && !userRating && !hasPoster && (
+        {SHOW_COMMUNITY_STATS && avg >= 4.5 && total >= 5 && !userRating && !hasPoster && (
           <div style={{
             position: "absolute", bottom: 10,
             background: `${C.purple}22`, border: `1px solid ${C.purple}44`,
@@ -858,6 +863,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
         )}
 
         {/* ─── Your Rating ─── */}
+        {SHOW_VOTING && (
         <div style={{
           margin: "18px 0 14px", padding: "14px 16px", borderRadius: 10,
           background: `${C.purple}08`,
@@ -878,6 +884,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
             </div>
           )}
         </div>
+        )}
 
         {/* ─── Listen to Episode ─── */}
         <div style={{
@@ -900,6 +907,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
         </div>
 
         {/* ─── Community Rating ─── */}
+        {SHOW_COMMUNITY_STATS && (<>
         <div style={{
           fontSize: 10, color: C.textDim, textTransform: "uppercase",
           letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Oswald', sans-serif",
@@ -918,6 +926,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
           </div>
           <RatingBar avg={avg} total={total} />
         </div>
+        </>)}
 
         {/* ─── Links ─── */}
         <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "center", flexWrap: "wrap" }}>
@@ -1038,7 +1047,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
               loading="lazy"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
-            {avg > 0 && (
+            {SHOW_COMMUNITY_STATS && avg > 0 && (
               <div style={{
                 position: "absolute", bottom: 4, right: 4,
                 background: "rgba(0,0,0,0.75)", borderRadius: 3, padding: "1px 5px",
@@ -1095,7 +1104,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
           </div>
 
           {/* Star rating + stats */}
-          {film && total > 0 && (
+          {SHOW_COMMUNITY_STATS && film && total > 0 && (
             <div style={{ marginTop: 8 }}>
               <RatingBar avg={avg} total={total} />
               <div style={{
@@ -1113,7 +1122,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
             display: "flex", alignItems: "center", justifyContent: "space-between",
             marginTop: 10, gap: 8,
           }}>
-            {film && (
+            {SHOW_VOTING && film && (
               <CompactStarRating value={userRating} onChange={(r) => onRate(film.item_id, r)} size={16} gap={1} />
             )}
 
@@ -1294,7 +1303,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
   const [totalFilmsCount, setTotalFilmsCount] = useState(0);
   const [directors, setDirectors] = useState(["All"]);
   const [memberStats, setMemberStats] = useState({ total_members: 0, active_this_week: 0, total_logs: 0 });
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [badgeCount, setBadgeCount] = useState(0);
   const [userRatings, setUserRatings] = useState({});
 
   // Schedule
@@ -1328,13 +1337,11 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         setCommunityId(page.id);
         setRssUrl(page.theme_config?.rss_url || "");
 
-        const [itemsRes, statsRes, lbRes, msRes] = await Promise.all([
+        const [itemsRes, statsRes, msRes, badgeRes] = await Promise.all([
           supabase.from("community_item_stats").select("*").eq("community_id", page.id).order("sort_order", { ascending: true }),
           supabase.from("community_member_stats").select("*").eq("slug", COMMUNITY_SLUG).single(),
-          userId
-            ? supabase.from("community_leaderboard").select("*").eq("slug", COMMUNITY_SLUG).order("films_logged", { ascending: false }).limit(15)
-            : Promise.resolve({ data: [] }),
           supabase.from("community_miniseries").select("id, title, tab_key").eq("community_id", page.id).order("sort_order", { ascending: true }),
+          supabase.from("badges").select("id").eq("community_id", page.id).eq("is_active", true),
         ]);
 
         // Build set of filmography miniseries IDs (main feed only — exclude patreon & awards)
@@ -1346,6 +1353,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         // Total films across ALL tabs (for hero stats)
         const allItemsWithTmdb = (itemsRes.data || []).filter(i => i.tmdb_id);
         setTotalFilmsCount(allItemsWithTmdb.length);
+        setBadgeCount((badgeRes.data || []).length);
 
         const items = allItemsWithTmdb.filter(i => filmographyIds.has(i.miniseries_id));
         setFilms(items);
@@ -1356,7 +1364,6 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         setDirectors(["All", ...Array.from(directorSet).sort()]);
 
         if (statsRes.data) setMemberStats(statsRes.data);
-        setLeaderboard(lbRes.data || []);
 
         // Load user ratings (batched)
         if (userId) {
@@ -1793,24 +1800,6 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
 
       <div style={{ background: C.bgDeep, borderBottom: `1px solid ${C.border}` }}><FilmStrip /></div>
 
-      {!isAuthed && (
-        <div style={{
-          background: `${C.purple}0d`, borderBottom: `1px solid ${C.purpleBorder}`,
-          padding: "10px 24px", display: "flex", alignItems: "center",
-          justifyContent: "center", gap: 12,
-        }}>
-          <span style={{ fontSize: 12, color: C.purple, fontFamily: "'Source Sans 3', sans-serif" }}>
-            Rate films and track your way through every director's filmography
-          </span>
-          <button onClick={() => setShowLogin(true)} style={{
-            fontSize: 11, fontWeight: 700, color: "#fff",
-            background: C.purple, borderRadius: 3, padding: "4px 12px",
-            border: "none", fontFamily: "'Oswald', sans-serif",
-            textTransform: "uppercase", letterSpacing: 1, cursor: "pointer",
-          }}>Join Free</button>
-        </div>
-      )}
-
       {/* ═══ HERO ══════════════════════════════════════════════════════ */}
       <div style={{
         padding: "48px 24px 36px", position: "relative", overflow: "hidden",
@@ -1842,7 +1831,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             <span style={{
               fontSize: 10, color: C.purple, fontWeight: 700, letterSpacing: 2,
               textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace",
-            }}>Live Community · {memberStats.active_this_week || 0} active this week</span>
+            }}>Live Community{SHOW_COMMUNITY_STATS ? ` · ${memberStats.active_this_week || 0} active this week` : ""}</span>
           </div>
 
           <h1 style={{
@@ -1859,9 +1848,11 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
 
           <div style={{ display: "flex", gap: 24, marginTop: 28, animation: "slideUp 0.4s ease 0.15s both" }}>
             {[
-              { v: memberStats.total_members || 0, l: "Members" },
+              ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_members || 0, l: "Members" }] : []),
               { v: totalFilmsCount, l: "Films" },
-              { v: memberStats.total_logs || 0, l: "Total Ratings" },
+              { v: directors.length - 1, l: "Directors" },
+              { v: badgeCount, l: "Badges" },
+              ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_logs || 0, l: "Total Ratings" }] : []),
             ].map((s) => (
               <div key={s.l} style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: "'Oswald', sans-serif" }}>
@@ -1950,13 +1941,42 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         </div>
       </div>
 
+      {/* ═══ TRACKING PITCH (unauth only) ═════════════════════════════ */}
+      {!isAuthed && (
+        <div style={{
+          maxWidth: 1100, margin: "0 auto", padding: "32px 24px",
+          borderBottom: `1px solid ${C.border}`,
+        }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              fontSize: 18, fontWeight: 700, color: C.text,
+              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+              letterSpacing: 1.5, marginBottom: 6,
+            }}>Track Every Director. <span style={{ color: C.purple }}>Earn Badges.</span></div>
+            <div style={{
+              fontSize: 13, color: C.textMuted, fontFamily: "'Source Sans 3', sans-serif",
+              lineHeight: 1.5, maxWidth: 420, margin: "0 auto 20px",
+            }}>
+              Follow your progress across {directors.length - 1} directors{badgeCount > 0 ? ` and collect ${badgeCount} badges` : ""} as you work through every filmography.
+            </div>
+            <button onClick={() => setShowLogin(true)} style={{
+              padding: "10px 28px", borderRadius: 4,
+              background: C.purple, border: "none",
+              color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+              letterSpacing: 2, transition: "opacity 0.15s",
+            }}>Start Tracking on MANTL</button>
+          </div>
+        </div>
+      )}
+
       {/* ═══ TABS ══════════════════════════════════════════════════════ */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
           {[
             { key: "grid", label: "Films" },
-            { key: "schedule", label: "Schedule" },
-            { key: "leaderboard", label: "Leaderboard" },
+            { key: "upcoming", label: "Coming Soon" },
+            ...(rssUrl ? [{ key: "recent", label: "Recent Episodes" }] : []),
           ].map((t) => (
             <button key={t.key} style={tabBtn(t.key)} onClick={() => setTab(t.key)}>
               {t.label}
@@ -2032,8 +2052,10 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                 <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
               {[
                 { key: "az", label: sortBy === "za" ? "Z–A" : "A–Z", toggle: true },
-                { key: "rating", label: "Top Rated" },
-                { key: "popular", label: "Popular" },
+                ...(SHOW_COMMUNITY_STATS ? [
+                  { key: "rating", label: "Top Rated" },
+                  { key: "popular", label: "Popular" },
+                ] : []),
                 { key: "recent", label: "Newest" },
               ].map((s) => {
                 const isActive = s.toggle ? (sortBy === "az" || sortBy === "za") : sortBy === s.key;
@@ -2137,156 +2159,52 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         )}
 
         {/* ─── SCHEDULE ───────────────────────────────────────────── */}
-        {tab === "schedule" && (
+        {/* ─── COMING SOON ─────────────────────────────────────────── */}
+        {tab === "upcoming" && (
           <div style={{ paddingBottom: 48 }}>
-            {!rssUrl && (
+            {upcoming.length > 0 ? upcoming.map((ep, i) => (
+              <EpisodeCard
+                key={ep.key} ep={ep} isUpcoming index={i}
+                userRating={ep.matchedFilm ? (userRatings[ep.matchedFilm.item_id] || null) : null}
+                onRate={handleRate} isAuthed={isAuthed}
+                isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
+              />
+            )) : (
               <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
-                RSS feed not configured yet. Set <code>rss_url</code> in community_pages.theme_config.
+                No upcoming episodes yet
               </div>
             )}
+          </div>
+        )}
 
+        {/* ─── RECENT EPISODES ───────────────────────────────────────── */}
+        {tab === "recent" && (
+          <div style={{ paddingBottom: 48 }}>
             {rssLoading && (
               <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
-                Loading schedule...
+                Loading episodes...
               </div>
             )}
-
-            {rssError && !rssLoading && upcoming.length === 0 && recent.length === 0 && (
+            {rssError && !rssLoading && recent.length === 0 && (
               <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
                 {rssError}
               </div>
             )}
-
-            {upcoming.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.purple, animation: "pulse 2s ease infinite" }} />
-                  <h3 style={{
-                    fontSize: 14, fontWeight: 700, color: C.purple,
-                    fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
-                  }}>Upcoming Episodes</h3>
-                </div>
-                {upcoming.map((ep, i) => (
-                  <EpisodeCard
-                    key={ep.key} ep={ep} isUpcoming index={i}
-                    userRating={ep.matchedFilm ? (userRatings[ep.matchedFilm.item_id] || null) : null}
-                    onRate={handleRate} isAuthed={isAuthed}
-                    isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
-                  />
-                ))}
-              </div>
-            )}
-
-            {recent.length > 0 && (
-              <div>
-                <h3 style={{
-                  fontSize: 14, fontWeight: 700, color: C.textDim,
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                  letterSpacing: 2, marginBottom: 16,
-                }}>Recent Episodes</h3>
-                {recent.map((ep, i) => (
-                  <EpisodeCard
-                    key={ep.key} ep={ep} isUpcoming={false} index={i}
-                    userRating={ep.matchedFilm ? (userRatings[ep.matchedFilm.item_id] || null) : null}
-                    onRate={handleRate} isAuthed={isAuthed}
-                    isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
-                  />
-                ))}
-              </div>
-            )}
-
-            {rssUrl && !rssLoading && upcoming.length === 0 && recent.length === 0 && !rssError && (
+            {recent.length > 0 ? recent.map((ep, i) => (
+              <EpisodeCard
+                key={ep.key} ep={ep} isUpcoming={false} index={i}
+                userRating={ep.matchedFilm ? (userRatings[ep.matchedFilm.item_id] || null) : null}
+                onRate={handleRate} isAuthed={isAuthed}
+                isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
+              />
+            )) : !rssLoading && (
               <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
-                No scheduled episodes yet
+                No recent episodes
               </div>
             )}
           </div>
         )}
 
-        {/* ─── LEADERBOARD ────────────────────────────────────────── */}
-        {tab === "leaderboard" && (
-          <div style={{ maxWidth: 580, paddingBottom: 48 }}>
-            {!isAuthed ? (
-              <div style={{
-                textAlign: "center", padding: "60px 24px",
-                background: "rgba(255,255,255,0.015)",
-                borderRadius: 12,
-                border: `1px solid ${C.border}`,
-              }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
-                <div style={{
-                  fontSize: 18, fontWeight: 700, color: C.text,
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                  letterSpacing: 1.5, marginBottom: 8,
-                }}>Community Leaderboard</div>
-                <div style={{
-                  fontSize: 13, color: C.textMuted, marginBottom: 24,
-                  fontFamily: "'Source Sans 3', sans-serif", lineHeight: 1.5,
-                }}>
-                  Log in to see who's leading the pack and track your own ranking.
-                </div>
-                <button onClick={() => setShowLogin(true)} style={{
-                  padding: "10px 28px", borderRadius: 4,
-                  background: C.purple, border: "none",
-                  color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
-                }}>Log In to View</button>
-              </div>
-            ) : (
-              <>
-                {leaderboard.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
-                    No ratings yet — be the first!
-                  </div>
-                )}
-                {leaderboard.map((user, i) => {
-                  const top3 = i < 3;
-                  const medals = ["🥇", "🥈", "🥉"];
-                  return (
-                    <div key={user.user_id} style={{
-                      display: "flex", alignItems: "center", gap: 14,
-                      padding: "12px 16px", borderRadius: 6, marginBottom: 6,
-                      background: top3 ? `${C.purple}08` : "rgba(255,255,255,0.015)",
-                      border: `1px solid ${top3 ? C.purpleBorder : C.border}`,
-                      animation: `slideUp 0.3s ease ${i * 0.05}s both`,
-                    }}>
-                      <div style={{
-                        width: 30, textAlign: "center",
-                        fontSize: top3 ? 18 : 13, color: top3 ? undefined : C.textDim,
-                        fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
-                      }}>{top3 ? medals[i] : `#${i + 1}`}</div>
-                      <div style={{
-                        width: 34, height: 34, borderRadius: "50%",
-                        background: top3 ? `${C.purple}22` : "rgba(255,255,255,0.05)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 14, fontWeight: 700, color: top3 ? C.purple : C.textDim,
-                        fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                      }}>{user.avatar_emoji || user.username?.[0] || "?"}</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          fontSize: 14, fontWeight: 700,
-                          color: top3 ? C.text : "rgba(240,236,228,0.65)",
-                          fontFamily: "'Source Sans 3', sans-serif",
-                        }}>{user.username || "anon"}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{
-                          fontSize: 18, fontWeight: 700,
-                          color: top3 ? C.purple : C.textMuted,
-                          fontFamily: "'Oswald', sans-serif",
-                        }}>{user.films_logged}</div>
-                        <div style={{
-                          fontSize: 9, color: C.textDim, textTransform: "uppercase",
-                          letterSpacing: 1.5, fontFamily: "'JetBrains Mono', monospace",
-                        }}>films</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ═══ FOOTER ════════════════════════════════════════════════════ */}
@@ -2326,8 +2244,8 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         }}>
           <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: "'Source Sans 3', sans-serif" }}>
             {isAuthed
-              ? "Earn badges, track your ratings, and see your full progress."
-              : "Track your own journey through every director's filmography."
+              ? "Track your progress across every director on MANTL."
+              : "Explore every director the hosts have covered."
             }
           </p>
           {isAuthed ? (

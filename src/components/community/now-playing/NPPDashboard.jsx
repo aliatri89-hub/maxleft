@@ -55,6 +55,19 @@ const BUCKET_LABELS = {
   decades: { label: "Decades / Patreon", icon: "📅" },
 };
 
+// ── Launch flag: hide community engagement stats until there's real activity ──
+const SHOW_COMMUNITY_STATS = false;
+// ── Launch flag: hide voting/rating UI until community features are live ──
+const SHOW_VOTING = false;
+
+// ── Badge pitch assets (from landing page) ──
+const PITCH_BADGES = [
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Backgroundhalloweenhero.jpg", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundAlienHero.jpg", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundMadMaxHero.jpg", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a" },
+  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundChucky.jpg", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6" },
+];
+
 async function searchTMDB(query) {
   if (!query || query.length < 2) return [];
   const results = await searchTMDBRaw(query);
@@ -236,29 +249,54 @@ const VoteRow = ({ filmId, userVote, onVote, compact }) => {
     setTimeout(() => setJustVoted(null), 400);
     onVote(filmId, newVote);
   };
+
+  const VOTE_STYLES = {
+    up:      { bg: "rgba(74,222,128,0.2)",  activeBg: "rgba(74,222,128,0.3)",  border: "rgba(74,222,128,0.3)",  activeBorder: "rgba(74,222,128,0.5)",  fill: "rgba(74,222,128,0.8)", activeFill: "rgba(74,222,128,0.95)" },
+    down:    { bg: "rgba(239,68,68,0.15)",   activeBg: "rgba(239,68,68,0.25)",   border: "rgba(239,68,68,0.25)",   activeBorder: "rgba(239,68,68,0.5)",   fill: "rgba(239,68,68,0.7)",  activeFill: "rgba(239,68,68,0.95)" },
+    neutral: { bg: "rgba(250,204,21,0.12)",  activeBg: "rgba(250,204,21,0.25)",  border: "rgba(250,204,21,0.2)",   activeBorder: "rgba(250,204,21,0.5)",  fill: "rgba(250,204,21,0.7)", activeFill: "rgba(250,204,21,0.95)" },
+    brown:   { bg: "rgba(160,82,45,0.2)",    activeBg: "rgba(160,82,45,0.3)",    border: "rgba(205,133,63,0.3)",   activeBorder: "rgba(205,133,63,0.6)",  fill: "rgba(205,133,63,0.7)", activeFill: "rgba(205,133,63,0.95)" },
+  };
+
+  const sz = compact ? 30 : 36;
+  const iconSz = compact ? 13 : 16;
+
   return (
-    <div style={{ display: "flex", gap: compact ? 3 : 6, justifyContent: "center" }}>
+    <div style={{ display: "flex", gap: compact ? 5 : 8, justifyContent: "center" }}>
       {VOTE_TYPES.map((v) => {
         const isActive = userVote === v.key;
         const isJust = justVoted === v.key;
+        const s = VOTE_STYLES[v.key];
         return (
           <button key={v.key} onClick={(e) => { e.stopPropagation(); handleVote(v.key); }} title={v.label}
             style={{
-              width: compact ? 34 : 42, height: compact ? 30 : 36,
-              borderRadius: compact ? 5 : 6,
-              border: isActive ? `2px solid ${v.color}` : `1.5px solid ${v.color}44`,
-              background: isActive ? `${v.color}30` : `${v.color}0d`,
-              color: isActive ? v.color : `${v.color}99`,
-              fontSize: compact ? 14 : 17,
-              fontWeight: 700,
+              width: sz, height: sz, borderRadius: 7,
+              background: isActive ? s.activeBg : s.bg,
+              border: `1px solid ${isActive ? s.activeBorder : s.border}`,
               cursor: "pointer",
               transition: "all 0.15s ease",
-              transform: isJust ? "scale(1.25)" : isActive ? "scale(1.05)" : "scale(1)",
+              transform: isJust ? "scale(1.2)" : "scale(1)",
               display: "flex", alignItems: "center", justifyContent: "center",
               padding: 0, flexShrink: 0,
-              boxShadow: isActive ? `0 0 12px ${v.color}33` : "none",
+              backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
             }}
-          >{v.icon}</button>
+          >
+            {(v.key === "up" || v.key === "brown") && (
+              <svg width={iconSz} height={iconSz} viewBox="0 0 24 24" fill="none">
+                <path d="M12 4L3 15h6v5h6v-5h6L12 4z" fill={isActive ? s.activeFill : s.fill} />
+              </svg>
+            )}
+            {v.key === "down" && (
+              <svg width={iconSz} height={iconSz} viewBox="0 0 24 24" fill="none">
+                <path d="M12 20L21 9h-6V4H9v5H3l9 11z" fill={isActive ? s.activeFill : s.fill} />
+              </svg>
+            )}
+            {v.key === "neutral" && (
+              <div style={{
+                width: compact ? 9 : 11, height: compact ? 9 : 11, borderRadius: "50%",
+                background: isActive ? s.activeFill : s.fill,
+              }} />
+            )}
+          </button>
         );
       })}
     </div>
@@ -477,7 +515,7 @@ const LoginModal = ({ onClose }) => {
             fontSize: 13, color: C.textMuted, lineHeight: 1.6, marginBottom: 20,
             fontFamily: "'Source Sans 3', sans-serif",
           }}>
-            Sign in to vote on films, track your progress, and appear on the leaderboard.
+            Sign in to track your progress across every franchise.
           </p>
         )}
 
@@ -639,7 +677,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
         )}
 
         {/* User vote badge — community-style arrow stamp, top left */}
-        {userVote && (() => {
+        {SHOW_VOTING && userVote && (() => {
           const BADGE = {
             up:      { bg: "rgba(74,222,128,0.25)",  border: "rgba(74,222,128,0.5)",  shadow: "rgba(74,222,128,0.3)",  fill: "rgba(74,222,128,0.9)" },
             brown:   { bg: "rgba(160,82,45,0.3)",    border: "rgba(205,133,63,0.6)",  shadow: "rgba(160,82,45,0.4)",   fill: "rgba(205,133,63,0.9)" },
@@ -697,7 +735,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
         </div>
 
         {/* Cult badge */}
-        {br > 50 && !userVote && !hasPoster && (
+        {SHOW_COMMUNITY_STATS && br > 50 && !userVote && !hasPoster && (
           <div style={{
             position: "absolute", bottom: 10,
             background: `${C.brown}22`, border: `1px solid ${C.brown}44`,
@@ -712,6 +750,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
       </div>
 
       {/* Vote buttons — overlapping the bottom of the poster */}
+      {SHOW_VOTING && (
       <div style={{
         position: "absolute", bottom: -14, left: 0, right: 0, zIndex: 5,
         display: "flex", justifyContent: "center",
@@ -726,6 +765,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
           <VoteRow filmId={film.item_id} userVote={userVote} onVote={onVote} compact />
         </div>
       </div>
+      )}
 
     </div>
   );
@@ -1066,6 +1106,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
         )}
 
         {/* ─── Rating Hero ─── */}
+        {SHOW_COMMUNITY_STATS && (
         <div style={{ textAlign: "center", margin: "24px 0 18px" }}>
           <div style={{
             fontSize: 52, fontWeight: 800, color: C.gold,
@@ -1075,6 +1116,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             {total > 0 ? `avg from ${total.toLocaleString()} logs` : "No logs yet"}
           </div>
         </div>
+        )}
 
         {/* ─── Host Verdicts — promoted ─── */}
         {(hostData.up > 0 || hostData.down > 0 || hostData.brown > 0) && (
@@ -1147,6 +1189,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
         </div>
 
         {/* ─── Community Verdicts ─── */}
+        {SHOW_COMMUNITY_STATS && (<>
         <div style={{
           fontSize: 10, color: C.textDim, textTransform: "uppercase",
           letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Oswald', sans-serif",
@@ -1180,6 +1223,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             </div>
           ))}
         </div>
+        </>)}
 
         {/* ─── Links: Track on MANTL + Visit NPP ─── */}
         <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "center", flexWrap: "wrap" }}>
@@ -1313,7 +1357,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
             {/* Rating pip on poster */}
-            {avg > 0 && (
+            {SHOW_COMMUNITY_STATS && avg > 0 && (
               <div style={{
                 position: "absolute", bottom: 4, right: 4,
                 background: "rgba(0,0,0,0.75)", borderRadius: 3, padding: "1px 5px",
@@ -1373,7 +1417,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
           </div>
 
           {/* Arrow stats (if matched) */}
-          {film && total > 0 && (
+          {SHOW_COMMUNITY_STATS && film && total > 0 && (
             <div style={{ marginTop: 8 }}>
               <ArrowBar green={g} red={r} brown={br} yellow={film.yellow_count || 0} total={total} />
               <div style={{
@@ -1394,7 +1438,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
             marginTop: 10, gap: 8,
           }}>
             {/* Vote buttons (only if matched to a DB film) */}
-            {film && (
+            {SHOW_VOTING && film && (
               <VoteRow filmId={film.item_id} userVote={userVote} onVote={onVote} compact />
             )}
 
@@ -1578,6 +1622,7 @@ export default function NPPDashboard({ session: sessionProp }) {
   }, [sessionProp]);
 
   const [showLogin, setShowLogin] = useState(false);
+  const [revealedBadges, setRevealedBadges] = useState(new Set());
 
   const [loading, setLoading] = useState(true);
   const [communityId, setCommunityId] = useState(null);
@@ -1586,7 +1631,8 @@ export default function NPPDashboard({ session: sessionProp }) {
   const [genres, setGenres] = useState(["All"]);
   const [bucketMap, setBucketMap] = useState({});  // miniseries_id → genre_bucket
   const [memberStats, setMemberStats] = useState({ total_members: 0, active_this_week: 0, total_logs: 0 });
-  const [leaderboard, setLeaderboard] = useState([]);
+  const [badgeCount, setBadgeCount] = useState(0);
+
   const [userVotes, setUserVotes] = useState({});
 
   // Schedule
@@ -1621,17 +1667,16 @@ export default function NPPDashboard({ session: sessionProp }) {
         setCommunityId(page.id);
         setRssUrl(page.theme_config?.rss_url || "");
 
-        const [itemsRes, statsRes, lbRes, msRes] = await Promise.all([
+        const [itemsRes, statsRes, msRes, badgeRes] = await Promise.all([
           supabase.from("community_item_stats").select("*").eq("community_id", page.id).order("sort_order", { ascending: true }),
           supabase.from("community_member_stats").select("*").eq("slug", COMMUNITY_SLUG).single(),
-          userId
-            ? supabase.from("community_leaderboard").select("*").eq("slug", COMMUNITY_SLUG).order("films_logged", { ascending: false }).limit(15)
-            : Promise.resolve({ data: [] }),
           supabase.from("community_miniseries").select("id, title, genre_bucket").eq("community_id", page.id),
+          supabase.from("badges").select("id").eq("community_id", page.id).eq("is_active", true),
         ]);
 
         const items = (itemsRes.data || []).filter(i => i.tmdb_id);
         setFilms(items);
+        setBadgeCount((badgeRes.data || []).length);
 
         // Build bucket map: miniseries_id → genre_bucket
         const bMap = {};
@@ -1642,7 +1687,6 @@ export default function NPPDashboard({ session: sessionProp }) {
         setGenres(["All", ...Array.from(genreSet).sort()]);
 
         if (statsRes.data) setMemberStats(statsRes.data);
-        setLeaderboard(lbRes.data || []);
 
         // Load user votes (batched — Supabase .in() has URL length limits)
         if (userId) {
@@ -2010,55 +2054,19 @@ export default function NPPDashboard({ session: sessionProp }) {
         @keyframes modalIn { from { opacity: 0; transform: scale(0.96) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-        /* ── DEVICE MOCKUP ────────────────────────────── */
-        @keyframes deviceEnter { from { opacity: 0; transform: translateY(24px) rotate(0deg); } to { opacity: 1; transform: translateY(0) rotate(-2deg); } }
-        @keyframes deviceFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-6px) rotate(-2deg); } }
-        .hero-flex { display: flex; align-items: center; gap: 40px; max-width: 1100px; margin: 0 auto; position: relative; }
-        .hero-text { flex: 1; min-width: 0; }
-        .hero-device { flex-shrink: 0; opacity: 0; animation: deviceEnter 0.8s ease-out 0.6s forwards; }
-        .hero-device .device-phone { animation: deviceFloat 5s ease-in-out infinite 1.4s; }
-        @media (max-width: 700px) { .hero-flex { flex-direction: column; gap: 24px; } .hero-device { align-self: center; } }
-        .device-phone {
-          width: 190px; background: linear-gradient(160deg, #1e1c1a 0%, #121010 50%, #1a1816 100%); border-radius: 26px;
-          border: 2px solid rgba(245,197,24,0.15);
-          box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(245,197,24,0.08), 0 0 0 1px rgba(245,197,24,0.06), inset 0 1px 0 rgba(255,255,255,0.06);
-          overflow: hidden; position: relative;
-        }
-        /* Shine highlight on left edge */
-        .device-phone::before {
-          content: ''; position: absolute; top: 40px; left: -1px; width: 2px; height: 80px;
-          background: linear-gradient(180deg, transparent, rgba(245,197,24,0.25), transparent);
-          border-radius: 1px; z-index: 5;
-        }
-        /* Subtle top reflection */
-        .device-phone::after {
-          content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-          z-index: 5;
-        }
-        .device-notch { width: 56px; height: 12px; background: #0a0a0a; border-radius: 0 0 10px 10px; margin: 0 auto; }
-        .device-screen { padding: 4px 8px 14px; background: linear-gradient(180deg, #111 0%, #1a1a1a 100%); }
-        .ds-header { display: flex; align-items: center; gap: 6px; padding: 8px 0 6px; }
-        .ds-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; flex-shrink: 0; }
-        .ds-name { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.48rem; font-weight: 700; color: #f0ece4; }
-        .ds-sub { font-family: 'Source Sans 3', sans-serif; font-size: 0.32rem; color: rgba(240,236,228,0.4); }
-        .ds-shelf-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.35rem; font-weight: 600; color: rgba(240,236,228,0.4); margin: 7px 0 4px; }
-        .ds-shelf-row { display: flex; gap: 4px; overflow: hidden; }
-        .ds-poster { width: 34px; height: 51px; border-radius: 3px; background-size: cover; background-position: center; flex-shrink: 0; position: relative; }
-        .ds-poster-bg { background: rgba(245,197,24,0.08); }
-        .ds-check { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; border-radius: 3px; background: rgba(74,222,128,0.85); display: flex; align-items: center; justify-content: center; font-size: 5px; color: #111; font-weight: 700; }
-        .ds-badge-row { display: flex; align-items: center; gap: 5px; margin-top: 8px; padding: 5px 6px; background: rgba(255,255,255,0.03); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); }
-        .ds-badge-icon { width: 22px; height: 22px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; flex-shrink: 0; }
-        .ds-badge-name { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.35rem; font-weight: 700; }
-        .ds-badge-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 2px; overflow: hidden; }
-        .ds-badge-fill { height: 100%; border-radius: 2px; }
-        .ds-badge-count { font-family: 'JetBrains Mono', monospace; font-size: 0.32rem; font-weight: 600; flex-shrink: 0; }
-        .ds-stats { display: flex; justify-content: space-around; margin-top: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.04); }
-        .ds-stat-num { font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; font-weight: 700; color: #f0ece4; line-height: 1; }
-        .ds-stat-label { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.25rem; color: rgba(240,236,228,0.3); margin-top: 2px; }
-        .ds-accent { width: 36px; height: 2px; border-radius: 1px; margin-top: 4px; }
-        .ds-cta { margin-top: 8px; padding: 5px 0; border-radius: 4px; text-align: center; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.33rem; font-weight: 700; cursor: default; }
+        .pitch-badge { width: 100%; aspect-ratio: 3/4; perspective: 600px; cursor: pointer; }
+        .pitch-badge-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.22,1,0.36,1); transform-style: preserve-3d; }
+        .pitch-badge.revealed .pitch-badge-inner { transform: rotateY(180deg); }
+        .pitch-badge-front, .pitch-badge-back { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 10px; overflow: hidden; }
+        .pitch-badge-front { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+        .pitch-badge-front img { width: 54%; opacity: 0.15; filter: blur(6px); }
+        .pitch-badge-front span { font-size: 22px; color: rgba(245,197,24,0.4); font-weight: 700; }
+        .pitch-badge-back { transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 6px; }
+        .pitch-badge-back .backdrop { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.3; }
+        .pitch-badge-back .overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(15,13,11,0.5) 0%, rgba(15,13,11,0.9) 100%); }
+        .pitch-badge-back img { width: 48px; height: 48px; border-radius: 10px; position: relative; z-index: 1; }
+        .pitch-badge-back .badge-name { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-align: center; line-height: 1.2; position: relative; z-index: 1; }
+        .pitch-badge-back .badge-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; position: relative; z-index: 1; }
       `}</style>
 
       {/* ═══ YELLOW MASTHEAD ═══════════════════════════════════════════ */}
@@ -2154,24 +2162,6 @@ export default function NPPDashboard({ session: sessionProp }) {
 
       <div style={{ background: C.bgDeep, borderBottom: `1px solid ${C.border}` }}><FilmStrip /></div>
 
-      {!isAuthed && (
-        <div style={{
-          background: `${C.gold}0d`, borderBottom: `1px solid ${C.goldBorder}`,
-          padding: "10px 24px", display: "flex", alignItems: "center",
-          justifyContent: "center", gap: 12,
-        }}>
-          <span style={{ fontSize: 12, color: C.gold, fontFamily: "'Source Sans 3', sans-serif" }}>
-            Vote on films and track your progress across every franchise
-          </span>
-          <button onClick={() => setShowLogin(true)} style={{
-            fontSize: 11, fontWeight: 700, color: C.bgDeep,
-            background: C.gold, borderRadius: 3, padding: "4px 12px",
-            border: "none", fontFamily: "'Oswald', sans-serif",
-            textTransform: "uppercase", letterSpacing: 1, cursor: "pointer",
-          }}>Join Free</button>
-        </div>
-      )}
-
       {/* ═══ HERO ══════════════════════════════════════════════════════ */}
       <div style={{
         padding: "48px 24px 36px", position: "relative", overflow: "hidden",
@@ -2191,8 +2181,8 @@ export default function NPPDashboard({ session: sessionProp }) {
           background: `radial-gradient(ellipse, ${C.goldGlow} 0%, transparent 70%)`,
           pointerEvents: "none",
         }} />
-        <div className="hero-flex">
-          <div className="hero-text">
+        <div style={{ maxWidth: 1100, margin: "0 auto", position: "relative" }}>
+          <div>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             background: C.goldGlow, border: `1px solid ${C.goldBorder}`,
@@ -2203,7 +2193,7 @@ export default function NPPDashboard({ session: sessionProp }) {
             <span style={{
               fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2,
               textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace",
-            }}>Live Community · {memberStats.active_this_week || 0} active this week</span>
+            }}>Live Community{SHOW_COMMUNITY_STATS ? ` · ${memberStats.active_this_week || 0} active this week` : ""}</span>
           </div>
 
           <h1 style={{
@@ -2220,9 +2210,11 @@ export default function NPPDashboard({ session: sessionProp }) {
 
           <div style={{ display: "flex", gap: 24, marginTop: 28, animation: "slideUp 0.4s ease 0.15s both" }}>
             {[
-              { v: memberStats.total_members || 0, l: "Members" },
+              ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_members || 0, l: "Members" }] : []),
               { v: films.length, l: "Films" },
-              { v: memberStats.total_logs || 0, l: "Total Logs" },
+              { v: genres.length - 1, l: "Franchises" },
+              { v: badgeCount, l: "Badges" },
+              ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_logs || 0, l: "Total Logs" }] : []),
             ].map((s) => (
               <div key={s.l} style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: "'Oswald', sans-serif" }}>
@@ -2233,6 +2225,7 @@ export default function NPPDashboard({ session: sessionProp }) {
             ))}
           </div>
 
+          {SHOW_VOTING && (
           <div style={{ display: "flex", gap: 20, marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.border}`, animation: "slideUp 0.4s ease 0.2s both" }}>
             {VOTE_TYPES.map((a) => (
               <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: C.textDim }}>
@@ -2241,92 +2234,84 @@ export default function NPPDashboard({ session: sessionProp }) {
               </div>
             ))}
           </div>
+          )}
           </div>
 
-          {/* ── Device Mockup ─────────────────────────── */}
-          <div className="hero-device">
-            <div className="device-phone">
-              <div className="device-notch" />
-              <div className="device-screen">
-                <div className="ds-header">
-                  <div className="ds-icon" style={{ background: `${C.gold}18` }}>🎬</div>
-                  <div>
-                    <div className="ds-name">Now Playing Podcast</div>
-                    <div className="ds-sub">42 franchises · 1000+ films</div>
-                  </div>
-                </div>
-                <div className="ds-accent" style={{ background: `linear-gradient(90deg, ${C.gold}, transparent)` }} />
-
-                <div className="ds-shelf-label">Marvel</div>
-                <div className="ds-shelf-row">
-                  {[
-                    "/78lPtwv72eTNqFW9COBYI0dWDJa.jpg",  /* Iron Man */
-                    "/gKzYx79y0AQTL4UAk1cBQJ3nvrm.jpg",  /* The Incredible Hulk */
-                    "/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",   /* The Avengers */
-                    "/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",   /* Thunderbolts */
-                  ].map((p, i) => (
-                    <div key={i} className="ds-poster" style={{ backgroundImage: `url(${TMDB_IMG}/w92${p})` }}>
-                      {i < 3 && <div className="ds-check">✓</div>}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="ds-shelf-label">Halloween</div>
-                <div className="ds-shelf-row">
-                  {[
-                    "/wijlZ3HaYMvlDTPqJoTCWKFkCPU.jpg",  /* Halloween (1978) */
-                    "/WABfdeaThFYXCySGIOvRNv2sSW.jpg",   /* Halloween III */
-                    "/vSHPM4LQDpWdQrD5KZWK6wNqSOD.jpg",  /* Halloween II (Rob Zombie) */
-                    "/q06saepaXeBdkMibuN4R2fXmgIw.jpg",   /* Halloween Ends */
-                  ].map((p, i) => (
-                    <div key={i} className="ds-poster" style={{ backgroundImage: `url(${TMDB_IMG}/w92${p})` }}>
-                      {i < 2 && <div className="ds-check">✓</div>}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="ds-badge-row">
-                  <div className="ds-badge-icon" style={{ background: "rgba(255,106,0,0.12)" }}>🎃</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div className="ds-badge-name" style={{ color: "#ff6a00" }}>Haddonfield Historian</div>
-                    <div className="ds-badge-bar">
-                      <div className="ds-badge-fill" style={{ width: "62.5%", background: "linear-gradient(90deg, #ff6a00, #ff8533)" }} />
-                    </div>
-                  </div>
-                  <div className="ds-badge-count" style={{ color: "#ff6a00" }}>5/8</div>
-                </div>
-
-                <div className="ds-stats">
-                  <div style={{ textAlign: "center" }}>
-                    <div className="ds-stat-num">47</div>
-                    <div className="ds-stat-label">Shelved</div>
-                  </div>
-                  <div style={{ textAlign: "center" }}>
-                    <div className="ds-stat-num">5</div>
-                    <div className="ds-stat-label">Badges</div>
-                  </div>
-                  <div style={{ textAlign: "center" }}>
-                    <div className="ds-stat-num" style={{ color: C.gold }}>#12</div>
-                    <div className="ds-stat-label">Rank</div>
-                  </div>
-                </div>
-
-                <div className="ds-cta" style={{ background: `${C.gold}18`, color: C.gold }}>
-                  Track on MANTL →
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* ═══ BADGE PITCH (unauth only) ═════════════════════════════════ */}
+      {!isAuthed && (
+        <div style={{
+          maxWidth: 1100, margin: "0 auto", padding: "28px 24px 32px",
+          borderBottom: `1px solid ${C.border}`,
+        }}>
+          <div style={{
+            fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2.5,
+            textTransform: "uppercase", fontFamily: "'Oswald', sans-serif",
+            marginBottom: 6,
+          }}>Collect</div>
+          <div style={{
+            fontSize: 20, fontWeight: 700, color: C.text,
+            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            marginBottom: 6,
+          }}>Earn Badges Across Every Franchise</div>
+          <p style={{
+            fontSize: 13, color: C.textMuted, fontFamily: "'Source Sans 3', sans-serif",
+            lineHeight: 1.5, marginBottom: 18, maxWidth: 420,
+          }}>
+            Complete a franchise and unlock its badge. {badgeCount > 0 ? `${badgeCount} badges` : "Badges"} to
+            earn — tap to reveal.
+          </p>
+
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(4, 1fr)",
+            gap: 10, marginBottom: 20, maxWidth: 400,
+          }}>
+            {PITCH_BADGES.map((badge, i) => (
+              <div
+                key={i}
+                className={`pitch-badge${revealedBadges.has(i) ? " revealed" : ""}`}
+                onClick={() => setRevealedBadges(prev => { const n = new Set(prev); n.add(i); return n; })}
+              >
+                <div className="pitch-badge-inner">
+                  <div className="pitch-badge-front">
+                    <img src={badge.art} alt="" />
+                    <span>?</span>
+                  </div>
+                  <div className="pitch-badge-back" style={{ border: `1px solid ${badge.color}44` }}>
+                    <div className="backdrop" style={{ backgroundImage: `url(${badge.backdrop})` }} />
+                    <div className="overlay" />
+                    <img src={badge.art} alt={badge.name} style={{ border: `2px solid ${badge.color}66` }} />
+                    <div className="badge-name" style={{ color: badge.color }}>{badge.name}</div>
+                    <div className="badge-sub" style={{ color: `${badge.color}99` }}>{badge.sub}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={() => setShowLogin(true)} style={{
+              padding: "10px 24px", borderRadius: 4,
+              background: C.gold, border: "none",
+              color: C.bgDeep, fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+            }}>Start Tracking</button>
+            <span style={{
+              fontSize: 11, color: C.textDim, fontFamily: "'Source Sans 3', sans-serif",
+            }}>Free to join · Sync with Letterboxd</span>
+          </div>
+        </div>
+      )}
 
       {/* ═══ TABS ══════════════════════════════════════════════════════ */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
         <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, marginBottom: 24 }}>
           {[
             { key: "grid", label: "Films" },
-            { key: "schedule", label: "Schedule" },
-            { key: "leaderboard", label: "Leaderboard" },
+            { key: "upcoming", label: "Coming Soon" },
+            { key: "recent", label: "Recent Episodes" },
           ].map((t) => (
             <button key={t.key} style={tabBtn(t.key, t.label)} onClick={() => setTab(t.key)}>
               {t.label}
@@ -2444,9 +2429,11 @@ export default function NPPDashboard({ session: sessionProp }) {
                 <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
                 {[
                   { key: "az", label: sortBy === "za" ? "Z–A" : "A–Z", toggle: true },
-                  { key: "avg", label: "Top Rated" },
-                  { key: "divisive", label: "Divisive" },
-                  { key: "popular", label: "Popular" },
+                  ...(SHOW_COMMUNITY_STATS ? [
+                    { key: "avg", label: "Top Rated" },
+                    { key: "divisive", label: "Divisive" },
+                    { key: "popular", label: "Popular" },
+                  ] : []),
                   { key: "recent", label: "Newest" },
                 ].map((s) => {
                   const isActive = s.toggle ? (sortBy === "az" || sortBy === "za") : sortBy === s.key;
@@ -2566,153 +2553,52 @@ export default function NPPDashboard({ session: sessionProp }) {
           </div>
         )}
 
-        {/* ─── SCHEDULE ───────────────────────────────────────────── */}
-        {tab === "schedule" && (
+        {/* ─── COMING SOON ─────────────────────────────────────────── */}
+        {tab === "upcoming" && (
+          <div style={{ paddingBottom: 48 }}>
+            {upcoming.length > 0 ? upcoming.map((ep, i) => (
+              <EpisodeCard
+                key={ep.key} ep={ep} isUpcoming index={i}
+                userVote={ep.matchedFilm ? (userVotes[ep.matchedFilm.item_id] || null) : null}
+                onVote={handleVote} isAuthed={isAuthed}
+                isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
+              />
+            )) : (
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+                No upcoming episodes yet
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── RECENT EPISODES ───────────────────────────────────────── */}
+        {tab === "recent" && (
           <div style={{ paddingBottom: 48 }}>
             {rssLoading && (
               <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
-                Loading schedule...
+                Loading episodes...
               </div>
             )}
-
-            {rssError && !rssLoading && upcoming.length === 0 && recent.length === 0 && (
+            {rssError && !rssLoading && recent.length === 0 && (
               <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
                 {rssError}
               </div>
             )}
-
-            {/* Upcoming */}
-            {upcoming.length > 0 && (
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.gold, animation: "pulse 2s ease infinite" }} />
-                  <h3 style={{
-                    fontSize: 14, fontWeight: 700, color: C.gold,
-                    fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
-                  }}>Upcoming Episodes</h3>
-                </div>
-                {upcoming.map((ep, i) => (
-                  <EpisodeCard
-                    key={ep.key} ep={ep} isUpcoming index={i}
-                    userVote={ep.matchedFilm ? (userVotes[ep.matchedFilm.item_id] || null) : null}
-                    onVote={handleVote} isAuthed={isAuthed}
-                    isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Recent */}
-            {recent.length > 0 && (
-              <div>
-                <h3 style={{
-                  fontSize: 14, fontWeight: 700, color: C.textDim,
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                  letterSpacing: 2, marginBottom: 16,
-                }}>Recent Episodes</h3>
-                {recent.map((ep, i) => (
-                  <EpisodeCard
-                    key={ep.key} ep={ep} isUpcoming={false} index={i}
-                    userVote={ep.matchedFilm ? (userVotes[ep.matchedFilm.item_id] || null) : null}
-                    onVote={handleVote} isAuthed={isAuthed}
-                    isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
-                  />
-                ))}
-              </div>
-            )}
-
-            {!rssLoading && upcoming.length === 0 && recent.length === 0 && !rssError && (
+            {recent.length > 0 ? recent.map((ep, i) => (
+              <EpisodeCard
+                key={ep.key} ep={ep} isUpcoming={false} index={i}
+                userVote={ep.matchedFilm ? (userVotes[ep.matchedFilm.item_id] || null) : null}
+                onVote={handleVote} isAuthed={isAuthed}
+                isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
+              />
+            )) : !rssLoading && (
               <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
-                No scheduled episodes yet
+                No recent episodes
               </div>
             )}
           </div>
         )}
 
-        {/* ─── LEADERBOARD ────────────────────────────────────────── */}
-        {tab === "leaderboard" && (
-          <div style={{ maxWidth: 580, paddingBottom: 48 }}>
-            {!isAuthed ? (
-              <div style={{
-                textAlign: "center", padding: "60px 24px",
-                background: "rgba(255,255,255,0.015)",
-                borderRadius: 12,
-                border: `1px solid ${C.border}`,
-              }}>
-                <div style={{ fontSize: 40, marginBottom: 16 }}>🏆</div>
-                <div style={{
-                  fontSize: 18, fontWeight: 700, color: C.text,
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                  letterSpacing: 1.5, marginBottom: 8,
-                }}>Community Leaderboard</div>
-                <div style={{
-                  fontSize: 13, color: C.textMuted, marginBottom: 24,
-                  fontFamily: "'Source Sans 3', sans-serif", lineHeight: 1.5,
-                }}>
-                  Log in to see who's leading the pack and track your own ranking.
-                </div>
-                <button onClick={() => setShowLogin(true)} style={{
-                  padding: "10px 28px", borderRadius: 4,
-                  background: C.gold, border: "none",
-                  color: C.bgDeep, fontSize: 13, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
-                }}>Log In to View</button>
-              </div>
-            ) : (
-              <>
-                {leaderboard.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
-                    No logs yet — be the first!
-                  </div>
-                )}
-                {leaderboard.map((user, i) => {
-                  const top3 = i < 3;
-                  const medals = ["🥇", "🥈", "🥉"];
-                  return (
-                    <div key={user.user_id} style={{
-                      display: "flex", alignItems: "center", gap: 14,
-                      padding: "12px 16px", borderRadius: 6, marginBottom: 6,
-                      background: top3 ? `${C.gold}08` : "rgba(255,255,255,0.015)",
-                      border: `1px solid ${top3 ? C.goldBorder : C.border}`,
-                      animation: `slideUp 0.3s ease ${i * 0.05}s both`,
-                    }}>
-                      <div style={{
-                        width: 30, textAlign: "center",
-                        fontSize: top3 ? 18 : 13, color: top3 ? undefined : C.textDim,
-                        fontFamily: "'JetBrains Mono', monospace", fontWeight: 700,
-                      }}>{top3 ? medals[i] : `#${i + 1}`}</div>
-                      <div style={{
-                        width: 34, height: 34, borderRadius: "50%",
-                        background: top3 ? `${C.gold}22` : "rgba(255,255,255,0.05)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 14, fontWeight: 700, color: top3 ? C.gold : C.textDim,
-                        fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
-                      }}>{user.avatar_emoji || user.username?.[0] || "?"}</div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{
-                          fontSize: 14, fontWeight: 700,
-                          color: top3 ? C.text : "rgba(240,236,228,0.65)",
-                          fontFamily: "'Source Sans 3', sans-serif",
-                        }}>{user.username || "anon"}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{
-                          fontSize: 18, fontWeight: 700,
-                          color: top3 ? C.gold : C.textMuted,
-                          fontFamily: "'Oswald', sans-serif",
-                        }}>{user.films_logged}</div>
-                        <div style={{
-                          fontSize: 9, color: C.textDim, textTransform: "uppercase",
-                          letterSpacing: 1.5, fontFamily: "'JetBrains Mono', monospace",
-                        }}>films</div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* ═══ FOOTER ════════════════════════════════════════════════════ */}
@@ -2753,8 +2639,8 @@ export default function NPPDashboard({ session: sessionProp }) {
         }}>
           <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: "'Source Sans 3', sans-serif" }}>
             {isAuthed
-              ? "Your votes are tracked. See your full shelf, ratings, and progress."
-              : "Track your own journey through every franchise."
+              ? "Track your progress across every franchise on MANTL."
+              : "Explore every franchise the hosts have covered."
             }
           </p>
           {isAuthed ? (
