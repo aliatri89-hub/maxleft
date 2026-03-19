@@ -131,21 +131,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         });
         if (cancelled || !res?.images?.backdrops) return;
         const all = res.images.backdrops;
-        // Prefer clean scene stills (no language tag = no baked-in text/logos)
-        const clean = all.filter(b => !b.iso_639_1);
-        // Use clean if we have enough, otherwise fall back to all
-        const pool = clean.length >= 6 ? clean : all;
-        // Skip index 0 (same as hero), pick spread-out stills for variety
-        const pick = (...indices) => {
-          for (const i of indices) {
-            if (pool[i]?.file_path) return `${TMDB_IMG_BASE}/w780${pool[i].file_path}`;
-          }
-          return null;
-        };
-        const stills = [pick(5, 3, 2, 1), pick(7, 4, 3, 2)].filter(Boolean);
-        // Dedupe in case fallback indices overlap
-        const unique = [...new Set(stills)];
-        if (!cancelled && unique.length) setExtraBackdrops(unique);
+        if (all.length < 3) return;
+        // Sort by vote_average desc — highest-rated are clean scene stills,
+        // promo art with baked-in logos tends to rank lower
+        const heroPath = all[0]?.file_path;
+        const ranked = [...all]
+          .filter(b => b.file_path && b.file_path !== heroPath)
+          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        const stills = ranked
+          .slice(0, 2)
+          .map(b => `${TMDB_IMG_BASE}/w780${b.file_path}`);
+        if (!cancelled && stills.length) setExtraBackdrops(stills);
       } catch {}
     })();
     return () => { cancelled = true; };
