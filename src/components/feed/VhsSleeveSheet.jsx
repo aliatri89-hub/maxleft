@@ -6,6 +6,55 @@ import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrim
 // VHS SLEEVE SHEET — dark box-back slide-up
 // ════════════════════════════════════════════════
 
+// ── Genre → Font mapping ──
+// Each genre gets a Google Font that matches its video store energy
+const GENRE_FONTS = {
+  Horror:           { family: "Creepster",          weight: 400, transform: "none",       spacing: "0.04em" },
+  Comedy:           { family: "Boogaloo",           weight: 400, transform: "none",       spacing: "0.02em" },
+  Action:           { family: "Anton",              weight: 400, transform: "uppercase",  spacing: "0.08em" },
+  Drama:            { family: "Playfair Display",   weight: 700, transform: "none",       spacing: "0.03em" },
+  Romance:          { family: "Dancing Script",     weight: 700, transform: "none",       spacing: "0.01em" },
+  "Science Fiction": { family: "Orbitron",          weight: 700, transform: "uppercase",  spacing: "0.1em"  },
+  Thriller:         { family: "Teko",               weight: 600, transform: "uppercase",  spacing: "0.12em" },
+  Adventure:        { family: "Righteous",          weight: 400, transform: "none",       spacing: "0.03em" },
+  Fantasy:          { family: "Cinzel Decorative",  weight: 700, transform: "none",       spacing: "0.06em" },
+  Animation:        { family: "Bubblegum Sans",     weight: 400, transform: "none",       spacing: "0.02em" },
+  Documentary:      { family: "Special Elite",      weight: 400, transform: "none",       spacing: "0.04em" },
+  Crime:            { family: "Russo One",          weight: 400, transform: "uppercase",  spacing: "0.08em" },
+  Mystery:          { family: "Shadows Into Light", weight: 400, transform: "none",       spacing: "0.03em" },
+  War:              { family: "Black Ops One",      weight: 400, transform: "uppercase",  spacing: "0.06em" },
+  Western:          { family: "Rye",                weight: 400, transform: "none",       spacing: "0.04em" },
+  Music:            { family: "Lobster",            weight: 400, transform: "none",       spacing: "0.01em" },
+  History:          { family: "Cinzel",             weight: 700, transform: "none",       spacing: "0.08em" },
+  Family:           { family: "Fredoka",            weight: 600, transform: "none",       spacing: "0.02em" },
+};
+
+const DEFAULT_FONT = { family: "Barlow Condensed", weight: 600, transform: "uppercase", spacing: "0.14em" };
+
+// Extract primary genre from comma-separated string
+function getPrimaryGenre(genreStr) {
+  if (!genreStr) return null;
+  return genreStr.split(",")[0].trim();
+}
+
+// Get font config for a genre string
+function getGenreFont(genreStr) {
+  const primary = getPrimaryGenre(genreStr);
+  if (!primary) return DEFAULT_FONT;
+  return GENRE_FONTS[primary] || DEFAULT_FONT;
+}
+
+// Load a Google Font on demand (idempotent)
+const _loadedFonts = new Set();
+function loadGoogleFont(family) {
+  if (!family || family === "Barlow Condensed" || _loadedFonts.has(family)) return;
+  _loadedFonts.add(family);
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@400;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
 // Compact money formatter
 function fmtMoney(v) {
   if (!v || v <= 0) return null;
@@ -49,10 +98,18 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const director = data?.director || data?.creator || null;
   const cast = data?.cast_names || [];
   const studios = data?.studio_names || [];
+  const genreFont = getGenreFont(data?.genre);
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
     : (data?.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const stripes = makeBarcode(seed);
+
+  // Load genre font on demand when sheet opens
+  useEffect(() => {
+    if (open && genreFont.family !== "Barlow Condensed") {
+      loadGoogleFont(genreFont.family);
+    }
+  }, [open, genreFont.family]);
 
   // Lock body scroll when open
   useEffect(() => {
@@ -143,16 +200,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }} />
         </div>
 
-        {/* ── Tagline — 90s VHS box style at top ── */}
+        {/* ── Tagline — genre-driven typography ── */}
         {data.tagline && (
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 600, fontSize: 12,
-            color: "rgba(240,235,225,0.65)",
+            fontFamily: `'${genreFont.family}', sans-serif`,
+            fontWeight: genreFont.weight,
+            fontSize: 15,
+            color: "rgba(240,235,225,0.75)",
             textAlign: "center",
-            textTransform: "uppercase",
-            letterSpacing: "0.14em",
-            lineHeight: 1.4,
+            textTransform: genreFont.transform,
+            letterSpacing: genreFont.spacing,
+            lineHeight: 1.35,
             padding: "2px 24px 8px",
             maxWidth: "90%",
             margin: "0 auto",

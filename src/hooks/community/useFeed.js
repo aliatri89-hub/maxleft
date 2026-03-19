@@ -208,6 +208,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         director: _extractDirector(log.credits, log.creator),
         cast_names: _extractCast(log.credits),
         studio_names: _extractStudios(log.production_companies),
+        genre: log.genre || null,
         communities: [],
       });
     }
@@ -306,6 +307,7 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         director: _extractDirector(shelf.credits, shelf.creator),
         cast_names: _extractCast(shelf.credits),
         studio_names: _extractStudios(shelf.production_companies),
+        genre: shelf.genre || null,
         communities: [],
         isShelfLog: true,
       });
