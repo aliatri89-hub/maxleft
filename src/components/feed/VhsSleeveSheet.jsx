@@ -111,11 +111,21 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     }
   }, [open, genreFont.family]);
 
-  // Lock body scroll when open
+  // Lock body scroll when open — preserves scroll position on iOS/Capacitor
   useEffect(() => {
     if (open) {
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        window.scrollTo(0, scrollY);
+      };
     }
   }, [open]);
 
@@ -169,6 +179,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           maxHeight: "92%",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
+          overscrollBehavior: "contain",
           background: "#0f0d0b",
           borderRadius: "14px 14px 0 0",
           transform: open ? "translateY(0)" : "translateY(100%)",
