@@ -18,7 +18,9 @@ createRoot(document.getElementById('root')).render(
 )
 
 // ——— SERVICE WORKER — auto-update on every deploy ——————————
-if ('serviceWorker' in navigator) {
+// Skip on native — Capacitor handles its own caching
+import { Capacitor } from '@capacitor/core';
+if (!Capacitor.isNativePlatform() && 'serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).then(reg => {
     // Check for updates every 30 seconds
     setInterval(() => reg.update(), 30000);

@@ -6,6 +6,7 @@ import "./styles/App.css";
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
 import { sb } from "./utils/api";
 import { tapLight } from "./utils/haptics";
+import { signInWithGoogle, initDeepLinkListener } from "./utils/nativeAuth";
 
 // Screens
 import LandingScreen from "./screens/LandingScreen";
@@ -203,6 +204,7 @@ export default function App() {
 
   // ── AUTH ──
   useEffect(() => {
+    initDeepLinkListener(); // Listen for OAuth deep link callbacks on native
     let loadingUserId = null;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
@@ -218,9 +220,7 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const signIn = async () => {
-    await sb(supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } }), showToast, "Couldn't save");
-  };
+  const signIn = () => signInWithGoogle(showToast);
 
   const signOut = async () => {
     await supabase.auth.signOut();
