@@ -331,7 +331,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <img src={backdropUrl} alt="" style={{
                 width: "100%", height: 200,
                 objectFit: "cover", objectPosition: "center top",
-                display: "block", opacity: 0.4,
+                display: "block",
               }} />
               {/* Gradient to dark — top and bottom */}
               <div style={{
