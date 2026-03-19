@@ -157,9 +157,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             (!b.aspect_ratio || b.aspect_ratio > 1.4)
           )
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-        const stills = clean
-          .slice(0, 2)
-          .map(b => `${TMDB_IMG_BASE}/w780${b.file_path}`);
+
+        // Pick two visually distinct stills: one from the top, one from the middle
+        const picks = [];
+        if (clean.length >= 2) {
+          picks.push(clean[0]);
+          const midIdx = Math.min(Math.floor(clean.length / 2), clean.length - 1);
+          picks.push(clean[midIdx]);
+        } else if (clean.length === 1) {
+          picks.push(clean[0]);
+        }
+        const stills = picks.map(b => `${TMDB_IMG_BASE}/w780${b.file_path}`);
         if (!cancelled && stills.length) setExtraBackdrops(stills);
       } catch {}
     })();
