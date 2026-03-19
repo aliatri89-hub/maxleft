@@ -237,10 +237,10 @@
 /* ── Toast ── */
 
 .toast.toast {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background: #f0ead8;
+  color: #1a100a;
+  border: none;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.55), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Loading Screen ── */
