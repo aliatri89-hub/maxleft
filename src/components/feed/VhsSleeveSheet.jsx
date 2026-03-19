@@ -263,6 +263,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
               }} />
+              {/* Scanlines — dialed way down on the still */}
+              <div style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 3px)",
+                opacity: 0.3,
+                mixBlendMode: "multiply",
+              }} />
               {/* Corner wear */}
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
