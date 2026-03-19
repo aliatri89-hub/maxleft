@@ -126,14 +126,27 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     (async () => {
       try {
         const type = (data.media_type === "show") ? "tv" : "movie";
-        const res = await apiProxy("tmdb_images", {
+        const heroBdPath = data.backdrop_path;
+
+        // Try dedicated images endpoint first (clean null-language only)
+        let backdrops = null;
+        const imgRes = await apiProxy("tmdb_images", {
           tmdb_id: String(data.tmdb_id), type,
         });
-        if (cancelled || !res?.backdrops) return;
-        // Dedicated images endpoint with include_image_language=null
-        // returns ONLY clean no-language backdrops — no promo art
-        const heroBdPath = data.backdrop_path;
-        const clean = res.backdrops
+        if (imgRes?.backdrops) {
+          backdrops = imgRes.backdrops;
+        } else {
+          // Fallback: piggyback on tmdb_details (may include promo art)
+          const detailRes = await apiProxy("tmdb_details", {
+            tmdb_id: String(data.tmdb_id), type, append: "images",
+          });
+          if (detailRes?.images?.backdrops) {
+            backdrops = detailRes.images.backdrops.filter(b => !b.iso_639_1);
+          }
+        }
+
+        if (cancelled || !backdrops?.length) return;
+        const clean = backdrops
           .filter(b => b.file_path && b.file_path !== heroBdPath)
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const stills = clean
