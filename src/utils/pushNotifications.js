@@ -8,9 +8,10 @@ import { supabase } from '../supabase';
 let _pushModule = null;
 
 // Lazy-load the plugin only on native (avoids web bundling issues)
+// @vite-ignore prevents Rolldown from trying to resolve this at build time
 async function getPush() {
   if (!_pushModule) {
-    _pushModule = await import('@capacitor/push-notifications');
+    _pushModule = await import(/* @vite-ignore */ '@capacitor/push-notifications');
   }
   return _pushModule.PushNotifications;
 }
