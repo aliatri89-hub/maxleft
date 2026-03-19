@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
-import { Stars, getCommunityAccent, getTimeAgo, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
+import { Stars, getCommunityAccent, getTimeAgo } from "./FeedPrimitives";
+import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
 // LOG CARD — cinematic backdrop + community context
@@ -93,19 +94,9 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-// Compact money formatter — $150M, $1.2B, etc.
-function fmtMoney(v) {
-  if (!v || v <= 0) return null;
-  if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
-  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
-  return `$${v}`;
-}
-
 function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false }) {
-  const [flipped, setFlipped] = useState(false);
-  const hasFlipped = useRef(false);
-  const [isLightLogo, setIsLightLogo] = useState(true); // default dark until detected
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
@@ -167,19 +158,16 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         borderRadius: 4,
         overflow: "hidden",
       }}>
-      {!flipped ? (
+      {/* Front — always visible */}
         <div
-          key="front"
           onClick={() => {
-            hasFlipped.current = true;
-            setFlipped(true);
+            setSheetOpen(true);
             setShowHint(false);
           }}
           style={{
             background: "#1a1612",
             borderRadius: 5,
             position: "relative",
-            animation: hasFlipped.current ? "tapeFlip 0.3s ease-out" : "none",
           }}
         >
           <div style={{
@@ -361,309 +349,6 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
             <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
           </div>
         </div>
-      ) : (
-        <div
-          key="back"
-          onClick={() => setFlipped(false)}
-          style={{
-            background: "#1a1612",
-            borderRadius: 5,
-            position: "relative",
-            animation: "tapeFlip 0.3s ease-out",
-            cursor: "pointer",
-          }}
-        >
-          {(() => {
-            const backdropUrl = resolveImg(data.backdrop_path, TMDB_BACKDROP);
-            const budgetStr = fmtMoney(data.budget);
-            const grossStr = fmtMoney(data.revenue);
-            const hasFinancials = budgetStr || grossStr;
-            const hasTagline = data.tagline && data.tagline.trim().length > 0;
-            const hasCommunities = communities.length > 0;
-
-            // Deterministic barcode
-            const seed = data.tmdb_id
-              ? Number(data.tmdb_id)
-              : (data.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-            const pseudoRand = (i) => {
-              const x = Math.sin(seed * 9301 + i * 49297 + 233) * 0.5 + 0.5;
-              return Math.floor(x * 3) + 1;
-            };
-            const stripes = [];
-            stripes.push({ w: 1, dark: true }, { w: 1, dark: false }, { w: 1, dark: true });
-            for (let i = 0; i < 24; i++) stripes.push({ w: pseudoRand(i), dark: i % 2 === 0 });
-            stripes.push({ w: 1, dark: true }, { w: 1, dark: false }, { w: 1, dark: true });
-
-            return (
-              <div style={{ borderRadius: 3, overflow: "hidden", position: "relative" }}>
-
-                {/* ── Backdrop image — full width cinematic still ── */}
-                {backdropUrl && (
-                  <div style={{
-                    position: "relative",
-                    width: "100%",
-                    height: 120,
-                    overflow: "hidden",
-                  }}>
-                    <img
-                      src={backdropUrl}
-                      alt=""
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        objectPosition: "center top",
-                        display: "block",
-                      }}
-                    />
-                    {/* Fade to cream at bottom */}
-                    <div style={{
-                      position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
-                      background: "linear-gradient(transparent, #f0ebe1)",
-                      pointerEvents: "none",
-                    }} />
-                    {/* Subtle film grain over image */}
-                    <div style={{
-                      position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
-                      backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
-                    }} />
-                  </div>
-                )}
-
-                {/* ── Info section — cream background ── */}
-                <div style={{
-                  background: "#f0ebe1",
-                  padding: backdropUrl ? "4px 14px 12px" : "10px 14px 12px",
-                  position: "relative",
-                }}>
-                  {/* Grid lines */}
-                  <div style={{
-                    position: "absolute", inset: 0, pointerEvents: "none",
-                    backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
-                  }} />
-
-                  {/* Title — sharpie style */}
-                  <div style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 11, color: "rgba(44,40,36,0.5)",
-                    textAlign: "center",
-                    marginBottom: 4,
-                    position: "relative",
-                  }}>
-                    {data.title}{data.year ? ` (${data.year})` : ""}
-                  </div>
-
-                  {/* Tagline */}
-                  {hasTagline && (
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 8, lineHeight: 1.4,
-                      color: "rgba(44,40,36,0.5)",
-                      fontStyle: "italic",
-                      textAlign: "center",
-                      maxWidth: "92%",
-                      margin: "0 auto",
-                      letterSpacing: "0.01em",
-                      position: "relative",
-                    }}>
-                      "{data.tagline}"
-                    </div>
-                  )}
-
-                  {/* Financials strip */}
-                  {hasFinancials && (
-                    <div style={{
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      gap: 0, width: "100%", marginTop: 6,
-                      position: "relative",
-                    }}>
-                      <div style={{ flex: 1, height: 1, background: "rgba(44,40,36,0.08)" }} />
-                      <div style={{ display: "flex", gap: 10, padding: "0 8px" }}>
-                        {budgetStr && (
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{
-                              fontFamily: "'Barlow Condensed', sans-serif",
-                              fontWeight: 800, fontSize: 6,
-                              color: "rgba(44,40,36,0.3)",
-                              letterSpacing: "0.12em", textTransform: "uppercase",
-                            }}>Budget</div>
-                            <div style={{
-                              fontFamily: "'Permanent Marker', cursive",
-                              fontSize: 12, color: "rgba(44,40,36,0.6)", lineHeight: 1.1,
-                            }}>{budgetStr}</div>
-                          </div>
-                        )}
-                        {budgetStr && grossStr && (
-                          <div style={{ width: 1, alignSelf: "stretch", background: "rgba(44,40,36,0.1)" }} />
-                        )}
-                        {grossStr && (
-                          <div style={{ textAlign: "center" }}>
-                            <div style={{
-                              fontFamily: "'Barlow Condensed', sans-serif",
-                              fontWeight: 800, fontSize: 6,
-                              color: "rgba(44,40,36,0.3)",
-                              letterSpacing: "0.12em", textTransform: "uppercase",
-                            }}>WW Gross</div>
-                            <div style={{
-                              fontFamily: "'Permanent Marker', cursive",
-                              fontSize: 12, color: "rgba(44,40,36,0.6)", lineHeight: 1.1,
-                            }}>{grossStr}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, height: 1, background: "rgba(44,40,36,0.08)" }} />
-                    </div>
-                  )}
-
-                  {/* ── Community podcast rows (when covered) ── */}
-                  {hasCommunities && (
-                    <div style={{
-                      display: "flex", flexDirection: "column", gap: 8,
-                      position: "relative",
-                      marginTop: 8, paddingTop: 8,
-                      borderTop: "1px solid rgba(44,40,36,0.08)",
-                    }}>
-                      {communities.map((c, i) => {
-                        const cAccent = getCommunityAccent(c.community_slug);
-                        const img = c.community_image;
-                        return (
-                          <div
-                            key={`back-${c.community_slug}-${c.series_title || ""}-${i}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onNavigateCommunity?.(c.community_slug, data.tmdb_id);
-                            }}
-                            style={{
-                              display: "flex", alignItems: "center", gap: 8,
-                              cursor: "pointer", padding: "3px 4px", borderRadius: 4,
-                              transition: "background 0.15s",
-                            }}
-                          >
-                            {img ? (
-                              <img src={img} alt={c.community_name} style={{
-                                width: 26, height: 26, borderRadius: 6, objectFit: "cover",
-                                border: `1.5px solid ${cAccent}44`, flexShrink: 0,
-                              }} />
-                            ) : (
-                              <div style={{
-                                width: 26, height: 26, borderRadius: 6, flexShrink: 0,
-                                background: `${cAccent}15`, border: `1.5px solid ${cAccent}44`,
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                                fontSize: 8, color: cAccent,
-                              }}>
-                                {(c.community_name || "").split(" ").map(w => w[0]).join("")}
-                              </div>
-                            )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{
-                                fontFamily: "'Permanent Marker', cursive",
-                                fontSize: 10, color: "#2C2824",
-                                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                              }}>
-                                {c.community_name}
-                              </div>
-                              {(c.series_title || c.episode_title) && (
-                                <div style={{
-                                  fontFamily: "'IBM Plex Mono', monospace",
-                                  fontSize: 7, color: "rgba(44,40,36,0.4)",
-                                  textTransform: "uppercase", letterSpacing: "0.04em",
-                                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                                  marginTop: 1, display: "flex", alignItems: "center", gap: 4,
-                                }}>
-                                  <span>{c.series_title || c.episode_title}</span>
-                                  {c.series_total > 0 && (
-                                    <span style={{ color: "rgba(44,40,36,0.55)", fontWeight: 600 }}>
-                                      {c.series_watched || 0}/{c.series_total}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-                              {c.series_total > 0 && (
-                                <div style={{
-                                  marginTop: 3, height: 3, borderRadius: 2,
-                                  background: "rgba(44,40,36,0.08)", overflow: "hidden",
-                                }}>
-                                  <div style={{
-                                    height: "100%", borderRadius: 2,
-                                    width: `${Math.min(100, Math.round(((c.series_watched || 0) / c.series_total) * 100))}%`,
-                                    background: cAccent,
-                                    opacity: (c.series_watched || 0) >= c.series_total ? 0.7 : 0.5,
-                                    transition: "width 0.3s ease",
-                                  }} />
-                                </div>
-                              )}
-                              {c.badge?.badge_name && (
-                                <div style={{
-                                  fontFamily: "'Permanent Marker', cursive",
-                                  fontSize: 7, color: c.badge.accent_color || cAccent,
-                                  opacity: (c.series_watched || 0) >= (c.series_total || 999) ? 1 : 0.5,
-                                  marginTop: 2,
-                                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                                }}>
-                                  {(c.series_watched || 0) >= (c.series_total || 999) ? "🏆 " : "🔒 "}{c.badge.badge_name}
-                                </div>
-                              )}
-                            </div>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                              stroke={cAccent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                              style={{ flexShrink: 0, opacity: 0.6 }}>
-                              <path d="M9 18l6-6-6-6" />
-                            </svg>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* ── Bottom row: HOME VIDEO stamp + Barcode ── */}
-                  <div style={{
-                    display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-                    width: "100%", gap: 8, marginTop: 8, position: "relative",
-                  }}>
-                    <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 900, fontSize: 7,
-                      color: "rgba(44,40,36,0.18)",
-                      letterSpacing: "0.22em", textTransform: "uppercase",
-                      border: "1px solid rgba(44,40,36,0.12)",
-                      borderRadius: 2, padding: "2px 6px", flexShrink: 0,
-                    }}>
-                      Home Video
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                      <div style={{ display: "flex", alignItems: "stretch", height: 18 }}>
-                        {stripes.map((s, i) => (
-                          <div key={i} style={{
-                            width: s.w * 1.5, height: "100%",
-                            background: s.dark ? "rgba(44,40,36,0.4)" : "transparent", flexShrink: 0,
-                          }} />
-                        ))}
-                      </div>
-                      <div style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 5, color: "rgba(44,40,36,0.22)", letterSpacing: "0.12em",
-                      }}>
-                        {String(seed).padStart(12, "0").slice(0, 12)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Flip hint */}
-                  <div style={{
-                    position: "absolute", bottom: 3, right: 8,
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 6, color: "rgba(44,40,36,0.18)",
-                    letterSpacing: "0.06em", textTransform: "uppercase",
-                  }}>
-                    tap to flip
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      )}
       </div>
 
       {/* ═══ VCR DECK — playable audio on MANTL ═══ */}
@@ -877,6 +562,12 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         </span>
       </div>
     )}
+    <VhsSleeveSheet
+      data={data}
+      open={sheetOpen}
+      onClose={() => setSheetOpen(false)}
+      onNavigateCommunity={onNavigateCommunity}
+    />
     </>
   );
 }

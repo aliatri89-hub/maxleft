@@ -176,6 +176,10 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         tagline: log.tagline || null,
         budget: log.budget || null,
         revenue: log.revenue || null,
+        runtime: log.runtime || null,
+        overview: log.overview || null,
+        credits: log.credits || null,
+        production_companies: log.production_companies || null,
         communities: [],
       });
     }
@@ -269,6 +273,10 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         tagline: shelf.tagline || null,
         budget: shelf.budget || null,
         revenue: shelf.revenue || null,
+        runtime: shelf.runtime || null,
+        overview: shelf.overview || null,
+        credits: shelf.credits || null,
+        production_companies: shelf.production_companies || null,
         communities: [],
         isShelfLog: true,
       });
