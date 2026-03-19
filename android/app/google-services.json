@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "246741915727",
+    "project_id": "mantl-6c5d1",
+    "storage_bucket": "mantl-6c5d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246741915727:android:75eab9a6b46334e2abb23a",
+        "android_client_info": {
+          "package_name": "app.mymantl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcEYwpu2A_PJSoYGVQE-6CDbKmejOK888"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
