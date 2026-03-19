@@ -316,6 +316,30 @@ export const getLogoUrl = (tmdbId) => {
   return val || null;
 };
 
+// ─── Extra backdrops cache (piggybacks on logo fetch) ────────
+// Stores top 2 extra backdrop URLs per tmdb_id (excluding the main backdrop)
+const stillsCache = {};
+
+export const getExtraBackdrops = (tmdbId) => {
+  if (!tmdbId) return [];
+  return stillsCache[`stills:${tmdbId}`] || [];
+};
+
+const _cacheStills = (tmdbId, backdrops) => {
+  if (!backdrops?.length || backdrops.length < 2) return;
+  // Pick deep into the list for variety — top results are usually the same hero crop
+  // Still 1: prefer index 5, fall back to 3, then 1
+  // Still 2: prefer index 7, fall back to 4, then 2
+  const pick = (...indices) => {
+    for (const i of indices) {
+      if (backdrops[i]?.file_path) return `${TMDB_IMG}/w780${backdrops[i].file_path}`;
+    }
+    return null;
+  };
+  const stills = [pick(5, 3, 1), pick(7, 4, 2)].filter(Boolean);
+  if (stills.length) stillsCache[`stills:${tmdbId}`] = stills;
+};
+
 // Returns true if we've already checked this tmdb_id (even if no logo found)
 export const isLogoChecked = (tmdbId) => {
   if (!tmdbId) return true;
@@ -337,10 +361,15 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
     });
 
     if (!data || data.error || !data.images?.logos) {
+      // Still cache backdrops even if no logos
+      if (data?.images?.backdrops) _cacheStills(tmdbId, data.images.backdrops);
       logoCache[key] = null; // Mark as checked, no logo
       saveLogoCache();
       return null;
     }
+
+    // Cache extra backdrops for sleeve stills (piggyback — zero extra API calls)
+    if (data.images.backdrops) _cacheStills(tmdbId, data.images.backdrops);
 
     // Prefer English logo, then no-language, sorted by width (largest first)
     const logos = data.images.logos;

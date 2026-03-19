@@ -65,7 +65,13 @@ function _extractCast(credits) {
 
 function _extractStudios(companies) {
   if (!Array.isArray(companies)) return [];
-  return companies.slice(0, 3).map(c => (typeof c === "string" ? c : c?.name || "")).filter(Boolean);
+  return companies.slice(0, 3).map(c => {
+    if (typeof c === "string") return { name: c, logo_url: null };
+    return {
+      name: c?.name || "",
+      logo_url: c?.logo_path ? `https://image.tmdb.org/t/p/w92${c.logo_path}` : null,
+    };
+  }).filter(s => s.name);
 }
 
 // ════════════════════════════════════════════════

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
+import { getExtraBackdrops } from "../../utils/communityTmdb";
 
 // ════════════════════════════════════════════════
 // VHS SLEEVE SHEET — dark box-back slide-up
@@ -98,6 +99,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const director = data?.director || data?.creator || null;
   const cast = data?.cast_names || [];
   const studios = data?.studio_names || [];
+  const extraBackdrops = getExtraBackdrops(data?.tmdb_id);
   const genreFont = getGenreFont(data?.genre);
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
@@ -181,11 +183,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           WebkitOverflowScrolling: "touch",
           overscrollBehavior: "contain",
           background: `
-            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(240,235,225,0.03) 2px, rgba(240,235,225,0.03) 3px),
-            url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.14'/%3E%3C/svg%3E"),
             #171411
           `.trim(),
-          backgroundSize: "auto, 128px 128px, auto",
+          backgroundSize: "100px 100px, auto",
           borderRadius: "14px 14px 0 0",
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: open ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "transform 0.25s ease-in",
@@ -262,13 +263,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
                 backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
-              }} />
-              {/* Scanlines — dialed way down on the still */}
-              <div style={{
-                position: "absolute", inset: 0, pointerEvents: "none",
-                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.12) 2px, rgba(0,0,0,0.12) 3px)",
-                opacity: 0.3,
-                mixBlendMode: "multiply",
               }} />
               {/* Corner wear */}
               <div style={{
@@ -378,21 +372,63 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 </div>
               )}
               {cast.length > 0 && (
-                <div style={{ display: "flex", gap: 6 }}>
-                  <span style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 800, fontSize: 8,
-                    color: "rgba(240,235,225,0.45)",
-                    letterSpacing: "0.14em", textTransform: "uppercase",
-                    flexShrink: 0, paddingTop: 2,
-                  }}>STARRING</span>
-                  <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 10, color: "rgba(240,235,225,0.65)",
-                    lineHeight: 1.5,
-                  }}>
-                    {cast.join(" · ")}
-                  </span>
+                <div style={{ textAlign: "center", marginTop: director ? 8 : 0 }}>
+                  {/* Top-billed actors with "and" / "with" connectors */}
+                  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 6px" }}>
+                    {cast[0] && (
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 700, fontSize: 16,
+                        color: "rgba(240,235,225,0.9)",
+                        letterSpacing: "0.06em", textTransform: "uppercase",
+                      }}>{cast[0]}</span>
+                    )}
+                    {cast[1] && (<>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 400, fontSize: 9,
+                        color: "rgba(240,235,225,0.45)",
+                        letterSpacing: "0.08em",
+                      }}>and</span>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 700, fontSize: 13,
+                        color: "rgba(240,235,225,0.85)",
+                        letterSpacing: "0.06em", textTransform: "uppercase",
+                      }}>{cast[1]}</span>
+                    </>)}
+                    {cast[2] && (<>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 400, fontSize: 9,
+                        color: "rgba(240,235,225,0.45)",
+                        letterSpacing: "0.08em",
+                      }}>with</span>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 700, fontSize: 11,
+                        color: "rgba(240,235,225,0.75)",
+                        letterSpacing: "0.06em", textTransform: "uppercase",
+                      }}>{cast[2]}</span>
+                    </>)}
+                  </div>
+                  {/* Also starring — remaining cast */}
+                  {cast.length > 3 && (
+                    <div style={{ marginTop: 4 }}>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 400, fontSize: 8,
+                        color: "rgba(240,235,225,0.4)",
+                        letterSpacing: "0.1em",
+                      }}>also starring </span>
+                      <span style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 600, fontSize: 9,
+                        color: "rgba(240,235,225,0.55)",
+                        letterSpacing: "0.06em", textTransform: "uppercase",
+                      }}>{cast.slice(3).join(", ")}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -412,6 +448,38 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               overflow: "hidden",
             }}>
               {data.overview}
+            </div>
+          )}
+
+          {/* ── Scene stills — 2-up gallery like VHS box back ── */}
+          {extraBackdrops.length > 0 && (
+            <div style={{
+              display: "flex", gap: 8, justifyContent: "center",
+              marginBottom: 14, padding: "0 4px",
+            }}>
+              {extraBackdrops.map((url, i) => (
+                <div key={i} style={{
+                  flex: 1, maxWidth: "48%", aspectRatio: "16/9",
+                  borderRadius: 2, overflow: "hidden", position: "relative",
+                  border: "2px solid rgba(240,235,225,0.15)",
+                  boxShadow: "inset 0 0 8px rgba(0,0,0,0.4)",
+                }}>
+                  <img
+                    src={url}
+                    alt=""
+                    style={{
+                      width: "100%", height: "100%",
+                      objectFit: "cover", display: "block",
+                    }}
+                    loading="lazy"
+                  />
+                  {/* Film grain on stills */}
+                  <div style={{
+                    position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.1,
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
+                  }} />
+                </div>
+              ))}
             </div>
           )}
 
@@ -575,20 +643,38 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             marginTop: 8,
             paddingTop: 12,
           }}>
-            {/* Studio names — pure white */}
+            {/* Studio names + logos */}
             {studios.length > 0 && (
               <div style={{
-                display: "flex", justifyContent: "center", gap: 14,
-                marginBottom: 12,
+                display: "flex", justifyContent: "center", alignItems: "center",
+                gap: 16, marginBottom: 12, flexWrap: "wrap",
               }}>
-                {studios.map((name, i) => (
+                {studios.map((studio, i) => (
                   <div key={i} style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 800, fontSize: 9,
-                    color: "#f0ebe1",
-                    letterSpacing: "0.1em", textTransform: "uppercase",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                   }}>
-                    {name}
+                    {studio.logo_url ? (
+                      <img
+                        src={studio.logo_url}
+                        alt={studio.name}
+                        style={{
+                          height: 18, width: "auto", maxWidth: 72,
+                          objectFit: "contain",
+                          filter: "brightness(0) invert(1)",
+                          opacity: 0.85,
+                        }}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div style={{
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontWeight: 800, fontSize: 9,
+                        color: "#f0ebe1",
+                        letterSpacing: "0.1em", textTransform: "uppercase",
+                      }}>
+                        {studio.name}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
