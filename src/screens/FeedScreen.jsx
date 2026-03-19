@@ -6,6 +6,7 @@ import { useEpisodeMatch } from "../hooks/community/useEpisodeMatch";
 import { getPosterUrl, fetchSinglePoster, isLogoChecked } from "../utils/communityTmdb";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
+import ShareShelf from "../components/ShareShelf";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
 const TMDB_BACKDROP = "https://image.tmdb.org/t/p/w780";
@@ -2324,6 +2325,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   refreshRef.current = refresh;
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
+  const [showShareShelf, setShowShareShelf] = useState(false);
 
   // Random picks are stabilized by the module-level _randomPicksCache in useFeed,
   // so they don't re-roll on tab switches — no additional latching needed.
@@ -2473,8 +2475,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         <div style={{ paddingTop: 4, position: "relative" }}>
           {/* Feed mode toggle */}
           <div style={{
-            display: "flex", justifyContent: "center",
+            display: "flex", alignItems: "center", justifyContent: "center",
             padding: "6px 16px 4px",
+            position: "relative",
           }}>
             <div className="vhs-toggle">
               {[
@@ -2490,6 +2493,30 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                 </button>
               ))}
             </div>
+
+            {/* Share shelf button — Activity tab only, needs 1+ logs */}
+            {feedMode === "activity" && feedItems.some(item => item.type === "log") && (
+              <div
+                onClick={() => setShowShareShelf(true)}
+                style={{
+                  position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
+                  width: 32, height: 32, borderRadius: 8,
+                  background: "rgba(240,235,225,0.06)",
+                  border: "1px solid rgba(240,235,225,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                {/* Share/export icon — VHS-tinted */}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="#8a7d68" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                  <polyline points="16 6 12 2 8 6" />
+                  <line x1="12" y1="2" x2="12" y2="15" />
+                </svg>
+              </div>
+            )}
           </div>
 
           {/* Welcome cards for users with no real activity yet */}
@@ -2664,6 +2691,19 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           userId={userId}
           earnedAt={viewingBadgeDetail.earned_at || new Date().toISOString()}
           onClose={() => setViewingBadgeDetail(null)}
+        />
+      )}
+
+      {/* Share Shelf overlay — Last 6 share image */}
+      {showShareShelf && (
+        <ShareShelf
+          items={feedItems
+            .filter(item => item.type === "log")
+            .slice(0, 6)
+            .map(item => item.data)}
+          username={profile?.username}
+          onClose={() => setShowShareShelf(false)}
+          onToast={onToast}
         />
       )}
     </div>
