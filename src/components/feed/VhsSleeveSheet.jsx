@@ -125,7 +125,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           border: "1.5px solid rgba(240,235,225,0.1)",
           borderBottom: "none",
           boxShadow: "0 -4px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(240,235,225,0.03)",
-          minHeight: "70vh",
+          minHeight: "86vh",
           display: "flex",
           flexDirection: "column",
         }}
@@ -148,7 +148,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 600, fontSize: 12,
-            color: "rgba(240,235,225,0.45)",
+            color: "rgba(240,235,225,0.65)",
             textAlign: "center",
             textTransform: "uppercase",
             letterSpacing: "0.14em",
@@ -249,24 +249,24 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <span style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 700, fontSize: 11,
-                color: "rgba(240,235,225,0.4)",
+                color: "rgba(240,235,225,0.8)",
                 letterSpacing: "0.06em",
               }}>{data.year}</span>
             )}
             {runtimeStr && (
               <>
-                <span style={{ color: "rgba(240,235,225,0.15)", fontSize: 10 }}>·</span>
+                <span style={{ color: "rgba(240,235,225,0.3)", fontSize: 10 }}>·</span>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 700, fontSize: 11,
-                  color: "rgba(240,235,225,0.4)",
+                  color: "rgba(240,235,225,0.8)",
                   letterSpacing: "0.06em",
                 }}>{runtimeStr}</span>
               </>
             )}
             {data.rating > 0 && (
               <>
-                <span style={{ color: "rgba(240,235,225,0.15)", fontSize: 10 }}>·</span>
+                <span style={{ color: "rgba(240,235,225,0.3)", fontSize: 10 }}>·</span>
                 <Stars rating={data.rating} size={13} />
               </>
             )}
@@ -286,13 +286,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   <span style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
                     fontWeight: 800, fontSize: 8,
-                    color: "rgba(240,235,225,0.25)",
+                    color: "rgba(240,235,225,0.45)",
                     letterSpacing: "0.14em", textTransform: "uppercase",
                     flexShrink: 0, paddingTop: 1,
                   }}>DIRECTED BY</span>
                   <span style={{
                     fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 12, color: "rgba(240,235,225,0.7)",
+                    fontSize: 12, color: "rgba(240,235,225,0.9)",
                   }}>{director}</span>
                 </div>
               )}
@@ -301,13 +301,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   <span style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
                     fontWeight: 800, fontSize: 8,
-                    color: "rgba(240,235,225,0.25)",
+                    color: "rgba(240,235,225,0.45)",
                     letterSpacing: "0.14em", textTransform: "uppercase",
                     flexShrink: 0, paddingTop: 2,
                   }}>STARRING</span>
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 10, color: "rgba(240,235,225,0.45)",
+                    fontSize: 10, color: "rgba(240,235,225,0.65)",
                     lineHeight: 1.5,
                   }}>
                     {cast.join(" · ")}
@@ -322,7 +322,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10, lineHeight: 1.55,
-              color: "rgba(240,235,225,0.4)",
+              color: "rgba(240,235,225,0.8)",
               textAlign: "center",
               marginBottom: 14,
               display: "-webkit-box",
@@ -347,12 +347,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     <div style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.2)",
+                      color: "rgba(240,235,225,0.4)",
                       letterSpacing: "0.14em", textTransform: "uppercase",
                     }}>Budget</div>
                     <div style={{
                       fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 16, color: "rgba(240,235,225,0.6)",
+                      fontSize: 16, color: "rgba(240,235,225,0.85)",
                       lineHeight: 1.1,
                     }}>{budgetStr}</div>
                   </div>
@@ -365,12 +365,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     <div style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
                       fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.2)",
+                      color: "rgba(240,235,225,0.4)",
                       letterSpacing: "0.14em", textTransform: "uppercase",
                     }}>WW Gross</div>
                     <div style={{
                       fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 16, color: "rgba(240,235,225,0.6)",
+                      fontSize: 16, color: "rgba(240,235,225,0.85)",
                       lineHeight: 1.1,
                     }}>{grossStr}</div>
                   </div>
@@ -389,7 +389,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
                 fontWeight: 800, fontSize: 8,
-                color: "rgba(240,235,225,0.2)",
+                color: "rgba(240,235,225,0.4)",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 marginBottom: 8,
               }}>
@@ -437,7 +437,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                         {(c.series_title || c.episode_title) && (
                           <div style={{
                             fontFamily: "'IBM Plex Mono', monospace",
-                            fontSize: 9, color: "rgba(240,235,225,0.35)",
+                            fontSize: 9, color: "rgba(240,235,225,0.6)",
                             textTransform: "uppercase", letterSpacing: "0.04em",
                             marginTop: 1, display: "flex", alignItems: "center", gap: 4,
                           }}>
@@ -495,7 +495,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 <div key={i} style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontWeight: 800, fontSize: 9,
-                  color: "rgba(240,235,225,0.18)",
+                  color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em", textTransform: "uppercase",
                 }}>
                   {name}
@@ -517,7 +517,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 900, fontSize: 8,
-              color: "rgba(240,235,225,0.12)",
+              color: "rgba(240,235,225,0.25)",
               letterSpacing: "0.22em", textTransform: "uppercase",
               border: "1px solid rgba(240,235,225,0.08)",
               borderRadius: 2, padding: "3px 8px", flexShrink: 0,
@@ -536,7 +536,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               </div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 6, color: "rgba(240,235,225,0.12)",
+                fontSize: 6, color: "rgba(240,235,225,0.25)",
                 letterSpacing: "0.12em",
               }}>
                 {String(seed).padStart(12, "0").slice(0, 12)}
@@ -547,7 +547,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* Legal flair — VHS authenticity touch */}
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 6, color: "rgba(240,235,225,0.08)",
+            fontSize: 6, color: "rgba(240,235,225,0.15)",
             textAlign: "center", marginTop: 10,
             letterSpacing: "0.04em",
           }}>
