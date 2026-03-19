@@ -133,33 +133,51 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }} />
         </div>
 
-        {/* ── Backdrop still ── */}
+        {/* ── Backdrop still — retro framed ── */}
         {backdropUrl && (
           <div style={{
-            position: "relative", width: "100%", height: 220, overflow: "hidden",
-            marginTop: -10,
+            padding: "0 16px",
+            marginTop: -4,
+            marginBottom: 4,
           }}>
-            <img src={backdropUrl} alt="" style={{
-              width: "100%", height: "100%",
-              objectFit: "cover", objectPosition: "center top",
-              display: "block",
-            }} />
-            {/* Gradient to dark */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
-              background: "linear-gradient(transparent, #0f0d0b)",
-              pointerEvents: "none",
-            }} />
-            {/* Film grain */}
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.06,
-              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
-            }} />
+              position: "relative", width: "100%", height: 200, overflow: "hidden",
+              borderRadius: 3,
+              border: "2px solid rgba(240,235,225,0.12)",
+              boxShadow: "inset 0 0 12px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
+            }}>
+              <img src={backdropUrl} alt="" style={{
+                width: "100%", height: "100%",
+                objectFit: "cover", objectPosition: "center top",
+                display: "block",
+              }} />
+              {/* Gradient to dark at bottom edge */}
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "40%",
+                background: "linear-gradient(transparent, rgba(15,13,11,0.8))",
+                pointerEvents: "none",
+              }} />
+              {/* Film grain */}
+              <div style={{
+                position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
+              }} />
+              {/* Corner wear — subtle light corners like a printed photo */}
+              <div style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                borderRadius: 3,
+                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.04)",
+              }} />
+            </div>
           </div>
         )}
 
         {/* ── Content area ── */}
-        <div style={{ padding: backdropUrl ? "0 20px 24px" : "12px 20px 24px" }}>
+        <div style={{
+          padding: "8px 20px 24px",
+          display: "flex", flexDirection: "column",
+          minHeight: backdropUrl ? "calc(100% - 230px)" : "calc(100% - 40px)",
+        }}>
 
           {/* Title */}
           <div style={{
@@ -451,7 +469,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* ── Bottom: HOME VIDEO + Barcode (dark variant) ── */}
+          {/* Spacer — pushes barcode to bottom */}
+          <div style={{ flex: 1, minHeight: 16 }} />
+
+          {/* ── Bottom: HOME VIDEO + Barcode (anchored) ── */}
           <div style={{
             display: "flex", alignItems: "flex-end", justifyContent: "space-between",
             width: "100%", gap: 8,
