@@ -307,8 +307,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         {/* ── Hero backdrop — atmospheric full-bleed wash ── */}
         {backdropUrl && (
           <div style={{
-            position: "relative", width: "100%", overflow: "hidden",
-            marginBottom: 0,
+            position: "relative", width: "100%", overflow: "visible",
+            marginBottom: 0, zIndex: 3,
           }}>
             <img src={backdropUrl} alt="" style={{
               width: "100%", height: 200,
