@@ -25,3 +25,13 @@ dist-ssr
 
 .vercel
 .env*.local
+.env
+
+# Firebase / Google Services (sensitive keys)
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
+
+# Capacitor build artifacts
+android/.gradle
+android/app/build
+ios/App/Pods
