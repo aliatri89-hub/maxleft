@@ -304,34 +304,35 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Hero backdrop — atmospheric full-bleed wash ── */}
+        {/* ── Hero + Stills + Logo — layered: hero(back) → stills(mid) → logo(front) ── */}
         {backdropUrl && (
-          <div style={{
-            position: "relative", width: "100%", overflow: "visible",
-            marginBottom: 0, zIndex: 3,
-          }}>
-            <img src={backdropUrl} alt="" style={{
-              width: "100%", height: 200,
-              objectFit: "cover", objectPosition: "center top",
-              display: "block", opacity: 0.4,
-            }} />
-            {/* Gradient to dark — top and bottom */}
-            <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: "30%",
-              background: "linear-gradient(rgba(23,20,17,0.6), transparent)",
-              pointerEvents: "none",
-            }} />
-            <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
-              background: "linear-gradient(transparent, #171411)",
-              pointerEvents: "none",
-            }} />
-            {/* ── Movie logo — overlaying bottom of hero ── */}
+          <div style={{ position: "relative", width: "100%", marginBottom: 0 }}>
+            {/* Hero backdrop — z1 (back) */}
+            <div style={{ position: "relative", width: "100%", overflow: "hidden", zIndex: 1 }}>
+              <img src={backdropUrl} alt="" style={{
+                width: "100%", height: 200,
+                objectFit: "cover", objectPosition: "center top",
+                display: "block", opacity: 0.4,
+              }} />
+              {/* Gradient to dark — top and bottom */}
+              <div style={{
+                position: "absolute", top: 0, left: 0, right: 0, height: "30%",
+                background: "linear-gradient(rgba(23,20,17,0.6), transparent)",
+                pointerEvents: "none",
+              }} />
+              <div style={{
+                position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
+                background: "linear-gradient(transparent, #171411)",
+                pointerEvents: "none",
+              }} />
+            </div>
+
+            {/* Movie logo — z3 (front, above stills) */}
             {data.logo_url ? (
               <div style={{
                 position: "absolute", bottom: 12, left: 0, right: 0,
                 display: "flex", justifyContent: "center",
-                zIndex: 1,
+                zIndex: 3, pointerEvents: "none",
               }}>
                 <img
                   src={data.logo_url}
@@ -348,7 +349,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             ) : (
               <div style={{
                 position: "absolute", bottom: 10, left: 0, right: 0,
-                textAlign: "center", zIndex: 1,
+                textAlign: "center", zIndex: 3, pointerEvents: "none",
               }}>
                 <span style={{
                   fontFamily: "'Permanent Marker', cursive",
@@ -362,7 +363,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Scene stills — 2-up framed gallery, overlapping hero ── */}
+        {/* ── Scene stills — z2 (between hero and logo) ── */}
         {extraBackdrops.length > 0 && (
           <div style={{
             display: "flex", gap: 8, justifyContent: "center",
@@ -487,6 +488,23 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   </div>
                 )}
               </>)}
+            </div>
+          )}
+
+          {/* Overview / Synopsis */}
+          {data.overview && (
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, lineHeight: 1.55,
+              color: "rgba(240,235,225,0.65)",
+              textAlign: "center",
+              marginBottom: 14,
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}>
+              {data.overview}
             </div>
           )}
 
