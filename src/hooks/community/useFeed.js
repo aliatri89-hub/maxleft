@@ -42,6 +42,33 @@ function _persistPicks(userId, picks) {
 }
 
 // ════════════════════════════════════════════════
+// JSONB → SAFE STRINGS (prevent React object-as-child errors)
+// ════════════════════════════════════════════════
+
+function _extractDirector(credits, fallback) {
+  if (!credits || typeof credits !== "object") return fallback || null;
+  // TMDB standard: {crew: [{job:"Director", name:"..."}]}
+  if (Array.isArray(credits.crew)) {
+    const dir = credits.crew.find(c => c && c.job === "Director");
+    if (dir?.name) return dir.name;
+  }
+  // Flat: {director: "Name"}
+  if (typeof credits.director === "string") return credits.director;
+  return fallback || null;
+}
+
+function _extractCast(credits) {
+  if (!credits || typeof credits !== "object") return [];
+  const raw = Array.isArray(credits.cast) ? credits.cast : [];
+  return raw.slice(0, 6).map(c => (typeof c === "string" ? c : c?.name || "")).filter(Boolean);
+}
+
+function _extractStudios(companies) {
+  if (!Array.isArray(companies)) return [];
+  return companies.slice(0, 3).map(c => (typeof c === "string" ? c : c?.name || "")).filter(Boolean);
+}
+
+// ════════════════════════════════════════════════
 // DATA FETCHING
 // ════════════════════════════════════════════════
 
@@ -178,8 +205,9 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         revenue: log.revenue || null,
         runtime: log.runtime || null,
         overview: log.overview || null,
-        credits: log.credits || null,
-        production_companies: log.production_companies || null,
+        director: _extractDirector(log.credits, log.creator),
+        cast_names: _extractCast(log.credits),
+        studio_names: _extractStudios(log.production_companies),
         communities: [],
       });
     }
@@ -275,8 +303,9 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         revenue: shelf.revenue || null,
         runtime: shelf.runtime || null,
         overview: shelf.overview || null,
-        credits: shelf.credits || null,
-        production_companies: shelf.production_companies || null,
+        director: _extractDirector(shelf.credits, shelf.creator),
+        cast_names: _extractCast(shelf.credits),
+        studio_names: _extractStudios(shelf.production_companies),
         communities: [],
         isShelfLog: true,
       });

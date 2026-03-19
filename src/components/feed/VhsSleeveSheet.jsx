@@ -14,36 +14,6 @@ function fmtMoney(v) {
   return `$${v}`;
 }
 
-// Extract credits flexibly — handles TMDB {cast:[],crew:[]} or flat {director, cast:[]}
-function parseCredits(credits, fallbackDirector) {
-  if (!credits || (typeof credits === "object" && Object.keys(credits).length === 0)) {
-    return { director: fallbackDirector || null, cast: [] };
-  }
-  // TMDB standard format
-  if (credits.crew) {
-    const dir = credits.crew.find(c => c.job === "Director");
-    const cast = (credits.cast || []).slice(0, 6).map(c => c.name);
-    return { director: dir?.name || fallbackDirector || null, cast };
-  }
-  // Flat format
-  if (credits.director || credits.cast) {
-    return {
-      director: credits.director || fallbackDirector || null,
-      cast: Array.isArray(credits.cast) ? credits.cast.slice(0, 6) : [],
-    };
-  }
-  return { director: fallbackDirector || null, cast: [] };
-}
-
-// Parse studio names from production_companies
-function parseStudios(companies) {
-  if (!companies || !Array.isArray(companies) || companies.length === 0) return [];
-  return companies
-    .slice(0, 3)
-    .map(c => (typeof c === "string" ? c : c.name))
-    .filter(Boolean);
-}
-
 // Runtime formatter
 function fmtRuntime(min) {
   if (!min || min <= 0) return null;
@@ -75,8 +45,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const budgetStr = fmtMoney(data?.budget);
   const grossStr = fmtMoney(data?.revenue);
   const runtimeStr = fmtRuntime(data?.runtime);
-  const { director, cast } = parseCredits(data?.credits, data?.creator);
-  const studios = parseStudios(data?.production_companies);
+  const director = data?.director || data?.creator || null;
+  const cast = data?.cast_names || [];
+  const studios = data?.studio_names || [];
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
     : (data?.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
