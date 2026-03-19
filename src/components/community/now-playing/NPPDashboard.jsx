@@ -1632,6 +1632,7 @@ export default function NPPDashboard({ session: sessionProp }) {
   const [bucketMap, setBucketMap] = useState({});  // miniseries_id → genre_bucket
   const [memberStats, setMemberStats] = useState({ total_members: 0, active_this_week: 0, total_logs: 0 });
   const [badgeCount, setBadgeCount] = useState(0);
+  const [tabCounts, setTabCounts] = useState({ films: 0, games: 0, books: 0 });
 
   const [userVotes, setUserVotes] = useState({});
 
@@ -1670,7 +1671,7 @@ export default function NPPDashboard({ session: sessionProp }) {
         const [itemsRes, statsRes, msRes, badgeRes] = await Promise.all([
           supabase.from("community_item_stats").select("*").eq("community_id", page.id).order("sort_order", { ascending: true }),
           supabase.from("community_member_stats").select("*").eq("slug", COMMUNITY_SLUG).single(),
-          supabase.from("community_miniseries").select("id, title, genre_bucket").eq("community_id", page.id),
+          supabase.from("community_miniseries").select("id, title, genre_bucket, tab_key").eq("community_id", page.id),
           supabase.from("badges").select("id").eq("community_id", page.id).eq("is_active", true),
         ]);
 
@@ -1680,8 +1681,23 @@ export default function NPPDashboard({ session: sessionProp }) {
 
         // Build bucket map: miniseries_id → genre_bucket
         const bMap = {};
-        (msRes.data || []).forEach(ms => { bMap[ms.id] = ms.genre_bucket || "other"; });
+        const tabMap = {}; // miniseries_id → tab_key
+        (msRes.data || []).forEach(ms => {
+          bMap[ms.id] = ms.genre_bucket || "other";
+          tabMap[ms.id] = ms.tab_key || "filmography";
+        });
         setBucketMap(bMap);
+
+        // Count items per tab
+        const counts = { films: 0, games: 0, books: 0 };
+        items.forEach(item => {
+          const tk = tabMap[item.miniseries_id] || "filmography";
+          const gb = bMap[item.miniseries_id] || "other";
+          if (tk === "arcade" || gb === "video_games") counts.games++;
+          else if (tk === "books") counts.books++;
+          else counts.films++;
+        });
+        setTabCounts(counts);
 
         const genreSet = new Set(items.map(i => i.miniseries_title).filter(Boolean));
         setGenres(["All", ...Array.from(genreSet).sort()]);
@@ -2067,6 +2083,8 @@ export default function NPPDashboard({ session: sessionProp }) {
         .pitch-badge-back img { width: 48px; height: 48px; border-radius: 10px; position: relative; z-index: 1; }
         .pitch-badge-back .badge-name { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-align: center; line-height: 1.2; position: relative; z-index: 1; }
         .pitch-badge-back .badge-sub { font-family: 'JetBrains Mono', monospace; font-size: 9px; position: relative; z-index: 1; }
+        .feature-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        @media (max-width: 500px) { .feature-cards { grid-template-columns: 1fr; } }
       `}</style>
 
       {/* ═══ YELLOW MASTHEAD ═══════════════════════════════════════════ */}
@@ -2301,6 +2319,70 @@ export default function NPPDashboard({ session: sessionProp }) {
             <span style={{
               fontSize: 11, color: C.textDim, fontFamily: "'Source Sans 3', sans-serif",
             }}>Free to join · Sync with Letterboxd</span>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ INSIDE THE APP (unauth only) ══════════════════════════════ */}
+      {!isAuthed && (
+        <div style={{
+          maxWidth: 1100, margin: "0 auto", padding: "28px 24px 32px",
+          borderBottom: `1px solid ${C.border}`,
+        }}>
+          <div style={{
+            fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2.5,
+            textTransform: "uppercase", fontFamily: "'Oswald', sans-serif",
+            marginBottom: 6,
+          }}>Inside the App</div>
+          <div style={{
+            fontSize: 20, fontWeight: 700, color: C.text,
+            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            marginBottom: 16,
+          }}>Three Ways to <span style={{ color: C.gold }}>Track</span></div>
+
+          <div className="feature-cards">
+            {[
+              {
+                icon: "🎬", label: "Franchises", count: tabCounts.films,
+                color: C.gold, desc: "Every franchise the hosts have covered — from Marvel to Mad Max",
+              },
+              {
+                icon: "🎮", label: "Arcade", count: tabCounts.games,
+                color: "#00ffc8", desc: "Video game movies and the games that inspired them",
+              },
+              {
+                icon: "📚", label: "Books", count: tabCounts.books,
+                color: "#d4a574", desc: "Books & Nachos — the reading companion to every retrospective",
+              },
+            ].filter(t => t.count > 0).map((t) => (
+              <div key={t.label} style={{
+                background: `${t.color}08`, border: `1px solid ${t.color}20`,
+                borderRadius: 10, padding: "18px 16px",
+                display: "flex", flexDirection: "column", gap: 8,
+                transition: "border-color 0.2s",
+              }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = `${t.color}44`}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = `${t.color}20`}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 20, lineHeight: 1 }}>{t.icon}</span>
+                  <div>
+                    <div style={{
+                      fontSize: 14, fontWeight: 700, color: t.color,
+                      fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                      letterSpacing: 1, lineHeight: 1.2,
+                    }}>{t.label}</div>
+                    <div style={{
+                      fontSize: 10, color: C.textDim, fontFamily: "'JetBrains Mono', monospace",
+                    }}>{t.count} titles</div>
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 11, color: C.textMuted, fontFamily: "'Source Sans 3', sans-serif",
+                  lineHeight: 1.4,
+                }}>{t.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       )}
