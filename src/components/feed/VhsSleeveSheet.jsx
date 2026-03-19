@@ -113,11 +113,21 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
           background: "#0f0d0b",
-          borderRadius: "16px 16px 0 0",
+          borderRadius: "14px 14px 0 0",
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: open ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "transform 0.25s ease-in",
           willChange: "transform",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          /* VHS box frame */
+          maxWidth: 420,
+          marginLeft: "auto",
+          marginRight: "auto",
+          border: "1.5px solid rgba(240,235,225,0.1)",
+          borderBottom: "none",
+          boxShadow: "0 -4px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(240,235,225,0.03)",
+          minHeight: "70vh",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* ── Drag handle ── */}
@@ -196,10 +206,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     src={data.logo_url}
                     alt={data.title}
                     style={{
-                      maxHeight: 40,
+                      height: 36,
                       maxWidth: "65%",
                       objectFit: "contain",
-                      filter: "brightness(0) invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.7))",
+                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.7))",
                       opacity: 0.9,
                     }}
                   />
@@ -223,7 +233,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         )}
 
         {/* ── Content area ── */}
-        <div style={{ padding: "6px 20px 20px" }}>
+        <div style={{
+          padding: "6px 20px 20px",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}>
 
           {/* Year · Runtime · Rating — spec line */}
           <div style={{
@@ -488,6 +503,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               ))}
             </div>
           )}
+
+          {/* Spacer — fills remaining VHS box space */}
+          <div style={{ flex: 1 }} />
 
           {/* ── Bottom: HOME VIDEO + Barcode (anchored) ── */}
           <div style={{
