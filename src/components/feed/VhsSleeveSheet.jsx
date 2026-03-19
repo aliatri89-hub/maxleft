@@ -141,7 +141,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             tmdb_id: String(data.tmdb_id), type, append: "images",
           });
           if (detailRes?.images?.backdrops) {
-            backdrops = detailRes.images.backdrops.filter(b => !b.iso_639_1);
+            backdrops = detailRes.images.backdrops;
           }
         }
 
