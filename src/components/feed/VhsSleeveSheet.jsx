@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
 import { apiProxy } from "../../utils/api";
+import { supabase } from "../../supabase";
 
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -118,20 +119,29 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     }
   }, [open, genreFont.family]);
 
-  // Fetch extra backdrops when sheet opens (lazy — only for tapped movies)
+  // Fetch extra backdrops — use cached still_paths when available, else fetch + cache
   useEffect(() => {
     setExtraBackdrops([]);
     if (!open || !data?.tmdb_id) return;
     let cancelled = false;
+
+    // If still_paths are already cached in the DB, use them instantly
+    if (data.still_paths?.length) {
+      const stills = data.still_paths.map(p =>
+        p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`
+      );
+      setExtraBackdrops(stills);
+      return;
+    }
+
     (async () => {
       try {
         const type = (data.media_type === "show") ? "tv" : "movie";
-        // Normalize hero path to relative — DB may store full URL or relative
         const rawHero = data.backdrop_path || "";
         const heroMatch = rawHero.match(/\/[^/]+$/);
         const heroBdPath = heroMatch ? heroMatch[0] : rawHero;
 
-        // Try dedicated images endpoint first (en + null-language stills)
+        // Fetch from TMDB
         let backdrops = null;
         const imgRes = await apiProxy("tmdb_images", {
           tmdb_id: String(data.tmdb_id), type,
@@ -139,7 +149,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         if (imgRes?.backdrops?.length) {
           backdrops = imgRes.backdrops;
         } else {
-          // Fallback: piggyback on tmdb_details
           const detailRes = await apiProxy("tmdb_details", {
             tmdb_id: String(data.tmdb_id), type, append: "images",
           });
@@ -155,15 +164,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           (!b.aspect_ratio || b.aspect_ratio > 1.4)
         );
 
-        // Prefer null-language stills (clean, no baked-in text/logos)
-        // Fall back to en-language only if not enough clean ones
         const nullLang = base.filter(b => !b.iso_639_1)
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const enLang = base.filter(b => b.iso_639_1 === "en")
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
 
-        // Pick two visually distinct stills — spread across the list
         const picks = [];
         if (clean.length >= 4) {
           const a = Math.max(1, Math.floor(clean.length * 0.25));
@@ -174,8 +180,19 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         } else if (clean.length === 1) {
           picks.push(clean[0]);
         }
-        const stills = picks.map(b => `${TMDB_IMG_BASE}/w780${b.file_path}`);
-        if (!cancelled && stills.length) setExtraBackdrops(stills);
+
+        if (!cancelled && picks.length) {
+          const paths = picks.map(b => b.file_path);
+          const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
+          setExtraBackdrops(stills);
+
+          // Write back to media so next open (by anyone) is instant
+          supabase
+            .from("media")
+            .update({ still_paths: paths })
+            .eq("tmdb_id", data.tmdb_id)
+            .then(() => {});
+        }
       } catch {}
     })();
     return () => { cancelled = true; };

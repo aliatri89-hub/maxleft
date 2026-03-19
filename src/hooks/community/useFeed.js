@@ -216,6 +216,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         studio_names: _extractStudios(log.production_companies),
         genre: log.genre || null,
         certification: log.certification || null,
+        still_paths: log.still_paths || null,
         communities: [],
       });
     }
@@ -316,6 +317,7 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         studio_names: _extractStudios(shelf.production_companies),
         genre: shelf.genre || null,
         certification: shelf.certification || null,
+        still_paths: shelf.still_paths || null,
         communities: [],
         isShelfLog: true,
       });
