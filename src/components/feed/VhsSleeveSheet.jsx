@@ -126,7 +126,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     (async () => {
       try {
         const type = (data.media_type === "show") ? "tv" : "movie";
-        const heroBdPath = data.backdrop_path;
+        // Normalize hero path to relative — DB may store full URL or relative
+        const rawHero = data.backdrop_path || "";
+        const heroMatch = rawHero.match(/\/[^/]+$/);
+        const heroBdPath = heroMatch ? heroMatch[0] : rawHero;
 
         // Try dedicated images endpoint first (clean null-language only)
         let backdrops = null;
