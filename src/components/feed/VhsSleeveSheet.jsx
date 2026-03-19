@@ -130,15 +130,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           tmdb_id: String(data.tmdb_id), type, append: "images",
         });
         if (cancelled || !res?.images?.backdrops) return;
-        const all = res.images.backdrops;
-        if (all.length < 3) return;
-        // Sort by vote_average desc — highest-rated are clean scene stills,
-        // promo art with baked-in logos tends to rank lower
-        const heroPath = all[0]?.file_path;
-        const ranked = [...all]
-          .filter(b => b.file_path && b.file_path !== heroPath)
+        // STRICTLY null-language only — the en-US API param pulls in English-tagged
+        // promo art with baked-in logos that don't appear on TMDB's website
+        const heroBdPath = data.backdrop_path; // e.g. "/abc123.jpg" from DB
+        const clean = res.images.backdrops
+          .filter(b => b.file_path && !b.iso_639_1 && b.file_path !== heroBdPath)
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-        const stills = ranked
+        const stills = clean
           .slice(0, 2)
           .map(b => `${TMDB_IMG_BASE}/w780${b.file_path}`);
         if (!cancelled && stills.length) setExtraBackdrops(stills);
