@@ -183,7 +183,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           background: `
             repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(240,235,225,0.03) 2px, rgba(240,235,225,0.03) 3px),
             url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
-            #0f0d0b
+            #171411
           `.trim(),
           backgroundSize: "auto, 128px 128px, auto",
           borderRadius: "14px 14px 0 0",
@@ -208,7 +208,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           position: "sticky", top: 0, zIndex: 2,
           display: "flex", justifyContent: "center",
           padding: "10px 0 6px",
-          background: "linear-gradient(#0f0d0b, #0f0d0bEE, transparent)",
+          background: "linear-gradient(#171411, #171411EE, transparent)",
         }}>
           <div style={{
             width: 36, height: 4, borderRadius: 2,
@@ -255,7 +255,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               {/* Gradient to dark at bottom edge */}
               <div style={{
                 position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
-                background: "linear-gradient(transparent, rgba(15,13,11,0.85))",
+                background: "linear-gradient(transparent, rgba(23,20,17,0.85))",
                 pointerEvents: "none",
               }} />
               {/* Film grain */}
