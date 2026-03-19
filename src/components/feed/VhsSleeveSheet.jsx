@@ -180,7 +180,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
           overscrollBehavior: "contain",
-          background: "#0f0d0b",
+          background: `
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(240,235,225,0.03) 2px, rgba(240,235,225,0.03) 3px),
+            url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+            #0f0d0b
+          `.trim(),
+          backgroundSize: "auto, 128px 128px, auto",
           borderRadius: "14px 14px 0 0",
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: open ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "transform 0.25s ease-in",
@@ -198,28 +203,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           flexDirection: "column",
         }}
       >
-        {/* ── Matte cardboard texture — VHS box material feel ── */}
-        <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none",
-          borderRadius: "14px 14px 0 0",
-          overflow: "hidden",
-          zIndex: 0,
-        }}>
-          {/* Cardboard grain — fine noise */}
-          <div style={{
-            position: "absolute", inset: 0,
-            opacity: 0.035,
-            backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E\")",
-            backgroundSize: "128px 128px",
-          }} />
-          {/* Scanlines — very subtle horizontal lines */}
-          <div style={{
-            position: "absolute", inset: 0,
-            opacity: 0.04,
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(240,235,225,0.15) 2px, rgba(240,235,225,0.15) 3px)",
-          }} />
-        </div>
-
         {/* ── Drag handle ── */}
         <div style={{
           position: "sticky", top: 0, zIndex: 2,
