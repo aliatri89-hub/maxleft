@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
@@ -84,7 +85,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   if (!data) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop overlay */}
       <div
@@ -498,6 +499,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
