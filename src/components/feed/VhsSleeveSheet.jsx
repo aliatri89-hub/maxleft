@@ -107,8 +107,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         style={{
           position: "fixed",
           left: 0, right: 0, bottom: 0,
+          top: "10%",
           zIndex: 1000,
-          maxHeight: "88vh",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
           background: "#0f0d0b",
@@ -116,6 +116,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: open ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "transform 0.25s ease-in",
           willChange: "transform",
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}
       >
         {/* ── Drag handle ── */}
