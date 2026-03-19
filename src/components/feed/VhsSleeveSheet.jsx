@@ -179,9 +179,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           maxWidth: 420,
           marginLeft: "auto",
           marginRight: "auto",
-          border: "1.5px solid rgba(240,235,225,0.1)",
+          border: "1.5px solid rgba(240,235,225,0.18)",
           borderBottom: "none",
-          boxShadow: "0 -4px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(240,235,225,0.03)",
+          boxShadow: "0 -4px 30px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(240,235,225,0.06)",
           minHeight: "86vh",
           display: "flex",
           flexDirection: "column",
@@ -228,7 +228,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <div style={{
               position: "relative", width: "100%", height: 200, overflow: "hidden",
               borderRadius: 3,
-              border: "2px solid rgba(240,235,225,0.12)",
+              border: "2px solid rgba(240,235,225,0.22)",
               boxShadow: "inset 0 0 12px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
             }}>
               <img src={backdropUrl} alt="" style={{
@@ -251,7 +251,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 borderRadius: 3,
-                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.04)",
+                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.08)",
               }} />
               {/* ── Movie logo — overlaying bottom of frame ── */}
               {data.logo_url ? (
@@ -565,29 +565,35 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* Spacer — fills remaining VHS box space */}
           <div style={{ flex: 1 }} />
 
-          {/* ── Bottom: HOME VIDEO + Barcode (anchored) ── */}
+          {/* ── Bottom: centered barcode + MPAA rating ── */}
           <div style={{
-            display: "flex", alignItems: "flex-end", justifyContent: "space-between",
-            width: "100%", gap: 8,
-            borderTop: "1px solid rgba(240,235,225,0.04)",
+            borderTop: "1px solid rgba(240,235,225,0.06)",
             paddingTop: 10,
+            position: "relative",
           }}>
+            {/* HOME VIDEO stamp — centered above barcode */}
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900, fontSize: 8,
-              color: "rgba(240,235,225,0.25)",
-              letterSpacing: "0.22em", textTransform: "uppercase",
-              border: "1px solid rgba(240,235,225,0.08)",
-              borderRadius: 2, padding: "3px 8px", flexShrink: 0,
+              textAlign: "center", marginBottom: 6,
             }}>
-              Home Video
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900, fontSize: 8,
+                color: "rgba(240,235,225,0.25)",
+                letterSpacing: "0.22em", textTransform: "uppercase",
+                border: "1px solid rgba(240,235,225,0.1)",
+                borderRadius: 2, padding: "3px 8px",
+              }}>
+                Home Video
+              </span>
             </div>
+
+            {/* Barcode — centered */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              <div style={{ display: "flex", alignItems: "stretch", height: 22 }}>
+              <div style={{ display: "flex", alignItems: "stretch", height: 26 }}>
                 {stripes.map((s, i) => (
                   <div key={i} style={{
                     width: s.w * 1.5, height: "100%",
-                    background: s.dark ? "rgba(240,235,225,0.2)" : "transparent",
+                    background: s.dark ? "rgba(240,235,225,0.22)" : "transparent",
                     flexShrink: 0,
                   }} />
                 ))}
@@ -600,6 +606,23 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 {String(seed).padStart(12, "0").slice(0, 12)}
               </div>
             </div>
+
+            {/* MPAA Rating — lower right */}
+            {data.certification && data.certification !== "NR" && (
+              <div style={{
+                position: "absolute", bottom: 2, right: 0,
+                border: "1.5px solid rgba(240,235,225,0.35)",
+                borderRadius: 2,
+                padding: "2px 5px",
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800, fontSize: 10,
+                color: "rgba(240,235,225,0.7)",
+                letterSpacing: "0.06em",
+                lineHeight: 1,
+              }}>
+                {data.certification}
+              </div>
+            )}
           </div>
 
           {/* Legal flair — VHS authenticity touch */}
