@@ -158,12 +158,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
 
-        // Pick two visually distinct stills: one from the top, one from the middle
+        // Pick two visually distinct stills — skip the top (too similar to hero)
+        // and spread picks across the list for variety
         const picks = [];
-        if (clean.length >= 2) {
-          picks.push(clean[0]);
-          const midIdx = Math.min(Math.floor(clean.length / 2), clean.length - 1);
-          picks.push(clean[midIdx]);
+        if (clean.length >= 4) {
+          // Enough depth — grab from ~25% and ~65% through the sorted list
+          const a = Math.max(1, Math.floor(clean.length * 0.25));
+          const b = Math.min(clean.length - 1, Math.floor(clean.length * 0.65));
+          picks.push(clean[a], clean[b]);
+        } else if (clean.length >= 2) {
+          picks.push(clean[0], clean[clean.length - 1]);
         } else if (clean.length === 1) {
           picks.push(clean[0]);
         }
