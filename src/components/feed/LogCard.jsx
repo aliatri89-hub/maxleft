@@ -393,6 +393,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
 
             {/* Podcast tracking rows */}
             {communities.length > 0 ? (
+              <>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
                 {communities.map((c, i) => {
                   const cAccent = getCommunityAccent(c.community_slug);
@@ -497,69 +498,207 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                   );
                 })}
               </div>
+              {/* ── Compact metadata strip below podcast rows ── */}
+              {(() => {
+                const fmtMoney = (v) => {
+                  if (!v || v <= 0) return null;
+                  if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
+                  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+                  if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
+                  return `$${v}`;
+                };
+                const budgetStr = fmtMoney(data.budget);
+                const grossStr = fmtMoney(data.revenue);
+                const hasAny = data.tagline || budgetStr || grossStr;
+                if (!hasAny) return null;
+                return (
+                  <div style={{
+                    marginTop: 6, paddingTop: 6,
+                    borderTop: "1px solid rgba(44,40,36,0.08)",
+                    position: "relative",
+                  }}>
+                    {data.tagline && (
+                      <div style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 7, lineHeight: 1.35,
+                        color: "rgba(44,40,36,0.35)",
+                        fontStyle: "italic",
+                        textAlign: "center",
+                        marginBottom: (budgetStr || grossStr) ? 4 : 0,
+                      }}>
+                        "{data.tagline}"
+                      </div>
+                    )}
+                    {(budgetStr || grossStr) && (
+                      <div style={{
+                        display: "flex", justifyContent: "center", gap: 8,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 6, color: "rgba(44,40,36,0.3)",
+                        letterSpacing: "0.04em", textTransform: "uppercase",
+                      }}>
+                        {budgetStr && <span>{budgetStr} budget</span>}
+                        {budgetStr && grossStr && <span>·</span>}
+                        {grossStr && <span>{grossStr} ww gross</span>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              </>
             ) : (() => {
-              // Deterministic barcode — EAN/UPC style, uniform height, varying widths
+              // ── VHS Sleeve Back — Blockbuster style ──
               const seed = data.tmdb_id
                 ? Number(data.tmdb_id)
                 : (data.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
 
-              // Generate sequence of bar+space widths (1–3px each), alternating black/white
-              // Guard bars at start/end (always narrow-wide-narrow)
+              const fmtMoney = (v) => {
+                if (!v || v <= 0) return null;
+                if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
+                if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+                if (v >= 1_000) return `$${(v / 1_000).toFixed(0)}K`;
+                return `$${v}`;
+              };
+
+              const budgetStr = fmtMoney(data.budget);
+              const grossStr = fmtMoney(data.revenue);
+              const hasFinancials = budgetStr || grossStr;
+              const hasTagline = data.tagline && data.tagline.trim().length > 0;
+
+              // Deterministic barcode stripes
               const pseudoRand = (i) => {
                 const x = Math.sin(seed * 9301 + i * 49297 + 233) * 0.5 + 0.5;
-                return Math.floor(x * 3) + 1; // 1, 2, or 3
+                return Math.floor(x * 3) + 1;
               };
               const stripes = [];
-              // Left guard
-              stripes.push({ w: 1, dark: true });
-              stripes.push({ w: 1, dark: false });
-              stripes.push({ w: 1, dark: true });
-              // Data bars — 30 alternating stripes
-              for (let i = 0; i < 30; i++) {
-                stripes.push({ w: pseudoRand(i), dark: i % 2 === 0 });
-              }
-              // Right guard
-              stripes.push({ w: 1, dark: true });
-              stripes.push({ w: 1, dark: false });
-              stripes.push({ w: 1, dark: true });
+              stripes.push({ w: 1, dark: true }, { w: 1, dark: false }, { w: 1, dark: true });
+              for (let i = 0; i < 24; i++) stripes.push({ w: pseudoRand(i), dark: i % 2 === 0 });
+              stripes.push({ w: 1, dark: true }, { w: 1, dark: false }, { w: 1, dark: true });
 
               return (
                 <div style={{
                   display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center",
-                  gap: 10, padding: "2px 0", width: "100%",
+                  alignItems: "center", gap: 6,
+                  padding: "0 8px", width: "100%", position: "relative",
                 }}>
-                  {/* HOME VIDEO stamp */}
-                  <div style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 900, fontSize: 7,
-                    color: "rgba(44,40,36,0.22)",
-                    letterSpacing: "0.22em", textTransform: "uppercase",
-                    border: "1px solid rgba(44,40,36,0.14)",
-                    borderRadius: 2, padding: "2px 7px",
-                  }}>
-                    Home Video
-                  </div>
 
-                  {/* Barcode */}
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                    <div style={{ display: "flex", alignItems: "stretch", height: 32 }}>
-                      {stripes.map((s, i) => (
-                        <div key={i} style={{
-                          width: s.w * 2,
-                          height: "100%",
-                          background: s.dark ? "rgba(44,40,36,0.55)" : "transparent",
-                          flexShrink: 0,
-                        }} />
-                      ))}
-                    </div>
-                    {/* Numeric digits below — purely decorative */}
+                  {/* ── Tagline — italic synopsis block ── */}
+                  {hasTagline && (
                     <div style={{
                       fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 6, color: "rgba(44,40,36,0.3)",
-                      letterSpacing: "0.15em",
+                      fontSize: 9, lineHeight: 1.4,
+                      color: "rgba(44,40,36,0.55)",
+                      fontStyle: "italic",
+                      textAlign: "center",
+                      maxWidth: "92%",
+                      letterSpacing: "0.01em",
                     }}>
-                      {String(seed).padStart(12, "0").slice(0, 12)}
+                      "{data.tagline}"
+                    </div>
+                  )}
+
+                  {/* ── Financials strip — technical specs style ── */}
+                  {hasFinancials && (
+                    <div style={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      gap: 0, width: "100%",
+                    }}>
+                      {/* Divider line left */}
+                      <div style={{ flex: 1, height: 1, background: "rgba(44,40,36,0.1)" }} />
+
+                      <div style={{
+                        display: "flex", gap: 10,
+                        padding: "0 8px",
+                      }}>
+                        {budgetStr && (
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontWeight: 800, fontSize: 6,
+                              color: "rgba(44,40,36,0.3)",
+                              letterSpacing: "0.12em", textTransform: "uppercase",
+                            }}>
+                              Budget
+                            </div>
+                            <div style={{
+                              fontFamily: "'Permanent Marker', cursive",
+                              fontSize: 12, color: "rgba(44,40,36,0.6)",
+                              lineHeight: 1.1,
+                            }}>
+                              {budgetStr}
+                            </div>
+                          </div>
+                        )}
+
+                        {budgetStr && grossStr && (
+                          <div style={{
+                            width: 1, alignSelf: "stretch",
+                            background: "rgba(44,40,36,0.1)",
+                          }} />
+                        )}
+
+                        {grossStr && (
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontWeight: 800, fontSize: 6,
+                              color: "rgba(44,40,36,0.3)",
+                              letterSpacing: "0.12em", textTransform: "uppercase",
+                            }}>
+                              WW Gross
+                            </div>
+                            <div style={{
+                              fontFamily: "'Permanent Marker', cursive",
+                              fontSize: 12, color: "rgba(44,40,36,0.6)",
+                              lineHeight: 1.1,
+                            }}>
+                              {grossStr}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Divider line right */}
+                      <div style={{ flex: 1, height: 1, background: "rgba(44,40,36,0.1)" }} />
+                    </div>
+                  )}
+
+                  {/* ── Bottom row: HOME VIDEO stamp + Barcode ── */}
+                  <div style={{
+                    display: "flex", alignItems: "flex-end", justifyContent: "space-between",
+                    width: "100%", gap: 8,
+                  }}>
+                    {/* HOME VIDEO stamp — left aligned */}
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 900, fontSize: 7,
+                      color: "rgba(44,40,36,0.18)",
+                      letterSpacing: "0.22em", textTransform: "uppercase",
+                      border: "1px solid rgba(44,40,36,0.12)",
+                      borderRadius: 2, padding: "2px 6px",
+                      flexShrink: 0,
+                    }}>
+                      Home Video
+                    </div>
+
+                    {/* Barcode — compact, right aligned */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+                      <div style={{ display: "flex", alignItems: "stretch", height: 18 }}>
+                        {stripes.map((s, i) => (
+                          <div key={i} style={{
+                            width: s.w * 1.5,
+                            height: "100%",
+                            background: s.dark ? "rgba(44,40,36,0.4)" : "transparent",
+                            flexShrink: 0,
+                          }} />
+                        ))}
+                      </div>
+                      <div style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 5, color: "rgba(44,40,36,0.22)",
+                        letterSpacing: "0.12em",
+                      }}>
+                        {String(seed).padStart(12, "0").slice(0, 12)}
+                      </div>
                     </div>
                   </div>
                 </div>

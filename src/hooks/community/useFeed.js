@@ -173,6 +173,9 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         logged_at: effectiveDate,
         _created_at: log.created_at,
         completed_at: log.completed_at,
+        tagline: log.tagline || null,
+        budget: log.budget || null,
+        revenue: log.revenue || null,
         communities: [],
       });
     }
@@ -263,6 +266,9 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         logged_at: shelf.watched_at || shelf.created_at,
         _created_at: shelf.created_at,
         completed_at: shelf.watched_at,
+        tagline: shelf.tagline || null,
+        budget: shelf.budget || null,
+        revenue: shelf.revenue || null,
         communities: [],
         isShelfLog: true,
       });
