@@ -133,6 +133,45 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }} />
         </div>
 
+        {/* ── Movie logo — fixed size, centered ── */}
+        {data.logo_url && (
+          <div style={{
+            display: "flex", justifyContent: "center", alignItems: "center",
+            padding: "4px 24px 0",
+            minHeight: 48,
+          }}>
+            <img
+              src={data.logo_url}
+              alt={data.title}
+              style={{
+                maxHeight: 44,
+                maxWidth: "75%",
+                objectFit: "contain",
+                filter: "brightness(0) invert(1)",
+                opacity: 0.85,
+              }}
+            />
+          </div>
+        )}
+
+        {/* ── Tagline — 90s VHS box style above the still ── */}
+        {data.tagline && (
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: 600, fontSize: 12,
+            color: "rgba(240,235,225,0.45)",
+            textAlign: "center",
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            lineHeight: 1.4,
+            padding: "6px 24px 8px",
+            maxWidth: "90%",
+            margin: "0 auto",
+          }}>
+            {data.tagline}
+          </div>
+        )}
+
         {/* ── Backdrop still — retro framed ── */}
         {backdropUrl && (
           <div style={{
@@ -179,10 +218,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           minHeight: backdropUrl ? "calc(100% - 230px)" : "calc(100% - 40px)",
         }}>
 
-          {/* Title */}
+          {/* Title — hero when no logo, subtitle when logo present */}
           <div style={{
             fontFamily: "'Permanent Marker', cursive",
-            fontSize: 22, color: "#f0ebe1",
+            fontSize: data.logo_url ? 14 : 22,
+            color: data.logo_url ? "rgba(240,235,225,0.4)" : "#f0ebe1",
             textAlign: "center",
             lineHeight: 1.15,
             marginBottom: 2,
@@ -221,21 +261,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               </>
             )}
           </div>
-
-          {/* Tagline */}
-          {data.tagline && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 11, lineHeight: 1.5,
-              color: "rgba(240,235,225,0.55)",
-              fontStyle: "italic",
-              textAlign: "center",
-              maxWidth: "90%", margin: "0 auto 14px",
-              letterSpacing: "0.01em",
-            }}>
-              "{data.tagline}"
-            </div>
-          )}
 
           {/* Director + Cast */}
           {(director || cast.length > 0) && (
