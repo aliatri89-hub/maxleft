@@ -1,5 +1,14 @@
 {
   "appId": "app.mymantl",
   "appName": "MANTL",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#0f0d0b"
+    }
+  }
 }
