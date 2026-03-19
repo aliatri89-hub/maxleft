@@ -130,7 +130,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           tmdb_id: String(data.tmdb_id), type, append: "images",
         });
         if (cancelled || !res?.images?.backdrops) return;
-        const bds = res.images.backdrops;
+        // Filter to clean scene stills only — language-tagged ones have baked-in text/logos
+        const bds = res.images.backdrops.filter(b => !b.iso_639_1);
         // Pick deep indices for variety — top results are duplicate hero crops
         const pick = (...indices) => {
           for (const i of indices) {
@@ -268,74 +269,94 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Backdrop still — retro framed with logo overlay ── */}
+        {/* ── Hero backdrop — atmospheric full-bleed wash ── */}
         {backdropUrl && (
           <div style={{
-            padding: "0 16px",
-            marginBottom: 4,
+            position: "relative", width: "100%", overflow: "hidden",
+            marginBottom: 0,
           }}>
+            <img src={backdropUrl} alt="" style={{
+              width: "100%", height: 200,
+              objectFit: "cover", objectPosition: "center top",
+              display: "block", opacity: 0.4,
+            }} />
+            {/* Gradient to dark — top and bottom */}
             <div style={{
-              position: "relative", width: "100%", height: 200, overflow: "hidden",
-              borderRadius: 3,
-              border: "2px solid rgba(240,235,225,0.15)",
-              boxShadow: "inset 0 0 12px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
-            }}>
-              <img src={backdropUrl} alt="" style={{
-                width: "100%", height: "100%",
-                objectFit: "cover", objectPosition: "center top",
-                display: "block",
-              }} />
-              {/* Gradient to dark at bottom edge */}
+              position: "absolute", top: 0, left: 0, right: 0, height: "30%",
+              background: "linear-gradient(rgba(23,20,17,0.6), transparent)",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "60%",
+              background: "linear-gradient(transparent, #171411)",
+              pointerEvents: "none",
+            }} />
+            {/* ── Movie logo — overlaying bottom of hero ── */}
+            {data.logo_url ? (
               <div style={{
-                position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
-                background: "linear-gradient(transparent, rgba(23,20,17,0.85))",
-                pointerEvents: "none",
-              }} />
-              {/* Film grain */}
+                position: "absolute", bottom: 12, left: 0, right: 0,
+                display: "flex", justifyContent: "center",
+                zIndex: 1,
+              }}>
+                <img
+                  src={data.logo_url}
+                  alt={data.title}
+                  style={{
+                    height: 40,
+                    maxWidth: "70%",
+                    objectFit: "contain",
+                    filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.8))",
+                    opacity: 0.95,
+                  }}
+                />
+              </div>
+            ) : (
               <div style={{
-                position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
-                backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
-              }} />
-              {/* Corner wear */}
-              <div style={{
-                position: "absolute", inset: 0, pointerEvents: "none",
-                borderRadius: 3,
-                boxShadow: "inset 0 0 0 1px rgba(240,235,225,0.05)",
-              }} />
-              {/* ── Movie logo — overlaying bottom of frame ── */}
-              {data.logo_url ? (
-                <div style={{
-                  position: "absolute", bottom: 10, left: 0, right: 0,
-                  display: "flex", justifyContent: "center",
-                  zIndex: 1,
+                position: "absolute", bottom: 10, left: 0, right: 0,
+                textAlign: "center", zIndex: 1,
+              }}>
+                <span style={{
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 20, color: "#f0ebe1",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.9)",
                 }}>
-                  <img
-                    src={data.logo_url}
-                    alt={data.title}
-                    style={{
-                      height: 36,
-                      maxWidth: "65%",
-                      objectFit: "contain",
-                      filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.7))",
-                      opacity: 0.9,
-                    }}
-                  />
-                </div>
-              ) : (
+                  {data.title}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Scene stills — 2-up framed gallery below hero ── */}
+        {extraBackdrops.length > 0 && (
+          <div style={{
+            display: "flex", gap: 8, justifyContent: "center",
+            padding: "0 20px", marginTop: -8, marginBottom: 6,
+            position: "relative", zIndex: 2,
+          }}>
+            {extraBackdrops.map((url, i) => (
+              <div key={i} style={{
+                flex: 1, maxWidth: "48%", aspectRatio: "16/9",
+                borderRadius: 2, overflow: "hidden", position: "relative",
+                border: "2px solid rgba(240,235,225,0.18)",
+                boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
+              }}>
+                <img
+                  src={url}
+                  alt=""
+                  style={{
+                    width: "100%", height: "100%",
+                    objectFit: "cover", display: "block",
+                  }}
+                  loading="lazy"
+                />
+                {/* Film grain on stills */}
                 <div style={{
-                  position: "absolute", bottom: 8, left: 0, right: 0,
-                  textAlign: "center", zIndex: 1,
-                }}>
-                  <span style={{
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 18, color: "#f0ebe1",
-                    textShadow: "0 2px 8px rgba(0,0,0,0.8)",
-                  }}>
-                    {data.title}
-                  </span>
-                </div>
-              )}
-            </div>
+                  position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.1,
+                  backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
+                }} />
+              </div>
+            ))}
           </div>
         )}
 
@@ -480,38 +501,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               overflow: "hidden",
             }}>
               {data.overview}
-            </div>
-          )}
-
-          {/* ── Scene stills — 2-up gallery like VHS box back ── */}
-          {extraBackdrops.length > 0 && (
-            <div style={{
-              display: "flex", gap: 8, justifyContent: "center",
-              marginBottom: 14, padding: "0 4px",
-            }}>
-              {extraBackdrops.map((url, i) => (
-                <div key={i} style={{
-                  flex: 1, maxWidth: "48%", aspectRatio: "16/9",
-                  borderRadius: 2, overflow: "hidden", position: "relative",
-                  border: "2px solid rgba(240,235,225,0.15)",
-                  boxShadow: "inset 0 0 8px rgba(0,0,0,0.4)",
-                }}>
-                  <img
-                    src={url}
-                    alt=""
-                    style={{
-                      width: "100%", height: "100%",
-                      objectFit: "cover", display: "block",
-                    }}
-                    loading="lazy"
-                  />
-                  {/* Film grain on stills */}
-                  <div style={{
-                    position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.1,
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
-                  }} />
-                </div>
-              ))}
             </div>
           )}
 
