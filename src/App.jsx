@@ -7,6 +7,7 @@ import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants"
 import { sb } from "./utils/api";
 import { tapLight } from "./utils/haptics";
 import { signInWithGoogle, initDeepLinkListener } from "./utils/nativeAuth";
+import { initPushNotifications, setupPushListeners, removeDeviceToken } from "./utils/pushNotifications";
 
 // Screens
 import LandingScreen from "./screens/LandingScreen";
@@ -220,9 +221,15 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── PUSH NOTIFICATION LISTENERS (native only, no-op on web) ──
+  useEffect(() => {
+    return setupPushListeners(showToast);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const signIn = () => signInWithGoogle(showToast);
 
   const signOut = async () => {
+    await removeDeviceToken(); // stop push to this device
     await supabase.auth.signOut();
     setSession(null);
     setScreen("landing");
@@ -285,6 +292,7 @@ export default function App() {
         window.history.replaceState(null, "", "/");
       }
       setAuthLoading(false); setScreen("app");
+      initPushNotifications(showToast); // register for native push (no-op on web)
     } catch (err) {
       console.error("Load user error:", err);
       setAuthLoading(false); setScreen("landing");
