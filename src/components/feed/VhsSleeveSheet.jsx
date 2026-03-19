@@ -362,11 +362,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Scene stills — 2-up framed gallery below hero ── */}
+        {/* ── Scene stills — 2-up framed gallery, overlapping hero ── */}
         {extraBackdrops.length > 0 && (
           <div style={{
             display: "flex", gap: 8, justifyContent: "center",
-            padding: "0 20px", marginTop: -8, marginBottom: 6,
+            padding: "0 20px", marginTop: -28, marginBottom: 6,
             position: "relative", zIndex: 2,
           }}>
             {extraBackdrops.map((url, i) => (
@@ -490,69 +490,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* Overview / Synopsis */}
-          {data.overview && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, lineHeight: 1.55,
-              color: "rgba(240,235,225,0.8)",
-              textAlign: "center",
-              marginBottom: 14,
-              display: "-webkit-box",
-              WebkitLineClamp: 4,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}>
-              {data.overview}
-            </div>
-          )}
-
-          {/* Budget / WW Gross */}
-          {(budgetStr || grossStr) && (
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 0, width: "100%", marginBottom: 14,
-            }}>
-              <div style={{ flex: 1, height: 1, background: "rgba(240,235,225,0.06)" }} />
-              <div style={{ display: "flex", gap: 16, padding: "0 12px" }}>
-                {budgetStr && (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.14em", textTransform: "uppercase",
-                    }}>Budget</div>
-                    <div style={{
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 16, color: "rgba(240,235,225,0.85)",
-                      lineHeight: 1.1,
-                    }}>{budgetStr}</div>
-                  </div>
-                )}
-                {budgetStr && grossStr && (
-                  <div style={{ width: 1, alignSelf: "stretch", background: "rgba(240,235,225,0.08)" }} />
-                )}
-                {grossStr && (
-                  <div style={{ textAlign: "center" }}>
-                    <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 800, fontSize: 7,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.14em", textTransform: "uppercase",
-                    }}>WW Gross</div>
-                    <div style={{
-                      fontFamily: "'Permanent Marker', cursive",
-                      fontSize: 16, color: "rgba(240,235,225,0.85)",
-                      lineHeight: 1.1,
-                    }}>{grossStr}</div>
-                  </div>
-                )}
-              </div>
-              <div style={{ flex: 1, height: 1, background: "rgba(240,235,225,0.06)" }} />
-            </div>
-          )}
-
           {/* Community podcast rows */}
           {communities.length > 0 && (
             <div style={{
@@ -661,12 +598,53 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* Spacer — fills remaining VHS box space */}
           <div style={{ flex: 1 }} />
 
-          {/* ═══ BOTTOM SECTION — studios, barcode, rating ═══ */}
+          {/* ═══ BOTTOM SECTION — budget, studios, barcode, rating ═══ */}
           <div style={{
             borderTop: "2px solid rgba(240,235,225,0.15)",
             marginTop: 8,
             paddingTop: 12,
           }}>
+            {/* Budget / WW Gross */}
+            {(budgetStr || grossStr) && (
+              <div style={{
+                display: "flex", justifyContent: "center",
+                gap: 16, marginBottom: 12,
+              }}>
+                {budgetStr && (
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800, fontSize: 7,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.14em", textTransform: "uppercase",
+                    }}>Budget</div>
+                    <div style={{
+                      fontFamily: "'Permanent Marker', cursive",
+                      fontSize: 14, color: "rgba(240,235,225,0.75)",
+                      lineHeight: 1.1,
+                    }}>{budgetStr}</div>
+                  </div>
+                )}
+                {budgetStr && grossStr && (
+                  <div style={{ width: 1, alignSelf: "stretch", background: "rgba(240,235,225,0.08)" }} />
+                )}
+                {grossStr && (
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 800, fontSize: 7,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.14em", textTransform: "uppercase",
+                    }}>WW Gross</div>
+                    <div style={{
+                      fontFamily: "'Permanent Marker', cursive",
+                      fontSize: 14, color: "rgba(240,235,225,0.75)",
+                      lineHeight: 1.1,
+                    }}>{grossStr}</div>
+                  </div>
+                )}
+              </div>
+            )}
             {/* Studio names + logos */}
             {studios.length > 0 && (
               <div style={{
