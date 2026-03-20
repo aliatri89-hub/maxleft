@@ -96,9 +96,19 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
+  const prevTmdbId = useRef(null);
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
-    if (detail || data.credits) return; // already have detail data
+
+    // Reset detail when card changes
+    if (data.tmdb_id !== prevTmdbId.current) {
+      setDetail(null);
+      prevTmdbId.current = data.tmdb_id;
+    }
+
+    // Skip if we already have credits for THIS card
+    if (data.credits) return;
+
     let cancelled = false;
     (async () => {
       // Try media table first (fast, cached for logged films)
@@ -157,9 +167,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     })();
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
-
-  // Reset detail when card changes
-  useEffect(() => { setDetail(null); }, [data?.tmdb_id]);
 
   // Merge lazy detail into data
   const merged = detail ? { ...data, ...detail,
