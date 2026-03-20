@@ -870,6 +870,172 @@ const featureStyles = `
     flex-shrink: 0;
   }
 
+  /* ── PLAY BUTTON DEMO ─────────────────────────────────────── */
+  .play-demo-wrap {
+    max-width: 420px;
+    margin: 0 auto;
+    border-radius: 6px;
+    background: #302c28;
+    padding: 1px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .play-demo-tape {
+    background: #1a1612;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    min-height: 80px;
+  }
+  .play-demo-tape-end { width: 5px; flex-shrink: 0; background: #1a1612; }
+  .play-demo-label {
+    flex: 1;
+    background: #f0ebe1;
+    padding: 14px 12px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .play-demo-label::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px);
+  }
+  /* Brand stamps */
+  .play-demo-brand-left, .play-demo-brand-right {
+    position: absolute; top: 50%; font-weight: 800; text-transform: uppercase; white-space: nowrap;
+  }
+  .play-demo-brand-left {
+    left: 4px; transform: translateY(-50%) rotate(-90deg);
+    font-size: 7px; letter-spacing: 0.12em; color: var(--terracotta, #C75B3F);
+  }
+  .play-demo-brand-right {
+    right: 4px; transform: translateY(-50%) rotate(90deg);
+    font-size: 7px; letter-spacing: 0.1em; color: #999;
+  }
+  .play-demo-title {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 26px; line-height: 1.1; color: #2C2824;
+    text-transform: uppercase; letter-spacing: 0.02em;
+    position: relative; text-align: center;
+  }
+  .play-demo-year {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 10px; color: rgba(44,40,36,0.5);
+    margin-top: 2px; position: relative;
+  }
+  .play-demo-date {
+    position: absolute; bottom: 4px; left: 28px;
+    font-family: 'Permanent Marker', cursive;
+    font-size: 10px; color: #2C2824;
+  }
+  .play-demo-stars {
+    position: absolute; bottom: 5px; right: 28px;
+    font-size: 13px; letter-spacing: 1px;
+  }
+  .play-demo-headphones {
+    position: absolute; bottom: 18px; right: 26px; opacity: 0.4;
+  }
+  /* VCR Deck */
+  .play-demo-deck {
+    background: linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    padding: 8px 16px 7px;
+    display: flex; align-items: center; justify-content: center; gap: 16;
+    position: relative; cursor: pointer;
+  }
+  .play-demo-deck-edge {
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent);
+  }
+  .play-demo-corner { position: absolute; width: 10px; height: 10px; pointer-events: none; }
+  .play-demo-corner-tl { top: 5px; left: 10px; border-top: 2px solid rgba(255,255,255,0.75); border-left: 2px solid rgba(255,255,255,0.75); }
+  .play-demo-corner-tr { top: 5px; right: 10px; border-top: 2px solid rgba(255,255,255,0.75); border-right: 2px solid rgba(255,255,255,0.75); }
+  .play-demo-corner-bl { bottom: 5px; left: 10px; border-bottom: 2px solid rgba(255,255,255,0.75); border-left: 2px solid rgba(255,255,255,0.75); }
+  .play-demo-corner-br { bottom: 5px; right: 10px; border-bottom: 2px solid rgba(255,255,255,0.75); border-right: 2px solid rgba(255,255,255,0.75); }
+  .play-demo-grille {
+    flex: 1; height: 20px; border-radius: 3px;
+    background: radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px);
+    background-size: 5px 5px;
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2);
+  }
+  .play-demo-play-btn {
+    background: linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-bottom-color: rgba(0,0,0,0.4);
+    border-top-color: rgba(255,255,255,0.12);
+    border-radius: 4px; padding: 5px 24px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .play-demo-led {
+    position: absolute; top: -1px; right: -1px;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(52,211,153,0.2);
+    border: 0.5px solid rgba(52,211,153,0.15);
+    pointer-events: none; transition: all 0.3s;
+  }
+  .play-demo-led.active {
+    background: #34d399; border: none;
+    box-shadow: 0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3);
+  }
+  /* Picker */
+  .play-demo-picker {
+    background: #1a1612;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 6px 12px;
+    border-radius: 0 0 4px 4px;
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), padding 0.28s ease;
+  }
+  .play-demo-picker.open { max-height: 250px; padding: 6px 12px; }
+  .play-demo-picker-row {
+    display: flex; align-items: center; gap: 8;
+    padding: 5px 4px; cursor: pointer; border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .play-demo-picker-row:hover { background: rgba(255,255,255,0.04); }
+  .play-demo-picker-art {
+    width: 22px; height: 22px; border-radius: 5px; object-fit: cover;
+    border: 1.5px solid rgba(199,91,63,0.25);
+  }
+  .play-demo-picker-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .play-demo-picker-ep {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 7px; color: rgba(255,255,255,0.25);
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .play-demo-now-playing {
+    display: flex; align-items: center; gap: 8;
+    padding: 6px 12px; margin-top: 6px;
+    background: rgba(199,91,63,0.06);
+    border: 1px solid rgba(199,91,63,0.12);
+    border-radius: 6px;
+    animation: fadeIn 0.3s ease;
+  }
+  .play-demo-now-playing img {
+    width: 24px; height: 24px; border-radius: 6px; object-fit: cover;
+  }
+  .play-demo-now-playing-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+  .play-demo-now-playing-ep {
+    font-family: 'Lora', serif;
+    font-size: 9px; color: rgba(255,255,255,0.35);
+    font-style: italic;
+  }
+
   /* ── BOTTOM CTA ──────────────────────────────────────────── */
   .mantl-bottom-cta {
     text-align: center;
@@ -1032,6 +1198,15 @@ const DEMO_COMMUNITIES = [
   { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Fargoherodrop.jpg" },
 ];
 
+// ── Demo podcasts for play button demo (Iron Man 3 coverage) ──
+const DEMO_PLAY_PODCASTS = [
+  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective" },
+  { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three" },
+  { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3" },
+  { name: "HDTGM", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", episode: "Iron Man 3" },
+  { name: "The Filmcast", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/b3/f9/44b3f953-fbae-4e99-4d82-4c2cc83630e5/mza_1552332279859047099.jpg/300x300bb.webp", episode: "Ep. 216 — Iron Man 3" },
+];
+
 function LandingScreen({ onSignIn }) {
   const featuresRef = useRef(null);
   const [visibleBlocks, setVisibleBlocks] = useState(new Set());
@@ -1052,6 +1227,10 @@ function LandingScreen({ onSignIn }) {
   const [demoLogged, setDemoLogged] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [showPinBadge, setShowPinBadge] = useState(false);
+
+  // ── Play button demo state ───────────────────────────────
+  const [showDemoPicker, setShowDemoPicker] = useState(false);
+  const [demoPodcast, setDemoPodcast] = useState(null);
 
   // ── Intersection observer for scroll reveals ──────────────
   useEffect(() => {
@@ -1341,7 +1520,7 @@ function LandingScreen({ onSignIn }) {
         <div className="landing-top">
           <div className="vhs-scanlines" />
           <div className="vhs-logo-wrap">
-            <span className="vhs-eyebrow">Another reason to<br /><strong>press play</strong></span>
+            <span className="vhs-eyebrow">The podcast platform for<br /><strong>movie lovers</strong></span>
             <div className="vhs-logo">
               <span className="vhs-logo-letter" style={{ animationDelay: '0.3s' }}>M</span>
               <div className="vhs-play-btn" style={{ animationDelay: '0.4s' }} onClick={scrollToFeatures}>
@@ -1355,9 +1534,10 @@ function LandingScreen({ onSignIn }) {
             <span className="vhs-wordmark-line" />
           </div>
           <div className="landing-tagline">
-            Discover what to watch,<br />
-            read, and play from<br />
-            the <strong>podcasts you love.</strong>
+            <strong>Watch. Log. Listen.</strong><br />
+            Watched something good?<br />
+            Tap play. Hear your favorite hosts<br />
+            <strong>break it down.</strong>
           </div>
         </div>
         <div className="landing-bottom">
@@ -1385,15 +1565,111 @@ function LandingScreen({ onSignIn }) {
 
       {/* ═══════ FEATURES – INTERACTIVE ═════════════════════ */}
       <div className="mantl-features" ref={featuresRef}>
-        {/* ── 1. COMMUNITIES (moved to top) ────────────────── */}
+        {/* ── 0. PLAY BUTTON DEMO (the hook) ────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('play') ? ' visible' : ''}`}
+          data-block="play"
+        >
+          <div className="mantl-feature-label">Listen</div>
+          <div className="mantl-feature-title">Tap Play on Any Movie</div>
+          <div className="mantl-feature-desc">
+            See which podcasts covered it. Pick a show. Listen.
+          </div>
+          <div className="play-demo-wrap">
+            <div style={{ borderRadius: 4, overflow: "hidden" }}>
+              {/* VHS Tape */}
+              <div className="play-demo-tape">
+                <div className="play-demo-tape-end" />
+                <div className="play-demo-label">
+                  <span className="play-demo-brand-left">T-120 KODAK</span>
+                  <span className="play-demo-brand-right">VHS</span>
+                  <img
+                    src="https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.png"
+                    alt="Iron Man 3"
+                    crossOrigin="anonymous"
+                    style={{
+                      maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
+                      objectFit: "contain", position: "relative",
+                      filter: "brightness(0)", opacity: 0.8,
+                    }}
+                    onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "block"; }}
+                  />
+                  <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>Iron Man 3</div>
+                  <div className="play-demo-year">2013</div>
+                  <div className="play-demo-date">May 3</div>
+                  <div className="play-demo-stars">
+                    <span style={{ color: "#c9a827" }}>★★★</span><span style={{ color: "#ccc" }}>☆☆</span>
+                  </div>
+                  <div className="play-demo-headphones">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="play-demo-tape-end" />
+              </div>
+              {/* VCR Deck */}
+              <div className="play-demo-deck" onClick={() => setShowDemoPicker(p => !p)}>
+                <div className="play-demo-deck-edge" />
+                <div className="play-demo-corner play-demo-corner-tl" />
+                <div className="play-demo-corner play-demo-corner-tr" />
+                <div className="play-demo-corner play-demo-corner-bl" />
+                <div className="play-demo-corner play-demo-corner-br" />
+                <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+                  <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)", pointerEvents: "none" }} />
+                  <div className="play-demo-grille" />
+                </div>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <div className="play-demo-play-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <div className={`play-demo-led${demoPodcast ? ' active' : ''}`} />
+                  </div>
+                </div>
+                <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+                  <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)", pointerEvents: "none" }} />
+                  <div className="play-demo-grille" />
+                </div>
+              </div>
+              {/* Picker */}
+              <div className={`play-demo-picker${showDemoPicker ? ' open' : ''}`}>
+                {DEMO_PLAY_PODCASTS.map((p, i) => (
+                  <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); setDemoPodcast(p); setShowDemoPicker(false); }}>
+                    <img className="play-demo-picker-art" src={p.art} alt={p.name} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="play-demo-picker-name">{p.episode}</div>
+                      <div className="play-demo-picker-ep">{p.name}</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)"><path d="M8 5v14l11-7z" /></svg>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Now playing */}
+            {demoPodcast && (
+              <div className="play-demo-now-playing" onClick={() => setDemoPodcast(null)}>
+                <img src={demoPodcast.art} alt="" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="play-demo-now-playing-text">{demoPodcast.name}</div>
+                  <div className="play-demo-now-playing-ep">{demoPodcast.episode}</div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="tap-hint">tap the play button</div>
+        </div>
+
+        {/* ── 1. COMMUNITIES ────────────────────────────────── */}
         <div
           className={`mantl-feature-block${visibleBlocks.has('communities') ? ' visible' : ''}`}
           data-block="communities"
         >
-          <div className="mantl-feature-label">Discover</div>
-          <div className="mantl-feature-title">Your Podcast, Your Dashboard</div>
+          <div className="mantl-feature-label">Go Deeper</div>
+          <div className="mantl-feature-title">Join a Community</div>
           <div className="mantl-feature-desc">
-            Each podcast gets its own unique home — with miniseries,
+            Your favorite podcasts get their own home — with miniseries,
             badges, and your progress across everything they cover.
           </div>
           <div className="community-demo">
@@ -1586,7 +1862,7 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-label">Sync</div>
           <div className="mantl-feature-title">Already Tracking? Import It.</div>
           <div className="mantl-feature-desc">
-            Connect your Letterboxd, Goodreads, Storygraph, and Steam accounts.
+            Connect your Letterboxd account.
             Your logs sync automatically.
           </div>
           <div className="sync-demo">
@@ -1595,22 +1871,6 @@ function LandingScreen({ onSignIn }) {
               <div className="sync-info">
                 <div className="sync-name">Letterboxd</div>
                 <div className="sync-stat">Films & ratings</div>
-              </div>
-              <div className="sync-badge">Auto-sync</div>
-            </div>
-            <div className="sync-row">
-              <img className="sync-logo sync-logo-rounded" src="https://play-lh.googleusercontent.com/bOOrAMR_IOv0jyKJU2MstONEBGzAEQmEoNmaRPl-V4CY4uvFNmrI2aBoXmnhGxhsxdo=w240-h480-rw" alt="Storygraph" />
-              <div className="sync-info">
-                <div className="sync-name">Goodreads / Storygraph</div>
-                <div className="sync-stat">Books & ratings</div>
-              </div>
-              <div className="sync-badge">Auto-sync</div>
-            </div>
-            <div className="sync-row">
-              <img className="sync-logo" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Steam_Logo.png" alt="Steam" />
-              <div className="sync-info">
-                <div className="sync-name">Steam</div>
-                <div className="sync-stat">Games & playtime</div>
               </div>
               <div className="sync-badge">Auto-sync</div>
             </div>
@@ -1646,9 +1906,9 @@ function LandingScreen({ onSignIn }) {
               </div>
               <div className="podcast-marquee-overlay" />
             </div>
-            <div className="growing-headline">New communities<br />added regularly</div>
+            <div className="growing-headline">30+ podcasts<br />and growing</div>
             <div className="growing-sub">
-              If your podcast has a shelf, we're building it.
+              Every film with coverage gets a play button.
             </div>
             <div className="growing-divider" />
           </div>
