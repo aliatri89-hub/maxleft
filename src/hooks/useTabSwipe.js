@@ -6,11 +6,15 @@ import { tapLight } from "../utils/haptics";
  *
  * Handles touch start/move/end for swiping between tabs, slider animation,
  * preload tab tracking, and indicator bar offset calculation.
+ *
+ * Feed tab has two sub-modes (discover / activity) that the user swipes
+ * through before reaching the next main tab:
+ *   Discover → Activity → Communities → My MANTL
  */
 
 const TABS = ["feed", "explore", "shelf"];
 
-export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav) {
+export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode) {
   const tabSwipeStart = useRef(null);
   const tabSwipeDelta = useRef(0);
   const sliderRef = useRef(null);
@@ -81,15 +85,23 @@ export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav) {
       const idx = TABS.indexOf(activeTab);
       const screenW = window.innerWidth;
 
-      // Preload adjacent tab
-      const targetIdx = dx < 0 ? Math.min(idx + 1, TABS.length - 1) : Math.max(idx - 1, 0);
-      const target = TABS[targetIdx];
-      if (target !== activeTab && target !== preloadTab) setPreloadTab(target);
+      // Detect feed sub-mode swipes (discover↔activity):
+      // Slider stays put, content swaps within the feed pane
+      const isSubSwipeLeft = activeTab === "feed" && feedMode === "discover" && dx < 0;
+      const isSubSwipeRight = activeTab === "feed" && feedMode === "activity" && dx > 0;
+      const isSubSwipe = isSubSwipeLeft || isSubSwipeRight;
 
-      // Edge resistance
-      const atLeft = idx === 0 && dx > 0;
-      const atRight = idx === TABS.length - 1 && dx < 0;
-      const resist = atLeft || atRight ? 0.15 : 1;
+      // Preload adjacent tab (only for real tab transitions)
+      if (!isSubSwipe) {
+        const targetIdx = dx < 0 ? Math.min(idx + 1, TABS.length - 1) : Math.max(idx - 1, 0);
+        const target = TABS[targetIdx];
+        if (target !== activeTab && target !== preloadTab) setPreloadTab(target);
+      }
+
+      // Edge resistance at boundaries or during sub-swipes
+      const atLeftEdge = idx === 0 && dx > 0 && feedMode === "discover";
+      const atRightEdge = idx === TABS.length - 1 && dx < 0;
+      const resist = atLeftEdge || atRightEdge ? 0.15 : isSubSwipe ? 0.3 : 1;
       const offset = dx * resist;
 
       // Move slider directly (no React re-render)
@@ -98,7 +110,7 @@ export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav) {
       }
       setTabSwipeOffset((dx / screenW) * resist);
     }
-  }, [activeTab, preloadTab]);
+  }, [activeTab, preloadTab, feedMode]);
 
   const onTouchEnd = useCallback(() => {
     if (!tabSwipeStart.current) return;
@@ -117,21 +129,48 @@ export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav) {
     const threshold = velocity > 0.5 ? 50 : 120;
     const idx = TABS.indexOf(activeTab);
     let nextIdx = idx;
+    let handledBySubSwipe = false;
 
-    if (dx < -threshold && idx < TABS.length - 1) {
-      nextIdx = idx + 1;
-      const next = TABS[nextIdx];
-      if (activeTab !== next) pushNav("tab", () => { setActiveTab("feed"); });
-      setActiveTab(next);
-    } else if (dx > threshold && idx > 0) {
-      nextIdx = idx - 1;
-      const prev = TABS[nextIdx];
-      if (prev === "feed") removeNav("tab");
-      else pushNav("tab", () => { setActiveTab("feed"); });
-      setActiveTab(prev);
+    // ── Feed sub-mode transitions (discover ↔ activity) ──
+    if (activeTab === "feed") {
+      // Swipe left on discover → switch to activity (stay on feed tab)
+      if (dx < -threshold && feedMode === "discover") {
+        setFeedMode("activity");
+        tapLight();
+        handledBySubSwipe = true;
+      }
+      // Swipe right on activity → switch to discover (stay on feed tab)
+      else if (dx > threshold && feedMode === "activity") {
+        setFeedMode("discover");
+        tapLight();
+        handledBySubSwipe = true;
+      }
     }
 
-    if (nextIdx !== idx) tapLight();
+    // ── Normal tab transitions (when not handled by sub-swipe) ──
+    if (!handledBySubSwipe) {
+      if (dx < -threshold && idx < TABS.length - 1) {
+        nextIdx = idx + 1;
+        const next = TABS[nextIdx];
+        if (activeTab !== next) pushNav("tab", () => { setActiveTab("feed"); setFeedMode("discover"); });
+        setActiveTab(next);
+      } else if (dx > threshold && idx > 0) {
+        nextIdx = idx - 1;
+        const prev = TABS[nextIdx];
+        if (prev === "feed") {
+          removeNav("tab");
+          // Landing back on feed from explore → show activity (nearest sub-mode)
+          setFeedMode("activity");
+        } else {
+          pushNav("tab", () => { setActiveTab("feed"); setFeedMode("discover"); });
+        }
+        setActiveTab(prev);
+      }
+
+      if (nextIdx !== idx) tapLight();
+    }
+
+    // Animate slider to final position
     if (sliderRef.current) {
       sliderRef.current.classList.remove("swiping");
       sliderRef.current.classList.add("animating");
@@ -147,7 +186,7 @@ export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav) {
     tabSwipeDelta.current = 0;
     setTabSwipeOffset(0);
     setPreloadTab(null);
-  }, [activeTab, setActiveTab, pushNav, removeNav]);
+  }, [activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode]);
 
   return {
     sliderRef,

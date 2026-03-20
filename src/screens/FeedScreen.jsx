@@ -20,9 +20,8 @@ import {
 // FEED SCREEN
 // ════════════════════════════════════════════════
 
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, requestActivityMode, pushNav, removeNav }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
-  const [feedMode, setFeedMode] = useState("discover");
   const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
   const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
@@ -92,11 +91,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   useEffect(() => {
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
-
-  // Switch to Activity tab when requested
-  useEffect(() => {
-    if (requestActivityMode) setFeedMode("activity");
-  }, [requestActivityMode]);
 
   // ── Infinite scroll — load more when sentinel enters viewport ──
   // feedItems.length in deps forces observer reset after each batch,

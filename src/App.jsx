@@ -96,7 +96,7 @@ export default function App() {
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
-  const [requestActivityMode, setRequestActivityMode] = useState(0);
+  const [feedMode, setFeedMode] = useState("discover");
 
   // ── Profile + shelves ──
   const [profile, setProfile] = useState({
@@ -128,7 +128,7 @@ export default function App() {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
     animateSlider, syncSliderPosition,
     onTouchStart, onTouchMove, onTouchEnd, TABS,
-  } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav);
+  } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
 
   const loadShelves = useCallback(async (userId) => {
     const [
@@ -337,7 +337,7 @@ export default function App() {
             rewatches={letterboxdToast.rewatches}
             duration={3600}
             onDone={() => setLetterboxdToast(null)}
-            onTap={() => { setActiveTab("feed"); setRequestActivityMode(prev => prev + 1); }}
+            onTap={() => { setActiveTab("feed"); setFeedMode("activity"); }}
           />
         )}
 
@@ -387,7 +387,7 @@ export default function App() {
                   </svg>
                 )}
               </div>
-              <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
+              <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("discover"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
               </div>
@@ -407,7 +407,8 @@ export default function App() {
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
-                    communitySubscriptions={communitySubscriptions} requestActivityMode={requestActivityMode}
+                    communitySubscriptions={communitySubscriptions}
+                    feedMode={feedMode} setFeedMode={setFeedMode}
                     pushNav={pushNav} removeNav={removeNav} />
                 </div>
                 <div className="tab-pane" key="explore-tab">
@@ -517,7 +518,7 @@ export default function App() {
             })()}
             <button className={`nav-item${activeTab === "feed" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "feed") setPreloadTab("feed"); }}
-              onClick={() => { tapLight(); removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("discover"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
               <div className="nav-label">Feed</div>
             </button>
