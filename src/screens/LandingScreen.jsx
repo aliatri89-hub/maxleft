@@ -1187,9 +1187,9 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png",
     brand: "T-120 KODAK",
     podcasts: [
-      { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective" },
-      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three" },
-      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3" },
+      { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective", audio: "https://mcdn.podbean.com/mf/web/wbpmq3/NPPAVENGERS07.mp3" },
+      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three", audio: null },
+      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: null },
     ],
   },
   {
@@ -1238,7 +1238,22 @@ function LandingScreen({ onSignIn }) {
   // ── Play button demo state ───────────────────────────────
   const [demoPickerIdx, setDemoPickerIdx] = useState(null);
   const [demoPodcast, setDemoPodcast] = useState(null);
+  const demoAudioRef = useRef(null);
+  useEffect(() => () => { if (demoAudioRef.current) demoAudioRef.current.pause(); }, []);
   const toggleDemoPicker = (idx) => { setDemoPickerIdx(prev => prev === idx ? null : idx); };
+  const handleDemoPlay = (podcast, movieIdx) => {
+    // Stop any existing audio
+    if (demoAudioRef.current) { demoAudioRef.current.pause(); demoAudioRef.current = null; }
+    setDemoPodcast({ ...podcast, _movieIdx: movieIdx });
+    setDemoPickerIdx(null);
+    // Play audio if available
+    if (podcast.audio) {
+      const audio = new Audio(podcast.audio);
+      audio.volume = 0.8;
+      audio.play().catch(() => {});
+      demoAudioRef.current = audio;
+    }
+  };
 
   // ── Intersection observer for scroll reveals ──────────────
   useEffect(() => {
@@ -1651,7 +1666,7 @@ function LandingScreen({ onSignIn }) {
                   {/* Picker */}
                   <div className={`play-demo-picker${demoPickerIdx === idx ? ' open' : ''}`}>
                     {movie.podcasts.map((p, i) => (
-                      <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); setDemoPodcast({ ...p, _movieIdx: idx }); setDemoPickerIdx(null); }}>
+                      <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); handleDemoPlay(p, idx); }}>
                         <img className="play-demo-picker-art" src={p.art} alt={p.name} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div className="play-demo-picker-name">{p.episode}</div>
