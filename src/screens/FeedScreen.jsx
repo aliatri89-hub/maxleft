@@ -125,7 +125,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   // ── Loading skeleton ──
   if (loading && discoverItems.length === 0 && activityItems.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: 100 }}>
+      <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
         <div style={{ padding: "0 16px" }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{
@@ -202,7 +202,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       onTouchEnd={handleTouchEnd}
       style={{
         background: "var(--bg-primary, #0f0d0b)",
-        paddingBottom: 100,
+        paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
       }}
     >
       {/* Pull-to-refresh indicator */}
