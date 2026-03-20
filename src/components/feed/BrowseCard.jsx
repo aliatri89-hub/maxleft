@@ -2,6 +2,7 @@ import { useState } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
 // BROWSE CARD — VHS tape + play button for TMDB browse results
@@ -65,15 +66,26 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-export default function BrowseCard({ data }) {
+export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommunity }) {
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [episodes, setEpisodes] = useState(null); // null = not loaded yet
   const [epLoading, setEpLoading] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
   const hasPlayButton = data.podcast_count > 0;
+
+  const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
+  const openSleeve = () => {
+    setSheetOpen(true);
+    if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
+  };
+  const closeSleeve = () => {
+    setSheetOpen(false);
+    if (removeNav) removeNav(sleeveNavKey);
+  };
 
   const handleDeckTap = async (e) => {
     e.stopPropagation();
@@ -113,6 +125,7 @@ export default function BrowseCard({ data }) {
     episodes.some(ep => currentEp.enclosureUrl === ep.audio_url);
 
   return (
+    <>
     <div style={{
       margin: "4px 16px", borderRadius: 6, position: "relative",
       background: "#302c28", padding: "1px 1px",
@@ -121,7 +134,7 @@ export default function BrowseCard({ data }) {
     }}>
       <div style={{ borderRadius: 4, overflow: "hidden" }}>
         {/* ═══ VHS TAPE LABEL ═══ */}
-        <div style={{ background: "#1a1612", borderRadius: 5, position: "relative" }}>
+        <div onClick={() => openSleeve()} style={{ background: "#1a1612", borderRadius: 5, position: "relative", cursor: "pointer" }}>
           <div style={{ borderRadius: 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
             <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
 
@@ -396,5 +409,12 @@ export default function BrowseCard({ data }) {
         </div>
       </div>
     </div>
+    <VhsSleeveSheet
+      data={data}
+      open={sheetOpen}
+      onClose={closeSleeve}
+      onNavigateCommunity={onNavigateCommunity}
+    />
+    </>
   );
 }
