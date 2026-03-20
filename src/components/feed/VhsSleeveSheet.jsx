@@ -117,7 +117,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         tmdb_id: String(data.tmdb_id), type, append: "credits",
       });
       if (cancelled || !tmdbDetail || tmdbDetail.error) return;
-      setDetail({
+      const detailObj = {
         overview: tmdbDetail.overview || null,
         tagline: tmdbDetail.tagline || null,
         budget: tmdbDetail.budget || null,
@@ -126,7 +126,34 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         credits: tmdbDetail.credits || null,
         production_companies: tmdbDetail.production_companies || null,
         still_paths: null,
-      });
+      };
+      setDetail(detailObj);
+
+      // Cache to media table — next person gets instant load
+      const director = tmdbDetail.credits?.crew?.find(c => c.job === "Director")?.name || null;
+      const genre = (tmdbDetail.genres || []).slice(0, 2).map(g => g.name).join(", ") || null;
+      supabase
+        .from("media")
+        .upsert({
+          media_type: "film",
+          tmdb_id: data.tmdb_id,
+          title: data.title || tmdbDetail.title,
+          year: data.year ? parseInt(data.year) : (tmdbDetail.release_date || "").slice(0, 4) ? parseInt((tmdbDetail.release_date || "").slice(0, 4)) : null,
+          creator: director,
+          poster_path: data.poster_path || (tmdbDetail.poster_path ? `https://image.tmdb.org/t/p/w342${tmdbDetail.poster_path}` : null),
+          backdrop_path: data.backdrop_path || (tmdbDetail.backdrop_path ? `https://image.tmdb.org/t/p/w780${tmdbDetail.backdrop_path}` : null),
+          runtime: tmdbDetail.runtime || null,
+          genre,
+          overview: detailObj.overview,
+          tagline: detailObj.tagline,
+          budget: detailObj.budget,
+          revenue: detailObj.revenue,
+          credits: detailObj.credits,
+          production_companies: detailObj.production_companies,
+          certification: tmdbDetail.certification || null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "tmdb_id", ignoreDuplicates: false })
+        .then(() => {});
     })();
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
