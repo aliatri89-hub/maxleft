@@ -81,21 +81,12 @@ export default function BrowseCard({ data }) {
       setShowPicker(false);
       return;
     }
-    // If only 1 podcast, play directly without picker
-    if (episodes && episodes.length === 1) {
-      handlePlay(e, episodes[0]);
-      return;
-    }
     // Lazy-load episodes on first tap
     if (!episodes) {
       setEpLoading(true);
       const eps = await getEpisodesForFilm(data.tmdb_id);
       setEpisodes(eps);
       setEpLoading(false);
-      if (eps.length === 1) {
-        handlePlay(e, eps[0]);
-        return;
-      }
     }
     setShowPicker(true);
   };
@@ -344,7 +335,7 @@ export default function BrowseCard({ data }) {
 
         {/* ═══ EPISODE PICKER — animated slide down ═══ */}
         <div style={{
-          maxHeight: showPicker && episodes && episodes.length > 1 ? 200 : 0,
+          maxHeight: showPicker && episodes && episodes.length > 0 ? 200 : 0,
           overflow: "hidden",
           transition: "max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
         }}>
