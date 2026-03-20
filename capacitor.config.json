@@ -3,7 +3,6 @@
   "appName": "MANTL",
   "webDir": "dist",
   "server": {
-    "url": "https://mymantl.app",
     "androidScheme": "https"
   },
   "plugins": {
