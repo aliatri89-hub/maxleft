@@ -728,24 +728,29 @@ function enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRender
 
 const PAGE_SIZE = 15;
 
-export function useFeed(userId, subscribedIds, feedMode = "all") {
-  const [feedItems, setFeedItems] = useState([]);
+export function useFeed(userId, subscribedIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const feedBucketsRef = useRef({ all: [], activity: [], discover: [] });
   const fetchGenRef = useRef(0);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [discoverVisible, setDiscoverVisible] = useState(PAGE_SIZE);
+  const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
   const [renderTick, setRenderTick] = useState(0);
 
   const subscribedKey = subscribedIds
     ? [...subscribedIds].sort().join(",")
     : "";
 
-  // ── Single writer: derive feedItems from bucket + mode + pagination ──
-  useEffect(() => {
-    const bucket = feedBucketsRef.current[feedMode] || [];
-    setFeedItems(bucket.slice(0, visibleCount));
-  }, [feedMode, visibleCount, renderTick]);
+  // ── Derive items for both feeds from shared buckets ──
+  const discoverBucket = feedBucketsRef.current.discover || [];
+  const activityBucket = feedBucketsRef.current.activity || [];
+  // Activity feed = logs only (no badge_complete cards)
+  const activityLogsOnly = activityBucket.filter(item => item.type === "log");
+
+  const discoverItems = discoverBucket.slice(0, discoverVisible);
+  const activityItems = activityLogsOnly.slice(0, activityVisible);
+  const hasMoreDiscover = discoverVisible < discoverBucket.length;
+  const hasMoreActivity = activityVisible < activityLogsOnly.length;
 
   const fetchFeed = useCallback(async (isExplicit = false) => {
     if (!userId) { setLoading(false); return; }
@@ -832,19 +837,13 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, subscribedKey]);
 
-  const loadMore = useCallback(() => {
-    setVisibleCount(prev => prev + PAGE_SIZE);
+  const loadMoreDiscover = useCallback(() => {
+    setDiscoverVisible(prev => prev + PAGE_SIZE);
   }, []);
 
-  // Reset page when switching tabs
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [feedMode]);
-
-  const hasMore = (() => {
-    const bucket = feedBucketsRef.current[feedMode] || [];
-    return visibleCount < bucket.length;
-  })();
+  const loadMoreActivity = useCallback(() => {
+    setActivityVisible(prev => prev + PAGE_SIZE);
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -852,5 +851,10 @@ export function useFeed(userId, subscribedIds, feedMode = "all") {
     return () => { mountedRef.current = false; };
   }, [fetchFeed]);
 
-  return { feedItems, loading, refresh: () => fetchFeed(true), loadMore, hasMore };
+  return {
+    discoverItems, activityItems,
+    hasMoreDiscover, hasMoreActivity,
+    loadMoreDiscover, loadMoreActivity,
+    loading, refresh: () => fetchFeed(true),
+  };
 }

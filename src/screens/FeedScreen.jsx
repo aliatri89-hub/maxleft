@@ -22,7 +22,12 @@ import {
 
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
-  const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
+  const {
+    discoverItems, activityItems,
+    hasMoreDiscover, hasMoreActivity,
+    loadMoreDiscover, loadMoreActivity,
+    loading, refresh,
+  } = useFeed(userId, communitySubscriptions);
   const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
@@ -30,11 +35,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
   const [showShareShelf, setShowShareShelf] = useState(false);
-  const sentinelRef = useRef(null);
-
-  const ACTIVITY_ONLY_TYPES = new Set(["log"]);
-  const feedItems = rawFeedItems
-    .filter((item) => feedMode !== "activity" || ACTIVITY_ONLY_TYPES.has(item.type));
+  const discoverSentinelRef = useRef(null);
+  const activitySentinelRef = useRef(null);
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
@@ -92,22 +94,32 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
 
-  // ── Infinite scroll — load more when sentinel enters viewport ──
-  // feedItems.length in deps forces observer reset after each batch,
-  // so it re-fires when the sentinel stays visible (short card lists).
+  // ── Infinite scroll — discover feed ──
   useEffect(() => {
-    const el = sentinelRef.current;
-    if (!el || !hasMore) return;
+    const el = discoverSentinelRef.current;
+    if (!el || !hasMoreDiscover || feedMode !== "discover") return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      ([entry]) => { if (entry.isIntersecting) loadMoreDiscover(); },
       { rootMargin: "200px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasMore, loadMore, feedItems.length]);
+  }, [hasMoreDiscover, loadMoreDiscover, discoverItems.length, feedMode]);
+
+  // ── Infinite scroll — activity feed ──
+  useEffect(() => {
+    const el = activitySentinelRef.current;
+    if (!el || !hasMoreActivity || feedMode !== "activity") return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
 
   // ── Loading skeleton ──
-  if (loading && feedItems.length === 0) {
+  if (loading && discoverItems.length === 0 && activityItems.length === 0) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: 100 }}>
         <div style={{ padding: "0 16px" }}>
@@ -210,64 +222,38 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       )}
 
-      {(() => {
-        const hasUserActivity = feedItems.some(item => item.type === "log");
-        const showWelcome = feedMode !== "discover" && (feedItems.length === 0 || !hasUserActivity);
+      {/* Feed mode toggle */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "6px 16px 4px", position: "relative",
+      }}>
+        <div className="vhs-toggle">
+          {[
+            { key: "discover", label: "▶ Discover" },
+            { key: "activity", label: "● Activity" },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
+              onClick={() => setFeedMode(tab.key)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-        if (feedItems.length === 0 && feedMode === "activity") {
-          return <EmptyFeed onNavigateCommunity={onNavigateCommunity} />;
-        }
-
-        const firstLogRef = { current: false };
-
-        return (
-          <div style={{ paddingTop: 4, position: "relative" }}>
-            {/* Feed mode toggle */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              padding: "6px 16px 4px", position: "relative",
-            }}>
-              <div className="vhs-toggle">
-                {[
-                  { key: "discover", label: "▶ Discover" },
-                  { key: "activity", label: "● Activity" },
-                ].map(tab => (
-                  <button
-                    key={tab.key}
-                    className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
-                    onClick={() => setFeedMode(tab.key)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Share shelf button — hidden until share image is polished */}
-              {false && feedMode === "activity" && feedItems.some(item => item.type === "log") && (
-                <div
-                  onClick={() => setShowShareShelf(true)}
-                  style={{
-                    position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
-                    width: 32, height: 32, borderRadius: 8,
-                    background: "rgba(240,235,225,0.06)",
-                    border: "1px solid rgba(240,235,225,0.1)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", transition: "all 0.2s ease",
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="#8a7d68" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                    <polyline points="16 6 12 2 8 6" />
-                    <line x1="12" y1="2" x2="12" y2="15" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            {showWelcome && <EmptyFeed onNavigateCommunity={onNavigateCommunity} />}
-
-            {feedMode === "discover" && feedItems.length === 0 && (
+      {/* Sub-slider: both feeds rendered side by side, CSS slides between them */}
+      <div style={{ overflow: "hidden" }}>
+        <div style={{
+          display: "flex",
+          width: "200%",
+          transform: `translateX(${feedMode === "activity" ? "-50%" : "0"})`,
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}>
+          {/* ── Discover pane ── */}
+          <div style={{ width: "50%", minHeight: 200, flexShrink: 0 }}>
+            {discoverItems.length === 0 && !loading && (
               <div style={{
                 padding: "40px 24px", textAlign: "center",
                 color: "var(--text-muted, #8892a8)", fontSize: 13,
@@ -277,28 +263,47 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
                 Subscribe to more communities to unlock episode drops, recommendations, and badge nudges.
               </div>
             )}
+            {(() => {
+              const firstLogRef = { current: false };
+              return discoverItems.map((item, i) => {
+                const dismissKey = getDismissKey(item);
+                if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
+                return (
+                  <FeedCard
+                    key={getStableKey(item, i)}
+                    index={i}
+                    dismissable={!!dismissKey}
+                    onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
+                  >
+                    {renderCard(item, firstLogRef)}
+                  </FeedCard>
+                );
+              });
+            })()}
+            {hasMoreDiscover && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
+          </div>
 
-            {feedItems.map((item, i) => {
-              const dismissKey = getDismissKey(item);
-              if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
-
-              return (
+          {/* ── Activity pane ── */}
+          <div style={{ width: "50%", minHeight: 200, flexShrink: 0 }}>
+            {activityItems.length === 0 && !loading && (
+              <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
+            )}
+            {(() => {
+              const firstLogRef = { current: false };
+              return activityItems.map((item, i) => (
                 <FeedCard
-                  key={getStableKey(item, i)}
+                  key={`activity-${getStableKey(item, i)}`}
                   index={i}
-                  dismissable={!!dismissKey}
-                  onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
+                  dismissable={false}
                 >
                   {renderCard(item, firstLogRef)}
                 </FeedCard>
-              );
-            })}
-
-            {/* Infinite scroll sentinel */}
-            {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
+              ));
+            })()}
+            {hasMoreActivity && <div ref={activitySentinelRef} style={{ height: 1 }} />}
           </div>
-        );
-      })()}
+        </div>
+      </div>
 
       {/* Animations */}
       <style>{`
@@ -363,7 +368,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {showShareShelf && (
         <ShareShelf
-          items={feedItems
+          items={activityItems
             .filter(item => item.type === "log")
             .slice(0, 6)
             .map(item => item.data)}
