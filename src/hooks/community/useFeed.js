@@ -679,11 +679,27 @@ export function useFeed(userId, subscribedIds) {
   }, [userId, subscribedKey]);
 
   const loadMoreDiscover = useCallback(() => {
-    setDiscoverVisible(prev => prev + PAGE_SIZE);
+    setDiscoverVisible(prev => {
+      const next = prev + PAGE_SIZE;
+      const bucket = feedBucketsRef.current.discover || [];
+      const newSlice = bucket.slice(prev, next);
+      if (newSlice.length > 0) {
+        enrichMedia(newSlice, fetchGenRef.current, fetchGenRef, mountedRef, setRenderTick);
+      }
+      return next;
+    });
   }, []);
 
   const loadMoreActivity = useCallback(() => {
-    setActivityVisible(prev => prev + PAGE_SIZE);
+    setActivityVisible(prev => {
+      const next = prev + PAGE_SIZE;
+      const bucket = feedBucketsRef.current.activity || [];
+      const newSlice = bucket.slice(prev, next);
+      if (newSlice.length > 0) {
+        enrichMedia(newSlice, fetchGenRef.current, fetchGenRef, mountedRef, setRenderTick);
+      }
+      return next;
+    });
   }, []);
 
   useEffect(() => {
