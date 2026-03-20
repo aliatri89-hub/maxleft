@@ -71,12 +71,16 @@ export default function BrowseCard({ data }) {
   const [showPicker, setShowPicker] = useState(false);
   const [episodes, setEpisodes] = useState(null); // null = not loaded yet
   const [epLoading, setEpLoading] = useState(false);
-  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
   const hasPlayButton = data.podcast_count > 0;
 
   const handleDeckTap = async (e) => {
     e.stopPropagation();
+    // If this film's episode is currently playing, pause it
+    if (isThisPlaying) {
+      togglePlay();
+    }
     if (showPicker) {
       setShowPicker(false);
       return;
