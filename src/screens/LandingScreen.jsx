@@ -1581,7 +1581,7 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-desc">
             See which podcasts covered it. Pick a show. Listen.
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 420, margin: "0 auto" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {DEMO_PLAY_MOVIES.map((movie, idx) => (
               <div key={idx} className="play-demo-wrap">
                 <div style={{ borderRadius: 4, overflow: "hidden" }}>
