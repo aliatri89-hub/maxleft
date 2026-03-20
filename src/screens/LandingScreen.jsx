@@ -1518,9 +1518,7 @@ function LandingScreen({ onSignIn }) {
           </div>
           <div className="landing-tagline">
             <strong>Watch. Log. Listen.</strong><br />
-            Watched something good?<br />
-            Tap play. Hear your favorite hosts<br />
-            <strong>break it down.</strong>
+            Another reason to <strong>press play.</strong>
           </div>
         </div>
         <div className="landing-bottom">
