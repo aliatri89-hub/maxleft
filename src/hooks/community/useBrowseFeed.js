@@ -31,7 +31,7 @@ function normalizeTmdbResults(results) {
 
 export function useBrowseFeed(mode) {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // start true — skeleton until first fetch completes
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const mountedRef = useRef(true);
@@ -44,8 +44,11 @@ export function useBrowseFeed(mode) {
         ? await fetchTMDBNowPlaying(pageNum)
         : await fetchTMDBDiscover(pageNum);
 
+      console.log(`[BrowseFeed] ${mode} page ${pageNum}:`, data ? `${(data.results || []).length} results` : "null/empty", data?.error || "");
+
       if (!mountedRef.current) return;
       if (!data || data.error) {
+        console.warn(`[BrowseFeed] ${mode} failed:`, data?.error || "no data");
         setLoading(false);
         return;
       }
