@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "../../supabase";
 import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
 
@@ -86,7 +86,7 @@ function fetchAllData(userId, subscribedIds) {
       .select("*")
       .eq("user_id", userId)
       .order("logged_at", { ascending: false })
-      .limit(100),
+      .limit(300),
 
     // 2. Badge progress
     supabase
@@ -112,7 +112,7 @@ function fetchAllData(userId, subscribedIds) {
       .select("*")
       .eq("user_id", userId)
       .order("watched_at", { ascending: false, nullsFirst: false })
-      .limit(30),
+      .limit(100),
 
     // 6. Recently earned badges
     supabase
@@ -742,15 +742,20 @@ export function useFeed(userId, subscribedIds) {
     : "";
 
   // ── Derive items for both feeds from shared buckets ──
-  const discoverBucket = feedBucketsRef.current.discover || [];
-  const activityBucket = feedBucketsRef.current.activity || [];
-  // Activity feed = logs only (no badge_complete cards)
-  const activityLogsOnly = activityBucket.filter(item => item.type === "log");
-
-  const discoverItems = discoverBucket.slice(0, discoverVisible);
-  const activityItems = activityLogsOnly.slice(0, activityVisible);
-  const hasMoreDiscover = discoverVisible < discoverBucket.length;
-  const hasMoreActivity = activityVisible < activityLogsOnly.length;
+  // renderTick in deps ensures we re-derive after enrichMedia patches logo_url/poster_url
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const { discoverItems, activityItems, hasMoreDiscover, hasMoreActivity } = useMemo(() => {
+    const discoverBucket = feedBucketsRef.current.discover || [];
+    const activityBucket = feedBucketsRef.current.activity || [];
+    // Activity feed = logs only (no badge_complete cards)
+    const activityLogsOnly = activityBucket.filter(item => item.type === "log");
+    return {
+      discoverItems: discoverBucket.slice(0, discoverVisible),
+      activityItems: activityLogsOnly.slice(0, activityVisible),
+      hasMoreDiscover: discoverVisible < discoverBucket.length,
+      hasMoreActivity: activityVisible < activityLogsOnly.length,
+    };
+  }, [discoverVisible, activityVisible, renderTick]);
 
   const fetchFeed = useCallback(async (isExplicit = false) => {
     if (!userId) { setLoading(false); return; }
