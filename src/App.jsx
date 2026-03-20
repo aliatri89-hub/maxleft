@@ -402,7 +402,7 @@ export default function App() {
 
             {/* Tab slider */}
             <div className="main" style={{ touchAction: "pan-y" }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-              <div className="tab-slider" ref={sliderRef}>
+              <div className="tab-slider" ref={sliderRef} style={{ transform: "translateX(-100%)" }}>
                 <div className="tab-pane" key="feed-tab">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
