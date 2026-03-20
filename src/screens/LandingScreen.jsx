@@ -905,35 +905,18 @@ const featureStyles = `
   }
   /* Brand stamps */
   .play-demo-brand-left, .play-demo-brand-right {
-    position: absolute; top: 50%; font-weight: 800; text-transform: uppercase; white-space: nowrap;
+    position: absolute; top: 0; bottom: 0; font-weight: 800; text-transform: uppercase; white-space: nowrap;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;
   }
   .play-demo-brand-left {
-    left: 4px; transform: translateY(-50%) rotate(-90deg);
+    left: 4px; writing-mode: vertical-rl; transform: rotate(180deg);
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 7px; letter-spacing: 0.12em; color: var(--terracotta, #C75B3F);
   }
   .play-demo-brand-right {
-    right: 4px; transform: translateY(-50%) rotate(90deg);
+    right: 4px; writing-mode: vertical-rl; transform: rotate(180deg);
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 7px; letter-spacing: 0.1em; color: #999;
-  }
-  .play-demo-title {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 26px; line-height: 1.1; color: #2C2824;
-    text-transform: uppercase; letter-spacing: 0.02em;
-    position: relative; text-align: center;
-  }
-  .play-demo-year {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 10px; color: rgba(44,40,36,0.5);
-    margin-top: 2px; position: relative;
-  }
-  .play-demo-date {
-    position: absolute; bottom: 4px; left: 28px;
-    font-family: 'Permanent Marker', cursive;
-    font-size: 10px; color: #2C2824;
-  }
-  .play-demo-stars {
-    position: absolute; bottom: 5px; right: 28px;
-    font-size: 13px; letter-spacing: 1px;
   }
   .play-demo-headphones {
     position: absolute; bottom: 18px; right: 26px; opacity: 0.4;
@@ -1000,18 +983,18 @@ const featureStyles = `
   }
   .play-demo-picker-row:hover { background: rgba(255,255,255,0.04); }
   .play-demo-picker-art {
-    width: 22px; height: 22px; border-radius: 5px; object-fit: cover;
+    width: 28px; height: 28px; border-radius: 6px; object-fit: cover;
     border: 1.5px solid rgba(199,91,63,0.25);
   }
   .play-demo-picker-name {
     font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 700; font-size: 11px;
+    font-weight: 700; font-size: 13px;
     color: rgba(255,255,255,0.7);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .play-demo-picker-ep {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 7px; color: rgba(255,255,255,0.25);
+    font-size: 9px; color: rgba(255,255,255,0.3);
     text-transform: uppercase; letter-spacing: 0.04em;
   }
   .play-demo-now-playing {
@@ -1592,13 +1575,21 @@ function LandingScreen({ onSignIn }) {
                       objectFit: "contain", position: "relative",
                       filter: "brightness(0)", opacity: 0.8,
                     }}
-                    onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "block"; }}
+                    onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
                   />
                   <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>Iron Man 3</div>
-                  <div className="play-demo-year">2013</div>
-                  <div className="play-demo-date">May 3</div>
-                  <div className="play-demo-stars">
-                    <span style={{ color: "#c9a827" }}>★★★</span><span style={{ color: "#ccc" }}>☆☆</span>
+                  {/* Sharpie stars — bottom right */}
+                  <div style={{ position: "absolute", bottom: 6, right: 24, display: "flex", gap: 0, alignItems: "center" }}>
+                    {[
+                      "M12 1 L14.5 8 L22 9.5 L16.5 14.5 L18 22 L12 18 L6 22 L7.5 14.5 L2 9.5 L9.5 8 Z",
+                      "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
+                      "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
+                    ].map((d, i) => (
+                      <svg key={i} width={14} height={14} viewBox="0 0 24 24" style={{ display: "block" }}>
+                        <path d={d} fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
+                          style={{ transform: `rotate(${[-3, 2, -1][i]}deg)`, transformOrigin: "center" }} />
+                      </svg>
+                    ))}
                   </div>
                   <div className="play-demo-headphones">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
