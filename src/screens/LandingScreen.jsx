@@ -1565,7 +1565,7 @@ function LandingScreen({ onSignIn }) {
                   <span className="play-demo-brand-left">T-120 KODAK</span>
                   <span className="play-demo-brand-right">VHS</span>
                   <img
-                    src="https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.png"
+                    src="https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png"
                     alt="Iron Man 3"
                     crossOrigin="anonymous"
                     style={{
