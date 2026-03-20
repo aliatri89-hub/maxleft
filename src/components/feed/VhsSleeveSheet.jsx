@@ -94,22 +94,40 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const startY = useRef(0);
   const currentY = useRef(0);
 
-  // Lazy-load heavy detail fields (stripped from feed query to save bandwidth)
+  // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
-    // Already have detail data (either from a previous open or from full feed data)
     if (merged.overview !== undefined || data.credits !== undefined) return;
     let cancelled = false;
-    supabase
-      .from("media")
-      .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths")
-      .eq("tmdb_id", data.tmdb_id)
-      .maybeSingle()
-      .then(({ data: d }) => {
-        if (cancelled || !d) return;
-        setDetail(d);
+    (async () => {
+      // Try media table first (fast, cached for logged films)
+      const { data: d } = await supabase
+        .from("media")
+        .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths")
+        .eq("tmdb_id", data.tmdb_id)
+        .maybeSingle();
+
+      if (cancelled) return;
+      if (d) { setDetail(d); return; }
+
+      // Fallback: fetch from TMDB API (browse cards — film not in media table)
+      const type = (data.media_type === "show") ? "tv" : "movie";
+      const tmdbDetail = await apiProxy("tmdb_details", {
+        tmdb_id: String(data.tmdb_id), type, append: "credits",
       });
+      if (cancelled || !tmdbDetail || tmdbDetail.error) return;
+      setDetail({
+        overview: tmdbDetail.overview || null,
+        tagline: tmdbDetail.tagline || null,
+        budget: tmdbDetail.budget || null,
+        revenue: tmdbDetail.revenue || null,
+        runtime: tmdbDetail.runtime || null,
+        credits: tmdbDetail.credits || null,
+        production_companies: tmdbDetail.production_companies || null,
+        still_paths: null,
+      });
+    })();
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
 
@@ -495,7 +513,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               }}>
                 <div style={{
                   fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 7, fontWeight: 600,
+                  fontSize: 8, fontWeight: 600,
                   color: "rgba(240,235,225,0.3)",
                   textTransform: "uppercase",
                   letterSpacing: "0.12em",
@@ -504,8 +522,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 {cast.slice(0, 3).map((name, i) => (
                   <div key={i} style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 600, fontSize: 12,
-                    color: "rgba(240,235,225,0.65)",
+                    fontWeight: 600, fontSize: 14,
+                    color: "rgba(240,235,225,0.75)",
                     lineHeight: 1.4,
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{name}</div>
@@ -524,7 +542,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }}>
 
           {/* Director + Cast — VHS billing block */}
-          {(director || cast.length > 0) && (
+          {/* Cast shown here only when NOT already displayed next to the still */}
+          {(director || (cast.length > 0 && extraBackdrops.length === 0)) && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               borderBottom: "1px solid rgba(240,235,225,0.06)",
@@ -533,7 +552,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               {director && (
                 <div style={{
                   display: "flex", alignItems: "baseline", justifyContent: "center",
-                  gap: 6, marginBottom: cast.length > 0 ? 8 : 0,
+                  gap: 6, marginBottom: (cast.length > 0 && extraBackdrops.length === 0) ? 8 : 0,
                 }}>
                   <span style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
@@ -549,7 +568,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   }}>{director}</span>
                 </div>
               )}
-              {cast.length > 0 && (<>
+              {cast.length > 0 && extraBackdrops.length === 0 && (<>
                 {/* Top 3 billed — same size names, no connectors */}
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 10px" }}>
                   {cast.slice(0, 3).map((name, i) => (
