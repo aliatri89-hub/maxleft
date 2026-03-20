@@ -82,8 +82,8 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [screen, setScreen] = useState("loading");
-  const [activeTab, setActiveTab] = useState("feed");
-  const [visitedTabs, setVisitedTabs] = useState(new Set(["feed"]));
+  const [activeTab, setActiveTab] = useState("explore");
+  const [visitedTabs, setVisitedTabs] = useState(new Set(["explore"]));
   const navTapCount = useRef(0);
   const navTapTimer = useRef(null);
   const feedTapCount = useRef(0);
