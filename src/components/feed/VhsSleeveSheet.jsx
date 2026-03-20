@@ -114,7 +114,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       // Try media table first (fast, cached for logged films)
       const { data: d } = await supabase
         .from("media")
-        .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths")
+        .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths,creator")
         .eq("tmdb_id", data.tmdb_id)
         .maybeSingle();
 
@@ -170,7 +170,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   // Merge lazy detail into data
   const merged = detail ? { ...data, ...detail,
-    director: data.director || (detail.credits?.crew?.find(c => c.job === "Director")?.name) || data.creator || null,
+    director: data.director || (detail.credits?.crew?.find(c => c.job === "Director")?.name) || detail?.creator || data.creator || null,
     cast_names: data.cast_names?.length ? data.cast_names : (detail.credits?.cast?.slice(0,6).map(c => c?.name).filter(Boolean) || []),
     studio_names: data.studio_names?.length ? data.studio_names : (Array.isArray(detail.production_companies) ? detail.production_companies.slice(0,3).map(c => ({ name: c?.name || c, logo_url: c?.logo_path ? ("https://image.tmdb.org/t/p/w92" + c.logo_path) : null })).filter(s => s.name) : []),
   } : data;
