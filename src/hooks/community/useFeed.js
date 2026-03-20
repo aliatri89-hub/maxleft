@@ -6,18 +6,14 @@ import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } fro
  * useFeed — Home feed data hook.
  *
  * Architecture:
- *   1. fetchAllData()        — 11 parallel Supabase queries
+ *   1. fetchAllData()        — 10 parallel Supabase queries
  *   2. groupAndMergeLogs()   — dedupe logs by tmdb_id, merge community contexts
  *   3. mergeShelfLogs()      — fold in personal shelf logs not already covered
  *   4. buildEpisodePipeline()— split episodes by status, dedupe upcoming
- *   5. buildActivityFeed()   — pure chronological logs + badge completions
- *   6. buildDiscoverFeed()   — 8-HOUR DRIP ENGINE: epoch-rotated card queue where
- *                              passive discovery cards (random/badge-nudge/up_next/trending)
- *                              drop every 8h in round-robin. Event-driven cards override:
- *                              episode drops (air_date), coming soon (7d before air_date),
- *                              and active badge progress (last_progress_at within 3d).
- *   7. buildAllFeed()        — interleaves discovery cards into the chronological stream
- *   8. enrichMedia()         — background poster + logo patching
+ *   5. buildActivityFeed()   — pure chronological movie logs (nothing else)
+ *   6. buildDiscoverFeed()   — flat list of discovery cards (episodes, badges,
+ *                              up_next, random, trending). Drop system TBD.
+ *   7. enrichMedia()         — background poster + logo patching
  */
 
 // ════════════════════════════════════════════════
@@ -114,26 +110,19 @@ function fetchAllData(userId, subscribedIds) {
       .order("watched_at", { ascending: false, nullsFirst: false })
       .limit(100),
 
-    // 6. Recently earned badges
-    supabase
-      .from("feed_badge_completions")
-      .select("*")
-      .eq("user_id", userId)
-      .gte("earned_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-
-    // 7. Community slug ↔ id mapping
+    // 6. Community slug ↔ id mapping
     supabase
       .from("community_pages")
       .select("id, slug"),
 
-    // 8. Up Next
+    // 7. Up Next
     supabase
       .from("feed_up_next")
       .select("*")
       .eq("user_id", userId)
       .limit(8),
 
-    // 9. Random unwatched
+    // 8. Random unwatched
     subscribedIds?.size > 0
       ? supabase.rpc("feed_random_unwatched", {
           p_user_id: userId,
@@ -141,10 +130,10 @@ function fetchAllData(userId, subscribedIds) {
         })
       : Promise.resolve({ data: [], error: null }),
 
-    // 10. Unified episodes
+    // 9. Unified episodes
     supabase.rpc("feed_episodes_v2", { p_user_id: userId }),
 
-    // 11. Awards miniseries IDs (excluded from Up Next)
+    // 10. Awards miniseries IDs (excluded from Up Next)
     supabase
       .from("community_miniseries")
       .select("id")
@@ -420,38 +409,27 @@ function filterTrending(rawTrending, subscribedSlugs) {
     .filter(t => t.communities.length > 0);
 }
 
-function filterCompletions(rawCompletions, subscribedIds) {
-  return subscribedIds
-    ? rawCompletions.filter(c => !c.community_id || subscribedIds.has(c.community_id))
-    : rawCompletions;
-}
+
 
 // ════════════════════════════════════════════════
-// CHRONOLOGICAL STREAM (shared by Activity + All)
+// FEED BUILDERS
 // ════════════════════════════════════════════════
 
-function buildChronoStream(mergedGroups, filteredCompletions) {
-  const logCards = [...mergedGroups.values()]
+/**
+ * buildActivityFeed — pure chronological movie logs. Nothing else.
+ */
+function buildActivityFeed(mergedGroups) {
+  const sorted = [...mergedGroups.values()]
     .sort((a, b) => {
       const diff = new Date(b.logged_at || 0) - new Date(a.logged_at || 0);
       if (diff !== 0) return diff;
       return new Date(b._created_at || 0) - new Date(a._created_at || 0);
     });
 
-  const completionCards = filteredCompletions
-    .map(c => ({ type: "badge_complete", data: c, sortDate: new Date(c.earned_at || 0) }));
-
-  const logCardsWithDate = logCards
-    .map(l => ({ type: "log", data: l, sortDate: new Date(l.logged_at || 0) }));
-
-  const stream = [...logCardsWithDate, ...completionCards]
-    .sort((a, b) => b.sortDate - a.sortDate);
-
   // Fix series progress: older logs show lower counts
   const seriesSeenCount = {};
-  for (const item of stream) {
-    if (item.type !== "log") continue;
-    for (const c of item.data.communities) {
+  for (const log of sorted) {
+    for (const c of log.communities) {
       const key = `${c.community_slug}_${c.series_title}`;
       if (!seriesSeenCount[key]) seriesSeenCount[key] = 0;
       const offset = seriesSeenCount[key];
@@ -462,183 +440,56 @@ function buildChronoStream(mergedGroups, filteredCompletions) {
     }
   }
 
-  return stream;
-}
-
-// ════════════════════════════════════════════════
-// FEED BUILDERS
-// ════════════════════════════════════════════════
-
-function buildActivityFeed(chronoStream) {
-  const ACTIVITY_TYPES = new Set(["log", "badge_complete"]);
-  return chronoStream
-    .filter(item => ACTIVITY_TYPES.has(item.type))
-    .map(item => ({ type: item.type, data: item.data }));
+  return sorted.map(data => ({ type: "log", data }));
 }
 
 /**
- * buildDiscoverFeed — 8-hour drip engine.
- *
- * Every 8 hours a new discovery card "drops" to the top of the feed.
- * Three passive pools rotate round-robin: random → up_next → trending.
- *
- * Event-driven cards override the rotation (sorted by real timestamps):
- *   - Dropped/published episodes: air_date as drop time
- *   - Upcoming episodes: "drop" 7 days before air_date
- *   - Badge progress updates: last_progress_at as drop time (when the user
- *     recently watched something toward a badge, it surfaces organically)
- *
- * Badges with no recent activity (>3 days) fall into the epoch rotation
- * as passive nudges alongside random/up_next/trending.
- *
- * Everything is sorted by drop time (newest first).
+ * buildDiscoverFeed — flat discovery card list.
+ * Simple static ordering for now. Drop system TBD.
  */
-const EPOCH_MS = 8 * 60 * 60 * 1000; // 8 hours
-const BADGE_ACTIVE_WINDOW_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
-
 function buildDiscoverFeed({ upcomingCards, droppedEpisodes, randomPicks, sortedBadges, filteredUpNext, filteredTrending }) {
-  const now = Date.now();
-  const currentEpoch = Math.floor(now / EPOCH_MS);
-
   const feed = [];
   const seenKeys = new Set();
 
-  const tryPush = (type, data, dropTime) => {
+  const tryPush = (type, data) => {
     const key = data.tmdb_id || data.item_id || data.badge_id || data.title || data.badge_name;
-    if (key && seenKeys.has(key)) return false;
+    if (key && seenKeys.has(key)) return;
     if (key) seenKeys.add(key);
-    feed.push({ type, data, _dropTime: dropTime });
-    return true;
+    feed.push({ type, data });
   };
 
-  // ── Event-driven: dropped/published episodes ──
-  for (const ep of droppedEpisodes) {
-    const t = ep.air_date ? new Date(ep.air_date).getTime() : now;
-    tryPush("episode", ep, t);
-  }
+  // Episodes first (dropped/published, then upcoming)
+  for (const ep of droppedEpisodes) tryPush("episode", ep);
+  for (const ep of upcomingCards) tryPush("episode", ep);
 
-  // ── Event-driven: upcoming (coming soon) episodes ──
-  for (const ep of upcomingCards) {
-    const airMs = ep.air_date ? new Date(ep.air_date).getTime() : now;
-    const airEpoch = Math.floor(airMs / EPOCH_MS);
-    const dropEpoch = airEpoch - 21; // ~7 days before
-    let dropTime = dropEpoch * EPOCH_MS;
-    dropTime = Math.min(dropTime, now);
-    dropTime = Math.max(dropTime, now - 30 * 24 * 3600 * 1000);
-    tryPush("episode", ep, dropTime);
-  }
-
-  // ── Split badges: active progress vs. passive nudge ──
-  const activeBadges = [];
-  const passiveBadges = [];
-  for (const b of sortedBadges) {
-    const progressMs = b.last_progress_at ? new Date(b.last_progress_at).getTime() : 0;
-    if (progressMs > 0 && (now - progressMs) < BADGE_ACTIVE_WINDOW_MS) {
-      activeBadges.push(b);
-    } else {
-      passiveBadges.push(b);
-    }
-  }
-
-  // ── Event-driven: active badge progress ──
-  // User recently watched something in this badge's series → drop with real timestamp
-  for (const b of activeBadges) {
-    const t = new Date(b.last_progress_at).getTime();
-    tryPush("badge", b, t);
-  }
-
-  // ── Epoch-rotated: passive discovery card pools ──
+  // Then interleave the passive pools
   const pools = [
-    { type: "random_pick", items: randomPicks.slice(0, 8) },
-    { type: "badge",       items: passiveBadges.slice(0, 8) },
-    { type: "up_next",     items: filteredUpNext.slice(0, 8) },
-    { type: "trending",    items: filteredTrending.slice(0, 8) },
+    { type: "badge",       items: sortedBadges },
+    { type: "up_next",     items: filteredUpNext },
+    { type: "random_pick", items: randomPicks },
+    { type: "trending",    items: filteredTrending },
   ];
 
-  const poolCount = pools.length;
+  // Round-robin across pools so card types alternate
+  let added = true;
+  let cursor = 0;
   const poolCursors = pools.map(() => 0);
-  let slotsAssigned = 0;
-  const maxSlots = pools.reduce((sum, p) => sum + p.items.length, 0);
-
-  for (let e = currentEpoch; slotsAssigned < maxSlots && (currentEpoch - e) < 90; e--) {
-    const pIdx = ((e % poolCount) + poolCount) % poolCount;
-    const pool = pools[pIdx];
-    const cIdx = poolCursors[pIdx];
-
-    if (cIdx < pool.items.length) {
-      const dropTime = e * EPOCH_MS;
-      poolCursors[pIdx]++;
-      if (tryPush(pool.type, pool.items[cIdx], dropTime)) {
-        slotsAssigned++;
+  while (added) {
+    added = false;
+    for (let p = 0; p < pools.length; p++) {
+      const pool = pools[p];
+      const idx = poolCursors[p];
+      if (idx < pool.items.length) {
+        tryPush(pool.type, pool.items[idx]);
+        poolCursors[p]++;
+        added = true;
       }
     }
+    cursor++;
+    if (cursor > 50) break; // safety
   }
 
-  // Sort newest first
-  feed.sort((a, b) => b._dropTime - a._dropTime);
-
-  // Strip internal timing field
-  return feed.map(({ _dropTime, ...card }) => card);
-}
-
-function buildAllFeed({ chronoStream, allEpisodes, filteredUpNext, randomPicks, sortedBadges, filteredTrending }) {
-  const cards = [];
-  let upNextIdx = 0;
-  let badgeIdx = 0;
-  let trendingIdx = 0;
-  let episodesInserted = false;
-  let randomInserted = false;
-  let logCount = 0;
-
-  for (const item of chronoStream) {
-    cards.push({ type: item.type, data: item.data });
-
-    if (item.type === "log") {
-      logCount++;
-
-      if (logCount === 1) {
-        if (!episodesInserted && allEpisodes.length > 0) {
-          for (const ep of allEpisodes) cards.push({ type: "episode", data: ep });
-          episodesInserted = true;
-        }
-        if (upNextIdx < filteredUpNext.length) {
-          cards.push({ type: "up_next", data: filteredUpNext[upNextIdx++] });
-        }
-      }
-
-      if (logCount === 2 && !randomInserted && randomPicks.length > 0) {
-        cards.push({ type: "random_pick", data: randomPicks[0] });
-        randomInserted = true;
-      }
-
-      if (logCount === 3 && badgeIdx < sortedBadges.length) {
-        cards.push({ type: "badge", data: sortedBadges[badgeIdx++] });
-      }
-
-      if (logCount === 5 && trendingIdx < filteredTrending.length) {
-        cards.push({ type: "trending", data: filteredTrending[trendingIdx++] });
-      }
-
-      if (logCount === 7 && badgeIdx < sortedBadges.length) {
-        cards.push({ type: "badge", data: sortedBadges[badgeIdx++] });
-      }
-
-      if (logCount === 9 && upNextIdx < filteredUpNext.length) {
-        cards.push({ type: "up_next", data: filteredUpNext[upNextIdx++] });
-      }
-    }
-  }
-
-  // Fallback: if too few logs to trigger interleave slots
-  if (!episodesInserted && allEpisodes.length > 0) {
-    for (const ep of allEpisodes) cards.push({ type: "episode", data: ep });
-  }
-  if (upNextIdx === 0 && filteredUpNext.length > 0) cards.push({ type: "up_next", data: filteredUpNext[0] });
-  if (!randomInserted && randomPicks.length > 0) cards.push({ type: "random_pick", data: randomPicks[0] });
-  if (badgeIdx === 0 && sortedBadges.length > 0) cards.push({ type: "badge", data: sortedBadges[0] });
-  if (trendingIdx === 0 && filteredTrending.length > 0) cards.push({ type: "trending", data: filteredTrending[0] });
-
-  return cards;
+  return feed;
 }
 
 // ════════════════════════════════════════════════
@@ -646,13 +497,15 @@ function buildAllFeed({ chronoStream, allEpisodes, filteredUpNext, randomPicks, 
 // ════════════════════════════════════════════════
 
 function enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRenderTick) {
-  const allCards = feedBucketsRef.current.all;
-
-  // Collect ALL data objects across all buckets (shared refs)
+  // Collect ALL data objects across all buckets
   const allDataObjects = new Set();
+  const allCards = [];
   for (const bucket of Object.values(feedBucketsRef.current)) {
     for (const card of bucket) {
-      if (card.data) allDataObjects.add(card.data);
+      if (card.data) {
+        allDataObjects.add(card.data);
+        allCards.push(card);
+      }
     }
   }
 
@@ -731,7 +584,7 @@ const PAGE_SIZE = 15;
 export function useFeed(userId, subscribedIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
-  const feedBucketsRef = useRef({ all: [], activity: [], discover: [] });
+  const feedBucketsRef = useRef({ activity: [], discover: [] });
   const fetchGenRef = useRef(0);
   const [discoverVisible, setDiscoverVisible] = useState(PAGE_SIZE);
   const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
@@ -747,13 +600,11 @@ export function useFeed(userId, subscribedIds) {
   const { discoverItems, activityItems, hasMoreDiscover, hasMoreActivity } = useMemo(() => {
     const discoverBucket = feedBucketsRef.current.discover || [];
     const activityBucket = feedBucketsRef.current.activity || [];
-    // Activity feed = logs only (no badge_complete cards)
-    const activityLogsOnly = activityBucket.filter(item => item.type === "log");
     return {
       discoverItems: discoverBucket.slice(0, discoverVisible),
-      activityItems: activityLogsOnly.slice(0, activityVisible),
+      activityItems: activityBucket.slice(0, activityVisible),
       hasMoreDiscover: discoverVisible < discoverBucket.length,
-      hasMoreActivity: activityVisible < activityLogsOnly.length,
+      hasMoreActivity: activityVisible < activityBucket.length,
     };
   }, [discoverVisible, activityVisible, renderTick]);
 
@@ -765,7 +616,7 @@ export function useFeed(userId, subscribedIds) {
     try {
       const [
         logsRes, badgesRes, trendingRes, badgeLookupRes, shelfRes,
-        completionsRes, communityPagesRes, upNextRes, randomRes,
+        communityPagesRes, upNextRes, randomRes,
         episodesRes, awardsMiniseriesRes,
       ] = await fetchAllData(userId, subscribedIds);
 
@@ -777,7 +628,6 @@ export function useFeed(userId, subscribedIds) {
       const rawTrending = trendingRes.data || [];
       const rawBadgeLookup = badgeLookupRes.data || [];
       const rawShelfLogs = shelfRes.data || [];
-      const rawCompletions = completionsRes.data || [];
       const communityPages = communityPagesRes.data || [];
       const rawUpNext = upNextRes.data || [];
       const rawRandom = randomRes.data || [];
@@ -798,7 +648,7 @@ export function useFeed(userId, subscribedIds) {
       mergeShelfLogs(mergedGroups, rawShelfLogs);
 
       // ── Process episodes ──
-      const { droppedEpisodes, upcomingCards, episodeTmdbIds, allEpisodes } =
+      const { droppedEpisodes, upcomingCards, episodeTmdbIds } =
         buildEpisodePipeline(rawEpisodesAll, subscribedIds);
 
       // ── Random picks (stable) ──
@@ -806,28 +656,19 @@ export function useFeed(userId, subscribedIds) {
 
       // ── Filter pools ──
       const sortedBadges = filterBadges(rawBadges, subscribedIds);
-      const filteredCompletions = filterCompletions(rawCompletions, subscribedIds);
       const filteredUpNext = filterUpNext(rawUpNext, subscribedIds, awardsMiniseriesIds);
       const filteredTrending = filterTrending(rawTrending, subscribedSlugs);
 
-      // ── Build chronological stream ──
-      const chronoStream = buildChronoStream(mergedGroups, filteredCompletions);
-
-      // ── Assemble three feeds ──
-      const activityCards = buildActivityFeed(chronoStream);
+      // ── Assemble feeds ──
+      const activityCards = buildActivityFeed(mergedGroups);
 
       const discoverCards = buildDiscoverFeed({
         upcomingCards, droppedEpisodes, randomPicks,
         sortedBadges, filteredUpNext, filteredTrending,
       });
 
-      const allCards = buildAllFeed({
-        chronoStream, allEpisodes, filteredUpNext,
-        randomPicks, sortedBadges, filteredTrending,
-      });
-
       // ── Commit buckets ──
-      feedBucketsRef.current = { all: allCards, activity: activityCards, discover: discoverCards };
+      feedBucketsRef.current = { activity: activityCards, discover: discoverCards };
       setDiscoverVisible(PAGE_SIZE);
       setActivityVisible(PAGE_SIZE);
       setRenderTick(t => t + 1);
