@@ -95,32 +95,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
 
-  // ── Hybrid scroll: infinite for first AUTO_SCROLL_LIMIT items, then manual ──
-  const AUTO_SCROLL_LIMIT = 50;
-
-  // ── Infinite scroll — discover feed (auto up to limit) ──
-  useEffect(() => {
-    const el = discoverSentinelRef.current;
-    if (!el || !hasMoreDiscover || feedMode !== "discover" || discoverItems.length >= AUTO_SCROLL_LIMIT) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) loadMoreDiscover(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMoreDiscover, loadMoreDiscover, discoverItems.length, feedMode]);
-
-  // ── Infinite scroll — activity feed (auto up to limit) ──
-  useEffect(() => {
-    const el = activitySentinelRef.current;
-    if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= AUTO_SCROLL_LIMIT) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
+  // ── Load more is always manual (sliding window — auto-scroll would cause items to vanish from top) ──
 
   // ── Loading skeleton ──
   if (loading && discoverItems.length === 0 && activityItems.length === 0) {
@@ -275,8 +250,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             );
           });
         })()}
-        {hasMoreDiscover && discoverItems.length < AUTO_SCROLL_LIMIT && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
-        {hasMoreDiscover && discoverItems.length >= AUTO_SCROLL_LIMIT && (
+        {hasMoreDiscover && (
           <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
             <button onClick={loadMoreDiscover} style={{
               padding: "10px 28px", borderRadius: 10,
@@ -308,8 +282,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </FeedCard>
           ));
         })()}
-        {hasMoreActivity && activityItems.length < AUTO_SCROLL_LIMIT && <div ref={activitySentinelRef} style={{ height: 1 }} />}
-        {hasMoreActivity && activityItems.length >= AUTO_SCROLL_LIMIT && (
+        {hasMoreActivity && (
           <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
             <button onClick={loadMoreActivity} style={{
               padding: "10px 28px", borderRadius: 10,

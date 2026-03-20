@@ -580,14 +580,15 @@ function enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRender
 // ════════════════════════════════════════════════
 
 const PAGE_SIZE = 15;
+const MAX_DOM_CARDS = 30; // sliding window — never more than this in the DOM at once
 
 export function useFeed(userId, subscribedIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const feedBucketsRef = useRef({ activity: [], discover: [] });
   const fetchGenRef = useRef(0);
-  const [discoverVisible, setDiscoverVisible] = useState(PAGE_SIZE);
-  const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
+  const [discoverOffset, setDiscoverOffset] = useState(0);
+  const [activityOffset, setActivityOffset] = useState(0);
   const [renderTick, setRenderTick] = useState(0);
 
   const subscribedKey = subscribedIds
@@ -600,13 +601,15 @@ export function useFeed(userId, subscribedIds) {
   const { discoverItems, activityItems, hasMoreDiscover, hasMoreActivity } = useMemo(() => {
     const discoverBucket = feedBucketsRef.current.discover || [];
     const activityBucket = feedBucketsRef.current.activity || [];
+    const discoverEnd = Math.min(discoverOffset + MAX_DOM_CARDS, discoverBucket.length);
+    const activityEnd = Math.min(activityOffset + MAX_DOM_CARDS, activityBucket.length);
     return {
-      discoverItems: discoverBucket.slice(0, discoverVisible),
-      activityItems: activityBucket.slice(0, activityVisible),
-      hasMoreDiscover: discoverVisible < discoverBucket.length,
-      hasMoreActivity: activityVisible < activityBucket.length,
+      discoverItems: discoverBucket.slice(discoverOffset, discoverEnd),
+      activityItems: activityBucket.slice(activityOffset, activityEnd),
+      hasMoreDiscover: discoverEnd < discoverBucket.length,
+      hasMoreActivity: activityEnd < activityBucket.length,
     };
-  }, [discoverVisible, activityVisible, renderTick]);
+  }, [discoverOffset, activityOffset, renderTick]);
 
   const fetchFeed = useCallback(async (isExplicit = false) => {
     if (!userId) { setLoading(false); return; }
@@ -669,8 +672,8 @@ export function useFeed(userId, subscribedIds) {
 
       // ── Commit buckets ──
       feedBucketsRef.current = { activity: activityCards, discover: discoverCards };
-      setDiscoverVisible(PAGE_SIZE);
-      setActivityVisible(PAGE_SIZE);
+      setDiscoverOffset(0);
+      setActivityOffset(0);
       setRenderTick(t => t + 1);
 
       // ── Background media enrichment ──
@@ -685,11 +688,11 @@ export function useFeed(userId, subscribedIds) {
   }, [userId, subscribedKey]);
 
   const loadMoreDiscover = useCallback(() => {
-    setDiscoverVisible(prev => prev + PAGE_SIZE);
+    setDiscoverOffset(prev => prev + PAGE_SIZE);
   }, []);
 
   const loadMoreActivity = useCallback(() => {
-    setActivityVisible(prev => prev + PAGE_SIZE);
+    setActivityOffset(prev => prev + PAGE_SIZE);
   }, []);
 
   useEffect(() => {
