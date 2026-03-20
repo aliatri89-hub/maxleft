@@ -1181,13 +1181,38 @@ const DEMO_COMMUNITIES = [
   { name: "Blank Check with Griffin & David", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", color: "#4a9eff", stat: "Pod Country for Old Cast", done: 10, total: 21, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Fargoherodrop.jpg" },
 ];
 
-// ── Demo podcasts for play button demo (Iron Man 3 coverage) ──
-const DEMO_PLAY_PODCASTS = [
-  { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective" },
-  { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three" },
-  { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3" },
-  { name: "HDTGM", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", episode: "Iron Man 3" },
-  { name: "The Filmcast", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/b3/f9/44b3f953-fbae-4e99-4d82-4c2cc83630e5/mza_1552332279859047099.jpg/300x300bb.webp", episode: "Ep. 216 — Iron Man 3" },
+// ── Demo movies for play button demo (3 tapes, 3 audiences) ──
+const DEMO_PLAY_MOVIES = [
+  {
+    title: "Iron Man 3",
+    logo: "https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png",
+    brand: "T-120 KODAK",
+    podcasts: [
+      { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective" },
+      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three" },
+      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3" },
+    ],
+  },
+  {
+    title: "Barbie",
+    logo: "https://image.tmdb.org/t/p/original/nsMnkuWIZCBxkBLPi0ZXuRloYL2.png",
+    brand: "E-180 BASF",
+    podcasts: [
+      { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie" },
+      { name: "Unspooled", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/300x300bb.webp", episode: "Barbie (2023)" },
+      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza" },
+    ],
+  },
+  {
+    title: "Alien",
+    logo: "https://image.tmdb.org/t/p/original/2VtdN0UaK2RISxUgPw04oT4oWTO.png",
+    brand: "HGX MAXELL",
+    podcasts: [
+      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien" },
+      { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien" },
+      { name: "Eye of the Duck", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/0d/e1/1e/0de11e40-a1c4-22ee-19c1-408a3a03e46e/mza_12363992498403595498.jpg/300x300bb.webp", episode: "Alien (1979)" },
+    ],
+  },
 ];
 
 function LandingScreen({ onSignIn }) {
@@ -1214,6 +1239,9 @@ function LandingScreen({ onSignIn }) {
   // ── Play button demo state ───────────────────────────────
   const [showDemoPicker, setShowDemoPicker] = useState(false);
   const [demoPodcast, setDemoPodcast] = useState(null);
+  const [demoMovieIdx, setDemoMovieIdx] = useState(0);
+  const demoMovie = DEMO_PLAY_MOVIES[demoMovieIdx];
+  const cycleDemoMovie = () => { setDemoMovieIdx(i => (i + 1) % DEMO_PLAY_MOVIES.length); setShowDemoPicker(false); setDemoPodcast(null); };
 
   // ── Intersection observer for scroll reveals ──────────────
   useEffect(() => {
@@ -1559,23 +1587,25 @@ function LandingScreen({ onSignIn }) {
           <div className="play-demo-wrap">
             <div style={{ borderRadius: 4, overflow: "hidden" }}>
               {/* VHS Tape */}
-              <div className="play-demo-tape">
+              <div className="play-demo-tape" onClick={cycleDemoMovie} style={{ cursor: "pointer" }}>
                 <div className="play-demo-tape-end" />
                 <div className="play-demo-label">
-                  <span className="play-demo-brand-left">T-120 KODAK</span>
+                  <span className="play-demo-brand-left">{demoMovie.brand}</span>
                   <span className="play-demo-brand-right">VHS</span>
                   <img
-                    src="https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png"
-                    alt="Iron Man 3"
+                    key={demoMovie.title}
+                    src={demoMovie.logo}
+                    alt={demoMovie.title}
                     crossOrigin="anonymous"
                     style={{
-                      maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
+                      maxHeight: 54, minHeight: 36, maxWidth: "85%", width: "auto",
                       objectFit: "contain", position: "relative",
-                      filter: "brightness(0)", opacity: 0.8,
+                      opacity: 0.85,
+                      animation: "fadeIn 0.3s ease",
                     }}
                     onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
                   />
-                  <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>Iron Man 3</div>
+                  <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>{demoMovie.title}</div>
                   {/* Sharpie stars — bottom right */}
                   <div style={{ position: "absolute", bottom: 6, right: 24, display: "flex", gap: 0, alignItems: "center" }}>
                     {[
@@ -1624,7 +1654,7 @@ function LandingScreen({ onSignIn }) {
               </div>
               {/* Picker */}
               <div className={`play-demo-picker${showDemoPicker ? ' open' : ''}`}>
-                {DEMO_PLAY_PODCASTS.map((p, i) => (
+                {demoMovie.podcasts.map((p, i) => (
                   <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); setDemoPodcast(p); setShowDemoPicker(false); }}>
                     <img className="play-demo-picker-art" src={p.art} alt={p.name} />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -1646,6 +1676,23 @@ function LandingScreen({ onSignIn }) {
                 </div>
               </div>
             )}
+            {/* Movie dots */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12 }}>
+              {DEMO_PLAY_MOVIES.map((m, i) => (
+                <div
+                  key={i}
+                  onClick={() => { setDemoMovieIdx(i); setShowDemoPicker(false); setDemoPodcast(null); }}
+                  style={{
+                    width: i === demoMovieIdx ? 18 : 6,
+                    height: 6,
+                    borderRadius: 3,
+                    background: i === demoMovieIdx ? "var(--terracotta, #C75B3F)" : "rgba(255,255,255,0.15)",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                />
+              ))}
+            </div>
           </div>
           <div className="tap-hint">tap the play button</div>
         </div>
