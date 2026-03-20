@@ -47,8 +47,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const PULL_THRESHOLD = 70;
 
   const handleTouchStart = useCallback((e) => {
-    const el = scrollContainerRef.current;
-    const atTop = (el ? el.scrollTop <= 0 : true) && window.scrollY <= 0;
+    // Find the actual scroll container (tab-pane parent) rather than the feed div itself
+    const el = scrollContainerRef.current?.closest('.tab-pane') ?? scrollContainerRef.current;
+    const atTop = (el ? el.scrollTop <= 0 : true);
     if (atTop && !refreshing) {
       touchStartY.current = e.touches[0].clientY;
       isPulling.current = true;
@@ -200,9 +201,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       style={{
-        minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)",
+        background: "var(--bg-primary, #0f0d0b)",
         paddingBottom: 100,
-        overflowY: "auto", WebkitOverflowScrolling: "touch",
       }}
     >
       {/* Pull-to-refresh indicator */}
