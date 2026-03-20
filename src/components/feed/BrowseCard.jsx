@@ -409,12 +409,14 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         </div>
       </div>
     </div>
-    <VhsSleeveSheet
-      data={data}
-      open={sheetOpen}
-      onClose={closeSleeve}
-      onNavigateCommunity={onNavigateCommunity}
-    />
+    {sheetOpen && (
+      <VhsSleeveSheet
+        data={data}
+        open={sheetOpen}
+        onClose={closeSleeve}
+        onNavigateCommunity={onNavigateCommunity}
+      />
+    )}
     </>
   );
 }
