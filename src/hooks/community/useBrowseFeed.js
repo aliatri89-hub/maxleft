@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
-import { TMDB_IMG, fetchTMDBNowPlaying, fetchTMDBDiscover } from "../../utils/api";
+import { TMDB_IMG, fetchTMDBDiscover } from "../../utils/api";
 import { fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
 
 /**
@@ -98,9 +98,17 @@ export function useBrowseFeed(mode) {
 
     try {
       while (accumulated.length < TARGET_ITEMS && page <= MAX_PAGES) {
-        const data = mode === "releases"
-          ? await fetchTMDBNowPlaying(page)
-          : await fetchTMDBDiscover(page);
+        // Releases: popular films from last 6 months (bigger pool than now_playing)
+        // Streaming: popular films on major streaming services
+        const discoverOpts = mode === "releases"
+          ? {
+              releaseDateGte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+              releaseDateLte: new Date().toISOString().slice(0, 10),
+            }
+          : {
+              providers: "8|9|337|384|15|350|531|386",
+            };
+        const data = await fetchTMDBDiscover(page, discoverOpts);
 
         if (!mountedRef.current) return;
         if (!data || data.error || !data.results?.length) {

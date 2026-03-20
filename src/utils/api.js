@@ -124,17 +124,26 @@ export const fetchTMDBNowPlaying = async (page = 1, region = "US") => {
 };
 
 // Discover — streaming movies filtered by watch providers
+// Discover movies — flexible: streaming (with providers) or new releases (with dates)
 // Default providers: Netflix(8), Prime(9), Disney+(337), HBO Max(384),
 //   Hulu(15), Apple TV+(350), Paramount+(531), Peacock(386)
 export const fetchTMDBDiscover = async (page = 1, options = {}) => {
-  const data = await apiProxy("tmdb_discover", {
+  const params = {
     page: String(page),
-    watch_region: options.region || "US",
-    with_watch_providers: options.providers || "8|9|337|384|15|350|531|386",
     sort_by: options.sortBy || "popularity.desc",
-    with_watch_monetization_types: options.monetization || "flatrate",
-  });
-  return data; // { results, page, total_pages, total_results }
+  };
+  // Provider filters (streaming tab)
+  if (options.providers) {
+    params.watch_region = options.region || "US";
+    params.with_watch_providers = options.providers;
+    params.with_watch_monetization_types = options.monetization || "flatrate";
+  }
+  // Date range filters (new releases tab)
+  if (options.releaseDateGte) params.release_date_gte = options.releaseDateGte;
+  if (options.releaseDateLte) params.release_date_lte = options.releaseDateLte;
+
+  const data = await apiProxy("tmdb_discover", params);
+  return data;
 };
 
 // Raw Google Books search (returns the full API response)

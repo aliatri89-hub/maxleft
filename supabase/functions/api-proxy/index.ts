@@ -173,18 +173,27 @@ async function handleTmdbDiscover(params: Record<string, string>) {
     with_watch_providers,
     sort_by = "popularity.desc",
     with_watch_monetization_types = "flatrate",
+    release_date_gte,
+    release_date_lte,
   } = params;
 
-  const providerStr = with_watch_providers || "8|9|337|384|15|350|531|386";
-  const cacheKey = `tmdb:discover:${watch_region}:${providerStr}:${sort_by}:${page}`;
+  const cacheKey = `tmdb:discover:${watch_region}:${with_watch_providers || "none"}:${sort_by}:${release_date_gte || ""}:${release_date_lte || ""}:${page}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
-  const res = await fetch(
-    `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&language=en-US&sort_by=${sort_by}` +
-    `&watch_region=${watch_region}&with_watch_providers=${providerStr}` +
-    `&with_watch_monetization_types=${with_watch_monetization_types}&page=${page}`
-  );
+  let url = `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&language=en-US&sort_by=${sort_by}&page=${page}`;
+
+  // Provider filters (streaming tab)
+  if (with_watch_providers) {
+    url += `&watch_region=${watch_region}&with_watch_providers=${with_watch_providers}`;
+    url += `&with_watch_monetization_types=${with_watch_monetization_types}`;
+  }
+
+  // Date range filters (new releases tab)
+  if (release_date_gte) url += `&primary_release_date.gte=${release_date_gte}`;
+  if (release_date_lte) url += `&primary_release_date.lte=${release_date_lte}`;
+
+  const res = await fetch(url);
   const data = await res.json();
   setCache(cacheKey, data);
   return data;
