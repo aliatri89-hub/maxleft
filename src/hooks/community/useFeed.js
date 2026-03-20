@@ -572,15 +572,14 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
 // ════════════════════════════════════════════════
 
 const PAGE_SIZE = 15;
-const MAX_DOM_CARDS = 30; // sliding window — never more than this in the DOM at once
 
 export function useFeed(userId, subscribedIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const feedBucketsRef = useRef({ activity: [], discover: [] });
   const fetchGenRef = useRef(0);
-  const [discoverOffset, setDiscoverOffset] = useState(0);
-  const [activityOffset, setActivityOffset] = useState(0);
+  const [discoverVisible, setDiscoverVisible] = useState(PAGE_SIZE);
+  const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
   const [renderTick, setRenderTick] = useState(0);
 
   const subscribedKey = subscribedIds
@@ -593,15 +592,13 @@ export function useFeed(userId, subscribedIds) {
   const { discoverItems, activityItems, hasMoreDiscover, hasMoreActivity } = useMemo(() => {
     const discoverBucket = feedBucketsRef.current.discover || [];
     const activityBucket = feedBucketsRef.current.activity || [];
-    const discoverEnd = Math.min(discoverOffset + MAX_DOM_CARDS, discoverBucket.length);
-    const activityEnd = Math.min(activityOffset + MAX_DOM_CARDS, activityBucket.length);
     return {
-      discoverItems: discoverBucket.slice(discoverOffset, discoverEnd),
-      activityItems: activityBucket.slice(activityOffset, activityEnd),
-      hasMoreDiscover: discoverEnd < discoverBucket.length,
-      hasMoreActivity: activityEnd < activityBucket.length,
+      discoverItems: discoverBucket.slice(0, discoverVisible),
+      activityItems: activityBucket.slice(0, activityVisible),
+      hasMoreDiscover: discoverVisible < discoverBucket.length,
+      hasMoreActivity: activityVisible < activityBucket.length,
     };
-  }, [discoverOffset, activityOffset, renderTick]);
+  }, [discoverVisible, activityVisible, renderTick]);
 
   const fetchFeed = useCallback(async (isExplicit = false) => {
     if (!userId) { setLoading(false); return; }
@@ -664,13 +661,13 @@ export function useFeed(userId, subscribedIds) {
 
       // ── Commit buckets ──
       feedBucketsRef.current = { activity: activityCards, discover: discoverCards };
-      setDiscoverOffset(0);
-      setActivityOffset(0);
+      setDiscoverVisible(PAGE_SIZE);
+      setActivityVisible(PAGE_SIZE);
       setRenderTick(t => t + 1);
 
       // ── Background media enrichment — only visible window to avoid OOM on mobile ──
-      const initialActivity = activityCards.slice(0, MAX_DOM_CARDS);
-      const initialDiscover = discoverCards.slice(0, MAX_DOM_CARDS);
+      const initialActivity = activityCards.slice(0, PAGE_SIZE * 2);
+      const initialDiscover = discoverCards.slice(0, PAGE_SIZE * 2);
       enrichMedia([...initialActivity, ...initialDiscover], thisGen, fetchGenRef, mountedRef, setRenderTick);
 
     } catch (err) {
@@ -682,31 +679,12 @@ export function useFeed(userId, subscribedIds) {
   }, [userId, subscribedKey]);
 
   const loadMoreDiscover = useCallback(() => {
-    setDiscoverOffset(prev => prev + PAGE_SIZE);
+    setDiscoverVisible(prev => prev + PAGE_SIZE);
   }, []);
 
   const loadMoreActivity = useCallback(() => {
-    setActivityOffset(prev => prev + PAGE_SIZE);
+    setActivityVisible(prev => prev + PAGE_SIZE);
   }, []);
-
-  // Enrich newly visible items when the window advances
-  useEffect(() => {
-    const bucket = feedBucketsRef.current.activity || [];
-    if (!bucket.length) return;
-    const end = Math.min(activityOffset + MAX_DOM_CARDS, bucket.length);
-    const newSlice = bucket.slice(activityOffset, end);
-    const gen = fetchGenRef.current;
-    enrichMedia(newSlice, gen, fetchGenRef, mountedRef, setRenderTick);
-  }, [activityOffset]);
-
-  useEffect(() => {
-    const bucket = feedBucketsRef.current.discover || [];
-    if (!bucket.length) return;
-    const end = Math.min(discoverOffset + MAX_DOM_CARDS, bucket.length);
-    const newSlice = bucket.slice(discoverOffset, end);
-    const gen = fetchGenRef.current;
-    enrichMedia(newSlice, gen, fetchGenRef, mountedRef, setRenderTick);
-  }, [discoverOffset]);
 
   useEffect(() => {
     mountedRef.current = true;
