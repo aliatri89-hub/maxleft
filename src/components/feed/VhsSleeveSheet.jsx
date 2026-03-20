@@ -211,27 +211,19 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
 
-        const picks = [];
-        if (clean.length >= 4) {
-          const a = Math.max(1, Math.floor(clean.length * 0.25));
-          const b = Math.min(clean.length - 1, Math.floor(clean.length * 0.65));
-          picks.push(clean[a], clean[b]);
-        } else if (clean.length >= 2) {
-          picks.push(clean[0], clean[clean.length - 1]);
-        } else if (clean.length === 1) {
-          picks.push(clean[0]);
-        }
+        // Pick 1 best still — single clean image looks intentional,
+        // two similar stills looks like a bug
+        const pick = clean.length > 0 ? clean[0] : null;
 
-        if (!cancelled && picks.length) {
-          // Final dedup — ensure no duplicate paths in the pick set
-          const uniquePaths = [...new Set(picks.map(b => b.file_path))];
-          const stills = uniquePaths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
+        if (!cancelled && pick) {
+          const paths = [pick.file_path];
+          const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
           setExtraBackdrops(stills);
 
           // Write back to media so next open (by anyone) is instant
           supabase
             .from("media")
-            .update({ still_paths: uniquePaths })
+            .update({ still_paths: paths })
             .eq("tmdb_id", data.tmdb_id)
             .then(() => {});
         }
@@ -469,7 +461,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }}>
             {extraBackdrops.map((url, i) => (
               <div key={i} style={{
-                flex: 1, maxWidth: "48%", aspectRatio: "16/9",
+                flex: extraBackdrops.length === 1 ? "none" : 1,
+                width: extraBackdrops.length === 1 ? "70%" : "auto",
+                maxWidth: extraBackdrops.length === 1 ? "70%" : "48%",
+                aspectRatio: "16/9",
                 borderRadius: 2, overflow: "hidden", position: "relative",
                 border: "2px solid rgba(240,235,225,0.18)",
                 boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
