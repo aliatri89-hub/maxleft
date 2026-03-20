@@ -1,4 +1,5 @@
 export { default as LogCard } from "./LogCard";
+export { default as BrowseCard } from "./BrowseCard";
 export { default as EpisodeCard } from "./EpisodeCard";
 export { default as BadgeCard } from "./BadgeCard";
 export { default as BadgeCompleteCard } from "./BadgeCompleteCard";

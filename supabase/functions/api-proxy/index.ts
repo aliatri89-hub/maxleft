@@ -152,6 +152,44 @@ async function handleGoogleBooks(params: Record<string, string>) {
   return data;
 }
 
+async function handleTmdbNowPlaying(params: Record<string, string>) {
+  const { page = "1", region = "US" } = params;
+  const cacheKey = `tmdb:now_playing:${region}:${page}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const res = await fetch(
+    `${TMDB_BASE}/movie/now_playing?api_key=${TMDB_KEY}&language=en-US&region=${region}&page=${page}`
+  );
+  const data = await res.json();
+  setCache(cacheKey, data);
+  return data;
+}
+
+async function handleTmdbDiscover(params: Record<string, string>) {
+  const {
+    page = "1",
+    watch_region = "US",
+    with_watch_providers,
+    sort_by = "popularity.desc",
+    with_watch_monetization_types = "flatrate",
+  } = params;
+
+  const providerStr = with_watch_providers || "8|9|337|384|15|350|531|386";
+  const cacheKey = `tmdb:discover:${watch_region}:${providerStr}:${sort_by}:${page}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const res = await fetch(
+    `${TMDB_BASE}/discover/movie?api_key=${TMDB_KEY}&language=en-US&sort_by=${sort_by}` +
+    `&watch_region=${watch_region}&with_watch_providers=${providerStr}` +
+    `&with_watch_monetization_types=${with_watch_monetization_types}&page=${page}`
+  );
+  const data = await res.json();
+  setCache(cacheKey, data);
+  return data;
+}
+
 // ─── Main handler ────────────────────────────────────────────
 
 serve(async (req) => {
@@ -176,6 +214,12 @@ serve(async (req) => {
         break;
       case "tmdb_images":
         result = await handleTmdbImages(params);
+        break;
+      case "tmdb_now_playing":
+        result = await handleTmdbNowPlaying(params);
+        break;
+      case "tmdb_discover":
+        result = await handleTmdbDiscover(params);
         break;
       case "rawg_search":
         result = await handleRawgSearch(params);

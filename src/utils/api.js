@@ -114,6 +114,29 @@ export const fetchTMDBWatchProviders = async (tmdbId, type = "movie") => {
   return data; // raw TMDB watch/providers response or null
 };
 
+// Now Playing — movies currently in theaters
+export const fetchTMDBNowPlaying = async (page = 1, region = "US") => {
+  const data = await apiProxy("tmdb_now_playing", {
+    page: String(page),
+    region,
+  });
+  return data; // { results, page, total_pages, total_results }
+};
+
+// Discover — streaming movies filtered by watch providers
+// Default providers: Netflix(8), Prime(9), Disney+(337), HBO Max(384),
+//   Hulu(15), Apple TV+(350), Paramount+(531), Peacock(386)
+export const fetchTMDBDiscover = async (page = 1, options = {}) => {
+  const data = await apiProxy("tmdb_discover", {
+    page: String(page),
+    watch_region: options.region || "US",
+    with_watch_providers: options.providers || "8|9|337|384|15|350|531|386",
+    sort_by: options.sortBy || "popularity.desc",
+    with_watch_monetization_types: options.monetization || "flatrate",
+  });
+  return data; // { results, page, total_pages, total_results }
+};
+
 // Raw Google Books search (returns the full API response)
 // Used by ImportCSVModal, ChallengeScreen, GroupViewScreen
 export const searchGoogleBooksRaw = async (query, maxResults = 5) => {

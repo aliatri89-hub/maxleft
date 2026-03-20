@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useFeed } from "../hooks/community/useFeed";
+import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
 import {
   LogCard,
+  BrowseCard,
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
@@ -27,6 +29,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     loadMoreActivity,
     loading, refresh,
   } = useFeed(userId, communitySubscriptions);
+  const releases = useBrowseFeed("releases");
+  const streaming = useBrowseFeed("streaming");
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
@@ -34,6 +38,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
   const [showShareShelf, setShowShareShelf] = useState(false);
   const activitySentinelRef = useRef(null);
+  const releasesSentinelRef = useRef(null);
+  const streamingSentinelRef = useRef(null);
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
@@ -91,8 +97,31 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
 
-  // ── Infinite scroll — activity feed ──
+  // ── Infinite scroll — all tabs capped at 50 ──
+  const BROWSE_CAP = 50;
   const AUTO_SCROLL_LIMIT = 50;
+
+  useEffect(() => {
+    const el = releasesSentinelRef.current;
+    if (!el || !releases.hasMore || feedMode !== "releases" || releases.items.length >= BROWSE_CAP) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) releases.loadMore(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [releases.hasMore, releases.loadMore, releases.items.length, feedMode]);
+
+  useEffect(() => {
+    const el = streamingSentinelRef.current;
+    if (!el || !streaming.hasMore || feedMode !== "streaming" || streaming.items.length >= BROWSE_CAP) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) streaming.loadMore(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [streaming.hasMore, streaming.loadMore, streaming.items.length, feedMode]);
 
   useEffect(() => {
     const el = activitySentinelRef.current;
@@ -106,7 +135,11 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
 
   // ── Loading skeleton ──
-  if (loading && activityItems.length === 0 && feedMode === "activity") {
+  const showSkeleton = (feedMode === "activity" && loading && activityItems.length === 0)
+    || (feedMode === "releases" && releases.loading && releases.items.length === 0)
+    || (feedMode === "streaming" && streaming.loading && streaming.items.length === 0);
+
+  if (showSkeleton) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
         <div style={{ padding: "0 16px" }}>
@@ -193,26 +226,58 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
-        <div style={{
-          padding: "40px 24px", textAlign: "center",
-          color: "var(--text-muted, #8892a8)", fontSize: 13,
-          fontFamily: "var(--font-body)",
-        }}>
-          <div style={{ fontSize: 28, marginBottom: 10 }}>🎬</div>
-          New Releases — coming soon
-        </div>
+        {releases.items.length === 0 && !releases.loading && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🎬</div>
+            No new releases found
+          </div>
+        )}
+        {releases.items.slice(0, BROWSE_CAP).map((item) => (
+          <BrowseCard key={`rel-${item.tmdb_id}`} data={item} />
+        ))}
+        {releases.hasMore && releases.items.length < BROWSE_CAP && <div ref={releasesSentinelRef} style={{ height: 1 }} />}
+        {releases.loading && releases.items.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: "50%",
+              border: "2.5px solid var(--text-faint, #5a6480)",
+              borderTopColor: "transparent",
+              animation: "ptr-spin 0.8s linear infinite",
+            }} />
+          </div>
+        )}
       </div>
 
       {/* ── Streaming pane ── */}
       <div style={{ display: feedMode === "streaming" ? "block" : "none" }}>
-        <div style={{
-          padding: "40px 24px", textAlign: "center",
-          color: "var(--text-muted, #8892a8)", fontSize: 13,
-          fontFamily: "var(--font-body)",
-        }}>
-          <div style={{ fontSize: 28, marginBottom: 10 }}>📺</div>
-          Streaming — coming soon
-        </div>
+        {streaming.items.length === 0 && !streaming.loading && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>📺</div>
+            No streaming films found
+          </div>
+        )}
+        {streaming.items.slice(0, BROWSE_CAP).map((item) => (
+          <BrowseCard key={`str-${item.tmdb_id}`} data={item} />
+        ))}
+        {streaming.hasMore && streaming.items.length < BROWSE_CAP && <div ref={streamingSentinelRef} style={{ height: 1 }} />}
+        {streaming.loading && streaming.items.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: "50%",
+              border: "2.5px solid var(--text-faint, #5a6480)",
+              borderTopColor: "transparent",
+              animation: "ptr-spin 0.8s linear infinite",
+            }} />
+          </div>
+        )}
       </div>
 
       {/* ── Activity pane ── */}
