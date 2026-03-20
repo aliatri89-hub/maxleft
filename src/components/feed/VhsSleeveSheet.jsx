@@ -98,7 +98,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [detail, setDetail] = useState(null);
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
-    if (merged.overview !== undefined || data.credits !== undefined) return;
+    if (detail || data.credits) return; // already have detail data
     let cancelled = false;
     (async () => {
       // Try media table first (fast, cached for logged films)
@@ -531,7 +531,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               </div>
             )}
 
-            {/* Cast billing — right side */}
+            {/* Cast billing — right side (top 3 only) */}
             {cast.length > 0 && (
               <div style={{
                 flex: 1, display: "flex", flexDirection: "column",
@@ -555,22 +555,48 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{name}</div>
                 ))}
-                {cast.length > 3 && (
-                  <div style={{ marginTop: 4, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "wrap" }}>
-                    <span style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 400, fontSize: 8,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.1em",
-                    }}>also starring</span>
-                    <span style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontWeight: 400, fontSize: 11,
-                      color: "rgba(240,235,225,0.6)",
-                      letterSpacing: "0.04em", textTransform: "uppercase",
-                    }}>{cast.slice(3).join(", ")}</span>
-                  </div>
-                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Also starring + Directed by — centered billing block ── */}
+        {(director || cast.length > 3) && (
+          <div style={{
+            padding: "6px 20px 0", textAlign: "center",
+          }}>
+            {cast.length > 3 && (
+              <div style={{ marginBottom: 6, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 400, fontSize: 8,
+                  color: "rgba(240,235,225,0.4)",
+                  letterSpacing: "0.1em",
+                }}>also starring</span>
+                <span style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontWeight: 400, fontSize: 11,
+                  color: "rgba(240,235,225,0.6)",
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                }}>{cast.slice(3).join(", ")}</span>
+              </div>
+            )}
+            {director && (
+              <div style={{
+                display: "flex", alignItems: "baseline", justifyContent: "center", gap: 6,
+              }}>
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 400, fontSize: 8,
+                  color: "rgba(240,235,225,0.4)",
+                  letterSpacing: "0.1em", textTransform: "lowercase",
+                }}>directed by</span>
+                <span style={{
+                  fontFamily: "'Oswald', sans-serif",
+                  fontWeight: 500, fontSize: 14,
+                  color: "rgba(240,235,225,0.9)",
+                  letterSpacing: "0.06em", textTransform: "uppercase",
+                }}>{director}</span>
               </div>
             )}
           </div>
@@ -584,63 +610,23 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           flexDirection: "column",
         }}>
 
-          {/* Director + Cast — VHS billing block */}
-          {/* Cast shown here only when NOT already displayed next to the still */}
-          {(director || (cast.length > 0 && extraBackdrops.length === 0)) && (
+          {/* Cast fallback — only when no stills (cast normally shows next to still) */}
+          {cast.length > 0 && extraBackdrops.length === 0 && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               borderBottom: "1px solid rgba(240,235,225,0.06)",
               padding: "10px 0", marginBottom: 14, textAlign: "center",
             }}>
-              {director && (
-                <div style={{
-                  display: "flex", alignItems: "baseline", justifyContent: "center",
-                  gap: 6, marginBottom: (cast.length > 0 && extraBackdrops.length === 0) ? 8 : 0,
-                }}>
-                  <span style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 400, fontSize: 8,
-                    color: "rgba(240,235,225,0.4)",
-                    letterSpacing: "0.1em", textTransform: "lowercase",
-                  }}>directed by</span>
-                  <span style={{
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 10px" }}>
+                {cast.slice(0, 3).map((name, i) => (
+                  <span key={i} style={{
                     fontFamily: "'Oswald', sans-serif",
                     fontWeight: 500, fontSize: 14,
                     color: "rgba(240,235,225,0.9)",
                     letterSpacing: "0.06em", textTransform: "uppercase",
-                  }}>{director}</span>
-                </div>
-              )}
-              {cast.length > 0 && extraBackdrops.length === 0 && (<>
-                {/* Top 3 billed — same size names, no connectors */}
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 10px" }}>
-                  {cast.slice(0, 3).map((name, i) => (
-                    <span key={i} style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontWeight: 500, fontSize: 14,
-                      color: "rgba(240,235,225,0.9)",
-                      letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>{name}</span>
-                  ))}
-                </div>
-                {/* Also starring — second line */}
-                {cast.length > 3 && (
-                  <div style={{ marginTop: 4, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
-                    <span style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 400, fontSize: 8,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.1em",
-                    }}>also starring</span>
-                    <span style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontWeight: 400, fontSize: 11,
-                      color: "rgba(240,235,225,0.6)",
-                      letterSpacing: "0.04em", textTransform: "uppercase",
-                    }}>{cast.slice(3).join(", ")}</span>
-                  </div>
-                )}
-              </>)}
+                  }}>{name}</span>
+                ))}
+              </div>
             </div>
           )}
 
