@@ -94,10 +94,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
 
-  // ── Infinite scroll — discover feed ──
+  // ── Hybrid scroll: infinite for first AUTO_SCROLL_LIMIT items, then manual ──
+  const AUTO_SCROLL_LIMIT = 50;
+
+  // ── Infinite scroll — discover feed (auto up to limit) ──
   useEffect(() => {
     const el = discoverSentinelRef.current;
-    if (!el || !hasMoreDiscover || feedMode !== "discover") return;
+    if (!el || !hasMoreDiscover || feedMode !== "discover" || discoverItems.length >= AUTO_SCROLL_LIMIT) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMoreDiscover(); },
       { rootMargin: "200px" }
@@ -106,10 +109,10 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     return () => observer.disconnect();
   }, [hasMoreDiscover, loadMoreDiscover, discoverItems.length, feedMode]);
 
-  // ── Infinite scroll — activity feed ──
+  // ── Infinite scroll — activity feed (auto up to limit) ──
   useEffect(() => {
     const el = activitySentinelRef.current;
-    if (!el || !hasMoreActivity || feedMode !== "activity") return;
+    if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= AUTO_SCROLL_LIMIT) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
       { rootMargin: "200px" }
@@ -272,7 +275,20 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             );
           });
         })()}
-        {hasMoreDiscover && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
+        {hasMoreDiscover && discoverItems.length < AUTO_SCROLL_LIMIT && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
+        {hasMoreDiscover && discoverItems.length >= AUTO_SCROLL_LIMIT && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
+            <button onClick={loadMoreDiscover} style={{
+              padding: "10px 28px", borderRadius: 10,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "var(--text-muted, #8892a8)",
+              fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.06em", textTransform: "uppercase",
+              cursor: "pointer",
+            }}>Load more</button>
+          </div>
+        )}
       </div>
 
       {/* ── Activity pane ── */}
@@ -292,7 +308,20 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </FeedCard>
           ));
         })()}
-        {hasMoreActivity && <div ref={activitySentinelRef} style={{ height: 1 }} />}
+        {hasMoreActivity && activityItems.length < AUTO_SCROLL_LIMIT && <div ref={activitySentinelRef} style={{ height: 1 }} />}
+        {hasMoreActivity && activityItems.length >= AUTO_SCROLL_LIMIT && (
+          <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
+            <button onClick={loadMoreActivity} style={{
+              padding: "10px 28px", borderRadius: 10,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              color: "var(--text-muted, #8892a8)",
+              fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.06em", textTransform: "uppercase",
+              cursor: "pointer",
+            }}>Load more</button>
+          </div>
+        )}
       </div>
 
       {/* Animations */}
