@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
+import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
+import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 
 // ════════════════════════════════════════════════
-// BROWSE CARD — VHS tape for TMDB browse results
-// Same visual DNA as LogCard but stripped for browsing:
-// no rating, no community context, no timestamp.
+// BROWSE CARD — VHS tape + play button for TMDB browse results
 // ════════════════════════════════════════════════
 
 const VHS_BRANDS = [
@@ -21,19 +21,14 @@ function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const brand = VHS_BRANDS[hash % VHS_BRANDS.length];
   const vhsOnLeft = hash % 2 === 0;
-  return {
-    left: vhsOnLeft ? VHS_LOGO_BRAND : brand,
-    right: vhsOnLeft ? brand : VHS_LOGO_BRAND,
-  };
+  return { left: vhsOnLeft ? VHS_LOGO_BRAND : brand, right: vhsOnLeft ? brand : VHS_LOGO_BRAND };
 }
 
 function VhsLogoSvg({ color = "#222", size = 18 }) {
   return (
     <svg viewBox="0 0 100 50" width={size} height={size * 0.5} style={{ display: "block" }}>
       <text x="50" y="38" textAnchor="middle" fontFamily="'Barlow Condensed', sans-serif"
-        fontWeight="900" fontSize="42" letterSpacing="3" fill={color}>
-        VHS
-      </text>
+        fontWeight="900" fontSize="42" letterSpacing="3" fill={color}>VHS</text>
     </svg>
   );
 }
@@ -42,15 +37,9 @@ function BrandStamp({ brand, side = "right" }) {
   const brandFontSize = brand.text && brand.text.length > 4 ? 7 : 9;
   return (
     <div style={{
-      position: "absolute",
-      top: 0, bottom: 0,
-      [side]: 4,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 1,
-      zIndex: 1,
+      position: "absolute", top: 0, bottom: 0, [side]: 4,
+      display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", gap: 1, zIndex: 1,
     }}>
       {brand.isVhs ? (
         <div style={{ transform: "rotate(-90deg)", opacity: 0.6 }}>
@@ -59,32 +48,16 @@ function BrandStamp({ brand, side = "right" }) {
       ) : (
         <>
           <div style={{
-            writingMode: "vertical-rl",
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: brand.weight,
-            fontSize: brandFontSize,
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            color: brand.color,
-            transform: "rotate(180deg)",
-            lineHeight: 1,
-          }}>
-            {brand.text}
-          </div>
+            writingMode: "vertical-rl", fontFamily: "'Barlow Condensed', sans-serif",
+            fontWeight: brand.weight, fontSize: brandFontSize, letterSpacing: "0.05em",
+            textTransform: "uppercase", color: brand.color, transform: "rotate(180deg)", lineHeight: 1,
+          }}>{brand.text}</div>
           {brand.sub && (
             <div style={{
-              writingMode: "vertical-rl",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontWeight: 500,
-              fontSize: 5.5,
-              letterSpacing: "0.08em",
-              color: brand.color,
-              opacity: 0.5,
-              transform: "rotate(180deg)",
-              lineHeight: 1,
-            }}>
-              {brand.sub}
-            </div>
+              writingMode: "vertical-rl", fontFamily: "'IBM Plex Mono', monospace",
+              fontWeight: 500, fontSize: 5.5, letterSpacing: "0.08em",
+              color: brand.color, opacity: 0.5, transform: "rotate(180deg)", lineHeight: 1,
+            }}>{brand.sub}</div>
           )}
         </>
       )}
@@ -95,83 +68,104 @@ function BrandStamp({ brand, side = "right" }) {
 export default function BrowseCard({ data }) {
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [episodes, setEpisodes] = useState(null); // null = not loaded yet
+  const [epLoading, setEpLoading] = useState(false);
+  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
+  const hasPlayButton = data.podcast_count > 0;
+
+  const handleDeckTap = async (e) => {
+    e.stopPropagation();
+    if (showPicker) {
+      setShowPicker(false);
+      return;
+    }
+    // If only 1 podcast, play directly without picker
+    if (episodes && episodes.length === 1) {
+      handlePlay(e, episodes[0]);
+      return;
+    }
+    // Lazy-load episodes on first tap
+    if (!episodes) {
+      setEpLoading(true);
+      const eps = await getEpisodesForFilm(data.tmdb_id);
+      setEpisodes(eps);
+      setEpLoading(false);
+      if (eps.length === 1) {
+        handlePlay(e, eps[0]);
+        return;
+      }
+    }
+    setShowPicker(true);
+  };
+
+  const handlePlay = (e, ep) => {
+    e.stopPropagation();
+    if (!ep || !ep.audio_url) return;
+    playEpisode({
+      guid: `browse-${ep.episode_id || ep.audio_url}`,
+      title: ep.episode_title || data.title || "Episode",
+      enclosureUrl: ep.audio_url,
+      community: ep.podcast_name || null,
+      artwork: ep.podcast_artwork_url || null,
+    });
+    setShowPicker(false);
+  };
+
+  // Check if currently playing an episode from this film
+  const isThisPlaying = episodes && currentEp && isPlaying &&
+    episodes.some(ep => currentEp.enclosureUrl === ep.audio_url);
 
   return (
     <div style={{
-      margin: "4px 16px",
-      borderRadius: 6,
-      position: "relative",
-      background: "#302c28",
-      padding: "1px 1px",
+      margin: "4px 16px", borderRadius: 6, position: "relative",
+      background: "#302c28", padding: "1px 1px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
       backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
     }}>
       <div style={{ borderRadius: 4, overflow: "hidden" }}>
-        <div style={{
-          background: "#1a1612",
-          borderRadius: 5,
-          position: "relative",
-        }}>
-          <div style={{
-            borderRadius: 3,
-            overflow: "hidden",
-            display: "flex",
-            minHeight: 80,
-          }}>
-            {/* Left dark tape end */}
+        {/* ═══ VHS TAPE LABEL ═══ */}
+        <div style={{ background: "#1a1612", borderRadius: 5, position: "relative" }}>
+          <div style={{ borderRadius: 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
             <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
 
-            {/* Label — cream center with brand stamps */}
             <div style={{
-              flex: 1,
-              background: "#f0ebe1",
-              padding: "10px 12px",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              position: "relative",
-              overflow: "hidden",
+              flex: 1, background: "#f0ebe1", padding: "10px 12px",
+              display: "flex", flexDirection: "column", justifyContent: "center",
+              alignItems: "center", position: "relative", overflow: "hidden",
             }}>
               <BrandStamp brand={brandLeft} side="left" />
               <BrandStamp brand={brandRight} side="right" />
 
-              {/* Grid lines */}
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
                 backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
               }} />
 
-              {/* Logo / skeleton / title */}
               {(() => {
                 const expectsLogo = data.tmdb_id;
                 const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
-
                 return (
                   <>
                     {data.logo_url && (
                       <img
-                        src={data.logo_url}
-                        alt={data.title}
-                        crossOrigin="anonymous"
+                        src={data.logo_url} alt={data.title} crossOrigin="anonymous"
                         onLoad={(e) => {
                           setLogoReady(true);
                           const nw = e.target.naturalWidth;
                           const nh = e.target.naturalHeight;
                           const aspect = nw / (nh || 1);
                           if (nw > 0 && nw < 300) {
-                            const scale = aspect < 2 ? 1.6 : 1.3;
-                            e.target.style.transform = `scale(${scale})`;
+                            e.target.style.transform = `scale(${aspect < 2 ? 1.6 : 1.3})`;
                           }
                           try {
                             const img = e.target;
                             const c = document.createElement("canvas");
-                            const s = 40;
-                            c.width = s; c.height = s;
+                            c.width = 40; c.height = 40;
                             const ctx = c.getContext("2d");
-                            ctx.drawImage(img, 0, 0, s, s);
-                            const px = ctx.getImageData(0, 0, s, s).data;
+                            ctx.drawImage(img, 0, 0, 40, 40);
+                            const px = ctx.getImageData(0, 0, 40, 40).data;
                             let light = 0, visible = 0;
                             for (let i = 0; i < px.length; i += 4) {
                               if (px[i + 3] < 50) continue;
@@ -182,20 +176,14 @@ export default function BrowseCard({ data }) {
                           } catch {}
                         }}
                         style={{
-                          maxHeight: 54,
-                          minHeight: 36,
-                          maxWidth: "90%",
-                          width: "auto",
-                          objectFit: "contain",
-                          objectPosition: "center",
-                          position: "relative",
+                          maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
+                          objectFit: "contain", objectPosition: "center", position: "relative",
                           filter: isLightLogo ? "brightness(0)" : "none",
                           opacity: logoReady ? (isLightLogo ? 0.8 : 0.85) : 0,
                           transition: "opacity 0.2s ease-in",
                         }}
                       />
                     )}
-
                     {(logoLoading || (data.logo_url && !logoReady)) && (
                       <div style={{
                         height: 20, width: "55%", borderRadius: 3,
@@ -203,46 +191,212 @@ export default function BrowseCard({ data }) {
                         position: data.logo_url ? "absolute" : "relative",
                       }} />
                     )}
-
                     {!data.logo_url && !logoLoading && (
                       <div style={{
                         fontFamily: "'Permanent Marker', cursive",
                         fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
-                        lineHeight: 1.1,
-                        color: "#2C2824",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.02em",
-                        position: "relative",
-                        textAlign: "center",
+                        lineHeight: 1.1, color: "#2C2824", textTransform: "uppercase",
+                        letterSpacing: "0.02em", position: "relative", textAlign: "center",
                         transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
                         textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
-                        padding: "0 8px",
-                        maxWidth: "85%",
-                        margin: "0 auto",
-                        wordBreak: "break-word",
-                      }}>
-                        {data.title}
-                      </div>
+                        padding: "0 8px", maxWidth: "85%", margin: "0 auto", wordBreak: "break-word",
+                      }}>{data.title}</div>
                     )}
                   </>
                 );
               })()}
 
-              {/* Year */}
               {data.year && (
                 <div style={{
                   fontFamily: "'Permanent Marker', cursive",
                   fontSize: 10, color: "rgba(44,40,36,0.5)",
-                  marginTop: 2, position: "relative",
-                  textAlign: "center",
-                }}>
-                  {data.year}
+                  marginTop: 2, position: "relative", textAlign: "center",
+                }}>{data.year}</div>
+              )}
+
+              {/* Headphones sticker on label — visual hint that coverage exists */}
+              {hasPlayButton && (
+                <div style={{
+                  position: "absolute", bottom: 4, right: 28, opacity: 0.4,
+                }} title="Listen on MANTL">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                  </svg>
                 </div>
               )}
             </div>
 
-            {/* Right dark tape end */}
             <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
+          </div>
+        </div>
+
+        {/* ═══ VCR DECK — only when film has podcast coverage ═══ */}
+        {hasPlayButton && (
+          <div
+            onClick={handleDeckTap}
+            style={{
+              background: "linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%)",
+              borderTop: "1px solid rgba(255,255,255,0.04)",
+              padding: "8px 16px 7px",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 16,
+              position: "relative",
+              borderRadius: showPicker ? "0" : "0 0 4px 4px",
+              cursor: "pointer",
+            }}>
+            {/* Top highlight edge */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent)",
+            }} />
+
+            {/* Corner brackets */}
+            <div style={{ position: "absolute", top: 5, left: 10, width: 10, height: 10, pointerEvents: "none",
+              borderTop: "2px solid rgba(255,255,255,0.75)", borderLeft: "2px solid rgba(255,255,255,0.75)" }} />
+            <div style={{ position: "absolute", top: 5, right: 10, width: 10, height: 10, pointerEvents: "none",
+              borderTop: "2px solid rgba(255,255,255,0.75)", borderRight: "2px solid rgba(255,255,255,0.75)" }} />
+            <div style={{ position: "absolute", bottom: 5, left: 10, width: 10, height: 10, pointerEvents: "none",
+              borderBottom: "2px solid rgba(255,255,255,0.75)", borderLeft: "2px solid rgba(255,255,255,0.75)" }} />
+            <div style={{ position: "absolute", bottom: 5, right: 10, width: 10, height: 10, pointerEvents: "none",
+              borderBottom: "2px solid rgba(255,255,255,0.75)", borderRight: "2px solid rgba(255,255,255,0.75)" }} />
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: 1,
+              background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.3) 15%, rgba(0,0,0,0.3) 85%, transparent)",
+              borderRadius: showPicker ? 0 : "0 0 4px 4px",
+            }} />
+
+            {/* Left speaker grille */}
+            <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+              <div style={{
+                position: "absolute", top: "50%", left: 0, right: 0, height: 1,
+                transform: "translateY(-50%)",
+                background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)",
+                pointerEvents: "none",
+              }} />
+              <div style={{
+                flex: 1, height: 20, borderRadius: 3,
+                background: "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
+                backgroundSize: "5px 5px",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2)",
+              }} />
+            </div>
+
+            {/* Play button */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div style={{
+                background: "linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderBottomColor: "rgba(0,0,0,0.4)", borderTopColor: "rgba(255,255,255,0.12)",
+                borderRadius: 4, padding: "5px 24px",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4)",
+                pointerEvents: "none",
+              }}>
+                {epLoading ? (
+                  <div style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    border: "2px solid rgba(255,255,255,0.2)",
+                    borderTopColor: "rgba(255,255,255,0.7)",
+                    animation: "ptr-spin 0.8s linear infinite",
+                  }} />
+                ) : isThisPlaying ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                    <rect x="6" y="4" width="4" height="16" rx="1" />
+                    <rect x="14" y="4" width="4" height="16" rx="1" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </div>
+              {/* Green LED */}
+              <div style={{
+                position: "absolute", top: -1, right: -1,
+                width: 5, height: 5, borderRadius: "50%",
+                background: isThisPlaying ? "#34d399" : "rgba(52,211,153,0.2)",
+                border: isThisPlaying ? "none" : "0.5px solid rgba(52,211,153,0.15)",
+                boxShadow: isThisPlaying ? "0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3)" : "none",
+                animation: isThisPlaying ? "ledPulse 2s ease infinite" : "none",
+                transition: "all 0.3s ease", pointerEvents: "none",
+              }} />
+            </div>
+
+            {/* Right speaker grille */}
+            <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+              <div style={{
+                position: "absolute", top: "50%", left: 0, right: 0, height: 1,
+                transform: "translateY(-50%)",
+                background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)",
+                pointerEvents: "none",
+              }} />
+              <div style={{
+                flex: 1, height: 20, borderRadius: 3,
+                background: "radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px)",
+                backgroundSize: "5px 5px",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2)",
+              }} />
+            </div>
+          </div>
+        )}
+
+        {/* ═══ EPISODE PICKER — animated slide down ═══ */}
+        <div style={{
+          maxHeight: showPicker && episodes && episodes.length > 1 ? 200 : 0,
+          overflow: "hidden",
+          transition: "max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}>
+          <div style={{
+            background: "#1a1612",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            padding: "6px 12px",
+            borderRadius: "0 0 4px 4px",
+            opacity: showPicker ? 1 : 0,
+            transform: showPicker ? "translateY(0)" : "translateY(-6px)",
+            transition: "opacity 0.2s ease, transform 0.25s ease",
+          }}>
+            {(episodes || []).map((ep, i) => {
+              const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
+              return (
+                <div
+                  key={ep.episode_id || i}
+                  onClick={(e) => handlePlay(e, ep)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    padding: "5px 4px", cursor: "pointer", borderRadius: 4,
+                    background: isActive ? "rgba(255,255,255,0.04)" : "transparent",
+                  }}
+                >
+                  {ep.podcast_artwork_url && (
+                    <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
+                      width: 22, height: 22, borderRadius: 5, objectFit: "cover",
+                      border: "1.5px solid rgba(196,115,79,0.3)",
+                    }} />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700, fontSize: 11,
+                      color: "rgba(255,255,255,0.7)",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    }}>{ep.episode_title || ep.podcast_name}</div>
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 7, color: "rgba(255,255,255,0.25)",
+                      textTransform: "uppercase", letterSpacing: "0.04em",
+                    }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill={isActive && isPlaying ? "#c4734f" : "rgba(255,255,255,0.4)"}>
+                    {isActive && isPlaying
+                      ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                      : <path d="M8 5v14l11-7z" />
+                    }
+                  </svg>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

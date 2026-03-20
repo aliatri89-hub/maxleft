@@ -1,20 +1,23 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { supabase } from "../../supabase";
 import { TMDB_IMG, fetchTMDBNowPlaying, fetchTMDBDiscover } from "../../utils/api";
 import { fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
 
 /**
  * useBrowseFeed — powers the New Releases and Streaming tabs.
  *
- * Fetches from TMDB (now_playing / discover), normalizes to a flat
- * card data shape, enriches with movie logos in the background.
+ * 1. Fetches from TMDB (now_playing / discover)
+ * 2. Normalizes to flat card data
+ * 3. Enriches with movie logos
+ * 4. Bulk-checks podcast coverage via get_playable_films()
  */
 
-const PAGE_SIZE = 20; // TMDB returns 20 per page
-const MAX_ITEMS = 50; // Cap to prevent mobile memory issues with VHS cards
+const PAGE_SIZE = 20;
+const MAX_ITEMS = 50;
 
 function normalizeTmdbResults(results) {
   return (results || [])
-    .filter(m => m.poster_path) // skip films with no poster
+    .filter(m => m.poster_path)
     .map(m => ({
       tmdb_id: m.id,
       title: m.title || m.original_title,
@@ -25,13 +28,57 @@ function normalizeTmdbResults(results) {
       vote_average: m.vote_average || 0,
       genre_ids: m.genre_ids || [],
       media_type: "film",
-      logo_url: null, // enriched async
+      logo_url: null,
+      podcast_count: 0, // enriched by playability check
     }));
 }
 
+// ── Playability enrichment ──
+
+async function checkPlayability(tmdbIds) {
+  if (!tmdbIds.length) return new Map();
+  try {
+    const { data, error } = await supabase.rpc("get_playable_films", {
+      tmdb_ids: tmdbIds,
+    });
+    if (error) {
+      console.warn("[BrowseFeed] playability check failed:", error.message);
+      return new Map();
+    }
+    const map = new Map();
+    for (const row of (data || [])) {
+      map.set(row.tmdb_id, row.podcast_count);
+    }
+    return map;
+  } catch (err) {
+    console.warn("[BrowseFeed] playability check error:", err);
+    return new Map();
+  }
+}
+
+// ── Exported: fetch episodes for a single film (called on-demand by BrowseCard) ──
+
+export async function getEpisodesForFilm(tmdbId) {
+  try {
+    const { data, error } = await supabase.rpc("get_episodes_for_film", {
+      film_tmdb_id: tmdbId,
+    });
+    if (error) {
+      console.warn("[BrowseFeed] episode fetch failed:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.warn("[BrowseFeed] episode fetch error:", err);
+    return [];
+  }
+}
+
+// ── Hook ──
+
 export function useBrowseFeed(mode) {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true); // start true — skeleton until first fetch completes
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const mountedRef = useRef(true);
@@ -44,8 +91,6 @@ export function useBrowseFeed(mode) {
         ? await fetchTMDBNowPlaying(pageNum)
         : await fetchTMDBDiscover(pageNum);
 
-      console.log(`[BrowseFeed] ${mode} page ${pageNum}:`, data ? `${(data.results || []).length} results` : "null/empty", data?.error || "");
-
       if (!mountedRef.current) return;
       if (!data || data.error) {
         console.warn(`[BrowseFeed] ${mode} failed:`, data?.error || "no data");
@@ -55,7 +100,7 @@ export function useBrowseFeed(mode) {
 
       const normalized = normalizeTmdbResults(data.results);
 
-      // Patch any cached logos immediately
+      // Patch cached logos
       for (const item of normalized) {
         const url = getLogoUrl(item.tmdb_id);
         if (url) item.logo_url = url;
@@ -65,12 +110,11 @@ export function useBrowseFeed(mode) {
         const merged = append ? [...prev, ...normalized] : normalized;
         return merged.slice(0, MAX_ITEMS);
       });
-      // Estimate merged count for hasMore (page * PAGE_SIZE approximates total loaded)
       const estimatedTotal = append ? (pageNum * PAGE_SIZE) : normalized.length;
       setHasMore(data.page < data.total_pages && estimatedTotal < MAX_ITEMS);
       setPage(data.page);
 
-      // Enrich logos in background
+      // Background: enrich logos
       const logoItems = normalized
         .filter(m => !m.logo_url)
         .map(m => ({ tmdb_id: m.tmdb_id, media_type: "film" }));
@@ -85,6 +129,17 @@ export function useBrowseFeed(mode) {
           }));
         }).catch(() => {});
       }
+
+      // Background: check podcast coverage
+      const tmdbIds = normalized.map(m => m.tmdb_id);
+      checkPlayability(tmdbIds).then(playMap => {
+        if (!mountedRef.current || playMap.size === 0) return;
+        setItems(prev => prev.map(item => {
+          const count = playMap.get(item.tmdb_id);
+          return count ? { ...item, podcast_count: count } : item;
+        }));
+      });
+
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
     }
@@ -102,7 +157,6 @@ export function useBrowseFeed(mode) {
 
   useEffect(() => {
     mountedRef.current = true;
-    // Only fetch on first mount — avoid re-fetching on every tab switch
     if (!fetchedRef.current) {
       fetchPage(1, false);
       fetchedRef.current = true;
