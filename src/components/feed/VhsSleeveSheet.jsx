@@ -486,44 +486,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 </div>
               )}
               {cast.length > 0 && (<>
-                {/* Top 3 billed — same size names, small connectors */}
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 6px" }}>
-                  {cast[0] && (
-                    <span style={{
+                {/* Top 3 billed — same size names, no connectors */}
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", flexWrap: "wrap", gap: "0 10px" }}>
+                  {cast.slice(0, 3).map((name, i) => (
+                    <span key={i} style={{
                       fontFamily: "'Oswald', sans-serif",
                       fontWeight: 500, fontSize: 14,
                       color: "rgba(240,235,225,0.9)",
                       letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>{cast[0]}</span>
-                  )}
-                  {cast[1] && (<>
-                    <span style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 400, fontSize: 8,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.08em",
-                    }}>and</span>
-                    <span style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontWeight: 500, fontSize: 14,
-                      color: "rgba(240,235,225,0.9)",
-                      letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>{cast[1]}</span>
-                  </>)}
-                  {cast[2] && (<>
-                    <span style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 400, fontSize: 8,
-                      color: "rgba(240,235,225,0.4)",
-                      letterSpacing: "0.08em",
-                    }}>with</span>
-                    <span style={{
-                      fontFamily: "'Oswald', sans-serif",
-                      fontWeight: 500, fontSize: 14,
-                      color: "rgba(240,235,225,0.9)",
-                      letterSpacing: "0.06em", textTransform: "uppercase",
-                    }}>{cast[2]}</span>
-                  </>)}
+                    }}>{name}</span>
+                  ))}
                 </div>
                 {/* Also starring — second line */}
                 {cast.length > 3 && (
