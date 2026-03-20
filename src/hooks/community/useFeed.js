@@ -828,7 +828,8 @@ export function useFeed(userId, subscribedIds) {
 
       // ── Commit buckets ──
       feedBucketsRef.current = { all: allCards, activity: activityCards, discover: discoverCards };
-      setVisibleCount(PAGE_SIZE);
+      setDiscoverVisible(PAGE_SIZE);
+      setActivityVisible(PAGE_SIZE);
       setRenderTick(t => t + 1);
 
       // ── Background media enrichment ──
