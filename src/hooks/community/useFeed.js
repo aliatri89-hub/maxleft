@@ -496,18 +496,10 @@ function buildDiscoverFeed({ upcomingCards, droppedEpisodes, randomPicks, sorted
 // MEDIA ENRICHMENT (posters + logos)
 // ════════════════════════════════════════════════
 
-function enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRenderTick) {
-  // Collect ALL data objects across all buckets
-  const allDataObjects = new Set();
-  const allCards = [];
-  for (const bucket of Object.values(feedBucketsRef.current)) {
-    for (const card of bucket) {
-      if (card.data) {
-        allDataObjects.add(card.data);
-        allCards.push(card);
-      }
-    }
-  }
+function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTick) {
+  // Only enrich the visible window — processing all 400 items causes OOM on mobile
+  const allCards = visibleCards.filter(c => c?.data);
+  const allDataObjects = new Set(allCards.map(c => c.data));
 
   // ── Poster enrichment ──
   const posterItems = [];
@@ -676,8 +668,10 @@ export function useFeed(userId, subscribedIds) {
       setActivityOffset(0);
       setRenderTick(t => t + 1);
 
-      // ── Background media enrichment ──
-      enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRenderTick);
+      // ── Background media enrichment — only visible window to avoid OOM on mobile ──
+      const initialActivity = activityCards.slice(0, MAX_DOM_CARDS);
+      const initialDiscover = discoverCards.slice(0, MAX_DOM_CARDS);
+      enrichMedia([...initialActivity, ...initialDiscover], thisGen, fetchGenRef, mountedRef, setRenderTick);
 
     } catch (err) {
       console.error("[Feed] Error loading feed:", err);
@@ -694,6 +688,25 @@ export function useFeed(userId, subscribedIds) {
   const loadMoreActivity = useCallback(() => {
     setActivityOffset(prev => prev + PAGE_SIZE);
   }, []);
+
+  // Enrich newly visible items when the window advances
+  useEffect(() => {
+    const bucket = feedBucketsRef.current.activity || [];
+    if (!bucket.length) return;
+    const end = Math.min(activityOffset + MAX_DOM_CARDS, bucket.length);
+    const newSlice = bucket.slice(activityOffset, end);
+    const gen = fetchGenRef.current;
+    enrichMedia(newSlice, gen, fetchGenRef, mountedRef, setRenderTick);
+  }, [activityOffset]);
+
+  useEffect(() => {
+    const bucket = feedBucketsRef.current.discover || [];
+    if (!bucket.length) return;
+    const end = Math.min(discoverOffset + MAX_DOM_CARDS, bucket.length);
+    const newSlice = bucket.slice(discoverOffset, end);
+    const gen = fetchGenRef.current;
+    enrichMedia(newSlice, gen, fetchGenRef, mountedRef, setRenderTick);
+  }, [discoverOffset]);
 
   useEffect(() => {
     mountedRef.current = true;
