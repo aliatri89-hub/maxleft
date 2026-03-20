@@ -211,9 +211,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
 
-        // Pick 1 best still — single clean image looks intentional,
-        // two similar stills looks like a bug
-        const pick = clean.length > 0 ? clean[0] : null;
+        // Pick 1 still from the middle of the array — top-rated shots
+        // are often hero-adjacent, middle gives more visual variety
+        const midIdx = clean.length >= 3
+          ? Math.floor(clean.length / 2)
+          : clean.length > 0 ? 0 : -1;
+        const pick = midIdx >= 0 ? clean[midIdx] : null;
 
         if (!cancelled && pick) {
           const paths = [pick.file_path];
@@ -450,27 +453,25 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
-        {/* ── Scene stills — overlap hero when present, sit naturally without ── */}
-        {extraBackdrops.length > 0 && (
+        {/* ── Scene still (left) + Cast billing (right) ── */}
+        {(extraBackdrops.length > 0 || cast.length > 0) && (
           <div style={{
-            display: "flex", gap: 8, justifyContent: "center",
+            display: "flex", gap: 10, alignItems: "flex-end",
             padding: "0 20px",
-            marginTop: backdropUrl ? -28 : 0,
+            marginTop: backdropUrl && extraBackdrops.length > 0 ? -28 : 0,
             marginBottom: 6,
             position: "relative", zIndex: 2,
           }}>
-            {extraBackdrops.map((url, i) => (
-              <div key={i} style={{
-                flex: extraBackdrops.length === 1 ? "none" : 1,
-                width: extraBackdrops.length === 1 ? "70%" : "auto",
-                maxWidth: extraBackdrops.length === 1 ? "70%" : "48%",
-                aspectRatio: "16/9",
+            {/* Still — left side */}
+            {extraBackdrops.length > 0 && (
+              <div style={{
+                flex: "0 0 52%", aspectRatio: "16/9",
                 borderRadius: 2, overflow: "hidden", position: "relative",
                 border: "2px solid rgba(240,235,225,0.18)",
                 boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
               }}>
                 <img
-                  src={url}
+                  src={extraBackdrops[0]}
                   alt=""
                   style={{
                     width: "100%", height: "100%",
@@ -478,13 +479,39 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   }}
                   loading="lazy"
                 />
-                {/* Film grain on stills */}
                 <div style={{
                   position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.1,
                   backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E\")",
                 }} />
               </div>
-            ))}
+            )}
+
+            {/* Cast billing — right side */}
+            {cast.length > 0 && (
+              <div style={{
+                flex: 1, display: "flex", flexDirection: "column",
+                justifyContent: "flex-end",
+                paddingBottom: 2,
+              }}>
+                <div style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 7, fontWeight: 600,
+                  color: "rgba(240,235,225,0.3)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  marginBottom: 4,
+                }}>starring</div>
+                {cast.slice(0, 3).map((name, i) => (
+                  <div key={i} style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 600, fontSize: 12,
+                    color: "rgba(240,235,225,0.65)",
+                    lineHeight: 1.4,
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>{name}</div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
