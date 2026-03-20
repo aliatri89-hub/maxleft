@@ -243,66 +243,56 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       </div>
 
-      {/* Sub-slider: both feeds rendered side by side, CSS slides between them */}
-      <div style={{ overflow: "hidden" }}>
-        <div style={{
-          display: "flex",
-          width: "200%",
-          transform: `translateX(${feedMode === "activity" ? "-50%" : "0"})`,
-          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}>
-          {/* ── Discover pane ── */}
-          <div style={{ width: "50%", minHeight: 200, flexShrink: 0 }}>
-            {discoverItems.length === 0 && !loading && (
-              <div style={{
-                padding: "40px 24px", textAlign: "center",
-                color: "var(--text-muted, #8892a8)", fontSize: 13,
-                fontFamily: "var(--font-body)",
-              }}>
-                <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
-                Subscribe to more communities to unlock episode drops, recommendations, and badge nudges.
-              </div>
-            )}
-            {(() => {
-              const firstLogRef = { current: false };
-              return discoverItems.map((item, i) => {
-                const dismissKey = getDismissKey(item);
-                if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
-                return (
-                  <FeedCard
-                    key={getStableKey(item, i)}
-                    index={i}
-                    dismissable={!!dismissKey}
-                    onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
-                  >
-                    {renderCard(item, firstLogRef)}
-                  </FeedCard>
-                );
-              });
-            })()}
-            {hasMoreDiscover && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
+      {/* ── Discover pane ── */}
+      <div style={{ display: feedMode === "discover" ? "block" : "none" }}>
+        {discoverItems.length === 0 && !loading && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
+            Subscribe to more communities to unlock episode drops, recommendations, and badge nudges.
           </div>
+        )}
+        {(() => {
+          const firstLogRef = { current: false };
+          return discoverItems.map((item, i) => {
+            const dismissKey = getDismissKey(item);
+            if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
+            return (
+              <FeedCard
+                key={getStableKey(item, i)}
+                index={i}
+                dismissable={!!dismissKey}
+                onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
+              >
+                {renderCard(item, firstLogRef)}
+              </FeedCard>
+            );
+          });
+        })()}
+        {hasMoreDiscover && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
+      </div>
 
-          {/* ── Activity pane ── */}
-          <div style={{ width: "50%", minHeight: 200, flexShrink: 0 }}>
-            {activityItems.length === 0 && !loading && (
-              <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
-            )}
-            {(() => {
-              const firstLogRef = { current: false };
-              return activityItems.map((item, i) => (
-                <FeedCard
-                  key={`activity-${getStableKey(item, i)}`}
-                  index={i}
-                  dismissable={false}
-                >
-                  {renderCard(item, firstLogRef)}
-                </FeedCard>
-              ));
-            })()}
-            {hasMoreActivity && <div ref={activitySentinelRef} style={{ height: 1 }} />}
-          </div>
-        </div>
+      {/* ── Activity pane ── */}
+      <div style={{ display: feedMode === "activity" ? "block" : "none" }}>
+        {activityItems.length === 0 && !loading && (
+          <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
+        )}
+        {(() => {
+          const firstLogRef = { current: false };
+          return activityItems.map((item, i) => (
+            <FeedCard
+              key={`activity-${getStableKey(item, i)}`}
+              index={i}
+              dismissable={false}
+            >
+              {renderCard(item, firstLogRef)}
+            </FeedCard>
+          ));
+        })()}
+        {hasMoreActivity && <div ref={activitySentinelRef} style={{ height: 1 }} />}
       </div>
 
       {/* Animations */}
