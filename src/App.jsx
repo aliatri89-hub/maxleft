@@ -16,6 +16,7 @@ import ShelfHome from "./screens/ShelfHome";
 import FeedScreen from "./screens/FeedScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import ExploreScreen from "./screens/ExploreScreen";
+import SearchScreen from "./screens/SearchScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 import NPPDashboard from "./components/community/now-playing/NPPDashboard";
 import BlankCheckDashboard from "./components/community/blank-check/BlankCheckDashboard";
@@ -96,7 +97,7 @@ export default function App() {
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
-  const [feedMode, setFeedMode] = useState("discover");
+  const [feedMode, setFeedMode] = useState("releases");
 
   // ── Profile + shelves ──
   const [profile, setProfile] = useState({
@@ -387,7 +388,7 @@ export default function App() {
                   </svg>
                 )}
               </div>
-              <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("discover"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
+              <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
               </div>
@@ -411,11 +412,14 @@ export default function App() {
                     feedMode={feedMode} setFeedMode={setFeedMode}
                     pushNav={pushNav} removeNav={removeNav} />
                 </div>
-                <div className="tab-pane" key="explore-tab">
-                  {visitedTabs.has("explore") && <ExploreScreen session={session}
+                <div className="tab-pane" key="communities-tab">
+                  {visitedTabs.has("communities") && <ExploreScreen session={session}
                     onOpenCommunity={(slug) => { setScrollToTmdbId(null); setActiveCommunitySlug(slug); }}
-                    isActive={activeTab === "explore"} communitySubscriptions={communitySubscriptions}
+                    isActive={activeTab === "communities"} communitySubscriptions={communitySubscriptions}
                     onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded} />}
+                </div>
+                <div className="tab-pane" key="search-tab">
+                  {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} />}
                 </div>
                 <div className="tab-pane" key="shelf-tab">
                   {visitedTabs.has("shelf") && <ShelfHome profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
@@ -490,43 +494,40 @@ export default function App() {
           </div>
         )}
 
-        {/* Bottom Nav */}
+        {/* Bottom Nav — Communities | Search | My MANTL */}
         {screen === "app" && (
           <div className="nav-bar">
             {(() => {
-              const idx = TABS.indexOf(activeTab);
-              const tabCount = TABS.length;
-              const centerPct = (2 * idx + 1) / (2 * tabCount) * 100;
-              const swipeCenterPct = centerPct - (tabSwipeOffset * (100 / tabCount));
-              const minCenter = (1 / (2 * tabCount)) * 100;
-              const maxCenter = ((2 * (tabCount - 1) + 1) / (2 * tabCount)) * 100;
-              const clampedCenter = Math.max(minCenter, Math.min(maxCenter, swipeCenterPct));
-              const barBase = 56;
-              const barStretch = barBase + Math.abs(tabSwipeOffset) * 24;
-              const swiping = tabSwipeOffset !== 0;
+              // Indicator bar — only visible when on a bottom nav tab (not feed)
+              const NAV_TABS = ["communities", "search", "shelf"];
+              const navIdx = NAV_TABS.indexOf(activeTab);
+              const showIndicator = navIdx >= 0;
+              const navCount = NAV_TABS.length;
+              const centerPct = showIndicator ? (2 * navIdx + 1) / (2 * navCount) * 100 : 50;
               return (
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, pointerEvents: "none" }}>
                   <div style={{
                     position: "absolute", top: 0, height: 3,
-                    width: swiping ? barStretch : barBase, borderRadius: 2,
+                    width: 56, borderRadius: 2,
                     background: "var(--accent-green)",
-                    left: `${clampedCenter}%`, transform: "translateX(-50%)",
-                    transition: swiping ? "none" : "left 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                    left: `${centerPct}%`, transform: "translateX(-50%)",
+                    opacity: showIndicator ? 1 : 0,
+                    transition: "left 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease",
                   }} />
                 </div>
               );
             })()}
-            <button className={`nav-item${activeTab === "feed" ? " active" : ""}`}
-              onTouchStart={() => { if (activeTab !== "feed") setPreloadTab("feed"); }}
-              onClick={() => { tapLight(); removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("discover"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
-              <div className="nav-label">Feed</div>
-            </button>
-            <button className={`nav-item${activeTab === "explore" ? " active" : ""}`}
-              onTouchStart={() => { if (activeTab !== "explore") setPreloadTab("explore"); }}
-              onClick={() => { tapLight(); if (activeTab !== "explore") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("explore"); setActiveTab("explore"); setPreloadTab(null); }}>
+            <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
+              onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
+              onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("communities"); setActiveTab("communities"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
+            </button>
+            <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
+              onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
+              onClick={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("search"); setActiveTab("search"); setPreloadTab(null); }}>
+              <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div className="nav-label">Search</div>
             </button>
             <button className={`nav-item${activeTab === "shelf" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "shelf") setPreloadTab("shelf"); }}

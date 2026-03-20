@@ -1,41 +1,38 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useFeed } from "../hooks/community/useFeed";
-import { useDismissedCards } from "../hooks/community/useDismissedCards";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
 import {
   LogCard,
-  EpisodeCard,
-  BadgeCard,
-  BadgeCompleteCard,
-  TrendingCard,
-  UpNextCard,
-  RandomPickCard,
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN
+// FEED SCREEN — New Releases | Streaming | Activity
 // ════════════════════════════════════════════════
+
+const FEED_TABS = [
+  { key: "releases",  label: "New Releases" },
+  { key: "streaming", label: "Streaming" },
+  { key: "activity",  label: "Activity" },
+];
 
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const {
-    discoverItems, activityItems,
-    hasMoreDiscover, hasMoreActivity,
-    loadMoreDiscover, loadMoreActivity,
+    activityItems,
+    hasMoreActivity,
+    loadMoreActivity,
     loading, refresh,
   } = useFeed(userId, communitySubscriptions);
-  const { isDismissed, dismiss, loaded: dismissLoaded } = useDismissedCards(userId);
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
   const [showShareShelf, setShowShareShelf] = useState(false);
-  const discoverSentinelRef = useRef(null);
   const activitySentinelRef = useRef(null);
 
   // ── Pull-to-refresh ──
@@ -47,7 +44,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const PULL_THRESHOLD = 70;
 
   const handleTouchStart = useCallback((e) => {
-    // Find the actual scroll container (tab-pane parent) rather than the feed div itself
     const el = scrollContainerRef.current?.closest('.tab-pane') ?? scrollContainerRef.current;
     const atTop = (el ? el.scrollTop <= 0 : true);
     if (atTop && !refreshing) {
@@ -95,22 +91,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
 
-  // ── Hybrid scroll: infinite for first AUTO_SCROLL_LIMIT items, then manual ──
+  // ── Infinite scroll — activity feed ──
   const AUTO_SCROLL_LIMIT = 50;
 
-  // ── Infinite scroll — discover feed (auto up to limit) ──
-  useEffect(() => {
-    const el = discoverSentinelRef.current;
-    if (!el || !hasMoreDiscover || feedMode !== "discover" || discoverItems.length >= AUTO_SCROLL_LIMIT) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) loadMoreDiscover(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMoreDiscover, loadMoreDiscover, discoverItems.length, feedMode]);
-
-  // ── Infinite scroll — activity feed (auto up to limit) ──
   useEffect(() => {
     const el = activitySentinelRef.current;
     if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= AUTO_SCROLL_LIMIT) return;
@@ -123,7 +106,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
 
   // ── Loading skeleton ──
-  if (loading && discoverItems.length === 0 && activityItems.length === 0) {
+  if (loading && activityItems.length === 0 && feedMode === "activity") {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
         <div style={{ padding: "0 16px" }}>
@@ -141,57 +124,22 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     );
   }
 
-  // ── Render card by type ──
+  // ── Render card ──
   const renderCard = (item, firstLogRef) => {
     if (!item?.data) return null;
     const isFirstLog = item.type === "log" && !firstLogRef.current;
     if (item.type === "log") firstLogRef.current = true;
 
-    switch (item.type) {
-      case "log":
-        return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirstLog} pushNav={pushNav} removeNav={removeNav} />;
-      case "badge":
-        return <BadgeCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} />;
-      case "badge_complete":
-        return <BadgeCompleteCard data={item.data} onCelebrate={(b) => setCelebrationBadge(b)} />;
-      case "trending":
-        return <TrendingCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
-      case "up_next":
-        return <UpNextCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
-      case "random_pick":
-        return <RandomPickCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
-      case "episode":
-        return <EpisodeCard data={item.data} onNavigateCommunity={onNavigateCommunity} />;
-      default:
-        return null;
+    if (item.type === "log") {
+      return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirstLog} pushNav={pushNav} removeNav={removeNav} />;
     }
-  };
-
-  const getDismissKey = (item) => {
-    if (!item?.data) return null;
-    switch (item.type) {
-      case "badge": return { type: "badge", key: item.data.badge_id || item.data.id };
-      case "badge_complete": return { type: "badge_complete", key: item.data.badge_id || item.data.id };
-      case "up_next": return { type: "up_next", key: item.data.miniseries_id };
-      case "random_pick": return { type: "random_pick", key: item.data.item_id };
-      case "trending": return { type: "trending", key: item.data.tmdb_id || item.data.title };
-      case "episode": return { type: "episode", key: `${item.data.status}-${item.data.item_id}` };
-      default: return null;
-    }
+    return null;
   };
 
   const getStableKey = (item, i) => {
     if (!item?.data) return `feed-${i}`;
-    switch (item.type) {
-      case "log": return `log-${item.data.tmdb_id || item.data.title || i}-${(item.data.logged_at || "").slice(0, 10)}`;
-      case "badge": return `badge-${item.data.badge_id || item.data.id || item.data.name || i}`;
-      case "badge_complete": return `complete-${item.data.badge_id || item.data.id || i}`;
-      case "trending": return `trending-${item.data.tmdb_id || item.data.title || i}`;
-      case "up_next": return `upnext-${item.data.miniseries_id || i}`;
-      case "random_pick": return `random-${item.data.item_id || i}`;
-      case "episode": return `episode-${item.data.status}-${item.data.item_id || item.data.tmdb_id || i}`;
-      default: return `feed-${i}`;
-    }
+    if (item.type === "log") return `log-${item.data.tmdb_id || item.data.title || i}-${(item.data.logged_at || "").slice(0, 10)}`;
+    return `feed-${i}`;
   };
 
   return (
@@ -225,16 +173,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       )}
 
-      {/* Feed mode toggle */}
+      {/* Feed tab toggle */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: "6px 16px 4px", position: "relative",
       }}>
         <div className="vhs-toggle">
-          {[
-            { key: "discover", label: "▶ Discover" },
-            { key: "activity", label: "● Activity" },
-          ].map(tab => (
+          {FEED_TABS.map(tab => (
             <button
               key={tab.key}
               className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
@@ -246,49 +191,28 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       </div>
 
-      {/* ── Discover pane ── */}
-      <div style={{ display: feedMode === "discover" ? "block" : "none" }}>
-        {discoverItems.length === 0 && !loading && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
-          }}>
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
-            Subscribe to more communities to unlock episode drops, recommendations, and badge nudges.
-          </div>
-        )}
-        {(() => {
-          const firstLogRef = { current: false };
-          return discoverItems.map((item, i) => {
-            const dismissKey = getDismissKey(item);
-            if (dismissKey && isDismissed(dismissKey.type, dismissKey.key)) return null;
-            return (
-              <FeedCard
-                key={getStableKey(item, i)}
-                index={i}
-                dismissable={!!dismissKey}
-                onDismiss={dismissKey ? () => dismiss(dismissKey.type, dismissKey.key) : undefined}
-              >
-                {renderCard(item, firstLogRef)}
-              </FeedCard>
-            );
-          });
-        })()}
-        {hasMoreDiscover && discoverItems.length < AUTO_SCROLL_LIMIT && <div ref={discoverSentinelRef} style={{ height: 1 }} />}
-        {hasMoreDiscover && discoverItems.length >= AUTO_SCROLL_LIMIT && (
-          <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
-            <button onClick={loadMoreDiscover} style={{
-              padding: "10px 28px", borderRadius: 10,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "var(--text-muted, #8892a8)",
-              fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-              letterSpacing: "0.06em", textTransform: "uppercase",
-              cursor: "pointer",
-            }}>Load more</button>
-          </div>
-        )}
+      {/* ── New Releases pane ── */}
+      <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
+        <div style={{
+          padding: "40px 24px", textAlign: "center",
+          color: "var(--text-muted, #8892a8)", fontSize: 13,
+          fontFamily: "var(--font-body)",
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 10 }}>🎬</div>
+          New Releases — coming soon
+        </div>
+      </div>
+
+      {/* ── Streaming pane ── */}
+      <div style={{ display: feedMode === "streaming" ? "block" : "none" }}>
+        <div style={{
+          padding: "40px 24px", textAlign: "center",
+          color: "var(--text-muted, #8892a8)", fontSize: 13,
+          fontFamily: "var(--font-body)",
+        }}>
+          <div style={{ fontSize: 28, marginBottom: 10 }}>📺</div>
+          Streaming — coming soon
+        </div>
       </div>
 
       {/* ── Activity pane ── */}

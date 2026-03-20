@@ -3,39 +3,17 @@ import { supabase } from "../../supabase";
 import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
 
 /**
- * useFeed — Home feed data hook.
+ * useFeed — Activity feed data hook.
  *
  * Architecture:
- *   1. fetchAllData()        — 10 parallel Supabase queries
+ *   1. fetchAllData()        — 4 parallel Supabase queries (down from 10)
  *   2. groupAndMergeLogs()   — dedupe logs by tmdb_id, merge community contexts
  *   3. mergeShelfLogs()      — fold in personal shelf logs not already covered
- *   4. buildEpisodePipeline()— split episodes by status, dedupe upcoming
- *   5. buildActivityFeed()   — pure chronological movie logs (nothing else)
- *   6. buildDiscoverFeed()   — flat list of discovery cards (episodes, badges,
- *                              up_next, random, trending). Drop system TBD.
- *   7. enrichMedia()         — background poster + logo patching
+ *   4. buildActivityFeed()   — pure chronological movie logs
+ *   5. enrichMedia()         — background poster + logo patching
+ *
+ * New Releases + Streaming tabs are powered separately (TMDB client-side).
  */
-
-// ════════════════════════════════════════════════
-// STABLE RANDOM PICKS CACHE
-// Module-level — survives tab switches. localStorage — survives reloads.
-// ════════════════════════════════════════════════
-
-const _randomPicksCache = new Map();
-const _PICKS_STORAGE_KEY = (uid) => `mantl_random_picks_${uid}`;
-
-function _getPersistedPicks(userId) {
-  try {
-    const raw = localStorage.getItem(_PICKS_STORAGE_KEY(userId));
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-function _persistPicks(userId, picks) {
-  try {
-    localStorage.setItem(_PICKS_STORAGE_KEY(userId), JSON.stringify(picks));
-  } catch {}
-}
 
 // ════════════════════════════════════════════════
 // JSONB → SAFE STRINGS (prevent React object-as-child errors)
@@ -43,12 +21,10 @@ function _persistPicks(userId, picks) {
 
 function _extractDirector(credits, fallback) {
   if (!credits || typeof credits !== "object") return fallback || null;
-  // TMDB standard: {crew: [{job:"Director", name:"..."}]}
   if (Array.isArray(credits.crew)) {
     const dir = credits.crew.find(c => c && c.job === "Director");
     if (dir?.name) return dir.name;
   }
-  // Flat: {director: "Name"}
   if (typeof credits.director === "string") return credits.director;
   return fallback || null;
 }
@@ -71,12 +47,12 @@ function _extractStudios(companies) {
 }
 
 // ════════════════════════════════════════════════
-// DATA FETCHING
+// DATA FETCHING (4 queries — activity only)
 // ════════════════════════════════════════════════
 
-function fetchAllData(userId, subscribedIds) {
+function fetchAllData(userId) {
   return Promise.all([
-    // 1. Recent community logs — capped at 60 to keep payload manageable
+    // 1. Recent community logs
     supabase
       .from("feed_user_logs")
       .select("*")
@@ -84,25 +60,13 @@ function fetchAllData(userId, subscribedIds) {
       .order("logged_at", { ascending: false })
       .limit(60),
 
-    // 2. Badge progress
-    supabase
-      .from("feed_badge_progress")
-      .select("*")
-      .eq("user_id", userId),
-
-    // 3. Trending
-    supabase
-      .from("feed_trending_weekly")
-      .select("*")
-      .limit(8),
-
-    // 4. Badge metadata
+    // 2. Badge metadata (for log enrichment — community context on cards)
     supabase
       .from("badges")
       .select("id, name, miniseries_id, accent_color, image_url, community_id")
       .eq("is_active", true),
 
-    // 5. Personal shelf logs — capped at 40
+    // 3. Personal shelf logs
     supabase
       .from("feed_shelf_logs")
       .select("*")
@@ -110,34 +74,10 @@ function fetchAllData(userId, subscribedIds) {
       .order("watched_at", { ascending: false, nullsFirst: false })
       .limit(40),
 
-    // 6. Community slug ↔ id mapping
+    // 4. Community slug ↔ id mapping
     supabase
       .from("community_pages")
       .select("id, slug"),
-
-    // 7. Up Next
-    supabase
-      .from("feed_up_next")
-      .select("*")
-      .eq("user_id", userId)
-      .limit(8),
-
-    // 8. Random unwatched
-    subscribedIds?.size > 0
-      ? supabase.rpc("feed_random_unwatched", {
-          p_user_id: userId,
-          p_community_ids: [...subscribedIds],
-        })
-      : Promise.resolve({ data: [], error: null }),
-
-    // 9. Unified episodes
-    supabase.rpc("feed_episodes_v2", { p_user_id: userId }),
-
-    // 10. Awards miniseries IDs (excluded from Up Next)
-    supabase
-      .from("community_miniseries")
-      .select("id")
-      .eq("tab_key", "awards"),
   ]);
 }
 
@@ -172,7 +112,6 @@ function buildBadgeLookup(rawBadgeLookup) {
 }
 
 function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
-  // Step 1: Group by tmdb_id + date
   const logGroups = new Map();
 
   for (const log of rawLogs) {
@@ -236,7 +175,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
     }
   }
 
-  // Step 2: Merge groups that share the same tmdb_id across different dates
+  // Merge groups that share the same tmdb_id across different dates
   const mergedGroups = new Map();
   for (const group of logGroups.values()) {
     if (!group.tmdb_id) {
@@ -264,18 +203,15 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
 }
 
 function mergeShelfLogs(mergedGroups, rawShelfLogs) {
-  // Build set of tmdb_ids already covered by community logs
   const tmdbSeen = new Set();
   for (const group of mergedGroups.values()) {
     if (group.communities.length > 0 && group.tmdb_id) tmdbSeen.add(group.tmdb_id);
   }
 
-  // Remove empty community groups
   for (const [key, group] of mergedGroups) {
     if (group.communities.length === 0) mergedGroups.delete(key);
   }
 
-  // Fold in personal shelf logs
   for (const shelf of rawShelfLogs) {
     if (shelf.tmdb_id && tmdbSeen.has(shelf.tmdb_id)) continue;
     const dateKey = shelf.watched_at
@@ -317,107 +253,9 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
 }
 
 // ════════════════════════════════════════════════
-// EPISODE PIPELINE
+// FEED BUILDER
 // ════════════════════════════════════════════════
 
-function buildEpisodePipeline(rawEpisodesAll, subscribedIds) {
-  const filtered = rawEpisodesAll.filter(e =>
-    !subscribedIds || subscribedIds.size === 0 || subscribedIds.has(e.community_id)
-  );
-
-  const droppedEpisodes = filtered.filter(e => e.status === "dropped" || e.status === "published");
-  const upcomingEpisodes = filtered.filter(e => e.status === "upcoming");
-
-  // Dedupe upcoming: one per miniseries (nearest air_date wins)
-  const upcomingByKey = new Map();
-  for (const ep of upcomingEpisodes) {
-    const key = ep.miniseries_id || ep.item_id;
-    if (!upcomingByKey.has(key)) upcomingByKey.set(key, ep);
-  }
-  const upcomingCards = [...upcomingByKey.values()];
-
-  const episodeTmdbIds = new Set(filtered.map(e => e.tmdb_id).filter(Boolean));
-
-  return { droppedEpisodes, upcomingCards, episodeTmdbIds, allEpisodes: [...upcomingCards, ...droppedEpisodes] };
-}
-
-// ════════════════════════════════════════════════
-// RANDOM PICKS (stable, deduplicated)
-// ════════════════════════════════════════════════
-
-function resolveRandomPicks(userId, rawRandom, episodeTmdbIds) {
-  if (!_randomPicksCache.has(userId)) {
-    const persisted = _getPersistedPicks(userId);
-    if (persisted && persisted.length > 0) {
-      _randomPicksCache.set(userId, persisted);
-    } else {
-      const fresh = rawRandom.filter(r => r.media_type !== "book");
-      _randomPicksCache.set(userId, fresh);
-      _persistPicks(userId, fresh);
-    }
-  }
-
-  const raw = (_randomPicksCache.get(userId) || [])
-    .filter(r => !episodeTmdbIds.has(r.tmdb_id));
-
-  // Dedupe by tmdb_id + title
-  const seen = new Set();
-  const picks = [];
-  for (const r of raw) {
-    const key = r.tmdb_id ? `tmdb_${r.tmdb_id}` : `title_${(r.title || "").toLowerCase().trim()}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      picks.push(r);
-    }
-  }
-  return picks;
-}
-
-// ════════════════════════════════════════════════
-// FILTER HELPERS
-// ════════════════════════════════════════════════
-
-function filterBadges(rawBadges, subscribedIds) {
-  const filtered = subscribedIds
-    ? rawBadges.filter(b => !b.community_id || subscribedIds.has(b.community_id))
-    : rawBadges;
-
-  return filtered
-    .map(b => ({
-      ...b,
-      pct: b.total_items > 0 ? b.watched_count / b.total_items : 0,
-      remaining: b.total_items - b.watched_count,
-    }))
-    .sort((a, b) => b.pct - a.pct);
-}
-
-function filterUpNext(rawUpNext, subscribedIds, awardsMiniseriesIds) {
-  return (subscribedIds
-    ? rawUpNext.filter(u => !u.community_id || subscribedIds.has(u.community_id))
-    : rawUpNext
-  ).filter(u => u.media_type !== "book" && !awardsMiniseriesIds.has(u.miniseries_id));
-}
-
-function filterTrending(rawTrending, subscribedSlugs) {
-  return rawTrending
-    .map(t => ({
-      ...t,
-      communities: (t.communities || []).filter(c =>
-        !subscribedSlugs || subscribedSlugs.has(c.community_slug)
-      ),
-    }))
-    .filter(t => t.communities.length > 0);
-}
-
-
-
-// ════════════════════════════════════════════════
-// FEED BUILDERS
-// ════════════════════════════════════════════════
-
-/**
- * buildActivityFeed — pure chronological movie logs. Nothing else.
- */
 function buildActivityFeed(mergedGroups) {
   const sorted = [...mergedGroups.values()]
     .sort((a, b) => {
@@ -443,65 +281,15 @@ function buildActivityFeed(mergedGroups) {
   return sorted.map(data => ({ type: "log", data }));
 }
 
-/**
- * buildDiscoverFeed — flat discovery card list.
- * Simple static ordering for now. Drop system TBD.
- */
-function buildDiscoverFeed({ upcomingCards, droppedEpisodes, randomPicks, sortedBadges, filteredUpNext, filteredTrending }) {
-  const feed = [];
-  const seenKeys = new Set();
-
-  const tryPush = (type, data) => {
-    const key = data.tmdb_id || data.item_id || data.badge_id || data.title || data.badge_name;
-    if (key && seenKeys.has(key)) return;
-    if (key) seenKeys.add(key);
-    feed.push({ type, data });
-  };
-
-  // Episodes first (dropped/published, then upcoming)
-  for (const ep of droppedEpisodes) tryPush("episode", ep);
-  for (const ep of upcomingCards) tryPush("episode", ep);
-
-  // Then interleave the passive pools
-  const pools = [
-    { type: "badge",       items: sortedBadges },
-    { type: "up_next",     items: filteredUpNext },
-    { type: "random_pick", items: randomPicks },
-    { type: "trending",    items: filteredTrending },
-  ];
-
-  // Round-robin across pools so card types alternate
-  let added = true;
-  let cursor = 0;
-  const poolCursors = pools.map(() => 0);
-  while (added) {
-    added = false;
-    for (let p = 0; p < pools.length; p++) {
-      const pool = pools[p];
-      const idx = poolCursors[p];
-      if (idx < pool.items.length) {
-        tryPush(pool.type, pool.items[idx]);
-        poolCursors[p]++;
-        added = true;
-      }
-    }
-    cursor++;
-    if (cursor > 50) break; // safety
-  }
-
-  return feed;
-}
-
 // ════════════════════════════════════════════════
 // MEDIA ENRICHMENT (posters + logos)
 // ════════════════════════════════════════════════
 
 function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTick) {
-  // Only enrich the visible window — processing all 400 items causes OOM on mobile
   const allCards = visibleCards.filter(c => c?.data);
   const allDataObjects = new Set(allCards.map(c => c.data));
 
-  // ── Poster enrichment ──
+  // Poster enrichment
   const posterItems = [];
   const seenTmdb = new Set();
   for (const card of allCards) {
@@ -533,7 +321,7 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
     }).catch(() => {});
   }
 
-  // ── Logo enrichment ──
+  // Logo enrichment
   const logoItems = [];
   const seenLogo = new Set();
   for (const card of allCards) {
@@ -544,7 +332,6 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
     logoItems.push({ tmdb_id: d.tmdb_id, media_type: d.media_type || "film" });
   }
 
-  // Immediately patch cached logos
   let patchedCached = false;
   for (const d of allDataObjects) {
     if (!d.tmdb_id || d.logo_url) continue;
@@ -576,9 +363,8 @@ const PAGE_SIZE = 15;
 export function useFeed(userId, subscribedIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
-  const feedBucketsRef = useRef({ activity: [], discover: [] });
+  const feedBucketRef = useRef([]);
   const fetchGenRef = useRef(0);
-  const [discoverVisible, setDiscoverVisible] = useState(PAGE_SIZE);
   const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
   const [renderTick, setRenderTick] = useState(0);
 
@@ -586,19 +372,14 @@ export function useFeed(userId, subscribedIds) {
     ? [...subscribedIds].sort().join(",")
     : "";
 
-  // ── Derive items for both feeds from shared buckets ──
-  // renderTick in deps ensures we re-derive after enrichMedia patches logo_url/poster_url
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const { discoverItems, activityItems, hasMoreDiscover, hasMoreActivity } = useMemo(() => {
-    const discoverBucket = feedBucketsRef.current.discover || [];
-    const activityBucket = feedBucketsRef.current.activity || [];
+  const { activityItems, hasMoreActivity } = useMemo(() => {
+    const bucket = feedBucketRef.current || [];
     return {
-      discoverItems: discoverBucket.slice(0, discoverVisible),
-      activityItems: activityBucket.slice(0, activityVisible),
-      hasMoreDiscover: discoverVisible < discoverBucket.length,
-      hasMoreActivity: activityVisible < activityBucket.length,
+      activityItems: bucket.slice(0, activityVisible),
+      hasMoreActivity: activityVisible < bucket.length,
     };
-  }, [discoverVisible, activityVisible, renderTick]);
+  }, [activityVisible, renderTick]);
 
   const fetchFeed = useCallback(async (isExplicit = false) => {
     if (!userId) { setLoading(false); return; }
@@ -607,26 +388,16 @@ export function useFeed(userId, subscribedIds) {
 
     try {
       const [
-        logsRes, badgesRes, trendingRes, badgeLookupRes, shelfRes,
-        communityPagesRes, upNextRes, randomRes,
-        episodesRes, awardsMiniseriesRes,
-      ] = await fetchAllData(userId, subscribedIds);
+        logsRes, badgeLookupRes, shelfRes, communityPagesRes,
+      ] = await fetchAllData(userId);
 
       if (!mountedRef.current) return;
 
-      // ── Unpack raw data ──
       const rawLogs = logsRes.data || [];
-      const rawBadges = badgesRes.data || [];
-      const rawTrending = trendingRes.data || [];
       const rawBadgeLookup = badgeLookupRes.data || [];
       const rawShelfLogs = shelfRes.data || [];
       const communityPages = communityPagesRes.data || [];
-      const rawUpNext = upNextRes.data || [];
-      const rawRandom = randomRes.data || [];
-      const rawEpisodesAll = episodesRes.data || [];
-      const awardsMiniseriesIds = new Set((awardsMiniseriesRes.data || []).map(m => m.id));
 
-      // ── Build lookups ──
       const { idToSlug } = buildSlugMaps(communityPages);
       const badgeByMiniseries = buildBadgeLookup(rawBadgeLookup);
 
@@ -635,40 +406,18 @@ export function useFeed(userId, subscribedIds) {
         ? new Set([...subscribedIds].map(id => idToSlug.get(id)).filter(Boolean))
         : null;
 
-      // ── Process logs ──
       const mergedGroups = groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs);
       mergeShelfLogs(mergedGroups, rawShelfLogs);
 
-      // ── Process episodes ──
-      const { droppedEpisodes, upcomingCards, episodeTmdbIds } =
-        buildEpisodePipeline(rawEpisodesAll, subscribedIds);
-
-      // ── Random picks (stable) ──
-      const randomPicks = resolveRandomPicks(userId, rawRandom, episodeTmdbIds);
-
-      // ── Filter pools ──
-      const sortedBadges = filterBadges(rawBadges, subscribedIds);
-      const filteredUpNext = filterUpNext(rawUpNext, subscribedIds, awardsMiniseriesIds);
-      const filteredTrending = filterTrending(rawTrending, subscribedSlugs);
-
-      // ── Assemble feeds ──
       const activityCards = buildActivityFeed(mergedGroups);
 
-      const discoverCards = buildDiscoverFeed({
-        upcomingCards, droppedEpisodes, randomPicks,
-        sortedBadges, filteredUpNext, filteredTrending,
-      });
-
-      // ── Commit buckets ──
-      feedBucketsRef.current = { activity: activityCards, discover: discoverCards };
-      setDiscoverVisible(PAGE_SIZE);
+      feedBucketRef.current = activityCards;
       setActivityVisible(PAGE_SIZE);
       setRenderTick(t => t + 1);
 
-      // ── Background media enrichment — only visible window to avoid OOM on mobile ──
+      // Background media enrichment
       const initialActivity = activityCards.slice(0, PAGE_SIZE * 2);
-      const initialDiscover = discoverCards.slice(0, PAGE_SIZE * 2);
-      enrichMedia([...initialActivity, ...initialDiscover], thisGen, fetchGenRef, mountedRef, setRenderTick);
+      enrichMedia(initialActivity, thisGen, fetchGenRef, mountedRef, setRenderTick);
 
     } catch (err) {
       console.error("[Feed] Error loading feed:", err);
@@ -678,22 +427,10 @@ export function useFeed(userId, subscribedIds) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, subscribedKey]);
 
-  const loadMoreDiscover = useCallback(() => {
-    setDiscoverVisible(prev => {
-      const next = prev + PAGE_SIZE;
-      const bucket = feedBucketsRef.current.discover || [];
-      const newSlice = bucket.slice(prev, next);
-      if (newSlice.length > 0) {
-        enrichMedia(newSlice, fetchGenRef.current, fetchGenRef, mountedRef, setRenderTick);
-      }
-      return next;
-    });
-  }, []);
-
   const loadMoreActivity = useCallback(() => {
     setActivityVisible(prev => {
       const next = prev + PAGE_SIZE;
-      const bucket = feedBucketsRef.current.activity || [];
+      const bucket = feedBucketRef.current || [];
       const newSlice = bucket.slice(prev, next);
       if (newSlice.length > 0) {
         enrichMedia(newSlice, fetchGenRef.current, fetchGenRef, mountedRef, setRenderTick);
@@ -709,9 +446,10 @@ export function useFeed(userId, subscribedIds) {
   }, [fetchFeed]);
 
   return {
-    discoverItems, activityItems,
-    hasMoreDiscover, hasMoreActivity,
-    loadMoreDiscover, loadMoreActivity,
-    loading, refresh: () => fetchFeed(true),
+    activityItems,
+    hasMoreActivity,
+    loadMoreActivity,
+    loading,
+    refresh: () => fetchFeed(true),
   };
 }
