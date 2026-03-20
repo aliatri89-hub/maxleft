@@ -1205,7 +1205,7 @@ const DEMO_PLAY_MOVIES = [
   },
   {
     title: "Alien",
-    logo: "https://image.tmdb.org/t/p/original/2VtdN0UaK2RISxUgPw04oT4oWTO.png",
+    logo: "https://image.tmdb.org/t/p/original/dWqeM2MO3S48Z2hWHjtpsBUqZ62.png",
     brand: "HGX MAXELL",
     podcasts: [
       { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien" },
@@ -1237,11 +1237,9 @@ function LandingScreen({ onSignIn }) {
   const [showPinBadge, setShowPinBadge] = useState(false);
 
   // ── Play button demo state ───────────────────────────────
-  const [showDemoPicker, setShowDemoPicker] = useState(false);
+  const [demoPickerIdx, setDemoPickerIdx] = useState(null);
   const [demoPodcast, setDemoPodcast] = useState(null);
-  const [demoMovieIdx, setDemoMovieIdx] = useState(0);
-  const demoMovie = DEMO_PLAY_MOVIES[demoMovieIdx];
-  const cycleDemoMovie = () => { setDemoMovieIdx(i => (i + 1) % DEMO_PLAY_MOVIES.length); setShowDemoPicker(false); setDemoPodcast(null); };
+  const toggleDemoPicker = (idx) => { setDemoPickerIdx(prev => prev === idx ? null : idx); };
 
   // ── Intersection observer for scroll reveals ──────────────
   useEffect(() => {
@@ -1584,117 +1582,91 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-desc">
             See which podcasts covered it. Pick a show. Listen.
           </div>
-          <div className="play-demo-wrap">
-            <div style={{ borderRadius: 4, overflow: "hidden" }}>
-              {/* VHS Tape */}
-              <div className="play-demo-tape" onClick={cycleDemoMovie} style={{ cursor: "pointer" }}>
-                <div className="play-demo-tape-end" />
-                <div className="play-demo-label">
-                  <span className="play-demo-brand-left">{demoMovie.brand}</span>
-                  <span className="play-demo-brand-right">VHS</span>
-                  <img
-                    key={demoMovie.title}
-                    src={demoMovie.logo}
-                    alt={demoMovie.title}
-                    crossOrigin="anonymous"
-                    style={{
-                      maxHeight: 54, minHeight: 36, maxWidth: "85%", width: "auto",
-                      objectFit: "contain", position: "relative",
-                      opacity: 0.85,
-                      animation: "fadeIn 0.3s ease",
-                    }}
-                    onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
-                  />
-                  <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>{demoMovie.title}</div>
-                  {/* Sharpie stars — bottom right */}
-                  <div style={{ position: "absolute", bottom: 6, right: 24, display: "flex", gap: 0, alignItems: "center" }}>
-                    {[
-                      "M12 1 L14.5 8 L22 9.5 L16.5 14.5 L18 22 L12 18 L6 22 L7.5 14.5 L2 9.5 L9.5 8 Z",
-                      "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
-                      "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
-                    ].map((d, i) => (
-                      <svg key={i} width={14} height={14} viewBox="0 0 24 24" style={{ display: "block" }}>
-                        <path d={d} fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
-                          style={{ transform: `rotate(${[-3, 2, -1][i]}deg)`, transformOrigin: "center" }} />
-                      </svg>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 420, margin: "0 auto" }}>
+            {DEMO_PLAY_MOVIES.map((movie, idx) => (
+              <div key={idx} className="play-demo-wrap">
+                <div style={{ borderRadius: 4, overflow: "hidden" }}>
+                  {/* VHS Tape */}
+                  <div className="play-demo-tape">
+                    <div className="play-demo-tape-end" />
+                    <div className="play-demo-label">
+                      <span className="play-demo-brand-left">{movie.brand}</span>
+                      <span className="play-demo-brand-right">VHS</span>
+                      <img
+                        src={movie.logo}
+                        alt={movie.title}
+                        crossOrigin="anonymous"
+                        style={{
+                          maxHeight: 54, minHeight: 36, maxWidth: "85%", width: "auto",
+                          objectFit: "contain", position: "relative", opacity: 0.85,
+                        }}
+                        onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
+                      />
+                      <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>{movie.title}</div>
+                      {/* Sharpie stars */}
+                      <div style={{ position: "absolute", bottom: 6, right: 24, display: "flex", gap: 0, alignItems: "center" }}>
+                        {[
+                          "M12 1 L14.5 8 L22 9.5 L16.5 14.5 L18 22 L12 18 L6 22 L7.5 14.5 L2 9.5 L9.5 8 Z",
+                          "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
+                          "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
+                        ].map((d, i) => (
+                          <svg key={i} width={14} height={14} viewBox="0 0 24 24" style={{ display: "block" }}>
+                            <path d={d} fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
+                              style={{ transform: `rotate(${[-3, 2, -1][i]}deg)`, transformOrigin: "center" }} />
+                          </svg>
+                        ))}
+                      </div>
+                      <div className="play-demo-headphones">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="play-demo-tape-end" />
+                  </div>
+                  {/* VCR Deck */}
+                  <div className="play-demo-deck" onClick={() => toggleDemoPicker(idx)} style={{ borderRadius: demoPickerIdx === idx ? "0" : "0 0 4px 4px" }}>
+                    <div className="play-demo-deck-edge" />
+                    <div className="play-demo-corner play-demo-corner-tl" />
+                    <div className="play-demo-corner play-demo-corner-tr" />
+                    <div className="play-demo-corner play-demo-corner-bl" />
+                    <div className="play-demo-corner play-demo-corner-br" />
+                    <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+                      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)", pointerEvents: "none" }} />
+                      <div className="play-demo-grille" />
+                    </div>
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <div className="play-demo-play-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        <div className={`play-demo-led${demoPodcast && demoPodcast._movieIdx === idx ? ' active' : ''}`} />
+                      </div>
+                    </div>
+                    <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
+                      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)", pointerEvents: "none" }} />
+                      <div className="play-demo-grille" />
+                    </div>
+                  </div>
+                  {/* Picker */}
+                  <div className={`play-demo-picker${demoPickerIdx === idx ? ' open' : ''}`}>
+                    {movie.podcasts.map((p, i) => (
+                      <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); setDemoPodcast({ ...p, _movieIdx: idx }); setDemoPickerIdx(null); }}>
+                        <img className="play-demo-picker-art" src={p.art} alt={p.name} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="play-demo-picker-name">{p.episode}</div>
+                          <div className="play-demo-picker-ep">{p.name}</div>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
                     ))}
                   </div>
-                  <div className="play-demo-headphones">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-                      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="play-demo-tape-end" />
-              </div>
-              {/* VCR Deck */}
-              <div className="play-demo-deck" onClick={() => setShowDemoPicker(p => !p)}>
-                <div className="play-demo-deck-edge" />
-                <div className="play-demo-corner play-demo-corner-tl" />
-                <div className="play-demo-corner play-demo-corner-tr" />
-                <div className="play-demo-corner play-demo-corner-bl" />
-                <div className="play-demo-corner play-demo-corner-br" />
-                <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
-                  <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)", pointerEvents: "none" }} />
-                  <div className="play-demo-grille" />
-                </div>
-                <div style={{ position: "relative", flexShrink: 0 }}>
-                  <div className="play-demo-play-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                    <div className={`play-demo-led${demoPodcast ? ' active' : ''}`} />
-                  </div>
-                </div>
-                <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
-                  <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)", pointerEvents: "none" }} />
-                  <div className="play-demo-grille" />
                 </div>
               </div>
-              {/* Picker */}
-              <div className={`play-demo-picker${showDemoPicker ? ' open' : ''}`}>
-                {demoMovie.podcasts.map((p, i) => (
-                  <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); setDemoPodcast(p); setShowDemoPicker(false); }}>
-                    <img className="play-demo-picker-art" src={p.art} alt={p.name} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="play-demo-picker-name">{p.episode}</div>
-                      <div className="play-demo-picker-ep">{p.name}</div>
-                    </div>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)"><path d="M8 5v14l11-7z" /></svg>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Now playing */}
-            {demoPodcast && (
-              <div className="play-demo-now-playing" onClick={() => setDemoPodcast(null)}>
-                <img src={demoPodcast.art} alt="" />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="play-demo-now-playing-text">{demoPodcast.name}</div>
-                  <div className="play-demo-now-playing-ep">{demoPodcast.episode}</div>
-                </div>
-              </div>
-            )}
-            {/* Movie dots */}
-            <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 12 }}>
-              {DEMO_PLAY_MOVIES.map((m, i) => (
-                <div
-                  key={i}
-                  onClick={() => { setDemoMovieIdx(i); setShowDemoPicker(false); setDemoPodcast(null); }}
-                  style={{
-                    width: i === demoMovieIdx ? 18 : 6,
-                    height: 6,
-                    borderRadius: 3,
-                    background: i === demoMovieIdx ? "var(--terracotta, #C75B3F)" : "rgba(255,255,255,0.15)",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease",
-                  }}
-                />
-              ))}
-            </div>
+            ))}
           </div>
-          <div className="tap-hint">tap the play button</div>
+          <div className="tap-hint">tap a deck to see who covered it</div>
         </div>
 
         {/* ── 1. COMMUNITIES ────────────────────────────────── */}
