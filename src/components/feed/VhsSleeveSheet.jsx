@@ -94,14 +94,43 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const startY = useRef(0);
   const currentY = useRef(0);
 
-  const communities = data?.communities || [];
-  const backdropUrl = resolveImg(data?.backdrop_path, TMDB_BACKDROP);
-  const budgetStr = fmtMoney(data?.budget);
-  const grossStr = fmtMoney(data?.revenue);
-  const runtimeStr = fmtRuntime(data?.runtime);
-  const director = data?.director || data?.creator || null;
-  const cast = data?.cast_names || [];
-  const studios = data?.studio_names || [];
+  // Lazy-load heavy detail fields (stripped from feed query to save bandwidth)
+  const [detail, setDetail] = useState(null);
+  useEffect(() => {
+    if (!open || !data?.tmdb_id) return;
+    // Already have detail data (either from a previous open or from full feed data)
+    if (merged.overview !== undefined || data.credits !== undefined) return;
+    let cancelled = false;
+    supabase
+      .from("media")
+      .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths")
+      .eq("tmdb_id", data.tmdb_id)
+      .maybeSingle()
+      .then(({ data: d }) => {
+        if (cancelled || !d) return;
+        setDetail(d);
+      });
+    return () => { cancelled = true; };
+  }, [open, data?.tmdb_id]);
+
+  // Reset detail when card changes
+  useEffect(() => { setDetail(null); }, [data?.tmdb_id]);
+
+  // Merge lazy detail into data
+  const merged = detail ? { ...data, ...detail,
+    director: data.director || (detail.credits?.crew?.find(c => c.job === "Director")?.name) || data.creator || null,
+    cast_names: data.cast_names?.length ? data.cast_names : (detail.credits?.cast?.slice(0,6).map(c => c?.name).filter(Boolean) || []),
+    studio_names: data.studio_names?.length ? data.studio_names : (Array.isArray(detail.production_companies) ? detail.production_companies.slice(0,3).map(c => ({ name: c?.name || c, logo_url: c?.logo_path ? ("https://image.tmdb.org/t/p/w92" + c.logo_path) : null })).filter(s => s.name) : []),
+  } : data;
+
+  const communities = merged?.communities || [];
+  const backdropUrl = resolveImg(merged?.backdrop_path, TMDB_BACKDROP);
+  const budgetStr = fmtMoney(merged?.budget);
+  const grossStr = fmtMoney(merged?.revenue);
+  const runtimeStr = fmtRuntime(merged?.runtime);
+  const director = merged?.director || merged?.creator || null;
+  const cast = merged?.cast_names || [];
+  const studios = merged?.studio_names || [];
   const [extraBackdrops, setExtraBackdrops] = useState([]);
   const genreFont = getGenreFont(data?.genre);
   const seed = data?.tmdb_id
@@ -126,8 +155,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     let cancelled = false;
 
     // If still_paths are already cached in the DB, use them instantly
-    if (data.still_paths?.length) {
-      const stills = data.still_paths.map(p =>
+    if (merged.still_paths?.length) {
+      const stills = merged.still_paths.map(p =>
         p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`
       );
       setExtraBackdrops(stills);
@@ -300,7 +329,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         </div>
 
         {/* ── Tagline — genre-driven typography ── */}
-        {data.tagline && (
+        {merged.tagline && (
           <div style={{
             fontFamily: `'${genreFont.family}', sans-serif`,
             fontWeight: genreFont.weight,
@@ -314,7 +343,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             maxWidth: "90%",
             margin: "0 auto",
           }}>
-            {data.tagline}
+            {merged.tagline}
           </div>
         )}
 
@@ -519,7 +548,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )}
 
           {/* Overview / Synopsis */}
-          {data.overview && (
+          {merged.overview && (
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10, lineHeight: 1.55,
@@ -527,7 +556,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               textAlign: "center",
               marginBottom: 14,
             }}>
-              {data.overview}
+              {merged.overview}
             </div>
           )}
 

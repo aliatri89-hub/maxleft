@@ -76,10 +76,10 @@ function _extractStudios(companies) {
 
 function fetchAllData(userId, subscribedIds) {
   return Promise.all([
-    // 1. Recent community logs
+    // 1. Recent community logs — lean columns only (heavy fields fetched lazily on sleeve open)
     supabase
       .from("feed_user_logs")
-      .select("*")
+      .select("log_id,user_id,item_id,status,rating,completed_at,logged_at,title,year,creator,poster_path,backdrop_path,media_type,tmdb_id,miniseries_id,series_title,community_id,community_name,community_slug,community_image,episode_url,episode_title,series_total,series_watched,genre,certification,created_at")
       .eq("user_id", userId)
       .order("logged_at", { ascending: false })
       .limit(300),
@@ -102,10 +102,10 @@ function fetchAllData(userId, subscribedIds) {
       .select("id, name, miniseries_id, accent_color, image_url, community_id")
       .eq("is_active", true),
 
-    // 5. Personal shelf logs
+    // 5. Personal shelf logs — lean columns only
     supabase
       .from("feed_shelf_logs")
-      .select("*")
+      .select("log_id,user_id,tmdb_id,title,year,creator,poster_url,backdrop_url,media_type,rating,watched_at,created_at,genre,certification,runtime")
       .eq("user_id", userId)
       .order("watched_at", { ascending: false, nullsFirst: false })
       .limit(100),
