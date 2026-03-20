@@ -872,12 +872,11 @@ const featureStyles = `
 
   /* ── PLAY BUTTON DEMO ─────────────────────────────────────── */
   .play-demo-wrap {
-    max-width: 420px;
-    margin: 0 auto;
     border-radius: 6px;
     background: #302c28;
     padding: 1px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    width: 100%;
   }
   .play-demo-tape {
     background: #1a1612;
