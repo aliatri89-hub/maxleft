@@ -407,7 +407,8 @@ export default function App() {
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
-                    communitySubscriptions={communitySubscriptions} requestActivityMode={requestActivityMode} />
+                    communitySubscriptions={communitySubscriptions} requestActivityMode={requestActivityMode}
+                    pushNav={pushNav} removeNav={removeNav} />
                 </div>
                 <div className="tab-pane" key="explore-tab">
                   {visitedTabs.has("explore") && <ExploreScreen session={session}

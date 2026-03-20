@@ -94,7 +94,7 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false }) {
+function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false, pushNav, removeNav }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
@@ -107,6 +107,20 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const peekColor = communities[0]
     ? getCommunityAccent(communities[0].community_slug)
     : "#8B5CF6";
+
+  // Unique back-nav key per card instance
+  const sleeveNavKey = `sleeve-${data.tmdb_id || data.title}`;
+
+  const openSleeve = () => {
+    setSheetOpen(true);
+    setShowHint(false);
+    if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
+  };
+
+  const closeSleeve = () => {
+    setSheetOpen(false);
+    if (removeNav) removeNav(sleeveNavKey);
+  };
 
   // ── Audio source derivation ──
   const playableSources = communities.filter(c => c.episode_url && c.episode_url.includes(".mp3"));
@@ -160,10 +174,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       }}>
       {/* Front — always visible */}
         <div
-          onClick={() => {
-            setSheetOpen(true);
-            setShowHint(false);
-          }}
+          onClick={() => openSleeve()}
           style={{
             background: "#1a1612",
             borderRadius: 5,
@@ -562,7 +573,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     <VhsSleeveSheet
       data={data}
       open={sheetOpen}
-      onClose={() => setSheetOpen(false)}
+      onClose={closeSleeve}
       onNavigateCommunity={onNavigateCommunity}
     />
     </>

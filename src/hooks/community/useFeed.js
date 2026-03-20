@@ -567,8 +567,8 @@ function buildDiscoverFeed({ upcomingCards, droppedEpisodes, randomPicks, sorted
 
     if (cIdx < pool.items.length) {
       const dropTime = e * EPOCH_MS;
+      poolCursors[pIdx]++;
       if (tryPush(pool.type, pool.items[cIdx], dropTime)) {
-        poolCursors[pIdx]++;
         slotsAssigned++;
       }
     }
@@ -726,7 +726,7 @@ function enrichMedia(feedBucketsRef, thisGen, fetchGenRef, mountedRef, setRender
 // HOOK
 // ════════════════════════════════════════════════
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 15;
 
 export function useFeed(userId, subscribedIds, feedMode = "all") {
   const [feedItems, setFeedItems] = useState([]);

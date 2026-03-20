@@ -20,7 +20,7 @@ import {
 // FEED SCREEN
 // ════════════════════════════════════════════════
 
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, requestActivityMode }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, requestActivityMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const [feedMode, setFeedMode] = useState("discover");
   const { feedItems: rawFeedItems, loading, refresh, loadMore, hasMore } = useFeed(userId, communitySubscriptions, feedMode);
@@ -31,6 +31,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
   const [showShareShelf, setShowShareShelf] = useState(false);
+  const sentinelRef = useRef(null);
 
   const ACTIVITY_ONLY_TYPES = new Set(["log"]);
   const feedItems = rawFeedItems
@@ -97,6 +98,18 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (requestActivityMode) setFeedMode("activity");
   }, [requestActivityMode]);
 
+  // ── Infinite scroll — load more when sentinel enters viewport ──
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore]);
+
   // ── Loading skeleton ──
   if (loading && feedItems.length === 0) {
     return (
@@ -118,12 +131,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   // ── Render card by type ──
   const renderCard = (item, firstLogRef) => {
+    if (!item?.data) return null;
     const isFirstLog = item.type === "log" && !firstLogRef.current;
     if (item.type === "log") firstLogRef.current = true;
 
     switch (item.type) {
       case "log":
-        return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirstLog} />;
+        return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirstLog} pushNav={pushNav} removeNav={removeNav} />;
       case "badge":
         return <BadgeCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} />;
       case "badge_complete":
@@ -142,6 +156,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   };
 
   const getDismissKey = (item) => {
+    if (!item?.data) return null;
     switch (item.type) {
       case "badge": return { type: "badge", key: item.data.badge_id || item.data.id };
       case "badge_complete": return { type: "badge_complete", key: item.data.badge_id || item.data.id };
@@ -154,14 +169,15 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   };
 
   const getStableKey = (item, i) => {
+    if (!item?.data) return `feed-${i}`;
     switch (item.type) {
-      case "log": return `log-${item.data.tmdb_id || item.data.title}-${(item.data.logged_at || "").slice(0, 10)}`;
-      case "badge": return `badge-${item.data.badge_id || item.data.id || item.data.name}`;
-      case "badge_complete": return `complete-${item.data.badge_id || item.data.id}`;
-      case "trending": return `trending-${item.data.tmdb_id || item.data.title}`;
-      case "up_next": return `upnext-${item.data.miniseries_id}`;
-      case "random_pick": return `random-${item.data.item_id}`;
-      case "episode": return `episode-${item.data.status}-${item.data.tmdb_id}`;
+      case "log": return `log-${item.data.tmdb_id || item.data.title || i}-${(item.data.logged_at || "").slice(0, 10)}`;
+      case "badge": return `badge-${item.data.badge_id || item.data.id || item.data.name || i}`;
+      case "badge_complete": return `complete-${item.data.badge_id || item.data.id || i}`;
+      case "trending": return `trending-${item.data.tmdb_id || item.data.title || i}`;
+      case "up_next": return `upnext-${item.data.miniseries_id || i}`;
+      case "random_pick": return `random-${item.data.item_id || i}`;
+      case "episode": return `episode-${item.data.status}-${item.data.item_id || item.data.tmdb_id || i}`;
       default: return `feed-${i}`;
     }
   };
@@ -282,25 +298,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               );
             })}
 
-            {/* Load More */}
-            {hasMore && (
-              <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
-                <button
-                  onClick={loadMore}
-                  style={{
-                    padding: "10px 28px", borderRadius: 10,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    color: "var(--text-muted, #8892a8)",
-                    fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-                    letterSpacing: "0.06em", textTransform: "uppercase",
-                    cursor: "pointer", transition: "background 0.15s, border-color 0.15s",
-                  }}
-                >
-                  Load more
-                </button>
-              </div>
-            )}
+            {/* Infinite scroll sentinel */}
+            {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
           </div>
         );
       })()}
