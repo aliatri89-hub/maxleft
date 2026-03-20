@@ -512,22 +512,38 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 paddingBottom: 2,
               }}>
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 8, fontWeight: 600,
-                  color: "rgba(240,235,225,0.3)",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.12em",
-                  marginBottom: 4,
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 400, fontSize: 8,
+                  color: "rgba(240,235,225,0.4)",
+                  letterSpacing: "0.1em", textTransform: "lowercase",
+                  marginBottom: 3,
                 }}>starring</div>
                 {cast.slice(0, 3).map((name, i) => (
                   <div key={i} style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 600, fontSize: 14,
-                    color: "rgba(240,235,225,0.75)",
+                    fontFamily: "'Oswald', sans-serif",
+                    fontWeight: 500, fontSize: 14,
+                    color: "rgba(240,235,225,0.9)",
+                    letterSpacing: "0.06em", textTransform: "uppercase",
                     lineHeight: 1.4,
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{name}</div>
                 ))}
+                {cast.length > 3 && (
+                  <div style={{ marginTop: 4, display: "flex", alignItems: "baseline", gap: 4, flexWrap: "wrap" }}>
+                    <span style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 400, fontSize: 8,
+                      color: "rgba(240,235,225,0.4)",
+                      letterSpacing: "0.1em",
+                    }}>also starring</span>
+                    <span style={{
+                      fontFamily: "'Oswald', sans-serif",
+                      fontWeight: 400, fontSize: 11,
+                      color: "rgba(240,235,225,0.6)",
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                    }}>{cast.slice(3).join(", ")}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
