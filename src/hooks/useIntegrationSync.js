@@ -376,6 +376,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
           p_tmdb_id: rw.tmdb_id,
           p_watch_dates: newDates,
           p_watched_at: new Date(new Date(toLogTimestamp(rw.newDate)).getTime()).toISOString(),
+          p_rating: rw.rating || null,
         });
 
         if (rwErr) {
@@ -404,14 +405,16 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
               const rewatchTimestamp = new Date(
                 new Date(toLogTimestamp(rw.newDate)).getTime()
               ).toISOString();
-              await supabase
-                .from("community_user_progress")
-                .update({
+              const updatePayload = {
                   rewatch_count: newCount - 1,
                   rewatch_dates: rewatchDatesOnly,
                   completed_at: rewatchTimestamp,
                   updated_at: rewatchTimestamp,
-                })
+                };
+              if (rw.rating) updatePayload.rating = Math.round(rw.rating);
+              await supabase
+                .from("community_user_progress")
+                .update(updatePayload)
                 .eq("user_id", uid)
                 .in("item_id", progressItemIds);
 
