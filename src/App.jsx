@@ -82,8 +82,8 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [screen, setScreen] = useState("loading");
-  const [activeTab, setActiveTab] = useState("explore");
-  const [visitedTabs, setVisitedTabs] = useState(new Set(["explore"]));
+  const [activeTab, setActiveTab] = useState("feed");
+  const [visitedTabs, setVisitedTabs] = useState(new Set(["feed"]));
   const navTapCount = useRef(0);
   const navTapTimer = useRef(null);
   const feedTapCount = useRef(0);
@@ -402,7 +402,7 @@ export default function App() {
 
             {/* Tab slider */}
             <div className="main" style={{ touchAction: "pan-y" }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-              <div className="tab-slider" ref={sliderRef} style={{ transform: "translateX(-100%)" }}>
+              <div className="tab-slider" ref={sliderRef}>
                 <div className="tab-pane" key="feed-tab">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}

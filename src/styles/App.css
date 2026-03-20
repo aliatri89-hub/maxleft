@@ -1392,15 +1392,12 @@
     display: flex;
     height: 100%;
     position: relative;
-    /* SAFARI FIX: will-change: transform creates a containing block that breaks
-       position:fixed in all children — only apply during active interaction.
-       See .tab-slider.swiping and .tab-slider.animating below. */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
   .tab-slider.swiping,
   .tab-slider.animating {
     will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   .tab-slider.animating {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1417,7 +1414,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: 80px;
     animation: tabPaneFadeIn 0.3s ease-out;
     scrollbar-width: none;
