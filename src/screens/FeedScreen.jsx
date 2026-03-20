@@ -233,7 +233,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             fontFamily: "var(--font-body)",
           }}>
             <div style={{ fontSize: 28, marginBottom: 10 }}>🎬</div>
-            No new releases found
+            No podcast coverage for current releases yet
           </div>
         )}
         {releases.items.slice(0, BROWSE_CAP).map((item) => (
@@ -261,7 +261,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             fontFamily: "var(--font-body)",
           }}>
             <div style={{ fontSize: 28, marginBottom: 10 }}>📺</div>
-            No streaming films found
+            No podcast coverage for streaming films yet
           </div>
         )}
         {streaming.items.slice(0, BROWSE_CAP).map((item) => (
