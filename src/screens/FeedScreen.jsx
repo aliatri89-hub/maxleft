@@ -99,6 +99,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   }, [requestActivityMode]);
 
   // ── Infinite scroll — load more when sentinel enters viewport ──
+  // feedItems.length in deps forces observer reset after each batch,
+  // so it re-fires when the sentinel stays visible (short card lists).
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore) return;
@@ -108,7 +110,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [hasMore, loadMore]);
+  }, [hasMore, loadMore, feedItems.length]);
 
   // ── Loading skeleton ──
   if (loading && feedItems.length === 0) {
