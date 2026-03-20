@@ -1420,6 +1420,10 @@
     -webkit-overflow-scrolling: touch;
     padding-bottom: 80px;
     animation: tabPaneFadeIn 0.3s ease-out;
+    scrollbar-width: none;
+  }
+  .tab-pane::-webkit-scrollbar {
+    display: none;
   }
 
   @keyframes tabPaneFadeIn {
