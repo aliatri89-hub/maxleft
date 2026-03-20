@@ -187,15 +187,27 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }
 
         if (cancelled || !backdrops?.length) return;
+
+        // Deduplicate: exclude hero backdrop by file_path match
+        const heroPath = heroBdPath.replace(/^\//, "");
         const base = backdrops.filter(b =>
           b.file_path &&
-          b.file_path !== heroBdPath &&
+          b.file_path.replace(/^\//, "") !== heroPath &&
           (!b.aspect_ratio || b.aspect_ratio > 1.4)
         );
 
-        const nullLang = base.filter(b => !b.iso_639_1)
+        // Deduplicate by file_path (TMDB sometimes returns near-dupes)
+        const seen = new Set();
+        const deduped = base.filter(b => {
+          const key = b.file_path;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        const nullLang = deduped.filter(b => !b.iso_639_1)
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-        const enLang = base.filter(b => b.iso_639_1 === "en")
+        const enLang = deduped.filter(b => b.iso_639_1 === "en")
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
 
@@ -211,14 +223,15 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }
 
         if (!cancelled && picks.length) {
-          const paths = picks.map(b => b.file_path);
-          const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
+          // Final dedup — ensure no duplicate paths in the pick set
+          const uniquePaths = [...new Set(picks.map(b => b.file_path))];
+          const stills = uniquePaths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
           setExtraBackdrops(stills);
 
           // Write back to media so next open (by anyone) is instant
           supabase
             .from("media")
-            .update({ still_paths: paths })
+            .update({ still_paths: uniquePaths })
             .eq("tmdb_id", data.tmdb_id)
             .then(() => {});
         }
