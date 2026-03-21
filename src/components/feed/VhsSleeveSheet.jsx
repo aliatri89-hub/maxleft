@@ -146,7 +146,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
   const [expandedEpId, setExpandedEpId] = useState(null); // which episode row is expanded
+  const [hiddenEpIds, setHiddenEpIds] = useState(new Set()); // admin-deleted episodes
+  const [isAdmin, setIsAdmin] = useState(false);
   const prevTmdbId = useRef(null);
+
+  // Admin check (once)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id === "19410e64-d610-4fab-9c26-d24fafc94696") setIsAdmin(true);
+    });
+  }, []);
+
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
 
@@ -154,6 +164,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     if (data.tmdb_id !== prevTmdbId.current) {
       setDetail(null);
       setExpandedEpId(null);
+      setHiddenEpIds(new Set());
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -840,7 +851,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               )}
               {episodes && episodes.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {episodes.map((ep, i) => {
+                  {episodes.filter(ep => !hiddenEpIds.has(ep.episode_id)).map((ep, i) => {
                     const epKey = ep.episode_id || i;
                     const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
                     const isActiveAndPlaying = isActive && isPlaying;
@@ -903,6 +914,34 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               }
                             </svg>
                           </div>
+                          {/* Admin: unlink episode from film */}
+                          {isAdmin && ep.episode_id && (
+                            <div
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!confirm(`Unlink "${ep.episode_title || ep.podcast_name}" from this film?`)) return;
+                                const { error } = await supabase
+                                  .from("podcast_episode_films")
+                                  .delete()
+                                  .eq("episode_id", ep.episode_id)
+                                  .eq("tmdb_id", data.tmdb_id);
+                                if (!error) {
+                                  setHiddenEpIds(prev => new Set([...prev, ep.episode_id]));
+                                }
+                              }}
+                              style={{
+                                width: 26, height: 26, borderRadius: "50%",
+                                background: "rgba(239,68,68,0.08)",
+                                border: "1px solid rgba(239,68,68,0.2)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0, cursor: "pointer", marginLeft: -2,
+                              }}
+                            >
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
+                                <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                              </svg>
+                            </div>
+                          )}
                         </div>
                         {/* Inline accordion description */}
                         <div style={{
