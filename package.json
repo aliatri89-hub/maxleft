@@ -16,7 +16,6 @@
     "@capacitor/core": "^8.2.0",
     "@capacitor/ios": "^8.2.0",
     "@capacitor/push-notifications": "^8.0.0",
-    "capacitor-music-controls-plugin-new": "github:gokadzev/capacitor-music-controls-plugin-new",
     "@supabase/supabase-js": "^2.97.0",
     "cheerio": "^1.2.0",
     "dotenv": "^17.3.1",
