@@ -1188,8 +1188,8 @@ const DEMO_PLAY_MOVIES = [
     brand: "T-120 KODAK",
     podcasts: [
       { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective", audio: "https://mcdn.podbean.com/mf/web/wbpmq3/NPPAVENGERS07.mp3" },
-      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three", audio: null },
-      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: null },
+      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man Three", audio: "https://traffic.megaphone.fm/THI2209699175.mp3" },
+      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: "https://podtrac.com/pts/redirect.mp3/traffic.omny.fm/d/clips/e73c998e-6e60-432f-8610-ae210140c5b1/d28227f8-56d8-46d9-b2c5-b3d3012db5ab/aa3432b5-6264-42b9-8f3f-b412011b45a2/audio.mp3" },
     ],
   },
   {
@@ -1197,9 +1197,9 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/nsMnkuWIZCBxkBLPi0ZXuRloYL2.png",
     brand: "E-180 BASF",
     podcasts: [
-      { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie" },
+      { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie", audio: "https://play.podtrac.com/npr-510282/npr.simplecastaudio.com/f75261d2-0860-4d61-91c1-a78a2b997ff2/episodes/6f59940b-f4c4-4e76-b843-fd30022b2359/audio/128/default.mp3" },
       { name: "Unspooled", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/300x300bb.webp", episode: "Barbie (2023)" },
-      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza" },
+      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza", audio: "https://traffic.megaphone.fm/GLT7358892305.mp3" },
     ],
   },
   {
@@ -1207,8 +1207,8 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/dWqeM2MO3S48Z2hWHjtpsBUqZ62.png",
     brand: "HGX MAXELL",
     podcasts: [
-      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien" },
-      { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien" },
+      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://traffic.megaphone.fm/GLT8474795098.mp3" },
+      { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien", audio: "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/filmjunk/filmjunk1031.mp3" },
       { name: "Eye of the Duck", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/0d/e1/1e/0de11e40-a1c4-22ee-19c1-408a3a03e46e/mza_12363992498403595498.jpg/300x300bb.webp", episode: "Alien (1979)" },
     ],
   },
@@ -1238,20 +1238,50 @@ function LandingScreen({ onSignIn }) {
   // ── Play button demo state ───────────────────────────────
   const [demoPickerIdx, setDemoPickerIdx] = useState(null);
   const [demoPodcast, setDemoPodcast] = useState(null);
+  const [demoPlaying, setDemoPlaying] = useState(false);
   const demoAudioRef = useRef(null);
-  useEffect(() => () => { if (demoAudioRef.current) demoAudioRef.current.pause(); }, []);
-  const toggleDemoPicker = (idx) => { setDemoPickerIdx(prev => prev === idx ? null : idx); };
-  const handleDemoPlay = (podcast, movieIdx) => {
-    // Stop any existing audio
+  const demoTimerRef = useRef(null);
+
+  const stopDemoAudio = () => {
+    clearTimeout(demoTimerRef.current);
     if (demoAudioRef.current) { demoAudioRef.current.pause(); demoAudioRef.current = null; }
+    setDemoPlaying(false);
+  };
+
+  useEffect(() => () => stopDemoAudio(), []);
+  const toggleDemoPicker = (idx) => { setDemoPickerIdx(prev => prev === idx ? null : idx); };
+
+  const handleDemoPlay = (podcast, movieIdx) => {
+    stopDemoAudio();
     setDemoPodcast({ ...podcast, _movieIdx: movieIdx });
     setDemoPickerIdx(null);
-    // Play audio if available
     if (podcast.audio) {
       const audio = new Audio(podcast.audio);
       audio.volume = 0.8;
       audio.play().catch(() => {});
       demoAudioRef.current = audio;
+      setDemoPlaying(true);
+      // Fade out at 13s, stop at 15s
+      demoTimerRef.current = setTimeout(() => {
+        let vol = 0.8;
+        const fade = setInterval(() => {
+          vol -= 0.1;
+          if (vol <= 0) {
+            clearInterval(fade);
+            audio.pause();
+            demoAudioRef.current = null;
+            setDemoPlaying(false);
+          } else {
+            audio.volume = vol;
+          }
+        }, 200);
+      }, 13000);
+      // Also stop on natural end
+      audio.addEventListener("ended", () => {
+        clearTimeout(demoTimerRef.current);
+        demoAudioRef.current = null;
+        setDemoPlaying(false);
+      }, { once: true });
     }
   };
 
@@ -1655,7 +1685,7 @@ function LandingScreen({ onSignIn }) {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
                           <path d="M8 5v14l11-7z" />
                         </svg>
-                        <div className={`play-demo-led${demoPodcast && demoPodcast._movieIdx === idx ? ' active' : ''}`} />
+                        <div className={`play-demo-led${demoPlaying && demoPodcast && demoPodcast._movieIdx === idx ? ' active' : ''}`} />
                       </div>
                     </div>
                     <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
