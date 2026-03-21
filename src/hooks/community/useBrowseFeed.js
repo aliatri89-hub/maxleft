@@ -152,6 +152,8 @@ export function useBrowseFeed(mode) {
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
           // Update items progressively so user sees results streaming in
           setItems([...accumulated]);
+          // Start logo enrichment for this batch immediately (runs in parallel with next page fetch)
+          enrichLogos(covered, mountedRef, setItems);
         }
 
         if (data.page >= data.total_pages) { tmdbExhausted = true; break; }
@@ -165,11 +167,6 @@ export function useBrowseFeed(mode) {
 
       nextPageRef.current = page;
       setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
-
-      // Enrich logos for all accumulated items
-      if (accumulated.length > 0) {
-        enrichLogos(accumulated, mountedRef, setItems);
-      }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
     }
