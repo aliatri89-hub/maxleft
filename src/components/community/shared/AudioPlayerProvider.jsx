@@ -1380,9 +1380,16 @@ export default function AudioPlayerProvider({ children, session }) {
     const saved = loadBookmark();
     if (saved?.enclosureUrl && saved.time > 15) {
       updateRecents(prev => {
-        // Only add if not already in recents (avoid duplicating on every mount)
-        const exists = prev.some(r => r.guid === saved.guid || r.enclosureUrl === saved.enclosureUrl);
-        if (exists) return prev;
+        const idx = prev.findIndex(r => r.guid === saved.guid || r.enclosureUrl === saved.enclosureUrl);
+        if (idx >= 0) {
+          // Episode exists in recents — update position if bookmark is newer
+          if (saved.time > prev[idx].time) {
+            const updated = [...prev];
+            updated[idx] = { ...updated[idx], time: saved.time, speed: saved.speed || updated[idx].speed, duration: saved.duration || updated[idx].duration, savedAt: saved.savedAt };
+            return updated;
+          }
+          return prev;
+        }
         return upsertRecent(prev, saved, saved.time, saved.speed || 1, saved.duration || 0);
       });
       localStorage.removeItem(STORAGE_KEY); // consumed — now lives in recents
@@ -1404,6 +1411,12 @@ export default function AudioPlayerProvider({ children, session }) {
         if (now - saveThrottle.current > SAVE_INTERVAL) {
           saveThrottle.current = now;
           saveBookmark(currentEp, t, speed, audio.duration);
+          // Also persist recents so force-close doesn't lose position
+          if (currentEp && t > 15) {
+            const updated = upsertRecent(recentsRef.current, currentEp, t, speed, audio.duration);
+            recentsRef.current = updated;
+            persistRecents(updated);
+          }
           // Update OS scrubber position on the same throttle
           if (ms && audio.duration && isFinite(audio.duration)) {
             try {
