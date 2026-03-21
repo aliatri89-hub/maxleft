@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "../../supabase";
 import { searchTMDBRaw } from "../../utils/api";
 
@@ -420,8 +420,8 @@ export default function IngestReviewTool({ userId, onToast }) {
             const color = confidenceColor(confidence);
 
             return (
+              <React.Fragment key={match.mapping_id}>
               <div
-                key={match.mapping_id}
                 onClick={() => toggle(match.mapping_id)}
                 style={{
                   padding: "8px 12px",
@@ -614,6 +614,7 @@ export default function IngestReviewTool({ userId, onToast }) {
                   </div>
                 </div>
               )}
+              </React.Fragment>
             );
           })}
         </div>
