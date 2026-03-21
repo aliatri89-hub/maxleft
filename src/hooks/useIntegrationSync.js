@@ -833,13 +833,11 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
   // SESSION-ONCE AUTO-SYNC
   // ════════════════════════════════════════════════
 
-  const runInitialSync = useCallback((profile, uid, { letterboxdSyncFn } = {}) => {
-    console.log("[InitialSync] called", { hasSynced: hasSyncedThisSession.current, uid, closureUserId: userId, lbUsername: profile.letterboxd_username });
-    if (hasSyncedThisSession.current) { console.log("[InitialSync] SKIPPED — already synced this session"); return; }
+  const runInitialSync = useCallback((profile, uid) => {
+    if (hasSyncedThisSession.current) return;
     const id = uid || userId;
-    if (!id) { console.log("[InitialSync] SKIPPED — no userId available"); return; }
-    const lbSync = letterboxdSyncFn || syncLetterboxd;
-    if (profile.letterboxd_username) lbSync(profile.letterboxd_username, id);
+    if (!id) return;
+    if (profile.letterboxd_username) syncLetterboxd(profile.letterboxd_username, id);
     if (profile.goodreads_user_id) syncGoodreads(profile.goodreads_user_id, id);
     if (profile.steam_id) syncSteam(profile.steam_id, id);
     hasSyncedThisSession.current = true;

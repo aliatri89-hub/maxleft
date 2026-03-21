@@ -11,7 +11,7 @@ import {
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
-import IngestReviewTool from "../components/feed/IngestReviewTool";
+// import IngestReviewTool from "../components/feed/IngestReviewTool";
 
 // ════════════════════════════════════════════════
 // FEED SCREEN — New Releases | Streaming | Activity | Inbox (admin)
@@ -394,7 +394,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       {/* ── Inbox pane (admin only) ── */}
       {isAdmin && (
         <div style={{ display: feedMode === "inbox" ? "block" : "none" }}>
-          <IngestReviewTool userId={userId} onToast={onToast} />
+          {/* <IngestReviewTool userId={userId} onToast={onToast} /> */}
         </div>
       )}
 

@@ -286,12 +286,7 @@ export default function App() {
         };
         setProfile(p);
         await loadShelves(user.id);
-        sync.runInitialSync(p, user.id, {
-          letterboxdSyncFn: async (username, uid) => {
-            const result = await sync.syncLetterboxd(username, uid);
-            if (result) setLetterboxdToast({ synced: result.synced, rewatches: result.rewatchCount });
-          }
-        });
+        sync.runInitialSync(p, user.id);
       }
       const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
       if (path && path !== "" && path !== "index.html" && !path.includes("/")) {
