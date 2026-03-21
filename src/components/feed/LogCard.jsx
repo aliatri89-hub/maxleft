@@ -246,8 +246,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                     position: "absolute", inset: -4,
                     width: "calc(100% + 8px)", height: "calc(100% + 8px)",
                     objectFit: "cover", objectPosition: "center top",
-                    opacity: 0.09,
-                    filter: "sepia(1) saturate(0.3) brightness(0.9) contrast(1.2)",
+                    opacity: 0.2,
+                    filter: "sepia(0.6) saturate(0.4) brightness(1.0) contrast(1.1)",
                     mixBlendMode: "multiply",
                     pointerEvents: "none",
                   }}
