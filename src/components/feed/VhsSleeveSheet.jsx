@@ -59,6 +59,23 @@ function loadGoogleFont(family) {
   document.head.appendChild(link);
 }
 
+// Strip HTML tags from RSS descriptions
+function stripHtml(str) {
+  if (!str) return "";
+  return str
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 // Compact money formatter
 function fmtMoney(v) {
   if (!v || v <= 0) return null;
@@ -942,13 +959,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       </div>
                     </div>
                     {/* Episode description body */}
-                    {promotedEp.description && promotedEp.description.trim() ? (
+                    {promotedEp.description && stripHtml(promotedEp.description) ? (
                       <div style={{
                         fontFamily: "'IBM Plex Mono', monospace",
                         fontSize: 10, lineHeight: 1.55,
                         color: "rgba(240,235,225,0.6)",
+                        whiteSpace: "pre-wrap",
                       }}>
-                        {promotedEp.description}
+                        {stripHtml(promotedEp.description)}
                       </div>
                     ) : (
                       <div style={{
