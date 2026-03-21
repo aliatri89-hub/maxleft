@@ -360,17 +360,23 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
     : variant === "streaming" ? FilmStripLabel
     : CreamLabel;
 
+  const isReleases = variant === "releases";
+
   return (
     <>
     <div style={{
-      margin: "4px 16px", borderRadius: 6, position: "relative",
+      margin: "6px 16px",
+      borderRadius: isReleases ? 10 : 6,
+      position: "relative",
       background: "#302c28", padding: "1px 1px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+      boxShadow: isReleases
+        ? "inset 0 0 0 1px rgba(255,255,255,0.07), 0 3px 12px rgba(0,0,0,0.5)"
+        : "0 2px 8px rgba(0,0,0,0.4)",
       backgroundImage: NOISE_SVG,
     }}>
-      <div style={{ borderRadius: 4, overflow: "hidden" }}>
-        <div onClick={() => openSleeve()} style={{ background: TAPE_EDGE, borderRadius: 5, position: "relative", cursor: "pointer" }}>
-          <div style={{ borderRadius: 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
+      <div style={{ borderRadius: isReleases ? 9 : 4, overflow: "hidden" }}>
+        <div onClick={() => openSleeve()} style={{ background: TAPE_EDGE, borderRadius: isReleases ? 8 : 5, position: "relative", cursor: "pointer" }}>
+          <div style={{ borderRadius: isReleases ? 7 : 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
             <Label {...logoProps} />
           </div>
         </div>
