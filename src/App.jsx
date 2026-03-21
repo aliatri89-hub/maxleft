@@ -419,7 +419,7 @@ export default function App() {
                     onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded} />}
                 </div>
                 <div className="tab-pane" key="search-tab">
-                  {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} />}
+                  {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />}
                 </div>
                 <div className="tab-pane" key="shelf-tab">
                   {visitedTabs.has("shelf") && <ShelfHome profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}

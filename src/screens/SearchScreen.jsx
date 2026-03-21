@@ -24,7 +24,7 @@ const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const DEBOUNCE_MS = 300;
 
-export default function SearchScreen({ session, isActive, onToast }) {
+export default function SearchScreen({ session, isActive, onToast, pushNav, removeNav }) {
   const userId = session?.user?.id;
 
   // ── Search state ──
@@ -93,6 +93,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
     setSearching(true);
     setHasSearched(true);
     setExpandedTmdbId(null);
+    if (removeNav) removeNav("searchExpand");
 
     try {
       const [localRes, tmdbRows] = await Promise.all([
@@ -167,7 +168,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
     } finally {
       setSearching(false);
     }
-  }, []);
+  }, [removeNav]);
 
   const handleQueryChange = useCallback((val) => {
     setQuery(val);
@@ -176,10 +177,11 @@ export default function SearchScreen({ session, isActive, onToast }) {
       setResults([]);
       setHasSearched(false);
       lastQueryRef.current = "";
+      if (removeNav) removeNav("searchExpand");
       return;
     }
     debounceRef.current = setTimeout(() => runSearch(val), DEBOUNCE_MS);
-  }, [runSearch]);
+  }, [runSearch, removeNav]);
 
   // ═══════════════════════════════════════════
   // EXPAND (shared for covered + uncovered)
@@ -187,11 +189,15 @@ export default function SearchScreen({ session, isActive, onToast }) {
 
   const handleResultTap = useCallback(async (tmdbId, podcastCount) => {
     if (expandedTmdbId === tmdbId) {
+      // Collapse — remove nav entry
       setExpandedTmdbId(null);
+      if (removeNav) removeNav("searchExpand");
       return;
     }
 
+    // Expand — push nav entry so back gesture collapses instead of leaving tab
     setExpandedTmdbId(tmdbId);
+    if (pushNav) pushNav("searchExpand", () => setExpandedTmdbId(null));
 
     if (podcastCount > 0) {
       // Covered: load episodes
@@ -204,7 +210,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
       setLoadingEpisodes(false);
     }
     // Uncovered: expansion just reveals the "notify me" card (no async needed)
-  }, [expandedTmdbId]);
+  }, [expandedTmdbId, pushNav, removeNav]);
 
   // ── Play ──
   const handlePlay = useCallback((ep) => {
