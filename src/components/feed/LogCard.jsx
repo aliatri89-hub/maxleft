@@ -236,6 +236,23 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
               position: "relative",
               overflow: "hidden",
             }}>
+              {/* Ghost backdrop — faded movie still bleeding through the label */}
+              {(data.backdrop_path || data.poster_path) && (
+                <img
+                  src={data.backdrop_path || data.poster_path}
+                  alt=""
+                  loading="lazy"
+                  style={{
+                    position: "absolute", inset: -4,
+                    width: "calc(100% + 8px)", height: "calc(100% + 8px)",
+                    objectFit: "cover", objectPosition: "center top",
+                    opacity: 0.09,
+                    filter: "sepia(1) saturate(0.3) brightness(0.9) contrast(1.2)",
+                    mixBlendMode: "multiply",
+                    pointerEvents: "none",
+                  }}
+                />
+              )}
               {/* Brand stamps on label edges */}
               <BrandStamp brand={brandLeft} side="left" />
               <BrandStamp brand={brandRight} side="right" />
