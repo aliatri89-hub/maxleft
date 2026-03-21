@@ -45,8 +45,28 @@ export default function SearchScreen({ session, isActive, onToast }) {
   const [notifyingId, setNotifyingId] = useState(null);
   const [notifiedIds, setNotifiedIds] = useState(new Set());
 
+  // ── Recently covered (empty state) ──
+  const [recentlyCovered, setRecentlyCovered] = useState([]);
+  const [recentLoading, setRecentLoading] = useState(true);
+
   // ── Audio player ──
   const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+
+  // ── Load recently covered on mount ──
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("recently_covered_films", {
+        days_back: 30,
+        result_limit: 10,
+      });
+      if (!cancelled && !error && data) {
+        setRecentlyCovered(data);
+      }
+      if (!cancelled) setRecentLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // ── Focus input when tab becomes active ──
   useEffect(() => {
@@ -294,34 +314,139 @@ export default function SearchScreen({ session, isActive, onToast }) {
         </div>
       </div>
 
-      {/* ── Empty state ── */}
+      {/* ── Empty state: recently covered ── */}
       {!hasSearched && !query && (
-        <div style={{ padding: "60px 32px", textAlign: "center" }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: "rgba(199,91,63,0.08)",
-            border: "1px solid rgba(199,91,63,0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            margin: "0 auto 16px",
-          }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={TC} strokeWidth="1.8" strokeLinecap="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+        <div style={{ padding: "20px 0 0" }}>
+          {/* Section header */}
+          <div style={{ padding: "0 16px 12px" }}>
+            <div style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700, fontSize: 13,
+              color: "rgba(255,255,255,0.4)",
+              textTransform: "uppercase", letterSpacing: "0.08em",
+            }}>Recently covered</div>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              marginTop: 2,
+            }}>New podcast episodes this month</div>
           </div>
+
+          {/* Horizontal poster scroll */}
+          {recentLoading ? (
+            <div style={{
+              padding: "20px 16px",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.15)",
+            }}>Loading…</div>
+          ) : recentlyCovered.length > 0 ? (
+            <div className="search-hscroll" style={{
+              display: "flex", gap: 12,
+              overflowX: "auto", WebkitOverflowScrolling: "touch",
+              padding: "0 16px 16px",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}>
+              {recentlyCovered.map((film) => (
+                <div
+                  key={film.tmdb_id}
+                  onClick={() => { setQuery(film.title); runSearch(film.title); }}
+                  style={{
+                    flexShrink: 0, width: 110,
+                    cursor: "pointer",
+                  }}
+                >
+                  {/* Poster */}
+                  {film.poster_path ? (
+                    <img
+                      src={`${TMDB_IMG}/w185${film.poster_path}`}
+                      alt={film.title}
+                      loading="lazy"
+                      style={{
+                        width: 110, height: 165, borderRadius: 8,
+                        objectFit: "cover",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: 110, height: 165, borderRadius: 8,
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: 11, color: "rgba(255,255,255,0.2)",
+                      textTransform: "uppercase", textAlign: "center",
+                      padding: 8, lineHeight: 1.3,
+                    }}>{film.title}</div>
+                  )}
+
+                  {/* Title + podcast avatars */}
+                  <div style={{ marginTop: 6 }}>
+                    <div style={{
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontWeight: 700, fontSize: 12, color: "#f5f0eb",
+                      textTransform: "uppercase", letterSpacing: "0.02em",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    }}>{film.title}</div>
+
+                    {/* Stacked podcast artwork */}
+                    {film.podcasts && film.podcasts.length > 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                        <div style={{ display: "flex" }}>
+                          {film.podcasts.slice(0, 4).map((p, i) => (
+                            <img
+                              key={p.slug}
+                              src={p.artwork}
+                              alt={p.name}
+                              style={{
+                                width: 18, height: 18, borderRadius: 5,
+                                objectFit: "cover",
+                                border: "1.5px solid #0f0d0b",
+                                marginLeft: i === 0 ? 0 : -5,
+                                position: "relative", zIndex: 4 - i,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span style={{
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 9, color: TC,
+                          whiteSpace: "nowrap",
+                        }}>{film.year || ""}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{
+              padding: "20px 16px",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.15)",
+            }}>No recent coverage found</div>
+          )}
+
+          {/* Search prompt below */}
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 700, fontSize: 16,
-            color: "rgba(255,255,255,0.5)",
-            textTransform: "uppercase", letterSpacing: "0.04em",
-            marginBottom: 6,
-          }}>Search any film</div>
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 11, color: "rgba(255,255,255,0.2)",
-            lineHeight: 1.5,
+            padding: "24px 32px 0", textAlign: "center",
+            borderTop: "1px solid rgba(255,255,255,0.04)",
           }}>
-            Find podcast coverage across<br />all your favorite shows
+            <div style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700, fontSize: 14,
+              color: "rgba(255,255,255,0.35)",
+              textTransform: "uppercase", letterSpacing: "0.04em",
+              marginBottom: 4,
+            }}>Or search any film</div>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.15)",
+            }}>Find coverage across {recentlyCovered.length > 0
+              ? `${recentlyCovered[0]?.podcasts?.length || "all"} podcasts and counting`
+              : "all your favorite shows"
+            }</div>
           </div>
         </div>
       )}
@@ -401,6 +526,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
           to { opacity: 1; transform: translateY(0); }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .search-hscroll::-webkit-scrollbar { display: none; }
       `}</style>
     </div>
   );
