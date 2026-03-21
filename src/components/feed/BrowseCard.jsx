@@ -196,11 +196,6 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
             whiteSpace: "nowrap", pointerEvents: "none",
           }}>{dateStr}</div>
         )}
-        {hasPlayButton && (
-          <div style={{ position: "absolute", bottom: 4, right: 28, opacity: 0.4 }}>
-            <HeadphonesIcon color="#2C2824" />
-          </div>
-        )}
       </div>
       <div style={{ width: 5, flexShrink: 0, background: TAPE_EDGE }} />
     </>
@@ -236,7 +231,7 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
         )}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.65) 100%), radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.35) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.75) 100%), radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.4) 100%)",
         }} />
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
@@ -252,11 +247,6 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
             textShadow: "0 1px 3px rgba(0,0,0,0.8)",
             whiteSpace: "nowrap", pointerEvents: "none",
           }}>{dateStr}</div>
-        )}
-        {hasPlayButton && (
-          <div style={{ position: "absolute", bottom: 4, right: 18, opacity: 0.35, zIndex: 1 }}>
-            <HeadphonesIcon color="#fff" />
-          </div>
         )}
       </div>
       <div style={{ width: 5, flexShrink: 0, background: "#111" }} />
@@ -320,11 +310,6 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
             fontSize: 7, color: "rgba(240,215,170,0.25)",
             letterSpacing: "0.06em", whiteSpace: "nowrap", pointerEvents: "none",
           }}>{dateStr}</div>
-        )}
-        {hasPlayButton && (
-          <div style={{ position: "absolute", bottom: 4, right: 16, opacity: 0.3 }}>
-            <HeadphonesIcon color="rgba(240,215,170,0.7)" />
-          </div>
         )}
       </div>
       <SprocketStrip />
@@ -406,6 +391,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
         open={sheetVisible}
         onClose={closeSleeve}
         onNavigateCommunity={onNavigateCommunity}
+        artworkHero={variant === "releases"}
         episodes={episodes}
         epLoading={epLoading}
         onPlayEpisode={handlePlay}

@@ -89,7 +89,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -187,6 +187,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const cast = merged?.cast_names || [];
   const studios = merged?.studio_names || [];
   const [extraBackdrops, setExtraBackdrops] = useState([]);
+  // When opened from artwork card, swap hero to avoid duplicating the tape label image
+  const heroUrl = artworkHero && extraBackdrops.length > 0 ? extraBackdrops[0] : backdropUrl;
+  // Still image: use second pick for artwork (first is hero), first pick otherwise
+  const stillUrl = artworkHero ? (extraBackdrops[1] || null) : (extraBackdrops[0] || null);
   const genreFont = getGenreFont(merged?.genre);
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
@@ -266,15 +270,22 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const clean = nullLang.length >= 2 ? nullLang : [...nullLang, ...enLang];
 
-        // Pick 1 still from the middle of the array — top-rated shots
-        // are often hero-adjacent, middle gives more visual variety
-        const midIdx = clean.length >= 3
-          ? Math.floor(clean.length / 2)
-          : clean.length > 0 ? 0 : -1;
-        const pick = midIdx >= 0 ? clean[midIdx] : null;
+        // Pick 2 stills at spread-out positions for visual variety
+        // Targets: index 4 and 9 (positions ~5 and ~10), with fallbacks
+        function pickAt(arr, target, ...fallbacks) {
+          for (const idx of [target, ...fallbacks]) {
+            if (idx >= 0 && idx < arr.length) return arr[idx];
+          }
+          return arr.length > 0 ? arr[0] : null;
+        }
+        const pick1 = pickAt(clean, 4, 2, 0);       // hero replacement for artwork cards
+        const pick2 = pickAt(clean, 9, 6, 3, 1);     // still image
+        // Dedupe: if both resolve to same image, only keep one
+        const picks = pick1 && pick2 && pick1.file_path === pick2.file_path
+          ? [pick1] : [pick1, pick2].filter(Boolean);
 
-        if (!cancelled && pick) {
-          const paths = [pick.file_path];
+        if (!cancelled && picks.length > 0) {
+          const paths = picks.map(p => p.file_path);
           const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
           setExtraBackdrops(stills);
 
@@ -411,11 +422,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         )}
 
         {/* ── Hero + Stills + Logo — layered: hero(back) → stills(mid) → logo(front) ── */}
-        {backdropUrl && (
+        {heroUrl && (
           <div style={{ position: "relative", width: "100%", marginBottom: 0 }}>
             {/* Hero backdrop — z1 (back) */}
             <div style={{ position: "relative", width: "100%", overflow: "hidden", zIndex: 1 }}>
-              <img src={backdropUrl} alt="" style={{
+              <img src={heroUrl} alt="" style={{
                 width: "100%", height: 200,
                 objectFit: "cover", objectPosition: "center top",
                 display: "block",
@@ -470,7 +481,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         )}
 
         {/* ── No-backdrop fallback: standalone title ── */}
-        {!backdropUrl && (
+        {!heroUrl && (
           <div style={{
             padding: "8px 24px 12px",
             textAlign: "center",
@@ -509,16 +520,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         )}
 
         {/* ── Scene still (left) + Cast billing (right) ── */}
-        {(extraBackdrops.length > 0 || cast.length > 0) && (
+        {(stillUrl || cast.length > 0) && (
           <div style={{
             display: "flex", gap: 10, alignItems: "flex-end",
             padding: "0 20px",
-            marginTop: backdropUrl && extraBackdrops.length > 0 ? -28 : 0,
+            marginTop: heroUrl && stillUrl ? -28 : 0,
             marginBottom: 6,
             position: "relative", zIndex: 2,
           }}>
             {/* Still — left side */}
-            {extraBackdrops.length > 0 && (
+            {stillUrl && (
               <div style={{
                 flex: "0 0 52%", aspectRatio: "16/9",
                 borderRadius: 2, overflow: "hidden", position: "relative",
@@ -526,7 +537,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
               }}>
                 <img
-                  src={extraBackdrops[0]}
+                  src={stillUrl}
                   alt=""
                   style={{
                     width: "100%", height: "100%",
@@ -621,7 +632,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }}>
 
           {/* Cast fallback — only when no stills (cast normally shows next to still) */}
-          {cast.length > 0 && extraBackdrops.length === 0 && (
+          {cast.length > 0 && !stillUrl && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               borderBottom: "1px solid rgba(240,235,225,0.06)",
