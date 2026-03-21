@@ -1,6 +1,21 @@
 import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import { supabase } from "../../supabase";
-import { searchTMDBRaw } from "../../utils/api";
+
+// Inline TMDB search to avoid circular import chain through api.js
+const SUPABASE_URL = "https://api.mymantl.app";
+async function searchTMDB(query) {
+  if (!query || query.length < 2) return [];
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/api-proxy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "tmdb_search", query, type: "movie" }),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data?.results || []).slice(0, 6);
+  } catch { return []; }
+}
 
 /**
  * IngestReviewTool — Admin review queue for auto-matched podcast episodes.
@@ -188,7 +203,7 @@ export default function IngestReviewTool({ userId, onToast }) {
     if (!rematchQuery.trim()) return;
     setRematchSearching(true);
     try {
-      const results = await searchTMDBRaw(rematchQuery.trim());
+      const results = await searchTMDB(rematchQuery.trim());
       setRematchResults((results || []).slice(0, 6));
     } catch { setRematchResults([]); }
     setRematchSearching(false);
