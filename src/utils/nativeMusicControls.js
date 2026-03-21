@@ -6,10 +6,10 @@
  * (where the existing navigator.mediaSession code handles it).
  */
 import { Capacitor } from "@capacitor/core";
-import { CapacitorMediaSession } from "@capgo/capacitor-media-session";
+import { MediaSession } from "@capgo/capacitor-media-session";
 
 const _isNative = Capacitor.isNativePlatform();
-const plugin = _isNative ? CapacitorMediaSession : null;
+const plugin = _isNative ? MediaSession : null;
 
 // Track registered handlers so we can clean up
 let _handlersRegistered = false;
