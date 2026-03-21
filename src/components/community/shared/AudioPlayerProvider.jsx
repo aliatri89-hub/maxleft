@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { createControls, updatePlaying, destroyControls, listenControls } from "../../utils/nativeMusicControls";
+import { createControls, updatePlaying, destroyControls, listenControls } from "../../../utils/nativeMusicControls";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
