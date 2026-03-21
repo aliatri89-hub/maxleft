@@ -112,6 +112,9 @@ export async function registerActionHandlers({
         await plugin.setActionHandler({ action }, handler);
       }
     }
+    // Null out track-skip so Android shows seek ±15/30 buttons instead of prev/next arrows
+    try { await plugin.setActionHandler({ action: "previoustrack" }, null); } catch {}
+    try { await plugin.setActionHandler({ action: "nexttrack" }, null); } catch {}
     _handlersRegistered = true;
     // Return cleanup function
     return async () => {
