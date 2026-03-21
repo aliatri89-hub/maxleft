@@ -1385,6 +1385,65 @@ export default function AudioPlayerProvider({ children, session }) {
     }
   }, [speed]);
 
+  // ── Retry — reload current episode's audio source ────────
+  const retry = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentEp?.enclosureUrl) return;
+    setError(null);
+    setBuffering(true);
+    clearTimeout(stallTimerRef.current);
+    const savedTime = audio.currentTime || progress;
+    audio.src = currentEp.enclosureUrl;
+    audio.playbackRate = speed;
+    const onLoaded = () => {
+      if (savedTime > 5) audio.currentTime = savedTime;
+      audio.play().catch(() => {});
+      pendingSeekRef.current = null;
+    };
+    cleanupPendingSeek();
+    pendingSeekRef.current = { audio, handler: onLoaded };
+    audio.addEventListener("loadedmetadata", onLoaded, { once: true });
+    audio.load();
+  }, [currentEp, speed, progress, cleanupPendingSeek]);
+
+  // ── Sleep timer ─────────────────────────────────────────
+  const setSleepTimerAction = useCallback((option) => {
+    // Clear any existing timer
+    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+
+    if (option.minutes === -1) {
+      // "End of episode" — no real timer, just flag it
+      const st = { label: "End of ep", endOfEpisode: true, timerId: null };
+      sleepTimerRef.current = st;
+      setSleepTimer(st);
+      return;
+    }
+
+    const ms = option.minutes * 60 * 1000;
+    const timerId = setTimeout(() => {
+      const audio = audioRef.current;
+      if (audio) audio.pause();
+      setSleepTimer(null);
+      sleepTimerRef.current = null;
+    }, ms);
+    const st = { label: option.label, endOfEpisode: false, timerId, deadline: Date.now() + ms };
+    sleepTimerRef.current = st;
+    setSleepTimer(st);
+  }, []);
+
+  const clearSleepTimer = useCallback(() => {
+    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+    sleepTimerRef.current = null;
+    setSleepTimer(null);
+  }, []);
+
+  // Clean up sleep timer on unmount
+  useEffect(() => {
+    return () => {
+      if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+    };
+  }, []);
+
   const stop = useCallback(() => {
     cleanupPendingSeek();
     clearSleepTimer();
@@ -1482,65 +1541,6 @@ export default function AudioPlayerProvider({ children, session }) {
   const clearRecent = useCallback((guid) => {
     updateRecents(prev => prev.filter(r => r.guid !== guid));
   }, [updateRecents]);
-
-  // ── Retry — reload current episode's audio source ────────
-  const retry = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentEp?.enclosureUrl) return;
-    setError(null);
-    setBuffering(true);
-    clearTimeout(stallTimerRef.current);
-    const savedTime = audio.currentTime || progress;
-    audio.src = currentEp.enclosureUrl;
-    audio.playbackRate = speed;
-    const onLoaded = () => {
-      if (savedTime > 5) audio.currentTime = savedTime;
-      audio.play().catch(() => {});
-      pendingSeekRef.current = null;
-    };
-    cleanupPendingSeek();
-    pendingSeekRef.current = { audio, handler: onLoaded };
-    audio.addEventListener("loadedmetadata", onLoaded, { once: true });
-    audio.load();
-  }, [currentEp, speed, progress, cleanupPendingSeek]);
-
-  // ── Sleep timer ─────────────────────────────────────────
-  const setSleepTimerAction = useCallback((option) => {
-    // Clear any existing timer
-    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
-
-    if (option.minutes === -1) {
-      // "End of episode" — no real timer, just flag it
-      const st = { label: "End of ep", endOfEpisode: true, timerId: null };
-      sleepTimerRef.current = st;
-      setSleepTimer(st);
-      return;
-    }
-
-    const ms = option.minutes * 60 * 1000;
-    const timerId = setTimeout(() => {
-      const audio = audioRef.current;
-      if (audio) audio.pause();
-      setSleepTimer(null);
-      sleepTimerRef.current = null;
-    }, ms);
-    const st = { label: option.label, endOfEpisode: false, timerId, deadline: Date.now() + ms };
-    sleepTimerRef.current = st;
-    setSleepTimer(st);
-  }, []);
-
-  const clearSleepTimer = useCallback(() => {
-    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
-    sleepTimerRef.current = null;
-    setSleepTimer(null);
-  }, []);
-
-  // Clean up sleep timer on unmount
-  useEffect(() => {
-    return () => {
-      if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
-    };
-  }, []);
 
   // ── Media Session API ──────────────────────────────────────
   // Sets metadata and action handlers so the OS notification widget
