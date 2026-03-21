@@ -139,7 +139,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, hideOverview, showProviders, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -1018,18 +1018,22 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* Overview / Synopsis — only on log sleeves, hidden on browse */}
-          {!hideOverview && merged.overview && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, lineHeight: 1.55,
-              color: "rgba(240,235,225,0.65)",
-              textAlign: "center",
-              marginBottom: 14,
-            }}>
-              {merged.overview}
-            </div>
-          )}
+          {/* Overview / Synopsis — fallback when no podcast coverage */}
+          {(() => {
+            const visibleEps = episodes?.filter(ep => !hiddenEpIds.has(ep.episode_id)) || [];
+            const hasAudio = visibleEps.length > 0 || epLoading;
+            return !hasAudio && merged.overview ? (
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10, lineHeight: 1.55,
+                color: "rgba(240,235,225,0.65)",
+                textAlign: "center",
+                marginBottom: 14,
+              }}>
+                {merged.overview}
+              </div>
+            ) : null;
+          })()}
 
           <div style={{ flex: 1 }} />
 
