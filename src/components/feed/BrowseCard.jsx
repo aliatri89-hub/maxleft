@@ -83,15 +83,6 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-function HeadphonesIcon({ color = "#2C2824" }) {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-    </svg>
-  );
-}
-
 // ── Shared logo / title renderer ──
 function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, theme }) {
   const expectsLogo = data.tmdb_id;
@@ -168,7 +159,7 @@ const CREAM_THEME = {
   skeletonBg: "rgba(44,40,36,0.06)",
 };
 
-function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo }) {
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
   const dateStr = fmtSharpieDate(data.release_date);
   return (
@@ -213,7 +204,7 @@ const ARTWORK_THEME = {
   skeletonBg: "rgba(255,255,255,0.06)",
 };
 
-function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo }) {
   const dateStr = fmtSharpieDate(data.release_date);
   return (
     <>
@@ -283,7 +274,7 @@ function SprocketStrip() {
   );
 }
 
-function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo }) {
   const dateStr = fmtSharpieDate(data.release_date);
   return (
     <>
@@ -364,7 +355,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
     });
   };
 
-  const logoProps = { data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton };
+  const logoProps = { data, logoReady, setLogoReady, isLightLogo, setIsLightLogo };
   const Label = variant === "releases" ? ArtworkLabel
     : variant === "streaming" ? FilmStripLabel
     : CreamLabel;
