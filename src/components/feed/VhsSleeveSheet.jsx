@@ -116,7 +116,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       // Try media table first (fast, cached for logged films)
       const { data: d } = await supabase
         .from("media")
-        .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths,creator")
+        .select("overview,tagline,budget,revenue,runtime,credits,production_companies,still_paths,creator,genre")
         .eq("tmdb_id", data.tmdb_id)
         .maybeSingle();
 
@@ -137,6 +137,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         runtime: tmdbDetail.runtime || null,
         credits: tmdbDetail.credits || null,
         production_companies: tmdbDetail.production_companies || null,
+        genre: (tmdbDetail.genres || []).slice(0, 2).map(g => g.name).join(", ") || null,
         still_paths: null,
       };
       setDetail(detailObj);
@@ -186,7 +187,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const cast = merged?.cast_names || [];
   const studios = merged?.studio_names || [];
   const [extraBackdrops, setExtraBackdrops] = useState([]);
-  const genreFont = getGenreFont(data?.genre);
+  const genreFont = getGenreFont(merged?.genre);
   const seed = data?.tmdb_id
     ? Number(data.tmdb_id)
     : (data?.title || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);

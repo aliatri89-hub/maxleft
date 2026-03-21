@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
 import { TMDB_IMG, fetchTMDBDiscover } from "../../utils/api";
-import { fetchLogosForItems, getLogoUrl } from "../../utils/communityTmdb";
+import { fetchLogosForItems, getLogoUrl, isLogoChecked } from "../../utils/communityTmdb";
 
 /**
  * useBrowseFeed — powers the New Releases and Streaming tabs.
@@ -45,17 +45,27 @@ async function checkPlayability(tmdbIds) {
 }
 
 function enrichLogos(items, mountedRef, setItems) {
-  const logoItems = items
-    .filter(m => !m.logo_url)
-    .map(m => ({ tmdb_id: m.tmdb_id, media_type: "film" }));
-
-  // Patch any cached logos immediately
+  // Patch any cached logos immediately (synchronous localStorage read)
   let patched = false;
   for (const item of items) {
     if (item.logo_url) continue;
     const url = getLogoUrl(item.tmdb_id);
     if (url) { item.logo_url = url; patched = true; }
   }
+
+  // If we patched from cache, trigger re-render so logos show instantly
+  if (patched && mountedRef.current) {
+    setItems(prev => prev.map(item => {
+      if (item.logo_url) return item;
+      const url = getLogoUrl(item.tmdb_id);
+      return url ? { ...item, logo_url: url } : item;
+    }));
+  }
+
+  // Only fetch logos we haven't checked yet (post-patch)
+  const logoItems = items
+    .filter(m => !m.logo_url && !isLogoChecked(m.tmdb_id))
+    .map(m => ({ tmdb_id: m.tmdb_id, media_type: "film" }));
 
   if (logoItems.length > 0) {
     fetchLogosForItems(logoItems, () => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
@@ -81,15 +81,20 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
   const [logoReady, setLogoReady] = useState(false);
   const [episodes, setEpisodes] = useState(null); // null = not loaded yet
   const [epLoading, setEpLoading] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);   // controls DOM mount
+  const [sheetVisible, setSheetVisible] = useState(false); // controls CSS transition
+  const closeTimer = useRef(null);
   const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
   const hasPlayButton = data.podcast_count > 0;
 
   const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
   const openSleeve = async () => {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
     setSheetOpen(true);
-    if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
+    // Next frame: trigger CSS slide-up
+    requestAnimationFrame(() => requestAnimationFrame(() => setSheetVisible(true)));
+    if (pushNav) pushNav(sleeveNavKey, () => closeSleeve());
     // Lazy-load episodes on first sleeve open
     if (!episodes && hasPlayButton) {
       setEpLoading(true);
@@ -99,7 +104,11 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
     }
   };
   const closeSleeve = () => {
-    setSheetOpen(false);
+    setSheetVisible(false); // triggers slide-down
+    closeTimer.current = setTimeout(() => {
+      setSheetOpen(false); // unmount after transition
+      closeTimer.current = null;
+    }, 350);
     if (removeNav) removeNav(sleeveNavKey);
   };
 
@@ -240,9 +249,10 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         </div>
       </div>
     </div>
-    <VhsSleeveSheet
+    {sheetOpen && (
+      <VhsSleeveSheet
         data={data}
-        open={sheetOpen}
+        open={sheetVisible}
         onClose={closeSleeve}
         onNavigateCommunity={onNavigateCommunity}
         episodes={episodes}
@@ -252,6 +262,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         isPlaying={isPlaying}
         onTogglePlay={togglePlay}
       />
+    )}
     </>
   );
 }
