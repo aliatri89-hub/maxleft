@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { getPosterUrl, fetchSinglePoster } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 
@@ -146,7 +146,6 @@ export function ProgressBar({ current, total, color = "var(--accent-green, #34d3
 
 // ── Fade-in wrapper with optional swipe-to-dismiss ──
 export function FeedCard({ children, index, style = {}, dismissable = false, onDismiss }) {
-  const [visible, setVisible] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
   const [phase, setPhase] = useState("idle");
   const cardRef = useRef(null);
@@ -156,12 +155,10 @@ export function FeedCard({ children, index, style = {}, dismissable = false, onD
   const currentSwipeX = useRef(0);
   const heightRef = useRef(0);
 
-  const DISMISS_THRESHOLD = 120;
+  // CSS-only stagger: no React state updates, no timeouts
+  const staggerDelay = `${Math.min(index, 6) * 0.04}s`;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setVisible(true), 60 * Math.min(index, 8));
-    return () => clearTimeout(timer);
-  }, [index]);
+  const DISMISS_THRESHOLD = 120;
 
   useEffect(() => {
     if (!dismissable) return;
@@ -268,15 +265,14 @@ export function FeedCard({ children, index, style = {}, dismissable = false, onD
       <div
         style={{
           ...style,
-          opacity: visible ? (isSwiping ? 1 - swipePct * 0.3 : 1) : 0,
-          transform: visible
-            ? swipeX > 0 ? `translateX(${swipeX}px)` : "translateY(0)"
-            : "translateY(16px)",
+          opacity: isSwiping ? 1 - swipePct * 0.3 : 1,
+          transform: swipeX > 0 ? `translateX(${swipeX}px)` : "translateY(0)",
           transition: isSwiping
             ? "none"
             : isSlidingOut
             ? "transform 0.25s ease-in, opacity 0.2s ease"
-            : "opacity 0.45s ease, transform 0.45s ease",
+            : "none",
+          animation: `feedCardIn 0.35s ease ${staggerDelay} both`,
         }}
       >
         {children}

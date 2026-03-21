@@ -91,17 +91,21 @@ export async function getEpisodesForFilm(tmdbId) {
 }
 
 // ── Hook ──
+// `active` = true when this tab is visible. Defers initial fetch until first activation.
+// This prevents both browse feeds from firing 15+ TMDB pages on app launch.
 
-export function useBrowseFeed(mode) {
+const PAGES_PER_BATCH = 3; // Fetch 3 TMDB pages, then batch-check playability (60 films at once)
+
+export function useBrowseFeed(mode, active = false) {
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const mountedRef = useRef(true);
   const fetchedRef = useRef(false);
   const nextPageRef = useRef(1);       // next TMDB page to fetch
   const seenTmdbRef = useRef(new Set()); // dedup across pages
 
-  // Fetch TMDB pages until we accumulate enough covered films
+  // Fetch TMDB pages in batches, then check playability once per batch (fewer RPCs)
   const fetchCovered = useCallback(async (startPage, existingItems = []) => {
     setLoading(true);
     let accumulated = [...existingItems];
@@ -110,8 +114,7 @@ export function useBrowseFeed(mode) {
 
     try {
       while (accumulated.length < TARGET_ITEMS && page <= MAX_PAGES) {
-        // Releases: popular films from last 6 months (bigger pool than now_playing)
-        // Streaming: popular films on major streaming services
+        // ── Phase 1: Fetch PAGES_PER_BATCH pages of TMDB results ──
         const discoverOpts = mode === "releases"
           ? {
               releaseDateGte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
@@ -120,60 +123,58 @@ export function useBrowseFeed(mode) {
           : {
               providers: "8|9|337|384|15|350|531|386",
             };
-        const data = await fetchTMDBDiscover(page, discoverOpts);
 
-        if (!mountedRef.current) return;
-        if (!data || data.error || !data.results?.length) {
-          tmdbExhausted = true;
-          break;
+        const batchNormalized = [];
+        const pagesEnd = Math.min(page + PAGES_PER_BATCH, MAX_PAGES + 1);
+
+        for (let p = page; p < pagesEnd; p++) {
+          const data = await fetchTMDBDiscover(p, discoverOpts);
+          if (!mountedRef.current) return;
+          if (!data || data.error || !data.results?.length) {
+            tmdbExhausted = true;
+            break;
+          }
+
+          const normalized = normalizeTmdbResults(data.results)
+            .filter(m => !seenTmdbRef.current.has(m.tmdb_id));
+          for (const m of normalized) seenTmdbRef.current.add(m.tmdb_id);
+          batchNormalized.push(...normalized);
+
+          if (data.page >= data.total_pages) { tmdbExhausted = true; break; }
+          page = p + 1;
         }
 
-        const normalized = normalizeTmdbResults(data.results)
-          .filter(m => !seenTmdbRef.current.has(m.tmdb_id));
-        for (const m of normalized) seenTmdbRef.current.add(m.tmdb_id);
-
-        if (normalized.length === 0) {
-          if (data.page >= data.total_pages) { tmdbExhausted = true; break; }
-          page++;
+        if (batchNormalized.length === 0) {
+          if (tmdbExhausted) break;
           continue;
         }
 
-        // Check which have coverage
-        const tmdbIds = normalized.map(m => m.tmdb_id);
+        // ── Phase 2: Single playability check for entire batch (60 IDs vs 20) ──
+        const tmdbIds = batchNormalized.map(m => m.tmdb_id);
         const playMap = await checkPlayability(tmdbIds);
-
         if (!mountedRef.current) return;
 
-        // Keep only covered films
-        const covered = normalized
+        const covered = batchNormalized
           .filter(m => playMap.has(m.tmdb_id))
           .map(m => {
             const info = playMap.get(m.tmdb_id);
-            return { ...m, podcast_count: info.podcast_count, community_slugs: info.community_slugs };
+            // Patch cached logos synchronously before first render
+            const logo_url = getLogoUrl(m.tmdb_id) || null;
+            return { ...m, podcast_count: info.podcast_count, community_slugs: info.community_slugs, logo_url };
           });
 
         if (covered.length > 0) {
-          // Patch cached logos BEFORE the first render to avoid title→logo flash
-          for (const item of covered) {
-            if (!item.logo_url) {
-              const url = getLogoUrl(item.tmdb_id);
-              if (url) item.logo_url = url;
-            }
-          }
-
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
-          // Update items progressively so user sees results streaming in
           setItems([...accumulated]);
-          // Fetch logos we don't have cached yet (runs in parallel with next page fetch)
+          // Logos fetched in background — only uncached ones
           enrichLogos(covered, mountedRef, setItems);
         }
 
-        if (data.page >= data.total_pages) { tmdbExhausted = true; break; }
-        page++;
+        if (tmdbExhausted) break;
 
-        // Small delay between pages to avoid hammering
+        // Small delay between batches (not between individual pages)
         if (accumulated.length < TARGET_ITEMS) {
-          await new Promise(r => setTimeout(r, 150));
+          await new Promise(r => setTimeout(r, 100));
         }
       }
 
@@ -198,14 +199,15 @@ export function useBrowseFeed(mode) {
     fetchCovered(1, []);
   }, [fetchCovered]);
 
+  // ── Lazy activation: only fetch when tab becomes active for the first time ──
   useEffect(() => {
     mountedRef.current = true;
-    if (!fetchedRef.current) {
+    if (active && !fetchedRef.current) {
       fetchCovered(1, []);
       fetchedRef.current = true;
     }
     return () => { mountedRef.current = false; };
-  }, [fetchCovered]);
+  }, [active, fetchCovered]);
 
   return { items, loading, hasMore, loadMore, refresh };
 }

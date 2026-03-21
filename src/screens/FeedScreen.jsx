@@ -36,8 +36,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     loadMoreActivity,
     loading, refresh,
   } = useFeed(userId, communitySubscriptions);
-  const releases = useBrowseFeed("releases");
-  const streaming = useBrowseFeed("streaming");
+  const releases = useBrowseFeed("releases", feedMode === "releases");
+  const streaming = useBrowseFeed("streaming", feedMode === "streaming");
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
@@ -176,10 +176,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     return () => observer.disconnect();
   }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
 
-  // ── Loading skeleton ──
-  const showSkeleton = (feedMode === "activity" && loading && activityItems.length === 0)
-    || (feedMode === "releases" && releases.loading && releases.items.length === 0)
-    || (feedMode === "streaming" && streaming.loading && streaming.items.length === 0);
+  // ── Loading skeleton (only for initial activity load — browse tabs use inline loading) ──
+  const showSkeleton = feedMode === "activity" && loading && activityItems.length === 0;
 
   if (showSkeleton) {
     return (
@@ -277,6 +275,19 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
+        {releases.loading && releases.items.length === 0 && (
+          <div style={{ padding: "0 16px" }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                margin: "6px 0", height: i === 1 ? 80 : 100, borderRadius: 10,
+                background: "var(--bg-card, #1a1714)",
+                opacity: 0.5 - i * 0.12,
+                animation: "skeleton-pulse 1.5s ease infinite",
+                animationDelay: `${i * 0.2}s`,
+              }} />
+            ))}
+          </div>
+        )}
         {releases.items.length === 0 && !releases.loading && (
           <div style={{
             padding: "40px 24px", textAlign: "center",
@@ -314,6 +325,19 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
       {/* ── Streaming pane ── */}
       <div style={{ display: feedMode === "streaming" ? "block" : "none" }}>
+        {streaming.loading && streaming.items.length === 0 && (
+          <div style={{ padding: "0 16px" }}>
+            {[0, 1, 2].map(i => (
+              <div key={i} style={{
+                margin: "6px 0", height: i === 1 ? 80 : 100, borderRadius: 10,
+                background: "var(--bg-card, #1a1714)",
+                opacity: 0.5 - i * 0.12,
+                animation: "skeleton-pulse 1.5s ease infinite",
+                animationDelay: `${i * 0.2}s`,
+              }} />
+            ))}
+          </div>
+        )}
         {streaming.items.length === 0 && !streaming.loading && (
           <div style={{
             padding: "40px 24px", textAlign: "center",
@@ -409,6 +433,10 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         @keyframes skeleton-pulse {
           0%, 100% { opacity: 0.4; }
           50% { opacity: 0.2; }
+        }
+        @keyframes feedCardIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes badgeShimmer {
           0% { background-position: 200% 0; }

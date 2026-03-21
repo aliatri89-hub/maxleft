@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, memo } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
@@ -324,7 +324,7 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
 // ════════════════════════════════════
 // MAIN COMPONENT
 // ════════════════════════════════════
-export default function BrowseCard({ data, variant, pushNav, removeNav, onNavigateCommunity }) {
+export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onNavigateCommunity }) {
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
   const [episodes, setEpisodes] = useState(null);
@@ -428,4 +428,9 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
     )}
     </>
   );
-}
+}, (prev, next) =>
+  prev.data.tmdb_id === next.data.tmdb_id &&
+  prev.data.logo_url === next.data.logo_url &&
+  prev.data.podcast_count === next.data.podcast_count &&
+  prev.variant === next.variant
+);
