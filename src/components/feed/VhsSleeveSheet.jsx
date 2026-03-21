@@ -813,7 +813,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
                     const isActiveAndPlaying = isActive && isPlaying;
                     const isExpanded = expandedEpId === epKey;
-                    const descText = stripHtml(ep.description);
+                    const descText = stripHtml(ep.episode_description);
                     return (
                       <div key={epKey}>
                         <div
