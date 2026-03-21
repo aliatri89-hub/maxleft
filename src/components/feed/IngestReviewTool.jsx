@@ -53,7 +53,7 @@ function formatDate(dateStr) {
   } catch { return dateStr; }
 }
 
-export default function IngestReviewTool({ userId, onToast }) {
+export default function IngestReviewTool({ userId, onToast, session }) {
   const [queue, setQueue] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -100,7 +100,10 @@ export default function IngestReviewTool({ userId, onToast }) {
     try {
       const res = await fetch("https://api.mymantl.app/functions/v1/ingest-rss", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
         body: JSON.stringify({}),
       });
       const data = await res.json();
