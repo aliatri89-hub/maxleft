@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { createControls, updatePlaying, destroyControls, listenControls } from "../../utils/nativeMusicControls";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
@@ -1417,6 +1418,8 @@ export default function AudioPlayerProvider({ children, session }) {
             recentsRef.current = updated;
             persistRecents(updated);
           }
+          // Update native notification elapsed time
+          updatePlaying(true, t);
           // Update OS scrubber position on the same throttle
           if (ms && audio.duration && isFinite(audio.duration)) {
             try {
@@ -1431,6 +1434,17 @@ export default function AudioPlayerProvider({ children, session }) {
       },
       durationchange: () => {
         setDuration(audio.duration || 0);
+        // Create/refresh native notification when duration becomes known
+        if (currentEp && audio.duration && isFinite(audio.duration)) {
+          createControls({
+            track: currentEp.title,
+            artist: currentEp.community || "MANTL",
+            cover: currentEp.artwork || "",
+            isPlaying: !audio.paused,
+            duration: audio.duration,
+            elapsed: audio.currentTime,
+          });
+        }
         // Push position state when duration becomes known
         if (ms && audio.duration && isFinite(audio.duration)) {
           try {
@@ -1445,13 +1459,14 @@ export default function AudioPlayerProvider({ children, session }) {
       play: () => {
         setIsPlaying(true); setBuffering(false); setError(null);
         if (ms) ms.playbackState = "playing";
+        updatePlaying(true, audio.currentTime);
       },
       pause: () => {
         setIsPlaying(false);
         clearTimeout(stallTimerRef.current);
         saveBookmark(currentEp, audio.currentTime, speed, audio.duration);
         if (ms) ms.playbackState = "paused";
-        // Persist recents on pause so position survives app close
+        updatePlaying(false, audio.currentTime);
         if (currentEp && audio.currentTime > 15) {
           const updated = upsertRecent(recentsRef.current, currentEp, audio.currentTime, speed, audio.duration);
           recentsRef.current = updated;
@@ -1660,8 +1675,19 @@ export default function AudioPlayerProvider({ children, session }) {
           });
         } catch {}
       }
+      // Refresh native notification with updated duration context
+      if (currentEp && a.duration && isFinite(a.duration)) {
+        createControls({
+          track: currentEp.title,
+          artist: currentEp.community || "MANTL",
+          cover: currentEp.artwork || "",
+          isPlaying: !a.paused,
+          duration: a.duration,
+          elapsed: a.currentTime,
+        });
+      }
     }
-  }, [speed]);
+  }, [speed, currentEp]);
 
   // ── Retry — reload current episode's audio source ────────
   const retry = useCallback(() => {
@@ -1800,6 +1826,7 @@ export default function AudioPlayerProvider({ children, session }) {
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = "none";
     }
+    destroyControls();
     setCurrentEp(null);
     setIsPlaying(false);
     setProgress(0);
@@ -1825,6 +1852,7 @@ export default function AudioPlayerProvider({ children, session }) {
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = "none";
     }
+    destroyControls();
     setCurrentEp(null);
     setIsPlaying(false);
     setProgress(0);
@@ -1940,6 +1968,40 @@ export default function AudioPlayerProvider({ children, session }) {
       });
     };
   }, [currentEp, stop]);
+
+  // ── Native Music Controls listener ─────────────────────────
+  // Routes events from the Android/iOS media notification back
+  // to the audio element. Web falls through to Media Session above.
+  useEffect(() => {
+    let sub = null;
+    listenControls((action) => {
+      const a = audioRef.current;
+      if (!a) return;
+      switch (action.message) {
+        case "music-controls-play":
+          a.play().catch(() => {});
+          break;
+        case "music-controls-pause":
+          a.pause();
+          break;
+        case "music-controls-skip-forward":
+          a.currentTime = Math.min(a.duration || 0, a.currentTime + 30);
+          break;
+        case "music-controls-skip-backward":
+          a.currentTime = Math.max(0, a.currentTime - 15);
+          break;
+        case "music-controls-destroy":
+          dismiss();
+          break;
+        case "music-controls-toggle-play-pause":
+          a.paused ? a.play().catch(() => {}) : a.pause();
+          break;
+        default:
+          break;
+      }
+    }).then((handle) => { sub = handle; });
+    return () => { if (sub) sub.remove(); };
+  }, [dismiss]);
 
   // ── Context value ────────────────────────────────────────
 
