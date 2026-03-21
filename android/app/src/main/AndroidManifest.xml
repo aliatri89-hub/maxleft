@@ -47,12 +47,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
-
-        <!-- Media playback foreground service for lock-screen / notification controls -->
-        <service
-            android:name="com.gokadzev.capacitormusiccontrols.MusicControlsNotification"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
     </application>
 
     <!-- Permissions -->
