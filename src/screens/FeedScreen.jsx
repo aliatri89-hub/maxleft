@@ -11,19 +11,25 @@ import {
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
+import IngestReviewTool from "../components/feed/IngestReviewTool";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN — New Releases | Streaming | Activity
+// FEED SCREEN — New Releases | Streaming | Activity | Inbox (admin)
 // ════════════════════════════════════════════════
 
-const FEED_TABS = [
+const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
+
+const BASE_TABS = [
   { key: "releases",  label: "New Releases" },
   { key: "streaming", label: "Streaming" },
   { key: "activity",  label: "Activity" },
 ];
+const INBOX_TAB = { key: "inbox", label: "Inbox" };
 
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
+  const isAdmin = userId === ADMIN_ID;
+  const FEED_TABS = useMemo(() => isAdmin ? [...BASE_TABS, INBOX_TAB] : BASE_TABS, [isAdmin]);
   const {
     activityItems,
     hasMoreActivity,
@@ -384,6 +390,13 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           </div>
         )}
       </div>
+
+      {/* ── Inbox pane (admin only) ── */}
+      {isAdmin && (
+        <div style={{ display: feedMode === "inbox" ? "block" : "none" }}>
+          <IngestReviewTool userId={userId} onToast={onToast} />
+        </div>
+      )}
 
       {/* Animations */}
       <style>{`
