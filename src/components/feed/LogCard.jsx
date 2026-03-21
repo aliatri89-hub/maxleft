@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
+import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { Stars, getCommunityAccent, getTimeAgo } from "./FeedPrimitives";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
@@ -100,7 +101,9 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const [logoReady, setLogoReady] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const [episodes, setEpisodes] = useState(null);
+  const [epLoading, setEpLoading] = useState(false);
+  const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
@@ -111,10 +114,28 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   // Unique back-nav key per card instance
   const sleeveNavKey = `sleeve-${data.tmdb_id || data.title}`;
 
-  const openSleeve = () => {
+  const openSleeve = async () => {
     setSheetOpen(true);
     setShowHint(false);
     if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
+    // Fetch episodes for this film (if not already loaded)
+    if (!episodes && data.tmdb_id) {
+      setEpLoading(true);
+      const eps = await getEpisodesForFilm(data.tmdb_id);
+      setEpisodes(eps);
+      setEpLoading(false);
+    }
+  };
+
+  const handlePlayEpisode = (ep) => {
+    if (!ep || !ep.audio_url) return;
+    playEpisode({
+      guid: `log-${ep.episode_id || ep.audio_url}`,
+      title: ep.episode_title || data.title || "Episode",
+      enclosureUrl: ep.audio_url,
+      community: ep.podcast_name || null,
+      artwork: ep.podcast_artwork_url || null,
+    });
   };
 
   const closeSleeve = () => {
@@ -575,6 +596,13 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       open={sheetOpen}
       onClose={closeSleeve}
       onNavigateCommunity={onNavigateCommunity}
+      hideOverview={true}
+      episodes={episodes}
+      epLoading={epLoading}
+      onPlayEpisode={handlePlayEpisode}
+      currentEp={currentEp}
+      isPlaying={isPlaying}
+      onTogglePlay={togglePlay}
     />
     </>
   );

@@ -384,6 +384,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
         onNavigateCommunity={onNavigateCommunity}
         artworkHero={variant === "releases"}
         hideOverview={true}
+        showProviders={variant === "streaming"}
         episodes={episodes}
         epLoading={epLoading}
         onPlayEpisode={handlePlay}

@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
-import { apiProxy } from "../../utils/api";
+import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
+import WatchProviders from "../community/shared/WatchProviders";
 
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -138,7 +139,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, hideOverview, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, hideOverview, showProviders, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -148,6 +149,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [expandedEpId, setExpandedEpId] = useState(null); // which episode row is expanded
   const [hiddenEpIds, setHiddenEpIds] = useState(new Set()); // admin-deleted episodes
   const [isAdmin, setIsAdmin] = useState(false);
+  const [providers, setProviders] = useState(null);
   const prevTmdbId = useRef(null);
 
   // Admin check (once)
@@ -165,6 +167,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       setDetail(null);
       setExpandedEpId(null);
       setHiddenEpIds(new Set());
+      setProviders(null);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -230,6 +233,31 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     })();
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
+
+  // ── Fetch watch providers (streaming feed only) ──
+  useEffect(() => {
+    if (!open || !showProviders || !data?.tmdb_id) return;
+    if (providers) return; // already loaded for this card
+    let cancelled = false;
+    fetchTMDBWatchProviders(data.tmdb_id)
+      .then(res => {
+        if (cancelled || !res?.results) return;
+        const lang = navigator.language || "en-US";
+        const cc = lang.includes("-") ? lang.split("-")[1].toUpperCase() : "US";
+        const region = res.results[cc] || res.results["US"] || null;
+        if (region) {
+          setProviders({
+            stream: region.flatrate || [],
+            rent: region.rent || [],
+            buy: region.buy || [],
+            country: cc,
+            link: region.link || null,
+          });
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [open, showProviders, data?.tmdb_id]);
 
   // Merge lazy detail into data
   const merged = detail ? { ...data, ...detail,
@@ -814,6 +842,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 })}
               </div>
             </div>
+          )}
+
+          {/* ═══ WHERE TO WATCH — streaming feed only ═══ */}
+          {providers && (providers.stream.length > 0 || providers.rent.length > 0) && (
+            <WatchProviders providers={providers} />
           )}
 
           {/* ═══ EPISODE PICKER — when opened from browse cards ═══ */}
