@@ -1,5 +1,4 @@
 import { useState, useRef, memo } from "react";
-import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { isPatreonUrl } from "./FeedPrimitives";
@@ -86,12 +85,27 @@ function BrandStamp({ brand, side = "right" }) {
 
 // ── Shared logo / title renderer ──
 function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, theme }) {
-  const expectsLogo = data.tmdb_id;
-  const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
+  // Show fallback text as stable placeholder. When logo image loads, it fades in on top.
+  // This eliminates the text → skeleton → logo flash on first load.
+  const hasLogo = !!data.logo_url;
 
   return (
-    <>
-      {data.logo_url && (
+    <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36, width: "100%" }}>
+      {/* Fallback text — always rendered, fades out when logo is ready */}
+      <div style={{
+        fontFamily: "'Permanent Marker', cursive",
+        fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
+        lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
+        letterSpacing: "0.02em", textAlign: "center",
+        transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
+        textShadow: theme.textShadow,
+        padding: "0 8px", maxWidth: "85%", wordBreak: "break-word",
+        opacity: (hasLogo && logoReady) ? 0 : 1,
+        transition: "opacity 0.3s ease",
+      }}>{data.title}</div>
+
+      {/* Logo image — absolutely positioned over text, fades in when loaded */}
+      {hasLogo && (
         <img
           src={data.logo_url} alt={data.title} crossOrigin="anonymous"
           onLoad={(e) => {
@@ -119,33 +133,16 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
             } catch {}
           }}
           style={{
+            position: "absolute",
             maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
-            objectFit: "contain", objectPosition: "center", position: "relative",
+            objectFit: "contain", objectPosition: "center",
             filter: theme.logoFilter(isLightLogo),
-            opacity: theme.logoOpacity(isLightLogo, logoReady),
-            transition: "opacity 0.2s ease-in",
+            opacity: logoReady ? theme.logoOpacity(isLightLogo, true) : 0,
+            transition: "opacity 0.3s ease-in",
           }}
         />
       )}
-      {(logoLoading || (data.logo_url && !logoReady)) && (
-        <div style={{
-          height: 20, width: "55%", borderRadius: 3,
-          background: theme.skeletonBg,
-          position: data.logo_url ? "absolute" : "relative",
-        }} />
-      )}
-      {!data.logo_url && !logoLoading && (
-        <div style={{
-          fontFamily: "'Permanent Marker', cursive",
-          fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
-          lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
-          letterSpacing: "0.02em", position: "relative", textAlign: "center",
-          transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
-          textShadow: theme.textShadow,
-          padding: "0 8px", maxWidth: "85%", margin: "0 auto", wordBreak: "break-word",
-        }}>{data.title}</div>
-      )}
-    </>
+    </div>
   );
 }
 

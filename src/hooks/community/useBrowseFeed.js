@@ -166,8 +166,6 @@ export function useBrowseFeed(mode, active = false) {
         if (covered.length > 0) {
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
           setItems([...accumulated]);
-          // Logos fetched in background — only uncached ones
-          enrichLogos(covered, mountedRef, setItems);
         }
 
         if (tmdbExhausted) break;
@@ -180,6 +178,14 @@ export function useBrowseFeed(mode, active = false) {
 
       nextPageRef.current = page;
       setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
+
+      // ── Phase 3: Enrich logos ONCE after all items are accumulated ──
+      // Running this inside the loop caused a race: enrichLogos would patch
+      // logos into React state, then the next loop iteration's setItems([...accumulated])
+      // would overwrite them with the stale local array — causing logo ↔ text flash.
+      if (accumulated.length > 0) {
+        enrichLogos(accumulated, mountedRef, setItems);
+      }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
     }
