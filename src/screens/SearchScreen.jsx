@@ -51,7 +51,10 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   const [sortOrder, setSortOrder] = useState(null); // null | "recent" | "oldest"
   const [browseResults, setBrowseResults] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(false);
+  const [browseHasMore, setBrowseHasMore] = useState(false);
+  const [browseLoadingMore, setBrowseLoadingMore] = useState(false);
   const isBrowseMode = !query && (selectedPodcast || sortOrder);
+  const BROWSE_PAGE = 40;
 
   // ── Recently covered (empty state) ──
   const [recentlyCovered, setRecentlyCovered] = useState([]);
@@ -86,14 +89,17 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
 
   // ── Browse mode: load catalog when filters active + no query ──
   useEffect(() => {
-    if (query) return; // search mode, not browse
+    if (query) return;
     if (!selectedPodcast && !sortOrder) {
       setBrowseResults([]);
+      setBrowseHasMore(false);
       return;
     }
 
     let cancelled = false;
     setBrowseLoading(true);
+    setBrowseResults([]);
+    setBrowseHasMore(false);
     setExpandedTmdbId(null);
     if (removeNav) removeNav("searchExpand");
 
@@ -101,26 +107,49 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
       const { data, error } = await supabase.rpc("browse_covered_films", {
         podcast_slug: selectedPodcast || null,
         sort_dir: sortOrder === "oldest" ? "asc" : "desc",
-        result_limit: 40,
+        result_limit: BROWSE_PAGE,
         result_offset: 0,
       });
       if (!cancelled && !error && data) {
-        setBrowseResults(data.map((r) => ({
-          tmdbId: r.tmdb_id,
-          title: r.title,
-          year: r.year,
-          poster: r.poster_path ? `${TMDB_IMG}/w185${r.poster_path}` : null,
-          posterPath: r.poster_path,
-          podcastCount: r.podcast_count || 0,
-          latestDate: r.latest_episode_date,
-          podcasts: r.podcasts,
-          source: "browse",
-        })));
+        const mapped = data.map(mapBrowseRow);
+        setBrowseResults(mapped);
+        setBrowseHasMore(data.length === BROWSE_PAGE);
       }
       if (!cancelled) setBrowseLoading(false);
     })();
     return () => { cancelled = true; };
   }, [selectedPodcast, sortOrder, query, removeNav]);
+
+  const mapBrowseRow = (r) => ({
+    tmdbId: r.tmdb_id,
+    title: r.title,
+    year: r.year,
+    poster: r.poster_path ? `${TMDB_IMG}/w185${r.poster_path}` : null,
+    posterPath: r.poster_path,
+    podcastCount: r.podcast_count || 0,
+    latestDate: r.latest_episode_date,
+    podcasts: r.podcasts,
+    source: "browse",
+  });
+
+  const loadMoreBrowse = useCallback(async () => {
+    if (browseLoadingMore || !browseHasMore) return;
+    setBrowseLoadingMore(true);
+
+    const { data, error } = await supabase.rpc("browse_covered_films", {
+      podcast_slug: selectedPodcast || null,
+      sort_dir: sortOrder === "oldest" ? "asc" : "desc",
+      result_limit: BROWSE_PAGE,
+      result_offset: browseResults.length,
+    });
+
+    if (!error && data) {
+      const mapped = data.map(mapBrowseRow);
+      setBrowseResults((prev) => [...prev, ...mapped]);
+      setBrowseHasMore(data.length === BROWSE_PAGE);
+    }
+    setBrowseLoadingMore(false);
+  }, [browseLoadingMore, browseHasMore, selectedPodcast, sortOrder, browseResults.length]);
 
   // ═══════════════════════════════════════════
   // TWO-PHASE SEARCH
@@ -399,19 +428,57 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               fontSize: 10, color: "rgba(255,255,255,0.2)",
             }}>Loading…</div>
           ) : browseResults.length > 0 ? (
-            browseResults.map((r) => (
-              <ResultCard
-                key={r.tmdbId}
-                result={r}
-                isExpanded={expandedTmdbId === r.tmdbId}
-                onTap={() => handleResultTap(r.tmdbId, r.podcastCount)}
-                episodes={expandedTmdbId === r.tmdbId ? episodes : []}
-                loadingEpisodes={expandedTmdbId === r.tmdbId && loadingEpisodes}
-                onPlayEpisode={handlePlay}
-                currentEp={currentEp}
-                isPlaying={isPlaying}
-              />
-            ))
+            <>
+              {browseResults.map((r) => (
+                <ResultCard
+                  key={r.tmdbId}
+                  result={r}
+                  isExpanded={expandedTmdbId === r.tmdbId}
+                  onTap={() => handleResultTap(r.tmdbId, r.podcastCount)}
+                  episodes={expandedTmdbId === r.tmdbId ? episodes : []}
+                  loadingEpisodes={expandedTmdbId === r.tmdbId && loadingEpisodes}
+                  onPlayEpisode={handlePlay}
+                  currentEp={currentEp}
+                  isPlaying={isPlaying}
+                />
+              ))}
+
+              {/* Load more */}
+              {browseHasMore && (
+                <div style={{ padding: "12px 16px 20px", textAlign: "center" }}>
+                  <button
+                    onClick={loadMoreBrowse}
+                    disabled={browseLoadingMore}
+                    style={{
+                      padding: "10px 28px",
+                      background: "rgba(199,91,63,0.08)",
+                      border: `1px solid rgba(199,91,63,${browseLoadingMore ? "0.1" : "0.25"})`,
+                      borderRadius: 8,
+                      color: TC,
+                      fontSize: 12, fontWeight: 700,
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      textTransform: "uppercase", letterSpacing: "0.04em",
+                      cursor: browseLoadingMore ? "wait" : "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {browseLoadingMore ? "Loading…" : "Load more"}
+                  </button>
+                </div>
+              )}
+
+              {/* End of results */}
+              {!browseHasMore && browseResults.length >= BROWSE_PAGE && (
+                <div style={{
+                  padding: "8px 16px 20px", textAlign: "center",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 9, color: "rgba(255,255,255,0.12)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>
+                  {browseResults.length} films
+                </div>
+              )}
+            </>
           ) : (
             <div style={{
               padding: "32px 16px", textAlign: "center",
