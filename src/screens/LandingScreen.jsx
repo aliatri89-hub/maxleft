@@ -1209,7 +1209,7 @@ const DEMO_PLAY_MOVIES = [
     podcasts: [
       { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://traffic.megaphone.fm/GLT8474795098.mp3" },
       { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien", audio: "https://dts.podtrac.com/redirect.mp3/traffic.libsyn.com/filmjunk/filmjunk1031.mp3" },
-      { name: "Eye of the Duck", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/0d/e1/1e/0de11e40-a1c4-22ee-19c1-408a3a03e46e/mza_12363992498403595498.jpg/300x300bb.webp", episode: "Alien (1979)" },
+      { name: "Eye of the Duck", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/0d/e1/1e/0de11e40-a1c4-22ee-19c1-408a3a03e46e/mza_12363992498403595498.jpg/300x300bb.webp", episode: "Alien (1979)", audio: "https://dts.podtrac.com/redirect.mp3/stitcher.simplecastaudio.com/a45adc7c-00f0-441e-ba04-b597645c7a15/episodes/acdcd4d4-ea5f-448f-9c2e-204cb4db7be9/audio/128/default.mp3?aid=rss_feed&awCollectionId=a45adc7c-00f0-441e-ba04-b597645c7a15&awEpisodeId=acdcd4d4-ea5f-448f-9c2e-204cb4db7be9&feed=OtrahXd3" },
     ],
   },
 ];
