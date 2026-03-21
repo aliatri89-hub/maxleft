@@ -7,20 +7,18 @@
  *   → Merge by tmdb_id, batch-check uncovered TMDB results via get_playable_films()
  *   → Sort: covered first, uncovered after divider
  *
- * Episode picker:
- *   Tap a covered result → get_episodes_for_film(tmdb_id) → inline expansion
- *   Each row: podcast art, episode title, podcast name, play button
- *   Wired to AudioPlayerProvider via useAudioPlayer()
- *
- * Search miss logging:
- *   Tap + on uncovered result → insert into search_miss_log
+ * Every result expands on tap:
+ *   Covered  → episode picker via get_episodes_for_film(), wired to AudioPlayerProvider
+ *   Uncovered → "no coverage yet" card with "Notify me when covered" button
+ *              Writes to search_miss_log → generate_coverage_notifications() picks it up
+ *              when a podcast later covers that film → re-engagement notification
  */
 
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { supabase } from "../supabase";
-import { searchTMDB, fetchTMDBDetails } from "../utils/api";
+import { searchTMDB } from "../utils/api";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
-import { upsertMediaLog, toPosterPath } from "../utils/mediaWrite";
+import { toPosterPath } from "../utils/mediaWrite";
 
 const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
@@ -38,13 +36,14 @@ export default function SearchScreen({ session, isActive, onToast }) {
   const lastQueryRef = useRef("");
   const inputRef = useRef(null);
 
-  // ── Episode picker state ──
+  // ── Expand state (shared: both covered and uncovered expand) ──
   const [expandedTmdbId, setExpandedTmdbId] = useState(null);
   const [episodes, setEpisodes] = useState([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
 
-  // ── Logging state ──
-  const [loggingId, setLoggingId] = useState(null);
+  // ── Notify state ──
+  const [notifyingId, setNotifyingId] = useState(null);
+  const [notifiedIds, setNotifiedIds] = useState(new Set());
 
   // ── Audio player ──
   const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
@@ -76,7 +75,6 @@ export default function SearchScreen({ session, isActive, onToast }) {
     setExpandedTmdbId(null);
 
     try {
-      // Phase 1 + 2 in parallel
       const [localRes, tmdbRows] = await Promise.all([
         supabase.rpc("search_covered_films", {
           search_query: trimmed,
@@ -88,7 +86,6 @@ export default function SearchScreen({ session, isActive, onToast }) {
       const localRows = localRes.data || [];
       const mergedMap = new Map();
 
-      // Local results already have podcast_count
       localRows.forEach((r) => {
         if (!r.tmdb_id) return;
         mergedMap.set(r.tmdb_id, {
@@ -103,12 +100,10 @@ export default function SearchScreen({ session, isActive, onToast }) {
         });
       });
 
-      // Merge TMDB results
       const uncheckedTmdbIds = [];
       (tmdbRows || []).forEach((r) => {
         if (!r.tmdbId) return;
         if (mergedMap.has(r.tmdbId)) {
-          // Enrich local result with TMDB poster if missing
           const existing = mergedMap.get(r.tmdbId);
           if (!existing.poster && r.poster) existing.poster = r.poster;
           if (!existing.year && r.year) existing.year = parseInt(r.year);
@@ -127,7 +122,6 @@ export default function SearchScreen({ session, isActive, onToast }) {
         }
       });
 
-      // Phase 3: batch coverage check for TMDB-only results
       if (uncheckedTmdbIds.length > 0) {
         const { data: playable } = await supabase.rpc("get_playable_films", {
           tmdb_ids: uncheckedTmdbIds,
@@ -138,7 +132,6 @@ export default function SearchScreen({ session, isActive, onToast }) {
         });
       }
 
-      // Sort: covered first (podcast count desc), then uncovered (year desc)
       const all = [...mergedMap.values()];
       const covered = all
         .filter((r) => r.podcastCount > 0)
@@ -156,7 +149,6 @@ export default function SearchScreen({ session, isActive, onToast }) {
     }
   }, []);
 
-  // ── Debounced input ──
   const handleQueryChange = useCallback((val) => {
     setQuery(val);
     clearTimeout(debounceRef.current);
@@ -170,7 +162,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
   }, [runSearch]);
 
   // ═══════════════════════════════════════════
-  // EPISODE PICKER
+  // EXPAND (shared for covered + uncovered)
   // ═══════════════════════════════════════════
 
   const handleResultTap = useCallback(async (tmdbId, podcastCount) => {
@@ -178,18 +170,20 @@ export default function SearchScreen({ session, isActive, onToast }) {
       setExpandedTmdbId(null);
       return;
     }
+
+    setExpandedTmdbId(tmdbId);
+
     if (podcastCount > 0) {
-      setExpandedTmdbId(tmdbId);
+      // Covered: load episodes
       setLoadingEpisodes(true);
       setEpisodes([]);
-
       const { data, error } = await supabase.rpc("get_episodes_for_film", {
         film_tmdb_id: tmdbId,
       });
-
       if (!error && data) setEpisodes(data);
       setLoadingEpisodes(false);
     }
+    // Uncovered: expansion just reveals the "notify me" card (no async needed)
   }, [expandedTmdbId]);
 
   // ── Play ──
@@ -205,45 +199,33 @@ export default function SearchScreen({ session, isActive, onToast }) {
   }, [playEpisode]);
 
   // ═══════════════════════════════════════════
-  // LOG (uncovered films)
+  // NOTIFY ME (uncovered films)
   // ═══════════════════════════════════════════
 
-  const handleLog = useCallback(async (result) => {
-    if (!userId || loggingId) return;
-    setLoggingId(result.tmdbId);
+  const handleNotify = useCallback(async (result) => {
+    if (!userId || notifyingId) return;
+    setNotifyingId(result.tmdbId);
 
     try {
-      let director = null;
-      try {
-        const details = await fetchTMDBDetails(result.tmdbId, "movie");
-        director = details?.director || null;
-      } catch {}
-
-      await upsertMediaLog(userId, {
-        mediaType: "film",
-        tmdbId: result.tmdbId,
-        title: result.title,
-        year: result.year || null,
-        creator: director,
-        posterPath: result.posterPath || null,
-        source: "mantl",
-      });
-
-      // Log search miss for expansion roadmap
-      supabase.from("search_miss_log").insert({
+      const { error } = await supabase.from("search_miss_log").upsert({
         query: query.trim(),
         tmdb_id: result.tmdbId,
         user_id: userId,
-      }).then(() => {});
+      }, {
+        onConflict: "user_id,tmdb_id",
+        ignoreDuplicates: true,
+      });
 
-      if (onToast) onToast(`${result.title} logged`);
+      if (!error) {
+        setNotifiedIds((prev) => new Set([...prev, result.tmdbId]));
+        if (onToast) onToast(`We'll notify you when ${result.title} gets covered`);
+      }
     } catch (err) {
-      console.error("[Search] Log error:", err);
-      if (onToast) onToast("Couldn't log — try again");
+      console.error("[Search] Notify error:", err);
     } finally {
-      setLoggingId(null);
+      setNotifyingId(null);
     }
-  }, [userId, loggingId, query, onToast]);
+  }, [userId, notifyingId, query, onToast]);
 
   // ── Split for rendering ──
   const coveredResults = useMemo(
@@ -267,10 +249,8 @@ export default function SearchScreen({ session, isActive, onToast }) {
       {/* ── Search bar ── */}
       <div style={{
         padding: "16px 16px 8px",
-        position: "sticky",
-        top: 0,
-        background: "#0f0d0b",
-        zIndex: 10,
+        position: "sticky", top: 0,
+        background: "#0f0d0b", zIndex: 10,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
         <div style={{
@@ -405,12 +385,11 @@ export default function SearchScreen({ session, isActive, onToast }) {
             <ResultCard
               key={r.tmdbId}
               result={r}
-              isExpanded={false}
-              onTap={() => {}}
-              episodes={[]}
-              loadingEpisodes={false}
-              onLog={() => handleLog(r)}
-              logging={loggingId === r.tmdbId}
+              isExpanded={expandedTmdbId === r.tmdbId}
+              onTap={() => handleResultTap(r.tmdbId, 0)}
+              onNotify={() => handleNotify(r)}
+              notifying={notifyingId === r.tmdbId}
+              notified={notifiedIds.has(r.tmdbId)}
             />
           ))}
         </div>
@@ -421,6 +400,7 @@ export default function SearchScreen({ session, isActive, onToast }) {
           from { opacity: 0; transform: translateY(-8px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
@@ -428,24 +408,24 @@ export default function SearchScreen({ session, isActive, onToast }) {
 
 
 /* ═══════════════════════════════════════════════════
-   ResultCard
+   ResultCard — unified expand for covered + uncovered
    ═══════════════════════════════════════════════════ */
 
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
-  onPlayEpisode, onLog, logging, currentEp, isPlaying,
+  onPlayEpisode, onNotify, notifying, notified, currentEp, isPlaying,
 }) {
   const hasCoverage = result.podcastCount > 0;
 
   return (
     <div style={{ marginBottom: 2 }}>
+      {/* Main row — always tappable */}
       <div
-        onClick={hasCoverage ? onTap : undefined}
+        onClick={onTap}
         style={{
           display: "flex", gap: 12, padding: "12px 14px",
           background: isExpanded ? "rgba(255,255,255,0.04)" : "transparent",
-          borderRadius: 10,
-          cursor: hasCoverage ? "pointer" : "default",
+          borderRadius: 10, cursor: "pointer",
           transition: "background 0.15s",
         }}
       >
@@ -494,50 +474,31 @@ function ResultCard({
           )}
         </div>
 
-        {/* Action button */}
+        {/* Expand chevron — consistent for all results */}
         <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          {hasCoverage ? (
-            <div style={{
-              width: 32, height: 32, borderRadius: "50%",
-              background: `rgba(199,91,63,${isExpanded ? "0.2" : "0.1"})`,
-              border: `1px solid rgba(199,91,63,${isExpanded ? "0.35" : "0.2"})`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.15s",
-            }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill={TC}
-                style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          ) : (
-            <button onClick={(e) => { e.stopPropagation(); onLog?.(); }}
-              disabled={logging}
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            background: hasCoverage
+              ? `rgba(199,91,63,${isExpanded ? "0.2" : "0.08"})`
+              : `rgba(255,255,255,${isExpanded ? "0.08" : "0.03"})`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.15s",
+          }}>
+            <svg width="10" height="10" viewBox="0 0 24 24"
+              fill="none"
+              stroke={hasCoverage ? TC : "rgba(255,255,255,0.3)"}
+              strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               style={{
-                width: 32, height: 32, borderRadius: "50%",
-                background: logging ? "rgba(199,91,63,0.15)" : "rgba(255,255,255,0.04)",
-                border: logging ? "1px solid rgba(199,91,63,0.3)" : "1px solid rgba(255,255,255,0.08)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: logging ? "wait" : "pointer", transition: "all 0.15s",
+                transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.2s",
               }}>
-              {logging ? (
-                <div style={{
-                  width: 12, height: 12, borderRadius: "50%",
-                  border: "2px solid rgba(199,91,63,0.2)",
-                  borderTopColor: TC,
-                  animation: "spin 0.6s linear infinite",
-                }} />
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              )}
-            </button>
-          )}
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      {/* ── Episode picker ── */}
+      {/* ── Expanded: Episode picker (covered) ── */}
       {isExpanded && hasCoverage && (
         <div style={{ padding: "4px 14px 12px 78px", animation: "searchSlideDown 0.2s ease" }}>
           {loadingEpisodes && (
@@ -558,7 +519,7 @@ function ResultCard({
 
             return (
               <div key={ep.episode_id || i}
-                onClick={() => onPlayEpisode?.(ep)}
+                onClick={(e) => { e.stopPropagation(); onPlayEpisode?.(ep); }}
                 style={{
                   display: "flex", alignItems: "center", gap: 10,
                   padding: "7px 8px", borderRadius: 6,
@@ -618,7 +579,95 @@ function ResultCard({
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      {/* ── Expanded: Notify me (uncovered) ── */}
+      {isExpanded && !hasCoverage && (
+        <div style={{
+          padding: "4px 14px 14px 78px",
+          animation: "searchSlideDown 0.2s ease",
+        }}>
+          <div style={{
+            padding: "14px 16px",
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 10,
+          }}>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.25)",
+              textTransform: "uppercase", letterSpacing: "0.06em",
+              marginBottom: 10,
+            }}>
+              No podcast coverage yet
+            </div>
+
+            {notified ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 14px",
+                background: "rgba(199,91,63,0.06)",
+                border: "1px solid rgba(199,91,63,0.15)",
+                borderRadius: 8,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TC} strokeWidth="2" strokeLinecap="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 12, fontWeight: 600, color: TC,
+                  textTransform: "uppercase", letterSpacing: "0.04em",
+                }}>
+                  We'll let you know
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); onNotify?.(); }}
+                disabled={notifying}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "8px 14px", width: "100%",
+                  background: notifying ? "rgba(199,91,63,0.08)" : "rgba(199,91,63,0.1)",
+                  border: `1px solid rgba(199,91,63,${notifying ? "0.15" : "0.25"})`,
+                  borderRadius: 8, cursor: notifying ? "wait" : "pointer",
+                  transition: "all 0.15s",
+                }}
+              >
+                {notifying ? (
+                  <div style={{
+                    width: 14, height: 14, borderRadius: "50%",
+                    border: "2px solid rgba(199,91,63,0.2)",
+                    borderTopColor: TC,
+                    animation: "spin 0.6s linear infinite",
+                  }} />
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TC} strokeWidth="2" strokeLinecap="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                )}
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 12, fontWeight: 700, color: TC,
+                  textTransform: "uppercase", letterSpacing: "0.04em",
+                }}>
+                  {notifying ? "Subscribing…" : "Notify me when covered"}
+                </span>
+              </button>
+            )}
+
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 9, color: "rgba(255,255,255,0.15)",
+              marginTop: 8, lineHeight: 1.4,
+            }}>
+              {notified
+                ? "You'll get a notification when a podcast covers this film."
+                : "Get notified when a podcast in our network reviews this film."}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
