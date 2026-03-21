@@ -314,7 +314,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetVisible, setSheetVisible] = useState(false);
   const closeTimer = useRef(null);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, addToQueue } = useAudioPlayer();
   const hasPlayButton = data.podcast_count > 0;
 
   const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
@@ -342,6 +342,18 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
   const handlePlay = (ep) => {
     if (!ep || !ep.audio_url) return;
     playEpisode({
+      guid: `browse-${ep.episode_id || ep.audio_url}`,
+      title: ep.episode_title || data.title || "Episode",
+      enclosureUrl: ep.audio_url,
+      community: ep.podcast_name || null,
+      artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
+    });
+  };
+
+  const handleQueue = (ep) => {
+    if (!ep || !ep.audio_url) return;
+    addToQueue({
       guid: `browse-${ep.episode_id || ep.audio_url}`,
       title: ep.episode_title || data.title || "Episode",
       enclosureUrl: ep.audio_url,
@@ -390,6 +402,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
         episodes={episodes}
         epLoading={epLoading}
         onPlayEpisode={handlePlay}
+        onQueueEpisode={handleQueue}
         currentEp={currentEp}
         isPlaying={isPlaying}
         onTogglePlay={togglePlay}

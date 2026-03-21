@@ -103,7 +103,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const [showPicker, setShowPicker] = useState(false);
   const [episodes, setEpisodes] = useState(null);
   const [epLoading, setEpLoading] = useState(false);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, addToQueue } = useAudioPlayer();
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
@@ -130,6 +130,18 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const handlePlayEpisode = (ep) => {
     if (!ep || !ep.audio_url) return;
     playEpisode({
+      guid: `log-${ep.episode_id || ep.audio_url}`,
+      title: ep.episode_title || data.title || "Episode",
+      enclosureUrl: ep.audio_url,
+      community: ep.podcast_name || null,
+      artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
+    });
+  };
+
+  const handleQueueEpisode = (ep) => {
+    if (!ep || !ep.audio_url) return;
+    addToQueue({
       guid: `log-${ep.episode_id || ep.audio_url}`,
       title: ep.episode_title || data.title || "Episode",
       enclosureUrl: ep.audio_url,
@@ -601,6 +613,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       episodes={episodes}
       epLoading={epLoading}
       onPlayEpisode={handlePlayEpisode}
+      onQueueEpisode={handleQueueEpisode}
       currentEp={currentEp}
       isPlaying={isPlaying}
       onTogglePlay={togglePlay}

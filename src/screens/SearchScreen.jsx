@@ -61,7 +61,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   const [recentLoading, setRecentLoading] = useState(true);
 
   // ── Audio player ──
-  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const { play: playEpisode, currentEp, isPlaying, addToQueue } = useAudioPlayer();
 
   // ── Load recently covered on mount ──
   useEffect(() => {
@@ -312,6 +312,18 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     });
   }, [playEpisode]);
 
+  const handleQueue = useCallback((ep) => {
+    if (!ep.audio_url) return;
+    addToQueue({
+      guid: `search-${ep.episode_id}`,
+      title: ep.episode_title || "Episode",
+      enclosureUrl: ep.audio_url,
+      community: ep.podcast_name || null,
+      artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
+    });
+  }, [addToQueue]);
+
   // ═══════════════════════════════════════════
   // NOTIFY ME (uncovered films)
   // ═══════════════════════════════════════════
@@ -439,6 +451,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   episodes={expandedTmdbId === r.tmdbId ? episodes : []}
                   loadingEpisodes={expandedTmdbId === r.tmdbId && loadingEpisodes}
                   onPlayEpisode={handlePlay}
+                  onQueueEpisode={handleQueue}
                   currentEp={currentEp}
                   isPlaying={isPlaying}
                 />
@@ -656,6 +669,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               episodes={expandedTmdbId === r.tmdbId ? episodes : []}
               loadingEpisodes={expandedTmdbId === r.tmdbId && loadingEpisodes}
               onPlayEpisode={handlePlay}
+              onQueueEpisode={handleQueue}
               currentEp={currentEp}
               isPlaying={isPlaying}
             />
@@ -715,7 +729,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
 
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
-  onPlayEpisode, onNotify, notifying, notified, currentEp, isPlaying,
+  onPlayEpisode, onQueueEpisode, onNotify, notifying, notified, currentEp, isPlaying,
 }) {
   const hasCoverage = result.podcastCount > 0;
 
@@ -861,6 +875,25 @@ function ResultCard({
                 </div>
 
                 {ep.audio_url ? (
+                  <>
+                  {onQueueEpisode && !isCurrent && (
+                    <div
+                      onClick={(e) => { e.stopPropagation(); onQueueEpisode(ep); }}
+                      title="Add to Up Next"
+                      style={{
+                        width: 24, height: 24, borderRadius: "50%",
+                        background: "rgba(255,255,255,0.03)",
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, cursor: "pointer",
+                      }}
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </div>
+                  )}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill={TC}
                     opacity={isCurrent && isPlaying ? 1 : 0.5}>
                     {isCurrent && isPlaying ? (
@@ -869,6 +902,7 @@ function ResultCard({
                       <path d="M8 5v14l11-7z" />
                     )}
                   </svg>
+                  </>
                 ) : (
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",

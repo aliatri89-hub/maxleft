@@ -139,7 +139,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -947,6 +947,29 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               }
                             </svg>
                           </div>
+                          {/* Queue: add to up next */}
+                          {onQueueEpisode && !isActive && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onQueueEpisode(ep);
+                              }}
+                              title="Add to Up Next"
+                              style={{
+                                width: 28, height: 28, borderRadius: "50%",
+                                background: "rgba(240,235,225,0.03)",
+                                border: "1px solid rgba(240,235,225,0.06)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0, cursor: "pointer",
+                                transition: "all 0.15s",
+                              }}
+                            >
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                              </svg>
+                            </div>
+                          )}
                           {/* Admin: unlink episode from film */}
                           {isAdmin && ep.episode_id && (
                             <div

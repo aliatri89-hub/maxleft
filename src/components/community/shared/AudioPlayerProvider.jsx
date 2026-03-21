@@ -130,7 +130,7 @@ function upsertRecent(recents, ep, time, spd, dur) {
 //   badge → small circle, EQ bars / spinner / play icon
 //   pill  → horizontal strip with title + play/pause + progress
 
-function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration, mode, onTogglePlay, onExpand, onCollapse, onOpenFull, onDismiss, onRetry }) {
+function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration, mode, queueCount, onTogglePlay, onExpand, onCollapse, onOpenFull, onDismiss, onRetry }) {
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
   const isBadge = mode === "badge";
 
@@ -310,6 +310,10 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
               {episode.community && <span style={{ color: `${ACCENT}77` }}>{episode.community}</span>}
               {episode.community && <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>}
               <span>{remainingMin ? `${remainingMin}m left` : fmt(progress)}</span>
+              {queueCount > 0 && (<>
+                <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+                <span style={{ color: `${ACCENT}77` }}>{queueCount} queued</span>
+              </>)}
             </>)}
           </div>
         </div>
@@ -487,9 +491,10 @@ function ResumeNudge({ recent, onResume, onDismiss, onFade }) {
 
 function FullScreenPlayer({
   episode, isPlaying, buffering, error, bufferedPct, progress, duration, speed,
-  recents, onTogglePlay, onSkip, onSeek, onCycleSpeed, onRetry,
+  recents, queue, onTogglePlay, onSkip, onSeek, onCycleSpeed, onRetry,
   onResumeRecent, onClearRecent, onStop, onClose,
   sleepTimer, onSetSleep, onClearSleep,
+  onRemoveFromQueue, onClearQueue,
 }) {
   const scrubberRef = useRef(null);
   const [scrubbing, setScrubbing] = useState(false);
@@ -996,6 +1001,102 @@ function FullScreenPlayer({
           maxHeight: episode ? "35vh" : "70vh",
         }}>
 
+          {/* ── Up Next (queue) ── */}
+          {queue.length > 0 && (
+            <>
+              <div style={{
+                padding: "14px 20px 8px",
+                fontSize: 11, fontWeight: 700,
+                color: ACCENT,
+                fontFamily: "'Barlow Condensed', sans-serif",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                opacity: 0.8,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="8" y1="6" x2="21" y2="6" />
+                    <line x1="8" y1="12" x2="21" y2="12" />
+                    <line x1="8" y1="18" x2="21" y2="18" />
+                    <line x1="3" y1="6" x2="3.01" y2="6" />
+                    <line x1="3" y1="12" x2="3.01" y2="12" />
+                    <line x1="3" y1="18" x2="3.01" y2="18" />
+                  </svg>
+                  Up Next · {queue.length}
+                </div>
+                <button onClick={onClearQueue} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  color: "rgba(255,255,255,0.25)", fontSize: 10, fontWeight: 600,
+                  fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase",
+                  padding: "2px 4px",
+                }}>
+                  Clear
+                </button>
+              </div>
+
+              {queue.map((q, i) => (
+                <div
+                  key={`queue-${i}-${q.enclosureUrl}`}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "10px 20px",
+                  }}
+                >
+                  {/* Index number */}
+                  <div style={{
+                    width: 24, height: 24, borderRadius: 6,
+                    background: `${ACCENT}15`,
+                    border: `1px solid ${ACCENT}25`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    fontSize: 11, fontWeight: 700, color: ACCENT,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                  }}>
+                    {i + 1}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: 12, fontWeight: 700,
+                      color: "rgba(255,255,255,0.8)",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      textTransform: "uppercase",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      lineHeight: 1.3,
+                    }}>
+                      {q.title}
+                    </div>
+                    {q.community && (
+                      <span style={{
+                        fontSize: 9, color: `${ACCENT}88`,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                      }}>
+                        {q.community}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Remove button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRemoveFromQueue(i); }}
+                    aria-label="Remove from queue"
+                    style={{
+                      background: "none", border: "none",
+                      cursor: "pointer", padding: 4,
+                      color: "rgba(255,255,255,0.15)",
+                      fontSize: 12, lineHeight: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </>
+          )}
+
           {/* ── Recently Played ── */}
           {(() => {
             // Filter out the currently playing episode
@@ -1182,8 +1283,11 @@ export default function AudioPlayerProvider({ children, session }) {
   const [bubbleMode, setBubbleMode] = useState("badge"); // "badge" | "pill"
   const [activated, setActivated] = useState(false); // true once user plays something this session
   const [sleepTimer, setSleepTimer] = useState(null); // null | { label, deadline, timerId }
+  const [queue, setQueue] = useState([]);             // session-only play queue
   const sleepTimerRef = useRef(null);
   const stallTimerRef = useRef(null);
+  const queueRef = useRef([]);
+  const advanceQueueRef = useRef(null);
   const [nudgeDismissedGuid, setNudgeDismissedGuid] = useState(() => {
     try { return localStorage.getItem(NUDGE_DISMISSED_KEY) || null; } catch { return null; }
   });
@@ -1295,15 +1399,21 @@ export default function AudioPlayerProvider({ children, session }) {
         clearTimeout(stallTimerRef.current);
       },
       ended: () => {
-        setIsPlaying(false);
         clearTimeout(stallTimerRef.current);
-        if (ms) ms.playbackState = "none";
-        // If sleep timer is set to "end of episode", clear it
+        // If sleep timer is set to "end of episode", clear it and DON'T advance
         if (sleepTimerRef.current?.endOfEpisode) {
           clearTimeout(sleepTimerRef.current.timerId);
           setSleepTimer(null);
           sleepTimerRef.current = null;
+          setIsPlaying(false);
+          if (ms) ms.playbackState = "none";
+          return;
         }
+        // Try to auto-advance from queue
+        if (advanceQueueRef.current && advanceQueueRef.current()) return;
+        // Nothing queued — just stop
+        setIsPlaying(false);
+        if (ms) ms.playbackState = "none";
       },
       error: () => {
         const e = audio.error;
@@ -1540,9 +1650,72 @@ export default function AudioPlayerProvider({ children, session }) {
     };
   }, []);
 
+  // ── Queue actions ──────────────────────────────────────
+  const updateQueue = useCallback((updater) => {
+    setQueue(prev => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      queueRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const addToQueue = useCallback((ep) => {
+    if (!ep?.enclosureUrl) return;
+    updateQueue(prev => {
+      // Don't add duplicates
+      if (prev.some(q => q.enclosureUrl === ep.enclosureUrl)) return prev;
+      return [...prev, ep];
+    });
+  }, [updateQueue]);
+
+  const playNextInQueue = useCallback((ep) => {
+    if (!ep?.enclosureUrl) return;
+    updateQueue(prev => {
+      const filtered = prev.filter(q => q.enclosureUrl !== ep.enclosureUrl);
+      return [ep, ...filtered];
+    });
+  }, [updateQueue]);
+
+  const removeFromQueue = useCallback((index) => {
+    updateQueue(prev => prev.filter((_, i) => i !== index));
+  }, [updateQueue]);
+
+  const clearQueue = useCallback(() => {
+    updateQueue([]);
+  }, [updateQueue]);
+
+  // Auto-advance: play next queued episode when current one ends
+  const advanceQueue = useCallback(() => {
+    const next = queueRef.current[0];
+    if (!next) return false;
+    // Remove from queue and play
+    updateQueue(prev => prev.slice(1));
+    // Use playEpisode-like logic but without the same-ep toggle
+    const audio = audioRef.current;
+    if (!audio) return false;
+    // Save current to recents
+    if (currentEp && audio.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, currentEp, audio.currentTime, speed, audio.duration));
+    }
+    setCurrentEp(next);
+    setProgress(0);
+    setDuration(0);
+    setBuffering(true);
+    setError(null);
+    setBufferedPct(0);
+    audio.src = next.enclosureUrl;
+    audio.playbackRate = speed;
+    audio.play().catch(() => {});
+    return true;
+  }, [currentEp, speed, updateRecents, updateQueue]);
+
+  // Keep ref in sync so the ended handler always has the latest
+  useEffect(() => { advanceQueueRef.current = advanceQueue; }, [advanceQueue]);
+
   const stop = useCallback(() => {
     cleanupPendingSeek();
     clearSleepTimer();
+    clearQueue();
     const a = audioRef.current;
     // pause() triggers the pause event handler which saves position to recents
     if (a) { a.pause(); a.src = ""; }
@@ -1559,7 +1732,7 @@ export default function AudioPlayerProvider({ children, session }) {
     setFullScreen(false);
     setBubbleMode("badge");
     setNudgeFaded(true); // Don't nudge immediately after user explicitly closed
-  }, [cleanupPendingSeek, clearSleepTimer]);
+  }, [cleanupPendingSeek, clearSleepTimer, clearQueue]);
 
   // Dismiss — save position to recents so user can resume later, then clean up
   const dismiss = useCallback(() => {
@@ -1695,15 +1868,17 @@ export default function AudioPlayerProvider({ children, session }) {
   // ── Context value ────────────────────────────────────────
 
   const value = useMemo(() => ({
-    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents, queue,
     bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
+    addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue,
   }), [
-    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents, queue,
     bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimerAction, clearSleepTimer,
+    addToQueue, playNextInQueue, removeFromQueue, clearQueue,
   ]);
 
   // ── Render ───────────────────────────────────────────────
@@ -1759,6 +1934,7 @@ export default function AudioPlayerProvider({ children, session }) {
           progress={progress}
           duration={duration}
           mode={bubbleMode}
+          queueCount={queue.length}
           onTogglePlay={togglePlay}
           onExpand={restore}
           onCollapse={minimize}
@@ -1804,6 +1980,9 @@ export default function AudioPlayerProvider({ children, session }) {
           sleepTimer={sleepTimer}
           onSetSleep={setSleepTimerAction}
           onClearSleep={clearSleepTimer}
+          queue={queue}
+          onRemoveFromQueue={removeFromQueue}
+          onClearQueue={clearQueue}
         />,
         document.body
       )}
