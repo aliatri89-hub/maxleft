@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "../../supabase";
+import { searchTMDBRaw } from "../../utils/api";
 
 /**
  * IngestReviewTool — Admin review queue for auto-matched podcast episodes.
@@ -44,6 +45,12 @@ export default function IngestReviewTool({ userId, onToast }) {
   const [selected, setSelected] = useState(new Set());
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+
+  // ── Re-match state ──
+  const [rematchId, setRematchId] = useState(null);       // mapping_id being re-matched
+  const [rematchQuery, setRematchQuery] = useState("");
+  const [rematchResults, setRematchResults] = useState([]);
+  const [rematchSearching, setRematchSearching] = useState(false);
 
   const isAdmin = userId === ADMIN_ID;
 
@@ -154,6 +161,41 @@ export default function IngestReviewTool({ userId, onToast }) {
   }, [selected, fetchQueue, onToast]);
 
   if (!isAdmin) return null;
+
+  // ── Re-match: search TMDB ──
+  const handleRematchSearch = async () => {
+    if (!rematchQuery.trim()) return;
+    setRematchSearching(true);
+    try {
+      const results = await searchTMDBRaw(rematchQuery.trim());
+      setRematchResults((results || []).slice(0, 6));
+    } catch { setRematchResults([]); }
+    setRematchSearching(false);
+  };
+
+  // ── Re-match: swap tmdb_id on the mapping ──
+  const handleRematchSwap = async (mappingId, newTmdbId, newTitle, newYear, newPoster) => {
+    const { error } = await supabase
+      .from("podcast_episode_films")
+      .update({ tmdb_id: newTmdbId, confidence_score: 1.0 })
+      .eq("id", mappingId);
+
+    if (error) {
+      if (onToast) onToast(`Swap failed: ${error.message}`);
+      return;
+    }
+
+    // Update local queue state so UI reflects the swap immediately
+    setQueue(prev => prev.map(q =>
+      q.mapping_id === mappingId
+        ? { ...q, tmdb_id: newTmdbId, film_title: newTitle, film_year: newYear, poster_path: newPoster, confidence_score: 1.0 }
+        : q
+    ));
+    setRematchId(null);
+    setRematchQuery("");
+    setRematchResults([]);
+    if (onToast) onToast(`Swapped to "${newTitle}" ✓`);
+  };
 
   const selectedCount = selected.size;
   const totalCount = queue.length;
@@ -471,7 +513,107 @@ export default function IngestReviewTool({ userId, onToast }) {
                     {(confidence * 100).toFixed(0)}
                   </span>
                 </div>
+
+                {/* Re-match button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (rematchId === match.mapping_id) {
+                      setRematchId(null);
+                    } else {
+                      setRematchId(match.mapping_id);
+                      setRematchQuery(match.film_title || "");
+                      setRematchResults([]);
+                    }
+                  }}
+                  style={{
+                    background: rematchId === match.mapping_id ? "rgba(196,115,79,0.12)" : "rgba(255,255,255,0.06)",
+                    border: "none", borderRadius: 6,
+                    width: 26, height: 26, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: rematchId === match.mapping_id ? "#c4734f" : "rgba(240,235,225,0.4)",
+                    fontSize: 13, cursor: "pointer",
+                  }}
+                  title="Change TMDB match"
+                >↻</button>
               </div>
+
+              {/* Re-match search panel */}
+              {rematchId === match.mapping_id && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    padding: "8px 12px 10px 54px",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    background: "rgba(196,115,79,0.03)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                    <input
+                      type="text"
+                      value={rematchQuery}
+                      onChange={(e) => setRematchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleRematchSearch()}
+                      placeholder="Search TMDB…"
+                      autoFocus
+                      style={{
+                        flex: 1, background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 8, color: "#e4e4e7", padding: "6px 10px",
+                        fontSize: 12, outline: "none",
+                        fontFamily: "'IBM Plex Mono', monospace",
+                      }}
+                    />
+                    <button
+                      onClick={handleRematchSearch}
+                      disabled={rematchSearching}
+                      style={{
+                        padding: "6px 10px", borderRadius: 8,
+                        background: "rgba(196,115,79,0.12)",
+                        border: "1px solid rgba(196,115,79,0.25)",
+                        color: "#c4734f", fontSize: 11, fontWeight: 700,
+                        fontFamily: "'Barlow Condensed', sans-serif",
+                        textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                    >{rematchSearching ? "…" : "Search"}</button>
+                  </div>
+
+                  {/* Results */}
+                  <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+                    {rematchResults.map((alt) => (
+                      <button
+                        key={alt.id}
+                        onClick={() => handleRematchSwap(
+                          match.mapping_id,
+                          alt.id,
+                          alt.title || alt.name,
+                          parseInt((alt.release_date || "").split("-")[0]) || null,
+                          alt.poster_path
+                        )}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 6,
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          borderRadius: 8, padding: "4px 8px",
+                          cursor: "pointer", color: "#e4e4e7", flexShrink: 0,
+                        }}
+                      >
+                        {alt.poster_path && (
+                          <img
+                            src={`${TMDB_IMG}/w92${alt.poster_path}`}
+                            alt=""
+                            style={{ width: 24, height: 36, borderRadius: 3, objectFit: "cover" }}
+                          />
+                        )}
+                        <div style={{ fontSize: 11, whiteSpace: "nowrap", fontFamily: "'IBM Plex Mono', monospace" }}>
+                          {alt.title || alt.name} ({(alt.release_date || "").split("-")[0]})
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             );
           })}
         </div>
