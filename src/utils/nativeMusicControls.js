@@ -106,15 +106,15 @@ export async function registerActionHandlers({
       { action: "seekbackward", handler: onSeekBackward },
       { action: "seekto", handler: onSeekTo },
       { action: "stop", handler: onStop },
+      // Map prev/next arrows to skip ±15/30 so they work like a podcast player
+      { action: "previoustrack", handler: onSeekBackward },
+      { action: "nexttrack", handler: onSeekForward },
     ];
     for (const { action, handler } of actions) {
       if (handler) {
         await plugin.setActionHandler({ action }, handler);
       }
     }
-    // Null out track-skip so Android shows seek ±15/30 buttons instead of prev/next arrows
-    try { await plugin.setActionHandler({ action: "previoustrack" }, null); } catch {}
-    try { await plugin.setActionHandler({ action: "nexttrack" }, null); } catch {}
     _handlersRegistered = true;
     // Return cleanup function
     return async () => {
