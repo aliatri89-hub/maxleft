@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
+import FeedFilterBar from "../components/feed/FeedFilterBar";
 import {
   LogCard,
   BrowseCard,
@@ -40,6 +41,41 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const activitySentinelRef = useRef(null);
   const releasesSentinelRef = useRef(null);
   const streamingSentinelRef = useRef(null);
+
+  // ── Filter state ──
+  const [sortOrder, setSortOrder] = useState("recent");
+  const [selectedPodcast, setSelectedPodcast] = useState(null);
+
+  // ── Filtered + sorted browse items ──
+  const filteredReleases = useMemo(() => {
+    let items = releases.items;
+    if (selectedPodcast) {
+      items = items.filter(m => (m.community_slugs || []).includes(selectedPodcast));
+    }
+    if (sortOrder === "oldest") items = [...items].reverse();
+    return items;
+  }, [releases.items, selectedPodcast, sortOrder]);
+
+  const filteredStreaming = useMemo(() => {
+    let items = streaming.items;
+    if (selectedPodcast) {
+      items = items.filter(m => (m.community_slugs || []).includes(selectedPodcast));
+    }
+    if (sortOrder === "oldest") items = [...items].reverse();
+    return items;
+  }, [streaming.items, selectedPodcast, sortOrder]);
+
+  // ── Filtered + sorted activity items ──
+  const filteredActivity = useMemo(() => {
+    let items = activityItems;
+    if (selectedPodcast) {
+      items = items.filter(item =>
+        item.type === "log" && (item.data?.communities || []).some(c => c.community_slug === selectedPodcast)
+      );
+    }
+    if (sortOrder === "oldest") items = [...items].reverse();
+    return items;
+  }, [activityItems, selectedPodcast, sortOrder]);
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
@@ -224,6 +260,15 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       </div>
 
+      {/* Feed filter bar */}
+      <FeedFilterBar
+        sortOrder={sortOrder}
+        onSortChange={setSortOrder}
+        selectedPodcast={selectedPodcast}
+        onPodcastChange={setSelectedPodcast}
+        communitySubscriptions={communitySubscriptions}
+      />
+
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
         {releases.items.length === 0 && !releases.loading && (
@@ -236,7 +281,16 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             No podcast coverage for current releases yet
           </div>
         )}
-        {releases.items.slice(0, BROWSE_CAP).map((item) => (
+        {releases.items.length > 0 && filteredReleases.length === 0 && selectedPodcast && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            No releases covered by this podcast
+          </div>
+        )}
+        {filteredReleases.slice(0, BROWSE_CAP).map((item) => (
           <BrowseCard key={`rel-${item.tmdb_id}`} data={item} variant="releases" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
         ))}
         {releases.hasMore && releases.items.length < BROWSE_CAP && <div ref={releasesSentinelRef} style={{ height: 1 }} />}
@@ -264,7 +318,16 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             No podcast coverage for streaming films yet
           </div>
         )}
-        {streaming.items.slice(0, BROWSE_CAP).map((item) => (
+        {streaming.items.length > 0 && filteredStreaming.length === 0 && selectedPodcast && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            No streaming films covered by this podcast
+          </div>
+        )}
+        {filteredStreaming.slice(0, BROWSE_CAP).map((item) => (
           <BrowseCard key={`str-${item.tmdb_id}`} data={item} variant="streaming" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
         ))}
         {streaming.hasMore && streaming.items.length < BROWSE_CAP && <div ref={streamingSentinelRef} style={{ height: 1 }} />}
@@ -285,9 +348,18 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         {activityItems.length === 0 && !loading && (
           <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
         )}
+        {activityItems.length > 0 && filteredActivity.length === 0 && selectedPodcast && (
+          <div style={{
+            padding: "40px 24px", textAlign: "center",
+            color: "var(--text-muted, #8892a8)", fontSize: 13,
+            fontFamily: "var(--font-body)",
+          }}>
+            No activity for this podcast yet
+          </div>
+        )}
         {(() => {
           const firstLogRef = { current: false };
-          return activityItems.map((item, i) => (
+          return filteredActivity.map((item, i) => (
             <FeedCard
               key={`activity-${getStableKey(item, i)}`}
               index={i}

@@ -30,6 +30,7 @@ function normalizeTmdbResults(results) {
       media_type: "film",
       logo_url: null,
       podcast_count: 0,
+      community_slugs: [],
     }));
 }
 
@@ -39,7 +40,7 @@ async function checkPlayability(tmdbIds) {
     const { data, error } = await supabase.rpc("get_playable_films", { tmdb_ids: tmdbIds });
     if (error) { console.warn("[BrowseFeed] playability check failed:", error.message); return new Map(); }
     const map = new Map();
-    for (const row of (data || [])) map.set(row.tmdb_id, row.podcast_count);
+    for (const row of (data || [])) map.set(row.tmdb_id, { podcast_count: row.podcast_count, community_slugs: row.community_slugs || [] });
     return map;
   } catch (err) { console.warn("[BrowseFeed] playability error:", err); return new Map(); }
 }
@@ -146,7 +147,10 @@ export function useBrowseFeed(mode) {
         // Keep only covered films
         const covered = normalized
           .filter(m => playMap.has(m.tmdb_id))
-          .map(m => ({ ...m, podcast_count: playMap.get(m.tmdb_id) }));
+          .map(m => {
+            const info = playMap.get(m.tmdb_id);
+            return { ...m, podcast_count: info.podcast_count, community_slugs: info.community_slugs };
+          });
 
         if (covered.length > 0) {
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
