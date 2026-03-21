@@ -59,10 +59,30 @@ function loadGoogleFont(family) {
   document.head.appendChild(link);
 }
 
-// Strip HTML tags from RSS descriptions
+// Strip HTML tags + podcast promo tails from RSS descriptions
+const PROMO_MARKERS = [
+  /\bJoin our Patreon\b/i,
+  /\bFollow us [@on]/i,
+  /\bBe sure to (?:follow|subscribe)/i,
+  /\bLearn more about your ad choices/i,
+  /\bThanks to our SPONSOR/i,
+  /\bThis episode is (?:brought to you|sponsored) by/i,
+  /\bWeekly Plugs\b/i,
+  /\bProducers?:/i,
+  /\bVideo Producers?:/i,
+  /\bGo to hdtgm\.com/i,
+  /\bHave a Last Looks/i,
+  /\bUse #slashtag/i,
+  /\bWatch this episode on/i,
+  /\bwe're making video versions/i,
+  /\n\{[A-Z][^}]+Series\}/,           // NPP series tags like {Avengers Series}
+  /\n•\s+Go to\b/i,                   // HDTGM bullet-point promos
+];
+
 function stripHtml(str) {
   if (!str) return "";
-  return str
+  // 1. HTML → plain text
+  let text = str
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
     .replace(/<[^>]+>/g, "")
@@ -74,6 +94,18 @@ function stripHtml(str) {
     .replace(/&nbsp;/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+
+  // 2. Truncate at earliest promo marker
+  let cutIdx = text.length;
+  for (const marker of PROMO_MARKERS) {
+    const match = text.match(marker);
+    if (match && match.index < cutIdx) cutIdx = match.index;
+  }
+  if (cutIdx < text.length) {
+    text = text.slice(0, cutIdx).replace(/[\s\n:—–-]+$/, "").trim();
+  }
+
+  return text;
 }
 
 // Compact money formatter
