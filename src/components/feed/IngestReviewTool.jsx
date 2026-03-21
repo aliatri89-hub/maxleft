@@ -72,24 +72,6 @@ export default function IngestReviewTool({ userId, onToast }) {
 
   const isAdmin = userId === ADMIN_ID;
 
-  // ── Trigger ingest on demand ──
-  const handleSyncNow = useCallback(async () => {
-    setSyncing(true);
-    try {
-      const res = await fetch("https://api.mymantl.app/functions/v1/ingest-rss", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json();
-      if (onToast) onToast(`Synced: ${data.total_new_episodes || 0} new eps, ${data.total_matches || 0} matches`);
-      fetchQueue();
-    } catch (err) {
-      if (onToast) onToast(`Sync failed: ${err.message}`);
-    }
-    setSyncing(false);
-  }, [fetchQueue, onToast]);
-
   // ── Fetch review queue ──
   const fetchQueue = useCallback(async () => {
     setLoading(true);
@@ -111,6 +93,24 @@ export default function IngestReviewTool({ userId, onToast }) {
     }
     setSelected(highConf);
   }, []);
+
+  // ── Trigger ingest on demand ──
+  const handleSyncNow = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("https://api.mymantl.app/functions/v1/ingest-rss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (onToast) onToast(`Synced: ${data.total_new_episodes || 0} new eps, ${data.total_matches || 0} matches`);
+      fetchQueue();
+    } catch (err) {
+      if (onToast) onToast(`Sync failed: ${err.message}`);
+    }
+    setSyncing(false);
+  }, [fetchQueue, onToast]);
 
   useEffect(() => {
     if (isAdmin) fetchQueue();
