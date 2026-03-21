@@ -18,6 +18,45 @@ const VHS_BRANDS = [
 ];
 const VHS_LOGO_BRAND = { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
 
+// Dark label brand variants — muted light tones
+const VHS_BRANDS_DARK = [
+  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "FUJI", sub: "HQ", weight: 900 },
+  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "Memorex", sub: "HS", weight: 800 },
+  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "TDK", sub: "SA", weight: 900 },
+  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "Kodak", sub: "T-120", weight: 800 },
+  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "Maxell", sub: "HGX", weight: 800 },
+  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "BASF", sub: "E-180", weight: 900 },
+];
+const VHS_LOGO_BRAND_DARK = { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "VHS", sub: "", weight: 800, isVhs: true };
+
+// Label style tokens per variant
+const LABEL_THEMES = {
+  cream: {
+    labelBg: "#f0ebe1",
+    textColor: "#2C2824",
+    textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
+    dateColor: "rgba(44,40,36,0.7)",
+    headphoneStroke: "#2C2824",
+    gridLine: "rgba(0,0,0,0.03)",
+    skeletonBg: "rgba(44,40,36,0.06)",
+    // Logo: force dark on cream bg
+    logoFilter: (isLight) => isLight ? "brightness(0)" : "none",
+    logoOpacity: (isLight, ready) => ready ? (isLight ? 0.8 : 0.85) : 0,
+  },
+  dark: {
+    labelBg: "#1c1915",
+    textColor: "#f0ebe1",
+    textShadow: "1px 1px 4px rgba(0,0,0,0.6)",
+    dateColor: "rgba(240,235,225,0.6)",
+    headphoneStroke: "rgba(240,235,225,0.6)",
+    gridLine: "rgba(255,255,255,0.03)",
+    skeletonBg: "rgba(240,235,225,0.06)",
+    // Logo: show original on dark bg, invert if too dark
+    logoFilter: (isLight) => isLight ? "none" : "brightness(2) saturate(0.6)",
+    logoOpacity: (isLight, ready) => ready ? 0.9 : 0,
+  },
+};
+
 // Format "1979-05-25" → "May 25, 1979" (sharpie-on-tape style)
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function fmtSharpieDate(dateStr) {
@@ -28,11 +67,13 @@ function fmtSharpieDate(dateStr) {
   return `${MONTHS[mi - 1]} ${parseInt(d, 10)}, ${y}`;
 }
 
-function getVhsBrands(title) {
+function getVhsBrands(title, dark = false) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  const brand = VHS_BRANDS[hash % VHS_BRANDS.length];
+  const brands = dark ? VHS_BRANDS_DARK : VHS_BRANDS;
+  const logoBrand = dark ? VHS_LOGO_BRAND_DARK : VHS_LOGO_BRAND;
+  const brand = brands[hash % brands.length];
   const vhsOnLeft = hash % 2 === 0;
-  return { left: vhsOnLeft ? VHS_LOGO_BRAND : brand, right: vhsOnLeft ? brand : VHS_LOGO_BRAND };
+  return { left: vhsOnLeft ? logoBrand : brand, right: vhsOnLeft ? brand : logoBrand };
 }
 
 function VhsLogoSvg({ color = "#222", size = 18 }) {
@@ -76,7 +117,9 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommunity }) {
+export default function BrowseCard({ data, variant, pushNav, removeNav, onNavigateCommunity }) {
+  const isDark = variant === "releases";
+  const theme = isDark ? LABEL_THEMES.dark : LABEL_THEMES.cream;
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
   const [episodes, setEpisodes] = useState(null); // null = not loaded yet
@@ -85,7 +128,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
   const [sheetVisible, setSheetVisible] = useState(false); // controls CSS transition
   const closeTimer = useRef(null);
   const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
-  const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
+  const { left: brandLeft, right: brandRight } = getVhsBrands(data.title, isDark);
   const hasPlayButton = data.podcast_count > 0;
 
   const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
@@ -139,10 +182,10 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         {/* ═══ VHS TAPE LABEL ═══ */}
         <div onClick={() => openSleeve()} style={{ background: "#1a1612", borderRadius: 5, position: "relative", cursor: "pointer" }}>
           <div style={{ borderRadius: 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
-            <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
+            <div style={{ width: 5, flexShrink: 0, background: isDark ? "#141210" : "#1a1612" }} />
 
             <div style={{
-              flex: 1, background: "#f0ebe1", padding: "10px 12px",
+              flex: 1, background: theme.labelBg, padding: "10px 12px",
               display: "flex", flexDirection: "column", justifyContent: "center",
               alignItems: "center", position: "relative", overflow: "hidden",
             }}>
@@ -151,7 +194,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
 
               <div style={{
                 position: "absolute", inset: 0, pointerEvents: "none",
-                backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
+                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 17px, ${theme.gridLine} 17px, ${theme.gridLine} 18px)`,
               }} />
 
               {(() => {
@@ -189,8 +232,8 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
                         style={{
                           maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
                           objectFit: "contain", objectPosition: "center", position: "relative",
-                          filter: isLightLogo ? "brightness(0)" : "none",
-                          opacity: logoReady ? (isLightLogo ? 0.8 : 0.85) : 0,
+                          filter: theme.logoFilter(isLightLogo),
+                          opacity: theme.logoOpacity(isLightLogo, logoReady),
                           transition: "opacity 0.2s ease-in",
                         }}
                       />
@@ -198,7 +241,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
                     {(logoLoading || (data.logo_url && !logoReady)) && (
                       <div style={{
                         height: 20, width: "55%", borderRadius: 3,
-                        background: "rgba(44,40,36,0.06)",
+                        background: theme.skeletonBg,
                         position: data.logo_url ? "absolute" : "relative",
                       }} />
                     )}
@@ -206,10 +249,10 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
                       <div style={{
                         fontFamily: "'Permanent Marker', cursive",
                         fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
-                        lineHeight: 1.1, color: "#2C2824", textTransform: "uppercase",
+                        lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
                         letterSpacing: "0.02em", position: "relative", textAlign: "center",
                         transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
-                        textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
+                        textShadow: theme.textShadow,
                         padding: "0 8px", maxWidth: "85%", margin: "0 auto", wordBreak: "break-word",
                       }}>{data.title}</div>
                     )}
@@ -224,7 +267,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
                   <div style={{
                     position: "absolute", bottom: 5, left: 28,
                     fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 8, color: "#2C2824", opacity: 0.7,
+                    fontSize: 8, color: theme.dateColor,
                     transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
                     whiteSpace: "nowrap", pointerEvents: "none",
                   }}>{dateStr}</div>
@@ -236,7 +279,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
                 <div style={{
                   position: "absolute", bottom: 4, right: 28, opacity: 0.4,
                 }} title="Listen on MANTL">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.headphoneStroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                     <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                   </svg>
@@ -244,7 +287,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
               )}
             </div>
 
-            <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
+            <div style={{ width: 5, flexShrink: 0, background: isDark ? "#141210" : "#1a1612" }} />
           </div>
         </div>
       </div>

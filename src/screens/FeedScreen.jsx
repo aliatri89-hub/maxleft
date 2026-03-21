@@ -237,7 +237,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           </div>
         )}
         {releases.items.slice(0, BROWSE_CAP).map((item) => (
-          <BrowseCard key={`rel-${item.tmdb_id}`} data={item} pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
+          <BrowseCard key={`rel-${item.tmdb_id}`} data={item} variant="releases" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
         ))}
         {releases.hasMore && releases.items.length < BROWSE_CAP && <div ref={releasesSentinelRef} style={{ height: 1 }} />}
         {releases.loading && releases.items.length > 0 && (
