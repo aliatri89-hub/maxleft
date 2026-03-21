@@ -982,16 +982,31 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           overflow: "hidden",
                           transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}>
-                          {descText ? (
-                            <div style={{
-                              padding: "4px 6px 10px 48px",
-                              fontFamily: "'IBM Plex Mono', monospace",
-                              fontSize: 10, lineHeight: 1.55,
-                              color: "rgba(240,235,225,0.5)",
-                              whiteSpace: "pre-wrap",
-                            }}>
-                              {descText}
-                            </div>
+                          {descText ? (() => {
+                            // Split into hook sentence + rest
+                            const splitIdx = descText.search(/[.!?](\s|$)/);
+                            const hook = splitIdx > 0 ? descText.slice(0, splitIdx + 1) : descText;
+                            const rest = splitIdx > 0 ? descText.slice(splitIdx + 1).trim() : "";
+                            return (
+                              <div style={{
+                                padding: "4px 6px 10px 48px",
+                                fontFamily: "'IBM Plex Mono', monospace",
+                                fontSize: 10, lineHeight: 1.55,
+                              }}>
+                                <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{hook}</span>
+                                {rest && (
+                                  <span style={{
+                                    color: "rgba(240,235,225,0.35)",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 3,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden",
+                                    marginTop: 3,
+                                  }}>{" "}{rest}</span>
+                                )}
+                              </div>
+                            );
+                          })()
                           ) : isExpanded ? (
                             <div style={{
                               padding: "4px 6px 10px 48px",
