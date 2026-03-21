@@ -999,8 +999,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                 {rest && <>{" "}{rest}</>}
                               </div>
                             );
-                          })()
-                          ) : isExpanded ? (
+                          })() : isExpanded ? (
                             <div style={{
                               padding: "4px 6px 10px 48px",
                               fontFamily: "'IBM Plex Mono', monospace",
