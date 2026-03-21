@@ -286,7 +286,7 @@ export default function App() {
         };
         setProfile(p);
         await loadShelves(user.id);
-        sync.runInitialSync(p);
+        sync.runInitialSync(p, user.id);
       }
       const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
       if (path && path !== "" && path !== "index.html" && !path.includes("/")) {

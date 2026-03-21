@@ -193,7 +193,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
     setLetterboxdSyncing(true);
 
     try {
-      const edgeUrl = `https://api.mymantl.app/functions/v1/letterboxd-rss?username=${encodeURIComponent(username)}${manual ? `&t=${Date.now()}` : ""}`;
+      const edgeUrl = `https://api.mymantl.app/functions/v1/letterboxd-rss?username=${encodeURIComponent(username)}&t=${Date.now()}`;
       const res = await fetch(edgeUrl);
       const data = await res.json();
 
@@ -490,7 +490,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
     setGoodreadsSyncing(true);
 
     try {
-      const edgeUrl = `https://api.mymantl.app/functions/v1/goodreads-rss?user_id=${encodeURIComponent(grUserId)}&shelf=read${manual ? `&t=${Date.now()}` : ""}`;
+      const edgeUrl = `https://api.mymantl.app/functions/v1/goodreads-rss?user_id=${encodeURIComponent(grUserId)}&shelf=read&t=${Date.now()}`;
       const res = await fetch(edgeUrl);
       const data = await res.json();
 
@@ -813,11 +813,13 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
   // SESSION-ONCE AUTO-SYNC
   // ════════════════════════════════════════════════
 
-  const runInitialSync = useCallback((profile) => {
+  const runInitialSync = useCallback((profile, uid) => {
     if (hasSyncedThisSession.current) return;
-    if (profile.letterboxd_username && userId) syncLetterboxd(profile.letterboxd_username, userId);
-    if (profile.goodreads_user_id && userId) syncGoodreads(profile.goodreads_user_id, userId);
-    if (profile.steam_id && userId) syncSteam(profile.steam_id, userId);
+    const id = uid || userId;
+    if (!id) return;
+    if (profile.letterboxd_username) syncLetterboxd(profile.letterboxd_username, id);
+    if (profile.goodreads_user_id) syncGoodreads(profile.goodreads_user_id, id);
+    if (profile.steam_id) syncSteam(profile.steam_id, id);
     hasSyncedThisSession.current = true;
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
