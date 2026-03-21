@@ -242,7 +242,7 @@ function DropdownItem({ label, artwork, accent, active, onClick }) {
         color: active ? accent : "var(--text-primary, #e8e0d4)",
         fontSize: 12,
         fontWeight: active ? 700 : 500,
-        fontFamily: "var(--font-body, 'Inter', sans-serif)",
+        fontFamily: "var(--font-body, 'Barlow Condensed', sans-serif)",
         cursor: "pointer",
         textAlign: "left",
         transition: "all 0.15s",

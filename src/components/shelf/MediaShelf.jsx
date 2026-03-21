@@ -58,7 +58,7 @@ const S = {
   },
   empty: { textAlign: "center", padding: "40px 16px" },
   emptyText: {
-    fontFamily: "var(--font-serif)", fontSize: 14,
+    fontFamily: "var(--font-body)", fontSize: 14,
     color: "var(--text-muted)", fontStyle: "italic",
   },
   itemsRow: {

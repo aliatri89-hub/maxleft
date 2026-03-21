@@ -609,7 +609,7 @@ export default function NowPlayingGenreTab({
         upcomingSchedule.length === 0 ? (
           <div style={{
             textAlign: "center", padding: "40px 0",
-            fontFamily: "'Lora', serif", fontSize: 13,
+            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
             color: "rgba(255,255,255,0.25)", fontStyle: "italic",
           }}>No upcoming items</div>
         ) : (
@@ -652,7 +652,7 @@ export default function NowPlayingGenreTab({
       ) : visibleSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 0",
-          fontFamily: "'Lora', serif", fontSize: 13,
+          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
           color: "rgba(255,255,255,0.25)", fontStyle: "italic",
         }}>
           {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}

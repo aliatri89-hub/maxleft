@@ -63,7 +63,7 @@ const dark = {
 // ── Shared fonts ───────────────────────────────────────────
 const fonts = {
   heading: "'Barlow Condensed', sans-serif",
-  body: "'Lora', serif",
+  body: "'Barlow Condensed', sans-serif",
   mono: "'IBM Plex Mono', monospace",
 };
 

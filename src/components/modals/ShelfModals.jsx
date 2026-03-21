@@ -363,7 +363,7 @@ export default function ShelfModals({
               </div>
               {viewingCountry.status === "been" && !editingCountryDate && (
                 <div style={{ marginBottom: 12 }}>
-                  <span style={{ fontFamily: "'Lora', serif", fontSize: 12, color: "var(--terracotta)", cursor: "pointer" }} onClick={() => {
+                  <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: "var(--terracotta)", cursor: "pointer" }} onClick={() => {
                     setEditingCountryDate(true);
                     setEditVisitMonth(viewingCountry.visitMonth ? String(viewingCountry.visitMonth) : "");
                     setEditVisitYear(viewingCountry.visitYear ? String(viewingCountry.visitYear) : "");
@@ -374,7 +374,7 @@ export default function ShelfModals({
               )}
               {viewingCountry.status === "bucket_list" && !editingCountryDate && (
                 <div style={{ marginBottom: 12 }}>
-                  <span style={{ fontFamily: "'Lora', serif", fontSize: 12, color: "var(--sage)", cursor: "pointer" }} onClick={() => {
+                  <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: "var(--sage)", cursor: "pointer" }} onClick={() => {
                     setEditingCountryDate(true);
                     setEditVisitMonth(viewingCountry.tripMonth ? String(viewingCountry.tripMonth) : "");
                     setEditVisitYear(viewingCountry.tripYear ? String(viewingCountry.tripYear) : "");
@@ -427,7 +427,7 @@ export default function ShelfModals({
                 </div>
               )}
               {viewingCountry.notes && (
-                <div style={{ fontFamily: "'Lora', serif", fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 12 }}>
+                <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 12 }}>
                   {viewingCountry.notes}
                 </div>
               )}
@@ -455,7 +455,7 @@ export default function ShelfModals({
                 </div>
               ) : (
                 <div style={{ textAlign: "center", marginTop: 12 }}>
-                  <div style={{ fontFamily: "'Lora', serif", fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>Remove {viewingCountry.countryName}?</div>
+                  <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>Remove {viewingCountry.countryName}?</div>
                   <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                     <button className="btn-save-profile" style={{ fontSize: 11, padding: "8px 16px", background: "#C45043" }} onClick={async () => {
                       await sb(supabase.from("countries").delete().eq("id", viewingCountry.id), onToast, "Couldn't delete");

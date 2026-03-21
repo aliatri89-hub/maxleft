@@ -343,7 +343,7 @@ const featureStyles = `
     margin-bottom: 8px;
   }
   .mantl-feature-desc {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.85rem;
     color: #9a938a;
     line-height: 1.65;
@@ -464,7 +464,7 @@ const featureStyles = `
     filter: brightness(1.3);
   }
   .badge-back-flair {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.62rem;
     opacity: 0.85;
@@ -555,7 +555,7 @@ const featureStyles = `
     line-height: 1.2;
   }
   .log-demo-info span {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.72rem;
     color: #9a938a;
     font-style: italic;
@@ -664,7 +664,7 @@ const featureStyles = `
     color: #f5f0eb;
   }
   .demo-toast-sub {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.62rem;
     color: var(--terracotta, #C75B3F);
     font-style: italic;
@@ -779,7 +779,7 @@ const featureStyles = `
     color: #f5f0eb;
   }
   .community-stat {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.68rem;
     color: #9a938a;
     font-style: italic;
@@ -850,7 +850,7 @@ const featureStyles = `
     color: #f5f0eb;
   }
   .sync-stat {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.68rem;
     color: #9a938a;
     font-style: italic;
@@ -1013,7 +1013,7 @@ const featureStyles = `
     color: rgba(255,255,255,0.7);
   }
   .play-demo-now-playing-ep {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px; color: rgba(255,255,255,0.35);
     font-style: italic;
   }
@@ -1025,7 +1025,7 @@ const featureStyles = `
     padding: 0 12px;
   }
   .mantl-bottom-tagline {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
     color: #9a938a;
@@ -1034,7 +1034,7 @@ const featureStyles = `
 
   /* ── HINT TAP ────────────────────────────────────────────── */
   .tap-hint {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.72rem;
     color: rgba(255,255,255,0.4);
@@ -1140,7 +1140,7 @@ const featureStyles = `
     margin-bottom: 10px;
   }
   .growing-sub {
-    font-family: 'Lora', serif;
+    font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
     color: #9a938a;
@@ -1404,7 +1404,7 @@ function LandingScreen({ onSignIn }) {
             Enter your code
           </div>
           <div style={{ color: '#9a938a', fontSize: '0.82rem', lineHeight: 1.5, marginBottom: 8,
-            fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
+            fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic' }}>
             We sent a code to <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
           </div>
           {emailError && <div className="landing-email-error">{emailError}</div>}
@@ -1442,7 +1442,7 @@ function LandingScreen({ onSignIn }) {
         <div className="landing-email-section">
           {emailError && <div className="landing-email-error">{emailError}</div>}
           <div style={{ color: '#9a938a', fontSize: '0.82rem',
-            fontFamily: "'Lora', serif", fontStyle: 'italic' }}>
+            fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic' }}>
             Creating account for <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
           </div>
           <input
@@ -1743,7 +1743,7 @@ function LandingScreen({ onSignIn }) {
             })}
           </div>
           <div style={{
-            fontFamily: "'Lora', serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
             fontStyle: 'italic',
             fontSize: '0.72rem',
             color: 'rgba(255,255,255,0.3)',

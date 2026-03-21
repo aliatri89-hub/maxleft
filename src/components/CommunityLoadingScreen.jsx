@@ -134,7 +134,7 @@ export default function CommunityLoadingScreen({ slug }) {
 
       {/* Tagline */}
       <div style={{
-        fontFamily: "'Lora', serif",
+        fontFamily: "'Barlow Condensed', sans-serif",
         fontStyle: "italic",
         fontSize: 13,
         color: "#8a7e72",

@@ -654,7 +654,7 @@ function UsernameSetup({ name, session, onComplete }) {
                   whiteSpace: "pre-line",
                 }}>{opt.label}</div>
                 <div style={{
-                  fontFamily: "'Lora', serif", fontSize: 11, fontStyle: "italic",
+                  fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
                   color: on ? "rgba(255,255,255,0.5)" : dk.textDim, marginTop: 2,
                 }}>{opt.desc}</div>
               </div>
@@ -725,7 +725,7 @@ function UsernameSetup({ name, session, onComplete }) {
             <span style={{ fontSize: 15 }}>📡</span> Live Sync
           </div>
           <div style={{
-            fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
             lineHeight: 1.5, marginBottom: 10,
           }}>
             Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
@@ -765,7 +765,7 @@ function UsernameSetup({ name, session, onComplete }) {
             <span style={{ fontSize: 15 }}>📦</span> Import Full History
           </div>
           <div style={{
-            fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
             lineHeight: 1.5, marginBottom: 10,
           }}>
             This brings in everything you've ever logged — ratings, dates, the works.
@@ -874,7 +874,7 @@ function UsernameSetup({ name, session, onComplete }) {
             marginBottom: 16,
           }}>
             <div style={{
-              fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+              fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
               lineHeight: 1.5, marginBottom: 12,
             }}>
               {bookPlatform === "goodreads" ? (
@@ -962,7 +962,7 @@ function UsernameSetup({ name, session, onComplete }) {
         </div>
 
         <div style={{
-          fontFamily: "'Lora', serif", fontSize: 12, color: dk.textDim,
+          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
           lineHeight: 1.5, marginBottom: 16,
           padding: 14,
           background: dk.accent,
@@ -1073,7 +1073,7 @@ function UsernameSetup({ name, session, onComplete }) {
                     }}>{c.name}</div>
                     {c.description && (
                       <div style={{
-                        fontFamily: "'Lora', serif", fontSize: 11, fontStyle: "italic",
+                        fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
                         color: on ? "rgba(255,255,255,0.4)" : dk.textDim,
                         marginTop: 2,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -1104,7 +1104,7 @@ function UsernameSetup({ name, session, onComplete }) {
                 color: dk.text,
               }}>More communities coming soon</div>
               <div style={{
-                fontFamily: "'Lora', serif", fontSize: 11, fontStyle: "italic",
+                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
                 color: dk.textDim, marginTop: 4,
               }}>New podcast communities are added regularly.</div>
             </div>

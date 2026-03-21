@@ -33,7 +33,7 @@ const S = {
   empty: { textAlign: "center", padding: "40px 16px" },
   emptyIcon: { fontSize: 36, marginBottom: 10, opacity: 0.5 },
   emptyText: {
-    fontFamily: "var(--font-serif)", fontSize: 14,
+    fontFamily: "var(--font-body)", fontSize: 14,
     color: "var(--text-muted)", fontStyle: "italic",
   },
   emptyCta: {
@@ -103,7 +103,7 @@ const S = {
     color: "rgba(255,255,255,0.35)", cursor: "pointer",
   },
   emptyTab: {
-    fontFamily: "var(--font-serif)", fontSize: 13,
+    fontFamily: "var(--font-body)", fontSize: 13,
     color: "var(--text-muted)", fontStyle: "italic",
     textAlign: "center", padding: "20px 8px",
   },

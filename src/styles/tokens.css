@@ -9,7 +9,7 @@
    App.css variables. Old cream vars still work everywhere.
    ═══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Mono:wght@300;400;500&family=Permanent+Marker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@300;400;500&family=Permanent+Marker&display=swap');
 
 :root {
   /* ── Surfaces ── */
@@ -47,10 +47,9 @@
   --accent-terra:     #C4734F;        /* MANTL brand terracotta */
   --accent-terra-dim: rgba(196,115,79,0.12);
 
-  /* ── Typography ── */
+  /* ── Typography — 3 fonts only ── */
   --font-display:     'Barlow Condensed', sans-serif;
-  --font-body:        'Inter', system-ui, -apple-system, sans-serif;
-  --font-serif:       'Lora', serif;
+  --font-body:        'Barlow Condensed', sans-serif;
   --font-mono:        'IBM Plex Mono', monospace;
 
   /* ── Shadows ── */

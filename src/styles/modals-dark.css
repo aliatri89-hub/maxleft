@@ -132,7 +132,7 @@
 
 .pin-picker-empty.pin-picker-empty {
   color: var(--text-muted);
-  font-family: var(--font-serif);
+  font-family: var(--font-body);
 }
 
 /* ── Event / Trophy Form ── */

@@ -58,7 +58,7 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
       {patreonSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 0",
-          fontFamily: "'Lora', serif", fontSize: 13,
+          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
           color: "rgba(255,255,255,0.25)", fontStyle: "italic",
         }}>
           No commentary series yet
