@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
+import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
@@ -921,34 +921,58 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
-                          {/* Play/pause button — separate tap target */}
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (isActiveAndPlaying) {
-                                onTogglePlay?.();
-                              } else {
-                                onPlayEpisode?.(ep);
-                              }
-                            }}
-                            style={{
-                              width: 32, height: 32, borderRadius: "50%",
-                              background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
-                              border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
-                              display: "flex", alignItems: "center", justifyContent: "center",
-                              flexShrink: 0,
-                              transition: "all 0.15s",
-                            }}
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
-                              {isActiveAndPlaying
-                                ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                                : <path d="M8 5v14l11-7z" />
-                              }
-                            </svg>
-                          </div>
-                          {/* Queue: add to up next */}
-                          {onQueueEpisode && !isActive && (
+                          {/* Play/pause OR Patreon badge */}
+                          {isPatreonUrl(ep.audio_url) ? (
+                            <a
+                              href={ep.audio_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              title="Listen on Patreon"
+                              style={{
+                                width: 32, height: 32, borderRadius: "50%",
+                                background: "rgba(249,104,58,0.1)",
+                                border: "1px solid rgba(249,104,58,0.25)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0,
+                                transition: "all 0.15s",
+                                textDecoration: "none",
+                              }}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                                <circle cx="15" cy="9" r="5.5" fill="#F96836" />
+                                <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                              </svg>
+                            </a>
+                          ) : (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isActiveAndPlaying) {
+                                  onTogglePlay?.();
+                                } else {
+                                  onPlayEpisode?.(ep);
+                                }
+                              }}
+                              style={{
+                                width: 32, height: 32, borderRadius: "50%",
+                                background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
+                                border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                flexShrink: 0,
+                                transition: "all 0.15s",
+                              }}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                                {isActiveAndPlaying
+                                  ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                                  : <path d="M8 5v14l11-7z" />
+                                }
+                              </svg>
+                            </div>
+                          )}
+                          {/* Queue: add to up next (skip for Patreon eps) */}
+                          {onQueueEpisode && !isActive && !isPatreonUrl(ep.audio_url) && (
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();

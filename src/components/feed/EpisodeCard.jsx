@@ -1,5 +1,5 @@
 import { useEpisodeMatch } from "../../hooks/community/useEpisodeMatch";
-import { Stars, Poster, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
+import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
 // EPISODE CARD — unified (dropped + published + upcoming)
@@ -218,7 +218,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             </div>
 
             {/* VCR-style rectangular play button — bottom right */}
-            {matchedEpisode && (
+            {matchedEpisode && !isPatreonUrl(matchedEpisode.enclosureUrl) && (
               <button
                 onClick={handlePlay}
                 style={{
@@ -246,6 +246,38 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                   {isThisPlaying ? "Pause" : "Play"}
                 </span>
               </button>
+            )}
+            {/* Patreon link-out badge */}
+            {matchedEpisode && isPatreonUrl(matchedEpisode.enclosureUrl) && (
+              <a
+                href={matchedEpisode.enclosureUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: "flex", alignItems: "center", gap: 7,
+                  background: "rgba(249,104,58,0.15)",
+                  border: "1px solid rgba(249,104,58,0.3)",
+                  borderRadius: 6,
+                  padding: "7px 14px 7px 11px",
+                  cursor: "pointer", flexShrink: 0,
+                  textDecoration: "none",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <circle cx="15" cy="9" r="5.5" fill="#F96836" />
+                  <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                </svg>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  color: "#F96836",
+                  fontFamily: "var(--font-body, system-ui)",
+                }}>
+                  Patreon
+                </span>
+              </a>
             )}
           </div>
         </div>

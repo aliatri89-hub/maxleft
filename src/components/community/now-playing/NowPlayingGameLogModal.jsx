@@ -1,6 +1,7 @@
 import AdminItemEditor from "../shared/AdminItemEditor";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
+import { isPatreonUrl } from "../../feed/FeedPrimitives";
 import { useState } from "react";
 import { toLogTimestamp } from "../../../utils/helpers";
 
@@ -395,7 +396,7 @@ export default function NowPlayingGameLogModal({
             )}
 
             {/* Listen on MANTL — episode player */}
-            {matchedEpisode && (
+            {matchedEpisode && !isPatreonUrl(matchedEpisode.enclosureUrl) && (
               <div style={{ marginTop: 10 }}>
                 <button
                   onClick={(e) => {
@@ -514,12 +515,62 @@ export default function NowPlayingGameLogModal({
                 </button>
                 <ListenOnBadges
                   title={item.title}
-                  patreonUrl={
-                    item.extra_data?.episode_url?.includes("patreon.com")
-                      ? item.extra_data.episode_url
-                      : PATREON_URL
-                  }
-                  isPatreon={!!item.extra_data?.episode_url?.includes("patreon.com")}
+                  patreonUrl={PATREON_URL}
+                  isPatreon={false}
+                />
+              </div>
+            )}
+
+            {/* Listen on Patreon — link-out */}
+            {matchedEpisode && isPatreonUrl(matchedEpisode.enclosureUrl) && (
+              <div style={{ marginTop: 10 }}>
+                <a
+                  href={matchedEpisode.enclosureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    width: "100%", padding: "8px 12px",
+                    background: "rgba(249,104,58,0.08)",
+                    border: "1.5px solid rgba(249,104,58,0.25)",
+                    borderRadius: 10, cursor: "pointer",
+                    textDecoration: "none",
+                    transition: "all 0.2s",
+                    WebkitTapHighlightColor: "transparent",
+                  }}
+                >
+                  <div style={{
+                    width: 28, height: 28, borderRadius: "50%",
+                    background: "rgba(249,104,58,0.15)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <circle cx="15" cy="9" r="5.5" fill="#F96836" />
+                      <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                    <div style={{
+                      fontSize: 11, fontWeight: 700, color: "#F96836",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      textTransform: "uppercase", letterSpacing: 0.5,
+                    }}>Listen on Patreon</div>
+                    <div style={{
+                      fontSize: 10, color: "rgba(255,255,255,0.4)",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
+                    }}>{matchedEpisode.title}</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <path d="M7 17L17 7" />
+                    <path d="M7 7h10v10" />
+                  </svg>
+                </a>
+                <ListenOnBadges
+                  title={item.title}
+                  patreonUrl={matchedEpisode.enclosureUrl}
+                  isPatreon={true}
                 />
               </div>
             )}
@@ -930,7 +981,7 @@ export default function NowPlayingGameLogModal({
         )}
 
         {/* ── Episode toast — post-log prompt ── */}
-        {episodeToast && matchedEpisode && (
+        {episodeToast && matchedEpisode && !isPatreonUrl(matchedEpisode.enclosureUrl) && (
           <div
             style={{
               position: "fixed",
@@ -1054,6 +1105,78 @@ export default function NowPlayingGameLogModal({
             >
               Not now
             </button>
+          </div>
+        )}
+
+        {/* ── Patreon episode toast — post-log prompt ── */}
+        {episodeToast && matchedEpisode && isPatreonUrl(matchedEpisode.enclosureUrl) && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0, left: 0, right: 0,
+              padding: "0 16px 24px",
+              background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
+              zIndex: 10,
+              animation: "nppGameSlideUp 0.3s ease",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+            }}
+          >
+            <div style={{
+              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              textTransform: "uppercase", letterSpacing: 1.5,
+            }}>Logged! Hear what the hosts thought</div>
+
+            <a
+              href={matchedEpisode.enclosureUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { setEpisodeToast(false); onClose(); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                width: "100%", maxWidth: 360, padding: "12px 16px",
+                background: "rgba(249,104,58,0.12)",
+                border: "1.5px solid rgba(249,104,58,0.3)",
+                borderRadius: 14, cursor: "pointer",
+                textDecoration: "none",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <div style={{
+                width: 36, height: 36, borderRadius: "50%",
+                background: "rgba(249,104,58,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="15" cy="9" r="5.5" fill="#F96836" />
+                  <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                </svg>
+              </div>
+              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <div style={{
+                  fontSize: 14, fontWeight: 700, color: "#F96836",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  textTransform: "uppercase", letterSpacing: 0.5,
+                }}>Listen on Patreon</div>
+                <div style={{
+                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
+                }}>{matchedEpisode.title}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M7 17L17 7" />
+                <path d="M7 7h10v10" />
+              </svg>
+            </a>
+
+            <button
+              onClick={() => { setEpisodeToast(false); onClose(); }}
+              style={{
+                background: "none", border: "none",
+                color: "rgba(255,255,255,0.3)",
+                fontSize: 12, cursor: "pointer", padding: "6px 16px",
+              }}
+            >Not now</button>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import { isPatreonUrl } from "./FeedPrimitives";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
@@ -357,7 +358,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
   };
 
   const handlePlay = (ep) => {
-    if (!ep || !ep.audio_url) return;
+    if (!ep || !ep.audio_url || isPatreonUrl(ep.audio_url)) return;
     playEpisode({
       guid: `browse-${ep.episode_id || ep.audio_url}`,
       title: ep.episode_title || data.title || "Episode",
@@ -369,7 +370,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
   };
 
   const handleQueue = (ep) => {
-    if (!ep || !ep.audio_url) return;
+    if (!ep || !ep.audio_url || isPatreonUrl(ep.audio_url)) return;
     addToQueue({
       guid: `browse-${ep.episode_id || ep.audio_url}`,
       title: ep.episode_title || data.title || "Episode",

@@ -336,6 +336,9 @@ export function FeedPlayButton({ episodeUrl, episodeTitle, communityName, commun
 
 // ── Helpers ──
 
+/** True when url points to Patreon (not a playable audio stream) */
+export const isPatreonUrl = (url) => !!url && url.includes("patreon.com");
+
 export function getSlugAbbrev(slug) {
   const map = {
     blankcheck: "BC",

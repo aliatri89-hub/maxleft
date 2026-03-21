@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
-import { Stars, getCommunityAccent, getTimeAgo } from "./FeedPrimitives";
+import { Stars, getCommunityAccent, getTimeAgo, isPatreonUrl } from "./FeedPrimitives";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
@@ -157,8 +157,8 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   };
 
   // ── Audio source derivation ──
-  const playableSources = communities.filter(c => c.episode_url && c.episode_url.includes(".mp3"));
-  const externalSources = communities.filter(c => c.episode_url && !c.episode_url.includes(".mp3"));
+  const playableSources = communities.filter(c => c.episode_url && !isPatreonUrl(c.episode_url));
+  const externalSources = communities.filter(c => c.episode_url && isPatreonUrl(c.episode_url));
   const hasPlayableAudio = playableSources.length > 0;
   const hasExternalOnly = !hasPlayableAudio && externalSources.length > 0;
   const hasAnyCoverage = communities.length > 0;
@@ -368,7 +368,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
                 <div style={{
                   position: "absolute", bottom: 18, right: 26,
                   opacity: 0.3,
-                }} title="Audio available externally">
+                }} title="Listen on Patreon">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                     <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
