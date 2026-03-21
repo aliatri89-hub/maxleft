@@ -153,10 +153,18 @@ export function useBrowseFeed(mode) {
           });
 
         if (covered.length > 0) {
+          // Patch cached logos BEFORE the first render to avoid title→logo flash
+          for (const item of covered) {
+            if (!item.logo_url) {
+              const url = getLogoUrl(item.tmdb_id);
+              if (url) item.logo_url = url;
+            }
+          }
+
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
           // Update items progressively so user sees results streaming in
           setItems([...accumulated]);
-          // Start logo enrichment for this batch immediately (runs in parallel with next page fetch)
+          // Fetch logos we don't have cached yet (runs in parallel with next page fetch)
           enrichLogos(covered, mountedRef, setItems);
         }
 
