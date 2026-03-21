@@ -89,7 +89,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -755,7 +755,103 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* Spacer — fills remaining VHS box space */}
+          {/* ═══ EPISODE PICKER — when opened from browse cards ═══ */}
+          {(episodes || epLoading) && (
+            <div style={{
+              borderTop: "1px solid rgba(240,235,225,0.06)",
+              paddingTop: 12, marginBottom: 14,
+            }}>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 800, fontSize: 8,
+                color: "rgba(240,235,225,0.4)",
+                letterSpacing: "0.14em", textTransform: "uppercase",
+                marginBottom: 8,
+                display: "flex", alignItems: "center", gap: 8,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                  <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                </svg>
+                Listen
+              </div>
+              {epLoading && !episodes && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  padding: "12px 0",
+                }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    border: "2px solid rgba(240,235,225,0.1)",
+                    borderTopColor: "rgba(240,235,225,0.5)",
+                    animation: "ptr-spin 0.8s linear infinite",
+                  }} />
+                </div>
+              )}
+              {episodes && episodes.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {episodes.map((ep, i) => {
+                    const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
+                    const isActiveAndPlaying = isActive && isPlaying;
+                    return (
+                      <div
+                        key={ep.episode_id || i}
+                        onClick={() => {
+                          if (isActiveAndPlaying) {
+                            onTogglePlay?.();
+                          } else {
+                            onPlayEpisode?.(ep);
+                          }
+                        }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 10,
+                          padding: "7px 6px", cursor: "pointer", borderRadius: 6,
+                          background: isActive ? "rgba(240,235,225,0.04)" : "transparent",
+                          transition: "background 0.15s",
+                        }}
+                      >
+                        {ep.podcast_artwork_url && (
+                          <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
+                            width: 32, height: 32, borderRadius: 8, objectFit: "cover",
+                            border: isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                            flexShrink: 0,
+                          }} />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontFamily: "'Barlow Condensed', sans-serif",
+                            fontWeight: 700, fontSize: 13,
+                            color: isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
+                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                          }}>{ep.episode_title || ep.podcast_name}</div>
+                          <div style={{
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 9, color: "rgba(240,235,225,0.35)",
+                            textTransform: "uppercase", letterSpacing: "0.04em",
+                          }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                        </div>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: "50%",
+                          background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
+                          border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0,
+                          transition: "all 0.15s",
+                        }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                            {isActiveAndPlaying
+                              ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                              : <path d="M8 5v14l11-7z" />
+                            }
+                          </svg>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
           <div style={{ flex: 1 }} />
 
           {/* ═══ BOTTOM SECTION — studios, barcode row ═══ */}

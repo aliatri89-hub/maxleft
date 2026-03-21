@@ -21,6 +21,7 @@ function normalizeTmdbResults(results) {
       tmdb_id: m.id,
       title: m.title || m.original_title,
       year: (m.release_date || "").slice(0, 4),
+      release_date: m.release_date || null,
       poster_path: `${TMDB_IMG}/w342${m.poster_path}`,
       backdrop_path: m.backdrop_path ? `${TMDB_IMG}/w780${m.backdrop_path}` : null,
       overview: m.overview || "",
