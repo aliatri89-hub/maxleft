@@ -240,8 +240,7 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         </div>
       </div>
     </div>
-    {sheetOpen && (
-      <VhsSleeveSheet
+    <VhsSleeveSheet
         data={data}
         open={sheetOpen}
         onClose={closeSleeve}
@@ -253,7 +252,6 @@ export default function BrowseCard({ data, pushNav, removeNav, onNavigateCommuni
         isPlaying={isPlaying}
         onTogglePlay={togglePlay}
       />
-    )}
     </>
   );
 }

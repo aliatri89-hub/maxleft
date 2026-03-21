@@ -96,6 +96,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
+  const [expandedEpId, setExpandedEpId] = useState(null); // which episode row is expanded
   const prevTmdbId = useRef(null);
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
@@ -103,6 +104,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     // Reset detail when card changes
     if (data.tmdb_id !== prevTmdbId.current) {
       setDetail(null);
+      setExpandedEpId(null);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -791,59 +793,99 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               {episodes && episodes.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {episodes.map((ep, i) => {
+                    const epKey = ep.episode_id || i;
                     const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
                     const isActiveAndPlaying = isActive && isPlaying;
+                    const isExpanded = expandedEpId === epKey;
+                    const hasDesc = ep.description && ep.description.trim();
                     return (
-                      <div
-                        key={ep.episode_id || i}
-                        onClick={() => {
-                          if (isActiveAndPlaying) {
-                            onTogglePlay?.();
-                          } else {
-                            onPlayEpisode?.(ep);
-                          }
-                        }}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "7px 6px", cursor: "pointer", borderRadius: 6,
-                          background: isActive ? "rgba(240,235,225,0.04)" : "transparent",
-                          transition: "background 0.15s",
-                        }}
-                      >
-                        {ep.podcast_artwork_url && (
-                          <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
-                            width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                            border: isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
-                            flexShrink: 0,
-                          }} />
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontFamily: "'Barlow Condensed', sans-serif",
-                            fontWeight: 700, fontSize: 13,
-                            color: isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
-                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                          }}>{ep.episode_title || ep.podcast_name}</div>
-                          <div style={{
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            fontSize: 9, color: "rgba(240,235,225,0.35)",
-                            textTransform: "uppercase", letterSpacing: "0.04em",
-                          }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                      <div key={epKey}>
+                        <div
+                          onClick={() => setExpandedEpId(isExpanded ? null : epKey)}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 10,
+                            padding: "7px 6px", cursor: "pointer", borderRadius: 6,
+                            background: isExpanded ? "rgba(240,235,225,0.04)" : isActive ? "rgba(240,235,225,0.03)" : "transparent",
+                            transition: "background 0.15s",
+                          }}
+                        >
+                          {ep.podcast_artwork_url && (
+                            <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
+                              width: 32, height: 32, borderRadius: 8, objectFit: "cover",
+                              border: isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                              flexShrink: 0,
+                            }} />
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontWeight: 700, fontSize: 13,
+                              color: isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
+                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                            }}>{ep.episode_title || ep.podcast_name}</div>
+                            <div style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9, color: "rgba(240,235,225,0.35)",
+                              textTransform: "uppercase", letterSpacing: "0.04em",
+                            }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                          </div>
+                          {/* Play/pause button — separate tap target */}
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isActiveAndPlaying) {
+                                onTogglePlay?.();
+                              } else {
+                                onPlayEpisode?.(ep);
+                              }
+                            }}
+                            style={{
+                              width: 32, height: 32, borderRadius: "50%",
+                              background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
+                              border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0,
+                              transition: "all 0.15s",
+                            }}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                              {isActiveAndPlaying
+                                ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                                : <path d="M8 5v14l11-7z" />
+                              }
+                            </svg>
+                          </div>
                         </div>
+                        {/* Expanded description */}
                         <div style={{
-                          width: 28, height: 28, borderRadius: "50%",
-                          background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
-                          border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          flexShrink: 0,
-                          transition: "all 0.15s",
+                          maxHeight: isExpanded ? 200 : 0,
+                          overflow: "hidden",
+                          transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
-                            {isActiveAndPlaying
-                              ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                              : <path d="M8 5v14l11-7z" />
-                            }
-                          </svg>
+                          {hasDesc && (
+                            <div style={{
+                              padding: "4px 6px 10px 48px",
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 10, lineHeight: 1.55,
+                              color: "rgba(240,235,225,0.5)",
+                              overflow: "hidden",
+                              display: "-webkit-box",
+                              WebkitLineClamp: 5,
+                              WebkitBoxOrient: "vertical",
+                            }}>
+                              {ep.description}
+                            </div>
+                          )}
+                          {!hasDesc && isExpanded && (
+                            <div style={{
+                              padding: "4px 6px 10px 48px",
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9, fontStyle: "italic",
+                              color: "rgba(240,235,225,0.25)",
+                            }}>
+                              No description available
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
