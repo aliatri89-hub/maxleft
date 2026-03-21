@@ -347,6 +347,7 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
       enclosureUrl: ep.audio_url,
       community: ep.podcast_name || null,
       artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
     });
   };
 

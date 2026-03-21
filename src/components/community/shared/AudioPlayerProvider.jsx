@@ -28,6 +28,25 @@ const STALL_TIMEOUT = 15000; // 15s before showing stall error
 
 // ── Helpers ─────────────────────────────────────────────────
 
+function stripHtml(str) {
+  if (!str) return "";
+  return str.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#?\w+;/g, "").trim();
+}
+
+const PROMO_RE = /\b(Join our Patreon|Follow us|Be sure to (?:follow|subscribe)|Learn more about your ad|Thanks to our SPONSOR|This episode is (?:brought to you|sponsored)|Weekly Plugs|Go to hdtgm|Watch this episode on)/i;
+
+function cleanDescription(raw) {
+  if (!raw) return null;
+  let text = stripHtml(raw);
+  // Truncate at first promo marker
+  const match = PROMO_RE.exec(text);
+  if (match) text = text.slice(0, match.index).trim();
+  // Collapse whitespace
+  text = text.replace(/\n{3,}/g, "\n\n").trim();
+  return text || null;
+}
+
 function fmt(sec) {
   if (!sec || !isFinite(sec)) return "0:00";
   const h = Math.floor(sec / 3600);
@@ -467,7 +486,7 @@ function ResumeNudge({ recent, onResume, onDismiss, onFade }) {
 // ── Full Screen Player ──────────────────────────────────────
 
 function FullScreenPlayer({
-  episode, isPlaying, buffering, error, progress, duration, speed,
+  episode, isPlaying, buffering, error, bufferedPct, progress, duration, speed,
   recents, onTogglePlay, onSkip, onSeek, onCycleSpeed, onRetry,
   onResumeRecent, onClearRecent, onStop, onClose,
   sleepTimer, onSetSleep, onClearSleep,
@@ -477,6 +496,10 @@ function FullScreenPlayer({
   const [scrubValue, setScrubValue] = useState(0);
   const [closing, setClosing] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  // Reset description accordion when episode changes
+  useEffect(() => { setDescExpanded(false); }, [episode?.guid]);
 
   const displayProgress = scrubbing ? scrubValue : progress;
   const pct = duration > 0 ? (displayProgress / duration) * 100 : 0;
@@ -616,6 +639,58 @@ function FullScreenPlayer({
           </div>
         </div>
 
+        {/* Episode description — collapsible */}
+        {(() => {
+          const desc = cleanDescription(episode.description);
+          if (!desc) return null;
+          const isLong = desc.length > 120;
+          return (
+            <div
+              onClick={() => isLong && setDescExpanded(p => !p)}
+              style={{
+                margin: "0 24px 12px",
+                padding: "10px 14px",
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: 10,
+                cursor: isLong ? "pointer" : "default",
+              }}
+            >
+              <div style={{
+                fontSize: 12, lineHeight: 1.5,
+                color: "rgba(255,255,255,0.5)",
+                fontFamily: "var(--font-body, system-ui)",
+                overflow: "hidden",
+                maxHeight: descExpanded ? "none" : 42,
+                WebkitLineClamp: descExpanded ? "unset" : 2,
+                WebkitBoxOrient: "vertical",
+                display: descExpanded ? "block" : "-webkit-box",
+                whiteSpace: "pre-line",
+              }}>
+                {desc}
+              </div>
+              {isLong && (
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  marginTop: 6,
+                  fontSize: 10, fontWeight: 600,
+                  color: `${ACCENT}88`,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  gap: 4,
+                }}>
+                  {descExpanded ? "Show less" : "Show more"}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ transform: descExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Error banner */}
         {error && (
           <div style={{
@@ -662,8 +737,19 @@ function FullScreenPlayer({
               background: "rgba(255,255,255,0.08)",
               borderRadius: 2,
             }}>
-              {/* Filled */}
+              {/* Buffered range — lighter bar showing downloaded audio */}
+              {bufferedPct > 0 && (
+                <div style={{
+                  position: "absolute", top: 0, left: 0, height: "100%",
+                  width: `${bufferedPct}%`,
+                  background: "rgba(255,255,255,0.12)",
+                  borderRadius: 2,
+                  transition: "width 0.5s ease",
+                }} />
+              )}
+              {/* Filled — playback progress */}
               <div style={{
+                position: "relative", // above buffered
                 height: "100%",
                 width: `${pct}%`,
                 background: ACCENT,
@@ -1091,6 +1177,7 @@ export default function AudioPlayerProvider({ children, session }) {
   const [speed, setSpeed] = useState(1);
   const [buffering, setBuffering] = useState(false);
   const [error, setError] = useState(null);       // null | string message
+  const [bufferedPct, setBufferedPct] = useState(0); // 0-100, buffered range %
   const [fullScreen, setFullScreen] = useState(false);
   const [bubbleMode, setBubbleMode] = useState("badge"); // "badge" | "pill"
   const [activated, setActivated] = useState(false); // true once user plays something this session
@@ -1239,6 +1326,13 @@ export default function AudioPlayerProvider({ children, session }) {
           setError("Stream stalled — check your connection");
         }, STALL_TIMEOUT);
       },
+      progress: () => {
+        // Update buffered range percentage
+        if (audio.buffered.length > 0 && audio.duration && isFinite(audio.duration)) {
+          const end = audio.buffered.end(audio.buffered.length - 1);
+          setBufferedPct(Math.min(100, (end / audio.duration) * 100));
+        }
+      },
     };
     Object.entries(h).forEach(([e, fn]) => audio.addEventListener(e, fn));
     return () => {
@@ -1309,6 +1403,7 @@ export default function AudioPlayerProvider({ children, session }) {
     setActivated(true);
     setBuffering(true);
     setError(null);
+    setBufferedPct(0);
 
     // Active listening intent — clear any nudge dismissal for this episode
     // and reset session fade so nudge can appear again after this episode
@@ -1391,6 +1486,7 @@ export default function AudioPlayerProvider({ children, session }) {
     if (!audio || !currentEp?.enclosureUrl) return;
     setError(null);
     setBuffering(true);
+    setBufferedPct(0);
     clearTimeout(stallTimerRef.current);
     const savedTime = audio.currentTime || progress;
     audio.src = currentEp.enclosureUrl;
@@ -1521,6 +1617,7 @@ export default function AudioPlayerProvider({ children, session }) {
     setDuration(recent.duration || 0);
     setSpeed(resumeSpeed);
     setBuffering(true);
+    setBufferedPct(0);
 
     audio.src = recent.enclosureUrl;
     audio.playbackRate = resumeSpeed;
@@ -1598,12 +1695,12 @@ export default function AudioPlayerProvider({ children, session }) {
   // ── Context value ────────────────────────────────────────
 
   const value = useMemo(() => ({
-    currentEp, isPlaying, progress, duration, speed, buffering, error, recents,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents,
     bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
   }), [
-    currentEp, isPlaying, progress, duration, speed, buffering, error, recents,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents,
     bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimerAction, clearSleepTimer,
@@ -1690,6 +1787,7 @@ export default function AudioPlayerProvider({ children, session }) {
           isPlaying={isPlaying}
           buffering={buffering}
           error={error}
+          bufferedPct={bufferedPct}
           progress={progress}
           duration={duration}
           speed={speed}

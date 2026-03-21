@@ -26,6 +26,7 @@ export function useEpisodeMatch(item, communityName) {
       enclosureUrl: seeded,
       community: communityName,
       artwork: item.extra_data?.episode_artwork || null,
+      description: item.extra_data?.episode_description || null,
     };
   }, [item?.extra_data, item?.episode_url, item?.id, item?.title, communityName]);
 

@@ -308,6 +308,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
       enclosureUrl: ep.audio_url,
       community: ep.podcast_name || null,
       artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
     });
   }, [playEpisode]);
 

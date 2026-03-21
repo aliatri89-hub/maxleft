@@ -135,6 +135,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       enclosureUrl: ep.audio_url,
       community: ep.podcast_name || null,
       artwork: ep.podcast_artwork_url || null,
+      description: ep.episode_description || null,
     });
   };
 
