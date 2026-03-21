@@ -1267,6 +1267,64 @@ function FullScreenPlayer({
   );
 }
 
+// ── Queue Toast ─────────────────────────────────────────────
+// Brief notification when episode is added to queue
+
+function QueueToast({ toast }) {
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    setExiting(false);
+    const t = setTimeout(() => setExiting(true), 1800);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  return (
+    <div style={{
+      position: "fixed",
+      bottom: "calc(114px + env(safe-area-inset-bottom, 0px))",
+      left: "50%", transform: "translateX(-50%)",
+      zIndex: 10000,
+      animation: exiting
+        ? "nudgeSlideOut 0.35s ease forwards"
+        : "nudgeSlideIn 0.3s cubic-bezier(0, 0.8, 0.2, 1) forwards",
+      pointerEvents: "none",
+    }}>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "8px 16px",
+        background: "rgba(18,18,30,0.95)",
+        backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        border: `1px solid ${toast.duplicate ? "rgba(255,255,255,0.08)" : `${ACCENT}30`}`,
+        borderRadius: 12,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+        whiteSpace: "nowrap",
+      }}>
+        {toast.duplicate ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+        <span style={{
+          fontSize: 12, fontWeight: 600,
+          color: toast.duplicate ? "rgba(255,255,255,0.5)" : "#fff",
+          fontFamily: "'Barlow Condensed', sans-serif",
+          textTransform: "uppercase",
+          letterSpacing: "0.03em",
+        }}>
+          {toast.duplicate ? "Already in queue" : "Added to Up Next"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 // ── Provider ────────────────────────────────────────────────
 
 export default function AudioPlayerProvider({ children, session }) {
@@ -1288,6 +1346,8 @@ export default function AudioPlayerProvider({ children, session }) {
   const stallTimerRef = useRef(null);
   const queueRef = useRef([]);
   const advanceQueueRef = useRef(null);
+  const queueToastRef = useRef(null);
+  const [queueToast, setQueueToast] = useState(null); // null | { title }
   const [nudgeDismissedGuid, setNudgeDismissedGuid] = useState(() => {
     try { return localStorage.getItem(NUDGE_DISMISSED_KEY) || null; } catch { return null; }
   });
@@ -1661,11 +1721,14 @@ export default function AudioPlayerProvider({ children, session }) {
 
   const addToQueue = useCallback((ep) => {
     if (!ep?.enclosureUrl) return;
-    updateQueue(prev => {
-      // Don't add duplicates
-      if (prev.some(q => q.enclosureUrl === ep.enclosureUrl)) return prev;
-      return [...prev, ep];
-    });
+    const isDuplicate = queueRef.current.some(q => q.enclosureUrl === ep.enclosureUrl);
+    if (!isDuplicate) {
+      updateQueue(prev => [...prev, ep]);
+    }
+    // Show toast
+    clearTimeout(queueToastRef.current);
+    setQueueToast(isDuplicate ? { title: ep.title, duplicate: true } : { title: ep.title });
+    queueToastRef.current = setTimeout(() => setQueueToast(null), 2200);
   }, [updateQueue]);
 
   const playNextInQueue = useCallback((ep) => {
@@ -1953,6 +2016,12 @@ export default function AudioPlayerProvider({ children, session }) {
           onDismiss={() => dismissNudge(recents[0].guid)}
           onFade={() => setNudgeFaded(true)}
         />,
+        document.body
+      )}
+
+      {/* Queue toast — brief feedback when episode is added */}
+      {queueToast && createPortal(
+        <QueueToast toast={queueToast} />,
         document.body
       )}
 

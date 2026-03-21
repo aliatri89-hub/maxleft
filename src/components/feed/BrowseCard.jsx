@@ -281,6 +281,23 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
         display: "flex", flexDirection: "column", justifyContent: "center",
         alignItems: "center",
       }}>
+        {/* Faded celluloid backdrop */}
+        {data.backdrop_path && (
+          <img src={data.backdrop_path} alt="" style={{
+            position: "absolute", inset: -4,
+            width: "calc(100% + 8px)", height: "calc(100% + 8px)",
+            objectFit: "cover", objectPosition: "center top",
+            opacity: 0.14,
+            filter: "sepia(0.6) saturate(0.4) brightness(0.9) contrast(1.1)",
+            mixBlendMode: "luminosity",
+            pointerEvents: "none",
+          }} />
+        )}
+        {/* Celluloid wash over backdrop */}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(180deg, rgba(34,28,18,0.7) 0%, rgba(42,32,22,0.5) 50%, rgba(30,26,16,0.75) 100%)",
+        }} />
         {/* Grain */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.12,
@@ -293,6 +310,14 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
           background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,180,60,0.015) 3px, rgba(255,180,60,0.015) 4px)",
+        }} />
+        {/* Cigarette burn — top right */}
+        <div style={{
+          position: "absolute", top: 8, right: 10,
+          width: 9, height: 9, borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(180,120,40,0.25) 0%, rgba(80,50,10,0.15) 50%, transparent 70%)",
+          boxShadow: "0 0 4px 1px rgba(120,70,20,0.12)",
+          pointerEvents: "none",
         }} />
         <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
           isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={FILMSTRIP_THEME} />
