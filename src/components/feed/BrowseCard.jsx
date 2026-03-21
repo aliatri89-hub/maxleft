@@ -222,7 +222,7 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
         )}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.65) 100%), radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.3) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.5) 100%), radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.2) 100%)",
         }} />
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
@@ -259,15 +259,18 @@ const FILMSTRIP_THEME = {
 function SprocketStrip() {
   return (
     <div style={{
-      width: 18, flexShrink: 0, background: "#181410",
+      width: 26, flexShrink: 0,
+      background: "#0e0c09",
+      borderLeft: "1px solid rgba(255,180,60,0.08)",
+      borderRight: "1px solid rgba(255,180,60,0.08)",
       display: "flex", flexDirection: "column",
-      justifyContent: "space-evenly", alignItems: "center", padding: "6px 0",
+      justifyContent: "space-evenly", alignItems: "center", padding: "8px 0",
     }}>
-      {[0,1,2,3,4].map(i => (
+      {[0,1,2,3,4,5].map(i => (
         <div key={i} style={{
-          width: 8, height: 6, borderRadius: 1.5,
-          background: "#0d0b09",
-          border: "0.5px solid rgba(255,255,255,0.05)",
+          width: 11, height: 8, borderRadius: 2,
+          background: "#2a221a",
+          boxShadow: "inset 0 1px 2px rgba(0,0,0,0.8), 0 0 0 0.5px rgba(255,180,60,0.12)",
         }} />
       ))}
     </div>
@@ -281,24 +284,31 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
       <SprocketStrip />
       <div style={{
         flex: 1, position: "relative", overflow: "hidden",
-        background: "linear-gradient(180deg, #1e1810 0%, #221a12 50%, #1a1410 100%)",
+        background: "linear-gradient(180deg, #221c12 0%, #2a2016 50%, #1e1a10 100%)",
         padding: "10px 10px",
         display: "flex", flexDirection: "column", justifyContent: "center",
         alignItems: "center",
       }}>
+        {/* Grain */}
         <div style={{
-          position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.05,
+          position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.12,
           backgroundImage: NOISE_SVG,
         }} />
-        <div style={{ position: "absolute", top: 5, left: 4, right: 4, height: 1, background: "rgba(255,180,60,0.07)" }} />
-        <div style={{ position: "absolute", bottom: 5, left: 4, right: 4, height: 1, background: "rgba(255,180,60,0.07)" }} />
+        {/* Top & bottom frame lines */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "rgba(255,180,60,0.18)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(255,180,60,0.18)" }} />
+        {/* Vertical scan line shimmer */}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,180,60,0.015) 3px, rgba(255,180,60,0.015) 4px)",
+        }} />
         <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
           isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={FILMSTRIP_THEME} />
         {dateStr && (
           <div style={{
-            position: "absolute", bottom: 7, left: 16,
+            position: "absolute", bottom: 6, left: 10,
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 7, color: "rgba(240,215,170,0.25)",
+            fontSize: 7, color: "rgba(240,215,170,0.35)",
             letterSpacing: "0.06em", whiteSpace: "nowrap", pointerEvents: "none",
           }}>{dateStr}</div>
         )}
