@@ -231,7 +231,7 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
         )}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          background: "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.75) 100%), radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.4) 100%)",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.65) 100%), radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.3) 100%)",
         }} />
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
