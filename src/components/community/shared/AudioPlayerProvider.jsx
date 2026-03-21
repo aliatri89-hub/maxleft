@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { createControls, updatePlaying, destroyControls, listenControls } from "../../../utils/nativeMusicControls";
+import { createControls, updatePlaying, destroyControls, registerActionHandlers } from "../../../utils/nativeMusicControls";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
@@ -1419,7 +1419,7 @@ export default function AudioPlayerProvider({ children, session }) {
             persistRecents(updated);
           }
           // Update native notification elapsed time
-          updatePlaying(true, t);
+          updatePlaying(true, t, audio.duration, audio.playbackRate);
           // Update OS scrubber position on the same throttle
           if (ms && audio.duration && isFinite(audio.duration)) {
             try {
@@ -1443,6 +1443,7 @@ export default function AudioPlayerProvider({ children, session }) {
             isPlaying: !audio.paused,
             duration: audio.duration,
             elapsed: audio.currentTime,
+            playbackRate: audio.playbackRate,
           });
         }
         // Push position state when duration becomes known
@@ -1459,14 +1460,14 @@ export default function AudioPlayerProvider({ children, session }) {
       play: () => {
         setIsPlaying(true); setBuffering(false); setError(null);
         if (ms) ms.playbackState = "playing";
-        updatePlaying(true, audio.currentTime);
+        updatePlaying(true, audio.currentTime, audio.duration, audio.playbackRate);
       },
       pause: () => {
         setIsPlaying(false);
         clearTimeout(stallTimerRef.current);
         saveBookmark(currentEp, audio.currentTime, speed, audio.duration);
         if (ms) ms.playbackState = "paused";
-        updatePlaying(false, audio.currentTime);
+        updatePlaying(false, audio.currentTime, audio.duration, audio.playbackRate);
         if (currentEp && audio.currentTime > 15) {
           const updated = upsertRecent(recentsRef.current, currentEp, audio.currentTime, speed, audio.duration);
           recentsRef.current = updated;
@@ -1684,6 +1685,7 @@ export default function AudioPlayerProvider({ children, session }) {
           isPlaying: !a.paused,
           duration: a.duration,
           elapsed: a.currentTime,
+          playbackRate: next,
         });
       }
     }
@@ -1973,35 +1975,32 @@ export default function AudioPlayerProvider({ children, session }) {
   // Routes events from the Android/iOS media notification back
   // to the audio element. Web falls through to Media Session above.
   useEffect(() => {
-    let sub = null;
-    listenControls((action) => {
-      const a = audioRef.current;
-      if (!a) return;
-      switch (action.message) {
-        case "music-controls-play":
-          a.play().catch(() => {});
-          break;
-        case "music-controls-pause":
-          a.pause();
-          break;
-        case "music-controls-skip-forward":
-          a.currentTime = Math.min(a.duration || 0, a.currentTime + 30);
-          break;
-        case "music-controls-skip-backward":
-          a.currentTime = Math.max(0, a.currentTime - 15);
-          break;
-        case "music-controls-destroy":
-          dismiss();
-          break;
-        case "music-controls-toggle-play-pause":
-          a.paused ? a.play().catch(() => {}) : a.pause();
-          break;
-        default:
-          break;
-      }
-    }).then((handle) => { sub = handle; });
-    return () => { if (sub) sub.remove(); };
-  }, [dismiss]);
+    let cleanup = null;
+    registerActionHandlers({
+      onPlay: () => {
+        const a = audioRef.current;
+        if (a && currentEp) a.play().catch(() => {});
+      },
+      onPause: () => {
+        const a = audioRef.current;
+        if (a) a.pause();
+      },
+      onSeekForward: () => {
+        const a = audioRef.current;
+        if (a) a.currentTime = Math.min(a.duration || 0, a.currentTime + 30);
+      },
+      onSeekBackward: () => {
+        const a = audioRef.current;
+        if (a) a.currentTime = Math.max(0, a.currentTime - 15);
+      },
+      onSeekTo: (details) => {
+        const a = audioRef.current;
+        if (a && details.seekTime != null) a.currentTime = details.seekTime;
+      },
+      onStop: () => dismiss(),
+    }).then((fn) => { cleanup = fn; });
+    return () => { if (cleanup) cleanup(); };
+  }, [currentEp, dismiss]);
 
   // ── Context value ────────────────────────────────────────
 

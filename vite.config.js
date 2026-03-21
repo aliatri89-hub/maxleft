@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      external: ["capacitor-music-controls-plugin-new"],
+      external: ["@capgo/capacitor-media-session"],
     },
   },
 })

@@ -9,6 +9,9 @@
     "SplashScreen": {
       "launchAutoHide": false,
       "backgroundColor": "#0f0d0b"
+    },
+    "MediaSession": {
+      "smallIcon": "ic_notification"
     }
   }
 }

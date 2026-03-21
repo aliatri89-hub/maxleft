@@ -1,8 +1,9 @@
 /**
  * nativeMusicControls.js
- * Thin wrapper around capacitor-music-controls-plugin-new.
+ * Wrapper around @capgo/capacitor-media-session.
  * Lazy-loads the plugin only on native platforms; every export
- * is a silent no-op when running in a browser.
+ * is a silent no-op when running in a browser (where the existing
+ * navigator.mediaSession code handles it).
  */
 import { Capacitor } from "@capacitor/core";
 
@@ -13,8 +14,8 @@ async function getPlugin() {
   if (!_isNative) return null;
   if (!_plugin) {
     try {
-      const mod = await import("capacitor-music-controls-plugin-new");
-      _plugin = mod.CapacitorMusicControls;
+      const mod = await import("@capgo/capacitor-media-session");
+      _plugin = mod.CapacitorMediaSession;
     } catch (e) {
       console.warn("[MusicControls] plugin not available:", e);
       return null;
@@ -22,6 +23,9 @@ async function getPlugin() {
   }
   return _plugin;
 }
+
+// Track registered handlers so we can clean up
+let _handlersRegistered = false;
 
 /**
  * Create (or re-create) the native media notification.
@@ -34,29 +38,30 @@ export async function createControls({
   isPlaying,
   duration,
   elapsed,
+  playbackRate,
 }) {
   const plugin = await getPlugin();
   if (!plugin) return;
   try {
-    await plugin.create({
-      track: track || "",
+    // Set metadata (title, artist, artwork)
+    const artwork = cover ? [{ src: cover, sizes: "512x512", type: "image/png" }] : [];
+    await plugin.setMetadata({
+      title: track || "",
       artist: artist || "MANTL",
       album: artist || "MANTL",
-      cover: cover || "",
-      hasPrev: false,
-      hasNext: false,
-      hasClose: true,
-      hasSkipForward: true,
-      hasSkipBackward: true,
-      skipForwardInterval: 30,
-      skipBackwardInterval: 15,
-      duration: Math.floor(duration || 0),
-      elapsed: Math.floor(elapsed || 0),
-      isPlaying: isPlaying ?? true,
-      dismissable: true,
-      hasScrubbing: true,
-      ticker: track ? `Now playing "${track}"` : "",
-      notificationIcon: "ic_notification",
+      artwork,
+    });
+    // Set position state (enables scrubber)
+    if (duration && isFinite(duration)) {
+      await plugin.setPositionState({
+        duration: Math.max(0, duration),
+        playbackRate: playbackRate || 1,
+        position: Math.min(Math.max(0, elapsed || 0), duration),
+      });
+    }
+    // Set playback state
+    await plugin.setPlaybackState({
+      playbackState: isPlaying ? "playing" : "paused",
     });
   } catch (e) {
     console.warn("[MusicControls] create failed:", e);
@@ -64,18 +69,24 @@ export async function createControls({
 }
 
 /**
- * Update playing state and elapsed time on the existing notification.
+ * Update playing state and position on the existing notification.
  */
-export async function updatePlaying(isPlaying, elapsed) {
+export async function updatePlaying(isPlaying, elapsed, duration, playbackRate) {
   const plugin = await getPlugin();
   if (!plugin) return;
   try {
-    await plugin.updateState({
-      isPlaying,
-      elapsed: Math.floor(elapsed || 0),
+    await plugin.setPlaybackState({
+      playbackState: isPlaying ? "playing" : "paused",
     });
+    if (duration && isFinite(duration)) {
+      await plugin.setPositionState({
+        duration: Math.max(0, duration),
+        playbackRate: playbackRate || 1,
+        position: Math.min(Math.max(0, elapsed || 0), duration),
+      });
+    }
   } catch (e) {
-    console.warn("[MusicControls] updateState failed:", e);
+    console.warn("[MusicControls] updatePlaying failed:", e);
   }
 }
 
@@ -86,20 +97,50 @@ export async function destroyControls() {
   const plugin = await getPlugin();
   if (!plugin) return;
   try {
-    await plugin.destroy();
+    await plugin.setPlaybackState({ playbackState: "none" });
   } catch {}
 }
 
 /**
- * Subscribe to native control events (play, pause, skip, destroy).
- * Returns the listener handle (call .remove() to unsub) or null on web.
+ * Register native action handlers (play, pause, skip, seek, stop).
+ * Returns a cleanup function that removes all handlers.
  */
-export async function listenControls(handler) {
+export async function registerActionHandlers({
+  onPlay,
+  onPause,
+  onSeekForward,
+  onSeekBackward,
+  onSeekTo,
+  onStop,
+}) {
   const plugin = await getPlugin();
   if (!plugin) return null;
   try {
-    return await plugin.addListener("controlsNotification", handler);
-  } catch {
+    const actions = [
+      { action: "play", handler: onPlay },
+      { action: "pause", handler: onPause },
+      { action: "seekforward", handler: onSeekForward },
+      { action: "seekbackward", handler: onSeekBackward },
+      { action: "seekto", handler: onSeekTo },
+      { action: "stop", handler: onStop },
+    ];
+    for (const { action, handler } of actions) {
+      if (handler) {
+        await plugin.setActionHandler({ action }, handler);
+      }
+    }
+    _handlersRegistered = true;
+    // Return cleanup function
+    return async () => {
+      for (const { action } of actions) {
+        try {
+          await plugin.setActionHandler({ action }, null);
+        } catch {}
+      }
+      _handlersRegistered = false;
+    };
+  } catch (e) {
+    console.warn("[MusicControls] registerActionHandlers failed:", e);
     return null;
   }
 }
