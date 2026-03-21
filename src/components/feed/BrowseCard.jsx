@@ -5,60 +5,17 @@ import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
-// BROWSE CARD — VHS tape + play button for TMDB browse results
+// BROWSE CARD — variant tape labels for browse feeds
+//   cream     = default (fallback)
+//   releases  = printed artwork (backdrop bleed)
+//   streaming = film strip (sprocket holes)
 // ════════════════════════════════════════════════
 
-const VHS_BRANDS = [
-  { bg: "#f0ebe1", color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
-  { bg: "#f0ebe1", color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
-  { bg: "#f0ebe1", color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
-  { bg: "#f0ebe1", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
-  { bg: "#f0ebe1", color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
-  { bg: "#f0ebe1", color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
-];
-const VHS_LOGO_BRAND = { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
-
-// Dark label brand variants — muted light tones
-const VHS_BRANDS_DARK = [
-  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "FUJI", sub: "HQ", weight: 900 },
-  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "Memorex", sub: "HS", weight: 800 },
-  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "TDK", sub: "SA", weight: 900 },
-  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "Kodak", sub: "T-120", weight: 800 },
-  { bg: "#1c1915", color: "rgba(240,235,225,0.3)", text: "Maxell", sub: "HGX", weight: 800 },
-  { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "BASF", sub: "E-180", weight: 900 },
-];
-const VHS_LOGO_BRAND_DARK = { bg: "#1c1915", color: "rgba(240,235,225,0.25)", text: "VHS", sub: "", weight: 800, isVhs: true };
-
-// Label style tokens per variant
-const LABEL_THEMES = {
-  cream: {
-    labelBg: "#f0ebe1",
-    textColor: "#2C2824",
-    textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
-    dateColor: "rgba(44,40,36,0.7)",
-    headphoneStroke: "#2C2824",
-    gridLine: "rgba(0,0,0,0.03)",
-    skeletonBg: "rgba(44,40,36,0.06)",
-    // Logo: force dark on cream bg
-    logoFilter: (isLight) => isLight ? "brightness(0)" : "none",
-    logoOpacity: (isLight, ready) => ready ? (isLight ? 0.8 : 0.85) : 0,
-  },
-  dark: {
-    labelBg: "#1c1915",
-    textColor: "#f0ebe1",
-    textShadow: "1px 1px 4px rgba(0,0,0,0.6)",
-    dateColor: "rgba(240,235,225,0.6)",
-    headphoneStroke: "rgba(240,235,225,0.6)",
-    gridLine: "rgba(255,255,255,0.03)",
-    skeletonBg: "rgba(240,235,225,0.06)",
-    // Logo: show original on dark bg, invert if too dark
-    logoFilter: (isLight) => isLight ? "none" : "brightness(2) saturate(0.6)",
-    logoOpacity: (isLight, ready) => ready ? 0.9 : 0,
-  },
-};
-
-// Format "1979-05-25" → "May 25, 1979" (sharpie-on-tape style)
+const TAPE_EDGE = "#1a1612";
+const CREAM = "#f0ebe1";
+const NOISE_SVG = "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")";
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
 function fmtSharpieDate(dateStr) {
   if (!dateStr || dateStr.length < 10) return null;
   const [y, m, d] = dateStr.split("-");
@@ -67,13 +24,22 @@ function fmtSharpieDate(dateStr) {
   return `${MONTHS[mi - 1]} ${parseInt(d, 10)}, ${y}`;
 }
 
-function getVhsBrands(title, dark = false) {
+// ── Cream label brand stamps ──
+const VHS_BRANDS = [
+  { color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
+  { color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
+  { color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
+  { color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
+  { color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
+  { color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
+];
+const VHS_LOGO_BRAND = { color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
+
+function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  const brands = dark ? VHS_BRANDS_DARK : VHS_BRANDS;
-  const logoBrand = dark ? VHS_LOGO_BRAND_DARK : VHS_LOGO_BRAND;
-  const brand = brands[hash % brands.length];
+  const brand = VHS_BRANDS[hash % VHS_BRANDS.length];
   const vhsOnLeft = hash % 2 === 0;
-  return { left: vhsOnLeft ? logoBrand : brand, right: vhsOnLeft ? brand : logoBrand };
+  return { left: vhsOnLeft ? VHS_LOGO_BRAND : brand, right: vhsOnLeft ? brand : VHS_LOGO_BRAND };
 }
 
 function VhsLogoSvg({ color = "#222", size = 18 }) {
@@ -86,7 +52,7 @@ function VhsLogoSvg({ color = "#222", size = 18 }) {
 }
 
 function BrandStamp({ brand, side = "right" }) {
-  const brandFontSize = brand.text && brand.text.length > 4 ? 7 : 9;
+  const fs = brand.text && brand.text.length > 4 ? 7 : 9;
   return (
     <div style={{
       position: "absolute", top: 0, bottom: 0, [side]: 4,
@@ -101,7 +67,7 @@ function BrandStamp({ brand, side = "right" }) {
         <>
           <div style={{
             writingMode: "vertical-rl", fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: brand.weight, fontSize: brandFontSize, letterSpacing: "0.05em",
+            fontWeight: brand.weight, fontSize: fs, letterSpacing: "0.05em",
             textTransform: "uppercase", color: brand.color, transform: "rotate(180deg)", lineHeight: 1,
           }}>{brand.text}</div>
           {brand.sub && (
@@ -117,28 +83,275 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
+function HeadphonesIcon({ color = "#2C2824" }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+      <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+    </svg>
+  );
+}
+
+// ── Shared logo / title renderer ──
+function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, theme }) {
+  const expectsLogo = data.tmdb_id;
+  const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
+
+  return (
+    <>
+      {data.logo_url && (
+        <img
+          src={data.logo_url} alt={data.title} crossOrigin="anonymous"
+          onLoad={(e) => {
+            setLogoReady(true);
+            const nw = e.target.naturalWidth;
+            const nh = e.target.naturalHeight;
+            const aspect = nw / (nh || 1);
+            if (nw > 0 && nw < 300) {
+              e.target.style.transform = `scale(${aspect < 2 ? 1.6 : 1.3})`;
+            }
+            try {
+              const img = e.target;
+              const c = document.createElement("canvas");
+              c.width = 40; c.height = 40;
+              const ctx = c.getContext("2d");
+              ctx.drawImage(img, 0, 0, 40, 40);
+              const px = ctx.getImageData(0, 0, 40, 40).data;
+              let light = 0, visible = 0;
+              for (let i = 0; i < px.length; i += 4) {
+                if (px[i + 3] < 50) continue;
+                visible++;
+                if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
+              }
+              setIsLightLogo(visible > 0 && light / visible > 0.5);
+            } catch {}
+          }}
+          style={{
+            maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
+            objectFit: "contain", objectPosition: "center", position: "relative",
+            filter: theme.logoFilter(isLightLogo),
+            opacity: theme.logoOpacity(isLightLogo, logoReady),
+            transition: "opacity 0.2s ease-in",
+          }}
+        />
+      )}
+      {(logoLoading || (data.logo_url && !logoReady)) && (
+        <div style={{
+          height: 20, width: "55%", borderRadius: 3,
+          background: theme.skeletonBg,
+          position: data.logo_url ? "absolute" : "relative",
+        }} />
+      )}
+      {!data.logo_url && !logoLoading && (
+        <div style={{
+          fontFamily: "'Permanent Marker', cursive",
+          fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
+          lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
+          letterSpacing: "0.02em", position: "relative", textAlign: "center",
+          transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
+          textShadow: theme.textShadow,
+          padding: "0 8px", maxWidth: "85%", margin: "0 auto", wordBreak: "break-word",
+        }}>{data.title}</div>
+      )}
+    </>
+  );
+}
+
+// ════════════════════════════════════
+// CREAM — home video, sharpie on blank tape
+// ════════════════════════════════════
+const CREAM_THEME = {
+  textColor: "#2C2824",
+  textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
+  logoFilter: (isLight) => isLight ? "brightness(0)" : "none",
+  logoOpacity: (isLight, ready) => ready ? (isLight ? 0.8 : 0.85) : 0,
+  skeletonBg: "rgba(44,40,36,0.06)",
+};
+
+function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+  const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
+  const dateStr = fmtSharpieDate(data.release_date);
+  return (
+    <>
+      <div style={{ width: 5, flexShrink: 0, background: TAPE_EDGE }} />
+      <div style={{
+        flex: 1, background: CREAM, padding: "10px 12px",
+        display: "flex", flexDirection: "column", justifyContent: "center",
+        alignItems: "center", position: "relative", overflow: "hidden",
+      }}>
+        <BrandStamp brand={brandLeft} side="left" />
+        <BrandStamp brand={brandRight} side="right" />
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px)",
+        }} />
+        <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
+          isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={CREAM_THEME} />
+        {dateStr && (
+          <div style={{
+            position: "absolute", bottom: 5, left: 28,
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 8, color: "rgba(44,40,36,0.7)",
+            transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
+            whiteSpace: "nowrap", pointerEvents: "none",
+          }}>{dateStr}</div>
+        )}
+        {hasPlayButton && (
+          <div style={{ position: "absolute", bottom: 4, right: 28, opacity: 0.4 }}>
+            <HeadphonesIcon color="#2C2824" />
+          </div>
+        )}
+      </div>
+      <div style={{ width: 5, flexShrink: 0, background: TAPE_EDGE }} />
+    </>
+  );
+}
+
+// ════════════════════════════════════
+// ARTWORK — backdrop bleed (new releases)
+// ════════════════════════════════════
+const ARTWORK_THEME = {
+  textColor: "#fff",
+  textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.4)",
+  logoFilter: () => "drop-shadow(0 2px 6px rgba(0,0,0,0.8))",
+  logoOpacity: (_, ready) => ready ? 0.95 : 0,
+  skeletonBg: "rgba(255,255,255,0.06)",
+};
+
+function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+  const dateStr = fmtSharpieDate(data.release_date);
+  return (
+    <>
+      <div style={{ width: 5, flexShrink: 0, background: "#111" }} />
+      <div style={{
+        flex: 1, position: "relative", overflow: "hidden",
+        display: "flex", flexDirection: "column", justifyContent: "center",
+        alignItems: "center", padding: "10px 12px", background: "#151210",
+      }}>
+        {data.backdrop_path && (
+          <img src={data.backdrop_path} alt="" style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%",
+            objectFit: "cover", objectPosition: "center 25%",
+          }} />
+        )}
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.65) 100%), radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.35) 100%)",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.08,
+          backgroundImage: NOISE_SVG,
+        }} />
+        <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
+          isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={ARTWORK_THEME} />
+        {dateStr && (
+          <div style={{
+            position: "absolute", bottom: 5, left: 18, zIndex: 1,
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 8, color: "rgba(255,255,255,0.4)",
+            textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+            whiteSpace: "nowrap", pointerEvents: "none",
+          }}>{dateStr}</div>
+        )}
+        {hasPlayButton && (
+          <div style={{ position: "absolute", bottom: 4, right: 18, opacity: 0.35, zIndex: 1 }}>
+            <HeadphonesIcon color="#fff" />
+          </div>
+        )}
+      </div>
+      <div style={{ width: 5, flexShrink: 0, background: "#111" }} />
+    </>
+  );
+}
+
+// ════════════════════════════════════
+// FILM STRIP — sprocket holes, celluloid (streaming)
+// ════════════════════════════════════
+const FILMSTRIP_THEME = {
+  textColor: "rgba(240,215,170,0.85)",
+  textShadow: "1px 1px 4px rgba(0,0,0,0.5)",
+  logoFilter: () => "sepia(0.15) brightness(1.1) drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
+  logoOpacity: (_, ready) => ready ? 0.9 : 0,
+  skeletonBg: "rgba(240,215,170,0.06)",
+};
+
+function SprocketStrip() {
+  return (
+    <div style={{
+      width: 18, flexShrink: 0, background: "#181410",
+      display: "flex", flexDirection: "column",
+      justifyContent: "space-evenly", alignItems: "center", padding: "6px 0",
+    }}>
+      {[0,1,2,3,4].map(i => (
+        <div key={i} style={{
+          width: 8, height: 6, borderRadius: 1.5,
+          background: "#0d0b09",
+          border: "0.5px solid rgba(255,255,255,0.05)",
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton }) {
+  const dateStr = fmtSharpieDate(data.release_date);
+  return (
+    <>
+      <SprocketStrip />
+      <div style={{
+        flex: 1, position: "relative", overflow: "hidden",
+        background: "linear-gradient(180deg, #1e1810 0%, #221a12 50%, #1a1410 100%)",
+        padding: "10px 10px",
+        display: "flex", flexDirection: "column", justifyContent: "center",
+        alignItems: "center",
+      }}>
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.05,
+          backgroundImage: NOISE_SVG,
+        }} />
+        <div style={{ position: "absolute", top: 5, left: 4, right: 4, height: 1, background: "rgba(255,180,60,0.07)" }} />
+        <div style={{ position: "absolute", bottom: 5, left: 4, right: 4, height: 1, background: "rgba(255,180,60,0.07)" }} />
+        <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
+          isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={FILMSTRIP_THEME} />
+        {dateStr && (
+          <div style={{
+            position: "absolute", bottom: 7, left: 16,
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 7, color: "rgba(240,215,170,0.25)",
+            letterSpacing: "0.06em", whiteSpace: "nowrap", pointerEvents: "none",
+          }}>{dateStr}</div>
+        )}
+        {hasPlayButton && (
+          <div style={{ position: "absolute", bottom: 4, right: 16, opacity: 0.3 }}>
+            <HeadphonesIcon color="rgba(240,215,170,0.7)" />
+          </div>
+        )}
+      </div>
+      <SprocketStrip />
+    </>
+  );
+}
+
+// ════════════════════════════════════
+// MAIN COMPONENT
+// ════════════════════════════════════
 export default function BrowseCard({ data, variant, pushNav, removeNav, onNavigateCommunity }) {
-  const isDark = variant === "releases";
-  const theme = isDark ? LABEL_THEMES.dark : LABEL_THEMES.cream;
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
-  const [episodes, setEpisodes] = useState(null); // null = not loaded yet
+  const [episodes, setEpisodes] = useState(null);
   const [epLoading, setEpLoading] = useState(false);
-  const [sheetOpen, setSheetOpen] = useState(false);   // controls DOM mount
-  const [sheetVisible, setSheetVisible] = useState(false); // controls CSS transition
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetVisible, setSheetVisible] = useState(false);
   const closeTimer = useRef(null);
   const { play: playEpisode, togglePlay, currentEp, isPlaying } = useAudioPlayer();
-  const { left: brandLeft, right: brandRight } = getVhsBrands(data.title, isDark);
   const hasPlayButton = data.podcast_count > 0;
 
   const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
   const openSleeve = async () => {
     if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null; }
     setSheetOpen(true);
-    // Next frame: trigger CSS slide-up
     requestAnimationFrame(() => requestAnimationFrame(() => setSheetVisible(true)));
     if (pushNav) pushNav(sleeveNavKey, () => closeSleeve());
-    // Lazy-load episodes on first sleeve open
     if (!episodes && hasPlayButton) {
       setEpLoading(true);
       const eps = await getEpisodesForFilm(data.tmdb_id);
@@ -147,9 +360,9 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
     }
   };
   const closeSleeve = () => {
-    setSheetVisible(false); // triggers slide-down
+    setSheetVisible(false);
     closeTimer.current = setTimeout(() => {
-      setSheetOpen(false); // unmount after transition
+      setSheetOpen(false);
       closeTimer.current = null;
     }, 350);
     if (removeNav) removeNav(sleeveNavKey);
@@ -166,9 +379,10 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
     });
   };
 
-  // Check if currently playing an episode from this film
-  const isThisPlaying = episodes && currentEp && isPlaying &&
-    episodes.some(ep => currentEp.enclosureUrl === ep.audio_url);
+  const logoProps = { data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, hasPlayButton };
+  const Label = variant === "releases" ? ArtworkLabel
+    : variant === "streaming" ? FilmStripLabel
+    : CreamLabel;
 
   return (
     <>
@@ -176,118 +390,12 @@ export default function BrowseCard({ data, variant, pushNav, removeNav, onNaviga
       margin: "4px 16px", borderRadius: 6, position: "relative",
       background: "#302c28", padding: "1px 1px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
-      backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
+      backgroundImage: NOISE_SVG,
     }}>
       <div style={{ borderRadius: 4, overflow: "hidden" }}>
-        {/* ═══ VHS TAPE LABEL ═══ */}
-        <div onClick={() => openSleeve()} style={{ background: "#1a1612", borderRadius: 5, position: "relative", cursor: "pointer" }}>
+        <div onClick={() => openSleeve()} style={{ background: TAPE_EDGE, borderRadius: 5, position: "relative", cursor: "pointer" }}>
           <div style={{ borderRadius: 3, overflow: "hidden", display: "flex", minHeight: 80 }}>
-            <div style={{ width: 5, flexShrink: 0, background: isDark ? "#141210" : "#1a1612" }} />
-
-            <div style={{
-              flex: 1, background: theme.labelBg, padding: "10px 12px",
-              display: "flex", flexDirection: "column", justifyContent: "center",
-              alignItems: "center", position: "relative", overflow: "hidden",
-            }}>
-              <BrandStamp brand={brandLeft} side="left" />
-              <BrandStamp brand={brandRight} side="right" />
-
-              <div style={{
-                position: "absolute", inset: 0, pointerEvents: "none",
-                backgroundImage: `repeating-linear-gradient(0deg, transparent, transparent 17px, ${theme.gridLine} 17px, ${theme.gridLine} 18px)`,
-              }} />
-
-              {(() => {
-                const expectsLogo = data.tmdb_id;
-                const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
-                return (
-                  <>
-                    {data.logo_url && (
-                      <img
-                        src={data.logo_url} alt={data.title} crossOrigin="anonymous"
-                        onLoad={(e) => {
-                          setLogoReady(true);
-                          const nw = e.target.naturalWidth;
-                          const nh = e.target.naturalHeight;
-                          const aspect = nw / (nh || 1);
-                          if (nw > 0 && nw < 300) {
-                            e.target.style.transform = `scale(${aspect < 2 ? 1.6 : 1.3})`;
-                          }
-                          try {
-                            const img = e.target;
-                            const c = document.createElement("canvas");
-                            c.width = 40; c.height = 40;
-                            const ctx = c.getContext("2d");
-                            ctx.drawImage(img, 0, 0, 40, 40);
-                            const px = ctx.getImageData(0, 0, 40, 40).data;
-                            let light = 0, visible = 0;
-                            for (let i = 0; i < px.length; i += 4) {
-                              if (px[i + 3] < 50) continue;
-                              visible++;
-                              if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
-                            }
-                            setIsLightLogo(visible > 0 && light / visible > 0.5);
-                          } catch {}
-                        }}
-                        style={{
-                          maxHeight: 54, minHeight: 36, maxWidth: "90%", width: "auto",
-                          objectFit: "contain", objectPosition: "center", position: "relative",
-                          filter: theme.logoFilter(isLightLogo),
-                          opacity: theme.logoOpacity(isLightLogo, logoReady),
-                          transition: "opacity 0.2s ease-in",
-                        }}
-                      />
-                    )}
-                    {(logoLoading || (data.logo_url && !logoReady)) && (
-                      <div style={{
-                        height: 20, width: "55%", borderRadius: 3,
-                        background: theme.skeletonBg,
-                        position: data.logo_url ? "absolute" : "relative",
-                      }} />
-                    )}
-                    {!data.logo_url && !logoLoading && (
-                      <div style={{
-                        fontFamily: "'Permanent Marker', cursive",
-                        fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
-                        lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
-                        letterSpacing: "0.02em", position: "relative", textAlign: "center",
-                        transform: `rotate(${((data.tmdb_id || 0) % 5) * 0.6 - 1.2}deg)`,
-                        textShadow: theme.textShadow,
-                        padding: "0 8px", maxWidth: "85%", margin: "0 auto", wordBreak: "break-word",
-                      }}>{data.title}</div>
-                    )}
-                  </>
-                );
-              })()}
-
-              {/* Sharpie release date — lower left, like handwritten on the tape */}
-              {(() => {
-                const dateStr = fmtSharpieDate(data.release_date);
-                return dateStr ? (
-                  <div style={{
-                    position: "absolute", bottom: 5, left: 28,
-                    fontFamily: "'Permanent Marker', cursive",
-                    fontSize: 8, color: theme.dateColor,
-                    transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
-                    whiteSpace: "nowrap", pointerEvents: "none",
-                  }}>{dateStr}</div>
-                ) : null;
-              })()}
-
-              {/* Headphones sticker on label — visual hint that coverage exists */}
-              {hasPlayButton && (
-                <div style={{
-                  position: "absolute", bottom: 4, right: 28, opacity: 0.4,
-                }} title="Listen on MANTL">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.headphoneStroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-                    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            <div style={{ width: 5, flexShrink: 0, background: isDark ? "#141210" : "#1a1612" }} />
+            <Label {...logoProps} />
           </div>
         </div>
       </div>

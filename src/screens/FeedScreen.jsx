@@ -265,7 +265,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           </div>
         )}
         {streaming.items.slice(0, BROWSE_CAP).map((item) => (
-          <BrowseCard key={`str-${item.tmdb_id}`} data={item} pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
+          <BrowseCard key={`str-${item.tmdb_id}`} data={item} variant="streaming" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
         ))}
         {streaming.hasMore && streaming.items.length < BROWSE_CAP && <div ref={streamingSentinelRef} style={{ height: 1 }} />}
         {streaming.loading && streaming.items.length > 0 && (
