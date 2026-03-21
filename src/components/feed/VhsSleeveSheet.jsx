@@ -992,18 +992,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                 padding: "4px 6px 10px 48px",
                                 fontFamily: "'IBM Plex Mono', monospace",
                                 fontSize: 10, lineHeight: 1.55,
+                                color: "rgba(240,235,225,0.5)",
+                                whiteSpace: "pre-wrap",
                               }}>
                                 <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{hook}</span>
-                                {rest && (
-                                  <span style={{
-                                    color: "rgba(240,235,225,0.35)",
-                                    display: "-webkit-box",
-                                    WebkitLineClamp: 3,
-                                    WebkitBoxOrient: "vertical",
-                                    overflow: "hidden",
-                                    marginTop: 3,
-                                  }}>{" "}{rest}</span>
-                                )}
+                                {rest && <>{" "}{rest}</>}
                               </div>
                             );
                           })()
