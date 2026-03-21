@@ -19,6 +19,7 @@ import { supabase } from "../supabase";
 import { searchTMDB } from "../utils/api";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
 import { toPosterPath } from "../utils/mediaWrite";
+import FeedFilterBar from "../components/feed/FeedFilterBar";
 
 const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
@@ -44,6 +45,13 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   // ── Notify state ──
   const [notifyingId, setNotifyingId] = useState(null);
   const [notifiedIds, setNotifiedIds] = useState(new Set());
+
+  // ── Filter / Sort / Browse ──
+  const [selectedPodcast, setSelectedPodcast] = useState(null);
+  const [sortOrder, setSortOrder] = useState(null); // null | "recent" | "oldest"
+  const [browseResults, setBrowseResults] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const isBrowseMode = !query && (selectedPodcast || sortOrder);
 
   // ── Recently covered (empty state) ──
   const [recentlyCovered, setRecentlyCovered] = useState([]);
@@ -76,6 +84,44 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     }
   }, [isActive]);
 
+  // ── Browse mode: load catalog when filters active + no query ──
+  useEffect(() => {
+    if (query) return; // search mode, not browse
+    if (!selectedPodcast && !sortOrder) {
+      setBrowseResults([]);
+      return;
+    }
+
+    let cancelled = false;
+    setBrowseLoading(true);
+    setExpandedTmdbId(null);
+    if (removeNav) removeNav("searchExpand");
+
+    (async () => {
+      const { data, error } = await supabase.rpc("browse_covered_films", {
+        podcast_slug: selectedPodcast || null,
+        sort_dir: sortOrder === "oldest" ? "asc" : "desc",
+        result_limit: 40,
+        result_offset: 0,
+      });
+      if (!cancelled && !error && data) {
+        setBrowseResults(data.map((r) => ({
+          tmdbId: r.tmdb_id,
+          title: r.title,
+          year: r.year,
+          poster: r.poster_path ? `${TMDB_IMG}/w185${r.poster_path}` : null,
+          posterPath: r.poster_path,
+          podcastCount: r.podcast_count || 0,
+          latestDate: r.latest_episode_date,
+          podcasts: r.podcasts,
+          source: "browse",
+        })));
+      }
+      if (!cancelled) setBrowseLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [selectedPodcast, sortOrder, query, removeNav]);
+
   // ═══════════════════════════════════════════
   // TWO-PHASE SEARCH
   // ═══════════════════════════════════════════
@@ -100,6 +146,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         supabase.rpc("search_covered_films", {
           search_query: trimmed,
           result_limit: 20,
+          podcast_filter: selectedPodcast || null,
         }),
         searchTMDB(trimmed),
       ]);
@@ -168,7 +215,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     } finally {
       setSearching(false);
     }
-  }, [removeNav]);
+  }, [removeNav, selectedPodcast]);
 
   const handleQueryChange = useCallback((val) => {
     setQuery(val);
@@ -182,6 +229,17 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     }
     debounceRef.current = setTimeout(() => runSearch(val), DEBOUNCE_MS);
   }, [runSearch, removeNav]);
+
+  // ── Re-run search when podcast filter changes during active query ──
+  const prevPodcastRef = useRef(selectedPodcast);
+  useEffect(() => {
+    if (prevPodcastRef.current === selectedPodcast) return;
+    prevPodcastRef.current = selectedPodcast;
+    if (query.trim().length >= 2) {
+      lastQueryRef.current = ""; // force re-search (bypass dedup)
+      runSearch(query);
+    }
+  }, [selectedPodcast, query, runSearch]);
 
   // ═══════════════════════════════════════════
   // EXPAND (shared for covered + uncovered)
@@ -272,56 +330,100 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
       background: "#0f0d0b",
       paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
     }}>
-      {/* ── Search bar ── */}
+      {/* ── Sticky search + filter bar ── */}
       <div style={{
-        padding: "16px 16px 8px",
         position: "sticky", top: 0,
         background: "#0f0d0b", zIndex: 10,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
         <div style={{
-          display: "flex", alignItems: "center", gap: 10,
-          background: "rgba(255,255,255,0.06)",
-          borderRadius: 10, padding: "10px 14px",
-          border: "1px solid rgba(255,255,255,0.08)",
+          padding: "16px 16px 8px",
         }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke={searching ? TC : "rgba(255,255,255,0.35)"}
-            strokeWidth="2.5" strokeLinecap="round"
-            style={{ transition: "stroke 0.2s", flexShrink: 0 }}>
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
-            placeholder="Search films..."
-            autoCapitalize="off"
-            autoCorrect="off"
-            style={{
-              flex: 1, background: "none", border: "none", outline: "none",
-              color: "#f5f0eb", fontSize: 15,
-              fontFamily: "'Barlow Condensed', sans-serif",
-              letterSpacing: "0.03em",
-            }}
-          />
-          {query && (
-            <div onClick={() => handleQueryChange("")}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: 10, padding: "10px 14px",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke={searching ? TC : "rgba(255,255,255,0.35)"}
+              strokeWidth="2.5" strokeLinecap="round"
+              style={{ transition: "stroke 0.2s", flexShrink: 0 }}>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => handleQueryChange(e.target.value)}
+              placeholder="Search films..."
+              autoCapitalize="off"
+              autoCorrect="off"
               style={{
-                width: 20, height: 20, borderRadius: "50%",
-                background: "rgba(255,255,255,0.1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.5)",
-                flexShrink: 0,
-              }}>×</div>
-          )}
+                flex: 1, background: "none", border: "none", outline: "none",
+                color: "#f5f0eb", fontSize: 15,
+                fontFamily: "'Barlow Condensed', sans-serif",
+                letterSpacing: "0.03em",
+              }}
+            />
+            {query && (
+              <div onClick={() => handleQueryChange("")}
+                style={{
+                  width: 20, height: 20, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.5)",
+                  flexShrink: 0,
+                }}>×</div>
+            )}
+          </div>
         </div>
+
+        <FeedFilterBar
+          sortOrder={sortOrder}
+          onSortChange={setSortOrder}
+          selectedPodcast={selectedPodcast}
+          onPodcastChange={setSelectedPodcast}
+          communitySubscriptions={new Set()}
+        />
       </div>
 
-      {/* ── Empty state: recently covered ── */}
-      {!hasSearched && !query && (
+      {/* ── Browse mode: podcast catalog ── */}
+      {isBrowseMode && (
+        <div style={{ padding: "8px 4px 0" }}>
+          {browseLoading ? (
+            <div style={{
+              padding: "32px 16px", textAlign: "center",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.2)",
+            }}>Loading…</div>
+          ) : browseResults.length > 0 ? (
+            browseResults.map((r) => (
+              <ResultCard
+                key={r.tmdbId}
+                result={r}
+                isExpanded={expandedTmdbId === r.tmdbId}
+                onTap={() => handleResultTap(r.tmdbId, r.podcastCount)}
+                episodes={expandedTmdbId === r.tmdbId ? episodes : []}
+                loadingEpisodes={expandedTmdbId === r.tmdbId && loadingEpisodes}
+                onPlayEpisode={handlePlay}
+                currentEp={currentEp}
+                isPlaying={isPlaying}
+              />
+            ))
+          ) : (
+            <div style={{
+              padding: "32px 16px", textAlign: "center",
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.15)",
+            }}>No coverage found for this filter</div>
+          )}
+        </div>
+      )}
+
+      {/* ── Empty state: recently covered (only when no filters active) ── */}
+      {!hasSearched && !query && !isBrowseMode && (
         <div style={{ padding: "20px 0 0" }}>
           {/* Section header */}
           <div style={{ padding: "0 16px 12px" }}>
