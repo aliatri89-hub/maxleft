@@ -547,8 +547,7 @@ export default function NowPlayingGameLogModal({
                     flexShrink: 0,
                   }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                      <circle cx="15" cy="9" r="5.5" fill="#F96836" />
-                      <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                      <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
                     </svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
@@ -1148,8 +1147,7 @@ export default function NowPlayingGameLogModal({
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
               }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <circle cx="15" cy="9" r="5.5" fill="#F96836" />
-                  <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                  <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
                 </svg>
               </div>
               <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>

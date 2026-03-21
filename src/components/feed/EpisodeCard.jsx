@@ -266,8 +266,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 }}
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <circle cx="15" cy="9" r="5.5" fill="#F96836" />
-                  <rect x="3" y="3" width="3" height="18" rx="1" fill="#052D49" />
+                  <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
                 </svg>
                 <span style={{
                   fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
