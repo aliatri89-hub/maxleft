@@ -38,19 +38,10 @@ import { useRecentEpisodes } from "../../../hooks/community/useRecentEpisodes";
 export default function NowPlayingScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
-  const rssUrl = community?.theme_config?.rss_url || "https://www.nowplayingpodcast.com/NPP.xml";
 
-  // Load podcast episodes into the global audio player
-  const { loadEpisodes, episodes, currentEp, isPlaying, minimize } = useAudioPlayer();
+  const { currentEp, isPlaying, minimize } = useAudioPlayer();
   const isPlayingRef = useRef(false);
   isPlayingRef.current = isPlaying;
-
-  useEffect(() => {
-    loadEpisodes(rssUrl, {
-      community: "Now Playing Podcast",
-      artwork: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg",
-    });
-  }, [rssUrl, loadEpisodes]);
 
   // Auto-minimize the mini bar when leaving this community screen
   // But only if audio is paused — if playing, keep the mini bar so user has controls
@@ -123,7 +114,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress, "film");
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(episodes, allItems, 10, "nowplaying", community?.theme_config?.episode_source);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes([], allItems, 10, "nowplaying", community?.theme_config?.episode_source);
 
   // Stable fingerprint: only changes when the actual item set changes,
   // not when the parent re-provides miniseries with a new array reference.

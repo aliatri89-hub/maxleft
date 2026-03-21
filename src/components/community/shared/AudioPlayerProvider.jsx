@@ -9,14 +9,22 @@ export function useAudioPlayer() {
 }
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
-const SUPABASE_URL = "https://api.mymantl.app";
 const STORAGE_KEY = "mantl_audio_state";
 const RECENTS_KEY = "mantl_audio_recents";
 const NUDGE_DISMISSED_KEY = "mantl_audio_nudge_dismissed";
 const ACCENT = "#F5C518";
 const SAVE_INTERVAL = 5000;
 const BOOKMARK_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days
-const MAX_RECENTS = 5;
+const MAX_RECENTS = 20;
+const SLEEP_OPTIONS = [
+  { label: "5 min", minutes: 5 },
+  { label: "15 min", minutes: 15 },
+  { label: "30 min", minutes: 30 },
+  { label: "45 min", minutes: 45 },
+  { label: "1 hour", minutes: 60 },
+  { label: "End of episode", minutes: -1 },
+];
+const STALL_TIMEOUT = 15000; // 15s before showing stall error
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -103,7 +111,7 @@ function upsertRecent(recents, ep, time, spd, dur) {
 //   badge → small circle, EQ bars / spinner / play icon
 //   pill  → horizontal strip with title + play/pause + progress
 
-function PlayerBubble({ episode, isPlaying, buffering, progress, duration, mode, onTogglePlay, onExpand, onCollapse, onOpenFull, onDismiss }) {
+function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration, mode, onTogglePlay, onExpand, onCollapse, onOpenFull, onDismiss, onRetry }) {
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
   const isBadge = mode === "badge";
 
@@ -201,7 +209,11 @@ function PlayerBubble({ episode, isPlaying, buffering, progress, duration, mode,
         transition: "opacity 0.2s ease",
         pointerEvents: isBadge ? "auto" : "none",
       }}>
-        {buffering ? (
+        {error ? (
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4444" stroke="none">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+        ) : buffering ? (
           <div style={{
             width: 18, height: 18,
             border: `2.5px solid ${isPlaying ? "#0a0a0a" : ACCENT}`,
@@ -236,15 +248,17 @@ function PlayerBubble({ episode, isPlaying, buffering, progress, duration, mode,
       }}>
         {/* Play/Pause */}
         <button
-          onClick={(e) => { e.stopPropagation(); onTogglePlay(); }}
+          onClick={(e) => { e.stopPropagation(); error ? onRetry() : onTogglePlay(); }}
           style={{
             width: 36, height: 36, borderRadius: "50%",
-            background: ACCENT, border: "none",
+            background: error ? "#ff4444" : ACCENT, border: "none",
             display: "flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", flexShrink: 0,
           }}
         >
-          {buffering ? (
+          {error ? (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          ) : buffering ? (
             <div style={{ width: 14, height: 14, border: "2px solid #0a0a0a", borderTopColor: "transparent", borderRadius: "50%", animation: "audioSpin 0.8s linear infinite" }} />
           ) : isPlaying ? (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0a0a"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
@@ -271,9 +285,13 @@ function PlayerBubble({ episode, isPlaying, buffering, progress, duration, mode,
             fontFamily: "'IBM Plex Mono', monospace", marginTop: 1,
             display: "flex", alignItems: "center", gap: 4,
           }}>
-            {episode.community && <span style={{ color: `${ACCENT}77` }}>{episode.community}</span>}
-            {episode.community && <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>}
-            <span>{remainingMin ? `${remainingMin}m left` : fmt(progress)}</span>
+            {error ? (
+              <span style={{ color: "#ff4444" }}>Tap to retry</span>
+            ) : (<>
+              {episode.community && <span style={{ color: `${ACCENT}77` }}>{episode.community}</span>}
+              {episode.community && <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>}
+              <span>{remainingMin ? `${remainingMin}m left` : fmt(progress)}</span>
+            </>)}
           </div>
         </div>
 
@@ -449,14 +467,16 @@ function ResumeNudge({ recent, onResume, onDismiss, onFade }) {
 // ── Full Screen Player ──────────────────────────────────────
 
 function FullScreenPlayer({
-  episode, isPlaying, buffering, progress, duration, speed,
-  recents, onTogglePlay, onSkip, onSeek, onCycleSpeed,
+  episode, isPlaying, buffering, error, progress, duration, speed,
+  recents, onTogglePlay, onSkip, onSeek, onCycleSpeed, onRetry,
   onResumeRecent, onClearRecent, onStop, onClose,
+  sleepTimer, onSetSleep, onClearSleep,
 }) {
   const scrubberRef = useRef(null);
   const [scrubbing, setScrubbing] = useState(false);
   const [scrubValue, setScrubValue] = useState(0);
   const [closing, setClosing] = useState(false);
+  const [showSleepPicker, setShowSleepPicker] = useState(false);
 
   const displayProgress = scrubbing ? scrubValue : progress;
   const pct = duration > 0 ? (displayProgress / duration) * 100 : 0;
@@ -561,6 +581,17 @@ function FullScreenPlayer({
         {/* ── Now Playing section (only when an episode is active) ── */}
         {episode && (<>
         <div style={{ padding: "20px 24px 16px", textAlign: "center" }}>
+          {/* Artwork */}
+          {episode.artwork && (
+            <div style={{
+              width: 120, height: 120, borderRadius: 16,
+              margin: "0 auto 16px",
+              overflow: "hidden",
+              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)`,
+            }}>
+              <img src={episode.artwork} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            </div>
+          )}
           {/* Title */}
           <div style={{
             fontSize: 20, fontWeight: 800,
@@ -584,6 +615,33 @@ function FullScreenPlayer({
             {episode.community || "Podcast"}
           </div>
         </div>
+
+        {/* Error banner */}
+        {error && (
+          <div style={{
+            margin: "0 24px 12px",
+            padding: "10px 14px",
+            background: "rgba(255,68,68,0.1)",
+            border: "1px solid rgba(255,68,68,0.25)",
+            borderRadius: 10,
+            display: "flex", alignItems: "center", gap: 10,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4444" flexShrink="0">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <div style={{ flex: 1, fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "'IBM Plex Mono', monospace" }}>
+              {error}
+            </div>
+            <button onClick={onRetry} style={{
+              background: "rgba(255,68,68,0.2)", border: "1px solid rgba(255,68,68,0.3)",
+              borderRadius: 6, padding: "4px 10px", cursor: "pointer",
+              color: "#ff6666", fontSize: 11, fontWeight: 700,
+              fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
+            }}>
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* ── Scrubber ── */}
         <div style={{ padding: "0 24px 8px" }}>
@@ -683,20 +741,22 @@ function FullScreenPlayer({
 
           {/* Play/Pause — hero button */}
           <button
-            onClick={onTogglePlay}
-            aria-label={isPlaying ? "Pause" : "Play"}
+            onClick={error ? onRetry : onTogglePlay}
+            aria-label={error ? "Retry" : isPlaying ? "Pause" : "Play"}
             style={{
               width: 64, height: 64,
               borderRadius: "50%",
-              background: ACCENT,
+              background: error ? "#ff4444" : ACCENT,
               border: "none",
               display: "flex", alignItems: "center", justifyContent: "center",
               cursor: "pointer",
-              boxShadow: `0 4px 24px ${ACCENT}44`,
+              boxShadow: error ? "0 4px 24px rgba(255,68,68,0.3)" : `0 4px 24px ${ACCENT}44`,
               transition: "transform 0.1s, box-shadow 0.3s",
             }}
           >
-            {buffering ? (
+            {error ? (
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            ) : buffering ? (
               <div style={{
                 width: 24, height: 24,
                 border: "3px solid #0a0a0a",
@@ -734,7 +794,57 @@ function FullScreenPlayer({
             <span style={{ fontSize: 9, fontWeight: 700 }}>30</span>
           </button>
 
-          {/* Close */}
+          {/* Sleep timer */}
+          <button
+            onClick={() => sleepTimer ? onClearSleep() : setShowSleepPicker(p => !p)}
+            aria-label="Sleep timer"
+            style={{
+              background: sleepTimer ? `${ACCENT}18` : "rgba(255,255,255,0.04)",
+              border: `1px solid ${sleepTimer ? `${ACCENT}33` : "rgba(255,255,255,0.06)"}`,
+              borderRadius: 8, padding: "6px 10px",
+              color: sleepTimer ? ACCENT : "rgba(255,255,255,0.4)",
+              fontSize: 11, fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: "'IBM Plex Mono', monospace",
+              minWidth: 48,
+              transition: "all 0.2s",
+              display: "flex", alignItems: "center", gap: 4,
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+            </svg>
+            {sleepTimer ? sleepTimer.label : ""}
+          </button>
+        </div>
+
+        {/* Sleep timer picker */}
+        {showSleepPicker && !sleepTimer && (
+          <div style={{
+            display: "flex", flexWrap: "wrap", gap: 8,
+            padding: "0 24px 12px", justifyContent: "center",
+          }}>
+            {SLEEP_OPTIONS.map(opt => (
+              <button
+                key={opt.minutes}
+                onClick={() => { onSetSleep(opt); setShowSleepPicker(false); }}
+                style={{
+                  background: `${ACCENT}10`, border: `1px solid ${ACCENT}20`,
+                  borderRadius: 8, padding: "6px 14px",
+                  color: ACCENT, fontSize: 12, fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  transition: "all 0.15s",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Stop / close player */}
+        <div style={{ display: "flex", justifyContent: "center", paddingBottom: 8 }}>
           <button
             onClick={onStop}
             aria-label="Close player"
@@ -748,11 +858,10 @@ function FullScreenPlayer({
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
-              minWidth: 48,
               transition: "all 0.2s",
             }}
           >
-            Close
+            Stop &amp; Close
           </button>
         </div>
         </>)}
@@ -974,10 +1083,6 @@ function FullScreenPlayer({
 // ── Provider ────────────────────────────────────────────────
 
 export default function AudioPlayerProvider({ children, session }) {
-  const [episodes, setEpisodes] = useState([]);
-  const [loadedFeeds, setLoadedFeeds] = useState({});
-  const [loading, setLoading] = useState(false);
-  const activeMetaRef = useRef(null); // stores { community, artwork } from the most recent loadEpisodes call
   const audioRef = useRef(null);
   const [currentEp, setCurrentEp] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -985,9 +1090,13 @@ export default function AudioPlayerProvider({ children, session }) {
   const [duration, setDuration] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [buffering, setBuffering] = useState(false);
+  const [error, setError] = useState(null);       // null | string message
   const [fullScreen, setFullScreen] = useState(false);
   const [bubbleMode, setBubbleMode] = useState("badge"); // "badge" | "pill"
   const [activated, setActivated] = useState(false); // true once user plays something this session
+  const [sleepTimer, setSleepTimer] = useState(null); // null | { label, deadline, timerId }
+  const sleepTimerRef = useRef(null);
+  const stallTimerRef = useRef(null);
   const [nudgeDismissedGuid, setNudgeDismissedGuid] = useState(() => {
     try { return localStorage.getItem(NUDGE_DISMISSED_KEY) || null; } catch { return null; }
   });
@@ -1029,85 +1138,6 @@ export default function AudioPlayerProvider({ children, session }) {
     }
   }, [updateRecents]);
 
-  // ── RSS loader ───────────────────────────────────────────
-  const loadEpisodes = useCallback(async (rssUrl, meta) => {
-    if (!rssUrl) return;
-    // Remember the meta so playEpisode can apply it to seeded/non-RSS episodes
-    if (meta) activeMetaRef.current = meta;
-
-    // If feed already loaded, still enrich existing episodes with meta if provided
-    if (loadedFeeds[rssUrl]) {
-      if (meta?.community || meta?.artwork) {
-        setEpisodes(prev => prev.map(ep => {
-          if (!ep.enclosureUrl) return ep;
-          const needsName = meta.community && !ep.community;
-          const needsArt = meta.artwork && !ep.artwork;
-          if (!needsName && !needsArt) return ep;
-          return {
-            ...ep,
-            ...(needsName ? { community: meta.community } : {}),
-            ...(needsArt ? { artwork: meta.artwork } : {}),
-          };
-        }));
-        setCurrentEp(prev => {
-          if (!prev) return prev;
-          const needsName = meta.community && !prev.community;
-          const needsArt = meta.artwork && !prev.artwork;
-          if (!needsName && !needsArt) return prev;
-          return {
-            ...prev,
-            ...(needsName ? { community: meta.community } : {}),
-            ...(needsArt ? { artwork: meta.artwork } : {}),
-          };
-        });
-      }
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/rss-sync`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
-        },
-        body: JSON.stringify({ rss_url: rssUrl, limit: 30 }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const withAudio = (data.episodes || []).filter(ep => ep.enclosureUrl).map(ep => ({
-        ...ep,
-        ...(meta?.community ? { community: meta.community } : {}),
-        ...(meta?.artwork ? { artwork: meta.artwork } : {}),
-      }));
-      setEpisodes(prev => {
-        const guids = new Set(prev.map(e => e.guid));
-        const fresh = withAudio.filter(e => !guids.has(e.guid));
-        return fresh.length > 0 ? [...prev, ...fresh] : prev;
-      });
-      setLoadedFeeds(prev => ({ ...prev, [rssUrl]: true }));
-      // Enrich currentEp if it belongs to this feed and was restored without meta
-      if (meta?.community || meta?.artwork) {
-        const feedGuids = new Set(withAudio.map(e => e.guid));
-        setCurrentEp(prev => {
-          if (!prev || !feedGuids.has(prev.guid)) return prev;
-          const needsName = meta.community && !prev.community;
-          const needsArt = meta.artwork && !prev.artwork;
-          if (!needsName && !needsArt) return prev;
-          return {
-            ...prev,
-            ...(needsName ? { community: meta.community } : {}),
-            ...(needsArt ? { artwork: meta.artwork } : {}),
-          };
-        });
-      }
-    } catch (err) {
-      console.error("[AudioPlayer] RSS error:", err);
-    }
-    setLoading(false);
-  }, [loadedFeeds, session]);
-
   // ── Audio event listeners ────────────────────────────────
   useEffect(() => {
     const audio = audioRef.current;
@@ -1117,6 +1147,8 @@ export default function AudioPlayerProvider({ children, session }) {
       timeupdate: () => {
         const t = audio.currentTime;
         setProgress(t);
+        setError(null); // clear error on successful playback
+        clearTimeout(stallTimerRef.current);
         const now = Date.now();
         if (now - saveThrottle.current > SAVE_INTERVAL) {
           saveThrottle.current = now;
@@ -1147,11 +1179,12 @@ export default function AudioPlayerProvider({ children, session }) {
         }
       },
       play: () => {
-        setIsPlaying(true); setBuffering(false);
+        setIsPlaying(true); setBuffering(false); setError(null);
         if (ms) ms.playbackState = "playing";
       },
       pause: () => {
         setIsPlaying(false);
+        clearTimeout(stallTimerRef.current);
         saveBookmark(currentEp, audio.currentTime, speed, audio.duration);
         if (ms) ms.playbackState = "paused";
         // Persist recents on pause so position survives app close
@@ -1161,15 +1194,57 @@ export default function AudioPlayerProvider({ children, session }) {
           persistRecents(updated);
         }
       },
-      waiting: () => setBuffering(true),
-      canplay: () => setBuffering(false),
+      waiting: () => {
+        setBuffering(true);
+        // Start stall timer — if we're still buffering after STALL_TIMEOUT, show error
+        clearTimeout(stallTimerRef.current);
+        stallTimerRef.current = setTimeout(() => {
+          setBuffering(false);
+          setError("Stream stalled — check your connection");
+        }, STALL_TIMEOUT);
+      },
+      canplay: () => {
+        setBuffering(false); setError(null);
+        clearTimeout(stallTimerRef.current);
+      },
       ended: () => {
         setIsPlaying(false);
+        clearTimeout(stallTimerRef.current);
         if (ms) ms.playbackState = "none";
+        // If sleep timer is set to "end of episode", clear it
+        if (sleepTimerRef.current?.endOfEpisode) {
+          clearTimeout(sleepTimerRef.current.timerId);
+          setSleepTimer(null);
+          sleepTimerRef.current = null;
+        }
+      },
+      error: () => {
+        const e = audio.error;
+        const msgs = {
+          1: "Playback aborted",
+          2: "Network error — check your connection",
+          3: "Audio decoding failed",
+          4: "Audio format not supported",
+        };
+        setError(msgs[e?.code] || "Playback error");
+        setBuffering(false);
+        setIsPlaying(false);
+        clearTimeout(stallTimerRef.current);
+      },
+      stalled: () => {
+        // Audio download stalled — start a timer before showing error
+        clearTimeout(stallTimerRef.current);
+        stallTimerRef.current = setTimeout(() => {
+          setBuffering(false);
+          setError("Stream stalled — check your connection");
+        }, STALL_TIMEOUT);
       },
     };
     Object.entries(h).forEach(([e, fn]) => audio.addEventListener(e, fn));
-    return () => Object.entries(h).forEach(([e, fn]) => audio.removeEventListener(e, fn));
+    return () => {
+      Object.entries(h).forEach(([e, fn]) => audio.removeEventListener(e, fn));
+      clearTimeout(stallTimerRef.current);
+    };
   }, [currentEp, speed]);
 
   // ── Save on visibility change / beforeunload ─────────────
@@ -1229,18 +1304,11 @@ export default function AudioPlayerProvider({ children, session }) {
     // Check if this episode has a saved position in recents (use ref for fresh value)
     const saved = recentsRef.current.find(r => r.guid === ep.guid || r.enclosureUrl === ep.enclosureUrl);
 
-    // Enrich with active community meta if the episode is missing it (e.g. seeded episodes)
-    const meta = activeMetaRef.current;
-    const enrichedEp = (meta && (!ep.community || !ep.artwork)) ? {
-      ...ep,
-      ...(!ep.community && meta.community ? { community: meta.community } : {}),
-      ...(!ep.artwork && meta.artwork ? { artwork: meta.artwork } : {}),
-    } : ep;
-
-    setCurrentEp(enrichedEp);
+    setCurrentEp(ep);
     setBubbleMode("badge");
     setActivated(true);
     setBuffering(true);
+    setError(null);
 
     // Active listening intent — clear any nudge dismissal for this episode
     // and reset session fade so nudge can appear again after this episode
@@ -1319,6 +1387,7 @@ export default function AudioPlayerProvider({ children, session }) {
 
   const stop = useCallback(() => {
     cleanupPendingSeek();
+    clearSleepTimer();
     const a = audioRef.current;
     // pause() triggers the pause event handler which saves position to recents
     if (a) { a.pause(); a.src = ""; }
@@ -1331,10 +1400,11 @@ export default function AudioPlayerProvider({ children, session }) {
     setIsPlaying(false);
     setProgress(0);
     setDuration(0);
+    setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
     setNudgeFaded(true); // Don't nudge immediately after user explicitly closed
-  }, [cleanupPendingSeek]);
+  }, [cleanupPendingSeek, clearSleepTimer]);
 
   // Dismiss — save position to recents so user can resume later, then clean up
   const dismiss = useCallback(() => {
@@ -1345,6 +1415,7 @@ export default function AudioPlayerProvider({ children, session }) {
       saveBookmark(currentEp, a.currentTime, speed, a.duration);
     }
     cleanupPendingSeek();
+    clearSleepTimer();
     if (a) { a.pause(); a.src = ""; }
     if ("mediaSession" in navigator) {
       navigator.mediaSession.metadata = null;
@@ -1354,13 +1425,14 @@ export default function AudioPlayerProvider({ children, session }) {
     setIsPlaying(false);
     setProgress(0);
     setDuration(0);
+    setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
     setNudgeFaded(true); // Don't nudge immediately — will show on next app open
     // Clear dismissed guid so this episode's nudge isn't blocked next session
     setNudgeDismissedGuid(null);
     try { localStorage.removeItem(NUDGE_DISMISSED_KEY); } catch {}
-  }, [currentEp, speed, updateRecents, cleanupPendingSeek]);
+  }, [currentEp, speed, updateRecents, cleanupPendingSeek, clearSleepTimer]);
 
   const openFullScreen = useCallback(() => { setFullScreen(true); }, []);
   const closeFullScreen = useCallback(() => setFullScreen(false), []);
@@ -1410,6 +1482,65 @@ export default function AudioPlayerProvider({ children, session }) {
   const clearRecent = useCallback((guid) => {
     updateRecents(prev => prev.filter(r => r.guid !== guid));
   }, [updateRecents]);
+
+  // ── Retry — reload current episode's audio source ────────
+  const retry = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentEp?.enclosureUrl) return;
+    setError(null);
+    setBuffering(true);
+    clearTimeout(stallTimerRef.current);
+    const savedTime = audio.currentTime || progress;
+    audio.src = currentEp.enclosureUrl;
+    audio.playbackRate = speed;
+    const onLoaded = () => {
+      if (savedTime > 5) audio.currentTime = savedTime;
+      audio.play().catch(() => {});
+      pendingSeekRef.current = null;
+    };
+    cleanupPendingSeek();
+    pendingSeekRef.current = { audio, handler: onLoaded };
+    audio.addEventListener("loadedmetadata", onLoaded, { once: true });
+    audio.load();
+  }, [currentEp, speed, progress, cleanupPendingSeek]);
+
+  // ── Sleep timer ─────────────────────────────────────────
+  const setSleepTimerAction = useCallback((option) => {
+    // Clear any existing timer
+    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+
+    if (option.minutes === -1) {
+      // "End of episode" — no real timer, just flag it
+      const st = { label: "End of ep", endOfEpisode: true, timerId: null };
+      sleepTimerRef.current = st;
+      setSleepTimer(st);
+      return;
+    }
+
+    const ms = option.minutes * 60 * 1000;
+    const timerId = setTimeout(() => {
+      const audio = audioRef.current;
+      if (audio) audio.pause();
+      setSleepTimer(null);
+      sleepTimerRef.current = null;
+    }, ms);
+    const st = { label: option.label, endOfEpisode: false, timerId, deadline: Date.now() + ms };
+    sleepTimerRef.current = st;
+    setSleepTimer(st);
+  }, []);
+
+  const clearSleepTimer = useCallback(() => {
+    if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+    sleepTimerRef.current = null;
+    setSleepTimer(null);
+  }, []);
+
+  // Clean up sleep timer on unmount
+  useEffect(() => {
+    return () => {
+      if (sleepTimerRef.current?.timerId) clearTimeout(sleepTimerRef.current.timerId);
+    };
+  }, []);
 
   // ── Media Session API ──────────────────────────────────────
   // Sets metadata and action handlers so the OS notification widget
@@ -1466,20 +1597,16 @@ export default function AudioPlayerProvider({ children, session }) {
 
   // ── Context value ────────────────────────────────────────
 
-  const episodeMap = useMemo(() => {
-    const m = {};
-    episodes.forEach(ep => { if (ep.guid) m[ep.guid] = ep; });
-    return m;
-  }, [episodes]);
-
   const value = useMemo(() => ({
-    episodes, currentEp, isPlaying, progress, duration, speed, buffering, loading, episodeMap, recents,
-    bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, loadEpisodes,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, recents,
+    bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
+    sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
   }), [
-    episodes, currentEp, isPlaying, progress, duration, speed, buffering, loading, episodeMap, recents,
-    bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, loadEpisodes, openFullScreen, fullScreen,
+    currentEp, isPlaying, progress, duration, speed, buffering, error, recents,
+    bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
+    sleepTimer, setSleepTimerAction, clearSleepTimer,
   ]);
 
   // ── Render ───────────────────────────────────────────────
@@ -1531,6 +1658,7 @@ export default function AudioPlayerProvider({ children, session }) {
           episode={currentEp}
           isPlaying={isPlaying}
           buffering={buffering}
+          error={error}
           progress={progress}
           duration={duration}
           mode={bubbleMode}
@@ -1539,6 +1667,7 @@ export default function AudioPlayerProvider({ children, session }) {
           onCollapse={minimize}
           onOpenFull={openFullScreen}
           onDismiss={dismiss}
+          onRetry={retry}
         />,
         document.body
       )}
@@ -1560,6 +1689,7 @@ export default function AudioPlayerProvider({ children, session }) {
           episode={currentEp}
           isPlaying={isPlaying}
           buffering={buffering}
+          error={error}
           progress={progress}
           duration={duration}
           speed={speed}
@@ -1568,10 +1698,14 @@ export default function AudioPlayerProvider({ children, session }) {
           onSkip={skip}
           onSeek={seekTo}
           onCycleSpeed={cycleSpeed}
+          onRetry={retry}
           onResumeRecent={(r) => { resumeRecent(r); }}
           onClearRecent={(guid) => { clearRecent(guid); }}
           onStop={() => { stop(); }}
           onClose={closeFullScreen}
+          sleepTimer={sleepTimer}
+          onSetSleep={setSleepTimerAction}
+          onClearSleep={clearSleepTimer}
         />,
         document.body
       )}

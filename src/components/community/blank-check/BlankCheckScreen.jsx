@@ -45,19 +45,10 @@ const DEFAULT_TABS = [{ key: "filmography", label: "Filmography", icon: "🎬" }
 export default function BlankCheckScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
-  const rssUrl = community?.theme_config?.rss_url || "https://feeds.megaphone.fm/blank-check";
 
-  // Load podcast episodes into the global audio player
-  const { loadEpisodes, episodes, currentEp, isPlaying, minimize } = useAudioPlayer();
+  const { currentEp, isPlaying, minimize } = useAudioPlayer();
   const isPlayingRef = useRef(false);
   isPlayingRef.current = isPlaying;
-
-  useEffect(() => {
-    loadEpisodes(rssUrl, {
-      community: "Blank Check",
-      artwork: community?.theme_config?.banner_url || null,
-    });
-  }, [rssUrl, loadEpisodes]);
 
   // Auto-minimize mini bar when leaving — but only if audio is paused
   useEffect(() => {
@@ -145,8 +136,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress);
-  const bcEpisodes = useMemo(() => episodes.filter(e => e.feedUrl === rssUrl || e.community === "Blank Check"), [episodes, rssUrl]);
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes(bcEpisodes, allItems, 10, "blankcheck", community?.theme_config?.episode_source);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes([], allItems, 10, "blankcheck", community?.theme_config?.episode_source);
 
   useEffect(() => {
     if (allItems.length === 0) return;

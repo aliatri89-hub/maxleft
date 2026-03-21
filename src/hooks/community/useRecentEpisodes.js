@@ -53,143 +53,16 @@ export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, comm
   // Initialize from cache
   const [cachedItems, setCachedItems] = useState(() => readCache(cacheKey));
 
-  // Derive fresh matches — air_date fast path or RSS fuzzy matching
+  // Derive fresh matches — air_date based: "New Episodes" = items where air_date <= today, newest first
   const freshMatched = useMemo(() => {
     if (allItems.length === 0) return null;
 
-    // ── Air-date fast path ──────────────────────────────────────
-    // Communities with episode_source: "air_date" skip RSS entirely.
-    // "New Episodes" = items where air_date <= today, newest first.
-    if (episodeSource === "air_date") {
-      const aired = allItems
-        .filter(item => item.air_date && !isComingSoon(item))
-        .sort((a, b) => b.air_date.localeCompare(a.air_date))
-        .slice(0, limit);
-      return aired.length > 0 ? aired.map(item => ({ item, episode: null })) : null;
-    }
-
-    // ── RSS fuzzy matching (fallback for communities without air_dates) ──
-    if (episodes.length === 0) return null;
-
-    const normalize = (str) =>
-      (str || "")
-        .toLowerCase()
-        .replace(/['']/g, "'")
-        .replace(/[""]/g, '"')
-        .replace(/[^a-z0-9' ]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    const itemByEpisodeTitle = new Map();
-    const itemsByNormalizedTitle = new Map();
-
-    for (const item of allItems) {
-      const epTitle = item.extra_data?.episode_title;
-      if (epTitle) {
-        itemByEpisodeTitle.set(normalize(epTitle), item);
-      }
-      const normTitle = normalize(item.title);
-      if (normTitle && !itemsByNormalizedTitle.has(normTitle)) {
-        itemsByNormalizedTitle.set(normTitle, item);
-      }
-    }
-
-    const matched = [];
-    const usedItemIds = new Set();
-
-    for (const episode of episodes) {
-      if (matched.length >= limit) break;
-      const normEpTitle = normalize(episode.title);
-
-      // Skip non-film episodes: roundups, awards, intros, meta episodes
-      const SKIP_PREFIXES = [
-        "critical darlings",
-        "introducing",
-        "the blank check awards",
-        "annual blank check awards",
-        "march madness",
-      ];
-      if (SKIP_PREFIXES.some(p => normEpTitle.startsWith(p))) continue;
-
-      // Strip "with [guest name]" suffix (Blank Check convention: "Movie with Guest")
-      // Also handles "feat.", "featuring", "ft."
-      const normEpTitleNoGuest = normEpTitle
-        .replace(/\s+(?:with|feat\.?|featuring|ft\.?)\s+.+$/i, "")
-        .trim();
-
-      let item = itemByEpisodeTitle.get(normEpTitle);
-
-      // Confidence check: prevents short titles from false-matching inside longer strings.
-      // "ali" must not match "alien3...", "old" must not match "oldboy...", etc.
-      const isConfidentMatch = (filmTitle, epTitle) => {
-        if (filmTitle.length >= 10) return true;                      // long titles are safe
-
-        // For titles < 10 chars, require word-boundary match at start of episode
-        if (epTitle.startsWith(filmTitle)) {
-          const after = epTitle.charAt(filmTitle.length);
-          if (after === "" || after === " ") return true;             // full word at start
-        }
-
-        // Medium titles (5-9 chars) can pass if they're a big chunk of the ep title
-        if (filmTitle.length >= 5 && filmTitle.length / epTitle.length > 0.5) return true;
-
-        return false;
-      };
-
-      // Word-boundary substring check: filmTitle must appear as complete word(s) in epTitle
-      const includesAsWord = (haystack, needle) => {
-        const idx = haystack.indexOf(needle);
-        if (idx === -1) return false;
-        const before = idx === 0 ? " " : haystack.charAt(idx - 1);
-        const after = haystack.charAt(idx + needle.length) || " ";
-        return before === " " && (after === " " || after === "");
-      };
-
-      // Strategy 1: substring match on full episode title (longest title wins)
-      if (!item) {
-        const candidates = Array.from(itemsByNormalizedTitle.entries())
-          .filter(([title]) => includesAsWord(normEpTitle, title) && isConfidentMatch(title, normEpTitle))
-          .sort((a, b) => b[0].length - a[0].length);
-        if (candidates.length > 0) item = candidates[0][1];
-      }
-
-      // Strategy 2: match against guest-stripped title (handles "Movie with Guest" → "Movie")
-      // Require residual to be at least 6 chars to avoid "old", "ali", "here" false positives
-      if (!item && normEpTitleNoGuest !== normEpTitle && normEpTitleNoGuest.length >= 6) {
-        const candidates = Array.from(itemsByNormalizedTitle.entries())
-          .filter(([title]) =>
-            (includesAsWord(normEpTitleNoGuest, title) || includesAsWord(title, normEpTitleNoGuest))
-            && isConfidentMatch(title, normEpTitleNoGuest)
-          )
-          .sort((a, b) => b[0].length - a[0].length);
-        if (candidates.length > 0) item = candidates[0][1];
-      }
-
-      // Strategy 3: strip episode prefix (e.g. "Ep 12: Title"), then word-boundary match
-      // Require at least 6 chars after stripping to avoid tiny residual matches
-      if (!item) {
-        const stripped = normEpTitleNoGuest
-          .replace(/^(episode|ep\.?)\s*\d+\s*[:–—-]\s*/i, "")
-          .trim();
-        if (stripped.length >= 6) {
-          for (const [normTitle, candidate] of itemsByNormalizedTitle) {
-            if ((includesAsWord(normTitle, stripped) || includesAsWord(stripped, normTitle))
-              && isConfidentMatch(normTitle, stripped)) {
-              item = candidate;
-              break;
-            }
-          }
-        }
-      }
-
-      if (item && !usedItemIds.has(item.id)) {
-        usedItemIds.add(item.id);
-        matched.push({ item, episode });
-      }
-    }
-
-    return matched.length > 0 ? matched : null;
-  }, [episodes, allItems, limit, episodeSource]);
+    const aired = allItems
+      .filter(item => item.air_date && !isComingSoon(item))
+      .sort((a, b) => b.air_date.localeCompare(a.air_date))
+      .slice(0, limit);
+    return aired.length > 0 ? aired.map(item => ({ item, episode: null })) : null;
+  }, [allItems, limit]);
 
   // When fresh data arrives, update cache
   const prevFresh = useRef(null);
@@ -222,9 +95,7 @@ export function useRecentEpisodes(episodes = [], allItems = [], limit = 10, comm
     return cachedItems.map((c) => ({ item: c.item, episode: { title: c.episodeTitle } }));
   }, [freshMatched, cachedItems, allItems]);
 
-  const loading = episodeSource === "air_date"
-    ? recentEpisodeItems.length === 0 && allItems.length === 0
-    : recentEpisodeItems.length === 0 && allItems.length > 0 && episodes.length === 0;
+  const loading = recentEpisodeItems.length === 0 && allItems.length === 0;
 
   return { recentEpisodeItems, loading };
 }
