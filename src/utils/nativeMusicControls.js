@@ -1,28 +1,15 @@
 /**
  * nativeMusicControls.js
  * Wrapper around @capgo/capacitor-media-session.
- * Lazy-loads the plugin only on native platforms; every export
- * is a silent no-op when running in a browser (where the existing
- * navigator.mediaSession code handles it).
+ * Uses the native MediaSession bridge on Android/iOS.
+ * Every export is a silent no-op when running in a browser
+ * (where the existing navigator.mediaSession code handles it).
  */
 import { Capacitor } from "@capacitor/core";
+import { CapacitorMediaSession } from "@capgo/capacitor-media-session";
 
-let _plugin = null;
 const _isNative = Capacitor.isNativePlatform();
-
-async function getPlugin() {
-  if (!_isNative) return null;
-  if (!_plugin) {
-    try {
-      const mod = await import("@capgo/capacitor-media-session");
-      _plugin = mod.CapacitorMediaSession;
-    } catch (e) {
-      console.warn("[MusicControls] plugin not available:", e);
-      return null;
-    }
-  }
-  return _plugin;
-}
+const plugin = _isNative ? CapacitorMediaSession : null;
 
 // Track registered handlers so we can clean up
 let _handlersRegistered = false;
@@ -40,7 +27,6 @@ export async function createControls({
   elapsed,
   playbackRate,
 }) {
-  const plugin = await getPlugin();
   if (!plugin) return;
   try {
     // Set metadata (title, artist, artwork)
@@ -72,7 +58,6 @@ export async function createControls({
  * Update playing state and position on the existing notification.
  */
 export async function updatePlaying(isPlaying, elapsed, duration, playbackRate) {
-  const plugin = await getPlugin();
   if (!plugin) return;
   try {
     await plugin.setPlaybackState({
@@ -94,7 +79,6 @@ export async function updatePlaying(isPlaying, elapsed, duration, playbackRate) 
  * Tear down the native notification.
  */
 export async function destroyControls() {
-  const plugin = await getPlugin();
   if (!plugin) return;
   try {
     await plugin.setPlaybackState({ playbackState: "none" });
@@ -113,7 +97,6 @@ export async function registerActionHandlers({
   onSeekTo,
   onStop,
 }) {
-  const plugin = await getPlugin();
   if (!plugin) return null;
   try {
     const actions = [
