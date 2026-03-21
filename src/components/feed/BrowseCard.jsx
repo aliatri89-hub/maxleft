@@ -230,15 +230,7 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
         }} />
         <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
           isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={ARTWORK_THEME} />
-        {dateStr && (
-          <div style={{
-            position: "absolute", bottom: 5, left: 18, zIndex: 1,
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: 8, color: "rgba(255,255,255,0.4)",
-            textShadow: "0 1px 3px rgba(0,0,0,0.8)",
-            whiteSpace: "nowrap", pointerEvents: "none",
-          }}>{dateStr}</div>
-        )}
+
       </div>
       <div style={{ width: 5, flexShrink: 0, background: "#111" }} />
     </>
@@ -304,14 +296,7 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
         }} />
         <LogoOrTitle data={data} logoReady={logoReady} setLogoReady={setLogoReady}
           isLightLogo={isLightLogo} setIsLightLogo={setIsLightLogo} theme={FILMSTRIP_THEME} />
-        {dateStr && (
-          <div style={{
-            position: "absolute", bottom: 6, left: 10,
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 7, color: "rgba(240,215,170,0.35)",
-            letterSpacing: "0.06em", whiteSpace: "nowrap", pointerEvents: "none",
-          }}>{dateStr}</div>
-        )}
+
       </div>
       <SprocketStrip />
     </>
