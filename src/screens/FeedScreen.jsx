@@ -43,7 +43,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const streamingSentinelRef = useRef(null);
 
   // ── Filter state ──
-  const [sortOrder, setSortOrder] = useState("recent");
+  const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
   const [selectedPodcast, setSelectedPodcast] = useState(null);
 
   // ── Filtered + sorted browse items ──

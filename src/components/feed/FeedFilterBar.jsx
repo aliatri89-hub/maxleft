@@ -13,7 +13,7 @@ const SORT_OPTIONS = [
 ];
 
 export default function FeedFilterBar({
-  sortOrder = "recent",
+  sortOrder = null,
   onSortChange,
   selectedPodcast = null,  // null = "All Podcasts"
   onPodcastChange,
@@ -23,30 +23,22 @@ export default function FeedFilterBar({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // ── Fetch podcast list once ──
+  // ── Fetch podcast list once (all communities with active podcasts) ──
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("community_pages")
-        .select("id, slug, name")
-        .eq("launched", true)
-        .order("sort_order", { ascending: true });
-      if (!cancelled && !error && data) {
-        // Also grab artwork from podcasts table
-        const { data: pods } = await supabase
-          .from("podcasts")
-          .select("community_page_id, artwork_url")
-          .eq("active", true);
-        const artMap = new Map();
-        for (const p of (pods || [])) artMap.set(p.community_page_id, p.artwork_url);
-
-        setPodcasts(data.map(cp => ({
-          id: cp.id,
-          slug: cp.slug,
-          name: cp.name,
-          artwork_url: artMap.get(cp.id) || null,
-          accent: getCommunityAccent(cp.slug),
+      const { data: pods, error } = await supabase
+        .from("podcasts")
+        .select("community_page_id, artwork_url, community_pages!inner(id, slug, name, sort_order)")
+        .eq("active", true)
+        .order("sort_order", { referencedTable: "community_pages", ascending: true });
+      if (!cancelled && !error && pods) {
+        setPodcasts(pods.map(p => ({
+          id: p.community_pages.id,
+          slug: p.community_pages.slug,
+          name: p.community_pages.name,
+          artwork_url: p.artwork_url || null,
+          accent: getCommunityAccent(p.community_pages.slug),
         })));
       }
     })();
@@ -92,7 +84,7 @@ export default function FeedFilterBar({
         {SORT_OPTIONS.map(opt => (
           <button
             key={opt.key}
-            onClick={() => onSortChange(opt.key)}
+            onClick={() => onSortChange(sortOrder === opt.key ? null : opt.key)}
             style={{
               padding: "5px 12px",
               background: sortOrder === opt.key ? "rgba(255,255,255,0.08)" : "transparent",
