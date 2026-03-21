@@ -106,15 +106,14 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, hideOverview, episodes, epLoading, onPlayEpisode, currentEp, isPlaying, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
 
   // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
-  const [promotedEp, setPromotedEp] = useState(null); // episode promoted to synopsis area
-  const synopsisRef = useRef(null);
+  const [expandedEpId, setExpandedEpId] = useState(null); // which episode row is expanded
   const prevTmdbId = useRef(null);
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
@@ -122,7 +121,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     // Reset detail when card changes
     if (data.tmdb_id !== prevTmdbId.current) {
       setDetail(null);
-      setPromotedEp(null);
+      setExpandedEpId(null);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -813,74 +812,92 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     const epKey = ep.episode_id || i;
                     const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
                     const isActiveAndPlaying = isActive && isPlaying;
-                    const isPromoted = promotedEp && (promotedEp.episode_id || promotedEp.audio_url) === (ep.episode_id || ep.audio_url);
+                    const isExpanded = expandedEpId === epKey;
+                    const descText = stripHtml(ep.description);
                     return (
-                      <div
-                        key={epKey}
-                        onClick={() => {
-                          if (isPromoted) {
-                            setPromotedEp(null);
-                          } else {
-                            setPromotedEp(ep);
-                            // Smooth scroll to synopsis area
-                            setTimeout(() => {
-                              synopsisRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                            }, 80);
-                          }
-                        }}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "7px 6px", cursor: "pointer", borderRadius: 6,
-                          background: isPromoted ? "rgba(196,115,79,0.06)" : isActive ? "rgba(240,235,225,0.03)" : "transparent",
-                          border: isPromoted ? "1px solid rgba(196,115,79,0.12)" : "1px solid transparent",
-                          transition: "all 0.15s",
-                        }}
-                      >
-                        {ep.podcast_artwork_url && (
-                          <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
-                            width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                            border: isPromoted ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
-                            flexShrink: 0,
-                          }} />
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{
-                            fontFamily: "'Barlow Condensed', sans-serif",
-                            fontWeight: 700, fontSize: 13,
-                            color: isPromoted ? "#f0ebe1" : isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
-                            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                          }}>{ep.episode_title || ep.podcast_name}</div>
-                          <div style={{
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            fontSize: 9, color: "rgba(240,235,225,0.35)",
-                            textTransform: "uppercase", letterSpacing: "0.04em",
-                          }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
-                        </div>
-                        {/* Play/pause button — separate tap target */}
+                      <div key={epKey}>
                         <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (isActiveAndPlaying) {
-                              onTogglePlay?.();
-                            } else {
-                              onPlayEpisode?.(ep);
-                            }
-                          }}
+                          onClick={() => setExpandedEpId(isExpanded ? null : epKey)}
                           style={{
-                            width: 32, height: 32, borderRadius: "50%",
-                            background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
-                            border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            flexShrink: 0,
-                            transition: "all 0.15s",
+                            display: "flex", alignItems: "center", gap: 10,
+                            padding: "7px 6px", cursor: "pointer", borderRadius: 6,
+                            background: isExpanded ? "rgba(240,235,225,0.04)" : isActive ? "rgba(240,235,225,0.03)" : "transparent",
+                            transition: "background 0.15s",
                           }}
                         >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
-                            {isActiveAndPlaying
-                              ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                              : <path d="M8 5v14l11-7z" />
-                            }
-                          </svg>
+                          {ep.podcast_artwork_url && (
+                            <img src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
+                              width: 32, height: 32, borderRadius: 8, objectFit: "cover",
+                              border: isExpanded ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                              flexShrink: 0,
+                            }} />
+                          )}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontWeight: 700, fontSize: 13,
+                              color: isExpanded || isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
+                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                            }}>{ep.episode_title || ep.podcast_name}</div>
+                            <div style={{
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9, color: "rgba(240,235,225,0.35)",
+                              textTransform: "uppercase", letterSpacing: "0.04em",
+                            }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                          </div>
+                          {/* Play/pause button — separate tap target */}
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (isActiveAndPlaying) {
+                                onTogglePlay?.();
+                              } else {
+                                onPlayEpisode?.(ep);
+                              }
+                            }}
+                            style={{
+                              width: 32, height: 32, borderRadius: "50%",
+                              background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
+                              border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              flexShrink: 0,
+                              transition: "all 0.15s",
+                            }}
+                          >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                              {isActiveAndPlaying
+                                ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                                : <path d="M8 5v14l11-7z" />
+                              }
+                            </svg>
+                          </div>
+                        </div>
+                        {/* Inline accordion description */}
+                        <div style={{
+                          maxHeight: isExpanded ? 300 : 0,
+                          overflow: "hidden",
+                          transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                        }}>
+                          {descText ? (
+                            <div style={{
+                              padding: "4px 6px 10px 48px",
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 10, lineHeight: 1.55,
+                              color: "rgba(240,235,225,0.5)",
+                              whiteSpace: "pre-wrap",
+                            }}>
+                              {descText}
+                            </div>
+                          ) : isExpanded ? (
+                            <div style={{
+                              padding: "4px 6px 10px 48px",
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: 9, fontStyle: "italic",
+                              color: "rgba(240,235,225,0.25)",
+                            }}>
+                              No description available
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     );
@@ -890,96 +907,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* Overview / Synopsis — crossfades to episode description when promoted */}
-          {(merged.overview || promotedEp) && (
-            <div ref={synopsisRef} style={{ marginBottom: 14, position: "relative", minHeight: 40 }}>
-              {/* Movie overview */}
-              <div style={{
-                opacity: promotedEp ? 0 : 1,
-                maxHeight: promotedEp ? 0 : 500,
-                overflow: "hidden",
-                transition: "opacity 0.25s ease, max-height 0.3s ease",
-              }}>
-                <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 10, lineHeight: 1.55,
-                  color: "rgba(240,235,225,0.65)",
-                  textAlign: "center",
-                }}>
-                  {merged.overview}
-                </div>
-              </div>
-
-              {/* Promoted episode description */}
-              <div style={{
-                opacity: promotedEp ? 1 : 0,
-                maxHeight: promotedEp ? 500 : 0,
-                overflow: "hidden",
-                transition: "opacity 0.25s ease 0.05s, max-height 0.3s ease",
-              }}>
-                {promotedEp && (
-                  <>
-                    {/* Episode header */}
-                    <div style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      marginBottom: 8,
-                    }}>
-                      {promotedEp.podcast_artwork_url && (
-                        <img src={promotedEp.podcast_artwork_url} alt="" style={{
-                          width: 24, height: 24, borderRadius: 6, objectFit: "cover",
-                          border: "1px solid rgba(196,115,79,0.3)", flexShrink: 0,
-                        }} />
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontFamily: "'Permanent Marker', cursive",
-                          fontSize: 12, color: "#f0ebe1",
-                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                        }}>{promotedEp.episode_title || promotedEp.podcast_name}</div>
-                        <div style={{
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          fontSize: 8, color: "rgba(240,235,225,0.35)",
-                          textTransform: "uppercase", letterSpacing: "0.04em",
-                        }}>{promotedEp.podcast_name}</div>
-                      </div>
-                      {/* Dismiss — return to overview */}
-                      <div
-                        onClick={() => setPromotedEp(null)}
-                        style={{
-                          width: 22, height: 22, borderRadius: "50%",
-                          background: "rgba(240,235,225,0.04)",
-                          border: "1px solid rgba(240,235,225,0.08)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          cursor: "pointer", flexShrink: 0,
-                        }}
-                      >
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2.5" strokeLinecap="round">
-                          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                      </div>
-                    </div>
-                    {/* Episode description body */}
-                    {promotedEp.description && stripHtml(promotedEp.description) ? (
-                      <div style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 10, lineHeight: 1.55,
-                        color: "rgba(240,235,225,0.6)",
-                        whiteSpace: "pre-wrap",
-                      }}>
-                        {stripHtml(promotedEp.description)}
-                      </div>
-                    ) : (
-                      <div style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 10, fontStyle: "italic",
-                        color: "rgba(240,235,225,0.25)",
-                      }}>
-                        No description available
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+          {/* Overview / Synopsis — only on log sleeves, hidden on browse */}
+          {!hideOverview && merged.overview && (
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, lineHeight: 1.55,
+              color: "rgba(240,235,225,0.65)",
+              textAlign: "center",
+              marginBottom: 14,
+            }}>
+              {merged.overview}
             </div>
           )}
 
