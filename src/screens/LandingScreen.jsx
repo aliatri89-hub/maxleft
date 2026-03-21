@@ -870,152 +870,81 @@ const featureStyles = `
     flex-shrink: 0;
   }
 
-  /* ── PLAY BUTTON DEMO ─────────────────────────────────────── */
-  .play-demo-wrap {
-    border-radius: 6px;
-    background: #302c28;
-    padding: 1px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  /* ── FLIP CARD DEMO ─────────────────────────────────────── */
+  .flip-card-wrap {
+    perspective: 1000px;
     width: 100%;
+    height: 160px;
   }
-  .play-demo-tape {
-    background: #1a1612;
-    border-radius: 5px;
-    overflow: hidden;
-    display: flex;
-    min-height: 80px;
-  }
-  .play-demo-tape-end { width: 5px; flex-shrink: 0; background: #1a1612; }
-  .play-demo-label {
-    flex: 1;
-    background: #f0ebe1;
-    padding: 14px 12px 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  .flip-card-inner {
     position: relative;
+    width: 100%; height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+  .flip-card-inner.flipped { transform: rotateY(180deg); }
+  .flip-card-front, .flip-card-back {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
     overflow: hidden;
   }
-  .play-demo-label::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background-image: repeating-linear-gradient(0deg, transparent, transparent 17px, rgba(0,0,0,0.03) 17px, rgba(0,0,0,0.03) 18px);
+  .flip-card-front {
+    background: #1a1714;
   }
-  /* Brand stamps */
-  .play-demo-brand-left, .play-demo-brand-right {
-    position: absolute; top: 0; bottom: 0; font-weight: 800; text-transform: uppercase; white-space: nowrap;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1;
+  .flip-card-back {
+    background: linear-gradient(180deg, #1e1a16 0%, #141210 100%);
+    transform: rotateY(180deg);
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 14px 16px;
+    border: 1px solid rgba(255,255,255,0.06);
   }
-  .play-demo-brand-left {
-    left: 4px; writing-mode: vertical-rl; transform: rotate(180deg);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 7px; letter-spacing: 0.12em; color: var(--terracotta, #C75B3F);
+  .flip-card-back-row {
+    display: flex; align-items: center; gap: 10;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
   }
-  .play-demo-brand-right {
-    right: 4px; writing-mode: vertical-rl; transform: rotate(180deg);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 7px; letter-spacing: 0.1em; color: #999;
+  .flip-card-back-row:last-child { border-bottom: none; }
+  .flip-card-back-art {
+    width: 34px; height: 34px; border-radius: 8px; object-fit: cover;
+    border: 1.5px solid rgba(199,91,63,0.2);
+    flex-shrink: 0;
   }
-  .play-demo-headphones {
-    position: absolute; bottom: 18px; right: 26px; opacity: 0.4;
-  }
-  /* VCR Deck */
-  .play-demo-deck {
-    background: linear-gradient(180deg, #1e1a16 0%, #1a1612 50%, #161310 100%);
-    border-top: 1px solid rgba(255,255,255,0.04);
-    padding: 8px 16px 7px;
-    display: flex; align-items: center; justify-content: center; gap: 16;
-    position: relative; cursor: pointer;
-  }
-  .play-demo-deck-edge {
-    position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08) 15%, rgba(255,255,255,0.08) 85%, transparent);
-  }
-  .play-demo-corner { position: absolute; width: 10px; height: 10px; pointer-events: none; }
-  .play-demo-corner-tl { top: 5px; left: 10px; border-top: 2px solid rgba(255,255,255,0.75); border-left: 2px solid rgba(255,255,255,0.75); }
-  .play-demo-corner-tr { top: 5px; right: 10px; border-top: 2px solid rgba(255,255,255,0.75); border-right: 2px solid rgba(255,255,255,0.75); }
-  .play-demo-corner-bl { bottom: 5px; left: 10px; border-bottom: 2px solid rgba(255,255,255,0.75); border-left: 2px solid rgba(255,255,255,0.75); }
-  .play-demo-corner-br { bottom: 5px; right: 10px; border-bottom: 2px solid rgba(255,255,255,0.75); border-right: 2px solid rgba(255,255,255,0.75); }
-  .play-demo-grille {
-    flex: 1; height: 20px; border-radius: 3px;
-    background: radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px);
-    background-size: 5px 5px;
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.2);
-  }
-  .play-demo-play-btn {
-    background: linear-gradient(180deg, #2a2520 0%, #1a1612 40%, #151210 100%);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-bottom-color: rgba(0,0,0,0.4);
-    border-top-color: rgba(255,255,255,0.12);
-    border-radius: 4px; padding: 5px 24px;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 4px rgba(0,0,0,0.4);
-    position: relative;
-  }
-  .play-demo-led {
-    position: absolute; top: -1px; right: -1px;
-    width: 5px; height: 5px; border-radius: 50%;
-    background: rgba(52,211,153,0.2);
-    border: 0.5px solid rgba(52,211,153,0.15);
-    pointer-events: none; transition: all 0.3s;
-  }
-  .play-demo-led.active {
-    background: #34d399; border: none;
-    box-shadow: 0 0 4px #34d399, 0 0 8px rgba(52,211,153,0.3);
-  }
-  /* Picker */
-  .play-demo-picker {
-    background: #1a1612;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding: 6px 12px;
-    border-radius: 0 0 4px 4px;
-    max-height: 0; overflow: hidden;
-    transition: max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1), padding 0.28s ease;
-  }
-  .play-demo-picker.open { max-height: 250px; padding: 6px 12px; }
-  .play-demo-picker-row {
-    display: flex; align-items: center; gap: 8;
-    padding: 5px 4px; cursor: pointer; border-radius: 4px;
-    transition: background 0.15s;
-  }
-  .play-demo-picker-row:hover { background: rgba(255,255,255,0.04); }
-  .play-demo-picker-art {
-    width: 28px; height: 28px; border-radius: 6px; object-fit: cover;
-    border: 1.5px solid rgba(199,91,63,0.25);
-  }
-  .play-demo-picker-name {
+  .flip-card-back-name {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700; font-size: 13px;
-    color: rgba(255,255,255,0.7);
+    color: rgba(255,255,255,0.8);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .play-demo-picker-ep {
+  .flip-card-back-ep {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 9px; color: rgba(255,255,255,0.3);
     text-transform: uppercase; letter-spacing: 0.04em;
   }
-  .play-demo-now-playing {
-    display: flex; align-items: center; gap: 8;
-    padding: 6px 12px; margin-top: 6px;
-    background: rgba(199,91,63,0.06);
-    border: 1px solid rgba(199,91,63,0.12);
-    border-radius: 6px;
-    animation: fadeIn 0.3s ease;
+  .flip-card-play-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(199,91,63,0.15);
+    border: 1px solid rgba(199,91,63,0.25);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
   }
-  .play-demo-now-playing img {
-    width: 24px; height: 24px; border-radius: 6px; object-fit: cover;
+  .flip-card-play-btn.active {
+    background: rgba(199,91,63,0.3);
+    border-color: rgba(199,91,63,0.5);
   }
-  .play-demo-now-playing-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px; font-weight: 600;
-    color: rgba(255,255,255,0.7);
+  .flip-nudge {
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: rgba(255,255,255,0.25);
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 8px 0 0;
+    animation: flipNudgePulse 2.5s ease infinite;
   }
-  .play-demo-now-playing-ep {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 9px; color: rgba(255,255,255,0.35);
-    font-style: italic;
+  @keyframes flipNudgePulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
   }
 
   /* ── BOTTOM CTA ──────────────────────────────────────────── */
@@ -1185,6 +1114,7 @@ const DEMO_PLAY_MOVIES = [
   {
     title: "Iron Man 3",
     logo: "https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png",
+    backdrop: "https://image.tmdb.org/t/p/w780/iVped1djsF0tvGkvnHbzsE3ZPTF.jpg",
     brand: "T-120 KODAK",
     podcasts: [
       { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", episode: "Iron Man 3 Retrospective", audio: "https://mcdn.podbean.com/mf/web/wbpmq3/NPPAVENGERS07.mp3" },
@@ -1195,6 +1125,7 @@ const DEMO_PLAY_MOVIES = [
   {
     title: "Barbie",
     logo: "https://image.tmdb.org/t/p/original/nsMnkuWIZCBxkBLPi0ZXuRloYL2.png",
+    backdrop: "https://image.tmdb.org/t/p/w780/3N5QNUqS76GFYNoEayfkkJyAyTN.jpg",
     brand: "E-180 BASF",
     podcasts: [
       { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie", audio: "https://play.podtrac.com/npr-510282/npr.simplecastaudio.com/f75261d2-0860-4d61-91c1-a78a2b997ff2/episodes/6f59940b-f4c4-4e76-b843-fd30022b2359/audio/128/default.mp3" },
@@ -1205,6 +1136,7 @@ const DEMO_PLAY_MOVIES = [
   {
     title: "Alien",
     logo: "https://image.tmdb.org/t/p/original/dWqeM2MO3S48Z2hWHjtpsBUqZ62.png",
+    backdrop: "https://image.tmdb.org/t/p/w780/AmR3JG1VQVxU8TfAvljUhfSFUOx.jpg",
     brand: "HGX MAXELL",
     podcasts: [
       { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://traffic.megaphone.fm/GLT8474795098.mp3" },
@@ -1239,6 +1171,7 @@ function LandingScreen({ onSignIn }) {
   const [demoPickerIdx, setDemoPickerIdx] = useState(null);
   const [demoPodcast, setDemoPodcast] = useState(null);
   const [demoPlaying, setDemoPlaying] = useState(false);
+  const [flippedCards, setFlippedCards] = useState(new Set());
   const demoAudioRef = useRef(null);
   const demoTimerRef = useRef(null);
 
@@ -1622,95 +1555,108 @@ function LandingScreen({ onSignIn }) {
           data-block="play"
         >
           <div className="mantl-feature-label">Listen</div>
-          <div className="mantl-feature-title">Tap Play on Any Movie</div>
+          <div className="mantl-feature-title">Tap Any Movie</div>
           <div className="mantl-feature-desc">
             See which podcasts covered it. Pick a show. Listen.
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {DEMO_PLAY_MOVIES.map((movie, idx) => (
-              <div key={idx} className="play-demo-wrap">
-                <div style={{ borderRadius: 4, overflow: "hidden" }}>
-                  {/* VHS Tape */}
-                  <div className="play-demo-tape">
-                    <div className="play-demo-tape-end" />
-                    <div className="play-demo-label">
-                      <span className="play-demo-brand-left">{movie.brand}</span>
-                      <span className="play-demo-brand-right">VHS</span>
-                      <img
-                        src={movie.logo}
-                        alt={movie.title}
-                        crossOrigin="anonymous"
-                        style={{
-                          maxHeight: 54, minHeight: 36, maxWidth: "85%", width: "auto",
-                          objectFit: "contain", position: "relative", opacity: 0.85,
-                        }}
-                        onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
-                      />
-                      <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 26, color: "#2C2824", textTransform: "uppercase", position: "relative", textAlign: "center" }}>{movie.title}</div>
-                      {/* Sharpie stars */}
-                      <div style={{ position: "absolute", bottom: 6, right: 24, display: "flex", gap: 0, alignItems: "center" }}>
-                        {[
-                          "M12 1 L14.5 8 L22 9.5 L16.5 14.5 L18 22 L12 18 L6 22 L7.5 14.5 L2 9.5 L9.5 8 Z",
-                          "M11.5 2 L14 9 L21.5 10 L15.5 14 L17 21 L11.5 17.5 L5.5 20.5 L7.5 13.5 L2.5 9 L10 8.5 Z",
-                          "M12 2.5 L15 8.5 L22.5 9 L17 13.5 L18.5 20.5 L12 17 L5.5 20.5 L7 13.5 L1.5 9 L9 8.5 Z",
-                        ].map((d, i) => (
-                          <svg key={i} width={14} height={14} viewBox="0 0 24 24" style={{ display: "block" }}>
-                            <path d={d} fill="none" stroke="#6b5a10" strokeWidth="2.8" strokeLinejoin="round" strokeLinecap="round"
-                              style={{ transform: `rotate(${[-3, 2, -1][i]}deg)`, transformOrigin: "center" }} />
-                          </svg>
-                        ))}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {DEMO_PLAY_MOVIES.map((movie, idx) => {
+              const isFlipped = flippedCards.has(idx);
+              return (
+                <div key={idx} className="flip-card-wrap">
+                  <div
+                    className={`flip-card-inner${isFlipped ? ' flipped' : ''}`}
+                    onClick={() => {
+                      if (!isFlipped) {
+                        setFlippedCards(prev => new Set([...prev, idx]));
+                      }
+                    }}
+                  >
+                    {/* ── FRONT: backdrop + logo ── */}
+                    <div className="flip-card-front">
+                      <img src={movie.backdrop} alt="" style={{
+                        position: "absolute", inset: 0, width: "100%", height: "100%",
+                        objectFit: "cover", objectPosition: "center top",
+                      }} />
+                      {/* Gradient overlay */}
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        background: "linear-gradient(180deg, rgba(15,13,11,0.3) 0%, rgba(15,13,11,0.6) 60%, rgba(15,13,11,0.85) 100%)",
+                      }} />
+                      {/* Logo */}
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                        padding: 16,
+                      }}>
+                        <img
+                          src={movie.logo} alt={movie.title} crossOrigin="anonymous"
+                          style={{ maxHeight: 60, maxWidth: "70%", objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
+                          onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
+                        />
+                        <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{movie.title}</div>
                       </div>
-                      <div className="play-demo-headphones">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C2824" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      {/* Headphones icon + tap hint */}
+                      <div style={{
+                        position: "absolute", bottom: 10, left: 0, right: 0,
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                      }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                         </svg>
+                        <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                          tap to flip
+                        </span>
                       </div>
                     </div>
-                    <div className="play-demo-tape-end" />
-                  </div>
-                  {/* VCR Deck */}
-                  <div className="play-demo-deck" onClick={() => toggleDemoPicker(idx)} style={{ borderRadius: demoPickerIdx === idx ? "0" : "0 0 4px 4px" }}>
-                    <div className="play-demo-deck-edge" />
-                    <div className="play-demo-corner play-demo-corner-tl" />
-                    <div className="play-demo-corner play-demo-corner-tr" />
-                    <div className="play-demo-corner play-demo-corner-bl" />
-                    <div className="play-demo-corner play-demo-corner-br" />
-                    <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
-                      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%)", pointerEvents: "none" }} />
-                      <div className="play-demo-grille" />
-                    </div>
-                    <div style={{ position: "relative", flexShrink: 0 }}>
-                      <div className="play-demo-play-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                        <div className={`play-demo-led${demoPlaying && demoPodcast && demoPodcast._movieIdx === idx ? ' active' : ''}`} />
+
+                    {/* ── BACK: podcasts ── */}
+                    <div className="flip-card-back" onClick={(e) => e.stopPropagation()}>
+                      <div style={{
+                        fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)",
+                        fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase",
+                        letterSpacing: "0.08em", marginBottom: 6,
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                      }}>
+                        <span>{movie.title} — covered by</span>
+                        <span
+                          onClick={(e) => { e.stopPropagation(); setFlippedCards(prev => { const n = new Set(prev); n.delete(idx); return n; }); }}
+                          style={{ cursor: "pointer", color: "rgba(255,255,255,0.2)", fontSize: 12, padding: "0 2px" }}
+                        >✕</span>
                       </div>
+                      {movie.podcasts.map((p, i) => {
+                        const isThisPlaying = demoPlaying && demoPodcast?.name === p.name && demoPodcast?._movieIdx === idx;
+                        return (
+                          <div key={i} className="flip-card-back-row">
+                            <img className="flip-card-back-art" src={p.art} alt={p.name} />
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div className="flip-card-back-name">{p.episode}</div>
+                              <div className="flip-card-back-ep">{p.name}</div>
+                            </div>
+                            {p.audio && (
+                              <div
+                                className={`flip-card-play-btn${isThisPlaying ? ' active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); handleDemoPlay(p, idx); }}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill={isThisPlaying ? "#C75B3F" : "rgba(255,255,255,0.5)"}>
+                                  {isThisPlaying
+                                    ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                                    : <path d="M8 5v14l11-7z" />
+                                  }
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div style={{ flex: 1, position: "relative", display: "flex", alignItems: "center" }}>
-                      <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 1, transform: "translateY(-50%)", background: "linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.18) 100%)", pointerEvents: "none" }} />
-                      <div className="play-demo-grille" />
-                    </div>
-                  </div>
-                  {/* Picker */}
-                  <div className={`play-demo-picker${demoPickerIdx === idx ? ' open' : ''}`}>
-                    {movie.podcasts.map((p, i) => (
-                      <div key={i} className="play-demo-picker-row" onClick={(e) => { e.stopPropagation(); handleDemoPlay(p, idx); }}>
-                        <img className="play-demo-picker-art" src={p.art} alt={p.name} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div className="play-demo-picker-name">{p.episode}</div>
-                          <div className="play-demo-picker-ep">{p.name}</div>
-                        </div>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.4)"><path d="M8 5v14l11-7z" /></svg>
-                      </div>
-                    ))}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-          <div className="tap-hint">tap a deck to see who covered it</div>
+          <div className="flip-nudge">tap a movie to see who covered it</div>
         </div>
 
         {/* ── 1. COMMUNITIES ────────────────────────────────── */}
