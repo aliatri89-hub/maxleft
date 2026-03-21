@@ -188,7 +188,11 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
   };
 
   const syncLetterboxd = async (username, uid, manual = false) => {
-    if (!username || !uid || letterboxdLock.current) return;
+    console.log("[Letterboxd] syncLetterboxd called", { username, uid, manual, locked: letterboxdLock.current });
+    if (!username || !uid || letterboxdLock.current) {
+      console.log("[Letterboxd] BAILED — guard failed", { noUsername: !username, noUid: !uid, locked: letterboxdLock.current });
+      return;
+    }
     letterboxdLock.current = true;
     setLetterboxdSyncing(true);
 
@@ -230,6 +234,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         .select("title, year, tmdb_id, watch_dates").eq("user_id", uid);
       const existingSet = new Set((existingMovies || []).map(m => `${m.title}::${m.year}`));
       const existingMap = new Map((existingMovies || []).map(m => [`${m.title}::${m.year}`, m]));
+      console.log(`[Letterboxd] Existing films in DB: ${existingSet.size}`);
 
       const { data: existingFeed } = await supabase.from("feed_activity")
         .select("title, item_title").eq("user_id", uid).eq("activity_type", "movie");
@@ -301,7 +306,19 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         workQueue.push({ title, year, rating, ratingFromTitle, watchedDate, dedupKey, rssTmdbId: rssTmdbId ? parseInt(rssTmdbId) : null });
       }
 
-      console.log(`[Letterboxd] ${workQueue.length} new films to sync`);
+      console.log(`[Letterboxd] ${workQueue.length} new films to sync, ${rewatchQueue.length} rewatches`);
+      if (workQueue.length > 0) console.log("[Letterboxd] First new:", workQueue.slice(0, 3).map(w => w.title));
+      if (workQueue.length === 0 && rewatchQueue.length === 0) {
+        // Log first few RSS items to see what was skipped
+        const rssItems = [];
+        for (const item of items) {
+          const ft = getTagText(item, "filmTitle");
+          const yr = getTagText(item, "filmYear");
+          if (ft) rssItems.push(`${ft.trim()}::${yr}`);
+          if (rssItems.length >= 5) break;
+        }
+        console.log("[Letterboxd] All RSS items already in DB. First RSS items:", rssItems);
+      }
 
       const processMovie = async ({ title, year, ratingFromTitle, watchedDate, rssTmdbId }) => {
         let tmdbId = rssTmdbId;
@@ -449,7 +466,10 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         }
         return { synced, rewatchCount };
       } else if (manual) {
+        console.log("[Letterboxd] Sync complete — nothing new found");
         showToast("Letterboxd up to date ✓");
+      } else {
+        console.log("[Letterboxd] Auto-sync complete — nothing new found");
       }
       return null;
     } catch (e) {
@@ -814,9 +834,10 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
   // ════════════════════════════════════════════════
 
   const runInitialSync = useCallback((profile, uid) => {
-    if (hasSyncedThisSession.current) return;
+    console.log("[InitialSync] called", { hasSynced: hasSyncedThisSession.current, uid, closureUserId: userId, lbUsername: profile.letterboxd_username });
+    if (hasSyncedThisSession.current) { console.log("[InitialSync] SKIPPED — already synced this session"); return; }
     const id = uid || userId;
-    if (!id) return;
+    if (!id) { console.log("[InitialSync] SKIPPED — no userId available"); return; }
     if (profile.letterboxd_username) syncLetterboxd(profile.letterboxd_username, id);
     if (profile.goodreads_user_id) syncGoodreads(profile.goodreads_user_id, id);
     if (profile.steam_id) syncSteam(profile.steam_id, id);
