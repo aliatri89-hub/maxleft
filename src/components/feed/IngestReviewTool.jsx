@@ -52,7 +52,28 @@ export default function IngestReviewTool({ userId, onToast }) {
   const [rematchResults, setRematchResults] = useState([]);
   const [rematchSearching, setRematchSearching] = useState(false);
 
+  // ── On-demand sync state ──
+  const [syncing, setSyncing] = useState(false);
+
   const isAdmin = userId === ADMIN_ID;
+
+  // ── Trigger ingest on demand ──
+  const handleSyncNow = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("https://api.mymantl.app/functions/v1/ingest-rss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (onToast) onToast(`Synced: ${data.total_new_episodes || 0} new eps, ${data.total_matches || 0} matches`);
+      fetchQueue();
+    } catch (err) {
+      if (onToast) onToast(`Sync failed: ${err.message}`);
+    }
+    setSyncing(false);
+  }, [fetchQueue, onToast]);
 
   // ── Fetch review queue ──
   const fetchQueue = useCallback(async () => {
@@ -206,6 +227,38 @@ export default function IngestReviewTool({ userId, onToast }) {
 
   return (
     <div style={{ minHeight: "50vh" }}>
+      {/* ── Sync Now ── */}
+      <div style={{
+        display: "flex", justifyContent: "flex-end",
+        padding: "10px 16px 0",
+      }}>
+        <button
+          onClick={handleSyncNow}
+          disabled={syncing}
+          style={{
+            padding: "6px 14px", borderRadius: 8,
+            background: syncing ? "rgba(255,255,255,0.02)" : "rgba(196,115,79,0.1)",
+            border: `1px solid ${syncing ? "rgba(255,255,255,0.06)" : "rgba(196,115,79,0.25)"}`,
+            color: syncing ? "rgba(240,235,225,0.4)" : "#c4734f",
+            fontSize: 10, fontWeight: 800,
+            fontFamily: "'Barlow Condensed', sans-serif",
+            textTransform: "uppercase", letterSpacing: "0.06em",
+            cursor: syncing ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", gap: 6,
+          }}
+        >
+          {syncing && (
+            <div style={{
+              width: 10, height: 10, borderRadius: "50%",
+              border: "1.5px solid #c4734f",
+              borderTopColor: "transparent",
+              animation: "ptr-spin 0.8s linear infinite",
+            }} />
+          )}
+          {syncing ? "Syncing…" : "Sync Now"}
+        </button>
+      </div>
+
       {/* ── Summary header ── */}
       {summary && summary.total_matches > 0 && (
         <div style={{
@@ -356,7 +409,7 @@ export default function IngestReviewTool({ userId, onToast }) {
           }}>
             No matches waiting for review.
             <br />
-            Next ingest runs at 22:00 UTC.
+            Hit Sync Now or wait for the 22:00 UTC cron.
           </div>
         </div>
       )}
