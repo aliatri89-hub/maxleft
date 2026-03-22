@@ -172,7 +172,13 @@ export default function IngestReviewTool({ userId, onToast, session }) {
       });
       if (error) throw error;
       const result = data || {};
-      if (onToast) onToast(`Approved ${result.approved || 0} matches, ${result.notifications_generated || 0} notifications sent`);
+      if (onToast) {
+        const parts = [`✓ ${result.approved || 0} approved`];
+        if (result.community_items_updated) parts.push(`${result.community_items_updated} community items`);
+        if (result.media_ids_linked) parts.push(`${result.media_ids_linked} media linked`);
+        if (result.notifications_generated) parts.push(`${result.notifications_generated} notifs`);
+        onToast(parts.join(" · "));
+      }
       setSelected(new Set());
       fetchQueue();
     } catch (err) {
