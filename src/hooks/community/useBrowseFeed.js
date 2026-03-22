@@ -104,9 +104,11 @@ export function useBrowseFeed(mode, active = false) {
   const fetchedRef = useRef(false);
   const nextPageRef = useRef(1);       // next TMDB page to fetch
   const seenTmdbRef = useRef(new Set()); // dedup across pages
+  const genRef = useRef(0);            // generation counter — stale fetches bail out
 
   // Fetch TMDB pages in batches, then check playability once per batch (fewer RPCs)
   const fetchCovered = useCallback(async (startPage, existingItems = []) => {
+    const gen = ++genRef.current;      // claim this generation
     setLoading(true);
     let accumulated = [...existingItems];
     let page = startPage;
@@ -114,6 +116,7 @@ export function useBrowseFeed(mode, active = false) {
 
     try {
       while (accumulated.length < TARGET_ITEMS && page <= MAX_PAGES) {
+        if (gen !== genRef.current) return; // stale — newer fetch is running
         // ── Phase 1: Fetch PAGES_PER_BATCH pages of TMDB results ──
         const discoverOpts = mode === "releases"
           ? {
@@ -129,7 +132,7 @@ export function useBrowseFeed(mode, active = false) {
 
         for (let p = page; p < pagesEnd; p++) {
           const data = await fetchTMDBDiscover(p, discoverOpts);
-          if (!mountedRef.current) return;
+          if (!mountedRef.current || gen !== genRef.current) return;
           if (!data || data.error || !data.results?.length) {
             tmdbExhausted = true;
             break;
@@ -152,7 +155,7 @@ export function useBrowseFeed(mode, active = false) {
         // ── Phase 2: Single playability check for entire batch (60 IDs vs 20) ──
         const tmdbIds = batchNormalized.map(m => m.tmdb_id);
         const playMap = await checkPlayability(tmdbIds);
-        if (!mountedRef.current) return;
+        if (!mountedRef.current || gen !== genRef.current) return;
 
         const covered = batchNormalized
           .filter(m => playMap.has(m.tmdb_id))
@@ -175,14 +178,20 @@ export function useBrowseFeed(mode, active = false) {
         }
       }
 
+      if (gen !== genRef.current) return; // stale — bail before updating state
+
       nextPageRef.current = page;
       setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
 
       // ── Final sort: reorder by release date for browse tabs ──
       // TMDB fetches by popularity (to find covered films fast), then we
       // re-sort once all batches are done so newest releases appear first.
+      // Tiebreaker: title (deterministic order for same-date films).
       if (accumulated.length > 0) {
-        accumulated.sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
+        accumulated.sort((a, b) =>
+          (b.release_date || "").localeCompare(a.release_date || "")
+          || (a.title || "").localeCompare(b.title || "")
+        );
         setItems([...accumulated]);
       }
 
@@ -190,14 +199,14 @@ export function useBrowseFeed(mode, active = false) {
       // Running this inside the loop caused a race: enrichLogos would patch
       // logos into React state, then the next loop iteration's setItems([...accumulated])
       // would overwrite them with the stale local array — causing logo ↔ text flash.
-      if (accumulated.length > 0) {
+      if (accumulated.length > 0 && gen === genRef.current) {
         enrichLogos(accumulated, mountedRef, setItems);
       }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
     }
 
-    if (mountedRef.current) setLoading(false);
+    if (mountedRef.current && gen === genRef.current) setLoading(false);
   }, [mode]);
 
   const loadMore = useCallback(() => {
