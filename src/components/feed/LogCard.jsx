@@ -106,9 +106,19 @@ function BrandStamp({ brand, side = "right" }) {
 // ════════════════════════════════════════════════
 // TITLE BACKDROP FRONT — en-language backdrop from TMDB
 // ════════════════════════════════════════════════
-function BackdropFront({ url, timeAgo, hasAudio, onClick }) {
+function BackdropFront({ url, timeAgo, communities, rating, onClick }) {
   // Slight rotation for the sticker — deterministic from timeAgo string
   const stickerRotate = timeAgo ? ((timeAgo.charCodeAt(0) || 0) % 5) * 0.5 - 1.2 : -0.5;
+
+  // Deduplicate communities by slug for podcast pills
+  const uniquePods = [];
+  const seenSlugs = new Set();
+  for (const c of (communities || [])) {
+    if (c.community_image && !seenSlugs.has(c.community_slug)) {
+      seenSlugs.add(c.community_slug);
+      uniquePods.push(c);
+    }
+  }
 
   return (
     <div
@@ -143,45 +153,94 @@ function BackdropFront({ url, timeAgo, hasAudio, onClick }) {
         position: "absolute", inset: 0, pointerEvents: "none",
         background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.45) 100%)",
       }} />
+      {/* Worn edges — radial vignette + inner shadow */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        boxShadow: "inset 0 0 20px 4px rgba(0,0,0,0.25), inset 0 0 3px 1px rgba(0,0,0,0.15)",
+        borderRadius: 8,
+      }} />
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.2) 100%)",
+      }} />
       {/* Subtle film grain */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.06,
         backgroundImage: NOISE_SVG,
       }} />
 
-      {/* Sharpie date sticker — cream pill, bottom left */}
+      {/* ═══ BOTTOM STRIP — date sticker | podcast pills | star sticker ═══ */}
       <div style={{
-        position: "absolute", bottom: 8, left: 10,
-        background: "rgba(240, 235, 225, 0.88)",
-        padding: "3px 9px 2px",
-        borderRadius: 3,
-        transform: `rotate(${stickerRotate}deg)`,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        padding: "0 10px 8px",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "space-between",
+        gap: 8,
+        pointerEvents: "none",
       }}>
-        <span style={{
-          fontFamily: "'Permanent Marker', cursive",
-          fontSize: 10,
-          color: "#2C2824",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-        }}>
-          {timeAgo}
-        </span>
-      </div>
-
-      {/* Headphone icon — bottom right, only when audio coverage exists */}
-      {hasAudio && (
+        {/* Sharpie date sticker — cream pill */}
         <div style={{
-          position: "absolute", bottom: 10, right: 12,
-          opacity: 0.65,
-          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))",
+          background: "rgba(240, 235, 225, 0.9)",
+          padding: "4px 10px 3px",
+          borderRadius: 3,
+          transform: `rotate(${stickerRotate}deg)`,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+          flexShrink: 0,
         }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-          </svg>
+          <span style={{
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 11,
+            color: "#2C2824",
+            letterSpacing: "0.02em",
+            textTransform: "uppercase",
+            whiteSpace: "nowrap",
+          }}>
+            {timeAgo}
+          </span>
         </div>
-      )}
+
+        {/* Podcast artwork pills — center */}
+        {uniquePods.length > 0 && (
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: 4,
+            maxWidth: uniquePods.length <= 5 ? 5 * 28 : 5 * 28,
+            flex: "0 1 auto",
+          }}>
+            {uniquePods.slice(0, 10).map((c, i) => (
+              <img
+                key={c.community_slug}
+                src={c.community_image}
+                alt={c.community_name}
+                style={{
+                  width: 24, height: 24,
+                  borderRadius: 5,
+                  objectFit: "cover",
+                  border: "1.5px solid rgba(255,255,255,0.25)",
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Star rating sticker — cream pill, bottom right */}
+        {rating > 0 && (
+          <div style={{
+            background: "rgba(240, 235, 225, 0.9)",
+            padding: "3px 6px 2px",
+            borderRadius: 3,
+            transform: `rotate(${-stickerRotate * 0.8}deg)`,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+            flexShrink: 0,
+          }}>
+            <Stars rating={rating} size={13} sharpie />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -482,7 +541,6 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   }, [isFirst]);
 
   const useBackdrop = USE_TITLE_BACKDROPS && enBackdropUrl;
-  const hasAudio = communities.some(c => c.episode_url);
 
   return (
     <>
@@ -505,7 +563,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
       }}>
         {useBackdrop ? (
-          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} hasAudio={hasAudio} onClick={openSleeve} />
+          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} onClick={openSleeve} />
         ) : (
           <CreamFront
             data={data}
