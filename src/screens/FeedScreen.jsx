@@ -312,6 +312,25 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }} />
           </div>
         )}
+        {filteredReleases.length > 0 && !releases.loading && (
+          <div style={{
+            padding: "28px 24px 36px", textAlign: "center",
+          }}>
+            <div style={{
+              width: 40, height: 1,
+              background: "var(--border-subtle, rgba(255,255,255,0.08))",
+              margin: "0 auto 14px",
+            }} />
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+              letterSpacing: "0.04em",
+            }}>
+              — end of new releases —
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Streaming pane ── */}
@@ -350,6 +369,25 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               borderTopColor: "transparent",
               animation: "ptr-spin 0.8s linear infinite",
             }} />
+          </div>
+        )}
+        {filteredStreaming.length > 0 && !streaming.loading && (
+          <div style={{
+            padding: "28px 24px 36px", textAlign: "center",
+          }}>
+            <div style={{
+              width: 40, height: 1,
+              background: "var(--border-subtle, rgba(255,255,255,0.08))",
+              margin: "0 auto 14px",
+            }} />
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+              letterSpacing: "0.04em",
+            }}>
+              — end of streaming —
+            </div>
           </div>
         )}
       </div>

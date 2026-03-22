@@ -168,6 +168,11 @@ export function useBrowseFeed(mode, active = false) {
 
         if (covered.length > 0) {
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
+          // Streaming renders progressively (popularity order is final).
+          // Releases defers until the post-loop date sort.
+          if (mode !== "releases") {
+            setItems([...accumulated]);
+          }
         }
 
         if (tmdbExhausted) break;
@@ -183,15 +188,17 @@ export function useBrowseFeed(mode, active = false) {
       nextPageRef.current = page;
       setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
 
-      // ── Final sort: reorder by release date for browse tabs ──
-      // TMDB fetches by popularity (to find covered films fast), then we
-      // re-sort once all batches are done so newest releases appear first.
-      // Tiebreaker: title (deterministic order for same-date films).
+      // ── Final sort: releases = newest first, streaming = popularity (as-is) ──
+      // TMDB fetches by popularity (finds covered films fast). For releases we
+      // re-sort by release_date so newest films top the list. Streaming keeps
+      // popularity order since users expect "what's hot" rather than chronological.
       if (accumulated.length > 0) {
-        accumulated.sort((a, b) =>
-          (b.release_date || "").localeCompare(a.release_date || "")
-          || (a.title || "").localeCompare(b.title || "")
-        );
+        if (mode === "releases") {
+          accumulated.sort((a, b) =>
+            (b.release_date || "").localeCompare(a.release_date || "")
+            || (a.title || "").localeCompare(b.title || "")
+          );
+        }
         setItems([...accumulated]);
       }
 
