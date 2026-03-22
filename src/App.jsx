@@ -127,7 +127,7 @@ export default function App() {
   const { pushNav, removeNav } = useBackNav(activeTab, setActiveTab);
   const {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
-    animateSlider, syncSliderPosition,
+    syncSliderPosition,
     onTouchStart, onTouchMove, onTouchEnd, TABS,
   } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
 
@@ -388,7 +388,7 @@ export default function App() {
                   </svg>
                 )}
               </div>
-              <div onClick={() => { removeNav("tab"); animateSlider("feed"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
+              <div onClick={() => { removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
               </div>
@@ -407,7 +407,7 @@ export default function App() {
                 <div className="tab-pane" key="feed-tab">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
-                    onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("search"); setActiveTab("search"); }}
+                    onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     feedMode={feedMode} setFeedMode={setFeedMode}
@@ -500,13 +500,13 @@ export default function App() {
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
-              onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("communities"); setActiveTab("communities"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
-              onClick={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("search"); setActiveTab("search"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
               <div className="nav-label">Search</div>
             </button>
@@ -514,8 +514,8 @@ export default function App() {
               onTouchStart={() => { if (activeTab !== "shelf") setPreloadTab("shelf"); }}
               onClick={() => {
                 tapLight();
-                if (activeTab !== "shelf") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); });
-                animateSlider("shelf"); setActiveTab("shelf"); setPreloadTab(null);
+                if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); });
+                setActiveTab("shelf"); setPreloadTab(null);
                 navTapCount.current++; clearTimeout(navTapTimer.current);
                 navTapTimer.current = setTimeout(() => { navTapCount.current = 0; }, 2000);
                 if (navTapCount.current >= 10) { navTapCount.current = 0; setEasterEggGame(true); }
