@@ -353,16 +353,16 @@ const featureStyles = `
   /* ── BADGE COLLECTION DEMO ───────────────────────────────── */
   .badge-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    padding: 18px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 14px;
     background: rgba(255,255,255,0.03);
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
   }
   .badge-slot {
-    aspect-ratio: 4 / 5;
-    border-radius: 12px;
+    aspect-ratio: 3 / 4;
+    border-radius: 10px;
     position: relative;
     cursor: pointer;
     transition: transform 0.3s ease;
@@ -402,8 +402,8 @@ const featureStyles = `
     backdrop-filter: blur(8px);
   }
   .badge-front-art {
-    width: 70px;
-    height: 70px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
     filter: blur(5px) saturate(0) brightness(0.7);
     opacity: 0.35;
@@ -445,8 +445,8 @@ const featureStyles = `
     z-index: 1;
   }
   .badge-back-art {
-    width: 78px;
-    height: 78px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
     border-radius: 50%;
     border: 2px solid;
@@ -455,9 +455,9 @@ const featureStyles = `
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     font-weight: 600;
     line-height: 1.2;
     text-shadow: 0 1px 6px rgba(0,0,0,0.85), 0 0 12px rgba(0,0,0,0.6);
@@ -466,7 +466,7 @@ const featureStyles = `
   .badge-back-flair {
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
-    font-size: 0.62rem;
+    font-size: 0.52rem;
     opacity: 0.85;
     text-shadow: 0 1px 5px rgba(0,0,0,0.85), 0 0 10px rgba(0,0,0,0.5);
     filter: brightness(1.2);
@@ -480,235 +480,78 @@ const featureStyles = `
     animation: badgeRevealPulse 0.8s ease-out 0.3s;
   }
 
-  /* ── LOG MOVIE DEMO ──────────────────────────────────────── */
-  .log-demo {
+  /* ── TRIPLE FEATURE DEMO ────────────────────────────────── */
+  .tf-demo {
     background: rgba(255,255,255,0.03);
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
-    overflow: hidden;
-    position: relative;
+    padding: 18px 16px;
+    text-align: center;
   }
-  .log-demo-backdrop {
-    position: absolute;
-    inset: 0;
+  .tf-posters {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .tf-poster {
+    width: 80px;
+    height: 120px;
+    border-radius: 8px;
     background-size: cover;
-    background-position: center top;
-  }
-  .log-demo-backdrop::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(15,13,11,0.45) 0%, rgba(15,13,11,0.75) 35%, rgba(15,13,11,0.92) 60%, #0f0d0b 85%);
-  }
-  .log-demo-content {
-    padding: 100px 16px 16px;
-    position: relative;
-    z-index: 1;
-  }
-  .log-demo-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .log-demo-poster {
-    width: 56px;
-    height: 84px;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #C75B3F 0%, #8B3A2A 100%);
+    background-position: center;
+    background-color: rgba(199,91,63,0.08);
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.6rem;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    position: relative;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .log-demo-poster-badge {
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.55rem;
-    opacity: 0;
-    transform: scale(0);
-    transition: opacity 0.4s, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  .tf-poster.revealed {
+    border-color: rgba(212,175,55,0.4);
+    box-shadow: 0 0 16px rgba(212,175,55,0.15);
   }
-  .log-demo-poster-badge.show {
-    opacity: 1;
-    transform: scale(1);
-  }
-  .log-demo-info h3 {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+  .tf-prompt {
+    font-family: 'Permanent Marker', cursive;
     font-size: 1rem;
-    font-weight: 700;
-    color: #f5f0eb;
-    margin: 0 0 2px;
-    line-height: 1.2;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
   }
-  .log-demo-info span {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.72rem;
-    color: #9a938a;
-    font-style: italic;
-  }
-  .log-demo-stars {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 12px;
-  }
-  .log-demo-star {
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    user-select: none;
-  }
-  .log-demo-star.filled {
-    background: rgba(199,91,63,0.2);
-    border-color: var(--terracotta, #C75B3F);
-  }
-  .log-demo-star:hover {
-    background: rgba(199,91,63,0.15);
-    transform: scale(1.1);
-  }
-  .log-demo-btn {
-    width: 100%;
-    padding: 10px;
+  .tf-reveal-btn {
+    display: inline-block;
+    padding: 10px 28px;
     border-radius: 10px;
-    border: none;
+    border: 1.5px solid rgba(212,175,55,0.3);
+    background: rgba(212,175,55,0.08);
     font-family: 'Barlow Condensed', sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 700;
+    color: #d4af37;
     cursor: pointer;
-    transition: all 0.25s ease;
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s ease;
   }
-  .log-demo-btn.ready {
-    background: #3A8F5C;
-    color: #fff;
+  .tf-reveal-btn:hover {
+    background: rgba(212,175,55,0.15);
+    border-color: rgba(212,175,55,0.5);
   }
-  .log-demo-btn.ready:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-  }
-  .log-demo-btn.logged {
-    background: rgba(168,181,160,0.2);
-    color: #A8B5A0;
-    pointer-events: none;
-  }
-  @keyframes btnFlash {
-    0% { opacity: 0; transform: translateX(-100%); }
-    50% { opacity: 0.3; }
-    100% { opacity: 0; transform: translateX(100%); }
-  }
-  .log-demo-btn.logged::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: btnFlash 0.6s ease-out;
-  }
-
-  /* ── TOAST ───────────────────────────────────────────────── */
-  .demo-toast {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #2a2520;
-    border: 1px solid rgba(199,91,63,0.3);
-    border-radius: 12px;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    opacity: 0;
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 10;
-    white-space: nowrap;
-    pointer-events: none;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  }
-  .demo-toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  .demo-toast-icon {
+  .tf-answer {
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     font-size: 1.1rem;
+    font-weight: 700;
+    color: #d4af37;
+    animation: fadeUp 0.4s ease;
   }
-  .demo-toast-text {
+  .tf-answer-sub {
     font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #f5f0eb;
-  }
-  .demo-toast-sub {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.62rem;
-    color: var(--terracotta, #C75B3F);
     font-style: italic;
+    font-size: 0.72rem;
+    color: rgba(212,175,55,0.5);
+    margin-top: 4px;
   }
 
-  /* ── PROGRESS BAR ────────────────────────────────────────── */
-  .demo-progress-wrap {
-    margin-top: 12px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.05);
-  }
-  .demo-progress-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-  .demo-progress-label span:first-child {
-    font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #9a938a;
-  }
-  .demo-progress-label span:last-child {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--terracotta, #C75B3F);
-    font-weight: 600;
-  }
-  .demo-progress-bar {
-    height: 4px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .demo-progress-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  }
 
   /* ── COMMUNITY DEMO ──────────────────────────────────────── */
   .community-demo {
@@ -1099,13 +942,22 @@ const PODCAST_ART_ROW2 = [
   { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts112/v4/da/e9/e6/dae9e6d3-6b4e-b600-bb37-0ce7833c24d5/mza_9711243178432328693.jpg/300x300bb.webp", name: "You Must Remember This" },
 ];
 
-/* ── Badge data for the demo ────────────────────────────── */
+/* ── Badge data for the demo (3 in a row) ────────────────── */
 const DEMO_BADGES = [
   { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/pumpkin_badge.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Backgroundhalloweenhero.jpg", name: "Haddonfield Historian", sub: "Halloween", color: "#ff6a00", bg: "rgba(255,106,0,0.12)" },
   { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_alien.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundAlienHero.jpg", name: "Weyland-Yutani Employee", sub: "Alien", color: "#4a9eff", bg: "rgba(74,158,255,0.12)" },
   { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundMadMaxHero.jpg", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
-  { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_chucky.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundChucky.jpg", name: "Friend Till the End", sub: "Child's Play", color: "#9b59b6", bg: "rgba(155,89,182,0.12)" },
 ];
+
+/* ── Triple Feature demo ─────────────────────────────────── */
+const TF_DEMO = {
+  posters: [
+    "https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", // Alien
+    "https://image.tmdb.org/t/p/w185/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg", // Blade Runner
+    "https://image.tmdb.org/t/p/w185/czHGg5BayFmBGvJNsmvFLEV0MRZ.jpg", // Gladiator
+  ],
+  answer: "Directed by Ridley Scott",
+};
 
 const DEMO_COMMUNITIES = [
   { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Infinityhero.jpeg" },
@@ -1159,10 +1011,7 @@ function LandingScreen({ onSignIn }) {
 
   // ── Interactive demo state ────────────────────────────────
   const [revealedBadges, setRevealedBadges] = useState(new Set());
-  const [demoRating, setDemoRating] = useState(0);
-  const [demoLogged, setDemoLogged] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [showPinBadge, setShowPinBadge] = useState(false);
+  const [tfRevealed, setTfRevealed] = useState(false);
 
   // ── Play button demo state ───────────────────────────────
   const [demoPickerIdx, setDemoPickerIdx] = useState(null);
@@ -1275,20 +1124,6 @@ function LandingScreen({ onSignIn }) {
       return next;
     });
   }, []);
-
-  // ── Log movie handler ─────────────────────────────────────
-  const handleLogMovie = useCallback(() => {
-    if (demoLogged) return;
-    setDemoLogged(true);
-    setShowPinBadge(true);
-    setTimeout(() => setShowToast(true), 300);
-    setTimeout(() => setShowToast(false), 3200);
-    setTimeout(() => {
-      setDemoLogged(false);
-      setDemoRating(0);
-      setShowPinBadge(false);
-    }, 5000);
-  }, [demoLogged]);
 
   // ── Send OTP code ─────────────────────────────────────────
   const handleSendOtp = async () => {
@@ -1689,16 +1524,52 @@ function LandingScreen({ onSignIn }) {
           <div className="flip-nudge">tap a movie to see who covered it</div>
         </div>
 
-        {/* ── 1. COMMUNITIES ────────────────────────────────── */}
+        {/* ── 1. TRIPLE FEATURE — Daily Puzzle ────────────────── */}
         <div
-          className={`mantl-feature-block${visibleBlocks.has('communities') ? ' visible' : ''}`}
-          data-block="communities"
+          className={`mantl-feature-block${visibleBlocks.has('triplefeature') ? ' visible' : ''}`}
+          data-block="triplefeature"
         >
-          <div className="mantl-feature-label">Go Deeper</div>
+          <div className="mantl-feature-label">Play</div>
+          <div className="mantl-feature-title">A New Puzzle Every Day</div>
+          <div className="mantl-feature-desc">
+            Three movies. One hidden connection. Can you crack it?
+          </div>
+          <div className="tf-demo">
+            <div className="tf-posters">
+              {TF_DEMO.posters.map((src, i) => (
+                <div
+                  key={i}
+                  className={`tf-poster${tfRevealed ? ' revealed' : ''}`}
+                  style={{ backgroundImage: `url(${src})`, animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </div>
+            <div className="tf-prompt">What connects these three films?</div>
+            {!tfRevealed ? (
+              <div className="tf-reveal-btn" onClick={() => setTfRevealed(true)}>
+                Reveal Connection
+              </div>
+            ) : (
+              <div>
+                <div className="tf-answer">{TF_DEMO.answer}</div>
+                <div className="tf-answer-sub">Triple Feature — new puzzle daily</div>
+              </div>
+            )}
+          </div>
+          <div className="tap-hint">Try it — tap to reveal</div>
+        </div>
+
+        {/* ── 2. TRACK — Communities + Badges ──────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('track') ? ' visible' : ''}`}
+          data-block="track"
+          style={{ transitionDelay: '0.1s' }}
+        >
+          <div className="mantl-feature-label">Track</div>
           <div className="mantl-feature-title">Join a Community</div>
           <div className="mantl-feature-desc">
             Your favorite podcasts get their own home — with miniseries,
-            badges, and your progress across everything they cover.
+            progress tracking, and badges to earn along the way.
           </div>
           <div className="community-demo">
             {DEMO_COMMUNITIES.map((c, i) => {
@@ -1710,7 +1581,7 @@ function LandingScreen({ onSignIn }) {
                 <div
                   key={i}
                   className="community-row"
-                  style={{ transitionDelay: visibleBlocks.has('communities') ? `${i * 0.12}s` : '0s' }}
+                  style={{ transitionDelay: visibleBlocks.has('track') ? `${i * 0.12}s` : '0s' }}
                 >
                   {c.backdrop && (
                     <>
@@ -1748,30 +1619,25 @@ function LandingScreen({ onSignIn }) {
               );
             })}
           </div>
-          <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontStyle: 'italic',
-            fontSize: '0.72rem',
-            color: 'rgba(255,255,255,0.3)',
-            textAlign: 'center',
-            marginTop: 12,
-          }}>
-            New communities coming soon
-          </div>
-        </div>
 
-        {/* ── 2. BADGE COLLECTION ──────────────────────────── */}
-        <div
-          className={`mantl-feature-block${visibleBlocks.has('badges') ? ' visible' : ''}`}
-          data-block="badges"
-          style={{ transitionDelay: '0.1s' }}
-        >
-          <div className="mantl-feature-label">Collect</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-            <div className="mantl-feature-title" style={{ marginBottom: 4 }}>Earn the Badge</div>
+          {/* Badges — inline under communities */}
+          <div style={{
+            marginTop: 18,
+            display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+          }}>
+            <div style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              textTransform: 'uppercase', letterSpacing: '0.04em',
+              fontSize: '0.95rem', fontWeight: 700, color: '#f5f0eb',
+              marginBottom: 4,
+            }}>Earn Badges</div>
             <div className="tap-hint" style={{ animation: 'none', margin: 0 }}>tap to reveal</div>
           </div>
-          <div className="mantl-feature-desc" style={{ marginBottom: 14 }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: '0.82rem', color: '#9a938a', lineHeight: 1.5,
+            marginBottom: 12,
+          }}>
             Complete franchises and collect badges along the way.
           </div>
           <div className="badge-grid">
@@ -1800,92 +1666,11 @@ function LandingScreen({ onSignIn }) {
           </div>
         </div>
 
-        {/* ── 3. LOG A MOVIE ───────────────────────────────── */}
-        <div
-          className={`mantl-feature-block${visibleBlocks.has('log') ? ' visible' : ''}`}
-          data-block="log"
-          style={{ transitionDelay: '0.2s' }}
-        >
-          <div className="mantl-feature-label">Track</div>
-          <div className="mantl-feature-title">Every Log Counts</div>
-          <div className="mantl-feature-desc">
-            Rate, log, and watch your progress grow.
-          </div>
-          <div className="log-demo" style={{ position: 'relative' }}>
-            <div className="log-demo-backdrop" style={{
-              backgroundImage: 'url(https://image.tmdb.org/t/p/w780/AmR3JG1VQVxU8TfAvljUhfSFUOx.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center top',
-            }} />
-            <div className="log-demo-content">
-              <div className="log-demo-row">
-                <div className="log-demo-poster" style={{
-                  backgroundImage: 'url(https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg)',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  fontSize: 0,
-                }}>
-                  <div className={`log-demo-poster-badge${showPinBadge ? ' show' : ''}`}>
-                    📌
-                  </div>
-                </div>
-                <div className="log-demo-info">
-                  <h3>Alien</h3>
-                  <span>Ridley Scott · 1979</span>
-                </div>
-              </div>
-              <div className="log-demo-stars">
-                {[1, 2, 3, 4, 5].map(n => (
-                  <div
-                    key={n}
-                    className={`log-demo-star${demoRating >= n ? ' filled' : ''}`}
-                    onClick={() => !demoLogged && setDemoRating(demoRating === n ? 0 : n)}
-                  >
-                    {demoRating >= n ? '★' : '☆'}
-                  </div>
-                ))}
-              </div>
-              <button
-                className={`log-demo-btn ${demoLogged ? 'logged' : 'ready'}`}
-                onClick={handleLogMovie}
-                disabled={demoLogged}
-                style={{ opacity: demoLogged ? 1 : 1 }}
-              >
-                {demoLogged ? '✓ Logged' : 'Log'}
-              </button>
-              <div className="demo-progress-wrap">
-                <div className="demo-progress-label">
-                  <span>Alien Franchise</span>
-                  <span>{demoLogged ? '5' : '4'} / 8</span>
-                </div>
-                <div className="demo-progress-bar">
-                  <div
-                    className="demo-progress-fill"
-                    style={{
-                      width: demoLogged ? '62.5%' : '50%',
-                      background: `linear-gradient(90deg, #4a9eff, ${demoLogged ? '#6ab4ff' : '#4a9eff'})`,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            {/* Toast */}
-            <div className={`demo-toast${showToast ? ' show' : ''}`}>
-              <span className="demo-toast-icon">👽</span>
-              <div>
-                <div className="demo-toast-text">Alien Logged!</div>
-                <div className="demo-toast-sub">5 of 8 toward Weyland-Yutani Employee</div>
-              </div>
-            </div>
-          </div>
-          <div className="tap-hint">Try it — rate and log</div>
-        </div>
-
-        {/* ── 3.5 SYNC IMPORTS ──────────────────────────────── */}
+        {/* ── 3. SYNC IMPORTS ──────────────────────────────────── */}
         <div
           className={`mantl-feature-block${visibleBlocks.has('sync') ? ' visible' : ''}`}
           data-block="sync"
-          style={{ transitionDelay: '0.25s' }}
+          style={{ transitionDelay: '0.2s' }}
         >
           <div className="mantl-feature-label">Sync</div>
           <div className="mantl-feature-title">Already Tracking? Import It.</div>
@@ -1905,7 +1690,7 @@ function LandingScreen({ onSignIn }) {
           </div>
         </div>
 
-        {/* ── 4. GROWING COMMUNITIES ────────────────────────── */}
+        {/* ── 4. GROWING COMMUNITIES ────────────────────────────── */}
         <div
           className={`mantl-feature-block${visibleBlocks.has('growing') ? ' visible' : ''}`}
           data-block="growing"
@@ -1942,7 +1727,7 @@ function LandingScreen({ onSignIn }) {
           </div>
         </div>
 
-        {/* ── BOTTOM CTA ───────────────────────────────────── */}
+        {/* ── BOTTOM CTA ───────────────────────────────────────── */}
         <div className="mantl-bottom-cta">
           <button className="btn-primary" onClick={onSignIn}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
