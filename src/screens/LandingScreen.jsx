@@ -485,71 +485,165 @@ const featureStyles = `
     background: rgba(255,255,255,0.03);
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
-    padding: 18px 16px;
+    padding: 18px 12px;
     text-align: center;
   }
-  .tf-posters {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .tf-poster {
-    width: 80px;
-    height: 120px;
-    border-radius: 8px;
-    background-size: cover;
-    background-position: center;
-    background-color: rgba(199,91,63,0.08);
-    flex-shrink: 0;
-    border: 1.5px solid rgba(255,255,255,0.08);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  .tf-poster.revealed {
-    border-color: rgba(212,175,55,0.4);
-    box-shadow: 0 0 16px rgba(212,175,55,0.15);
-  }
-  .tf-prompt {
-    font-family: 'Permanent Marker', cursive;
-    font-size: 1rem;
-    color: rgba(255,255,255,0.5);
+  .tf-target {
     margin-bottom: 14px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg,rgba(212,175,55,0.10),rgba(212,175,55,0.03));
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 10px;
+    display: inline-block;
+  }
+  .tf-target-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #8a8070;
+    margin-bottom: 2px;
+  }
+  .tf-target-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #d4af37;
     letter-spacing: 0.02em;
   }
-  .tf-reveal-btn {
+  .tf-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .tf-card {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .tf-card.selected {
+    box-shadow: 0 0 0 2px #d4af37, 0 4px 16px rgba(212,175,55,0.3);
+    transform: scale(1.04);
+  }
+  .tf-card.locked.selected {
+    box-shadow: 0 0 0 2px #d4af37, 0 4px 16px rgba(212,175,55,0.3);
+    transform: scale(1.04);
+  }
+  .tf-card.locked:not(.selected) {
+    opacity: 0.3;
+  }
+  .tf-card-poster {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+  }
+  .tf-card-check {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #d4af37;
+    color: #0a0a0f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .tf-card-gross {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10,10,15,0.3) 0%, rgba(10,10,15,0.88) 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 6px;
+    animation: fadeUp 0.4s ease;
+  }
+  .tf-card-gross-val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: #d4af37;
+  }
+  .tf-card-info {
+    padding: 3px 2px;
+    background: #111118;
+    text-align: center;
+  }
+  .tf-card-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 600;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tf-card.selected .tf-card-title { color: #d4af37; }
+  .tf-prompt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 12px;
+    letter-spacing: 0.04em;
+  }
+  .tf-lock-btn {
     display: inline-block;
     padding: 10px 28px;
     border-radius: 10px;
-    border: 1.5px solid rgba(212,175,55,0.3);
-    background: rgba(212,175,55,0.08);
+    border: none;
     font-family: 'Barlow Condensed', sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.82rem;
     font-weight: 700;
-    color: #d4af37;
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  .tf-reveal-btn:hover {
-    background: rgba(212,175,55,0.15);
-    border-color: rgba(212,175,55,0.5);
+  .tf-result {
+    animation: fadeUp 0.5s ease;
   }
-  .tf-answer {
+  .tf-result-rank {
     font-family: 'Barlow Condensed', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: 900;
     color: #d4af37;
-    animation: fadeUp 0.4s ease;
+    line-height: 1;
   }
-  .tf-answer-sub {
+  .tf-result-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: #666;
+    margin-top: 2px;
+    letter-spacing: 0.04em;
+  }
+  .tf-result-total {
     font-family: 'Barlow Condensed', sans-serif;
-    font-style: italic;
-    font-size: 0.72rem;
-    color: rgba(212,175,55,0.5);
-    margin-top: 4px;
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: #f0ece4;
+    margin-top: 6px;
+  }
+  .tf-result-diff {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .tf-new-puzzle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    color: #555;
+    margin-top: 10px;
+    letter-spacing: 0.06em;
   }
 
 
@@ -949,15 +1043,15 @@ const DEMO_BADGES = [
   { art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/badge_mad_max.png", backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BackgroundMadMaxHero.jpg", name: "Witnessed", sub: "Mad Max", color: "#ff4a4a", bg: "rgba(255,74,74,0.12)" },
 ];
 
-/* ── Triple Feature demo ─────────────────────────────────── */
-const TF_DEMO = {
-  posters: [
-    "https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", // Alien
-    "https://image.tmdb.org/t/p/w185/63N9uy8nd9j7Eog2axPQ8lbr3Wj.jpg", // Blade Runner
-    "https://image.tmdb.org/t/p/w185/czHGg5BayFmBGvJNsmvFLEV0MRZ.jpg", // Gladiator
-  ],
-  answer: "Directed by Ridley Scott",
-};
+/* ── Triple Feature demo (static mini-game) ──────────────── */
+const TF_DEMO_MOVIES = [
+  { title: "Alien",        year: 1979, poster: "https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", gross: 81 },
+  { title: "Die Hard",     year: 1988, poster: "https://image.tmdb.org/t/p/w185/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg", gross: 140 },
+  { title: "The Matrix",   year: 1999, poster: "https://image.tmdb.org/t/p/w185/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg", gross: 171 },
+  { title: "Jaws",         year: 1975, poster: "https://image.tmdb.org/t/p/w185/lxM6kqilAdpdhqUl2biYp5frUxE.jpg", gross: 260 },
+  { title: "Scream",       year: 1996, poster: "https://image.tmdb.org/t/p/w185/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg", gross: 103 },
+];
+const TF_DEMO_TARGET = 392; // Alien+Matrix+Scream = 355, optimal = Die Hard+Matrix+Alien = 392
 
 const DEMO_COMMUNITIES = [
   { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Infinityhero.jpeg" },
@@ -1011,7 +1105,8 @@ function LandingScreen({ onSignIn }) {
 
   // ── Interactive demo state ────────────────────────────────
   const [revealedBadges, setRevealedBadges] = useState(new Set());
-  const [tfRevealed, setTfRevealed] = useState(false);
+  const [tfSelected, setTfSelected] = useState(new Set());
+  const [tfLocked, setTfLocked] = useState(false);
 
   // ── Play button demo state ───────────────────────────────
   const [demoPickerIdx, setDemoPickerIdx] = useState(null);
@@ -1532,31 +1627,95 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-label">Play</div>
           <div className="mantl-feature-title">A New Puzzle Every Day</div>
           <div className="mantl-feature-desc">
-            Three movies. One hidden connection. Can you crack it?
+            Pick 3 of 5 movies. Get as close to the target gross as you can.
           </div>
           <div className="tf-demo">
-            <div className="tf-posters">
-              {TF_DEMO.posters.map((src, i) => (
-                <div
-                  key={i}
-                  className={`tf-poster${tfRevealed ? ' revealed' : ''}`}
-                  style={{ backgroundImage: `url(${src})`, animationDelay: `${i * 0.1}s` }}
-                />
-              ))}
+            {/* Target */}
+            <div className="tf-target">
+              <div className="tf-target-label">Target Domestic Gross</div>
+              <div className="tf-target-val">${TF_DEMO_TARGET}M</div>
             </div>
-            <div className="tf-prompt">What connects these three films?</div>
-            {!tfRevealed ? (
-              <div className="tf-reveal-btn" onClick={() => setTfRevealed(true)}>
-                Reveal Connection
-              </div>
-            ) : (
+
+            {/* Movie grid */}
+            <div className="tf-grid">
+              {TF_DEMO_MOVIES.map((movie, idx) => {
+                const sel = tfSelected.has(idx);
+                return (
+                  <div
+                    key={idx}
+                    className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}`}
+                    onClick={() => {
+                      if (tfLocked) return;
+                      const next = new Set(tfSelected);
+                      if (next.has(idx)) next.delete(idx);
+                      else if (next.size < 3) next.add(idx);
+                      setTfSelected(next);
+                    }}
+                  >
+                    <div style={{ position: 'relative' }}>
+                      <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
+                      {sel && !tfLocked && <div className="tf-card-check">✓</div>}
+                      {tfLocked && sel && (
+                        <div className="tf-card-gross">
+                          <div className="tf-card-gross-val">${movie.gross}M</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="tf-card-info">
+                      <div className="tf-card-title">{movie.title}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Picking / Result */}
+            {!tfLocked ? (
               <div>
-                <div className="tf-answer">{TF_DEMO.answer}</div>
-                <div className="tf-answer-sub">Triple Feature — new puzzle daily</div>
+                <div className="tf-prompt">
+                  {tfSelected.size === 0 && "Pick 3 movies"}
+                  {tfSelected.size === 1 && "Pick 2 more"}
+                  {tfSelected.size === 2 && "Pick 1 more"}
+                  {tfSelected.size === 3 && "Ready to lock in!"}
+                </div>
+                <button
+                  className="tf-lock-btn"
+                  onClick={() => tfSelected.size === 3 && setTfLocked(true)}
+                  style={{
+                    background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
+                    color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
+                    cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
+                  }}
+                >Lock It In</button>
               </div>
-            )}
+            ) : (() => {
+              const arr = Array.from(tfSelected);
+              const userTotal = arr.reduce((s, i) => s + TF_DEMO_MOVIES[i].gross, 0);
+              const diff = Math.abs(userTotal - TF_DEMO_TARGET);
+              const combos = [];
+              for (let i = 0; i < 5; i++)
+                for (let j = i + 1; j < 5; j++)
+                  for (let k = j + 1; k < 5; k++)
+                    combos.push({ idx: [i,j,k], total: TF_DEMO_MOVIES[i].gross + TF_DEMO_MOVIES[j].gross + TF_DEMO_MOVIES[k].gross });
+              const ranked = [...combos].sort((a, b) => Math.abs(a.total - TF_DEMO_TARGET) - Math.abs(b.total - TF_DEMO_TARGET));
+              const selSet = new Set(arr);
+              const rank = ranked.findIndex(c => { const cs = new Set(c.idx); return [...selSet].every(i => cs.has(i)); }) + 1;
+              return (
+                <div className="tf-result">
+                  <div className="tf-result-rank">#{rank}</div>
+                  <div className="tf-result-sub">out of 10 possible picks</div>
+                  <div className="tf-result-total">${userTotal}M</div>
+                  <div className="tf-result-diff" style={{
+                    color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
+                  }}>
+                    {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
+                  </div>
+                  <div className="tf-new-puzzle">New puzzle every day at midnight</div>
+                </div>
+              );
+            })()}
           </div>
-          <div className="tap-hint">Try it — tap to reveal</div>
+          <div className="tap-hint">{tfLocked ? 'A new Triple Feature drops daily' : 'Try it — pick your 3'}</div>
         </div>
 
         {/* ── 2. TRACK — Communities + Badges ──────────────────── */}
