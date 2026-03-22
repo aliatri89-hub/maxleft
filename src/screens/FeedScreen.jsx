@@ -329,25 +329,38 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }}>
               — end of new releases —
             </div>
+            <div style={{
+              marginTop: 16,
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+            }}>
+              Looking for something?
+            </div>
             <div
               onClick={onNavigateSearch}
               style={{
-                marginTop: 14,
+                marginTop: 10,
                 fontFamily: "var(--font-body)",
                 fontSize: 13,
+                fontWeight: 600,
                 color: "var(--accent-terra, #c97c5d)",
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
+                padding: "8px 18px",
+                borderRadius: 20,
+                border: "1px solid rgba(201,124,93,0.25)",
+                background: "rgba(201,124,93,0.08)",
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              Looking for something? Search all films
+              Search all films
             </div>
           </div>
         )}
@@ -408,25 +421,38 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }}>
               — end of streaming —
             </div>
+            <div style={{
+              marginTop: 16,
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+            }}>
+              Looking for something?
+            </div>
             <div
               onClick={onNavigateSearch}
               style={{
-                marginTop: 14,
+                marginTop: 10,
                 fontFamily: "var(--font-body)",
                 fontSize: 13,
+                fontWeight: 600,
                 color: "var(--accent-terra, #c97c5d)",
                 cursor: "pointer",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
+                padding: "8px 18px",
+                borderRadius: 20,
+                border: "1px solid rgba(201,124,93,0.25)",
+                background: "rgba(201,124,93,0.08)",
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              Looking for something? Search all films
+              Search all films
             </div>
           </div>
         )}
