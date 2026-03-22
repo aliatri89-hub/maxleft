@@ -108,6 +108,7 @@ serve(async (req) => {
     const slug: string = body.podcast_slug;
     const maxEpisodes: number = body.max_episodes || 1000;
     const runMatching: boolean = body.run_matching !== false; // default true
+    const dryRun: boolean = body.dry_run === true;
 
     if (!slug) {
       return jsonResponse({ error: "podcast_slug required" }, 400);
@@ -166,6 +167,35 @@ serve(async (req) => {
     });
 
     console.log(`[Backfill] ${newEpisodes.length} new episodes (${episodes.length - newEpisodes.length} already exist)`);
+
+    // ── Dry run: return counts + sample titles without inserting ──
+    if (dryRun) {
+      const sorted = [...newEpisodes].sort(
+        (a: any, b: any) => (a.datePublished || 0) - (b.datePublished || 0)
+      );
+      const sampleTitles = sorted.slice(0, 10).map((ep: any) => {
+        let airDate: string | null = null;
+        if (ep.datePublished) {
+          try {
+            const d = new Date(ep.datePublished * 1000);
+            if (!isNaN(d.getTime())) airDate = d.toISOString().split("T")[0];
+          } catch {}
+        }
+        return { title: ep.title, air_date: airDate };
+      });
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      return jsonResponse({
+        dry_run: true,
+        podcast: podcast.name,
+        podcast_index_feed_id: feedId,
+        episodes_on_podcast_index: episodes.length,
+        already_in_db: episodes.length - newEpisodes.length,
+        would_insert: newEpisodes.length,
+        oldest_new_sample: sampleTitles,
+        elapsed_seconds: parseFloat(elapsed),
+      });
+    }
 
     // 5. Insert new episodes
     const insertRows = newEpisodes.map((ep: any) => {
