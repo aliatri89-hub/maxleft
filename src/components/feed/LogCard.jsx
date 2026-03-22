@@ -106,7 +106,7 @@ function BrandStamp({ brand, side = "right" }) {
 // ════════════════════════════════════════════════
 // TITLE BACKDROP FRONT — en-language backdrop from TMDB
 // ════════════════════════════════════════════════
-function BackdropFront({ url, timeAgo, communities, rating, onClick }) {
+function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, onClick }) {
   // Slight rotation for the sticker — deterministic from timeAgo string
   const stickerRotate = timeAgo ? ((timeAgo.charCodeAt(0) || 0) % 5) * 0.5 - 1.2 : -0.5;
 
@@ -142,6 +142,20 @@ function BackdropFront({ url, timeAgo, communities, rating, onClick }) {
           objectPosition: "center",
         }}
       />
+      {/* Headphone icon — upper left, when any podcast covered this film */}
+      {hasPodcastCoverage && (
+        <div style={{
+          position: "absolute", top: 9, left: 10,
+          opacity: 0.7,
+          filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.7))",
+          pointerEvents: "none",
+        }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+          </svg>
+        </div>
+      )}
       {/* Warm color shift — VHS amber tone */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
@@ -564,7 +578,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
       }}>
         {useBackdrop ? (
-          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} onClick={openSleeve} />
+          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} hasPodcastCoverage={!!data.has_podcast_coverage} onClick={openSleeve} />
         ) : (
           <CreamFront
             data={data}

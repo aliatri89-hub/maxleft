@@ -154,6 +154,8 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
     if (new Date(effectiveDate) > new Date(group.logged_at)) group.logged_at = effectiveDate;
 
     if (log.community_name) {
+      // Track coverage from ANY community (before subscription filter)
+      if (log.episode_url) group.has_podcast_coverage = true;
       if (subscribedSlugs && !subscribedSlugs.has(log.community_slug)) continue;
       const alreadyAdded = group.communities.some(
         c => c.community_slug === log.community_slug && c.series_title === log.series_title
@@ -196,6 +198,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         if (!dup) existing.communities.push(c);
       }
       if (!existing.backdrop_path && group.backdrop_path) existing.backdrop_path = group.backdrop_path;
+      if (group.has_podcast_coverage) existing.has_podcast_coverage = true;
     }
   }
 
