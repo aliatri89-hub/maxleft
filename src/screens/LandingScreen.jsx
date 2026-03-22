@@ -485,12 +485,12 @@ const featureStyles = `
     background: rgba(255,255,255,0.03);
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,0.06);
-    padding: 18px 12px;
+    padding: 14px 12px 12px;
     text-align: center;
   }
   .tf-target {
-    margin-bottom: 14px;
-    padding: 10px 16px;
+    margin-bottom: 10px;
+    padding: 8px 16px;
     background: linear-gradient(135deg,rgba(212,175,55,0.10),rgba(212,175,55,0.03));
     border: 1px solid rgba(212,175,55,0.2);
     border-radius: 10px;
@@ -515,7 +515,7 @@ const featureStyles = `
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
   .tf-card {
     position: relative;
@@ -592,12 +592,12 @@ const featureStyles = `
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
     color: rgba(255,255,255,0.4);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     letter-spacing: 0.04em;
   }
   .tf-lock-btn {
     display: inline-block;
-    padding: 10px 28px;
+    padding: 8px 24px;
     border-radius: 10px;
     border: none;
     font-family: 'Barlow Condensed', sans-serif;
@@ -1045,13 +1045,13 @@ const DEMO_BADGES = [
 
 /* ── Triple Feature demo (static mini-game) ──────────────── */
 const TF_DEMO_MOVIES = [
-  { title: "Alien",        year: 1979, poster: "https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", gross: 81 },
-  { title: "Die Hard",     year: 1988, poster: "https://image.tmdb.org/t/p/w185/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg", gross: 140 },
+  { title: "Alien",        year: 1979, poster: "https://image.tmdb.org/t/p/w185/vfrQk5IPloGg1v9Rzbh2Eg3VGyM.jpg", gross: 84 },
+  { title: "Die Hard",     year: 1988, poster: "https://image.tmdb.org/t/p/w185/yFihWxQcmqcaBR31QM6Y8gT6aYV.jpg", gross: 86 },
   { title: "The Matrix",   year: 1999, poster: "https://image.tmdb.org/t/p/w185/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg", gross: 171 },
   { title: "Jaws",         year: 1975, poster: "https://image.tmdb.org/t/p/w185/lxM6kqilAdpdhqUl2biYp5frUxE.jpg", gross: 260 },
   { title: "Scream",       year: 1996, poster: "https://image.tmdb.org/t/p/w185/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg", gross: 103 },
 ];
-const TF_DEMO_TARGET = 392; // Alien+Matrix+Scream = 355, optimal = Die Hard+Matrix+Alien = 392
+const TF_DEMO_TARGET = 360; // optimal = Die Hard + Matrix + Scream = 86+171+103 = 360
 
 const DEMO_COMMUNITIES = [
   { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Infinityhero.jpeg" },
@@ -1453,7 +1453,6 @@ function LandingScreen({ onSignIn }) {
 
         <div className="landing-glow" />
         <div className="landing-top">
-          <div className="vhs-scanlines" />
           <div className="vhs-logo-wrap">
             <span className="vhs-eyebrow">The podcast platform for<br /><strong>movie lovers</strong></span>
             <div className="vhs-logo">
@@ -1619,110 +1618,10 @@ function LandingScreen({ onSignIn }) {
           <div className="flip-nudge">tap a movie to see who covered it</div>
         </div>
 
-        {/* ── 1. TRIPLE FEATURE — Daily Puzzle ────────────────── */}
-        <div
-          className={`mantl-feature-block${visibleBlocks.has('triplefeature') ? ' visible' : ''}`}
-          data-block="triplefeature"
-        >
-          <div className="mantl-feature-label">Play</div>
-          <div className="mantl-feature-title">A New Puzzle Every Day</div>
-          <div className="mantl-feature-desc">
-            Pick 3 of 5 movies. Get as close to the target gross as you can.
-          </div>
-          <div className="tf-demo">
-            {/* Target */}
-            <div className="tf-target">
-              <div className="tf-target-label">Target Domestic Gross</div>
-              <div className="tf-target-val">${TF_DEMO_TARGET}M</div>
-            </div>
-
-            {/* Movie grid */}
-            <div className="tf-grid">
-              {TF_DEMO_MOVIES.map((movie, idx) => {
-                const sel = tfSelected.has(idx);
-                return (
-                  <div
-                    key={idx}
-                    className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}`}
-                    onClick={() => {
-                      if (tfLocked) return;
-                      const next = new Set(tfSelected);
-                      if (next.has(idx)) next.delete(idx);
-                      else if (next.size < 3) next.add(idx);
-                      setTfSelected(next);
-                    }}
-                  >
-                    <div style={{ position: 'relative' }}>
-                      <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
-                      {sel && !tfLocked && <div className="tf-card-check">✓</div>}
-                      {tfLocked && sel && (
-                        <div className="tf-card-gross">
-                          <div className="tf-card-gross-val">${movie.gross}M</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="tf-card-info">
-                      <div className="tf-card-title">{movie.title}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Picking / Result */}
-            {!tfLocked ? (
-              <div>
-                <div className="tf-prompt">
-                  {tfSelected.size === 0 && "Pick 3 movies"}
-                  {tfSelected.size === 1 && "Pick 2 more"}
-                  {tfSelected.size === 2 && "Pick 1 more"}
-                  {tfSelected.size === 3 && "Ready to lock in!"}
-                </div>
-                <button
-                  className="tf-lock-btn"
-                  onClick={() => tfSelected.size === 3 && setTfLocked(true)}
-                  style={{
-                    background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
-                    color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
-                    cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
-                  }}
-                >Lock It In</button>
-              </div>
-            ) : (() => {
-              const arr = Array.from(tfSelected);
-              const userTotal = arr.reduce((s, i) => s + TF_DEMO_MOVIES[i].gross, 0);
-              const diff = Math.abs(userTotal - TF_DEMO_TARGET);
-              const combos = [];
-              for (let i = 0; i < 5; i++)
-                for (let j = i + 1; j < 5; j++)
-                  for (let k = j + 1; k < 5; k++)
-                    combos.push({ idx: [i,j,k], total: TF_DEMO_MOVIES[i].gross + TF_DEMO_MOVIES[j].gross + TF_DEMO_MOVIES[k].gross });
-              const ranked = [...combos].sort((a, b) => Math.abs(a.total - TF_DEMO_TARGET) - Math.abs(b.total - TF_DEMO_TARGET));
-              const selSet = new Set(arr);
-              const rank = ranked.findIndex(c => { const cs = new Set(c.idx); return [...selSet].every(i => cs.has(i)); }) + 1;
-              return (
-                <div className="tf-result">
-                  <div className="tf-result-rank">#{rank}</div>
-                  <div className="tf-result-sub">out of 10 possible picks</div>
-                  <div className="tf-result-total">${userTotal}M</div>
-                  <div className="tf-result-diff" style={{
-                    color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
-                  }}>
-                    {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
-                  </div>
-                  <div className="tf-new-puzzle">New puzzle every day at midnight</div>
-                </div>
-              );
-            })()}
-          </div>
-          <div className="tap-hint">{tfLocked ? 'A new Triple Feature drops daily' : 'Try it — pick your 3'}</div>
-        </div>
-
-        {/* ── 2. TRACK — Communities + Badges ──────────────────── */}
+        {/* ── 1. TRACK — Communities + Badges ──────────────────── */}
         <div
           className={`mantl-feature-block${visibleBlocks.has('track') ? ' visible' : ''}`}
           data-block="track"
-          style={{ transitionDelay: '0.1s' }}
         >
           <div className="mantl-feature-label">Track</div>
           <div className="mantl-feature-title">Join a Community</div>
@@ -1822,6 +1721,99 @@ function LandingScreen({ onSignIn }) {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* ── 2. TRIPLE FEATURE — Daily Puzzle ────────────────── */}
+        <div
+          className={`mantl-feature-block${visibleBlocks.has('triplefeature') ? ' visible' : ''}`}
+          data-block="triplefeature"
+          style={{ transitionDelay: '0.1s' }}
+        >
+          <div className="mantl-feature-label">New Puzzles Every Day</div>
+          <div className="mantl-feature-title">Triple Feature</div>
+          <div className="mantl-feature-desc">
+            Pick 3 of 5 movies. Get as close to the target gross as you can.
+          </div>
+          <div className="tf-demo">
+            <div className="tf-target">
+              <div className="tf-target-label">Target Domestic Gross</div>
+              <div className="tf-target-val">${TF_DEMO_TARGET}M</div>
+            </div>
+            <div className="tf-grid">
+              {TF_DEMO_MOVIES.map((movie, idx) => {
+                const sel = tfSelected.has(idx);
+                return (
+                  <div
+                    key={idx}
+                    className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}`}
+                    onClick={() => {
+                      if (tfLocked) return;
+                      const next = new Set(tfSelected);
+                      if (next.has(idx)) next.delete(idx);
+                      else if (next.size < 3) next.add(idx);
+                      setTfSelected(next);
+                    }}
+                  >
+                    <div style={{ position: 'relative' }}>
+                      <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
+                      {sel && !tfLocked && <div className="tf-card-check">✓</div>}
+                      {tfLocked && sel && (
+                        <div className="tf-card-gross">
+                          <div className="tf-card-gross-val">${movie.gross}M</div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="tf-card-info">
+                      <div className="tf-card-title">{movie.title}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {!tfLocked ? (
+              <div>
+                <div className="tf-prompt">
+                  {tfSelected.size === 0 && "Pick 3 movies"}
+                  {tfSelected.size === 1 && "Pick 2 more"}
+                  {tfSelected.size === 2 && "Pick 1 more"}
+                  {tfSelected.size === 3 && "Ready to lock in!"}
+                </div>
+                <button
+                  className="tf-lock-btn"
+                  onClick={() => tfSelected.size === 3 && setTfLocked(true)}
+                  style={{
+                    background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
+                    color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
+                    cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
+                  }}
+                >Lock It In</button>
+              </div>
+            ) : (() => {
+              const arr = Array.from(tfSelected);
+              const userTotal = arr.reduce((s, i) => s + TF_DEMO_MOVIES[i].gross, 0);
+              const diff = Math.abs(userTotal - TF_DEMO_TARGET);
+              const combos = [];
+              for (let i = 0; i < 5; i++)
+                for (let j = i + 1; j < 5; j++)
+                  for (let k = j + 1; k < 5; k++)
+                    combos.push({ idx: [i,j,k], total: TF_DEMO_MOVIES[i].gross + TF_DEMO_MOVIES[j].gross + TF_DEMO_MOVIES[k].gross });
+              const ranked = [...combos].sort((a, b) => Math.abs(a.total - TF_DEMO_TARGET) - Math.abs(b.total - TF_DEMO_TARGET));
+              const selSet = new Set(arr);
+              const rank = ranked.findIndex(c => { const cs = new Set(c.idx); return [...selSet].every(i => cs.has(i)); }) + 1;
+              return (
+                <div className="tf-result">
+                  <div className="tf-result-rank">#{rank}</div>
+                  <div className="tf-result-sub">out of 10 possible picks</div>
+                  <div className="tf-result-total">${userTotal}M</div>
+                  <div className="tf-result-diff" style={{
+                    color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
+                  }}>
+                    {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
