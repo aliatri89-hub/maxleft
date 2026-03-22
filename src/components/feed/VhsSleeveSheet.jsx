@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Stars, getCommunityAccent, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
+import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
@@ -266,7 +266,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     studio_names: data.studio_names?.length ? data.studio_names : (Array.isArray(detail.production_companies) ? detail.production_companies.slice(0,3).map(c => ({ name: c?.name || c, logo_url: c?.logo_path ? ("https://image.tmdb.org/t/p/w92" + c.logo_path) : null })).filter(s => s.name) : []),
   } : data;
 
-  const communities = merged?.communities || [];
   const backdropUrl = resolveImg(merged?.backdrop_path, TMDB_BACKDROP);
   const budgetStr = fmtMoney(merged?.budget);
   const grossStr = fmtMoney(merged?.revenue);
@@ -739,110 +738,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
-          {/* Community podcast rows */}
-          {communities.length > 0 && (
-            <div style={{
-              borderTop: "1px solid rgba(240,235,225,0.06)",
-              paddingTop: 12, marginBottom: 14,
-            }}>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800, fontSize: 8,
-                color: "rgba(240,235,225,0.4)",
-                letterSpacing: "0.14em", textTransform: "uppercase",
-                marginBottom: 8,
-              }}>
-                Podcast Coverage
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {communities.map((c, i) => {
-                  const cAccent = getCommunityAccent(c.community_slug);
-                  return (
-                    <div
-                      key={`sheet-${c.community_slug}-${c.series_title || ""}-${i}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onClose();
-                        setTimeout(() => onNavigateCommunity?.(c.community_slug, data.tmdb_id), 300);
-                      }}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 10,
-                        cursor: "pointer", padding: "4px 0",
-                      }}
-                    >
-                      {c.community_image ? (
-                        <img src={c.community_image} alt={c.community_name} style={{
-                          width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                          border: `1.5px solid ${cAccent}44`, flexShrink: 0,
-                        }} />
-                      ) : (
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                          background: `${cAccent}15`, border: `1.5px solid ${cAccent}44`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-                          fontSize: 10, color: cAccent,
-                        }}>
-                          {(c.community_name || "").split(" ").map(w => w[0]).join("")}
-                        </div>
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontFamily: "'Permanent Marker', cursive",
-                          fontSize: 12, color: "#f0ebe1",
-                        }}>
-                          {c.community_name}
-                        </div>
-                        {(c.series_title || c.episode_title) && (
-                          <div style={{
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            fontSize: 9, color: "rgba(240,235,225,0.6)",
-                            textTransform: "uppercase", letterSpacing: "0.04em",
-                            marginTop: 1, display: "flex", alignItems: "center", gap: 4,
-                          }}>
-                            <span>{c.series_title || c.episode_title}</span>
-                            {c.series_total > 0 && (
-                              <span style={{ color: cAccent, fontWeight: 600 }}>
-                                {c.series_watched || 0}/{c.series_total}
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        {c.series_total > 0 && (
-                          <div style={{
-                            marginTop: 4, height: 3, borderRadius: 2,
-                            background: "rgba(240,235,225,0.06)", overflow: "hidden",
-                          }}>
-                            <div style={{
-                              height: "100%", borderRadius: 2,
-                              width: `${Math.min(100, Math.round(((c.series_watched || 0) / c.series_total) * 100))}%`,
-                              background: cAccent, opacity: 0.6,
-                              transition: "width 0.3s ease",
-                            }} />
-                          </div>
-                        )}
-                        {c.badge?.badge_name && (
-                          <div style={{
-                            fontFamily: "'Permanent Marker', cursive",
-                            fontSize: 9, color: c.badge.accent_color || cAccent,
-                            opacity: (c.series_watched || 0) >= (c.series_total || 999) ? 1 : 0.5,
-                            marginTop: 3,
-                          }}>
-                            {(c.series_watched || 0) >= (c.series_total || 999) ? "🏆 " : "🔒 "}{c.badge.badge_name}
-                          </div>
-                        )}
-                      </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                        stroke={cAccent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                        style={{ flexShrink: 0, opacity: 0.5 }}>
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+
 
           {/* ═══ WHERE TO WATCH — streaming feed only ═══ */}
           {providers && (providers.stream.length > 0 || providers.rent.length > 0) && (
