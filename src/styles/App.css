@@ -3406,6 +3406,10 @@
   }
 
   /* ── BOTTOM NAV ── */
+  /* ── VHS Bottom Nav Shell ─────────────────────────────────
+     Shared by main app nav AND community tab navs.
+     Community navs override --nav-accent via inline style.
+     ──────────────────────────────────────────────────────── */
   .nav-bar {
     position: fixed;
     bottom: 0;
@@ -3413,14 +3417,14 @@
     transform: translateX(-50%);
     width: 100%;
     max-width: 430px;
-    background: rgba(15,13,11,0.96);
+    background: rgba(15,13,11,0.97);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(196,115,79,0.10);
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 6px 0 0;
+    padding: 10px 0 0;
     padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
     z-index: 9999;
   }
@@ -3430,41 +3434,45 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 8px 0 6px;
+    padding: 4px 0 6px;
     transition: color 0.2s ease;
-    color: rgba(255,255,255,0.35);
+    color: rgba(240,235,225,0.28);
     -webkit-tap-highlight-color: transparent;
     position: relative;
   }
-  .nav-item.active { color: var(--accent-terra, #C4734F); }
-  .nav-item.active .nav-label { font-weight: 700; }
+  .nav-item.active {
+    color: var(--nav-accent, var(--terracotta, #C4734F));
+  }
 
   .nav-icon {
-    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 24px;
+    height: 22px;
+    width: 22px;
   }
   .nav-icon svg {
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, filter 0.2s ease;
   }
   .nav-item.active .nav-icon svg {
-    transform: scale(1.08);
-    stroke-width: 2.2;
+    transform: scale(1.06);
+    filter: drop-shadow(0 0 5px rgba(196,115,79,0.25));
   }
 
   .nav-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    transition: font-weight 0.2s;
+    transition: color 0.2s, font-weight 0.2s;
+  }
+  .nav-item.active .nav-label {
+    font-weight: 600;
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -3564,17 +3572,13 @@
   .nav-item.active::before {
     content: '';
     position: absolute;
-    top: 0;
+    top: -1px;
     left: 50%;
     transform: translateX(-50%);
-    width: 24px;
+    width: 28px;
     height: 2px;
-    background: var(--accent-terra, #C4734F);
+    background: var(--nav-accent, var(--terracotta, #C4734F));
     border-radius: 0 0 2px 2px;
-  }
-
-  .nav-item.active .nav-icon {
-    filter: drop-shadow(0 0 6px rgba(196,115,79,0.3));
   }
 
   /* ── VHS Feed Mode Toggle ──────────────────────────────── */

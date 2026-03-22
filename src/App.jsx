@@ -495,39 +495,19 @@ export default function App() {
           </div>
         )}
 
-        {/* Bottom Nav — Communities | Search | My MANTL */}
+        {/* Bottom Nav — Communities | Search | Mantl */}
         {screen === "app" && !activeCommunitySlug && (
           <div className="nav-bar">
-            {(() => {
-              // Indicator bar — only visible when on a bottom nav tab (not feed)
-              const NAV_TABS = ["communities", "search", "shelf"];
-              const navIdx = NAV_TABS.indexOf(activeTab);
-              const showIndicator = navIdx >= 0;
-              const navCount = NAV_TABS.length;
-              const centerPct = showIndicator ? (2 * navIdx + 1) / (2 * navCount) * 100 : 50;
-              return (
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, pointerEvents: "none" }}>
-                  <div style={{
-                    position: "absolute", top: 0, height: 3,
-                    width: 56, borderRadius: 2,
-                    background: "var(--accent-green)",
-                    left: `${centerPct}%`, transform: "translateX(-50%)",
-                    opacity: showIndicator ? 1 : 0,
-                    transition: "left 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease",
-                  }} />
-                </div>
-              );
-            })()}
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
               onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("communities"); setActiveTab("communities"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
               onClick={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("search"); setActiveTab("search"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
               <div className="nav-label">Search</div>
             </button>
             <button className={`nav-item${activeTab === "shelf" ? " active" : ""}`}
@@ -540,8 +520,8 @@ export default function App() {
                 navTapTimer.current = setTimeout(() => { navTapCount.current = 0; }, 2000);
                 if (navTapCount.current >= 10) { navTapCount.current = 0; setEasterEggGame(true); }
               }}>
-              <div className="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-              <div className="nav-label">My Mantl</div>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="15" r="2"/></svg></div>
+              <div className="nav-label">Mantl</div>
             </button>
           </div>
         )}
