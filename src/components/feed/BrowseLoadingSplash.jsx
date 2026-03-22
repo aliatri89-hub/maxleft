@@ -8,7 +8,7 @@
  */
 
 const MODES = {
-  releases:  { label: "Now In Theaters",  accent: "#C4734F" },
+  releases:  { label: "New Releases",     accent: "#C4734F" },
   streaming: { label: "Now Streaming",    accent: "#60a5fa" },
 };
 
