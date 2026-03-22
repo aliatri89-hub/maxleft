@@ -394,7 +394,7 @@ function ResumeNudge({ recent, onResume, onDismiss, onFade }) {
       onTouchEnd={handleTouchEnd}
       style={{
         position: "fixed",
-        bottom: "calc(58px + env(safe-area-inset-bottom, 0px))",
+        bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
         left: 12, right: 12,
         zIndex: 9998,
         animation: exiting
