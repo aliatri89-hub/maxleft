@@ -191,26 +191,8 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         alignItems: "flex-end",
         pointerEvents: "none",
       }}>
-        {/* LEFT — date sticker + letterboxd link */}
+        {/* LEFT — letterboxd link + date sticker */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-          <div style={{
-            background: "rgba(240, 235, 225, 0.9)",
-            padding: "4px 10px 3px",
-            borderRadius: 3,
-            transform: `rotate(${stickerRotate}deg)`,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
-          }}>
-            <span style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 11,
-              color: "#2C2824",
-              letterSpacing: "0.02em",
-              textTransform: "uppercase",
-              whiteSpace: "nowrap",
-            }}>
-              {timeAgo}
-            </span>
-          </div>
           {letterboxdUrl && (
             <a
               href={letterboxdUrl}
@@ -235,6 +217,24 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               />
             </a>
           )}
+          <div style={{
+            background: "rgba(240, 235, 225, 0.9)",
+            padding: "4px 10px 3px",
+            borderRadius: 3,
+            transform: `rotate(${stickerRotate}deg)`,
+            boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+          }}>
+            <span style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 11,
+              color: "#2C2824",
+              letterSpacing: "0.02em",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}>
+              {timeAgo}
+            </span>
+          </div>
         </div>
 
         {/* CENTER — podcast artwork pills (always centered) */}
@@ -450,12 +450,6 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
             position: "absolute", bottom: 4, left: 28,
             display: "flex", flexDirection: "column", gap: 3,
           }}>
-            <div style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 10, color: "#2C2824",
-            }}>
-              {timeAgo}
-            </div>
             {letterboxdUrl && (
               <a
                 href={letterboxdUrl}
@@ -478,6 +472,12 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                 />
               </a>
             )}
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 10, color: "#2C2824",
+            }}>
+              {timeAgo}
+            </div>
           </div>
 
           {/* Stars — bottom right */}
