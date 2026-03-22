@@ -36,6 +36,7 @@ import ShelfItModal from "./components/ShelfItModal";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
+import AudioPip from "./components/AudioPip";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
@@ -388,6 +389,7 @@ export default function App() {
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
               </div>
+              <AudioPip />
               <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
                 <div className="header-profile">
                   {profile.avatarUrl
