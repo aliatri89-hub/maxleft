@@ -29,16 +29,24 @@ export default function FeedFilterBar({
     (async () => {
       const { data: pods, error } = await supabase
         .from("podcasts")
-        .select("community_page_id, artwork_url, community_pages!inner(id, slug, name, sort_order)")
+        .select("id, name, slug, artwork_url, community_page_id, community_pages(id, slug, sort_order)")
         .eq("active", true)
-        .order("sort_order", { referencedTable: "community_pages", ascending: true });
+        .order("name", { ascending: true });
       if (!cancelled && !error && pods) {
-        setPodcasts(pods.map(p => ({
-          id: p.community_pages.id,
-          slug: p.community_pages.slug,
-          name: p.community_pages.name,
+        // Sort: community podcasts by sort_order first, then non-community alphabetically
+        const sorted = pods.sort((a, b) => {
+          const aOrder = a.community_pages?.sort_order ?? 999;
+          const bOrder = b.community_pages?.sort_order ?? 999;
+          if (aOrder !== bOrder) return aOrder - bOrder;
+          return a.name.localeCompare(b.name);
+        });
+        setPodcasts(sorted.map(p => ({
+          id: p.community_page_id || p.id,
+          slug: p.community_pages?.slug || p.slug,
+          name: p.name,
           artwork_url: p.artwork_url || null,
-          accent: getCommunityAccent(p.community_pages.slug),
+          accent: getCommunityAccent(p.community_pages?.slug || p.slug),
+          communityPageId: p.community_page_id || null,
         })));
       }
     })();
