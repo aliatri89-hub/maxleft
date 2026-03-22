@@ -533,7 +533,14 @@ const featureStyles = `
     box-shadow: 0 0 0 2px #d4af37, 0 4px 16px rgba(212,175,55,0.3);
     transform: scale(1.04);
   }
-  .tf-card.locked:not(.selected) {
+  .tf-card.locked.optimal {
+    box-shadow: 0 0 0 2px #4ade80, 0 4px 16px rgba(74,222,128,0.3);
+    opacity: 1 !important;
+  }
+  .tf-card.locked.selected.optimal {
+    box-shadow: 0 0 0 2px #4ade80, 0 4px 16px rgba(74,222,128,0.4);
+  }
+  .tf-card.locked:not(.selected):not(.optimal) {
     opacity: 0.3;
   }
   .tf-card-poster {
@@ -572,6 +579,17 @@ const featureStyles = `
     font-size: 0.75rem;
     font-weight: 900;
     color: #d4af37;
+  }
+  .tf-card-gross-val.optimal-val {
+    color: #4ade80;
+  }
+  .tf-card-optimal-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.4rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #4ade80;
+    margin-top: 1px;
   }
   .tf-card-info {
     padding: 3px 2px;
@@ -820,7 +838,7 @@ const featureStyles = `
     transform-style: preserve-3d;
     cursor: pointer;
   }
-  .flip-card-inner.flipped { transform: rotateY(180deg); }
+  .flip-card-inner.flipped { transform: rotateX(180deg); }
   .flip-card-front, .flip-card-back {
     position: absolute; inset: 0;
     backface-visibility: hidden;
@@ -833,7 +851,7 @@ const featureStyles = `
   }
   .flip-card-back {
     background: linear-gradient(180deg, #1e1a16 0%, #141210 100%);
-    transform: rotateY(180deg);
+    transform: rotateX(180deg);
     display: flex; flex-direction: column; justify-content: center;
     padding: 14px 16px;
     border: 1px solid rgba(255,255,255,0.06);
@@ -1740,78 +1758,88 @@ function LandingScreen({ onSignIn }) {
               <div className="tf-target-label">Target Domestic Gross</div>
               <div className="tf-target-val">${TF_DEMO_TARGET}M</div>
             </div>
-            <div className="tf-grid">
-              {TF_DEMO_MOVIES.map((movie, idx) => {
-                const sel = tfSelected.has(idx);
-                return (
-                  <div
-                    key={idx}
-                    className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}`}
-                    onClick={() => {
-                      if (tfLocked) return;
-                      const next = new Set(tfSelected);
-                      if (next.has(idx)) next.delete(idx);
-                      else if (next.size < 3) next.add(idx);
-                      setTfSelected(next);
-                    }}
-                  >
-                    <div style={{ position: 'relative' }}>
-                      <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
-                      {sel && !tfLocked && <div className="tf-card-check">✓</div>}
-                      {tfLocked && sel && (
-                        <div className="tf-card-gross">
-                          <div className="tf-card-gross-val">${movie.gross}M</div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="tf-card-info">
-                      <div className="tf-card-title">{movie.title}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {!tfLocked ? (
-              <div>
-                <div className="tf-prompt">
-                  {tfSelected.size === 0 && "Pick 3 movies"}
-                  {tfSelected.size === 1 && "Pick 2 more"}
-                  {tfSelected.size === 2 && "Pick 1 more"}
-                  {tfSelected.size === 3 && "Ready to lock in!"}
-                </div>
-                <button
-                  className="tf-lock-btn"
-                  onClick={() => tfSelected.size === 3 && setTfLocked(true)}
-                  style={{
-                    background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
-                    color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
-                    cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
-                  }}
-                >Lock It In</button>
-              </div>
-            ) : (() => {
+            {(() => {
+              // Compute optimal combo (needed for both grid highlights and result)
+              const combos = [];
+              for (let a = 0; a < 5; a++)
+                for (let b = a + 1; b < 5; b++)
+                  for (let c = b + 1; c < 5; c++)
+                    combos.push({ idx: [a,b,c], total: TF_DEMO_MOVIES[a].gross + TF_DEMO_MOVIES[b].gross + TF_DEMO_MOVIES[c].gross });
+              const ranked = [...combos].sort((x, y) => Math.abs(x.total - TF_DEMO_TARGET) - Math.abs(y.total - TF_DEMO_TARGET));
+              const optimalSet = new Set(ranked[0].idx);
+
               const arr = Array.from(tfSelected);
               const userTotal = arr.reduce((s, i) => s + TF_DEMO_MOVIES[i].gross, 0);
               const diff = Math.abs(userTotal - TF_DEMO_TARGET);
-              const combos = [];
-              for (let i = 0; i < 5; i++)
-                for (let j = i + 1; j < 5; j++)
-                  for (let k = j + 1; k < 5; k++)
-                    combos.push({ idx: [i,j,k], total: TF_DEMO_MOVIES[i].gross + TF_DEMO_MOVIES[j].gross + TF_DEMO_MOVIES[k].gross });
-              const ranked = [...combos].sort((a, b) => Math.abs(a.total - TF_DEMO_TARGET) - Math.abs(b.total - TF_DEMO_TARGET));
               const selSet = new Set(arr);
               const rank = ranked.findIndex(c => { const cs = new Set(c.idx); return [...selSet].every(i => cs.has(i)); }) + 1;
+
               return (
-                <div className="tf-result">
-                  <div className="tf-result-rank">#{rank}</div>
-                  <div className="tf-result-sub">out of 10 possible picks</div>
-                  <div className="tf-result-total">${userTotal}M</div>
-                  <div className="tf-result-diff" style={{
-                    color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
-                  }}>
-                    {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
+                <>
+                  <div className="tf-grid">
+                    {TF_DEMO_MOVIES.map((movie, idx) => {
+                      const sel = tfSelected.has(idx);
+                      const isOptimal = tfLocked && optimalSet.has(idx);
+                      return (
+                        <div
+                          key={idx}
+                          className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}${isOptimal ? ' optimal' : ''}`}
+                          onClick={() => {
+                            if (tfLocked) return;
+                            const next = new Set(tfSelected);
+                            if (next.has(idx)) next.delete(idx);
+                            else if (next.size < 3) next.add(idx);
+                            setTfSelected(next);
+                          }}
+                        >
+                          <div style={{ position: 'relative' }}>
+                            <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
+                            {sel && !tfLocked && <div className="tf-card-check">✓</div>}
+                            {tfLocked && (sel || isOptimal) && (
+                              <div className="tf-card-gross">
+                                <div className={`tf-card-gross-val${isOptimal && !sel ? ' optimal-val' : ''}`}>${movie.gross}M</div>
+                                {isOptimal && !sel && <div className="tf-card-optimal-tag">OPTIMAL</div>}
+                              </div>
+                            )}
+                          </div>
+                          <div className="tf-card-info">
+                            <div className="tf-card-title" style={isOptimal && !sel ? { color: '#4ade80' } : undefined}>{movie.title}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                  {!tfLocked ? (
+                    <div>
+                      <div className="tf-prompt">
+                        {tfSelected.size === 0 && "Pick 3 movies"}
+                        {tfSelected.size === 1 && "Pick 2 more"}
+                        {tfSelected.size === 2 && "Pick 1 more"}
+                        {tfSelected.size === 3 && "Ready to lock in!"}
+                      </div>
+                      <button
+                        className="tf-lock-btn"
+                        onClick={() => tfSelected.size === 3 && setTfLocked(true)}
+                        style={{
+                          background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
+                          color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
+                          cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
+                        }}
+                      >Lock It In</button>
+                    </div>
+                  ) : (
+                    <div className="tf-result">
+                      <div className="tf-result-rank">#{rank}</div>
+                      <div className="tf-result-sub">out of 10 possible picks</div>
+                      <div className="tf-result-total">${userTotal}M</div>
+                      <div className="tf-result-diff" style={{
+                        color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
+                      }}>
+                        {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
+                      </div>
+                    </div>
+                  )}
+                </>
               );
             })()}
           </div>
