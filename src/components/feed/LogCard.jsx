@@ -220,18 +220,15 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               style={{
                 pointerEvents: "auto",
                 display: "block",
-                background: "rgba(240, 235, 225, 0.9)",
-                padding: "5px 10px 4px",
-                borderRadius: 3,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
                 textDecoration: "none",
+                filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
               }}
             >
               <img
-                src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
+                src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
                 alt="Letterboxd"
                 style={{
-                  height: 11,
+                  height: 15,
                   width: "auto",
                   display: "block",
                 }}
@@ -471,13 +468,12 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                 }}
               >
                 <img
-                  src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
+                  src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
                   alt="Letterboxd"
                   style={{
-                    height: 10,
+                    height: 13,
                     width: "auto",
                     display: "block",
-                    opacity: 0.75,
                   }}
                 />
               </a>
