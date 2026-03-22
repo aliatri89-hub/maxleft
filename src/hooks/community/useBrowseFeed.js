@@ -117,6 +117,7 @@ export function useBrowseFeed(mode, active = false) {
         // ── Phase 1: Fetch PAGES_PER_BATCH pages of TMDB results ──
         const discoverOpts = mode === "releases"
           ? {
+              sortBy: "release_date.desc",
               releaseDateGte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
               releaseDateLte: new Date().toISOString().slice(0, 10),
             }
@@ -164,7 +165,12 @@ export function useBrowseFeed(mode, active = false) {
           });
 
         if (covered.length > 0) {
-          accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
+          accumulated = [...accumulated, ...covered];
+          // Keep release-date order when in releases mode
+          if (mode === "releases") {
+            accumulated.sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
+          }
+          accumulated = accumulated.slice(0, TARGET_ITEMS);
           setItems([...accumulated]);
         }
 
