@@ -164,12 +164,7 @@ export function useBrowseFeed(mode, active = false) {
           });
 
         if (covered.length > 0) {
-          accumulated = [...accumulated, ...covered];
-          // Keep release-date order when in releases mode
-          if (mode === "releases") {
-            accumulated.sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
-          }
-          accumulated = accumulated.slice(0, TARGET_ITEMS);
+          accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
           setItems([...accumulated]);
         }
 
@@ -183,6 +178,14 @@ export function useBrowseFeed(mode, active = false) {
 
       nextPageRef.current = page;
       setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
+
+      // ── Final sort: reorder by release date for releases mode ──
+      // TMDB fetches by popularity (to find covered films fast), then we
+      // re-sort once all batches are done so newest releases appear first.
+      if (mode === "releases" && accumulated.length > 0) {
+        accumulated.sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
+        setItems([...accumulated]);
+      }
 
       // ── Phase 3: Enrich logos ONCE after all items are accumulated ──
       // Running this inside the loop caused a race: enrichLogos would patch
