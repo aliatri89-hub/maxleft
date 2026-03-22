@@ -1,6 +1,7 @@
 import AdminGameEditor from "../shared/AdminGameEditor";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState } from "react";
+import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
 import { toLogTimestamp } from "../../../utils/helpers";
 
 const FANATICAL_AFFILIATE_TAG = ""; // TODO: Add your Fanatical affiliate ID
@@ -57,6 +58,7 @@ export default function GetPlayedLogModal({
   const [saving, setSaving] = useState(false);
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
 
+  const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(item, "Get Played");
   const accent = "#e91e8c";
   const isHdtgp = item.tags?.includes("hdtgp") || item.extra_data?.era === "hdtgp";
   const episodeDesc = item.extra_data?.episode_title || item.extra_data?.description || null;
@@ -273,6 +275,22 @@ export default function GetPlayedLogModal({
               </div>
             )}
 
+            {/* Listen on MANTL — inline player */}
+            {matchedEpisode && (
+              <div onClick={(e) => { e.stopPropagation(); playEpisode(matchedEpisode); }}
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginTop: 10, marginBottom: 4, background: "rgba(74,222,128,0.06)", border: "1px solid rgba(74,222,128,0.15)", borderRadius: 10, cursor: "pointer" }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(74,222,128,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {isThisEpPlaying && isPlaying
+                    ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#4ade80"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="#4ade80"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#4ade80", textTransform: "uppercase", letterSpacing: "0.04em" }}>{isThisEpPlaying && isPlaying ? "Now Playing" : "Listen on MANTL"}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{matchedEpisode.title}</div>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+              </div>
+            )}
             {/* Listen On badges — compact */}
             <ListenOnBadges title={item.title} compact />
           </div>
