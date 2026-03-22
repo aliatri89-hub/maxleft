@@ -273,6 +273,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         const watchedDate = getTagText(item, "watchedDate");
         const titleText = getTagText(item, "title") || "";
         const ratingFromTitle = rating || parseLetterboxdRating(titleText.match(/★[★½]*/)?.[0]);
+        const reviewUrl = getTagText(item, "link") || null;
 
         const dedupKey = `${title}::${year}`;
 
@@ -303,7 +304,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         }
 
         existingSet.add(dedupKey);
-        workQueue.push({ title, year, rating, ratingFromTitle, watchedDate, dedupKey, rssTmdbId: rssTmdbId ? parseInt(rssTmdbId) : null });
+        workQueue.push({ title, year, rating, ratingFromTitle, watchedDate, dedupKey, rssTmdbId: rssTmdbId ? parseInt(rssTmdbId) : null, reviewUrl });
       }
 
       console.log(`[Letterboxd] ${workQueue.length} new films to sync, ${rewatchQueue.length} rewatches`);
@@ -320,7 +321,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         console.log("[Letterboxd] All RSS items already in DB. First RSS items:", rssItems);
       }
 
-      const processMovie = async ({ title, year, ratingFromTitle, watchedDate, rssTmdbId }) => {
+      const processMovie = async ({ title, year, ratingFromTitle, watchedDate, rssTmdbId, reviewUrl }) => {
         let tmdbId = rssTmdbId;
         let poster = null, backdrop = null, director = null, genre = null, runtime = null, genreIds = [];
 
@@ -365,6 +366,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
           source: "letterboxd",
           watchCount: 1,
           watchDates: [watchDateStr],
+          extraData: reviewUrl ? { letterboxd_url: reviewUrl } : {},
         });
         if (!mediaId) console.error("[Letterboxd] upsert_media_log failed for", title);
 

@@ -211,6 +211,18 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
     if (group.communities.length > 0 && group.tmdb_id) tmdbSeen.add(group.tmdb_id);
   }
 
+  // First pass: enrich existing community groups with letterboxd_url from shelf logs
+  for (const shelf of rawShelfLogs) {
+    if (!shelf.tmdb_id) continue;
+    const lbUrl = shelf.extra_data?.letterboxd_url || null;
+    if (!lbUrl) continue;
+    for (const group of mergedGroups.values()) {
+      if (group.tmdb_id === shelf.tmdb_id && !group.letterboxd_url) {
+        group.letterboxd_url = lbUrl;
+      }
+    }
+  }
+
   for (const [key, group] of mergedGroups) {
     if (group.communities.length === 0) mergedGroups.delete(key);
   }
@@ -246,6 +258,7 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
         genre: shelf.genre || null,
         certification: shelf.certification || null,
         still_paths: shelf.still_paths || null,
+        letterboxd_url: shelf.extra_data?.letterboxd_url || null,
         communities: [],
         isShelfLog: true,
       });

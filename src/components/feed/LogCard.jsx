@@ -106,7 +106,7 @@ function BrandStamp({ brand, side = "right" }) {
 // ════════════════════════════════════════════════
 // TITLE BACKDROP FRONT — en-language backdrop from TMDB
 // ════════════════════════════════════════════════
-function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, onClick }) {
+function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, letterboxdUrl, onClick }) {
   // Slight rotation for the sticker — deterministic from timeAgo string
   const stickerRotate = timeAgo ? ((timeAgo.charCodeAt(0) || 0) % 5) * 0.5 - 1.2 : -0.5;
 
@@ -188,11 +188,11 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         position: "absolute", bottom: 0, left: 0, right: 0,
         padding: "0 10px 9px",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-end",
         pointerEvents: "none",
       }}>
-        {/* LEFT — date sticker */}
-        <div style={{ flex: 1, display: "flex", justifyContent: "flex-start" }}>
+        {/* LEFT — date sticker + letterboxd link */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
           <div style={{
             background: "rgba(240, 235, 225, 0.9)",
             padding: "4px 10px 3px",
@@ -211,6 +211,49 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               {timeAgo}
             </span>
           </div>
+          {letterboxdUrl && (
+            <a
+              href={letterboxdUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                pointerEvents: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: 4,
+                background: "rgba(0, 0, 0, 0.55)",
+                backdropFilter: "blur(6px)",
+                WebkitBackdropFilter: "blur(6px)",
+                padding: "3px 8px 3px 6px",
+                borderRadius: 3,
+                textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <span style={{
+                fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+                fontSize: 7,
+                fontWeight: 600,
+                color: "rgba(255,255,255,0.6)",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                lineHeight: 1,
+              }}>
+                View on
+              </span>
+              <img
+                src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
+                alt="Letterboxd"
+                style={{
+                  height: 10,
+                  width: "auto",
+                  display: "block",
+                  filter: "brightness(1.1)",
+                }}
+              />
+            </a>
+          )}
         </div>
 
         {/* CENTER — podcast artwork pills (always centered) */}
@@ -263,7 +306,7 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
 // ════════════════════════════════════════════════
 // CREAM LABEL FRONT — fallback when no en-backdrop
 // ════════════════════════════════════════════════
-function CreamFront({ data, timeAgo, brandLeft, brandRight, onClick }) {
+function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onClick }) {
   const [isLightLogo, setIsLightLogo] = useState(true);
   const [logoReady, setLogoReady] = useState(false);
 
@@ -421,13 +464,53 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, onClick }) {
             </div>
           )}
 
-          {/* Time ago — bottom left */}
+          {/* Time ago + Letterboxd link — bottom left */}
           <div style={{
             position: "absolute", bottom: 4, left: 28,
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: 10, color: "#2C2824",
+            display: "flex", flexDirection: "column", gap: 3,
           }}>
-            {timeAgo}
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 10, color: "#2C2824",
+            }}>
+              {timeAgo}
+            </div>
+            {letterboxdUrl && (
+              <a
+                href={letterboxdUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  textDecoration: "none",
+                }}
+              >
+                <span style={{
+                  fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+                  fontSize: 6,
+                  fontWeight: 600,
+                  color: "rgba(44,40,36,0.45)",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  lineHeight: 1,
+                }}>
+                  View on
+                </span>
+                <img
+                  src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
+                  alt="Letterboxd"
+                  style={{
+                    height: 8,
+                    width: "auto",
+                    display: "block",
+                    opacity: 0.7,
+                  }}
+                />
+              </a>
+            )}
           </div>
 
           {/* Stars — bottom right */}
@@ -578,13 +661,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
       }}>
         {useBackdrop ? (
-          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} hasPodcastCoverage={!!data.has_podcast_coverage} onClick={openSleeve} />
+          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} hasPodcastCoverage={!!data.has_podcast_coverage} letterboxdUrl={data.letterboxd_url} onClick={openSleeve} />
         ) : (
           <CreamFront
             data={data}
             timeAgo={timeAgo}
             brandLeft={brandLeft}
             brandRight={brandRight}
+            letterboxdUrl={data.letterboxd_url}
             onClick={openSleeve}
           />
         )}
