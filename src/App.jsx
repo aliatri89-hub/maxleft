@@ -456,9 +456,9 @@ export default function App() {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "hidden" }}>
             <CommunityLoadingSkeleton />
-            <div style={{ position: "relative", zIndex: 1, width: "100%", minHeight: "100%" }}>
+            <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
                 onBack={() => { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
                 onShelvesChanged={() => { if (session) loadShelves(session.user.id); }}

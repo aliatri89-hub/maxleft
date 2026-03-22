@@ -148,8 +148,8 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0d0b",
-      overflowX: "hidden",
+      height: "100dvh", background: "#0f0d0b",
+      overflowX: "hidden", overflowY: "auto",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
     }}>
       <div style={{
