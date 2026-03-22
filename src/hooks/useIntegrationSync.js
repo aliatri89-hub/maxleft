@@ -494,7 +494,8 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
 
   const disconnectLetterboxd = async () => {
     if (!session) return;
-    await supabase.from("profiles").update({ letterboxd_username: null }).eq("id", session.user.id);
+    const { error } = await supabase.from("profiles").update({ letterboxd_username: null }).eq("id", session.user.id);
+    if (error) { showToast("Couldn't disconnect Letterboxd"); return; }
     setProfile(prev => ({ ...prev, letterboxd_username: null }));
     setLetterboxdLastSync(null);
     showToast("Letterboxd disconnected");
@@ -634,7 +635,8 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
 
   const disconnectGoodreads = async () => {
     if (!session) return;
-    await supabase.from("profiles").update({ goodreads_user_id: null }).eq("id", session.user.id);
+    const { error } = await supabase.from("profiles").update({ goodreads_user_id: null }).eq("id", session.user.id);
+    if (error) { showToast("Couldn't disconnect Goodreads"); return; }
     setProfile(prev => ({ ...prev, goodreads_user_id: null }));
     setGoodreadsLastSync(null);
     showToast("Goodreads disconnected");
@@ -824,7 +826,8 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
 
   const disconnectSteam = async () => {
     if (!session) return;
-    await supabase.from("profiles").update({ steam_id: null }).eq("id", session.user.id);
+    const { error } = await supabase.from("profiles").update({ steam_id: null }).eq("id", session.user.id);
+    if (error) { showToast("Couldn't disconnect Steam"); return; }
     setProfile(prev => ({ ...prev, steam_id: null }));
     showToast("Steam disconnected");
   };

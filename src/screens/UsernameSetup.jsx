@@ -452,7 +452,8 @@ function UsernameSetup({ name, session, onComplete }) {
 
     const userId = session?.user?.id;
     if (userId) {
-      await supabase.from("profiles").update({ username: clean, name: clean }).eq("id", userId);
+      const { error: updateErr } = await supabase.from("profiles").update({ username: clean, name: clean }).eq("id", userId);
+      if (updateErr) { setError("Couldn't save — try again"); setChecking(false); return; }
     }
 
     setChecking(false);
