@@ -228,7 +228,7 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
                 src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
                 alt="Letterboxd"
                 style={{
-                  height: 15,
+                  height: 30,
                   width: "auto",
                   display: "block",
                 }}
@@ -471,7 +471,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                   src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
                   alt="Letterboxd"
                   style={{
-                    height: 13,
+                    height: 26,
                     width: "auto",
                     display: "block",
                   }}
