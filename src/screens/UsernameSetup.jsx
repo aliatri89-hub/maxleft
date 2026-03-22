@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
-import { parseFile, importMovies, importBooks } from "../utils/importUtils";
-import OnboardingShowcase from "./OnboardingShowcase";
+import { parseFile, importMovies } from "../utils/importUtils";
 
 // ═══════════════════════════════════════════════════════════
 //  DARK THEME PALETTE
@@ -20,7 +19,6 @@ const dk = {
   accent:     "rgba(201,120,73,0.10)",
 };
 
-// Injected once at the top of setup-screen to override class-based styles
 const DARK_STYLES = `
   .setup-screen {
     background: ${dk.bg} !important;
@@ -281,28 +279,16 @@ function TaskRow({ task }) {
 //  MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
 function UsernameSetup({ name, session, onComplete }) {
-  // ── Core flow ────────────────────────────────────────────
-  const [phase, setPhase] = useState("username"); // username | shelves | letterboxd | books | games | communities | processing
+  // ── Core flow: username → communities → letterboxd → processing
+  const [phase, setPhase] = useState("username");
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
 
-  const [selectedShelves, setSelectedShelves] = useState({
-    books: true, movies: true, shows: true, games: true, communities: true,
-  });
-
-  // ── Letterboxd (single screen) ───────────────────────────
+  // ── Letterboxd ───────────────────────────────────────────
   const [letterboxdUsername, setLetterboxdUsername] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
   const fileInputRef = useRef(null);
-
-  // ── Books (single screen) ────────────────────────────────
-  const [bookPlatform, setBookPlatform] = useState(null); // goodreads | storygraph
-  const [bookUploadedFile, setBookUploadedFile] = useState(null);
-  const bookFileInputRef = useRef(null);
-
-  // ── Games (single screen) ────────────────────────────────
-  const [steamId, setSteamId] = useState("");
 
   // ── Community picker ─────────────────────────────────────
   const [communities, setCommunities] = useState([]);
@@ -340,37 +326,11 @@ function UsernameSetup({ name, session, onComplete }) {
     return () => { cancelled = true; };
   }, [phase]);
 
-  // ── Step dots ────────────────────────────────────────────
-  const allSteps = (() => {
-    const steps = ["username", "shelves", "showcase"];
-    if (selectedShelves.movies) steps.push("letterboxd");
-    if (selectedShelves.books) steps.push("books");
-    if (selectedShelves.games) steps.push("games");
-    if (selectedShelves.communities) steps.push("communities");
-    return steps;
-  })();
+  // ── Steps ────────────────────────────────────────────────
+  const allSteps = ["username", "communities", "letterboxd"];
 
-  const currentStepIndex = allSteps.indexOf(phase);
-
-  // ── Navigation ───────────────────────────────────────────
-  const nextPhaseAfter = (current) => {
-    const idx = allSteps.indexOf(current);
-    return idx < allSteps.length - 1 ? allSteps[idx + 1] : null;
-  };
-
-  const prevPhaseBefore = (current) => {
-    const idx = allSteps.indexOf(current);
-    return idx > 0 ? allSteps[idx - 1] : null;
-  };
-
-  const advanceFrom = (current) => {
-    const next = nextPhaseAfter(current);
-    if (next) {
-      setPhase(next);
-    } else {
-      beginProcessing([]);
-    }
-  };
+  // ── Default shelves — all on, user can toggle in settings later
+  const defaultShelves = { movies: true, shows: true, games: true, books: true };
 
   // ── Processing ───────────────────────────────────────────
   const beginProcessing = (communityIds) => {
@@ -395,28 +355,8 @@ function UsernameSetup({ name, session, onComplete }) {
       });
     }
 
-    if (bookUploadedFile) {
-      const platformName = bookPlatform === "storygraph" ? "StoryGraph" : "Goodreads";
-      tasks.push({
-        id: "book-csv",
-        label: `Importing from ${platformName}`,
-        status: "pending",
-        progress: 0, total: 0, result: null,
-      });
-    }
-
-    if (steamId) {
-      tasks.push({
-        id: "steam",
-        label: "Connecting Steam",
-        status: "pending",
-        progress: 0, total: 0, result: null,
-      });
-    }
-
     if (tasks.length === 0) {
-      const { communities: _, ...shelvesToSave } = selectedShelves;
-      onComplete(username, shelvesToSave, communityIds);
+      onComplete(username, defaultShelves, communityIds);
       return;
     }
 
@@ -474,36 +414,6 @@ function UsernameSetup({ name, session, onComplete }) {
               result: `${result.count} film${result.count !== 1 ? "s" : ""} imported${result.errs > 0 ? `, ${result.errs} skipped` : ""}`,
             });
           }
-
-          else if (task.id === "book-csv") {
-            const { error: parseError, items } = await parseFile(bookUploadedFile, userId);
-            if (parseError) throw new Error(parseError);
-            if (items.length === 0) {
-              updateTask(task.id, { status: "done", result: "No new books to import" });
-              continue;
-            }
-
-            updateTask(task.id, { total: items.length });
-
-            const result = await importBooks(items, userId, (progress, total) => {
-              if (!cancelled) updateTask(task.id, { progress, total });
-            });
-
-            updateTask(task.id, {
-              status: "done",
-              result: `${result.count} book${result.count !== 1 ? "s" : ""} imported${result.errs > 0 ? `, ${result.errs} skipped` : ""}`,
-            });
-          }
-
-          else if (task.id === "steam") {
-            const { error } = await supabase
-              .from("profiles")
-              .update({ steam_id: steamId })
-              .eq("id", userId);
-
-            if (error) throw error;
-            updateTask(task.id, { status: "done", result: "Steam ID saved" });
-          }
         } catch (err) {
           console.error(`[Onboarding] Task ${task.id} failed:`, err);
           updateTask(task.id, { status: "error", result: err.message || "Something went wrong" });
@@ -518,8 +428,7 @@ function UsernameSetup({ name, session, onComplete }) {
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinalComplete = () => {
-    const { communities: _, ...shelvesToSave } = selectedShelves;
-    onComplete(username, shelvesToSave, savedCommunityIds);
+    onComplete(username, defaultShelves, savedCommunityIds);
   };
 
   // ═════════════════════════════════════════════════════════
@@ -541,7 +450,6 @@ function UsernameSetup({ name, session, onComplete }) {
 
     if (data) { setError("Already taken — try another"); setChecking(false); return; }
 
-    // Save username + set name to username (so feed/profile aren't stuck on Google auth name)
     const userId = session?.user?.id;
     if (userId) {
       await supabase.from("profiles").update({ username: clean, name: clean }).eq("id", userId);
@@ -549,7 +457,7 @@ function UsernameSetup({ name, session, onComplete }) {
 
     setChecking(false);
     setUsername(clean);
-    setPhase("shelves");
+    setPhase("communities");
   };
 
   if (phase === "username") {
@@ -598,403 +506,7 @@ function UsernameSetup({ name, session, onComplete }) {
   }
 
   // ═════════════════════════════════════════════════════════
-  //  STEP 2 — Shelf Picker
-  // ═════════════════════════════════════════════════════════
-  const shelfOptions = [
-    { key: "movies", emoji: "🎬", label: "Films", desc: "Log movies you watch" },
-    { key: "shows", emoji: "📺", label: "Shows", desc: "Follow series progress" },
-    { key: "books", emoji: "📖", label: "Books", desc: "Track what you read" },
-    { key: "games", emoji: "🎮", label: "Games", desc: "Track what you play" },
-    { key: "communities", emoji: "🎙️", label: "Podcast\nCommunities", desc: "Track along with your favorite podcasts" },
-  ];
-
-  const toggleShelf = (key) => {
-    setSelectedShelves(prev => {
-      const next = { ...prev, [key]: !prev[key] };
-      const contentKeys = ["books", "movies", "shows", "games", "communities"];
-      if (contentKeys.every(k => !next[k])) return prev;
-      return next;
-    });
-  };
-
-  if (phase === "shelves") {
-    return (
-      <div className="setup-screen">
-        <style>{DARK_STYLES}</style>
-        <StepDots total={allSteps.length} current={1} />
-        <div className="setup-title">Your Library</div>
-        <div className="setup-sub">
-          What do you want to track? Pick what interests you — you can always change this later in settings.
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 24 }}>
-          {shelfOptions.map(opt => {
-            const on = selectedShelves[opt.key];
-            const isCommunities = opt.key === "communities";
-            return (
-              <div key={opt.key} onClick={() => toggleShelf(opt.key)}
-                style={{
-                  background: on ? dk.cardActive : dk.card,
-                  border: `2px solid ${on ? (isCommunities ? "#e94560" : dk.terracotta) : dk.border}`,
-                  borderRadius: 14, padding: "16px 14px", cursor: "pointer",
-                  transition: "all 0.15s", position: "relative",
-                  ...(isCommunities ? { gridColumn: "1 / -1" } : {}),
-                }}>
-                {on && (
-                  <div style={{
-                    position: "absolute", top: 8, right: 10, fontSize: 12,
-                    color: isCommunities ? "#e94560" : dk.terracotta,
-                  }}>✓</div>
-                )}
-                <div style={{ fontSize: 28, marginBottom: 6 }}>{opt.emoji}</div>
-                <div style={{
-                  fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 16,
-                  textTransform: "uppercase", letterSpacing: "0.02em",
-                  color: on ? "#fff" : dk.text,
-                  whiteSpace: "pre-line",
-                }}>{opt.label}</div>
-                <div style={{
-                  fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
-                  color: on ? "rgba(255,255,255,0.5)" : dk.textDim, marginTop: 2,
-                }}>{opt.desc}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-          color: dk.textDim, textAlign: "center", marginBottom: 16, letterSpacing: "0.03em",
-        }}>
-          Tap to toggle · At least one required
-        </div>
-
-        <div className="setup-spacer" />
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <BackButton onClick={() => setPhase("username")} />
-          <button className="btn-primary" onClick={() => advanceFrom("shelves")} style={{ flex: 1 }}>
-            Next →
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════
-  //  STEP — Showcase ("Here's What You Unlock")
-  // ═════════════════════════════════════════════════════════
-  if (phase === "showcase") {
-    return (
-      <OnboardingShowcase
-        onContinue={() => advanceFrom("showcase")}
-        onBack={() => setPhase("shelves")}
-      />
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════
-  //  STEP 3 — Letterboxd (single screen)
-  // ═════════════════════════════════════════════════════════
-  if (phase === "letterboxd") {
-    const rssUrl = letterboxdUsername ? `https://letterboxd.com/${letterboxdUsername}/rss/` : "";
-    const hasAnything = letterboxdUsername || uploadedFile;
-
-    return (
-      <div className="setup-screen">
-        <style>{DARK_STYLES}</style>
-        <StepDots total={allSteps.length} current={allSteps.indexOf("letterboxd")} />
-        <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🎬</div>
-        <div className="setup-title">Connect Letterboxd</div>
-        <div className="setup-sub">
-          Two ways to bring your watch history into Mantl. Do both for the best experience.
-        </div>
-
-        {/* 1. Username / RSS */}
-        <div style={{
-          marginBottom: 14, padding: 14,
-          background: dk.accent,
-          border: "1px solid " + dk.border,
-          borderRadius: 12,
-        }}>
-          <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
-            textTransform: "uppercase", color: dk.text, marginBottom: 4,
-            display: "flex", alignItems: "center", gap: 8,
-          }}>
-            <span style={{ fontSize: 15 }}>📡</span> Live Sync
-          </div>
-          <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
-            lineHeight: 1.5, marginBottom: 10,
-          }}>
-            Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
-          </div>
-          <label className="field-label" style={{ marginBottom: 4 }}>Letterboxd Username</label>
-          <input
-            className="field-input"
-            type="text"
-            placeholder="e.g. ali"
-            value={letterboxdUsername}
-            onChange={(e) => setLetterboxdUsername(e.target.value.trim().toLowerCase())}
-            autoFocus
-          />
-          {letterboxdUsername && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
-              wordBreak: "break-all",
-            }}>
-              RSS: {rssUrl}
-            </div>
-          )}
-        </div>
-
-        {/* 2. CSV Export */}
-        <div style={{
-          marginBottom: 16, padding: 14,
-          background: dk.accent,
-          border: "1px solid " + dk.border,
-          borderRadius: 12,
-        }}>
-          <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
-            textTransform: "uppercase", color: dk.text, marginBottom: 4,
-            display: "flex", alignItems: "center", gap: 8,
-          }}>
-            <span style={{ fontSize: 15 }}>📦</span> Import Full History
-          </div>
-          <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
-            lineHeight: 1.5, marginBottom: 10,
-          }}>
-            This brings in everything you've ever logged — ratings, dates, the works.
-          </div>
-
-          {/* How-to steps */}
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-            color: dk.text, lineHeight: 1.8, marginBottom: 12,
-            padding: "10px 12px",
-            background: "rgba(255,255,255,0.03)",
-            borderRadius: 8,
-            border: "1px solid rgba(255,255,255,0.05)",
-          }}>
-            <div><span style={{ color: dk.terracotta }}>1.</span> Open your browser and go to:<br />
-              <span
-                onClick={() => {
-                  navigator.clipboard.writeText("https://letterboxd.com/data/export/");
-                  const el = document.getElementById("lb-copy-confirm");
-                  if (el) { el.textContent = "Copied!"; setTimeout(() => { el.textContent = "tap to copy link"; }, 1500); }
-                }}
-                style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer", wordBreak: "break-all" }}
-              >letterboxd.com/data/export</span>{" "}
-              <span id="lb-copy-confirm" style={{ fontSize: 9, color: dk.textDim }}>(tap to copy link)</span>
-            </div>
-            <div style={{ fontSize: 9, color: dk.textDim, marginLeft: 14, marginTop: -4 }}>
-              ⚠️ Use your browser, not the Letterboxd app
-            </div>
-            <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
-            <div><span style={{ color: dk.terracotta }}>3.</span> Unzip the download</div>
-            <div><span style={{ color: dk.terracotta }}>4.</span> Upload <strong>diary.csv</strong> below</div>
-          </div>
-
-          <FileUploadZone
-            file={uploadedFile}
-            onFileSelect={(f) => setUploadedFile(f)}
-            fileInputRef={fileInputRef}
-            label="Tap to upload diary.csv"
-          />
-        </div>
-
-        <div className="setup-spacer" />
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <BackButton onClick={() => setPhase("shelves")} />
-          <button
-            className="btn-primary"
-            onClick={() => advanceFrom("letterboxd")}
-            style={{ flex: 1 }}
-          >
-            Next →
-          </button>
-        </div>
-        {!letterboxdUsername && !uploadedFile && (
-          <SkipButton onClick={() => advanceFrom("letterboxd")} label="Skip — I don't use Letterboxd" />
-        )}
-      </div>
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════
-  //  STEP 4 — Books (single screen)
-  // ═════════════════════════════════════════════════════════
-  if (phase === "books") {
-    return (
-      <div className="setup-screen">
-        <style>{DARK_STYLES}</style>
-        <StepDots total={allSteps.length} current={allSteps.indexOf("books")} />
-        <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>📚</div>
-        <div className="setup-title">Import Your Library</div>
-        <div className="setup-sub">
-          Bring your reading history into Mantl from Goodreads or StoryGraph.
-        </div>
-
-        {/* Platform toggle */}
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          {[
-            { key: "goodreads", label: "Goodreads" },
-            { key: "storygraph", label: "StoryGraph" },
-          ].map(opt => (
-            <div
-              key={opt.key}
-              onClick={() => setBookPlatform(opt.key)}
-              style={{
-                flex: 1, padding: "12px 10px", textAlign: "center",
-                borderRadius: 10, cursor: "pointer", transition: "all 0.15s",
-                background: bookPlatform === opt.key ? dk.cardActive : dk.card,
-                border: `2px solid ${bookPlatform === opt.key ? dk.terracotta : dk.border}`,
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 14,
-                textTransform: "uppercase", letterSpacing: "0.02em",
-                color: bookPlatform === opt.key ? "#fff" : dk.text,
-              }}
-            >
-              {opt.label}
-            </div>
-          ))}
-        </div>
-
-        {/* Instructions + upload (shown after platform pick) */}
-        {bookPlatform && (
-          <div style={{
-            padding: 14,
-            background: dk.accent,
-            border: "1px solid " + dk.border,
-            borderRadius: 12,
-            marginBottom: 16,
-          }}>
-            <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
-              lineHeight: 1.5, marginBottom: 12,
-            }}>
-              {bookPlatform === "goodreads" ? (
-                <>
-                  Go to{" "}
-                  <span
-                    onClick={() => window.open("https://www.goodreads.com/review/import", "_blank")}
-                    style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer" }}
-                  >
-                    goodreads.com/review/import
-                  </span>
-                  , click <strong>"Export Library"</strong>, then upload the CSV below.
-                </>
-              ) : (
-                <>
-                  Go to{" "}
-                  <span
-                    onClick={() => window.open("https://app.thestorygraph.com/export", "_blank")}
-                    style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer" }}
-                  >
-                    app.thestorygraph.com/export
-                  </span>
-                  , click <strong>"Generate Export"</strong>, then upload the CSV below.
-                </>
-              )}
-            </div>
-            <FileUploadZone
-              file={bookUploadedFile}
-              onFileSelect={(f) => setBookUploadedFile(f)}
-              fileInputRef={bookFileInputRef}
-            />
-          </div>
-        )}
-
-        <div className="setup-spacer" />
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <BackButton onClick={() => setPhase(prevPhaseBefore("books") || "shelves")} />
-          <button
-            className="btn-primary"
-            onClick={() => advanceFrom("books")}
-            style={{ flex: 1 }}
-          >
-            Next →
-          </button>
-        </div>
-        <SkipButton onClick={() => advanceFrom("books")} label="Skip — I'll import later" />
-      </div>
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════
-  //  STEP 5 — Games (single screen)
-  // ═════════════════════════════════════════════════════════
-  if (phase === "games") {
-    return (
-      <div className="setup-screen">
-        <style>{DARK_STYLES}</style>
-        <StepDots total={allSteps.length} current={allSteps.indexOf("games")} />
-        <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🎮</div>
-        <div className="setup-title">Connect Steam</div>
-        <div className="setup-sub">
-          Enter your Steam ID to sync your game library. We'll keep your shelf up to date automatically.
-        </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label className="field-label">Steam ID</label>
-          <input
-            className="field-input"
-            type="text"
-            placeholder="76561198XXXXXXXX"
-            value={steamId}
-            onChange={(e) => setSteamId(e.target.value.trim())}
-            autoFocus
-          />
-          {steamId && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
-              wordBreak: "break-all",
-            }}>
-              Feed: https://steamcommunity.com/profiles/{steamId}/games/?xml=1
-            </div>
-          )}
-        </div>
-
-        <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
-          lineHeight: 1.5, marginBottom: 16,
-          padding: 14,
-          background: dk.accent,
-          border: "1px solid " + dk.border,
-          borderRadius: 12,
-        }}>
-          Find your Steam ID by going to your Steam profile — it's the long number in the URL{" "}
-          (<span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10 }}>
-            steamcommunity.com/profiles/<strong>76561198...</strong>
-          </span>).
-          If you see a custom URL instead, enable the Steam URL bar in <strong>Settings → Interface</strong>.
-        </div>
-
-        <div className="setup-spacer" />
-
-        <div style={{ display: "flex", gap: 10 }}>
-          <BackButton onClick={() => setPhase(prevPhaseBefore("games") || "shelves")} />
-          <button
-            className="btn-primary"
-            onClick={() => advanceFrom("games")}
-            style={{ flex: 1 }}
-          >
-            Next →
-          </button>
-        </div>
-        <SkipButton onClick={() => advanceFrom("games")} label="Skip — I don't use Steam" />
-      </div>
-    );
-  }
-
-  // ═════════════════════════════════════════════════════════
-  //  STEP 6 — Communities
+  //  STEP 2 — Communities
   // ═════════════════════════════════════════════════════════
   if (phase === "communities") {
     const selectedCount = Object.values(selectedCommunities).filter(Boolean).length;
@@ -1003,27 +515,21 @@ function UsernameSetup({ name, session, onComplete }) {
       setSelectedCommunities(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const handleCommunitiesFinish = () => {
+    const handleCommunitiesDone = () => {
       const ids = Object.entries(selectedCommunities)
         .filter(([, on]) => on)
         .map(([id]) => id);
-      beginProcessing(ids);
+      setSavedCommunityIds(ids);
+      setPhase("letterboxd");
     };
-
-    const goBack = () => {
-      const prev = prevPhaseBefore("communities");
-      if (prev) setPhase(prev);
-    };
-
-    const hasImportWork = letterboxdUsername || uploadedFile || bookUploadedFile || steamId;
 
     return (
       <div className="setup-screen">
         <style>{DARK_STYLES}</style>
-        <StepDots total={allSteps.length} current={allSteps.indexOf("communities")} />
+        <StepDots total={allSteps.length} current={1} />
         <div className="setup-title">Your Podcasts</div>
         <div className="setup-sub">
-          Which podcast communities do you want to follow? You'll track films, shows, and games alongside each community.
+          Which podcast communities do you want to follow? You'll track films alongside each community and unlock badges as you go.
         </div>
 
         {loadingCommunities ? (
@@ -1121,15 +627,147 @@ function UsernameSetup({ name, session, onComplete }) {
         <div className="setup-spacer" />
 
         <div style={{ display: "flex", gap: 10 }}>
-          <BackButton onClick={goBack} />
+          <BackButton onClick={() => setPhase("username")} />
           <button
             className="btn-primary"
-            onClick={handleCommunitiesFinish}
+            onClick={handleCommunitiesDone}
             style={{ flex: 1 }}
           >
-            {hasImportWork ? "Next →" : "Let's Go 🚀"}
+            Next →
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // ═════════════════════════════════════════════════════════
+  //  STEP 3 — Letterboxd
+  // ═════════════════════════════════════════════════════════
+  if (phase === "letterboxd") {
+    const rssUrl = letterboxdUsername ? `https://letterboxd.com/${letterboxdUsername}/rss/` : "";
+    const hasAnything = letterboxdUsername || uploadedFile;
+
+    return (
+      <div className="setup-screen">
+        <style>{DARK_STYLES}</style>
+        <StepDots total={allSteps.length} current={2} />
+        <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🎬</div>
+        <div className="setup-title">Connect Letterboxd</div>
+        <div className="setup-sub">
+          Two ways to bring your watch history into Mantl. Do both for the best experience.
+        </div>
+
+        {/* 1. Username / RSS */}
+        <div style={{
+          marginBottom: 14, padding: 14,
+          background: dk.accent,
+          border: "1px solid " + dk.border,
+          borderRadius: 12,
+        }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <span style={{ fontSize: 15 }}>📡</span> Live Sync
+          </div>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
+            lineHeight: 1.5, marginBottom: 10,
+          }}>
+            Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
+          </div>
+          <label className="field-label" style={{ marginBottom: 4 }}>Letterboxd Username</label>
+          <input
+            className="field-input"
+            type="text"
+            placeholder="e.g. ali"
+            value={letterboxdUsername}
+            onChange={(e) => setLetterboxdUsername(e.target.value.trim().toLowerCase())}
+            autoFocus
+          />
+          {letterboxdUsername && (
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
+              wordBreak: "break-all",
+            }}>
+              RSS: {rssUrl}
+            </div>
+          )}
+        </div>
+
+        {/* 2. CSV Export */}
+        <div style={{
+          marginBottom: 16, padding: 14,
+          background: dk.accent,
+          border: "1px solid " + dk.border,
+          borderRadius: 12,
+        }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <span style={{ fontSize: 15 }}>📦</span> Import Full History
+          </div>
+          <div style={{
+            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
+            lineHeight: 1.5, marginBottom: 10,
+          }}>
+            This brings in everything you've ever logged — ratings, dates, the works.
+          </div>
+
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
+            color: dk.text, lineHeight: 1.8, marginBottom: 12,
+            padding: "10px 12px",
+            background: "rgba(255,255,255,0.03)",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.05)",
+          }}>
+            <div><span style={{ color: dk.terracotta }}>1.</span> Open your browser and go to:<br />
+              <span
+                onClick={() => {
+                  navigator.clipboard.writeText("https://letterboxd.com/data/export/");
+                  const el = document.getElementById("lb-copy-confirm");
+                  if (el) { el.textContent = "Copied!"; setTimeout(() => { el.textContent = "tap to copy link"; }, 1500); }
+                }}
+                style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer", wordBreak: "break-all" }}
+              >letterboxd.com/data/export</span>{" "}
+              <span id="lb-copy-confirm" style={{ fontSize: 9, color: dk.textDim }}>(tap to copy link)</span>
+            </div>
+            <div style={{ fontSize: 9, color: dk.textDim, marginLeft: 14, marginTop: -4 }}>
+              ⚠️ Use your browser, not the Letterboxd app
+            </div>
+            <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
+            <div><span style={{ color: dk.terracotta }}>3.</span> Unzip the download</div>
+            <div><span style={{ color: dk.terracotta }}>4.</span> Upload <strong>diary.csv</strong> below</div>
+          </div>
+
+          <FileUploadZone
+            file={uploadedFile}
+            onFileSelect={(f) => setUploadedFile(f)}
+            fileInputRef={fileInputRef}
+            label="Tap to upload diary.csv"
+          />
+        </div>
+
+        <div className="setup-spacer" />
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <BackButton onClick={() => setPhase("communities")} />
+          <button
+            className="btn-primary"
+            onClick={() => beginProcessing(savedCommunityIds)}
+            style={{ flex: 1 }}
+          >
+            {hasAnything ? "Let's Go 🚀" : "Finish"}
+          </button>
+        </div>
+        {!letterboxdUsername && !uploadedFile && (
+          <SkipButton onClick={() => beginProcessing(savedCommunityIds)} label="Skip — I don't use Letterboxd" />
+        )}
       </div>
     );
   }
