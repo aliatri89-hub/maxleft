@@ -165,7 +165,11 @@ export function useBrowseFeed(mode, active = false) {
 
         if (covered.length > 0) {
           accumulated = [...accumulated, ...covered].slice(0, TARGET_ITEMS);
-          setItems([...accumulated]);
+          // For releases mode, defer rendering until final sort (avoids jump).
+          // For streaming, render progressively as items arrive.
+          if (mode !== "releases") {
+            setItems([...accumulated]);
+          }
         }
 
         if (tmdbExhausted) break;
@@ -184,6 +188,8 @@ export function useBrowseFeed(mode, active = false) {
       // re-sort once all batches are done so newest releases appear first.
       if (mode === "releases" && accumulated.length > 0) {
         accumulated.sort((a, b) => (b.release_date || "").localeCompare(a.release_date || ""));
+        console.log("[BrowseFeed] FINAL sorted order:",
+          accumulated.slice(0, 5).map(m => `${m.title} (${m.release_date})`));
         setItems([...accumulated]);
       }
 
