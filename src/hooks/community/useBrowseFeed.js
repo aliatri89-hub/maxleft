@@ -124,12 +124,22 @@ export function useBrowseFeed(mode, active = false) {
           : {
               providers: "8|9|337|384|15|350|531|386",
             };
+        console.log(`[BrowseFeed] mode=${mode}, opts=`, discoverOpts);
 
         const batchNormalized = [];
         const pagesEnd = Math.min(page + PAGES_PER_BATCH, MAX_PAGES + 1);
 
         for (let p = page; p < pagesEnd; p++) {
           const data = await fetchTMDBDiscover(p, discoverOpts);
+          console.log(`[BrowseFeed] TMDB page ${p} response:`, { 
+            hasData: !!data, 
+            error: data?.error, 
+            resultsCount: data?.results?.length,
+            totalPages: data?.total_pages,
+            sortBy: discoverOpts.sortBy,
+            firstTitle: data?.results?.[0]?.title,
+            firstDate: data?.results?.[0]?.release_date,
+          });
           if (!mountedRef.current) return;
           if (!data || data.error || !data.results?.length) {
             tmdbExhausted = true;
@@ -153,6 +163,8 @@ export function useBrowseFeed(mode, active = false) {
         // ── Phase 2: Single playability check for entire batch (60 IDs vs 20) ──
         const tmdbIds = batchNormalized.map(m => m.tmdb_id);
         const playMap = await checkPlayability(tmdbIds);
+        console.log(`[BrowseFeed] Playability: ${tmdbIds.length} checked, ${playMap.size} covered`, 
+          [...playMap.keys()].slice(0, 5));
         if (!mountedRef.current) return;
 
         const covered = batchNormalized
