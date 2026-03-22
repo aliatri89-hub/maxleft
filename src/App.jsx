@@ -407,6 +407,7 @@ export default function App() {
                 <div className="tab-pane" key="feed-tab">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
+                    onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { animateSlider("feed"); setActiveTab("feed"); }); animateSlider("search"); setActiveTab("search"); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     feedMode={feedMode} setFeedMode={setFeedMode}

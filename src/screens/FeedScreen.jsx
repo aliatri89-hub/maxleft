@@ -27,7 +27,7 @@ const BASE_TABS = [
 ];
 const INBOX_TAB = { key: "inbox", label: "Inbox" };
 
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
   const FEED_TABS = useMemo(() => isAdmin ? [...BASE_TABS, INBOX_TAB] : BASE_TABS, [isAdmin]);
@@ -329,6 +329,26 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }}>
               — end of new releases —
             </div>
+            <div
+              onClick={onNavigateSearch}
+              style={{
+                marginTop: 14,
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
+                color: "var(--accent-terra, #c97c5d)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Looking for something? Search all films
+            </div>
           </div>
         )}
       </div>
@@ -387,6 +407,26 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               letterSpacing: "0.04em",
             }}>
               — end of streaming —
+            </div>
+            <div
+              onClick={onNavigateSearch}
+              style={{
+                marginTop: 14,
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
+                color: "var(--accent-terra, #c97c5d)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Looking for something? Search all films
             </div>
           </div>
         )}
