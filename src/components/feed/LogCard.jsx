@@ -106,7 +106,10 @@ function BrandStamp({ brand, side = "right" }) {
 // ════════════════════════════════════════════════
 // TITLE BACKDROP FRONT — en-language backdrop from TMDB
 // ════════════════════════════════════════════════
-function BackdropFront({ url, timeAgo, onClick }) {
+function BackdropFront({ url, timeAgo, hasAudio, onClick }) {
+  // Slight rotation for the sticker — deterministic from timeAgo string
+  const stickerRotate = timeAgo ? ((timeAgo.charCodeAt(0) || 0) % 5) * 0.5 - 1.2 : -0.5;
+
   return (
     <div
       onClick={onClick}
@@ -129,6 +132,12 @@ function BackdropFront({ url, timeAgo, onClick }) {
           objectPosition: "center",
         }}
       />
+      {/* Warm color shift — VHS amber tone */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "rgba(255, 200, 140, 0.06)",
+        mixBlendMode: "multiply",
+      }} />
       {/* Vignette overlay */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
@@ -139,19 +148,40 @@ function BackdropFront({ url, timeAgo, onClick }) {
         position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.06,
         backgroundImage: NOISE_SVG,
       }} />
-      {/* Time ago — bottom left */}
+
+      {/* Sharpie date sticker — cream pill, bottom left */}
       <div style={{
-        position: "absolute", bottom: 8, left: 12,
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontWeight: 600,
-        fontSize: 9,
-        letterSpacing: "0.04em",
-        textTransform: "uppercase",
-        color: "rgba(255,255,255,0.6)",
-        textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+        position: "absolute", bottom: 8, left: 10,
+        background: "rgba(240, 235, 225, 0.88)",
+        padding: "3px 9px 2px",
+        borderRadius: 3,
+        transform: `rotate(${stickerRotate}deg)`,
+        boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
       }}>
-        {timeAgo}
+        <span style={{
+          fontFamily: "'Permanent Marker', cursive",
+          fontSize: 10,
+          color: "#2C2824",
+          letterSpacing: "0.02em",
+          textTransform: "uppercase",
+        }}>
+          {timeAgo}
+        </span>
       </div>
+
+      {/* Headphone icon — bottom right, only when audio coverage exists */}
+      {hasAudio && (
+        <div style={{
+          position: "absolute", bottom: 10, right: 12,
+          opacity: 0.65,
+          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.6))",
+        }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -452,6 +482,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   }, [isFirst]);
 
   const useBackdrop = USE_TITLE_BACKDROPS && enBackdropUrl;
+  const hasAudio = communities.some(c => c.episode_url);
 
   return (
     <>
@@ -474,7 +505,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         overflow: "hidden",
       }}>
         {useBackdrop ? (
-          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} onClick={openSleeve} />
+          <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} hasAudio={hasAudio} onClick={openSleeve} />
         ) : (
           <CreamFront
             data={data}
