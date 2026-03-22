@@ -219,37 +219,21 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               onClick={(e) => e.stopPropagation()}
               style={{
                 pointerEvents: "auto",
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                background: "rgba(0, 0, 0, 0.55)",
-                backdropFilter: "blur(6px)",
-                WebkitBackdropFilter: "blur(6px)",
-                padding: "3px 8px 3px 6px",
+                display: "block",
+                background: "rgba(240, 235, 225, 0.9)",
+                padding: "5px 10px 4px",
                 borderRadius: 3,
+                boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
                 textDecoration: "none",
-                border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <span style={{
-                fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
-                fontSize: 7,
-                fontWeight: 600,
-                color: "rgba(255,255,255,0.6)",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                lineHeight: 1,
-              }}>
-                View on
-              </span>
               <img
                 src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
                 alt="Letterboxd"
                 style={{
-                  height: 10,
+                  height: 11,
                   width: "auto",
                   display: "block",
-                  filter: "brightness(1.1)",
                 }}
               />
             </a>
@@ -482,31 +466,18 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 3,
+                  display: "block",
                   textDecoration: "none",
                 }}
               >
-                <span style={{
-                  fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
-                  fontSize: 6,
-                  fontWeight: 600,
-                  color: "rgba(44,40,36,0.45)",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                  lineHeight: 1,
-                }}>
-                  View on
-                </span>
                 <img
                   src="https://a.ltrbxd.com/logos/letterboxd-logo-h-pos-rgb-1000px.png"
                   alt="Letterboxd"
                   style={{
-                    height: 8,
+                    height: 10,
                     width: "auto",
                     display: "block",
-                    opacity: 0.7,
+                    opacity: 0.75,
                   }}
                 />
               </a>
