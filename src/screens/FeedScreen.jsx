@@ -12,6 +12,7 @@ import {
   FeedCard,
 } from "../components/feed";
 import IngestReviewTool from "../components/feed/IngestReviewTool";
+import BrowseLoadingSplash from "../components/feed/BrowseLoadingSplash";
 
 // ════════════════════════════════════════════════
 // FEED SCREEN — New Releases | Streaming | Activity | Inbox (admin)
@@ -276,17 +277,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
         {releases.loading && releases.items.length === 0 && (
-          <div style={{ padding: "0 16px" }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                margin: "6px 0", height: i === 1 ? 80 : 100, borderRadius: 10,
-                background: "var(--bg-card, #1a1714)",
-                opacity: 0.5 - i * 0.12,
-                animation: "skeleton-pulse 1.5s ease infinite",
-                animationDelay: `${i * 0.2}s`,
-              }} />
-            ))}
-          </div>
+          <BrowseLoadingSplash mode="releases" />
         )}
         {releases.items.length === 0 && !releases.loading && (
           <div style={{
@@ -326,17 +317,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       {/* ── Streaming pane ── */}
       <div style={{ display: feedMode === "streaming" ? "block" : "none" }}>
         {streaming.loading && streaming.items.length === 0 && (
-          <div style={{ padding: "0 16px" }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                margin: "6px 0", height: i === 1 ? 80 : 100, borderRadius: 10,
-                background: "var(--bg-card, #1a1714)",
-                opacity: 0.5 - i * 0.12,
-                animation: "skeleton-pulse 1.5s ease infinite",
-                animationDelay: `${i * 0.2}s`,
-              }} />
-            ))}
-          </div>
+          <BrowseLoadingSplash mode="streaming" />
         )}
         {streaming.items.length === 0 && !streaming.loading && (
           <div style={{
