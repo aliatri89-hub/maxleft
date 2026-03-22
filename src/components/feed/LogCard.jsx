@@ -135,7 +135,7 @@ function BackdropFront({ url, timeAgo, hasAudio, onClick }) {
       {/* Warm color shift — VHS amber tone */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        background: "rgba(255, 200, 140, 0.06)",
+        background: "rgba(255, 200, 140, 0.12)",
         mixBlendMode: "multiply",
       }} />
       {/* Vignette overlay */}
