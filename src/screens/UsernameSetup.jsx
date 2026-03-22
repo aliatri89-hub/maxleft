@@ -6,7 +6,7 @@ import { parseFile, importMovies } from "../utils/importUtils";
 //  DARK THEME PALETTE
 // ═══════════════════════════════════════════════════════════
 const dk = {
-  bg:         "#0f0f1a",
+  bg:         "#0f0d0b",
   card:       "#1a1a2e",
   cardActive: "#252542",
   border:     "rgba(255,255,255,0.08)",

@@ -228,12 +228,12 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   return (
     <div style={{
       height: "100dvh", display: "flex", flexDirection: "column",
-      background: "#0f0f1a", overflowX: "hidden",
+      background: "#0f0d0b", overflowX: "hidden",
     }}>
       {/* Back nav */}
       <div style={{
         flexShrink: 0, zIndex: 10,
-        background: "rgba(15,15,26,0.95)",
+        background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
         display: "flex", alignItems: "center", gap: 8,

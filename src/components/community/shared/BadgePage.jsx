@@ -49,7 +49,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "#0f0f1a",
+      background: "#0f0d0b",
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
     }}>
@@ -77,7 +77,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
       {/* Header */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "rgba(15,15,26,0.95)",
+        background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
         display: "flex", alignItems: "center",
@@ -328,7 +328,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
             position: "absolute", bottom: 0, right: 0,
             width: 24, height: 24, borderRadius: "50%",
             background: "#22c55e",
-            border: "2px solid #0f0f1a",
+            border: "2px solid #0f0d0b",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 12, color: "#fff", fontWeight: 700,
           }}>

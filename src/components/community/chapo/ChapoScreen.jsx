@@ -101,7 +101,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0f1a",
+      minHeight: "100vh", background: "#0f0d0b",
       overflowX: "hidden",
       paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
     }}>
@@ -151,7 +151,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
       {/* Back nav */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "rgba(15,15,26,0.95)",
+        background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
         display: "flex", alignItems: "center", gap: 8,
@@ -348,7 +348,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0,
           zIndex: 20,
-          background: "rgba(15,15,26,0.97)",
+          background: "rgba(15,13,11,0.97)",
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           display: "flex", justifyContent: "center", gap: 0,

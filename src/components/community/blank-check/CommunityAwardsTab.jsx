@@ -829,7 +829,7 @@ function AwardsHeroBanner({ community, children }) {
           />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(10,10,20,0.4) 0%, rgba(10,10,20,0.75) 60%, #0a0a14 100%)",
+            background: "linear-gradient(180deg, rgba(15,13,11,0.4) 0%, rgba(15,13,11,0.75) 60%, #0a0906 100%)",
           }} />
         </>
       )}

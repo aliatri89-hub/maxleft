@@ -45,7 +45,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   if (error || !community) {
     return (
       <div style={{
-        minHeight: "100vh", background: "#0f0f1a",
+        minHeight: "100vh", background: "#0f0d0b",
         display: "flex", alignItems: "center", justifyContent: "center",
         flexDirection: "column", gap: 12,
       }}>

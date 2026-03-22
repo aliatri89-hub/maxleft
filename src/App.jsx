@@ -44,7 +44,7 @@ function CommunityLoadingSkeleton() {
   return (
     <div style={{
       position: "absolute", inset: 0, zIndex: 0,
-      background: "#0f0f1a",
+      background: "#0f0d0b",
       display: "flex", flexDirection: "column",
       alignItems: "center",
       paddingTop: "env(safe-area-inset-top, 0px)",
@@ -452,7 +452,7 @@ export default function App() {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0f1a", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <CommunityLoadingSkeleton />
             <div style={{ position: "relative", zIndex: 1, width: "100%", minHeight: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}

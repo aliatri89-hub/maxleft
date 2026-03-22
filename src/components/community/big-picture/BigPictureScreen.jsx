@@ -196,14 +196,14 @@ export default function BigPictureScreen({ community, miniseries, session, onBac
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0f1a",
+      minHeight: "100vh", background: "#0f0d0b",
       overflowX: "hidden",
       paddingBottom: hasBottomNav ? 72 : "env(safe-area-inset-bottom, 0px)",
     }}>
       {/* Back nav */}
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
-        background: "rgba(15,15,26,0.95)",
+        background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
         display: "flex", alignItems: "center", gap: 8,

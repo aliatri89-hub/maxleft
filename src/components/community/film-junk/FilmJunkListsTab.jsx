@@ -441,13 +441,13 @@ function ListsHero({ community, seenStats, accent }) {
           />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(10,10,20,0.3) 0%, rgba(10,10,20,0.65) 50%, #0a0a14 100%)",
+            background: "linear-gradient(180deg, rgba(15,13,11,0.3) 0%, rgba(15,13,11,0.65) 50%, #0a0906 100%)",
           }} />
         </>
       ) : (
         <div style={{
           position: "absolute", inset: 0,
-          background: "linear-gradient(180deg, #0f0f1a 0%, #0a0a14 100%)",
+          background: "linear-gradient(180deg, #0f0d0b 0%, #0a0906 100%)",
         }} />
       )}
 

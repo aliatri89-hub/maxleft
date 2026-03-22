@@ -249,7 +249,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   return (
     <div style={{
       width: "100%", height: "100dvh", display: "flex", flexDirection: "column",
-      background: "#0f0f1a", overflowX: "hidden",
+      background: "#0f0d0b", overflowX: "hidden",
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap');`}</style>
       <style>{`
@@ -261,7 +261,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
       {/* Header */}
       <div style={{
         flexShrink: 0, zIndex: 10,
-        background: "rgba(15,15,26,0.95)",
+        background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
         display: "flex", alignItems: "center", gap: 8,
