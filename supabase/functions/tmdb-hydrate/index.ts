@@ -1,6 +1,7 @@
 // supabase/functions/tmdb-hydrate/index.ts
 // Bulk TMDB data hydration: backfills poster_path, backdrop_path, runtime,
-// genre, overview, tagline, budget, revenue for films missing any of those.
+// genre, overview, tagline, budget, revenue, creator, certification,
+// and still_paths for films missing any of those.
 //
 // Deploy:  supabase functions deploy tmdb-hydrate --no-verify-jwt
 // Run:     curl -X POST https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/tmdb-hydrate \
@@ -33,7 +34,7 @@ function sleep(ms: number) {
 
 // ── TMDB fetch with retry on 429 ──
 async function fetchTmdb(tmdbId: number): Promise<Record<string, unknown> | null> {
-  const url = `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_KEY}&append_to_response=credits&language=en-US`;
+  const url = `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_KEY}&append_to_response=credits,release_dates,images&language=en-US`;
   try {
     let res = await fetch(url);
     if (res.status === 429) {
@@ -126,15 +127,59 @@ function buildUpdate(
     }
   }
 
-  // certification (from release_dates if available — not in append_to_response here,
-  // but we can grab it from the main payload if present)
+  // creator — director name from credits
+  const rawCredits = tmdb.credits as Record<string, unknown[]> | undefined;
+  if (rawCredits && (overwrite || !existing.creator)) {
+    const directors = (rawCredits.crew || [])
+      .filter((c: Record<string, unknown>) => c.job === "Director")
+      .map((c: Record<string, unknown>) => c.name as string);
+    if (directors.length > 0) {
+      update.creator = directors[0];
+      changes.push("creator");
+    }
+  }
+
+  // certification — US MPAA rating from release_dates
+  const releaseDates = tmdb.release_dates as Record<string, unknown> | undefined;
+  if (releaseDates && (overwrite || !existing.certification)) {
+    const results = (releaseDates.results || []) as Record<string, unknown>[];
+    const us = results.find((r) => r.iso_3166_1 === "US");
+    if (us) {
+      const releases = (us.release_dates || []) as Record<string, unknown>[];
+      // Prefer theatrical (type 3), then digital (type 4), then any
+      const theatrical = releases.find((r) => r.type === 3);
+      const digital = releases.find((r) => r.type === 4);
+      const cert = (theatrical?.certification || digital?.certification ||
+        releases.find((r) => r.certification)?.certification) as string | undefined;
+      if (cert && cert.trim()) {
+        update.certification = cert.trim();
+        changes.push("certification");
+      }
+    }
+  }
+
+  // still_paths — backdrops from images (no-language for clean scene stills)
+  const images = tmdb.images as Record<string, unknown[]> | undefined;
+  if (images && (overwrite || !existing.still_paths)) {
+    const backdrops = (images.backdrops || []) as Record<string, unknown>[];
+    // Pick top 2 non-language backdrops by vote_average
+    const stills = backdrops
+      .filter((b) => !b.iso_639_1) // no text overlays
+      .sort((a, b) => ((b.vote_average as number) || 0) - ((a.vote_average as number) || 0))
+      .slice(0, 2)
+      .map((b) => b.file_path as string);
+    if (stills.length > 0) {
+      update.still_paths = stills;
+      changes.push("still_paths");
+    }
+  }
 
   return { update, changes };
 }
 
 // ── FILTER: rows missing at least one hydrate-able field ──
 const MISSING_FILTER =
-  "poster_path.is.null,backdrop_path.is.null,runtime.is.null,genre.is.null,overview.is.null,tagline.is.null";
+  "poster_path.is.null,backdrop_path.is.null,runtime.is.null,genre.is.null,overview.is.null,tagline.is.null,creator.is.null,certification.is.null,still_paths.is.null";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -152,7 +197,7 @@ serve(async (req) => {
   let query = supabase
     .from("media")
     .select(
-      "id, tmdb_id, title, year, poster_path, backdrop_path, runtime, genre, overview, tagline, budget, revenue"
+      "id, tmdb_id, title, year, poster_path, backdrop_path, runtime, genre, overview, tagline, budget, revenue, creator, certification, still_paths"
     )
     .eq("media_type", "film")
     .not("tmdb_id", "is", null)
