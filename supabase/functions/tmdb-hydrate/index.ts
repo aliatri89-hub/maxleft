@@ -2,7 +2,7 @@
 // Bulk TMDB data hydration: backfills poster_path, backdrop_path, runtime,
 // genre, overview, tagline, budget, revenue for films missing any of those.
 //
-// Deploy:  supabase functions deploy tmdb-hydrate
+// Deploy:  supabase functions deploy tmdb-hydrate --no-verify-jwt
 // Run:     curl -X POST https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/tmdb-hydrate \
 //            -H "Authorization: Bearer <ANON_KEY>" \
 //            -H "Content-Type: application/json" \
@@ -12,7 +12,6 @@
 // Modes:
 //   "missing" (default) — only rows missing at least one field
 //   "all"               — re-fetch every film with a tmdb_id
-//   "verify"            — dry-run: report what WOULD change
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -145,9 +144,8 @@ serve(async (req) => {
 
   const body = await req.json().catch(() => ({}));
   const batchSize = Math.min(body.batch_size ?? 200, 400);
-  const mode = body.mode ?? "missing"; // "missing" | "all" | "verify"
+  const mode = body.mode ?? "missing"; // "missing" | "all"
   const overwrite = mode === "all";
-  const dryRun = mode === "verify";
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -208,10 +206,6 @@ serve(async (req) => {
           return { title: film.title, ok: true, changes: [], skipped: true };
         }
 
-        if (dryRun) {
-          return { title: film.title, ok: true, changes };
-        }
-
         const { error: upErr } = await supabase
           .from("media")
           .update(update)
@@ -258,9 +252,7 @@ serve(async (req) => {
       batch_fetched: films.length,
       remaining: count || 0,
       sample_changes: sampleChanges,
-      message: dryRun
-        ? `Dry run: ${processed} films would be updated. ${count} remaining.`
-        : `Hydrated ${processed} films (${skipped} skipped, ${errors} errors). ${count} remaining.`,
+      message: `Hydrated ${processed} films (${skipped} skipped, ${errors} errors). ${count} remaining.`,
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
