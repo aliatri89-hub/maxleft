@@ -151,17 +151,17 @@ function BackdropFront({ url, timeAgo, communities, rating, onClick }) {
       {/* Vignette overlay */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(180deg, rgba(0,0,0,0.08) 0%, transparent 30%, transparent 60%, rgba(0,0,0,0.45) 100%)",
+        background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, transparent 25%, transparent 55%, rgba(0,0,0,0.55) 100%)",
       }} />
       {/* Worn edges — radial vignette + inner shadow */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        boxShadow: "inset 0 0 20px 4px rgba(0,0,0,0.25), inset 0 0 3px 1px rgba(0,0,0,0.15)",
+        boxShadow: "inset 0 0 30px 8px rgba(0,0,0,0.35), inset 0 0 4px 2px rgba(0,0,0,0.2)",
         borderRadius: 8,
       }} />
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.2) 100%)",
+        background: "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.3) 100%)",
       }} />
       {/* Subtle film grain */}
       <div style={{
@@ -169,77 +169,78 @@ function BackdropFront({ url, timeAgo, communities, rating, onClick }) {
         backgroundImage: NOISE_SVG,
       }} />
 
-      {/* ═══ BOTTOM STRIP — date sticker | podcast pills | star sticker ═══ */}
+      {/* ═══ BOTTOM STRIP — 3 equal columns: date | podcasts | stars ═══ */}
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
-        padding: "0 10px 8px",
+        padding: "0 10px 9px",
         display: "flex",
-        alignItems: "flex-end",
-        justifyContent: "space-between",
-        gap: 8,
+        alignItems: "center",
         pointerEvents: "none",
       }}>
-        {/* Sharpie date sticker — cream pill */}
-        <div style={{
-          background: "rgba(240, 235, 225, 0.9)",
-          padding: "4px 10px 3px",
-          borderRadius: 3,
-          transform: `rotate(${stickerRotate}deg)`,
-          boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
-          flexShrink: 0,
-        }}>
-          <span style={{
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: 11,
-            color: "#2C2824",
-            letterSpacing: "0.02em",
-            textTransform: "uppercase",
-            whiteSpace: "nowrap",
-          }}>
-            {timeAgo}
-          </span>
-        </div>
-
-        {/* Podcast artwork pills — center */}
-        {uniquePods.length > 0 && (
-          <div style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 4,
-            maxWidth: uniquePods.length <= 5 ? 5 * 28 : 5 * 28,
-            flex: "0 1 auto",
-          }}>
-            {uniquePods.slice(0, 10).map((c, i) => (
-              <img
-                key={c.community_slug}
-                src={c.community_image}
-                alt={c.community_name}
-                style={{
-                  width: 24, height: 24,
-                  borderRadius: 5,
-                  objectFit: "cover",
-                  border: "1.5px solid rgba(255,255,255,0.25)",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Star rating sticker — cream pill, bottom right */}
-        {rating > 0 && (
+        {/* LEFT — date sticker */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "flex-start" }}>
           <div style={{
             background: "rgba(240, 235, 225, 0.9)",
-            padding: "3px 6px 2px",
+            padding: "4px 10px 3px",
             borderRadius: 3,
-            transform: `rotate(${-stickerRotate * 0.8}deg)`,
+            transform: `rotate(${stickerRotate}deg)`,
             boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
-            flexShrink: 0,
           }}>
-            <Stars rating={rating} size={13} sharpie />
+            <span style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 11,
+              color: "#2C2824",
+              letterSpacing: "0.02em",
+              textTransform: "uppercase",
+              whiteSpace: "nowrap",
+            }}>
+              {timeAgo}
+            </span>
           </div>
-        )}
+        </div>
+
+        {/* CENTER — podcast artwork pills (always centered) */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+          {uniquePods.length > 0 && (
+            <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: 4,
+              maxWidth: 5 * 28,
+            }}>
+              {uniquePods.slice(0, 10).map((c) => (
+                <img
+                  key={c.community_slug}
+                  src={c.community_image}
+                  alt={c.community_name}
+                  style={{
+                    width: 24, height: 24,
+                    borderRadius: 5,
+                    objectFit: "cover",
+                    border: "1.5px solid rgba(255,255,255,0.25)",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT — star rating sticker (or empty space) */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+          {rating > 0 && (
+            <div style={{
+              background: "rgba(240, 235, 225, 0.9)",
+              padding: "4px 7px 3px",
+              borderRadius: 3,
+              transform: `rotate(${-stickerRotate * 0.8}deg)`,
+              boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
+            }}>
+              <Stars rating={rating} size={13} sharpie />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
