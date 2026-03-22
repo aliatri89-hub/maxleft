@@ -288,17 +288,17 @@ serve(async (req) => {
 
   const remaining = count || 0;
 
-  // ── Self-chain: if work remains, re-invoke after a breather ──
+  // ── Self-chain: if work remains, re-invoke before returning ──
   if (remaining > 0) {
     const selfUrl = `${SUPABASE_URL}/functions/v1/tmdb-hydrate`;
-    // Fire-and-forget — don't await, let the current response return immediately
-    sleep(3000).then(() =>
-      fetch(selfUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ batch_size: batchSize, mode }),
-      }).catch((e) => console.error("Self-chain failed:", e))
-    );
+    // Kick off the request (don't await the full response — just dispatch it)
+    fetch(selfUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batch_size: batchSize, mode }),
+    }).catch((e) => console.error("Self-chain failed:", e));
+    // Brief pause to ensure the request leaves before the isolate shuts down
+    await sleep(1500);
   }
 
   return new Response(
