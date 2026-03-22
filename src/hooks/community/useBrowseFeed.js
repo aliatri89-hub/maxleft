@@ -117,7 +117,7 @@ export function useBrowseFeed(mode, active = false) {
         // ── Phase 1: Fetch PAGES_PER_BATCH pages of TMDB results ──
         const discoverOpts = mode === "releases"
           ? {
-              sortBy: "release_date.desc",
+              sortBy: "primary_release_date.desc",
               releaseDateGte: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
               releaseDateLte: new Date().toISOString().slice(0, 10),
             }
