@@ -27,7 +27,7 @@ const BASE_TABS = [
 ];
 const INBOX_TAB = { key: "inbox", label: "Inbox" };
 
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
   const FEED_TABS = useMemo(() => isAdmin ? [...BASE_TABS, INBOX_TAB] : BASE_TABS, [isAdmin]);
@@ -142,7 +142,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   // ── Infinite scroll — all tabs capped at 50 ──
   const BROWSE_CAP = 50;
-  const AUTO_SCROLL_LIMIT = 50;
+  const ACTIVITY_CAP = 30;
 
   useEffect(() => {
     const el = releasesSentinelRef.current;
@@ -168,7 +168,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   useEffect(() => {
     const el = activitySentinelRef.current;
-    if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= AUTO_SCROLL_LIMIT) return;
+    if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= ACTIVITY_CAP) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
       { rootMargin: "200px" }
@@ -474,7 +474,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         )}
         {(() => {
           const firstLogRef = { current: false };
-          return filteredActivity.map((item, i) => (
+          return filteredActivity.slice(0, ACTIVITY_CAP).map((item, i) => (
             <FeedCard
               key={`activity-${getStableKey(item, i)}`}
               index={i}
@@ -484,18 +484,59 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </FeedCard>
           ));
         })()}
-        {hasMoreActivity && activityItems.length < AUTO_SCROLL_LIMIT && <div ref={activitySentinelRef} style={{ height: 1 }} />}
-        {hasMoreActivity && activityItems.length >= AUTO_SCROLL_LIMIT && (
-          <div style={{ display: "flex", justifyContent: "center", padding: "20px 16px 8px" }}>
-            <button onClick={loadMoreActivity} style={{
-              padding: "10px 28px", borderRadius: 10,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "var(--text-muted, #8892a8)",
-              fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600,
-              letterSpacing: "0.06em", textTransform: "uppercase",
-              cursor: "pointer",
-            }}>Load more</button>
+        {hasMoreActivity && activityItems.length < ACTIVITY_CAP && <div ref={activitySentinelRef} style={{ height: 1 }} />}
+        {filteredActivity.length > 0 && !loading && (
+          <div style={{
+            padding: "28px 24px 36px", textAlign: "center",
+          }}>
+            <div style={{
+              width: 40, height: 1,
+              background: "var(--border-subtle, rgba(255,255,255,0.08))",
+              margin: "0 auto 14px",
+            }} />
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+              letterSpacing: "0.04em",
+            }}>
+              — end of activity —
+            </div>
+            <div style={{
+              marginTop: 16,
+              fontFamily: "var(--font-body)",
+              fontSize: 12,
+              color: "var(--text-faint, #5a6480)",
+            }}>
+              Looking for your full watch history?
+            </div>
+            <div
+              onClick={onNavigateMantl}
+              style={{
+                marginTop: 10,
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--accent-terra, #c97c5d)",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 18px",
+                borderRadius: 20,
+                border: "1px solid rgba(201,124,93,0.25)",
+                background: "rgba(201,124,93,0.08)",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              View diary on My MANTL
+            </div>
           </div>
         )}
       </div>

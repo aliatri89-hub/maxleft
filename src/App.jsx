@@ -406,6 +406,7 @@ export default function App() {
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                     onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); }}
+                    onNavigateMantl={() => { tapLight(); if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("shelf"); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     feedMode={feedMode} setFeedMode={setFeedMode}
