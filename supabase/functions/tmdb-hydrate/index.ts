@@ -34,7 +34,7 @@ function sleep(ms: number) {
 
 // ── TMDB fetch with retry on 429 ──
 async function fetchTmdb(tmdbId: number): Promise<Record<string, unknown> | null> {
-  const url = `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_KEY}&append_to_response=credits,release_dates,images&language=en-US`;
+  const url = `${TMDB_BASE}/movie/${tmdbId}?api_key=${TMDB_KEY}&append_to_response=credits,release_dates,images&language=en-US&include_image_language=en,null`;
   try {
     let res = await fetch(url);
     if (res.status === 429) {
@@ -168,10 +168,9 @@ function buildUpdate(
       .sort((a, b) => ((b.vote_average as number) || 0) - ((a.vote_average as number) || 0))
       .slice(0, 2)
       .map((b) => b.file_path as string);
-    if (stills.length > 0) {
-      update.still_paths = stills;
-      changes.push("still_paths");
-    }
+    // Always write — empty array marks "checked, none available"
+    update.still_paths = stills;
+    if (stills.length > 0) changes.push("still_paths");
   }
 
   return { update, changes };
@@ -291,14 +290,19 @@ serve(async (req) => {
   // ── Self-chain: if work remains, re-invoke before returning ──
   if (remaining > 0) {
     const selfUrl = `${SUPABASE_URL}/functions/v1/tmdb-hydrate`;
-    // Kick off the request (don't await the full response — just dispatch it)
-    fetch(selfUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ batch_size: batchSize, mode }),
-    }).catch((e) => console.error("Self-chain failed:", e));
-    // Brief pause to ensure the request leaves before the isolate shuts down
-    await sleep(1500);
+    const controller = new AbortController();
+    // Give 2s for the request to reach the server, then abort our read
+    setTimeout(() => controller.abort(), 2000);
+    try {
+      await fetch(selfUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batch_size: batchSize, mode }),
+        signal: controller.signal,
+      });
+    } catch {
+      // AbortError is expected — the request was dispatched, next invocation runs independently
+    }
   }
 
   return new Response(
