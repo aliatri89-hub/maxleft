@@ -495,7 +495,7 @@ export default function App() {
         )}
 
         {/* Bottom Nav — Communities | Search | My MANTL */}
-        {screen === "app" && (
+        {screen === "app" && !activeCommunitySlug && (
           <div className="nav-bar">
             {(() => {
               // Indicator bar — only visible when on a bottom nav tab (not feed)
