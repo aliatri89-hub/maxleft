@@ -4,11 +4,10 @@
 //
 // Deploy:  supabase functions deploy tmdb-hydrate --no-verify-jwt
 // Run:     curl -X POST https://gfjobhkofftvmluocxyw.supabase.co/functions/v1/tmdb-hydrate \
-//            -H "Authorization: Bearer <ANON_KEY>" \
 //            -H "Content-Type: application/json" \
 //            -d '{"batch_size": 200}'
 //
-// Self-chains: call repeatedly until "remaining" hits 0.
+// Self-chains automatically — fire once, walk away. Stops when remaining=0.
 // Modes:
 //   "missing" (default) — only rows missing at least one field
 //   "all"               — re-fetch every film with a tmdb_id
@@ -242,17 +241,35 @@ serve(async (req) => {
     .not("tmdb_id", "is", null)
     .or(MISSING_FILTER);
 
+  const remaining = count || 0;
+
+  // ── Self-chain: if work remains, re-invoke after a breather ──
+  if (remaining > 0) {
+    const selfUrl = `${SUPABASE_URL}/functions/v1/tmdb-hydrate`;
+    // Fire-and-forget — don't await, let the current response return immediately
+    sleep(3000).then(() =>
+      fetch(selfUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ batch_size: batchSize, mode }),
+      }).catch((e) => console.error("Self-chain failed:", e))
+    );
+  }
+
   return new Response(
     JSON.stringify({
-      done: (count || 0) === 0,
+      done: remaining === 0,
       mode,
       processed,
       skipped,
       errors,
       batch_fetched: films.length,
-      remaining: count || 0,
+      remaining,
+      chaining: remaining > 0,
       sample_changes: sampleChanges,
-      message: `Hydrated ${processed} films (${skipped} skipped, ${errors} errors). ${count} remaining.`,
+      message: remaining > 0
+        ? `Hydrated ${processed} films (${skipped} skipped, ${errors} errors). ${remaining} remaining — auto-chaining next batch...`
+        : `Hydrated ${processed} films (${skipped} skipped, ${errors} errors). Done!`,
     }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
