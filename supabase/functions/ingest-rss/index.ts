@@ -14,7 +14,7 @@
 //   6. Insert matches into podcast_episode_films (admin_reviewed = false)
 //   7. Log results to daily_ingest_log
 //
-// Request:  POST { podcast_slugs?: string[] }  (optional filter; omit to process all)
+// Request:  POST { podcast_slugs?: string[], parse_limit?: number }  (defaults: all podcasts, 100 eps)
 // Response: { podcasts_processed, total_new_episodes, total_matches, details[] }
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -101,6 +101,7 @@ serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const filterSlugs: string[] | null = body.podcast_slugs || null;
+    const parseLimit: number = body.parse_limit || 100;
 
     // Service-role client (bypasses RLS)
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -157,7 +158,7 @@ serve(async (req) => {
         }
 
         const xml = await feedRes.text();
-        const episodes = parseRSS(xml, 100);
+        const episodes = parseRSS(xml, parseLimit);
         podResult.episodes_in_feed = episodes.length;
 
         if (episodes.length === 0) {
