@@ -33,7 +33,6 @@ import { useIntegrationSync } from "./hooks/useIntegrationSync";
 
 // Components
 import ShelfItModal from "./components/ShelfItModal";
-import FlappyMantl from "./components/FlappyMantl";
 import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
@@ -85,11 +84,6 @@ export default function App() {
   const [screen, setScreen] = useState("loading");
   const [activeTab, setActiveTab] = useState("feed");
   const [visitedTabs, setVisitedTabs] = useState(new Set(["feed"]));
-  const navTapCount = useRef(0);
-  const navTapTimer = useRef(null);
-  const feedTapCount = useRef(0);
-  const feedTapTimer = useRef(null);
-  const [easterEggGame, setEasterEggGame] = useState(false);
   const [profileInitView, setProfileInitView] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showTripleFeature, setShowTripleFeature] = useState(false);
@@ -334,8 +328,6 @@ export default function App() {
     <AudioPlayerProvider session={session}>
       <div className="mantl-app">
 
-        {easterEggGame && <FlappyMantl onClose={() => setEasterEggGame(false)} />}
-
         {letterboxdToast && (
           <LetterboxdSyncToast
             synced={letterboxdToast.synced}
@@ -520,9 +512,6 @@ export default function App() {
                 tapLight();
                 if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); });
                 setActiveTab("shelf"); setPreloadTab(null);
-                navTapCount.current++; clearTimeout(navTapTimer.current);
-                navTapTimer.current = setTimeout(() => { navTapCount.current = 0; }, 2000);
-                if (navTapCount.current >= 10) { navTapCount.current = 0; setEasterEggGame(true); }
               }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="15" r="2"/></svg></div>
               <div className="nav-label">Mantl</div>
