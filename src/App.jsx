@@ -21,6 +21,7 @@ import CommunityRouter from "./screens/CommunityRouter";
 import NPPDashboard from "./components/community/now-playing/NPPDashboard";
 import BlankCheckDashboard from "./components/community/blank-check/BlankCheckDashboard";
 import TripleFeature from "./features/triple-feature/TripleFeature";
+import WhatToWatch from "./features/what-to-watch/WhatToWatch";
 import TripleFeaturePublic from "./features/triple-feature/TripleFeaturePublic";
 import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
 
@@ -89,6 +90,7 @@ export default function App() {
   const [profileInitView, setProfileInitView] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showTripleFeature, setShowTripleFeature] = useState(false);
+  const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
@@ -417,7 +419,8 @@ export default function App() {
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     feedMode={feedMode} setFeedMode={setFeedMode}
-                    pushNav={pushNav} removeNav={removeNav} />
+                    pushNav={pushNav} removeNav={removeNav}
+                    onOpenWhatToWatch={() => { tapLight(); setShowWhatToWatch(true); pushNav("whatToWatch", () => setShowWhatToWatch(false)); }} />
                 </div>
                 <div className="tab-pane" key="communities-tab">
                   {visitedTabs.has("communities") && <ExploreScreen session={session}
@@ -454,6 +457,11 @@ export default function App() {
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0a0a0f", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} />
           </div>
+        )}
+
+        {/* What to Watch */}
+        {showWhatToWatch && (
+          <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} />
         )}
 
         {/* Community View */}
