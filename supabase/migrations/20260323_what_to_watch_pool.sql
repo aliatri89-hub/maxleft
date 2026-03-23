@@ -11,7 +11,6 @@ returns table (
   poster_path text,
   backdrop_path text,
   overview  text,
-  vote_average numeric,
   genre     text,
   podcast_count bigint,
   latest_episode_at timestamptz
@@ -25,10 +24,9 @@ as $$
     m.poster_path,
     m.backdrop_path,
     m.overview,
-    m.vote_average,
     m.genre,
     count(distinct pe.podcast_id) as podcast_count,
-    max(pe.published_at)          as latest_episode_at
+    max(pe.air_date)              as latest_episode_at
   from podcast_episode_films pef
   join podcast_episodes pe  on pe.id = pef.episode_id
   join user_podcast_favorites upf on upf.podcast_id = pe.podcast_id
@@ -45,10 +43,10 @@ as $$
         and m2.media_type = 'film'
     )
   group by m.tmdb_id, m.title, m.year, m.poster_path, m.backdrop_path,
-           m.overview, m.vote_average, m.genre
+           m.overview, m.genre
   order by
     count(distinct pe.podcast_id) desc,  -- most coverage first
-    max(pe.published_at) desc nulls last, -- then recency
+    max(pe.air_date) desc nulls last,    -- then recency
     random()                              -- sprinkle randomness
   limit p_limit;
 $$;
