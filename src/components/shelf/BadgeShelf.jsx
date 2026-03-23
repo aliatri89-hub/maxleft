@@ -10,19 +10,6 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /** Gold pedestal — tapered column with base plate */
-function Pedestal({ gold }) {
-  const hi = gold ? "#c9a84c" : "#555";
-  const lo = gold ? "#8b6914" : "#333";
-  const mid = gold ? "#b8942e" : "#444";
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -1, position: "relative", zIndex: 0 }}>
-      <div style={{ width: 28, height: 4, background: `linear-gradient(180deg, ${hi}, ${lo})`, borderRadius: 1 }} />
-      <div style={{ width: 20, height: 12, background: `linear-gradient(180deg, ${mid}, ${lo})`, clipPath: "polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)", marginTop: -1 }} />
-      <div style={{ width: 32, height: 5, background: `linear-gradient(180deg, ${hi}, ${lo})`, borderRadius: "1px 1px 2px 2px", marginTop: -1 }} />
-    </div>
-  );
-}
-
 function BadgeSlot({ badge, delay = 0, onTap }) {
   const badgeAccent = badge.accent_color || accent;
   return (
@@ -30,12 +17,13 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
       onClick={onTap}
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        cursor: "pointer", width: 80,
+        cursor: "pointer", width: 86,
         animation: `badgeShelfIn 0.4s ${delay}s ease-out both`,
         opacity: 0,
       }}
     >
-      <div style={{ position: "relative", width: SIZE, height: SIZE }}>
+      {/* ── Badge circle ── */}
+      <div style={{ position: "relative", width: SIZE, height: SIZE, zIndex: 1 }}>
         <svg width={SIZE} height={SIZE} style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
           <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={`${badgeAccent}30`} strokeWidth={STROKE} />
           <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={badgeAccent} strokeWidth={STROKE}
@@ -66,29 +54,37 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
           fontSize: 9, color: "#fff", fontWeight: 700,
         }}>✓</div>
       </div>
-      <Pedestal gold />
-      {/* Engraved plaque */}
-      {badge.plaque_name && (
-        <div style={{
-          marginTop: 4,
-          padding: "2px 8px",
-          background: "linear-gradient(180deg, #c9a84c, #8b6914)",
-          borderRadius: 2,
-          fontSize: 8, fontWeight: 700,
-          color: "#2a1f0a",
-          fontFamily: "var(--font-display)",
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          textAlign: "center",
-          lineHeight: 1.3,
-          maxWidth: 80,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}>
-          {badge.plaque_name}
-        </div>
-      )}
+
+      {/* ── Connected pedestal + plaque (one fused unit) ── */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -4 }}>
+        {/* Neck — connects to badge ring */}
+        <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #c9a84c, #a07c28)", borderRadius: "0 0 1px 1px" }} />
+        {/* Column — tapered */}
+        <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #b8942e, #7a5c12)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
+        {/* Base plate */}
+        <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #c9a84c, #8b6914)", borderRadius: badge.plaque_name ? "1px 1px 0 0" : "1px 1px 2px 2px" }} />
+        {/* Platinum plaque — fused to base */}
+        {badge.plaque_name && (
+          <div style={{
+            padding: "2.5px 10px",
+            background: "linear-gradient(180deg, #d4d4d4, #9a9a9a)",
+            borderRadius: "0 0 2px 2px",
+            fontSize: 8, fontWeight: 700,
+            color: "#1a1a1a",
+            fontFamily: "var(--font-display)",
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            textAlign: "center",
+            lineHeight: 1.3,
+            maxWidth: 86,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}>
+            {badge.plaque_name}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -97,7 +93,7 @@ function EmptySlot({ delay = 0, onTap }) {
   return (
     <div onClick={onTap} style={{
       display: "flex", flexDirection: "column", alignItems: "center",
-      width: 80, cursor: "pointer",
+      width: 86, cursor: "pointer",
       animation: `badgeShelfIn 0.4s ${delay}s ease-out both`, opacity: 0,
     }}>
       <div style={{
@@ -110,7 +106,12 @@ function EmptySlot({ delay = 0, onTap }) {
           <path d="M9 3v12M3 9h12" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
-      <Pedestal gold={false} />
+      {/* Silver pedestal */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -4 }}>
+        <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #555, #3a3a3a)", borderRadius: "0 0 1px 1px" }} />
+        <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #444, #2a2a2a)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
+        <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #555, #333)", borderRadius: "1px 1px 2px 2px" }} />
+      </div>
     </div>
   );
 }
