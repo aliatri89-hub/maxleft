@@ -277,73 +277,81 @@ export default function TripleFeaturePublic() {
 
         {/* ── Movie Grid ──────────────────────────────────── */}
         <div style={S.grid}>
-          {puzzle.movies.map((movie, idx) => {
-            const sel = selected.has(idx);
-            const revealing = phase === PHASE.REVEALING && selectedArray.indexOf(idx) <= revealIndex && sel;
-            const revealed = phase === PHASE.RESULT && sel;
-            const optimal = phase === PHASE.RESULT && puzzle.optimalCombo.includes(idx);
-            const currentReveal = phase === PHASE.REVEALING && selectedArray.indexOf(idx) === revealIndex;
-            const notPicked = phase === PHASE.RESULT && !sel;
+          {(() => {
+            const grossRanks = puzzle.movies.map((m, i) => ({ idx: i, gross: m.gross }));
+            grossRanks.sort((a, b) => b.gross - a.gross);
+            const rankMap = {};
+            grossRanks.forEach((m, rank) => { rankMap[m.idx] = rank + 1; });
 
-            return (
-              <div
-                key={idx}
-                onClick={() => toggleSelect(idx)}
-                style={{
-                  position: "relative", cursor: phase === PHASE.PICKING ? "pointer" : "default",
-                  borderRadius: 8, overflow: "hidden",
-                  transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
-                  transform: sel && phase === PHASE.PICKING ? "scale(1.03)" : currentReveal ? "scale(1.06)" : "scale(1)",
-                  boxShadow: sel && optimal ? "0 0 0 2px #4ade80,0 4px 20px rgba(74,222,128,.4)"
-                    : sel ? "0 0 0 2px #d4af37,0 4px 20px rgba(212,175,55,.3)"
-                    : optimal ? "0 0 0 2px #4ade80,0 4px 20px rgba(74,222,128,.3)"
-                    : "0 2px 8px rgba(0,0,0,.3)",
-                  opacity: (phase === PHASE.REVEALING || phase === PHASE.RESULT) && !sel && !optimal ? 0.3 : 1,
-                }}
-              >
-                <div style={{ aspectRatio: "2/3", position: "relative" }}>
-                  <img src={movie.poster} alt={movie.title} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            return puzzle.movies.map((movie, idx) => {
+              const sel = selected.has(idx);
+              const revealing = phase === PHASE.REVEALING && selectedArray.indexOf(idx) <= revealIndex && sel;
+              const revealed = phase === PHASE.RESULT && sel;
+              const rank = rankMap[idx];
+              const isTop3 = phase === PHASE.RESULT && rank <= 3;
+              const currentReveal = phase === PHASE.REVEALING && selectedArray.indexOf(idx) === revealIndex;
+              const notPicked = phase === PHASE.RESULT && !sel;
 
-                  {sel && phase === PHASE.PICKING && (
-                    <div style={S.check}>✓</div>
-                  )}
+              return (
+                <div
+                  key={idx}
+                  onClick={() => toggleSelect(idx)}
+                  style={{
+                    position: "relative", cursor: phase === PHASE.PICKING ? "pointer" : "default",
+                    borderRadius: 8, overflow: "hidden",
+                    transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
+                    transform: sel && phase === PHASE.PICKING ? "scale(1.03)" : currentReveal ? "scale(1.06)" : "scale(1)",
+                    boxShadow: sel && isTop3 ? "0 0 0 2px #4ade80,0 4px 20px rgba(74,222,128,.4)"
+                      : sel ? "0 0 0 2px #d4af37,0 4px 20px rgba(212,175,55,.3)"
+                      : isTop3 ? "0 0 0 2px #4ade80,0 4px 20px rgba(74,222,128,.3)"
+                      : "0 2px 8px rgba(0,0,0,.3)",
+                    opacity: (phase === PHASE.REVEALING || phase === PHASE.RESULT) && !sel && !isTop3 ? 0.3 : 1,
+                  }}
+                >
+                  <div style={{ aspectRatio: "2/3", position: "relative" }}>
+                    <img src={movie.poster} alt={movie.title} loading="eager" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
 
-                  {(revealing || revealed) && (
-                    <div style={S.revealOv}>
-                      <div style={S.revealGross}>{formatMoney(movie.gross)}</div>
-                      {optimal && (
-                        <div style={{
-                          fontSize: 8, fontWeight: 700, letterSpacing: "1px",
-                          color: "#4ade80", marginTop: 2,
-                        }}>OPTIMAL</div>
-                      )}
-                    </div>
-                  )}
+                    {sel && phase === PHASE.PICKING && (
+                      <div style={S.check}>✓</div>
+                    )}
 
-                  {notPicked && !optimal && (
-                    <div style={S.dimOv}>
-                      <div style={S.dimGross}>{formatMoney(movie.gross)}</div>
-                    </div>
-                  )}
-
-                  {optimal && !sel && (
-                    <div style={S.optOv}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "#4ade80", textAlign: "center", padding: 4 }}>
-                        {formatMoney(movie.gross)}<br /><span style={{ fontSize: 9, opacity: 0.7 }}>OPTIMAL</span>
+                    {(revealing || revealed) && (
+                      <div style={S.revealOv}>
+                        <div style={S.revealGross}>{formatMoney(movie.gross)}</div>
+                        {isTop3 && (
+                          <div style={{
+                            fontSize: 9, fontWeight: 700, letterSpacing: "1px",
+                            color: "#4ade80", marginTop: 2,
+                          }}>#{rank}</div>
+                        )}
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
 
-                <div style={{ padding: "6px 4px", background: "#111118", textAlign: "center" }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, lineHeight: 1.3, color: sel && optimal ? "#4ade80" : sel ? "#d4af37" : "#999" }}>
-                    {movie.title}
+                    {notPicked && !isTop3 && (
+                      <div style={S.dimOv}>
+                        <div style={S.dimGross}>{formatMoney(movie.gross)}</div>
+                      </div>
+                    )}
+
+                    {isTop3 && !sel && (
+                      <div style={S.optOv}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: "#4ade80", textAlign: "center", padding: 4 }}>
+                          {formatMoney(movie.gross)}<br /><span style={{ fontSize: 9, opacity: 0.7 }}>#{rank}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 9, color: "#555", marginTop: 1 }}>{movie.year}</div>
+
+                  <div style={{ padding: "6px 4px", background: "#111118", textAlign: "center" }}>
+                    <div style={{ fontSize: 10, fontWeight: 600, lineHeight: 1.3, color: sel && isTop3 ? "#4ade80" : sel ? "#d4af37" : "#999" }}>
+                      {movie.title}
+                    </div>
+                    <div style={{ fontSize: 9, color: "#555", marginTop: 1 }}>{movie.year}</div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
         </div>
 
         {/* ── Picking phase ───────────────────────────────── */}
