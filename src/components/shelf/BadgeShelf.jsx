@@ -322,7 +322,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         border: "0.5px solid rgba(255,255,255,0.06)",
         borderBottom: "none",
         borderRadius: "12px 12px 0 0",
-        padding: "22px 8px 16px",
+        padding: "22px 8px 4px",
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 20, padding: "8px 0" }}>
@@ -366,7 +366,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         {/* Nudge to explore communities when shelf isn't full */}
         {!loading && hasAnyBadges && displayBadges.filter(Boolean).length < 3 && (
           <div style={{
-            textAlign: "center", marginTop: 12,
+            textAlign: "center", marginTop: 6,
             fontSize: 11, color: "var(--text-faint)",
             fontFamily: "var(--font-mono)", letterSpacing: "0.02em",
             fontStyle: "italic",
