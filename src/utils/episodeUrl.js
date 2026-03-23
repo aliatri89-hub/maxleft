@@ -47,9 +47,10 @@ export function toPlayerEpisode(ep, overrides = {}) {
   return {
     guid:
       overrides.guid ||
+      ep.episode_id ||
+      ep.id ||
       ep.guid ||
-      ep.rss_guid ||
-      `ep-${ep.episode_id || ep.id || url}`,
+      `fallback-${resolveAudioUrl(ep)}`,
     title:
       overrides.title ||
       ep.episode_title ||

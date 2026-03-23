@@ -567,14 +567,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const handlePlayEpisode = (ep) => {
     const url = resolveAudioUrl(ep);
     if (!url) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `log-${ep.episode_id || url}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) playEpisode(playerEp);
   };
 
   const handleQueueEpisode = (ep) => {
     const url = resolveAudioUrl(ep);
     if (!url) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `log-${ep.episode_id || url}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) addToQueue(playerEp);
   };
 

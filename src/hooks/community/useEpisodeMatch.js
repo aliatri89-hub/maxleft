@@ -20,7 +20,6 @@ export function useEpisodeMatch(item, communityName) {
 
   const matchedEpisode = useMemo(() => {
     return toPlayerEpisode(item, {
-      guid: `seeded-${item?.id}`,
       title: item?.extra_data?.episode_title || `${communityName}: ${item?.title}`,
       community: communityName,
       artwork: item?.extra_data?.episode_artwork || null,

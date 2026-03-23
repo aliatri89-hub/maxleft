@@ -304,14 +304,14 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   const handlePlay = useCallback((ep) => {
     const url = resolveAudioUrl(ep);
     if (!url) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `search-${ep.episode_id}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) playEpisode(playerEp);
   }, [playEpisode]);
 
   const handleQueue = useCallback((ep) => {
     const url = resolveAudioUrl(ep);
     if (!url) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `search-${ep.episode_id}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) addToQueue(playerEp);
   }, [addToQueue]);
 
@@ -823,10 +823,10 @@ function ResultCard({
           {episodes.map((ep, i) => {
             const epUrl = resolveAudioUrl(ep);
             const isCurrent = currentEp &&
-              (currentEp.guid === `search-${ep.episode_id}` || currentEp.enclosureUrl === epUrl);
+              (currentEp.guid === (ep.episode_id || ep.id) || currentEp.enclosureUrl === epUrl);
 
             return (
-              <div key={ep.episode_id || i}
+              <div key={ep.id || ep.episode_id || i}
                 onClick={(e) => { e.stopPropagation(); onPlayEpisode?.(ep); }}
                 style={{
                   display: "flex", alignItems: "center", gap: 10,

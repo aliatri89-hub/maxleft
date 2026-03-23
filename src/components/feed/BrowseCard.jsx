@@ -358,14 +358,14 @@ export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onN
   const handlePlay = (ep) => {
     const url = resolveAudioUrl(ep);
     if (!url || isPatreonUrl(url)) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `browse-${ep.episode_id || url}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) playEpisode(playerEp);
   };
 
   const handleQueue = (ep) => {
     const url = resolveAudioUrl(ep);
     if (!url || isPatreonUrl(url)) return;
-    const playerEp = toPlayerEpisode(ep, { guid: `browse-${ep.episode_id || url}` });
+    const playerEp = toPlayerEpisode(ep);
     if (playerEp) addToQueue(playerEp);
   };
 
