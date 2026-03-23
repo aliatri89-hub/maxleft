@@ -29,7 +29,7 @@ export function useGlobalBadges(userId) {
         // ── 1. Fetch earned badges with badge details ──
         const { data: earnedRows, error: earnedErr } = await supabase
           .from("user_badges")
-          .select("badge_id, earned_at, badges(id, name, image_url, accent_color, community_id)")
+          .select("badge_id, earned_at, badges(id, name, plaque_name, image_url, accent_color, community_id)")
           .eq("user_id", userId)
           .order("earned_at", { ascending: false });
 
@@ -45,6 +45,7 @@ export function useGlobalBadges(userId) {
           .map(r => ({
             id: r.badges.id,
             name: r.badges.name,
+            plaque_name: r.badges.plaque_name || null,
             image_url: r.badges.image_url,
             accent_color: r.badges.accent_color,
             community_id: r.badges.community_id,

@@ -67,9 +67,29 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
         }}>✓</div>
       </div>
       <Pedestal gold />
+      {/* Engraved plaque */}
+      {badge.plaque_name && (
+        <div style={{
+          marginTop: 4,
+          padding: "2px 8px",
+          background: "linear-gradient(180deg, #c9a84c, #8b6914)",
+          borderRadius: 2,
+          fontSize: 8, fontWeight: 700,
+          color: "#2a1f0a",
+          fontFamily: "var(--font-display)",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          textAlign: "center",
+          lineHeight: 1.3,
+          maxWidth: 80,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}>
+          {badge.plaque_name}
+        </div>
+      )}
     </div>
-  );
-}
 
 function EmptySlot({ delay = 0, onTap }) {
   return (
