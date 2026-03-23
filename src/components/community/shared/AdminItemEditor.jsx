@@ -308,19 +308,30 @@ export default function AdminItemEditor({
   const handleQuickMatch = async (ep) => {
     setQuickSaving(true);
     try {
-      // Build the update — episode_url + extra_data merge
+      // Look up podcast_episodes row by audio_url for the FK
+      const { data: peRow } = await supabase
+        .from("podcast_episodes")
+        .select("id")
+        .eq("audio_url", ep.audioUrl)
+        .maybeSingle();
+
+      // Build the update — episode_url column + episode_id FK
+      // extra_data gets episode_title only (not episode_url — column is source of truth)
       const existingExtra = item.extra_data || {};
       const newExtra = { ...existingExtra };
-      newExtra.episode_url = ep.audioUrl;
       newExtra.episode_title = ep.title;
+      delete newExtra.episode_url; // column is source of truth
+
+      const updates = {
+        episode_url: ep.audioUrl,
+        rss_guid: ep.guid,
+        extra_data: newExtra,
+      };
+      if (peRow?.id) updates.episode_id = peRow.id;
 
       const { error } = await supabase
         .from("community_items")
-        .update({
-          episode_url: ep.audioUrl,
-          rss_guid: ep.guid,
-          extra_data: newExtra,
-        })
+        .update(updates)
         .eq("id", item.id);
 
       if (error) throw error;
@@ -447,8 +458,20 @@ export default function AdminItemEditor({
           : null,
       };
 
-      // ─── Episode URL: write to BOTH the column and extra_data ───
+      // ─── Episode URL: write to column (source of truth) ───
       updates.episode_url = episodeUrl.trim() || null;
+
+      // ─── Episode ID FK: look up from podcast_episodes ───
+      if (episodeUrl.trim()) {
+        const { data: peRow } = await supabase
+          .from("podcast_episodes")
+          .select("id")
+          .eq("audio_url", episodeUrl.trim())
+          .maybeSingle();
+        updates.episode_id = peRow?.id || null;
+      } else {
+        updates.episode_id = null;
+      }
 
       // ─── Backdrop ───
       updates.backdrop_path = backdropPath.trim() || null;
@@ -477,14 +500,13 @@ export default function AdminItemEditor({
       const existingExtra = item.extra_data || {};
       const newExtra = { ...existingExtra };
 
-      // Episode info in extra_data (for backwards compat)
+      // Episode title in extra_data (episode_url lives in column only)
       if (episodeUrl.trim()) {
-        newExtra.episode_url = episodeUrl.trim();
         newExtra.episode_title = episodeTitle.trim() || null;
       } else {
-        delete newExtra.episode_url;
         delete newExtra.episode_title;
       }
+      delete newExtra.episode_url; // column is source of truth
 
       // Commentary-only flag
       if (commentaryOnly) {
