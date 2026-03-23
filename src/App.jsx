@@ -33,6 +33,9 @@ import TripleFeature from "./features/triple-feature/TripleFeature";
 import WhatToWatch from "./features/what-to-watch/WhatToWatch";
 import TripleFeaturePublic from "./features/triple-feature/TripleFeaturePublic";
 import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
+import ReelTime from "./features/reel-time/ReelTime";
+import GamesHub from "./features/games-hub/GamesHub";
+import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
@@ -100,8 +103,10 @@ export default function App() {
   const [showProfile, setShowProfile] = useState(false);
   const [showTripleFeature, setShowTripleFeature] = useState(false);
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
-  const [showGamesMenu, setShowGamesMenu] = useState(false);
+  const [showReelTime, setShowReelTime] = useState(false);
+  const [showGamesHub, setShowGamesHub] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
+  const [rtUnplayed, setRtUnplayed] = useState(false);
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
@@ -189,6 +194,12 @@ export default function App() {
     if (!session?.user?.id) return;
     hasPlayedToday(session.user.id).then((played) => setTfUnplayed(!played));
   }, [session?.user?.id, showTripleFeature]);
+
+  // ── Reel Time unplayed check ──
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    rtHasPlayedToday(session.user.id).then((played) => setRtUnplayed(!played));
+  }, [session?.user?.id, showReelTime]);
 
   // ── Community slug persistence ──
   useEffect(() => {
@@ -384,9 +395,9 @@ export default function App() {
           <div className="screen-fade">
             {/* Header */}
             <div className="header">
-              <div onClick={() => { tapLight(); setShowGamesMenu(true); }}
+              <div onClick={() => { tapLight(); setShowGamesHub(true); pushNav("gamesHub", () => setShowGamesHub(false)); }}
                 style={{ width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                {tfUnplayed ? (
+                {(tfUnplayed || rtUnplayed) ? (
                   <svg width="20" height="22" viewBox="0 0 22 22" fill="none" style={{ transform: "rotate(-12deg)", transition: "transform 0.3s ease" }}>
                     <rect x="3" y="1" width="16" height="20" rx="2" stroke="#d4af37" strokeWidth="1" fill="none"/>
                     <rect x="6" y="3.5" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/><rect x="6" y="13" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/>
@@ -468,62 +479,47 @@ export default function App() {
           </div>
         )}
 
+        {/* Reel Time Game */}
+        {showReelTime && (
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+            <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} />
+          </div>
+        )}
+
         {/* What to Watch */}
         {showWhatToWatch && (
           <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} />
         )}
 
-        {/* Games Menu */}
-        {showGamesMenu && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", flexDirection: "column" }}>
-            <div onClick={() => setShowGamesMenu(false)} style={{ flex: 1, background: "rgba(0,0,0,0.6)" }} />
-            <div style={{
-              background: "#1a1612", borderRadius: "16px 16px 0 0",
-              padding: "20px 20px calc(env(safe-area-inset-bottom, 16px) + 20px)",
-              animation: "gm-slide 0.25s ease-out",
-            }}>
-              <style>{`@keyframes gm-slide { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
-              <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: "#d4af37", marginBottom: 16, textAlign: "center", letterSpacing: 1 }}>GAMES</div>
-
-              {/* Triple Feature */}
-              <button onClick={() => {
-                setShowGamesMenu(false);
-                setShowTripleFeature(true);
-                pushNav("tripleFeature", () => setShowTripleFeature(false));
-              }} style={{
-                width: "100%", background: "rgba(240,235,225,0.04)", border: "1px solid rgba(240,235,225,0.08)",
-                borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left",
-                display: "flex", alignItems: "center", gap: 14, marginBottom: 10,
-              }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, background: "rgba(154,142,194,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 20 }}>🎬</span>
-                </div>
-                <div>
-                  <div style={{ color: "#f0ebe1", fontSize: 15, fontWeight: 600 }}>Triple Feature</div>
-                  <div style={{ color: "#f0ebe1", opacity: 0.4, fontSize: 12, marginTop: 2 }}>Daily box office game</div>
-                </div>
-                {tfUnplayed && <div style={{ marginLeft: "auto", width: 8, height: 8, borderRadius: 4, background: "#d4af37" }} />}
-              </button>
-
-              {/* Pick a Flick */}
-              <button onClick={() => {
-                setShowGamesMenu(false);
-                setShowWhatToWatch(true);
-                pushNav("whatToWatch", () => setShowWhatToWatch(false));
-              }} style={{
-                width: "100%", background: "rgba(240,235,225,0.04)", border: "1px solid rgba(240,235,225,0.08)",
-                borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left",
-                display: "flex", alignItems: "center", gap: 14,
-              }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, background: "rgba(212,175,55,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 20 }}>📼</span>
-                </div>
-                <div>
-                  <div style={{ color: "#f0ebe1", fontSize: 15, fontWeight: 600 }}>Pick a Flick</div>
-                  <div style={{ color: "#f0ebe1", opacity: 0.4, fontSize: 12, marginTop: 2 }}>Swipe to find what to watch</div>
-                </div>
-              </button>
-            </div>
+        {/* Games Hub */}
+        {showGamesHub && (
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+            <GamesHub
+              session={session}
+              onBack={() => { removeNav("gamesHub"); setShowGamesHub(false); }}
+              onLaunchGame={(gameId) => {
+                setShowGamesHub(false);
+                removeNav("gamesHub");
+                if (gameId === "tripleFeature") {
+                  setShowTripleFeature(true);
+                  pushNav("tripleFeature", () => setShowTripleFeature(false));
+                } else if (gameId === "reelTime") {
+                  setShowReelTime(true);
+                  pushNav("reelTime", () => setShowReelTime(false));
+                } else if (gameId === "pickAFlick") {
+                  setShowWhatToWatch(true);
+                  pushNav("whatToWatch", () => setShowWhatToWatch(false));
+                } else if (gameId === "creditCheck") {
+                  showToast("Credit Check coming soon!");
+                }
+              }}
+              gameStatuses={{
+                tripleFeature: tfUnplayed ? "available" : "completed",
+                reelTime: rtUnplayed ? "available" : "completed",
+                creditCheck: "available",
+                pickAFlick: "always",
+              }}
+            />
           </div>
         )}
 
@@ -578,7 +574,7 @@ export default function App() {
         )}
 
         {/* Bottom Nav — Communities | Search | Mantl */}
-        {screen === "app" && !activeCommunitySlug && !showGamesMenu && !showWhatToWatch && !showTripleFeature && (
+        {screen === "app" && !activeCommunitySlug && !showGamesHub && !showWhatToWatch && !showTripleFeature && !showReelTime && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
