@@ -75,7 +75,7 @@ function StatsRibbon({ movies }) {
       background: "#080706",
       borderTop: "0.5px solid rgba(255,255,255,0.04)",
       borderBottom: "0.5px solid rgba(255,255,255,0.04)",
-      margin: "0 16px",
+      margin: 0,
     }}>
       {items.map((s) => (
         <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
@@ -159,7 +159,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       <StatsRibbon movies={movies} />
 
       {/* ── Fireplace Hearth ── */}
-      <div style={{ padding: "0 16px", marginTop: 0 }}>
+      <div style={{ padding: 0, marginTop: 0 }}>
         <div style={{ display: "flex" }}>
 
           {/* Left stone column */}
@@ -401,9 +401,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
 
         {/* Hearth floor */}
         <div style={{
-          height: 8, margin: "0 16px",
+          height: 8, margin: 0,
           background: "linear-gradient(180deg, #1a1510, #0f0d0b)",
-          borderRadius: "0 0 4px 4px",
           border: "0.5px solid rgba(255,255,255,0.03)",
           borderTop: "none",
         }} />

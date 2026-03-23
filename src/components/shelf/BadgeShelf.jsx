@@ -308,7 +308,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
   };
 
   return (
-    <div style={{ padding: "0 16px", marginBottom: 0 }}>
+    <div style={{ padding: 0, marginBottom: 0 }}>
       <style>{`
         @keyframes badgeShelfIn {
           from { opacity: 0; transform: translateY(10px) scale(0.95); }
@@ -321,7 +321,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         background: "rgba(255,255,255,0.02)",
         border: "0.5px solid rgba(255,255,255,0.06)",
         borderBottom: "none",
-        borderRadius: "12px 12px 0 0",
+        borderRadius: 0,
         padding: "12px 8px 4px",
       }}>
         {loading ? (
@@ -382,8 +382,6 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         <div style={{
           height: 6,
           background: "linear-gradient(180deg, #7a5a32 0%, #6b4c2a 100%)",
-          borderRadius: "0 0 2px 2px",
-          margin: "0 -4px",
           position: "relative", zIndex: 2,
         }}>
           <div style={{ position: "absolute", top: 1, left: 8, right: 8, height: "0.5px", background: "rgba(255,255,255,0.10)" }} />
@@ -405,25 +403,22 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         <div style={{
           height: 5,
           background: "linear-gradient(180deg, #3d2a16 0%, #2e1f10 100%)",
-          borderRadius: "0 0 3px 3px",
         }}>
           <div style={{ position: "absolute", bottom: 0, left: 16, right: 16, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
         </div>
 
         {/* Corbels / brackets */}
         <div style={{
-          position: "absolute", bottom: -10, left: 6,
+          position: "absolute", bottom: -10, left: 0,
           width: 14, height: 16,
           background: "linear-gradient(180deg, #5a3f22, #3d2a16)",
           clipPath: "polygon(0% 0%, 100% 0%, 100% 40%, 60% 100%, 0% 100%)",
-          borderRadius: "0 0 2px 2px",
         }} />
         <div style={{
-          position: "absolute", bottom: -10, right: 6,
+          position: "absolute", bottom: -10, right: 0,
           width: 14, height: 16,
           background: "linear-gradient(180deg, #5a3f22, #3d2a16)",
           clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 40% 100%, 0% 40%)",
-          borderRadius: "0 0 2px 2px",
         }} />
 
         {/* Shadow underneath */}
