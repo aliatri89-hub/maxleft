@@ -6,6 +6,18 @@
 
 ---
 
+## What This Fixes (User-Facing)
+
+**Duplicate recents entries — FIXED.** The same episode played from Browse, then from a community page, then from Search would create up to 3 separate recents entries. The `upsertRecent` dedup checks both guid and enclosureUrl, but each surface produced different URLs from different field names. Now all surfaces resolve through `resolveAudioUrl`, producing the same string — URL-based dedup catches duplicates every time.
+
+**"Is this playing?" indicator not lighting up — FIXED.** VhsSleeveSheet, SearchScreen, and useEpisodeMatch compare `currentEp.enclosureUrl` against the episode's URL to show the active state. Before, one side might hold `audio_url` while the other held `episode_url`. Now both sides use the same resolver.
+
+**Bookmark resume not finding saved position — FIXED.** On app launch, the bookmark merges into recents by matching guid or enclosureUrl. With consistent URLs, the match always succeeds.
+
+**Remaining edge case (Priority 2 below):** guid prefixes (`browse-`, `log-`, `seeded-`) still differ across surfaces. This doesn't cause duplicate recents (URL dedup handles it), but `playEpisode` checks recents by guid *first* for resume position — on guid miss it falls through to URL match, which works but is the slower path. Using `episode_id` as the canonical guid makes resume lookup instant and eliminates the prefix system entirely.
+
+---
+
 ## What Was Done
 
 ### 1. Single Source of Truth Helper (`src/utils/episodeUrl.js`)
