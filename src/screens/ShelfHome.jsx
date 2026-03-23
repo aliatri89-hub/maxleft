@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import BadgeShelf from "../components/shelf/BadgeShelf";
 import ShelfModals from "../components/modals/ShelfModals";
@@ -10,18 +10,95 @@ function renderStars(rating) {
   const full = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
   return (
-    <span style={{ fontSize: 12, color: "var(--accent-gold)", letterSpacing: 1 }}>
+    <span style={{ fontSize: 13, color: accent, letterSpacing: 1.5 }}>
       {"★".repeat(full)}
       {hasHalf && <span style={{ display: "inline-block", width: "0.55em", overflow: "hidden", verticalAlign: "top" }}>★</span>}
     </span>
   );
 }
 
-function formatDiaryDate(dateStr) {
-  if (!dateStr) return "";
+function parseDiaryDate(dateStr) {
+  if (!dateStr) return { month: "", day: "" };
   const d = new Date(dateStr);
   const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return `${months[d.getMonth()]} ${d.getDate()}`;
+  return { month: months[d.getMonth()], day: d.getDate() };
+}
+
+/** ── Stats Ribbon ── */
+function StatsRibbon({ movies }) {
+  const stats = useMemo(() => {
+    const total = movies.length;
+    const thisYear = movies.filter(m => {
+      if (!m.watchedAt) return false;
+      return new Date(m.watchedAt).getFullYear() === new Date().getFullYear();
+    }).length;
+
+    const rated = movies.filter(m => m.rating);
+    const avg = rated.length > 0
+      ? (rated.reduce((s, m) => s + m.rating, 0) / rated.length).toFixed(1)
+      : "—";
+
+    // Simple streak: count consecutive days from today backwards
+    let streak = 0;
+    if (movies.length > 0) {
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const daySet = new Set();
+      movies.forEach(m => {
+        if (m.watchedAt) {
+          const d = new Date(m.watchedAt);
+          d.setHours(0,0,0,0);
+          daySet.add(d.getTime());
+        }
+      });
+      let check = new Date(today);
+      while (daySet.has(check.getTime())) {
+        streak++;
+        check.setDate(check.getDate() - 1);
+      }
+    }
+
+    return { total, thisYear, avg, streak };
+  }, [movies]);
+
+  const items = [
+    { value: stats.total.toLocaleString(), label: "FILMS" },
+    { value: stats.thisYear.toString(), label: new Date().getFullYear().toString() },
+    { value: stats.streak > 0 ? `${stats.streak}d` : "—", label: "STREAK", highlight: stats.streak >= 3 },
+    { value: `★ ${stats.avg}`, label: "AVG" },
+  ];
+
+  return (
+    <div style={{
+      display: "flex", justifyContent: "space-around",
+      padding: "14px 12px",
+      background: "#080706",
+      borderTop: "0.5px solid rgba(255,255,255,0.04)",
+      borderBottom: "0.5px solid rgba(255,255,255,0.04)",
+      margin: "0 16px",
+    }}>
+      {items.map((s) => (
+        <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
+          <div style={{
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 20, lineHeight: 1,
+            color: s.highlight ? accent : "rgba(255,255,255,0.85)",
+            textShadow: s.highlight ? `0 0 12px ${accent}44` : "none",
+          }}>
+            {s.value}
+          </div>
+          <div style={{
+            fontSize: 8, letterSpacing: 2,
+            color: "var(--text-faint)",
+            fontFamily: "var(--font-mono)",
+            fontWeight: 300, marginTop: 4,
+          }}>
+            {s.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
@@ -43,6 +120,13 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   const movies = shelves.movies || [];
   const recentMovies = movies.slice(0, 6);
 
+  // Count films this week for diary header
+  const weekCount = useMemo(() => {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    return movies.filter(m => m.watchedAt && new Date(m.watchedAt) >= weekAgo).length;
+  }, [movies]);
+
   return (
     <div className="shelf-home" style={{
       background: "var(--bg-primary)",
@@ -50,11 +134,32 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
+      <style>{`
+        @keyframes hearth-glow {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 0.7; }
+        }
+        @keyframes hearth-flicker {
+          0%, 100% { opacity: 0.25; transform: scaleX(1) scaleY(1); }
+          25% { opacity: 0.4; transform: scaleX(1.02) scaleY(1.04); }
+          50% { opacity: 0.3; transform: scaleX(0.98) scaleY(0.97); }
+          75% { opacity: 0.35; transform: scaleX(1.01) scaleY(1.02); }
+        }
+        @keyframes ember-rise {
+          0% { opacity: 0; transform: translateY(0) scale(1); }
+          12% { opacity: 0.8; }
+          100% { opacity: 0; transform: translateY(-80px) scale(0.2) translateX(8px); }
+        }
+      `}</style>
+
       {/* ── Badge Shelf Hero ── */}
       <BadgeShelf session={session} profile={profile} onUpdateProfile={onUpdateProfile} onToast={onToast} />
 
+      {/* ── Stats Ribbon ── */}
+      <StatsRibbon movies={movies} />
+
       {/* ── Fireplace Hearth ── */}
-      <div style={{ padding: "0 16px", marginTop: -2 }}>
+      <div style={{ padding: "0 16px", marginTop: 0 }}>
         <div style={{ display: "flex" }}>
 
           {/* Left stone column */}
@@ -64,7 +169,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             borderLeft: "0.5px solid rgba(255,255,255,0.04)",
             position: "relative",
           }}>
-            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230].map((t, i) => (
+            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230,250,270,290,310,330].map((t, i) => (
               <div key={i} style={{
                 position: "absolute", top: t, left: i % 2 === 0 ? 2 : 4,
                 width: i % 2 === 0 ? 11 : 8, height: i % 2 === 0 ? 7 : 5,
@@ -83,67 +188,146 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             position: "relative",
             overflow: "hidden",
           }}>
-            {/* Ember glow */}
+            {/* Multi-layer ember glow */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: 60,
-              background: "radial-gradient(ellipse at center bottom, rgba(200,100,20,0.08) 0%, rgba(200,80,10,0.03) 40%, transparent 70%)",
+              position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
+              background: "radial-gradient(ellipse at center bottom, rgba(200,100,20,0.10) 0%, rgba(200,80,10,0.04) 40%, transparent 70%)",
+              animation: "hearth-glow 4s ease-in-out infinite",
+              pointerEvents: "none",
+            }} />
+            <div style={{
+              position: "absolute", bottom: -8, left: "15%", right: "15%", height: 40,
+              background: "radial-gradient(ellipse, rgba(234,88,12,0.14) 0%, transparent 70%)",
+              animation: "hearth-flicker 2.5s ease-in-out infinite",
               pointerEvents: "none",
             }} />
 
-            {/* Top spacer */}
-            <div style={{ height: 10 }} />
+            {/* Rising ember particles (CSS-only) */}
+            {[
+              { left: "22%", delay: "0s", size: 3 },
+              { left: "45%", delay: "1.4s", size: 2 },
+              { left: "68%", delay: "0.7s", size: 3 },
+              { left: "35%", delay: "2.1s", size: 2 },
+              { left: "58%", delay: "0.3s", size: 2 },
+            ].map((e, i) => (
+              <div key={i} style={{
+                position: "absolute", bottom: 0, left: e.left,
+                width: e.size, height: e.size, borderRadius: "50%",
+                background: accent,
+                boxShadow: `0 0 ${e.size * 2}px ${e.size}px ${accent}44`,
+                opacity: 0,
+                animation: `ember-rise 3.5s ease-out ${e.delay} infinite`,
+                pointerEvents: "none",
+              }} />
+            ))}
+
+            {/* ── Diary Header ── */}
+            <div style={{
+              display: "flex", justifyContent: "space-between", alignItems: "baseline",
+              padding: "14px 12px 6px",
+            }}>
+              <div style={{
+                fontFamily: "'Permanent Marker', cursive",
+                fontSize: 15, color: "var(--text-faint)",
+                letterSpacing: 1,
+              }}>
+                Diary
+              </div>
+              {weekCount > 0 && (
+                <div style={{
+                  fontSize: 9, color: "var(--text-faint)",
+                  fontFamily: "var(--font-mono)", letterSpacing: 1,
+                  fontWeight: 300,
+                }}>
+                  THIS WEEK: {weekCount}
+                </div>
+              )}
+            </div>
 
             {recentMovies.length > 0 ? (
               <>
                 {/* Diary entries */}
-                <div style={{ padding: "0 8px" }}>
+                <div style={{ padding: "0 8px 0" }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
                     overflow: "hidden",
                     border: "0.5px solid rgba(255,255,255,0.04)",
                   }}>
-                    {recentMovies.map((movie, i) => (
-                      <div
-                        key={movie.id}
-                        onClick={() => setViewingItem({ ...movie, shelfType: "movies" })}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "10px 12px",
-                          borderBottom: i < recentMovies.length - 1 ? "0.5px solid rgba(255,255,255,0.04)" : "none",
-                          cursor: "pointer", transition: "background 0.15s",
-                        }}
-                      >
-                        <div style={{
-                          fontFamily: "var(--font-mono)", fontSize: 11,
-                          color: "var(--text-faint)", minWidth: 42,
-                          letterSpacing: "0.02em", fontWeight: 400, flexShrink: 0,
-                        }}>
-                          {formatDiaryDate(movie.watchedAt)}
-                        </div>
-                        {movie.cover && (
+                    {recentMovies.map((movie, i) => {
+                      const { month, day } = parseDiaryDate(movie.watchedAt);
+                      return (
+                        <div
+                          key={movie.id}
+                          onClick={() => setViewingItem({ ...movie, shelfType: "movies" })}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 10,
+                            padding: "10px 12px",
+                            borderBottom: i < recentMovies.length - 1 ? "0.5px solid rgba(255,255,255,0.04)" : "none",
+                            cursor: "pointer", transition: "background 0.15s",
+                            position: "relative",
+                          }}
+                        >
+                          {/* Stacked date */}
                           <div style={{
-                            width: 24, height: 34, borderRadius: 2, overflow: "hidden",
-                            flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                            minWidth: 38, flexShrink: 0, textAlign: "center",
                           }}>
-                            <img src={movie.cover} alt="" style={{
-                              width: "100%", height: "100%", objectFit: "cover", display: "block",
-                            }} loading="lazy" />
+                            <div style={{
+                              fontFamily: "var(--font-mono)", fontSize: 9,
+                              color: "var(--text-faint)", letterSpacing: "0.04em",
+                              fontWeight: 300, lineHeight: 1,
+                            }}>
+                              {month}
+                            </div>
+                            <div style={{
+                              fontFamily: "'Permanent Marker', cursive",
+                              fontSize: 18, color: "rgba(255,255,255,0.35)",
+                              lineHeight: 1.1,
+                            }}>
+                              {day}
+                            </div>
                           </div>
-                        )}
-                        <div style={{
-                          flex: 1, minWidth: 0,
-                          fontFamily: "var(--font-display)", fontSize: 14,
-                          fontWeight: 600, color: "rgba(255,255,255,0.75)",
-                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                        }}>
-                          {movie.title}
+
+                          {/* Poster */}
+                          {movie.cover && (
+                            <div style={{
+                              width: 34, height: 50, borderRadius: 3, overflow: "hidden",
+                              flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                            }}>
+                              <img src={movie.cover} alt="" style={{
+                                width: "100%", height: "100%", objectFit: "cover", display: "block",
+                              }} loading="lazy" />
+                            </div>
+                          )}
+
+                          {/* Title + year */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{
+                              fontFamily: "var(--font-display)", fontSize: 14,
+                              fontWeight: 600, color: "rgba(255,255,255,0.75)",
+                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                            }}>
+                              {movie.title}
+                            </div>
+                            {movie.year && (
+                              <div style={{
+                                fontFamily: "var(--font-mono)", fontSize: 10,
+                                color: "var(--text-faint)", fontWeight: 300,
+                                marginTop: 1,
+                              }}>
+                                {movie.year}{movie.director ? ` · ${movie.director}` : ""}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Stars */}
+                          <div style={{ flexShrink: 0 }}>
+                            {renderStars(movie.rating)}
+                          </div>
                         </div>
-                        <div style={{ flexShrink: 0 }}>
-                          {renderStars(movie.rating)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -165,7 +349,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                         cursor: "pointer", transition: "all 0.2s",
                       }}
                     >
-                      <span>See all {movies.length}</span>
+                      <span>See all {movies.length.toLocaleString()}</span>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                         <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -202,7 +386,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             borderRight: "0.5px solid rgba(255,255,255,0.04)",
             position: "relative",
           }}>
-            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230].map((t, i) => (
+            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230,250,270,290,310,330].map((t, i) => (
               <div key={i} style={{
                 position: "absolute", top: t, right: i % 2 === 0 ? 2 : 4,
                 width: i % 2 === 0 ? 11 : 8, height: i % 2 === 0 ? 7 : 5,
