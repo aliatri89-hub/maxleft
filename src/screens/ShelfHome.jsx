@@ -1,41 +1,35 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { updateGameStatus } from "../utils/mediaWrite";
-import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
-import LazyShelf from "../components/LazyShelf";
+import BadgeShelf from "../components/shelf/BadgeShelf";
 import MediaShelf from "../components/shelf/MediaShelf";
 import ShelfModals from "../components/modals/ShelfModals";
 
-// ── Skeleton templates ──
-const skelCovers = (
-  <div style={{ padding: "0 16px" }}>
-    <div className="skeleton-dark" style={{ width: 120, height: 18, marginBottom: 14 }} />
-    <div style={{ display: "flex", gap: 16 }}>
-      {[0,1,2].map(j => <div className="skeleton-dark" key={j} style={{ width: 140, height: 200, borderRadius: 10, flexShrink: 0 }} />)}
-    </div>
-  </div>
-);
-const skelCompact = (
-  <div style={{ padding: "0 16px" }}>
-    <div className="skeleton-dark" style={{ width: 100, height: 16, marginBottom: 10 }} />
-    <div style={{ background: "var(--bg-card)", borderRadius: "var(--radius-lg)", padding: 14, minHeight: 60 }}>
-      <div className="skeleton-dark" style={{ height: 14, width: "70%", marginBottom: 8 }} />
-      <div className="skeleton-dark" style={{ height: 14, width: "45%" }} />
-    </div>
-  </div>
-);
+const accent = "#EF9F27";
+
+function renderStars(rating) {
+  if (!rating) return null;
+  const full = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+  return (
+    <span style={{ fontSize: 12, color: "var(--accent-gold)", letterSpacing: 1 }}>
+      {"★".repeat(full)}
+      {hasHalf && <span style={{ display: "inline-block", width: "0.55em", overflow: "hidden", verticalAlign: "top" }}>★</span>}
+    </span>
+  );
+}
+
+function formatDiaryDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[d.getMonth()]} ${d.getDate()}`;
+}
 
 function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
 
   // ── Trigger state (controls which modal/overlay is open) ──
   const [viewingItem, setViewingItem] = useState(null);
-  const [addingCountry, setAddingCountry] = useState(false);
-  const [viewingCountry, setViewingCountry] = useState(null);
-  const [showPassportMap, setShowPassportMap] = useState(false);
   const [diaryShelf, setDiaryShelf] = useState(null);
-
-  // ── UI state ──
-  const [beatAnimId, setBeatAnimId] = useState(null);
 
   // ── Back gesture navigation ──
   useEffect(() => {
@@ -47,19 +41,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
     else if (!diaryShelf && removeNav) removeNav("diary");
   }, [!!diaryShelf]);
 
-  // ── Beat toggle (games) ──
-  const toggleBeat = async (gameId, currentStatus) => {
-    const newStatus = currentStatus === "beat" ? "backlog" : "beat";
-    setBeatAnimId(gameId);
-    setTimeout(() => setBeatAnimId(null), 500);
-    const ok = await updateGameStatus(gameId, newStatus);
-    if (ok && onRefresh) await onRefresh();
-  };
-
-  // ── Shelf ordering ──
-  const isShelfOn = (key) => (profile.enabledShelves || DEFAULT_ENABLED_SHELVES)[key] !== false;
-  const shelfOrder = profile.shelfOrder || DEFAULT_SHELF_ORDER;
-  const getShelfPos = (key) => { const i = shelfOrder.indexOf(key); return i >= 0 ? i : 99; };
+  const movies = shelves.movies || [];
+  const recentMovies = movies.slice(0, 6);
 
   return (
     <div className="shelf-home" style={{
@@ -68,44 +51,129 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       paddingBottom: 100,
     }}>
 
-      {/* ── Movies shelf: always first, hero treatment ── */}
-      {isShelfOn("movies") && (
-        <MediaShelf
-          shelfKey="movies" items={shelves.movies || []} profile={profile}
-          onShelfIt={onShelfIt}
-          onViewItem={(item) => setViewingItem(item)}
-          onOpenDiary={(k) => setDiaryShelf(k)}
-          letterboxdSyncing={letterboxdSyncing} steamSyncing={steamSyncing}
-          isHero
-        />
-      )}
+      {/* ── Badge Shelf Hero ── */}
+      <BadgeShelf session={session} />
 
-        {/* ── Remaining Shelves ── */}
-        <div className="shelf-order-wrap">
+      {/* ── Movies Shelf ── */}
+      <MediaShelf
+        shelfKey="movies" items={movies} profile={profile}
+        onShelfIt={onShelfIt}
+        onViewItem={(item) => setViewingItem(item)}
+        onOpenDiary={(k) => setDiaryShelf(k)}
+        letterboxdSyncing={letterboxdSyncing} steamSyncing={steamSyncing}
+        isHero
+      />
 
-          {/* Media Shelves (minus movies) */}
-          {["books", "shows", "games"].filter(key => isShelfOn(key)).map(key => (
-            <LazyShelf key={key} style={{ order: getShelfPos(key) }} skeleton={skelCovers}>
-              <MediaShelf
-                shelfKey={key} items={shelves[key] || []} profile={profile}
-                onShelfIt={onShelfIt}
-                onViewItem={(item) => setViewingItem(item)}
-                onOpenDiary={(k) => setDiaryShelf(k)}
-                letterboxdSyncing={letterboxdSyncing} steamSyncing={steamSyncing}
-              />
-            </LazyShelf>
-          ))}
+      {/* ── Diary Section ── */}
+      {recentMovies.length > 0 && (
+        <div style={{ padding: "0 16px", marginTop: 8 }}>
+          {/* Header */}
+          <div style={{ textAlign: "center", paddingBottom: 14 }}>
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 22, color: accent,
+              letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
+            }}>
+              Diary
+            </div>
+            <div style={{
+              height: 1, margin: "10px 0 0",
+              background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
+            }} />
+          </div>
 
+          {/* Diary entries */}
+          <div style={{
+            background: "var(--bg-card)",
+            borderRadius: "var(--radius-md)",
+            overflow: "hidden",
+            border: "1px solid var(--border-subtle)",
+          }}>
+            {recentMovies.map((movie, i) => (
+              <div
+                key={movie.id}
+                onClick={() => setViewingItem({ ...movie, shelfType: "movies" })}
+                style={{
+                  display: "flex", alignItems: "center", gap: 12,
+                  padding: "11px 14px",
+                  borderBottom: i < recentMovies.length - 1 ? "0.5px solid var(--border-subtle)" : "none",
+                  cursor: "pointer",
+                  transition: "background 0.15s",
+                }}
+              >
+                {/* Date */}
+                <div style={{
+                  fontFamily: "var(--font-mono)", fontSize: 11,
+                  color: "var(--text-faint)", minWidth: 44,
+                  letterSpacing: "0.02em", fontWeight: 400,
+                  flexShrink: 0,
+                }}>
+                  {formatDiaryDate(movie.watchedAt)}
+                </div>
 
+                {/* Poster thumbnail */}
+                {movie.cover && (
+                  <div style={{
+                    width: 28, height: 40, borderRadius: 3, overflow: "hidden",
+                    flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${accent}12`,
+                  }}>
+                    <img src={movie.cover} alt="" style={{
+                      width: "100%", height: "100%", objectFit: "cover", display: "block",
+                    }} loading="lazy" />
+                  </div>
+                )}
 
+                {/* Title */}
+                <div style={{
+                  flex: 1, minWidth: 0,
+                  fontFamily: "var(--font-display)", fontSize: 14,
+                  fontWeight: 600, color: "var(--text-secondary)",
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                }}>
+                  {movie.title}
+                </div>
+
+                {/* Stars */}
+                <div style={{ flexShrink: 0 }}>
+                  {renderStars(movie.rating)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* See full diary */}
+          {movies.length > 6 && (
+            <div style={{ textAlign: "center", paddingTop: 14 }}>
+              <div
+                onClick={() => setDiaryShelf("movies")}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  fontFamily: "var(--font-mono)", fontSize: 11,
+                  fontWeight: 500, letterSpacing: "0.04em",
+                  color: `${accent}cc`,
+                  background: `${accent}0a`,
+                  border: `1px solid ${accent}20`,
+                  borderRadius: 20, padding: "6px 14px",
+                  cursor: "pointer", transition: "all 0.2s",
+                }}
+              >
+                <span>Full diary</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
+      )}
 
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(
         <ShelfModals
-          addingCountry={addingCountry} setAddingCountry={setAddingCountry}
-          viewingCountry={viewingCountry} setViewingCountry={setViewingCountry}
-          showPassportMap={showPassportMap} setShowPassportMap={setShowPassportMap}
+          addingCountry={false} setAddingCountry={() => {}}
+          viewingCountry={null} setViewingCountry={() => {}}
+          showPassportMap={false} setShowPassportMap={() => {}}
           diaryShelf={diaryShelf} setDiaryShelf={setDiaryShelf}
           viewingItem={viewingItem} setViewingItem={setViewingItem}
           shelves={shelves} profile={profile} session={session}
