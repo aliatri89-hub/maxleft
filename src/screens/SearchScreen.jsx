@@ -18,6 +18,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { supabase } from "../supabase";
 import { searchTMDB } from "../utils/api";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
+import { toPlayerEpisode, resolveAudioUrl } from "../utils/episodeUrl";
 import { toPosterPath } from "../utils/mediaWrite";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
 
@@ -301,27 +302,17 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
 
   // ── Play ──
   const handlePlay = useCallback((ep) => {
-    if (!ep.audio_url) return;
-    playEpisode({
-      guid: `search-${ep.episode_id}`,
-      title: ep.episode_title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `search-${ep.episode_id}` });
+    if (playerEp) playEpisode(playerEp);
   }, [playEpisode]);
 
   const handleQueue = useCallback((ep) => {
-    if (!ep.audio_url) return;
-    addToQueue({
-      guid: `search-${ep.episode_id}`,
-      title: ep.episode_title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `search-${ep.episode_id}` });
+    if (playerEp) addToQueue(playerEp);
   }, [addToQueue]);
 
   // ═══════════════════════════════════════════
@@ -830,8 +821,9 @@ function ResultCard({
           )}
 
           {episodes.map((ep, i) => {
+            const epUrl = resolveAudioUrl(ep);
             const isCurrent = currentEp &&
-              (currentEp.guid === `search-${ep.episode_id}` || currentEp.enclosureUrl === ep.audio_url);
+              (currentEp.guid === `search-${ep.episode_id}` || currentEp.enclosureUrl === epUrl);
 
             return (
               <div key={ep.episode_id || i}
@@ -839,7 +831,7 @@ function ResultCard({
                 style={{
                   display: "flex", alignItems: "center", gap: 10,
                   padding: "7px 8px", borderRadius: 6,
-                  cursor: ep.audio_url ? "pointer" : "default",
+                  cursor: epUrl ? "pointer" : "default",
                   transition: "background 0.15s",
                   background: isCurrent ? "rgba(199,91,63,0.08)" : "transparent",
                 }}>
@@ -874,7 +866,7 @@ function ResultCard({
                   </div>
                 </div>
 
-                {ep.audio_url ? (
+                {epUrl ? (
                   <>
                   {onQueueEpisode && !isCurrent && (
                     <div

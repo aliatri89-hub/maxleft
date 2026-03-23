@@ -4,6 +4,7 @@ import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { Stars, getCommunityAccent, getTimeAgo } from "./FeedPrimitives";
+import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
@@ -564,27 +565,17 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   };
 
   const handlePlayEpisode = (ep) => {
-    if (!ep || !ep.audio_url) return;
-    playEpisode({
-      guid: `log-${ep.episode_id || ep.audio_url}`,
-      title: ep.episode_title || data.title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `log-${ep.episode_id || url}` });
+    if (playerEp) playEpisode(playerEp);
   };
 
   const handleQueueEpisode = (ep) => {
-    if (!ep || !ep.audio_url) return;
-    addToQueue({
-      guid: `log-${ep.episode_id || ep.audio_url}`,
-      title: ep.episode_title || data.title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `log-${ep.episode_id || url}` });
+    if (playerEp) addToQueue(playerEp);
   };
 
   const closeSleeve = () => {

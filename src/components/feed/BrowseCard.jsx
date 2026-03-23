@@ -2,6 +2,7 @@ import { useState, useRef, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { isPatreonUrl } from "./FeedPrimitives";
+import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
 // ════════════════════════════════════════════════
@@ -355,27 +356,17 @@ export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onN
   };
 
   const handlePlay = (ep) => {
-    if (!ep || !ep.audio_url || isPatreonUrl(ep.audio_url)) return;
-    playEpisode({
-      guid: `browse-${ep.episode_id || ep.audio_url}`,
-      title: ep.episode_title || data.title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url || isPatreonUrl(url)) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `browse-${ep.episode_id || url}` });
+    if (playerEp) playEpisode(playerEp);
   };
 
   const handleQueue = (ep) => {
-    if (!ep || !ep.audio_url || isPatreonUrl(ep.audio_url)) return;
-    addToQueue({
-      guid: `browse-${ep.episode_id || ep.audio_url}`,
-      title: ep.episode_title || data.title || "Episode",
-      enclosureUrl: ep.audio_url,
-      community: ep.podcast_name || null,
-      artwork: ep.podcast_artwork_url || null,
-      description: ep.episode_description || null,
-    });
+    const url = resolveAudioUrl(ep);
+    if (!url || isPatreonUrl(url)) return;
+    const playerEp = toPlayerEpisode(ep, { guid: `browse-${ep.episode_id || url}` });
+    if (playerEp) addToQueue(playerEp);
   };
 
   const logoProps = { data, logoReady, setLogoReady, isLightLogo, setIsLightLogo };

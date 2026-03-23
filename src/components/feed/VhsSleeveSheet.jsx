@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
+import { resolveAudioUrl } from "../../utils/episodeUrl";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
@@ -782,7 +783,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   {episodes.filter(ep => !hiddenEpIds.has(ep.episode_id)).map((ep, i) => {
                     const epKey = ep.episode_id || i;
-                    const isActive = currentEp && currentEp.enclosureUrl === ep.audio_url;
+                    const epUrl = resolveAudioUrl(ep);
+                    const isActive = currentEp && epUrl && currentEp.enclosureUrl === epUrl;
                     const isActiveAndPlaying = isActive && isPlaying;
                     const isExpanded = expandedEpId === epKey;
                     const descText = stripHtml(ep.episode_description);
@@ -818,9 +820,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
                           {/* Play/pause OR Patreon badge */}
-                          {isPatreonUrl(ep.audio_url) ? (
+                          {isPatreonUrl(epUrl) ? (
                             <a
-                              href={ep.audio_url}
+                              href={epUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
@@ -867,7 +869,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             </div>
                           )}
                           {/* Queue: add to up next (skip for Patreon eps) */}
-                          {onQueueEpisode && !isActive && !isPatreonUrl(ep.audio_url) && (
+                          {onQueueEpisode && !isActive && !isPatreonUrl(epUrl) && (
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
