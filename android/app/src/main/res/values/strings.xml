@@ -4,4 +4,5 @@
     <string name="title_activity_main">MANTL</string>
     <string name="package_name">app.mymantl</string>
     <string name="custom_url_scheme">app.mymantl</string>
+    <string name="audio_player_service_description">Allows podcast audio to play in the background.</string>
 </resources>
