@@ -113,10 +113,12 @@ export function useBrowseFeed(mode, active = false) {
     let accumulated = [...existingItems];
     let page = startPage;
     let tmdbExhausted = false;
+    let consecutiveFailures = 0;
+    const MAX_CONSECUTIVE_FAILURES = 3;
 
     try {
       while (accumulated.length < TARGET_ITEMS && page <= MAX_PAGES) {
-        if (gen !== genRef.current) return; // stale — newer fetch is running
+        if (gen !== genRef.current || !mountedRef.current) break; // stale or unmounted — exit loop cleanly
         // ── Phase 1: Fetch PAGES_PER_BATCH pages of TMDB results ──
         const discoverOpts = mode === "releases"
           ? {
@@ -131,12 +133,30 @@ export function useBrowseFeed(mode, active = false) {
         const pagesEnd = Math.min(page + PAGES_PER_BATCH, MAX_PAGES + 1);
 
         for (let p = page; p < pagesEnd; p++) {
+          if (gen !== genRef.current || !mountedRef.current) break;
           const data = await fetchTMDBDiscover(p, discoverOpts);
-          if (!mountedRef.current || gen !== genRef.current) return;
-          if (!data || data.error || !data.results?.length) {
+          if (gen !== genRef.current || !mountedRef.current) break;
+
+          // Transient failure: skip this page instead of killing the whole feed
+          if (!data || data.error) {
+            console.warn(`[BrowseFeed] ${mode} page ${p} failed, skipping`);
+            consecutiveFailures++;
+            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+              console.warn(`[BrowseFeed] ${mode} ${MAX_CONSECUTIVE_FAILURES} consecutive failures, stopping`);
+              tmdbExhausted = true;
+              break;
+            }
+            page = p + 1;
+            continue;
+          }
+
+          // Empty results = genuinely exhausted
+          if (!data.results?.length) {
             tmdbExhausted = true;
             break;
           }
+
+          consecutiveFailures = 0; // reset on success
 
           const normalized = normalizeTmdbResults(data.results)
             .filter(m => !seenTmdbRef.current.has(m.tmdb_id));
@@ -147,6 +167,8 @@ export function useBrowseFeed(mode, active = false) {
           page = p + 1;
         }
 
+        if (gen !== genRef.current || !mountedRef.current) break;
+
         if (batchNormalized.length === 0) {
           if (tmdbExhausted) break;
           continue;
@@ -155,7 +177,7 @@ export function useBrowseFeed(mode, active = false) {
         // ── Phase 2: Single playability check for entire batch (60 IDs vs 20) ──
         const tmdbIds = batchNormalized.map(m => m.tmdb_id);
         const playMap = await checkPlayability(tmdbIds);
-        if (!mountedRef.current || gen !== genRef.current) return;
+        if (gen !== genRef.current || !mountedRef.current) break;
 
         const covered = batchNormalized
           .filter(m => playMap.has(m.tmdb_id))
@@ -183,37 +205,31 @@ export function useBrowseFeed(mode, active = false) {
         }
       }
 
-      if (gen !== genRef.current) return; // stale — bail before updating state
+      // ── Always update state if we're still the active generation ──
+      if (gen === genRef.current && mountedRef.current) {
+        nextPageRef.current = page;
+        setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
 
-      nextPageRef.current = page;
-      setHasMore(!tmdbExhausted && accumulated.length < TARGET_ITEMS && page <= MAX_PAGES);
+        // ── Final sort: releases = newest first, streaming = popularity (as-is) ──
+        if (accumulated.length > 0) {
+          if (mode === "releases") {
+            accumulated.sort((a, b) =>
+              (b.release_date || "").localeCompare(a.release_date || "")
+              || (a.title || "").localeCompare(b.title || "")
+            );
+          }
+          setItems([...accumulated]);
 
-      // ── Final sort: releases = newest first, streaming = popularity (as-is) ──
-      // TMDB fetches by popularity (finds covered films fast). For releases we
-      // re-sort by release_date so newest films top the list. Streaming keeps
-      // popularity order since users expect "what's hot" rather than chronological.
-      if (accumulated.length > 0) {
-        if (mode === "releases") {
-          accumulated.sort((a, b) =>
-            (b.release_date || "").localeCompare(a.release_date || "")
-            || (a.title || "").localeCompare(b.title || "")
-          );
+          // ── Phase 3: Enrich logos ONCE after all items are accumulated ──
+          enrichLogos(accumulated, mountedRef, setItems);
         }
-        setItems([...accumulated]);
-      }
-
-      // ── Phase 3: Enrich logos ONCE after all items are accumulated ──
-      // Running this inside the loop caused a race: enrichLogos would patch
-      // logos into React state, then the next loop iteration's setItems([...accumulated])
-      // would overwrite them with the stale local array — causing logo ↔ text flash.
-      if (accumulated.length > 0 && gen === genRef.current) {
-        enrichLogos(accumulated, mountedRef, setItems);
       }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
+    } finally {
+      // ── ALWAYS clear loading — the old code had early returns that skipped this ──
+      if (mountedRef.current) setLoading(false);
     }
-
-    if (mountedRef.current && gen === genRef.current) setLoading(false);
   }, [mode]);
 
   const loadMore = useCallback(() => {

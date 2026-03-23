@@ -11,11 +11,20 @@ export { TMDB_IMG };
 // ─── Edge function caller (replaces direct fetch to TMDB/RAWG/Google Books) ───
 // Uses supabase.functions.invoke() so the user's JWT is attached automatically.
 // Returns the parsed JSON body, or null on error.
+// Includes a timeout so a single hung call can't block the app indefinitely.
+const API_PROXY_TIMEOUT = 12000; // 12s — well under Supabase's gateway timeout
+
 export const apiProxy = async (action, params = {}) => {
   try {
-    const { data, error } = await supabase.functions.invoke("api-proxy", {
-      body: { action, ...params },
-    });
+    const result = await Promise.race([
+      supabase.functions.invoke("api-proxy", {
+        body: { action, ...params },
+      }),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`api-proxy timeout: ${action}`)), API_PROXY_TIMEOUT)
+      ),
+    ]);
+    const { data, error } = result;
     if (error) {
       console.error(`[api-proxy] ${action} error:`, error);
       return null;
