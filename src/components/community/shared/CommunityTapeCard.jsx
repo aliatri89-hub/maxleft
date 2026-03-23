@@ -93,10 +93,12 @@ export default function CommunityTapeCard({
   onFlip,
 }) {
   const { left: brandLeft, right: brandRight } = getVhsBrands(community.slug);
-  const titleLen = (community.name || "").length;
+  const tapeTitle = community.theme_config?.tape_title || community.name || "";
+  const tapeTitleLines = tapeTitle.split("\n");
+  const longestLine = Math.max(...tapeTitleLines.map(l => l.length));
   const titleSize = isSubscribed
-    ? Math.max(15, Math.min(22, 340 / Math.max(titleLen, 1)))
-    : Math.max(14, Math.min(20, 320 / Math.max(titleLen, 1)));
+    ? Math.max(15, Math.min(22, 340 / Math.max(longestLine, 1)))
+    : Math.max(14, Math.min(20, 320 / Math.max(longestLine, 1)));
 
   // Slight rotation for that sharpie-on-a-label feel
   const hash = (community.slug || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
@@ -194,7 +196,6 @@ export default function CommunityTapeCard({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontFamily: "'Permanent Marker', cursive",
-                    fontSize: titleSize,
                     color: "#2C2824",
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
@@ -202,7 +203,12 @@ export default function CommunityTapeCard({
                     textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
                     transform: `rotate(${tilt * 0.4}deg)`,
                   }}>
-                    {community.name}
+                    {tapeTitleLines.map((line, i) => (
+                      <div key={i} style={{
+                        fontSize: i === 0 ? titleSize : Math.max(11, titleSize * 0.6),
+                        opacity: i === 0 ? 1 : 0.6,
+                      }}>{line}</div>
+                    ))}
                   </div>
                   {/* Minimal stat */}
                   {stats?.totalSeries > 0 && (
@@ -255,7 +261,6 @@ export default function CommunityTapeCard({
             <>
               <div style={{
                 fontFamily: "'Permanent Marker', cursive",
-                fontSize: titleSize,
                 color: "#2C2824",
                 textTransform: "uppercase",
                 letterSpacing: "0.02em",
@@ -267,7 +272,12 @@ export default function CommunityTapeCard({
                 transform: `rotate(${tilt * 0.6}deg)`,
                 maxWidth: "85%",
               }}>
-                {community.name}
+                {tapeTitleLines.map((line, i) => (
+                  <div key={i} style={{
+                    fontSize: i === 0 ? titleSize : Math.max(10, titleSize * 0.6),
+                    opacity: i === 0 ? 1 : 0.6,
+                  }}>{line}</div>
+                ))}
               </div>
               <div style={{
                 fontFamily: "'Permanent Marker', cursive",

@@ -50,6 +50,7 @@ export default function CommunitySleeveSheet({
   const alsoHosts = hosts.slice(3);
   const network = theme.network || null;
   const podcastAbout = theme.podcast_about || null;
+  const sleeveHero = theme.sleeve_hero || null;
   const slug = community?.slug || "";
   const abbrev = SLUG_ABBREV[slug] || slug.slice(0, 2).toUpperCase();
 
@@ -172,12 +173,62 @@ export default function CommunitySleeveSheet({
           }} />
         </div>
 
+        {/* ── Hero image — feed-style framing ── */}
+        {sleeveHero && (
+          <div style={{
+            position: "relative",
+            width: "100%",
+            overflow: "hidden",
+            marginBottom: -16,
+          }}>
+            <img
+              src={sleeveHero}
+              alt=""
+              loading="lazy"
+              style={{
+                width: "100%",
+                aspectRatio: "16 / 9",
+                objectFit: "cover",
+                objectPosition: "center",
+                display: "block",
+              }}
+            />
+            {/* Warm amber overlay */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: "rgba(255, 200, 140, 0.12)",
+              mixBlendMode: "multiply",
+            }} />
+            {/* Bottom gradient fade into sheet bg */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: "linear-gradient(180deg, rgba(23,20,17,0.1) 0%, transparent 25%, transparent 50%, #171411 100%)",
+            }} />
+            {/* Worn edges — vignette + inner shadow */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              boxShadow: "inset 0 0 30px 8px rgba(0,0,0,0.35), inset 0 0 4px 2px rgba(0,0,0,0.2)",
+            }} />
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.3) 100%)",
+            }} />
+            {/* Film grain */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.06,
+              backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
+            }} />
+          </div>
+        )}
+
         {/* ── Podcast name + art — inline row ── */}
         <div style={{
           display: "flex",
           alignItems: "center",
           gap: 14,
-          padding: "6px 20px 12px",
+          padding: sleeveHero ? "0 20px 12px" : "6px 20px 12px",
+          position: "relative",
+          zIndex: 2,
         }}>
           {artworkUrl && (
             <img
@@ -415,13 +466,45 @@ export default function CommunitySleeveSheet({
           </div>
         )}
 
-        {/* ── Barcode ── */}
+        {/* ── Bottom row: network left, barcode right ── */}
         <div style={{
-          display: "flex", justifyContent: "center",
-          padding: "20px 20px 4px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          padding: "24px 20px 8px",
         }}>
+          {/* Left: network + MPAA box */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}>
+            {network && (
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 700, fontSize: 12,
+                color: "rgba(240,235,225,0.3)",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                fontStyle: "italic",
+              }}>{network}</span>
+            )}
+            <div style={{
+              width: 22, height: 22,
+              border: "1.5px solid rgba(240,235,225,0.3)",
+              borderRadius: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 800, fontSize: 9,
+              color: "rgba(240,235,225,0.4)",
+            }}>{abbrev}</div>
+          </div>
+
+          {/* Right: barcode */}
           <div>
-            <div style={{ display: "flex", height: 32 }}>
+            <div style={{ display: "flex", height: 28 }}>
               {stripes.map((s, i) => (
                 <div key={i} style={{
                   width: s.w,
@@ -435,41 +518,10 @@ export default function CommunitySleeveSheet({
               fontSize: 7,
               color: "rgba(240,235,225,0.3)",
               textAlign: "center",
-              marginTop: 3,
+              marginTop: 2,
               letterSpacing: "0.15em",
             }}>{barcodeNum}</div>
           </div>
-        </div>
-
-        {/* ── Studio row + MPAA box ── */}
-        <div style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 16,
-          padding: "8px 20px",
-        }}>
-          {network && (
-            <span style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 700, fontSize: 12,
-              color: "rgba(240,235,225,0.3)",
-              textTransform: "uppercase",
-              letterSpacing: "0.06em",
-              fontStyle: "italic",
-            }}>{network}</span>
-          )}
-          <div style={{
-            width: 22, height: 22,
-            border: "1.5px solid rgba(240,235,225,0.3)",
-            borderRadius: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 800, fontSize: 9,
-            color: "rgba(240,235,225,0.4)",
-          }}>{abbrev}</div>
         </div>
 
         {/* Fine print */}
