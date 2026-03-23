@@ -44,6 +44,10 @@ export function toPlayerEpisode(ep, overrides = {}) {
   const url = resolveAudioUrl(ep);
   if (!url) return null;
 
+  // Gate: if episode is flagged dead, don't offer playback
+  const status = ep.audio_status || ep.extra_data?.audio_status || null;
+  if (status === 'dead' || status === 'paywalled') return null;
+
   return {
     guid:
       overrides.guid ||

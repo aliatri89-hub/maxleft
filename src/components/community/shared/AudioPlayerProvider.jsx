@@ -1527,7 +1527,6 @@ export default function AudioPlayerProvider({ children, session }) {
         stallTimerRef.current = setTimeout(() => {
           setBuffering(false);
           setError("Stream stalled — check your connection");
-          // Report dead audio — stall timeout likely means dead/paywalled URL
           if (currentEp) reportDeadAudio(currentEp, 'stalled_timeout');
         }, STALL_TIMEOUT);
       },
