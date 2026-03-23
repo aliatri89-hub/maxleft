@@ -9,9 +9,6 @@ import { tapLight } from "../utils/haptics";
 export default function AudioPip() {
   const { currentEp, recents, isPlaying, openFullScreen } = useAudioPlayer();
 
-  const hasAudio = currentEp || (recents && recents.length > 0);
-  if (!hasAudio) return null;
-
   return (
     <div
       onClick={() => { tapLight(); openFullScreen(); }}
