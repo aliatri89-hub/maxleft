@@ -120,11 +120,11 @@ function StatsCard({ stats }) {
 
   const statItems = [
     { label: "Played", value: stats.games_played },
-    { label: "Avg Rank", value: `#${stats.avg_rank}` },
-    { label: "Best", value: `#${stats.best_rank}` },
-    { label: "Streak", value: stats.current_streak, icon: "🔥" },
-    { label: "Max Streak", value: stats.longest_streak },
+    { label: "Avg Score", value: `${stats.avg_pct}%` },
+    { label: "This Week", value: stats.week_total },
     { label: "Perfect", value: stats.perfect_games, icon: "🏆" },
+    { label: "P. Streak", value: stats.current_perfect_streak, icon: "🔥" },
+    { label: "Best P. Streak", value: stats.best_perfect_streak },
   ];
 
   return (
