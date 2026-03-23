@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
-import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "../utils/constants";
+
 import { sb } from "../utils/api";
 import InitialAvatar from "../components/InitialAvatar";
 import ImportCSVModal from "../components/ImportCSVModal";
@@ -25,7 +25,6 @@ function Expandable({ open, children }) {
 function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
-  const [managingShelves, setManagingShelves] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [expandedListType, setExpandedListType] = useState(null);
@@ -42,99 +41,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [syncOpen, setSyncOpen] = useState(false);
   const fileRef = useRef(null);
 
-  // Shelf drag-to-reorder
-  const [shelfDragIdx, setShelfDragIdx] = useState(null);
-  const [shelfDragOverIdx, setShelfDragOverIdx] = useState(null);
-  const shelfDragRefs = useRef({ startY: 0, startIdx: -1, timer: null });
-  const shelfListRef = useRef(null);
-
-  useEffect(() => {
-    const el = shelfListRef.current;
-    if (!el || shelfDragIdx === null) return;
-    const handler = (e) => { if (shelfDragIdx !== null) e.preventDefault(); };
-    el.addEventListener("touchmove", handler, { passive: false });
-    return () => el.removeEventListener("touchmove", handler);
-  }, [shelfDragIdx]);
-
-  const onShelfDragStart = (idx, e) => {
-    const touch = e.touches?.[0] || e;
-    shelfDragRefs.current.startY = touch.clientY;
-    shelfDragRefs.current.startIdx = idx;
-    shelfDragRefs.current.timer = setTimeout(() => {
-      setShelfDragIdx(idx);
-      setShelfDragOverIdx(idx);
-      if (navigator.vibrate) navigator.vibrate(30);
-    }, 300);
-  };
-
-  const onShelfDragMove = (e) => {
-    if (shelfDragIdx === null) {
-      const touch = e.touches?.[0] || e;
-      if (Math.abs(touch.clientY - shelfDragRefs.current.startY) > 10) {
-        clearTimeout(shelfDragRefs.current.timer);
-      }
-      return;
-    }
-    const touch = e.touches?.[0] || e;
-    const listEl = shelfListRef.current;
-    if (!listEl) return;
-    const rows = listEl.querySelectorAll("[data-shelf-idx]");
-    let closest = shelfDragIdx;
-    let minDist = Infinity;
-    rows.forEach(row => {
-      const rect = row.getBoundingClientRect();
-      const mid = rect.top + rect.height / 2;
-      const dist = Math.abs(touch.clientY - mid);
-      if (dist < minDist) { minDist = dist; closest = parseInt(row.dataset.shelfIdx); }
-    });
-    if (closest !== shelfDragOverIdx) setShelfDragOverIdx(closest);
-  };
-
-  const onShelfDragEnd = async () => {
-    clearTimeout(shelfDragRefs.current.timer);
-    if (shelfDragIdx === null || shelfDragOverIdx === null || shelfDragIdx === shelfDragOverIdx) {
-      setShelfDragIdx(null);
-      setShelfDragOverIdx(null);
-      return;
-    }
-    // Reorder within the visible (filtered) toggles only
-    const visibleKeys = shelfToggles.map(t => t.key);
-    const [moved] = visibleKeys.splice(shelfDragIdx, 1);
-    visibleKeys.splice(shelfDragOverIdx, 0, moved);
-    // Rebuild full order: keep hidden keys in front, then visible in new order
-    const hiddenKeys = currentOrder.filter(k => !shelfToggleMap[k]);
-    const order = [...hiddenKeys, ...visibleKeys];
-    setShelfDragIdx(null);
-    setShelfDragOverIdx(null);
-    if (onUpdateProfile) onUpdateProfile({ shelfOrder: order });
-    await sb(supabase.from("profiles").update({ shelf_order: order }).eq("id", session.user.id), onToast, "Couldn't update");
-  };
-
-  const onShelfDragCancel = () => {
-    clearTimeout(shelfDragRefs.current.timer);
-    setShelfDragIdx(null);
-    setShelfDragOverIdx(null);
-  };
-
-  const shelfToggleMap = {
-    books: { label: "Books" },
-    movies: { label: "Films" },
-    shows: { label: "Shows" },
-    games: { label: "Games" },
-  };
-
-  const currentOrder = profile.shelfOrder || DEFAULT_SHELF_ORDER;
-  const shelfToggles = currentOrder.map(key => ({ key, ...shelfToggleMap[key] })).filter(t => t.label);
-
-  const enabledShelves = { ...DEFAULT_ENABLED_SHELVES, ...(profile.enabledShelves || {}) };
-
-  const handleToggleShelf = async (key) => {
-    const updated = { ...enabledShelves, [key]: !enabledShelves[key] };
-    // If turning off training, also turn off trophies (trophies come from events)
-    // Actually no — keep them independent. User might want to show past trophies but not upcoming events.
-    if (onUpdateProfile) onUpdateProfile({ enabledShelves: updated });
-    await sb(supabase.from("profiles").update({ enabled_shelves: updated }).eq("id", session.user.id), onToast, "Couldn't update");
-  };
 
   const handleSaveName = async () => {
     if (!session || !editName.trim()) return;
@@ -252,44 +158,6 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
         )}
 
         <div className="profile-big-handle">@{profile.username}</div>
-      </div>
-
-      {/* ── PROFILE GROUP ── */}
-      <div className="profile-group">
-        <div className="profile-group-label">Profile</div>
-        <div className="profile-group-card">
-          <div className="profile-group-row" onClick={() => setManagingShelves(!managingShelves)}>
-            <span className="profile-group-row-text">Manage Library</span>
-            <span className="profile-group-row-chevron">{managingShelves ? "▾" : "›"}</span>
-          </div>
-          <Expandable open={managingShelves}>
-            <div className="manage-shelves-panel" ref={shelfListRef}
-              onTouchMove={onShelfDragMove} onTouchEnd={onShelfDragEnd} onTouchCancel={onShelfDragCancel}
-              onMouseMove={shelfDragIdx !== null ? onShelfDragMove : undefined}
-              onMouseUp={shelfDragIdx !== null ? onShelfDragEnd : undefined}
-              onMouseLeave={shelfDragIdx !== null ? onShelfDragCancel : undefined}>
-              {shelfToggles.map(({ key, label }, idx) => {
-                const isDragging = shelfDragIdx === idx;
-                const isDragOver = shelfDragIdx !== null && shelfDragOverIdx === idx && shelfDragIdx !== idx;
-                return (
-                  <div className={`shelf-toggle-row${isDragging ? " shelf-dragging" : ""}${isDragOver ? " shelf-drag-over" : ""}`}
-                    key={key} data-shelf-idx={idx}
-                    onTouchStart={(e) => onShelfDragStart(idx, e)}
-                    onMouseDown={(e) => onShelfDragStart(idx, e)}>
-                    <div className="shelf-drag-handle">⠿</div>
-                    <div className="shelf-toggle-info">
-                      <div className={`shelf-toggle-label${!enabledShelves[key] ? " disabled" : ""}`}>{label}</div>
-                    </div>
-                    <div
-                      className={`shelf-toggle-switch${enabledShelves[key] ? " on" : ""}`}
-                      onClick={(e) => { e.stopPropagation(); handleToggleShelf(key); }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </Expandable>
-        </div>
       </div>
 
       {/* ── LIBRARY GROUP ── */}
