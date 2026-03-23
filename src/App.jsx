@@ -466,7 +466,7 @@ export default function App() {
 
         {/* Games Menu */}
         {showGamesMenu && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 180, display: "flex", flexDirection: "column" }}>
+          <div style={{ position: "fixed", inset: 0, zIndex: 10000, display: "flex", flexDirection: "column" }}>
             <div onClick={() => setShowGamesMenu(false)} style={{ flex: 1, background: "rgba(0,0,0,0.6)" }} />
             <div style={{
               background: "#1a1612", borderRadius: "16px 16px 0 0",
@@ -569,7 +569,7 @@ export default function App() {
         )}
 
         {/* Bottom Nav — Communities | Search | Mantl */}
-        {screen === "app" && !activeCommunitySlug && (
+        {screen === "app" && !activeCommunitySlug && !showGamesMenu && !showWhatToWatch && !showTripleFeature && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
