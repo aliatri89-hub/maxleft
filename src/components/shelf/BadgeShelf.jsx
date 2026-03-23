@@ -90,6 +90,8 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
         </div>
       )}
     </div>
+  );
+}
 
 function EmptySlot({ delay = 0, onTap }) {
   return (
