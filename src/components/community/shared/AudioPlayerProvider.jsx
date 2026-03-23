@@ -534,7 +534,6 @@ function FullScreenPlayer({
 
   const handleScrubEnd = useCallback(() => {
     if (!scrubbing) return;
-    console.log(`[AudioPlayer] scrubEnd → onSeek(${scrubValue})`);
     onSeek(scrubValue);
     setScrubbing(false);
   }, [scrubbing, scrubValue, onSeek]);
@@ -1598,14 +1597,11 @@ export default function AudioPlayerProvider({ children, session }) {
   const skip = useCallback((sec) => {
     const ct = bridge.currentTime;
     const newTime = Math.max(0, Math.min(duration || 0, ct + sec));
-    console.log(`[AudioPlayer] skip(${sec}) ct=${ct} dur=${duration} → ${newTime}`);
     bridge.seek(newTime);
   }, [bridge, duration]);
 
   const seekTo = useCallback((time) => {
-    const clamped = Math.max(0, Math.min(duration || 0, time));
-    console.log(`[AudioPlayer] seekTo(${time}) dur=${duration} bridgeDur=${bridge.duration} → ${clamped}`);
-    bridge.seek(clamped);
+    bridge.seek(Math.max(0, Math.min(duration || 0, time)));
   }, [bridge, duration]);
 
   const cycleSpeed = useCallback(() => {
