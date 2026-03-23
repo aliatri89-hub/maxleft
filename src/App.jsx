@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Capacitor } from "@capacitor/core";
+import { StatusBar, Style } from "@capacitor/status-bar";
 import { supabase } from "./supabase";
 import "./styles/App.css";
+
+// ─── NATIVE STATUS BAR CONFIG ─────────────────────────────────
+if (Capacitor.isNativePlatform()) {
+  StatusBar.setOverlaysWebView({ overlay: false });
+  StatusBar.setBackgroundColor({ color: "#0f0d0b" });
+  StatusBar.setStyle({ style: Style.Dark });
+}
 
 // Utils
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
