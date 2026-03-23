@@ -36,11 +36,6 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
-
-    // Media3 — needed for MantlAudioService to customize notification buttons
-    implementation "androidx.media3:media3-common:1.5.1"
-    implementation "androidx.media3:media3-session:1.5.1"
-
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
