@@ -123,7 +123,7 @@ export default function CommunityTapeCard({
         borderRadius: 4,
         overflow: "hidden",
         display: "flex",
-        minHeight: isSubscribed ? 88 : 72,
+        minHeight: 88,
       }}>
         {/* Left dark tape end */}
         <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
@@ -256,37 +256,57 @@ export default function CommunityTapeCard({
             </>
           )}
 
-          {/* ── Unfollowed: just the name ── */}
+          {/* ── Unfollowed: art + name ── */}
           {!isSubscribed && (
             <>
               <div style={{
-                fontFamily: "'Permanent Marker', cursive",
-                color: "#2C2824",
-                textTransform: "uppercase",
-                letterSpacing: "0.02em",
-                lineHeight: 1.15,
-                textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
                 position: "relative",
                 zIndex: 2,
-                textAlign: "center",
-                transform: `rotate(${tilt * 0.6}deg)`,
-                maxWidth: "85%",
+                width: "100%",
+                padding: "0 18px",
               }}>
-                {tapeTitleLines.map((line, i) => (
-                  <div key={i} style={{
-                    fontSize: i === 0 ? titleSize : Math.max(10, titleSize * 0.6),
-                    opacity: i === 0 ? 1 : 0.6,
-                  }}>{line}</div>
-                ))}
+                {artworkUrl && (
+                  <img
+                    src={artworkUrl}
+                    alt=""
+                    style={{
+                      width: 48, height: 48,
+                      borderRadius: 8,
+                      objectFit: "cover",
+                      flexShrink: 0,
+                      border: "1.5px solid rgba(44,40,36,0.12)",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    color: "#2C2824",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.02em",
+                    lineHeight: 1.15,
+                    textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
+                    transform: `rotate(${tilt * 0.5}deg)`,
+                  }}>
+                    {tapeTitleLines.map((line, i) => (
+                      <div key={i} style={{
+                        fontSize: i === 0 ? titleSize : Math.max(10, titleSize * 0.6),
+                        opacity: i === 0 ? 1 : 0.6,
+                      }}>{line}</div>
+                    ))}
+                  </div>
+                  <div style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: 9,
+                    color: "rgba(44,40,36,0.35)",
+                    marginTop: 2,
+                  }}>tap to learn more</div>
+                </div>
               </div>
-              <div style={{
-                fontFamily: "'Permanent Marker', cursive",
-                fontSize: 9,
-                color: "rgba(44,40,36,0.35)",
-                position: "relative",
-                zIndex: 2,
-                marginTop: 3,
-              }}>tap to learn more</div>
             </>
           )}
         </div>
