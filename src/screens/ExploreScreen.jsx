@@ -244,7 +244,7 @@ export default function ExploreScreen({
                   accent={accent}
                   stats={stats[c.id]}
                   onTap={() => onOpenCommunity(c.slug)}
-                  onLongPress={() => openSleeve(c)}
+                  onFlip={() => openSleeve(c)}
                 />
               );
             })}

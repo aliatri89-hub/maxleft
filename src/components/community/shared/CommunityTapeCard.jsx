@@ -90,56 +90,21 @@ export default function CommunityTapeCard({
   accent,
   stats,
   onTap,
-  onLongPress,
+  onFlip,
 }) {
   const { left: brandLeft, right: brandRight } = getVhsBrands(community.slug);
   const titleLen = (community.name || "").length;
   const titleSize = isSubscribed
-    ? Math.max(16, Math.min(24, 360 / Math.max(titleLen, 1)))
+    ? Math.max(15, Math.min(22, 340 / Math.max(titleLen, 1)))
     : Math.max(14, Math.min(20, 320 / Math.max(titleLen, 1)));
 
   // Slight rotation for that sharpie-on-a-label feel
   const hash = (community.slug || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0);
   const tilt = ((hash % 5) * 0.5 - 1.2);
 
-  // Long press handler for followed tapes → see the back
-  let pressTimer = null;
-  const handleTouchStart = () => {
-    if (!onLongPress) return;
-    pressTimer = setTimeout(() => {
-      onLongPress();
-      pressTimer = null;
-    }, 500);
-  };
-  const handleTouchEnd = (e) => {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-      // Short tap — navigate
-      onTap?.();
-    }
-    // If pressTimer was already cleared (long press fired), do nothing
-  };
-  const handleTouchMove = () => {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
-    }
-  };
-
-  const handleClick = (e) => {
-    // On desktop, just tap
-    if (!("ontouchstart" in window)) {
-      onTap?.();
-    }
-  };
-
   return (
     <div
-      onClick={handleClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
+      onClick={() => onTap?.()}
       style={{
         margin: "5px 0",
         borderRadius: 6,
@@ -156,7 +121,7 @@ export default function CommunityTapeCard({
         borderRadius: 4,
         overflow: "hidden",
         display: "flex",
-        minHeight: isSubscribed ? 80 : 72,
+        minHeight: isSubscribed ? 88 : 72,
       }}>
         {/* Left dark tape end */}
         <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
@@ -165,7 +130,7 @@ export default function CommunityTapeCard({
         <div style={{
           flex: 1,
           background: "#f0ebe1",
-          padding: isSubscribed ? "10px 14px" : "10px 14px",
+          padding: isSubscribed ? "8px 14px" : "10px 14px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -200,71 +165,88 @@ export default function CommunityTapeCard({
           <BrandStamp brand={brandLeft} side="left" />
           <BrandStamp brand={brandRight} side="right" />
 
-          {/* ── Followed: art + name row ── */}
+          {/* ── Followed: big art + name beside it ── */}
           {isSubscribed && (
             <>
               <div style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
+                gap: 12,
                 position: "relative",
                 zIndex: 2,
-                maxWidth: "85%",
+                width: "100%",
+                padding: "0 18px",
               }}>
                 {artworkUrl && (
                   <img
                     src={artworkUrl}
                     alt=""
                     style={{
-                      width: 34, height: 34,
-                      borderRadius: 6,
+                      width: 58, height: 58,
+                      borderRadius: 8,
                       objectFit: "cover",
                       flexShrink: 0,
                       border: "1.5px solid rgba(44,40,36,0.12)",
+                      boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
                     }}
                   />
                 )}
-                <div style={{
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: titleSize,
-                  color: "#2C2824",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.02em",
-                  lineHeight: 1.15,
-                  textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
-                  transform: `rotate(${tilt * 0.5}deg)`,
-                }}>
-                  {community.name}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: "'Permanent Marker', cursive",
+                    fontSize: titleSize,
+                    color: "#2C2824",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.02em",
+                    lineHeight: 1.15,
+                    textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
+                    transform: `rotate(${tilt * 0.4}deg)`,
+                  }}>
+                    {community.name}
+                  </div>
+                  {/* Minimal stat */}
+                  {stats?.totalSeries > 0 && (
+                    <div style={{
+                      fontFamily: "'Permanent Marker', cursive",
+                      fontSize: 10,
+                      color: "rgba(44,40,36,0.4)",
+                      marginTop: 2,
+                    }}>
+                      {stats.completedSeries} / {stats.totalSeries} series
+                    </div>
+                  )}
                 </div>
               </div>
-              {/* Minimal stat */}
-              {stats?.totalSeries > 0 && (
-                <div style={{
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 10,
-                  color: "rgba(44,40,36,0.45)",
-                  position: "relative",
-                  zIndex: 2,
-                  marginTop: 2,
-                }}>
-                  {stats.completedSeries} / {stats.totalSeries} series
-                </div>
+
+              {/* ── Flip button (ℹ) — opens sleeve for info / unfollow ── */}
+              {onFlip && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onFlip(); }}
+                  style={{
+                    position: "absolute",
+                    top: 6, right: 22,
+                    zIndex: 4,
+                    width: 24, height: 24,
+                    borderRadius: 12,
+                    border: "none",
+                    background: "rgba(44,40,36,0.08)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    WebkitTapHighlightColor: "transparent",
+                    padding: 0,
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="rgba(44,40,36,0.4)" strokeWidth="2.5"
+                    strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4" />
+                    <path d="M12 8h.01" />
+                  </svg>
+                </button>
               )}
-              {/* Following indicator */}
-              <div style={{
-                position: "absolute",
-                bottom: 5, right: 28,
-                zIndex: 3,
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 7,
-                fontWeight: 600,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                padding: "2px 6px",
-                borderRadius: 2,
-                background: "rgba(44,40,36,0.06)",
-                color: accent || "rgba(44,40,36,0.5)",
-              }}>● following</div>
             </>
           )}
 
