@@ -39,13 +39,19 @@ export async function fetchTodaysPuzzle() {
     };
   });
 
+  // Compute optimal combo (top 3 by gross) from actual movie data
+  const indexed = orderedMovies.map((m, i) => ({ idx: i, gross: m.gross }));
+  indexed.sort((a, b) => b.gross - a.gross);
+  const optimalCombo = indexed.slice(0, 3).map((m) => m.idx).sort((a, b) => a - b);
+  const optimalTotal = optimalCombo.reduce((sum, i) => sum + orderedMovies[i].gross, 0);
+
   return {
     id: puzzle.id,
     date: puzzle.puzzle_date,
     movies: orderedMovies,
     target: puzzle.target,
-    optimalCombo: puzzle.optimal_combo,
-    optimalTotal: puzzle.optimal_total,
+    optimalCombo,
+    optimalTotal,
   };
 }
 
