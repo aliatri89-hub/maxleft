@@ -22,7 +22,7 @@ function Expandable({ open, children }) {
   );
 }
 
-function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete }) {
+function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [wishlist, setWishlist] = useState([]);
@@ -39,7 +39,33 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [steamOpen, setSteamOpen] = useState(false);
   const [steamIdInput, setSteamIdInput] = useState(profile.steam_id || "");
   const [syncOpen, setSyncOpen] = useState(false);
+  const [podcastsOpen, setPodcastsOpen] = useState(false);
+  const [allCommunities, setAllCommunities] = useState([]);
+  const [loadingCommunities, setLoadingCommunities] = useState(false);
   const fileRef = useRef(null);
+
+  // ── Load communities for podcast picker ──
+  useEffect(() => {
+    if (!podcastsOpen || allCommunities.length > 0) return;
+    let cancelled = false;
+    const isDev = new URLSearchParams(window.location.search).has("dev");
+
+    (async () => {
+      setLoadingCommunities(true);
+      const query = supabase
+        .from("community_pages")
+        .select("id, name, slug, description, theme_config")
+        .order("sort_order", { ascending: true });
+
+      if (!isDev) query.eq("launched", true);
+
+      const { data, error } = await query;
+      if (!cancelled && !error) setAllCommunities(data || []);
+      if (!cancelled) setLoadingCommunities(false);
+    })();
+
+    return () => { cancelled = true; };
+  }, [podcastsOpen]);
 
 
   const handleSaveName = async () => {
@@ -330,6 +356,117 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   )}
                 </div>
               </Expandable>
+            </div>
+          </Expandable>
+
+          <div className="profile-group-divider" />
+
+          {/* ── My Podcasts ── */}
+          <div className="profile-group-row" onClick={() => setPodcastsOpen(!podcastsOpen)}>
+            <span className="profile-group-row-text">My Podcasts</span>
+            <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {communitySubscriptions?.size > 0 && (
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 9,
+                  color: "var(--terracotta)", opacity: 0.7,
+                }}>{communitySubscriptions.size} following</span>
+              )}
+              {podcastsOpen ? "▾" : "›"}
+            </span>
+          </div>
+          <Expandable open={podcastsOpen}>
+            <div style={{ padding: "4px 14px 12px" }}>
+              {loadingCommunities ? (
+                <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-faint)", fontSize: 12, fontFamily: "var(--font-mono)" }}>
+                  Loading...
+                </div>
+              ) : allCommunities.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-faint)", fontSize: 12, fontFamily: "var(--font-mono)" }}>
+                  No communities available
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {allCommunities.map(c => {
+                    const theme = c.theme_config || {};
+                    const accent = theme.accent || "#e94560";
+                    const isOn = communitySubscriptions?.has(c.id);
+
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => {
+                          if (isOn) {
+                            onUnsubscribe(c.id);
+                          } else {
+                            onSubscribe(c.id);
+                          }
+                        }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 12,
+                          padding: "12px 14px",
+                          background: isOn ? `${accent}0c` : "rgba(255,255,255,0.02)",
+                          border: `1.5px solid ${isOn ? `${accent}40` : "var(--border-medium)"}`,
+                          borderRadius: 10,
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        {/* Accent dot */}
+                        <div style={{
+                          width: 8, height: 8, borderRadius: "50%",
+                          background: isOn ? accent : "var(--border-medium)",
+                          flexShrink: 0,
+                          transition: "background 0.15s",
+                          boxShadow: isOn ? `0 0 6px ${accent}44` : "none",
+                        }} />
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{
+                            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14,
+                            textTransform: "uppercase", letterSpacing: "0.02em",
+                            color: isOn ? "var(--text-primary)" : "var(--text-muted)",
+                            lineHeight: 1.2,
+                          }}>{c.name}</div>
+                          {c.description && (
+                            <div style={{
+                              fontFamily: "var(--font-body)", fontSize: 11, fontStyle: "italic",
+                              color: "var(--text-faint)",
+                              marginTop: 2,
+                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                            }}>{c.description}</div>
+                          )}
+                        </div>
+
+                        {/* Toggle pill */}
+                        <div style={{
+                          width: 36, height: 20, borderRadius: 10,
+                          background: isOn ? accent : "rgba(255,255,255,0.08)",
+                          position: "relative",
+                          transition: "background 0.2s ease",
+                          flexShrink: 0,
+                        }}>
+                          <div style={{
+                            width: 16, height: 16, borderRadius: "50%",
+                            background: isOn ? "#fff" : "rgba(255,255,255,0.3)",
+                            position: "absolute",
+                            top: 2,
+                            left: isOn ? 18 : 2,
+                            transition: "left 0.2s ease, background 0.2s ease",
+                          }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  <div style={{
+                    fontFamily: "var(--font-mono)", fontSize: 9,
+                    color: "var(--text-faint)", textAlign: "center",
+                    marginTop: 4, letterSpacing: "0.03em",
+                  }}>
+                    Toggle podcasts to show in your feed and communities tab
+                  </div>
+                </div>
+              )}
             </div>
           </Expandable>
 

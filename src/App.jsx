@@ -491,6 +491,9 @@ export default function App() {
               onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}
               steamSyncing={sync.steamSyncing}
               onImportComplete={() => { if (session) loadShelves(session.user.id); }}
+              communitySubscriptions={communitySubscriptions}
+              onSubscribe={handleSubscribeCommunity}
+              onUnsubscribe={unsubscribeCommunity}
             />
           </div>
         )}
