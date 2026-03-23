@@ -796,7 +796,7 @@ function ResultCard({
           }}>{result.year || "—"}</div>
 
           {hasCoverage && (
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
               {result.podcasts?.length > 0 ? (
                 <>
                   {result.podcasts.slice(0, 5).map((pod, i) => (
@@ -805,14 +805,18 @@ function ResultCard({
                         title={pod.name}
                         style={{
                           width: 22, height: 22, borderRadius: 5, objectFit: "cover",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          border: "1.5px solid #0f0d0b",
+                          marginLeft: i > 0 ? -6 : 0,
+                          position: "relative", zIndex: 5 - i,
                         }} />
                     ) : (
                       <div key={pod.slug || i} title={pod.name}
                         style={{
                           width: 22, height: 22, borderRadius: 5,
                           background: "rgba(255,255,255,0.06)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          border: "1.5px solid #0f0d0b",
+                          marginLeft: i > 0 ? -6 : 0,
+                          position: "relative", zIndex: 5 - i,
                         }} />
                     )
                   ))}
@@ -820,6 +824,7 @@ function ResultCard({
                     <span style={{
                       fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "rgba(255,255,255,0.3)",
+                      marginLeft: 4,
                     }}>+{result.podcasts.length - 5}</span>
                   )}
                 </>
