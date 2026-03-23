@@ -9,7 +9,7 @@ import { useWhatToWatch } from "./useWhatToWatch";
 import { useAudioPlayer } from "../../components/community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
-import { upsertMediaLog } from "../../utils/mediaWrite";
+import { supabase } from "../../supabase";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const SWIPE_THRESHOLD = 80;
@@ -421,13 +421,17 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
     if (!userId || saving || saved) return;
     setSaving(true);
     try {
-      await upsertMediaLog(userId, {
-        mediaType: "film", tmdbId: film.tmdb_id, title: film.title,
-        year: film.year, posterPath: film.poster_path, backdropPath: film.backdrop_path,
-        status: "want_to_watch",
+      const coverUrl = film.poster_path ? `${TMDB_IMG}/w342${film.poster_path}` : null;
+      const { error } = await supabase.from("wishlist").insert({
+        user_id: userId,
+        item_type: "movie",
+        title: film.title,
+        cover_url: coverUrl,
+        year: film.year || null,
       });
+      if (error) throw error;
       setSaved(true);
-      onToast?.("Added to watchlist");
+      onToast?.("Added to watch list");
     } catch { onToast?.("Couldn't save — try again"); }
     setSaving(false);
   }, [userId, film, saving, saved, onToast]);
@@ -451,7 +455,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
           border: `1px solid ${saved ? GREEN : AMBER}`, color: saved ? GREEN : AMBER,
           borderRadius: 20, padding: "10px 24px", fontSize: 14, fontWeight: 600,
           cursor: saved ? "default" : "pointer", opacity: saving ? 0.5 : 1,
-        }}>{saved ? "✓ On watchlist" : saving ? "Saving…" : "Add to watchlist"}</button>
+        }}>{saved ? "✓ On watch list" : saving ? "Saving…" : "Add to watch list"}</button>
       </div>
 
       <div style={{ padding: "0 16px" }}>

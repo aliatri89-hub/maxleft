@@ -27,7 +27,7 @@ const BASE_TABS = [
 ];
 const INBOX_TAB = { key: "inbox", label: "Inbox" };
 
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav, onOpenWhatToWatch }) {
+export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, feedMode, setFeedMode, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
   const FEED_TABS = useMemo(() => isAdmin ? [...BASE_TABS, INBOX_TAB] : BASE_TABS, [isAdmin]);
@@ -262,15 +262,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               {tab.label}
             </button>
           ))}
-          {onOpenWhatToWatch && (
-            <button
-              className="vhs-toggle-btn"
-              onClick={onOpenWhatToWatch}
-              style={{ color: "#d4af37" }}
-            >
-              Pick a Flick
-            </button>
-          )}
         </div>
       </div>
 
