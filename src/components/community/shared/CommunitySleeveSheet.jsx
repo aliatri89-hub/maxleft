@@ -178,8 +178,9 @@ export default function CommunitySleeveSheet({
           <div style={{
             position: "relative",
             width: "100%",
+            height: 200,
             overflow: "hidden",
-            marginBottom: -16,
+            marginBottom: -24,
           }}>
             <img
               src={sleeveHero}
@@ -187,35 +188,31 @@ export default function CommunitySleeveSheet({
               loading="lazy"
               style={{
                 width: "100%",
-                aspectRatio: "16 / 9",
+                height: "100%",
                 objectFit: "cover",
-                objectPosition: "center",
+                objectPosition: "center top",
                 display: "block",
               }}
             />
             {/* Warm amber overlay */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
-              background: "rgba(255, 200, 140, 0.12)",
+              background: "rgba(255, 200, 140, 0.1)",
               mixBlendMode: "multiply",
             }} />
-            {/* Bottom gradient fade into sheet bg */}
+            {/* Bottom gradient — hard fade into sheet bg */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
-              background: "linear-gradient(180deg, rgba(23,20,17,0.1) 0%, transparent 25%, transparent 50%, #171411 100%)",
+              background: "linear-gradient(180deg, transparent 0%, transparent 40%, rgba(23,20,17,0.6) 70%, #171411 100%)",
             }} />
             {/* Worn edges — vignette + inner shadow */}
             <div style={{
               position: "absolute", inset: 0, pointerEvents: "none",
-              boxShadow: "inset 0 0 30px 8px rgba(0,0,0,0.35), inset 0 0 4px 2px rgba(0,0,0,0.2)",
-            }} />
-            <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none",
-              background: "radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.3) 100%)",
+              boxShadow: "inset 0 0 30px 8px rgba(0,0,0,0.3)",
             }} />
             {/* Film grain */}
             <div style={{
-              position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.06,
+              position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.05,
               backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='4' height='4' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
             }} />
           </div>
