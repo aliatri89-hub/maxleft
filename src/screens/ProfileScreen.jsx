@@ -482,6 +482,44 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
         )}
       </div>
 
+      {/* ── ATTRIBUTION ── */}
+      <div className="profile-group" style={{ opacity: 0.5, paddingBottom: 8 }}>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+          padding: "8px 16px",
+        }}>
+          <a
+            href="https://www.themoviedb.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ display: "inline-block" }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190.24 81.52" style={{ height: 12, opacity: 0.7 }}>
+              <defs>
+                <linearGradient id="tmdb-grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stopColor="#90CEA1" />
+                  <stop offset="0.56" stopColor="#3CBEC9" />
+                  <stop offset="1" stopColor="#00B3E5" />
+                </linearGradient>
+              </defs>
+              <g fill="url(#tmdb-grad)">
+                <path d="M105.67 36.06h66.6a17.97 17.97 0 000-35.93h-66.6a17.97 17.97 0 000 35.93zm-88.7 45.46h7.49V58.35h12.34v-6.5H24.46V39.43H38.4v-6.5H16.97zM46.56 81.52h7.5V32.93h-7.5zm20.62 0h7.49V58.35h12.34v-6.5H74.67V39.43h13.95v-6.5H67.18zm36.82-35.96v22.86c0 7.55 4.03 13.68 14.02 13.68 10 0 14.03-6.13 14.03-13.68V45.56c0-7.55-4.03-13.73-14.03-13.73-9.99 0-14.02 6.18-14.02 13.73zm7.5-.9c0-4.38 2.11-6.33 6.52-6.33s6.52 1.95 6.52 6.33v24.64c0 4.38-2.11 6.33-6.52 6.33s-6.52-1.95-6.52-6.33zm28.24-11.73h14.03c9.47 0 13.7 5.2 13.7 12.47v12.07c0 7.27-4.23 12.47-13.7 12.47h-14.03zm7.49 30.51h5.94c4.32 0 6.8-2 6.8-6.57v-11.2c0-4.6-2.48-6.57-6.8-6.57h-5.94zm28.18-30.51h14.36c8.38 0 12.07 3.74 12.07 10.14 0 4.13-1.88 7.6-6.52 8.58v.14c5.25.6 7.72 3.87 7.72 8.72 0 7.11-4.5 10.89-12.81 10.89h-14.82zm7.49 16.87h5.73c3.79 0 5.73-1.5 5.73-5.2 0-3.56-2.07-5.17-5.73-5.17h-5.73zm0 17.14h6.52c4.17 0 6.2-1.9 6.2-5.53 0-3.48-2.34-5.2-6.2-5.2h-6.52z"/>
+              </g>
+            </svg>
+          </a>
+          <div style={{
+            fontFamily: "var(--font-body)",
+            fontSize: 9,
+            color: "var(--text-faint, #5a6480)",
+            textAlign: "center",
+            lineHeight: 1.5,
+            maxWidth: 260,
+          }}>
+            This product uses the TMDB API but is not endorsed or certified by TMDB.
+          </div>
+        </div>
+      </div>
+
       {/* Import CSV Modal — portaled to body to escape transform containing block */}
       {showImportCSV && createPortal(
         <ImportCSVModal
