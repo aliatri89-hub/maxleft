@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { createControls, updatePlaying, destroyControls, registerActionHandlers } from "../../../utils/nativeMusicControls";
-import { reportDeadAudio, getAudioErrorInfo } from "../../../utils/reportDeadAudio";
+import { getAudioBridge } from "../../../utils/nativeAudioBridge";
+import { reportDeadAudio } from "../../../utils/reportDeadAudio";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
@@ -1330,7 +1330,11 @@ function QueueToast({ toast }) {
 // ── Provider ────────────────────────────────────────────────
 
 export default function AudioPlayerProvider({ children, session }) {
-  const audioRef = useRef(null);
+  const bridgeRef = useRef(null);
+  // Lazily get the bridge singleton
+  if (!bridgeRef.current) bridgeRef.current = getAudioBridge();
+  const bridge = bridgeRef.current;
+
   const [currentEp, setCurrentEp] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -1398,162 +1402,119 @@ export default function AudioPlayerProvider({ children, session }) {
     }
   }, [updateRecents]);
 
-  // ── Audio event listeners ────────────────────────────────
+  // ── Bridge event listeners ────────────────────────────────
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const ms = "mediaSession" in navigator ? navigator.mediaSession : null;
-    const h = {
-      timeupdate: () => {
-        const t = audio.currentTime;
-        setProgress(t);
-        setError(null); // clear error on successful playback
-        clearTimeout(stallTimerRef.current);
-        const now = Date.now();
-        if (now - saveThrottle.current > SAVE_INTERVAL) {
-          saveThrottle.current = now;
-          saveBookmark(currentEp, t, speed, audio.duration);
-          // Also persist recents so force-close doesn't lose position
-          if (currentEp && t > 15) {
-            const updated = upsertRecent(recentsRef.current, currentEp, t, speed, audio.duration);
-            recentsRef.current = updated;
-            persistRecents(updated);
-          }
-          // Update native notification elapsed time
-          updatePlaying(true, t, audio.duration, audio.playbackRate);
-          // Update OS scrubber position on the same throttle
-          if (ms && audio.duration && isFinite(audio.duration)) {
-            try {
-              ms.setPositionState({
-                duration: audio.duration,
-                playbackRate: audio.playbackRate,
-                position: Math.min(t, audio.duration),
-              });
-            } catch {}
-          }
-        }
-      },
-      durationchange: () => {
-        setDuration(audio.duration || 0);
-        // Create/refresh native notification when duration becomes known
-        if (currentEp && audio.duration && isFinite(audio.duration)) {
-          createControls({
-            track: currentEp.title,
-            artist: currentEp.community || "MANTL",
-            cover: currentEp.artwork || "",
-            isPlaying: !audio.paused,
-            duration: audio.duration,
-            elapsed: audio.currentTime,
-            playbackRate: audio.playbackRate,
-          });
-        }
-        // Push position state when duration becomes known
-        if (ms && audio.duration && isFinite(audio.duration)) {
-          try {
-            ms.setPositionState({
-              duration: audio.duration,
-              playbackRate: audio.playbackRate,
-              position: Math.min(audio.currentTime, audio.duration),
-            });
-          } catch {}
-        }
-      },
-      play: () => {
-        setIsPlaying(true); setBuffering(false); setError(null);
-        if (ms) ms.playbackState = "playing";
-        updatePlaying(true, audio.currentTime, audio.duration, audio.playbackRate);
-      },
-      pause: () => {
-        setIsPlaying(false);
-        clearTimeout(stallTimerRef.current);
-        saveBookmark(currentEp, audio.currentTime, speed, audio.duration);
-        if (ms) ms.playbackState = "paused";
-        updatePlaying(false, audio.currentTime, audio.duration, audio.playbackRate);
-        if (currentEp && audio.currentTime > 15) {
-          const updated = upsertRecent(recentsRef.current, currentEp, audio.currentTime, speed, audio.duration);
+    const onTimeUpdate = ({ currentTime, duration: dur }) => {
+      setProgress(currentTime);
+      setError(null);
+      clearTimeout(stallTimerRef.current);
+      const now = Date.now();
+      if (now - saveThrottle.current > SAVE_INTERVAL) {
+        saveThrottle.current = now;
+        saveBookmark(currentEp, currentTime, speed, dur || bridge.duration);
+        if (currentEp && currentTime > 15) {
+          const updated = upsertRecent(recentsRef.current, currentEp, currentTime, speed, dur || bridge.duration);
           recentsRef.current = updated;
           persistRecents(updated);
         }
-      },
-      waiting: () => {
-        setBuffering(true);
-        // Start stall timer — if we're still buffering after STALL_TIMEOUT, show error
-        clearTimeout(stallTimerRef.current);
-        stallTimerRef.current = setTimeout(() => {
-          setBuffering(false);
-          setError("Stream stalled — check your connection");
-          if (currentEp) reportDeadAudio(currentEp, 'waiting_timeout');
-        }, STALL_TIMEOUT);
-      },
-      canplay: () => {
-        setBuffering(false); setError(null);
-        clearTimeout(stallTimerRef.current);
-      },
-      ended: () => {
-        clearTimeout(stallTimerRef.current);
-        // If sleep timer is set to "end of episode", clear it and DON'T advance
-        if (sleepTimerRef.current?.endOfEpisode) {
-          clearTimeout(sleepTimerRef.current.timerId);
-          setSleepTimer(null);
-          sleepTimerRef.current = null;
-          setIsPlaying(false);
-          if (ms) ms.playbackState = "none";
-          return;
-        }
-        // Try to auto-advance from queue
-        if (advanceQueueRef.current && advanceQueueRef.current()) return;
-        // Nothing queued — just stop
-        setIsPlaying(false);
-        if (ms) ms.playbackState = "none";
-      },
-      error: () => {
-        const e = audio.error;
-        const msgs = {
-          1: "Playback aborted",
-          2: "Network error — check your connection",
-          3: "Audio decoding failed",
-          4: "Audio format not supported",
-        };
-        setError(msgs[e?.code] || "Playback error");
-        setBuffering(false);
-        setIsPlaying(false);
-        clearTimeout(stallTimerRef.current);
-        // Report dead audio — fire-and-forget
-        if (currentEp) reportDeadAudio(currentEp, getAudioErrorInfo(e));
-      },
-      stalled: () => {
-        // Audio download stalled — start a timer before showing error
-        clearTimeout(stallTimerRef.current);
-        stallTimerRef.current = setTimeout(() => {
-          setBuffering(false);
-          setError("Stream stalled — check your connection");
-          if (currentEp) reportDeadAudio(currentEp, 'stalled_timeout');
-        }, STALL_TIMEOUT);
-      },
-      progress: () => {
-        // Update buffered range percentage
-        if (audio.buffered.length > 0 && audio.duration && isFinite(audio.duration)) {
-          const end = audio.buffered.end(audio.buffered.length - 1);
-          setBufferedPct(Math.min(100, (end / audio.duration) * 100));
-        }
-      },
+      }
     };
-    Object.entries(h).forEach(([e, fn]) => audio.addEventListener(e, fn));
-    return () => {
-      Object.entries(h).forEach(([e, fn]) => audio.removeEventListener(e, fn));
+    const onDurationChange = ({ duration: dur }) => {
+      setDuration(dur || 0);
+    };
+    const onPlay = () => {
+      setIsPlaying(true); setBuffering(false); setError(null);
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+      clearTimeout(stallTimerRef.current);
+      const ct = bridge.currentTime;
+      const dur = bridge.duration;
+      saveBookmark(currentEp, ct, speed, dur);
+      if (currentEp && ct > 15) {
+        const updated = upsertRecent(recentsRef.current, currentEp, ct, speed, dur);
+        recentsRef.current = updated;
+        persistRecents(updated);
+      }
+    };
+    const onEnded = () => {
+      clearTimeout(stallTimerRef.current);
+      // Sleep timer — end of episode
+      if (sleepTimerRef.current?.endOfEpisode) {
+        clearTimeout(sleepTimerRef.current.timerId);
+        setSleepTimer(null);
+        sleepTimerRef.current = null;
+        setIsPlaying(false);
+        return;
+      }
+      // Try to auto-advance from queue
+      if (advanceQueueRef.current && advanceQueueRef.current()) return;
+      setIsPlaying(false);
+    };
+    const onError = ({ message }) => {
+      setError(message || "Playback error");
+      setBuffering(false);
+      setIsPlaying(false);
+      clearTimeout(stallTimerRef.current);
+      if (currentEp) reportDeadAudio(currentEp, message || "bridge_error");
+    };
+    const onWaiting = () => {
+      setBuffering(true);
+      clearTimeout(stallTimerRef.current);
+      stallTimerRef.current = setTimeout(() => {
+        setBuffering(false);
+        setError("Stream stalled — check your connection");
+        if (currentEp) reportDeadAudio(currentEp, "waiting_timeout");
+      }, STALL_TIMEOUT);
+    };
+    const onCanPlay = () => {
+      setBuffering(false); setError(null);
       clearTimeout(stallTimerRef.current);
     };
-  }, [currentEp, speed]);
+    const onBufferProgress = ({ bufferedPct: pct }) => {
+      setBufferedPct(pct || 0);
+    };
+    // On native, sync UI when app regains focus after background playback
+    const onFocusRegained = () => {
+      // Force a state refresh — bridge already synced its internal state
+      setProgress(bridge.currentTime);
+    };
+
+    bridge.on("timeupdate", onTimeUpdate);
+    bridge.on("durationchange", onDurationChange);
+    bridge.on("play", onPlay);
+    bridge.on("pause", onPause);
+    bridge.on("ended", onEnded);
+    bridge.on("error", onError);
+    bridge.on("waiting", onWaiting);
+    bridge.on("canplay", onCanPlay);
+    bridge.on("bufferprogress", onBufferProgress);
+    bridge.on("focusregained", onFocusRegained);
+
+    return () => {
+      bridge.off("timeupdate", onTimeUpdate);
+      bridge.off("durationchange", onDurationChange);
+      bridge.off("play", onPlay);
+      bridge.off("pause", onPause);
+      bridge.off("ended", onEnded);
+      bridge.off("error", onError);
+      bridge.off("waiting", onWaiting);
+      bridge.off("canplay", onCanPlay);
+      bridge.off("bufferprogress", onBufferProgress);
+      bridge.off("focusregained", onFocusRegained);
+      clearTimeout(stallTimerRef.current);
+    };
+  }, [currentEp, speed, bridge]);
 
   // ── Save on visibility change / beforeunload ─────────────
   useEffect(() => {
-    const save = () => {
-      const a = audioRef.current;
-      if (a && currentEp) {
-        saveBookmark(currentEp, a.currentTime, speed, a.duration);
-        // Also persist to recents so position survives app kills / deploys
-        if (a.currentTime > 15) {
-          const updated = upsertRecent(recentsRef.current, currentEp, a.currentTime, speed, a.duration);
+    const save = async () => {
+      if (currentEp) {
+        const ct = bridge.isNative ? await bridge.getFreshCurrentTime() : bridge.currentTime;
+        const dur = bridge.duration;
+        saveBookmark(currentEp, ct, speed, dur);
+        if (ct > 15) {
+          const updated = upsertRecent(recentsRef.current, currentEp, ct, speed, dur);
           recentsRef.current = updated;
           persistRecents(updated);
         }
@@ -1566,28 +1527,19 @@ export default function AudioPlayerProvider({ children, session }) {
       window.removeEventListener("beforeunload", save);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [currentEp, speed]);
+  }, [currentEp, speed, bridge]);
 
   // ── Actions ──────────────────────────────────────────────
 
-  // Track pending loadedmetadata listener for cleanup
-  const pendingSeekRef = useRef(null);
-
-  const cleanupPendingSeek = useCallback(() => {
-    if (pendingSeekRef.current) {
-      const { audio, handler } = pendingSeekRef.current;
-      audio.removeEventListener("loadedmetadata", handler);
-      pendingSeekRef.current = null;
-    }
-  }, []);
+  // Legacy cleanup stub — bridge handles seeks internally now
+  const cleanupPendingSeek = useCallback(() => {}, []);
 
   const playEpisode = useCallback((ep) => {
-    const audio = audioRef.current;
-    if (!audio || !ep?.enclosureUrl) return;
+    if (!ep?.enclosureUrl) return;
 
     const isSameEp = currentEp && (currentEp.guid === ep.guid || currentEp.enclosureUrl === ep.enclosureUrl);
     if (isSameEp) {
-      isPlaying ? audio.pause() : audio.play().catch(() => {});
+      isPlaying ? bridge.pause() : bridge.play();
       return;
     }
 
@@ -1595,8 +1547,8 @@ export default function AudioPlayerProvider({ children, session }) {
     cleanupPendingSeek();
 
     // Save current episode to recents before switching
-    if (currentEp && audio.currentTime > 15) {
-      updateRecents(prev => upsertRecent(prev, currentEp, audio.currentTime, speed, audio.duration));
+    if (currentEp && bridge.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, currentEp, bridge.currentTime, speed, bridge.duration));
     }
 
     // Check if this episode has a saved position in recents (use ref for fresh value)
@@ -1610,7 +1562,6 @@ export default function AudioPlayerProvider({ children, session }) {
     setBufferedPct(0);
 
     // Active listening intent — clear any nudge dismissal for this episode
-    // and reset session fade so nudge can appear again after this episode
     setNudgeFaded(false);
     setNudgeDismissedGuid(prev => {
       if (prev === ep.guid) {
@@ -1620,103 +1571,56 @@ export default function AudioPlayerProvider({ children, session }) {
       return prev;
     });
 
+    const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
+
     if (saved && saved.time > 15) {
-      // Resume from saved position
       setProgress(saved.time);
       setDuration(saved.duration || 0);
       setSpeed(saved.speed || speed);
-      audio.src = ep.enclosureUrl;
-      audio.playbackRate = saved.speed || speed;
-
-      const onLoaded = () => {
-        audio.currentTime = saved.time;
-        audio.play().catch(() => {});
-        pendingSeekRef.current = null;
-      };
-      pendingSeekRef.current = { audio, handler: onLoaded };
-      audio.addEventListener("loadedmetadata", onLoaded, { once: true });
-      audio.load();
-      // Don't remove from recents here — if app dies before new position saves,
-      // the episode would be lost. FullScreenPlayer filters currentEp from display.
+      bridge.load(ep.enclosureUrl, meta, {
+        seekTo: saved.time,
+        rate: saved.speed || speed,
+      }).then(() => bridge.play());
     } else {
-      // Fresh start
       setProgress(0);
       setDuration(0);
-      audio.src = ep.enclosureUrl;
-      audio.playbackRate = speed;
-      audio.play().catch(() => {});
+      bridge.load(ep.enclosureUrl, meta, { rate: speed })
+        .then(() => bridge.play());
     }
-  }, [currentEp, isPlaying, speed, updateRecents, cleanupPendingSeek]);
+  }, [currentEp, isPlaying, speed, updateRecents, cleanupPendingSeek, bridge]);
 
   const togglePlay = useCallback(() => {
-    const a = audioRef.current;
-    if (!a || !currentEp) return;
-    isPlaying ? a.pause() : a.play().catch(() => {});
-  }, [isPlaying, currentEp]);
+    if (!currentEp) return;
+    isPlaying ? bridge.pause() : bridge.play();
+  }, [isPlaying, currentEp, bridge]);
 
   const skip = useCallback((sec) => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.currentTime = Math.max(0, Math.min(a.duration || 0, a.currentTime + sec));
-  }, []);
+    const newTime = Math.max(0, Math.min(bridge.duration || 0, bridge.currentTime + sec));
+    bridge.seek(newTime);
+  }, [bridge]);
 
   const seekTo = useCallback((time) => {
-    const a = audioRef.current;
-    if (!a) return;
-    a.currentTime = Math.max(0, Math.min(a.duration || 0, time));
-  }, []);
+    bridge.seek(Math.max(0, Math.min(bridge.duration || 0, time)));
+  }, [bridge]);
 
   const cycleSpeed = useCallback(() => {
-    const a = audioRef.current;
     const next = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
     setSpeed(next);
-    if (a) {
-      a.playbackRate = next;
-      if ("mediaSession" in navigator && a.duration && isFinite(a.duration)) {
-        try {
-          navigator.mediaSession.setPositionState({
-            duration: a.duration,
-            playbackRate: next,
-            position: Math.min(a.currentTime, a.duration),
-          });
-        } catch {}
-      }
-      // Refresh native notification with updated duration context
-      if (currentEp && a.duration && isFinite(a.duration)) {
-        createControls({
-          track: currentEp.title,
-          artist: currentEp.community || "MANTL",
-          cover: currentEp.artwork || "",
-          isPlaying: !a.paused,
-          duration: a.duration,
-          elapsed: a.currentTime,
-          playbackRate: next,
-        });
-      }
-    }
-  }, [speed, currentEp]);
+    bridge.setRate(next);
+  }, [speed, bridge]);
 
   // ── Retry — reload current episode's audio source ────────
   const retry = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentEp?.enclosureUrl) return;
+    if (!currentEp?.enclosureUrl) return;
     setError(null);
     setBuffering(true);
     setBufferedPct(0);
     clearTimeout(stallTimerRef.current);
-    const savedTime = audio.currentTime || progress;
-    audio.src = currentEp.enclosureUrl;
-    audio.playbackRate = speed;
-    const onLoaded = () => {
-      if (savedTime > 5) audio.currentTime = savedTime;
-      audio.play().catch(() => {});
-      pendingSeekRef.current = null;
-    };
-    cleanupPendingSeek();
-    pendingSeekRef.current = { audio, handler: onLoaded };
-    audio.addEventListener("loadedmetadata", onLoaded, { once: true });
-    audio.load();
-  }, [currentEp, speed, progress, cleanupPendingSeek]);
+    const savedTime = bridge.currentTime || progress;
+    const meta = { title: currentEp.title, artist: currentEp.community || "MANTL", artwork: currentEp.artwork || "" };
+    bridge.load(currentEp.enclosureUrl, meta, { seekTo: savedTime > 5 ? savedTime : 0, rate: speed })
+      .then(() => bridge.play());
+  }, [currentEp, speed, progress, bridge]);
 
   // ── Sleep timer ─────────────────────────────────────────
   const setSleepTimerAction = useCallback((option) => {
@@ -1733,8 +1637,7 @@ export default function AudioPlayerProvider({ children, session }) {
 
     const ms = option.minutes * 60 * 1000;
     const timerId = setTimeout(() => {
-      const audio = audioRef.current;
-      if (audio) audio.pause();
+      bridge.pause();
       setSleepTimer(null);
       sleepTimerRef.current = null;
     }, ms);
@@ -1797,14 +1700,10 @@ export default function AudioPlayerProvider({ children, session }) {
   const advanceQueue = useCallback(() => {
     const next = queueRef.current[0];
     if (!next) return false;
-    // Remove from queue and play
     updateQueue(prev => prev.slice(1));
-    // Use playEpisode-like logic but without the same-ep toggle
-    const audio = audioRef.current;
-    if (!audio) return false;
     // Save current to recents
-    if (currentEp && audio.currentTime > 15) {
-      updateRecents(prev => upsertRecent(prev, currentEp, audio.currentTime, speed, audio.duration));
+    if (currentEp && bridge.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, currentEp, bridge.currentTime, speed, bridge.duration));
     }
     setCurrentEp(next);
     setProgress(0);
@@ -1812,11 +1711,11 @@ export default function AudioPlayerProvider({ children, session }) {
     setBuffering(true);
     setError(null);
     setBufferedPct(0);
-    audio.src = next.enclosureUrl;
-    audio.playbackRate = speed;
-    audio.play().catch(() => {});
+    const meta = { title: next.title, artist: next.community || "MANTL", artwork: next.artwork || "" };
+    bridge.load(next.enclosureUrl, meta, { rate: speed })
+      .then(() => bridge.play());
     return true;
-  }, [currentEp, speed, updateRecents, updateQueue]);
+  }, [currentEp, speed, updateRecents, updateQueue, bridge]);
 
   // Keep ref in sync so the ended handler always has the latest
   useEffect(() => { advanceQueueRef.current = advanceQueue; }, [advanceQueue]);
@@ -1825,15 +1724,7 @@ export default function AudioPlayerProvider({ children, session }) {
     cleanupPendingSeek();
     clearSleepTimer();
     clearQueue();
-    const a = audioRef.current;
-    // pause() triggers the pause event handler which saves position to recents
-    if (a) { a.pause(); a.src = ""; }
-    // Clear OS media session
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.playbackState = "none";
-    }
-    destroyControls();
+    bridge.destroy();
     setCurrentEp(null);
     setIsPlaying(false);
     setProgress(0);
@@ -1841,25 +1732,21 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
-    setNudgeFaded(true); // Don't nudge immediately after user explicitly closed
-  }, [cleanupPendingSeek, clearSleepTimer, clearQueue]);
+    setNudgeFaded(true);
+  }, [cleanupPendingSeek, clearSleepTimer, clearQueue, bridge]);
 
   // Dismiss — save position to recents so user can resume later, then clean up
   const dismiss = useCallback(() => {
-    const a = audioRef.current;
     // Explicitly save to recents before tearing down
-    if (currentEp && a && a.currentTime > 5) {
-      updateRecents(prev => upsertRecent(prev, currentEp, a.currentTime, speed, a.duration));
-      saveBookmark(currentEp, a.currentTime, speed, a.duration);
+    const ct = bridge.currentTime;
+    const dur = bridge.duration;
+    if (currentEp && ct > 5) {
+      updateRecents(prev => upsertRecent(prev, currentEp, ct, speed, dur));
+      saveBookmark(currentEp, ct, speed, dur);
     }
     cleanupPendingSeek();
     clearSleepTimer();
-    if (a) { a.pause(); a.src = ""; }
-    if ("mediaSession" in navigator) {
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.playbackState = "none";
-    }
-    destroyControls();
+    bridge.destroy();
     setCurrentEp(null);
     setIsPlaying(false);
     setProgress(0);
@@ -1867,11 +1754,10 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
-    setNudgeFaded(true); // Don't nudge immediately — will show on next app open
-    // Clear dismissed guid so this episode's nudge isn't blocked next session
+    setNudgeFaded(true);
     setNudgeDismissedGuid(null);
     try { localStorage.removeItem(NUDGE_DISMISSED_KEY); } catch {}
-  }, [currentEp, speed, updateRecents, cleanupPendingSeek, clearSleepTimer]);
+  }, [currentEp, speed, updateRecents, cleanupPendingSeek, clearSleepTimer, bridge]);
 
   const openFullScreen = useCallback(() => { setFullScreen(true); }, []);
   const closeFullScreen = useCallback(() => setFullScreen(false), []);
@@ -1880,14 +1766,13 @@ export default function AudioPlayerProvider({ children, session }) {
 
   // Resume a recently played episode from its saved position
   const resumeRecent = useCallback((recent) => {
-    const audio = audioRef.current;
-    if (!audio || !recent?.enclosureUrl) return;
+    if (!recent?.enclosureUrl) return;
 
     cleanupPendingSeek();
 
     // Save current episode to recents before switching
-    if (currentEp && audio.currentTime > 15) {
-      updateRecents(prev => upsertRecent(prev, currentEp, audio.currentTime, speed, audio.duration));
+    if (currentEp && bridge.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, currentEp, bridge.currentTime, speed, bridge.duration));
     }
 
     const ep = { guid: recent.guid, title: recent.title, enclosureUrl: recent.enclosureUrl, community: recent.community || null, artwork: recent.artwork || null };
@@ -1903,109 +1788,29 @@ export default function AudioPlayerProvider({ children, session }) {
     setBuffering(true);
     setBufferedPct(0);
 
-    audio.src = recent.enclosureUrl;
-    audio.playbackRate = resumeSpeed;
-
-    const onLoaded = () => {
-      audio.currentTime = resumeTime;
-      audio.play().catch(() => {});
-      pendingSeekRef.current = null;
-    };
-    pendingSeekRef.current = { audio, handler: onLoaded };
-    audio.addEventListener("loadedmetadata", onLoaded, { once: true });
-    audio.load();
-    // Don't remove from recents — display filters currentEp, and keeping it
-    // protects against data loss if the app dies before new position saves.
-  }, [currentEp, speed, updateRecents, cleanupPendingSeek]);
+    const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
+    bridge.load(ep.enclosureUrl, meta, { seekTo: resumeTime, rate: resumeSpeed })
+      .then(() => bridge.play());
+  }, [currentEp, speed, updateRecents, cleanupPendingSeek, bridge]);
 
   // Remove a single episode from recents
   const clearRecent = useCallback((guid) => {
     updateRecents(prev => prev.filter(r => r.guid !== guid));
   }, [updateRecents]);
 
-  // ── Media Session API ──────────────────────────────────────
-  // Sets metadata and action handlers so the OS notification widget
-  // shows episode info and working controls.
-
-  // Metadata — update when episode changes
+  // ── Media notification ──────────────────────────────────────
+  // On native: the @mediagrid/capacitor-native-audio plugin handles all
+  // notification/lock-screen controls via its built-in foreground service.
+  // On web: the bridge sets up navigator.mediaSession in load().
+  // Update metadata when episode changes (web only — native sets it in load()).
   useEffect(() => {
-    if (!("mediaSession" in navigator) || !currentEp) return;
-    const artwork = [];
-    const artUrl = currentEp.artwork || currentEp.image || null;
-    if (artUrl) {
-      artwork.push({ src: artUrl, sizes: "512x512", type: "image/png" });
-    }
-    navigator.mediaSession.metadata = new MediaMetadata({
+    if (bridge.isNative || !currentEp) return;
+    bridge.changeMetadata({
       title: currentEp.title || "Unknown Episode",
       artist: currentEp.community || "MANTL",
-      album: currentEp.community || "MANTL",
-      ...(artwork.length > 0 ? { artwork } : {}),
+      artwork: currentEp.artwork || currentEp.image || "",
     });
-  }, [currentEp]);
-
-  // Action handlers — keeps the OS session alive while paused
-  useEffect(() => {
-    if (!("mediaSession" in navigator)) return;
-    const actions = {
-      play: () => { const a = audioRef.current; if (a && currentEp) a.play().catch(() => {}); },
-      pause: () => { const a = audioRef.current; if (a) a.pause(); },
-      seekbackward: (details) => {
-        const a = audioRef.current;
-        if (a) a.currentTime = Math.max(0, a.currentTime - (details.seekOffset || 15));
-      },
-      seekforward: (details) => {
-        const a = audioRef.current;
-        if (a) a.currentTime = Math.min(a.duration || 0, a.currentTime + (details.seekOffset || 30));
-      },
-      seekto: (details) => {
-        const a = audioRef.current;
-        if (a && details.seekTime != null) a.currentTime = details.seekTime;
-      },
-      stop: () => stop(),
-    };
-    Object.entries(actions).forEach(([action, handler]) => {
-      try { navigator.mediaSession.setActionHandler(action, handler); } catch {}
-    });
-    // Null out track-skip to free slots for seek buttons on Android
-    try { navigator.mediaSession.setActionHandler("previoustrack", null); } catch {}
-    try { navigator.mediaSession.setActionHandler("nexttrack", null); } catch {}
-    return () => {
-      Object.keys(actions).forEach((action) => {
-        try { navigator.mediaSession.setActionHandler(action, null); } catch {}
-      });
-    };
-  }, [currentEp, stop]);
-
-  // ── Native Music Controls listener ─────────────────────────
-  // Routes events from the Android/iOS media notification back
-  // to the audio element. Web falls through to Media Session above.
-  useEffect(() => {
-    let cleanup = null;
-    registerActionHandlers({
-      onPlay: () => {
-        const a = audioRef.current;
-        if (a && currentEp) a.play().catch(() => {});
-      },
-      onPause: () => {
-        const a = audioRef.current;
-        if (a) a.pause();
-      },
-      onSeekForward: () => {
-        const a = audioRef.current;
-        if (a) a.currentTime = Math.min(a.duration || 0, a.currentTime + 30);
-      },
-      onSeekBackward: () => {
-        const a = audioRef.current;
-        if (a) a.currentTime = Math.max(0, a.currentTime - 15);
-      },
-      onSeekTo: (details) => {
-        const a = audioRef.current;
-        if (a && details.seekTime != null) a.currentTime = details.seekTime;
-      },
-      onStop: () => dismiss(),
-    }).then((fn) => { cleanup = fn; });
-    return () => { if (cleanup) cleanup(); };
-  }, [currentEp, dismiss]);
+  }, [currentEp, bridge]);
 
   // ── Context value ────────────────────────────────────────
 
@@ -2028,7 +1833,6 @@ export default function AudioPlayerProvider({ children, session }) {
   return (
     <AudioPlayerContext.Provider value={value}>
       {children}
-      <audio ref={audioRef} preload="none" />
 
       <style>{`
         @keyframes audioEqBar {
