@@ -132,7 +132,7 @@ function BadgePicker({ earnedBadges, currentIds, slotIndex, onPick, onClear, onC
           width: "100%", maxWidth: 480,
           background: "#1a1714",
           borderRadius: "20px 20px 0 0",
-          padding: "20px 16px 32px",
+          padding: "20px 16px calc(32px + env(safe-area-inset-bottom, 0px) + 80px)",
           maxHeight: "60vh", overflowY: "auto",
           animation: "pickerSlideUp 0.25s ease-out",
         }}
