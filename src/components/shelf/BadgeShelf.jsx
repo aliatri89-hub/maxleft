@@ -116,16 +116,6 @@ function BadgeSlot({ badge, isEarned, current, total, delay = 0 }) {
 
       {/* Pedestal */}
       <Pedestal gold={isEarned} />
-
-      {/* Badge name */}
-      <div style={{
-        marginTop: 5, fontSize: 11, fontWeight: 600,
-        color: isEarned ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.35)",
-        textAlign: "center", lineHeight: 1.2, maxWidth: 84,
-        fontFamily: "var(--font-display)", letterSpacing: "0.02em",
-      }}>
-        {badge.name}
-      </div>
     </div>
   );
 }
@@ -148,11 +138,6 @@ function EmptySlot({ delay = 0 }) {
         </svg>
       </div>
       <Pedestal gold={false} />
-      <div style={{
-        marginTop: 5, fontSize: 10, fontWeight: 500,
-        color: "rgba(255,255,255,0.12)",
-        fontFamily: "var(--font-mono)", letterSpacing: "0.04em",
-      }}>???</div>
     </div>
   );
 }
@@ -162,21 +147,11 @@ export default function BadgeShelf({ session }) {
   const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId);
 
   const slots = useMemo(() => {
-    const result = [];
-    const recentEarned = earnedBadges.slice(0, 3);
-    for (const badge of recentEarned) {
-      result.push({ badge, isEarned: true });
-    }
-    if (closestBadge && !recentEarned.some(e => e.id === closestBadge.id)) {
-      result.push({
-        badge: closestBadge, isEarned: false,
-        current: closestBadge.current, total: closestBadge.total,
-      });
-    }
-    return result;
-  }, [earnedBadges, closestBadge]);
+    // 3 most recent earned (default curation — user can customize later)
+    return earnedBadges.slice(0, 3).map(badge => ({ badge, isEarned: true }));
+  }, [earnedBadges]);
 
-  const hasAnyBadges = earnedBadges.length > 0 || closestBadge;
+  const hasAnyBadges = earnedBadges.length > 0;
 
   return (
     <div style={{ padding: "0 16px", marginBottom: 0 }}>
@@ -197,7 +172,7 @@ export default function BadgeShelf({ session }) {
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 14, padding: "8px 0" }}>
-            {[0,1,2,3].map(i => (
+            {[0,1,2].map(i => (
               <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <div className="skeleton-dark" style={{ width: SIZE, height: SIZE, borderRadius: "50%" }} />
                 <div className="skeleton-dark" style={{ width: 28, height: 20, borderRadius: 2 }} />
@@ -215,7 +190,7 @@ export default function BadgeShelf({ session }) {
             </div>
           </div>
         ) : (
-          <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "nowrap" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "nowrap" }}>
             {slots.map((slot, i) => (
               <BadgeSlot
                 key={slot.badge.id} badge={slot.badge}
@@ -224,14 +199,14 @@ export default function BadgeShelf({ session }) {
                 delay={i * 0.08}
               />
             ))}
-            {Array.from({ length: Math.max(0, 4 - slots.length) }).map((_, i) => (
+            {Array.from({ length: Math.max(0, 3 - slots.length) }).map((_, i) => (
               <EmptySlot key={`empty-${i}`} delay={(slots.length + i) * 0.08} />
             ))}
           </div>
         )}
 
         {/* Nudge to explore communities when shelf isn't full */}
-        {!loading && hasAnyBadges && slots.length < 4 && (
+        {!loading && hasAnyBadges && slots.length < 3 && (
           <div style={{
             textAlign: "center", marginTop: 12,
             fontSize: 11, color: "var(--text-faint)",
