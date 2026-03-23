@@ -282,6 +282,7 @@ export default function App() {
           enabledShelves: { ...DEFAULT_ENABLED_SHELVES, ...(prof.enabled_shelves || {}) },
           shelfOrder: prof.shelf_order || [...DEFAULT_SHELF_ORDER],
           nextUpBook: prof.next_up_book || null,
+          mantlpiece_badges: prof.mantlpiece_badges || null,
         };
         setProfile(p);
         await loadShelves(user.id);

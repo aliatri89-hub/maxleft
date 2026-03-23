@@ -51,7 +51,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
     }}>
 
       {/* ── Badge Shelf Hero ── */}
-      <BadgeShelf session={session} />
+      <BadgeShelf session={session} profile={profile} onUpdateProfile={onUpdateProfile} onToast={onToast} />
 
       {/* ── Diary Section ── */}
       <div style={{ padding: "0 16px", marginTop: 8 }}>

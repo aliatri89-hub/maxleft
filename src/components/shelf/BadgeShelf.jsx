@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { supabase } from "../../supabase";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
 
 const accent = "#EF9F27";
@@ -14,23 +16,18 @@ function Pedestal({ gold }) {
   const mid = gold ? "#b8942e" : "#444";
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -1, position: "relative", zIndex: 0 }}>
-      {/* Neck */}
       <div style={{ width: 28, height: 4, background: `linear-gradient(180deg, ${hi}, ${lo})`, borderRadius: 1 }} />
-      {/* Column (tapered via clip-path) */}
       <div style={{ width: 20, height: 12, background: `linear-gradient(180deg, ${mid}, ${lo})`, clipPath: "polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)", marginTop: -1 }} />
-      {/* Base */}
       <div style={{ width: 32, height: 5, background: `linear-gradient(180deg, ${hi}, ${lo})`, borderRadius: "1px 1px 2px 2px", marginTop: -1 }} />
     </div>
   );
 }
 
-function BadgeSlot({ badge, isEarned, current, total, delay = 0 }) {
-  const progress = isEarned ? 1 : (total > 0 ? current / total : 0);
-  const dashOffset = CIRCUMFERENCE * (1 - progress);
+function BadgeSlot({ badge, delay = 0, onTap }) {
   const badgeAccent = badge.accent_color || accent;
-
   return (
     <div
+      onClick={onTap}
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
         cursor: "pointer", width: 80,
@@ -38,94 +35,48 @@ function BadgeSlot({ badge, isEarned, current, total, delay = 0 }) {
         opacity: 0,
       }}
     >
-      {/* Badge circle */}
       <div style={{ position: "relative", width: SIZE, height: SIZE }}>
-        {/* Progress/earned ring */}
-        <svg
-          width={SIZE} height={SIZE}
-          style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}
-        >
-          <circle
-            cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
-            fill="none"
-            stroke={isEarned ? `${badgeAccent}30` : "#ffffff08"}
-            strokeWidth={STROKE}
-          />
-          <circle
-            cx={SIZE / 2} cy={SIZE / 2} r={RADIUS}
-            fill="none"
-            stroke={isEarned ? badgeAccent : `${badgeAccent}80`}
-            strokeWidth={STROKE}
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            style={{ transition: "stroke-dashoffset 0.8s ease" }}
-          />
+        <svg width={SIZE} height={SIZE} style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}>
+          <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={`${badgeAccent}30`} strokeWidth={STROKE} />
+          <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={badgeAccent} strokeWidth={STROKE}
+            strokeLinecap="round" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={0} />
         </svg>
-
-        {/* Badge image */}
         <div style={{
-          position: "absolute",
-          top: STROKE + 3, left: STROKE + 3,
+          position: "absolute", top: STROKE + 3, left: STROKE + 3,
           width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
           borderRadius: "50%", overflow: "hidden", background: "#1a1714",
         }}>
           {badge.image_url ? (
-            <img
-              src={badge.image_url} alt={badge.name}
-              style={{
-                width: "100%", height: "100%", objectFit: "cover",
-                filter: isEarned ? "none" : `blur(${Math.max(4, 14 - (progress * 14))}px) brightness(0.5)`,
-                transform: "scale(1.1)", transition: "filter 0.3s",
-              }}
-            />
+            <img src={badge.image_url} alt={badge.name} style={{
+              width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.1)",
+            }} />
           ) : (
             <div style={{
               width: "100%", height: "100%",
-              background: isEarned ? `radial-gradient(circle, ${badgeAccent}30, ${badgeAccent}10)` : "#1a1714",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 26, color: badgeAccent,
-            }}>
-              🏆
-            </div>
+              background: `radial-gradient(circle, ${badgeAccent}30, ${badgeAccent}10)`,
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26,
+            }}>🏆</div>
           )}
         </div>
-
-        {/* Earned check */}
-        {isEarned && (
-          <div style={{
-            position: "absolute", bottom: -1, right: -1,
-            width: 18, height: 18, borderRadius: "50%",
-            background: "#22c55e", border: "2px solid #0f0d0b",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 9, color: "#fff", fontWeight: 700,
-          }}>✓</div>
-        )}
-
-        {/* Progress fraction */}
-        {!isEarned && current > 0 && (
-          <div style={{
-            position: "absolute", bottom: -3, right: -5,
-            background: "#1a1714", border: `1px solid ${badgeAccent}50`,
-            borderRadius: 8, padding: "1px 5px",
-            fontSize: 9, fontWeight: 700, color: `${badgeAccent}cc`,
-            fontFamily: "var(--font-mono)",
-          }}>{current}/{total}</div>
-        )}
+        <div style={{
+          position: "absolute", bottom: -1, right: -1,
+          width: 18, height: 18, borderRadius: "50%",
+          background: "#22c55e", border: "2px solid #0f0d0b",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 9, color: "#fff", fontWeight: 700,
+        }}>✓</div>
       </div>
-
-      {/* Pedestal */}
-      <Pedestal gold={isEarned} />
+      <Pedestal gold />
     </div>
   );
 }
 
-/** Empty placeholder slot with silver pedestal */
-function EmptySlot({ delay = 0 }) {
+function EmptySlot({ delay = 0, onTap }) {
   return (
-    <div style={{
+    <div onClick={onTap} style={{
       display: "flex", flexDirection: "column", alignItems: "center",
-      width: 80, animation: `badgeShelfIn 0.4s ${delay}s ease-out both`, opacity: 0,
+      width: 80, cursor: "pointer",
+      animation: `badgeShelfIn 0.4s ${delay}s ease-out both`, opacity: 0,
     }}>
       <div style={{
         width: SIZE, height: SIZE, borderRadius: "50%",
@@ -142,16 +93,196 @@ function EmptySlot({ delay = 0 }) {
   );
 }
 
-export default function BadgeShelf({ session }) {
-  const userId = session?.user?.id;
-  const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId);
+/** ── Badge Picker Bottom Sheet ── */
+function BadgePicker({ earnedBadges, currentIds, slotIndex, onPick, onClear, onClose }) {
+  const alreadyPinned = new Set(currentIds.filter((id, i) => i !== slotIndex && id));
 
-  const slots = useMemo(() => {
-    // 3 most recent earned (default curation — user can customize later)
-    return earnedBadges.slice(0, 3).map(badge => ({ badge, isEarned: true }));
-  }, [earnedBadges]);
+  return createPortal(
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 300,
+        background: "rgba(0,0,0,0.6)",
+        display: "flex", alignItems: "flex-end", justifyContent: "center",
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%", maxWidth: 480,
+          background: "#1a1714",
+          borderRadius: "20px 20px 0 0",
+          padding: "20px 16px 32px",
+          maxHeight: "60vh", overflowY: "auto",
+          animation: "pickerSlideUp 0.25s ease-out",
+        }}
+      >
+        <style>{`
+          @keyframes pickerSlideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+          }
+        `}</style>
+
+        {/* Handle */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+        </div>
+
+        {/* Title */}
+        <div style={{
+          fontFamily: "'Permanent Marker', cursive", fontSize: 16,
+          color: accent, textAlign: "center", marginBottom: 16,
+          letterSpacing: "0.04em",
+        }}>
+          Pick a trophy
+        </div>
+
+        {/* Clear option if slot currently has a badge */}
+        {currentIds[slotIndex] && (
+          <div
+            onClick={onClear}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              gap: 8, padding: "10px 0", marginBottom: 12,
+              fontFamily: "var(--font-mono)", fontSize: 12,
+              color: "var(--text-faint)", cursor: "pointer",
+              borderBottom: "0.5px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M4 4l6 6M10 4l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+            Remove from mantlpiece
+          </div>
+        )}
+
+        {/* Badge grid */}
+        {earnedBadges.length === 0 ? (
+          <div style={{
+            textAlign: "center", padding: "24px 0",
+            fontFamily: "var(--font-body)", fontSize: 13,
+            color: "var(--text-muted)", fontStyle: "italic",
+          }}>
+            No badges earned yet
+          </div>
+        ) : (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))",
+            gap: 12, justifyItems: "center",
+          }}>
+            {earnedBadges.map(badge => {
+              const isPinned = alreadyPinned.has(badge.id);
+              const badgeAccent = badge.accent_color || accent;
+              return (
+                <div
+                  key={badge.id}
+                  onClick={() => !isPinned && onPick(badge.id)}
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    cursor: isPinned ? "not-allowed" : "pointer",
+                    opacity: isPinned ? 0.3 : 1,
+                    transition: "opacity 0.15s, transform 0.15s",
+                  }}
+                >
+                  <div style={{
+                    width: 56, height: 56, borderRadius: "50%",
+                    border: `2px solid ${badgeAccent}`,
+                    overflow: "hidden", background: "#1a1714",
+                  }}>
+                    {badge.image_url ? (
+                      <img src={badge.image_url} alt={badge.name} style={{
+                        width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.1)",
+                      }} />
+                    ) : (
+                      <div style={{
+                        width: "100%", height: "100%",
+                        background: `radial-gradient(circle, ${badgeAccent}30, ${badgeAccent}10)`,
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+                      }}>🏆</div>
+                    )}
+                  </div>
+                  <div style={{
+                    marginTop: 5, fontSize: 10, fontWeight: 600,
+                    color: "rgba(255,255,255,0.6)", textAlign: "center",
+                    lineHeight: 1.2, maxWidth: 72,
+                    fontFamily: "var(--font-display)",
+                  }}>
+                    {badge.name}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export default function BadgeShelf({ session, profile, onUpdateProfile, onToast }) {
+  const userId = session?.user?.id;
+  const { earnedBadges, loading } = useGlobalBadges(userId);
+  const [pickerSlot, setPickerSlot] = useState(null); // null | 0 | 1 | 2
+
+  // Resolve display slots: custom picks or default to 3 most recent
+  const customPicks = profile?.mantlpiece_badges; // array of badge IDs or null
+  const isCustomized = Array.isArray(customPicks);
+
+  const displayBadges = useMemo(() => {
+    if (!isCustomized) {
+      // Default: 3 most recent earned
+      return earnedBadges.slice(0, 3);
+    }
+    // Custom: look up each pinned badge ID from earned badges
+    const earnedMap = new Map(earnedBadges.map(b => [b.id, b]));
+    return customPicks.slice(0, 3).map(id => earnedMap.get(id) || null);
+  }, [earnedBadges, customPicks, isCustomized]);
+
+  // Current slot IDs for the picker (to grey out already-pinned ones)
+  const currentSlotIds = useMemo(() => {
+    if (isCustomized) return [...customPicks.slice(0, 3)];
+    return displayBadges.map(b => b?.id || null);
+  }, [displayBadges, customPicks, isCustomized]);
 
   const hasAnyBadges = earnedBadges.length > 0;
+
+  // ── Save mantlpiece picks ──
+  const savePicks = async (newPicks) => {
+    if (!userId) return;
+    // Update local state immediately
+    if (onUpdateProfile) onUpdateProfile({ mantlpiece_badges: newPicks });
+    // Persist to DB
+    const { error } = await supabase
+      .from("profiles")
+      .update({ mantlpiece_badges: newPicks })
+      .eq("id", userId);
+    if (error) {
+      console.error("[Mantlpiece] Save error:", error.message);
+      if (onToast) onToast("Couldn't save — try again");
+    }
+  };
+
+  const handlePick = (badgeId) => {
+    const newPicks = [...currentSlotIds];
+    // Ensure array is 3 long
+    while (newPicks.length < 3) newPicks.push(null);
+    newPicks[pickerSlot] = badgeId;
+    savePicks(newPicks);
+    setPickerSlot(null);
+  };
+
+  const handleClear = () => {
+    const newPicks = [...currentSlotIds];
+    while (newPicks.length < 3) newPicks.push(null);
+    newPicks[pickerSlot] = null;
+    // If all slots empty, reset to null (back to default behavior)
+    const allEmpty = newPicks.every(id => !id);
+    savePicks(allEmpty ? null : newPicks);
+    setPickerSlot(null);
+  };
 
   return (
     <div style={{ padding: "0 16px", marginBottom: 0 }}>
@@ -171,12 +302,11 @@ export default function BadgeShelf({ session }) {
         padding: "22px 8px 16px",
       }}>
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", gap: 14, padding: "8px 0" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20, padding: "8px 0" }}>
             {[0,1,2].map(i => (
               <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <div className="skeleton-dark" style={{ width: SIZE, height: SIZE, borderRadius: "50%" }} />
                 <div className="skeleton-dark" style={{ width: 28, height: 20, borderRadius: 2 }} />
-                <div className="skeleton-dark" style={{ width: 50, height: 10, borderRadius: 4 }} />
               </div>
             ))}
           </div>
@@ -191,22 +321,27 @@ export default function BadgeShelf({ session }) {
           </div>
         ) : (
           <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "nowrap" }}>
-            {slots.map((slot, i) => (
-              <BadgeSlot
-                key={slot.badge.id} badge={slot.badge}
-                isEarned={slot.isEarned}
-                current={slot.current || 0} total={slot.total || 0}
-                delay={i * 0.08}
-              />
-            ))}
-            {Array.from({ length: Math.max(0, 3 - slots.length) }).map((_, i) => (
-              <EmptySlot key={`empty-${i}`} delay={(slots.length + i) * 0.08} />
-            ))}
+            {[0, 1, 2].map(i => {
+              const badge = displayBadges[i];
+              return badge ? (
+                <BadgeSlot
+                  key={badge.id} badge={badge}
+                  delay={i * 0.08}
+                  onTap={() => setPickerSlot(i)}
+                />
+              ) : (
+                <EmptySlot
+                  key={`empty-${i}`}
+                  delay={i * 0.08}
+                  onTap={() => earnedBadges.length > 0 ? setPickerSlot(i) : null}
+                />
+              );
+            })}
           </div>
         )}
 
         {/* Nudge to explore communities when shelf isn't full */}
-        {!loading && hasAnyBadges && slots.length < 3 && (
+        {!loading && hasAnyBadges && displayBadges.filter(Boolean).length < 3 && (
           <div style={{
             textAlign: "center", marginTop: 12,
             fontSize: 11, color: "var(--text-faint)",
@@ -240,6 +375,18 @@ export default function BadgeShelf({ session }) {
           mantlpiece
         </div>
       </div>
+
+      {/* ── Badge Picker ── */}
+      {pickerSlot !== null && (
+        <BadgePicker
+          earnedBadges={earnedBadges}
+          currentIds={currentSlotIds}
+          slotIndex={pickerSlot}
+          onPick={handlePick}
+          onClear={handleClear}
+          onClose={() => setPickerSlot(null)}
+        />
+      )}
     </div>
   );
 }
