@@ -210,6 +210,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           poster: r.poster_path ? `${TMDB_IMG}/w185${r.poster_path}` : null,
           podcastCount: r.podcast_count || 0,
           inCommunity: r.in_community,
+          podcasts: r.podcasts,
           source: "local",
         });
       });
@@ -242,7 +243,10 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         });
         (playable || []).forEach((p) => {
           const entry = mergedMap.get(p.tmdb_id);
-          if (entry) entry.podcastCount = p.podcast_count || 0;
+          if (entry) {
+            entry.podcastCount = p.podcast_count || 0;
+            if (p.podcasts) entry.podcasts = p.podcasts;
+          }
         });
       }
 
@@ -792,14 +796,42 @@ function ResultCard({
           }}>{result.year || "—"}</div>
 
           {hasCoverage && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
-              <span style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 11, fontWeight: 600, color: TC,
-                letterSpacing: "0.04em", textTransform: "uppercase",
-              }}>
-                {result.podcastCount} podcast{result.podcastCount !== 1 ? "s" : ""}
-              </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+              {result.podcasts?.length > 0 ? (
+                <>
+                  {result.podcasts.slice(0, 5).map((pod, i) => (
+                    pod.artwork ? (
+                      <img key={pod.slug || i} src={pod.artwork} alt={pod.name}
+                        title={pod.name}
+                        style={{
+                          width: 22, height: 22, borderRadius: 5, objectFit: "cover",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                        }} />
+                    ) : (
+                      <div key={pod.slug || i} title={pod.name}
+                        style={{
+                          width: 22, height: 22, borderRadius: 5,
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                        }} />
+                    )
+                  ))}
+                  {result.podcasts.length > 5 && (
+                    <span style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 9, color: "rgba(255,255,255,0.3)",
+                    }}>+{result.podcasts.length - 5}</span>
+                  )}
+                </>
+              ) : (
+                <span style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 11, fontWeight: 600, color: TC,
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                }}>
+                  {result.podcastCount} podcast{result.podcastCount !== 1 ? "s" : ""}
+                </span>
+              )}
             </div>
           )}
         </div>
