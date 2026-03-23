@@ -64,6 +64,22 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   // ── Audio player ──
   const { play: playEpisode, currentEp, isPlaying, addToQueue } = useAudioPlayer();
 
+  // ── Admin: unlink bad matches ──
+  const isAdmin = userId === "19410e64-d610-4fab-9c26-d24fafc94696";
+  const [hiddenEpIds, setHiddenEpIds] = useState(new Set());
+
+  const handleUnlinkEpisode = useCallback(async (ep, tmdbId) => {
+    const epId = ep.episode_id || ep.id;
+    if (!epId || !tmdbId) return;
+    if (!confirm(`Unlink "${ep.episode_title || ep.podcast_name}" from this film?`)) return;
+    const { error } = await supabase
+      .from("podcast_episode_films")
+      .delete()
+      .eq("episode_id", epId)
+      .eq("tmdb_id", tmdbId);
+    if (!error) setHiddenEpIds(prev => new Set([...prev, epId]));
+  }, []);
+
   // ── Load recently covered on mount ──
   useEffect(() => {
     let cancelled = false;
@@ -445,6 +461,9 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   onQueueEpisode={handleQueue}
                   currentEp={currentEp}
                   isPlaying={isPlaying}
+                  isAdmin={isAdmin}
+                  hiddenEpIds={hiddenEpIds}
+                  onUnlinkEpisode={handleUnlinkEpisode}
                 />
               ))}
 
@@ -663,6 +682,9 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               onQueueEpisode={handleQueue}
               currentEp={currentEp}
               isPlaying={isPlaying}
+              isAdmin={isAdmin}
+              hiddenEpIds={hiddenEpIds}
+              onUnlinkEpisode={handleUnlinkEpisode}
             />
           ))}
         </div>
@@ -721,6 +743,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
   onPlayEpisode, onQueueEpisode, onNotify, notifying, notified, currentEp, isPlaying,
+  isAdmin, hiddenEpIds, onUnlinkEpisode,
 }) {
   const hasCoverage = result.podcastCount > 0;
 
@@ -820,7 +843,7 @@ function ResultCard({
             </div>
           )}
 
-          {episodes.map((ep, i) => {
+          {episodes.filter(ep => !hiddenEpIds?.has(ep.episode_id || ep.id)).map((ep, i) => {
             const epUrl = resolveAudioUrl(ep);
             const isCurrent = currentEp &&
               (currentEp.guid === (ep.episode_id || ep.id) || currentEp.enclosureUrl === epUrl);
@@ -883,6 +906,23 @@ function ResultCard({
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19" />
                         <line x1="5" y1="12" x2="19" y2="12" />
+                      </svg>
+                    </div>
+                  )}
+                  {isAdmin && (ep.episode_id || ep.id) && (
+                    <div
+                      onClick={(e) => { e.stopPropagation(); onUnlinkEpisode?.(ep, result.tmdbId); }}
+                      title="Unlink episode"
+                      style={{
+                        width: 24, height: 24, borderRadius: "50%",
+                        background: "rgba(239,68,68,0.08)",
+                        border: "1px solid rgba(239,68,68,0.2)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, cursor: "pointer",
+                      }}
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
+                        <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                       </svg>
                     </div>
                   )}
