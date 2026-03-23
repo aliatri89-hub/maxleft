@@ -35,15 +35,13 @@ export default function WhatToWatch({ session, onBack, onToast }) {
   const {
     phase, pool, currentIndex, currentFilm, kept, round,
     selectedFilm, episodes, epLoading, error, remaining, total,
-    start, swipeRight, swipeLeft, nextRound, selectFilm, reset,
+    start, swipeRight, swipeLeft, nextRound, selectFilm, backToSetup, reset,
   } = useWhatToWatch(userId);
 
   // ── Coverage peek state ──
   const [peekFilm, setPeekFilm] = useState(null);
   const [peekEpisodes, setPeekEpisodes] = useState(null);
   const [peekLoading, setPeekLoading] = useState(false);
-
-  useEffect(() => { if (userId) start(); }, [userId, start]);
 
   const handleClose = useCallback(() => { reset(); onBack(); }, [reset, onBack]);
 
@@ -86,8 +84,11 @@ export default function WhatToWatch({ session, onBack, onToast }) {
       <Header onClose={handleClose} round={round} phase={phase} remaining={remaining} />
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {phase === "setup" && (
+          <SetupScreen userId={userId} onStart={start} />
+        )}
         {phase === "loading" && <LoadingState />}
-        {phase === "empty" && <EmptyState onClose={handleClose} />}
+        {phase === "empty" && <EmptyState onClose={handleClose} onBack={backToSetup} />}
         {phase === "swiping" && currentFilm && (
           <SwipeCard film={currentFilm} onSwipeRight={swipeRight} onSwipeLeft={swipeLeft}
             onSelect={selectFilm} onPeek={handlePeek} remaining={remaining} total={total} />
@@ -100,12 +101,12 @@ export default function WhatToWatch({ session, onBack, onToast }) {
           <SelectedScreen film={selectedFilm} episodes={episodes} epLoading={epLoading}
             userId={userId} onPlayEpisode={handlePlay} onQueueEpisode={handleQueue}
             currentEp={currentEp} isPlaying={isPlaying} onToast={onToast}
-            onClose={handleClose} onStartOver={() => { closePeek(); start(); }} />
+            onClose={handleClose} onStartOver={() => { closePeek(); backToSetup(); }} />
         )}
         {error && (
           <div style={{ padding: 32, textAlign: "center", color: CREAM }}>
             <p style={{ opacity: 0.7 }}>{error}</p>
-            <button onClick={start} style={pillBtnStyle}>Try Again</button>
+            <button onClick={backToSetup} style={pillBtnStyle}>Try Again</button>
           </div>
         )}
       </div>
@@ -529,6 +530,165 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
 // LOADING + EMPTY
 // ════════════════════════════════════════════════
 
+// ════════════════════════════════════════════════
+// SETUP SCREEN — pick podcasts + pool size
+// ════════════════════════════════════════════════
+
+const POOL_SIZES = [10, 20, 30];
+
+function SetupScreen({ userId, onStart }) {
+  const [podcasts, setPodcasts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedIds, setSelectedIds] = useState(new Set()); // empty = all
+  const [allSelected, setAllSelected] = useState(true);
+  const [poolSize, setPoolSize] = useState(20);
+
+  // Load favorite podcasts
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("user_podcast_favorites")
+        .select("podcast_id, podcasts(id, name, slug, artwork_url)")
+        .eq("user_id", userId);
+      if (!cancelled && !error && data) {
+        const pods = data
+          .map(r => r.podcasts)
+          .filter(Boolean)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        setPodcasts(pods);
+      }
+      if (!cancelled) setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  const togglePodcast = useCallback((id) => {
+    setAllSelected(false);
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      // If all are now selected, switch to "all" mode
+      if (next.size === podcasts.length) {
+        setAllSelected(true);
+        return new Set();
+      }
+      // If none selected, switch to "all" mode
+      if (next.size === 0) {
+        setAllSelected(true);
+      }
+      return next;
+    });
+  }, [podcasts.length]);
+
+  const toggleAll = useCallback(() => {
+    setAllSelected(true);
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleGo = useCallback(() => {
+    haptic();
+    const podcastIds = allSelected ? null : Array.from(selectedIds);
+    onStart({ poolSize, podcastIds });
+  }, [allSelected, selectedIds, poolSize, onStart]);
+
+  const canGo = allSelected || selectedIds.size > 0;
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, overflow: "auto", padding: "16px 20px 120px" }}>
+
+        {/* Podcasts */}
+        <div style={{
+          fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+          color: AMBER, marginBottom: 12, letterSpacing: 0.5,
+        }}>PICK YOUR PODCASTS</div>
+
+        {loading && (
+          <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, padding: 16, textAlign: "center" }}>
+            Loading podcasts…
+          </div>
+        )}
+
+        {!loading && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 28 }}>
+            {/* All button */}
+            <button onClick={toggleAll} style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "8px 14px", borderRadius: 10,
+              background: allSelected ? "rgba(212,175,55,0.15)" : "rgba(240,235,225,0.04)",
+              border: `1.5px solid ${allSelected ? AMBER : "rgba(240,235,225,0.1)"}`,
+              color: allSelected ? AMBER : CREAM, fontSize: 13, fontWeight: 600,
+              cursor: "pointer", opacity: allSelected ? 1 : 0.6,
+            }}>All</button>
+
+            {podcasts.map(p => {
+              const isOn = !allSelected && selectedIds.has(p.id);
+              return (
+                <button key={p.id} onClick={() => togglePodcast(p.id)} style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "6px 12px", borderRadius: 10,
+                  background: isOn ? "rgba(212,175,55,0.15)" : "rgba(240,235,225,0.04)",
+                  border: `1.5px solid ${isOn ? AMBER : "rgba(240,235,225,0.1)"}`,
+                  color: isOn ? AMBER : CREAM, fontSize: 13, fontWeight: 500,
+                  cursor: "pointer", opacity: isOn || allSelected ? 1 : 0.5,
+                  transition: "all 0.15s ease",
+                }}>
+                  {p.artwork_url && (
+                    <img src={p.artwork_url} alt="" style={{
+                      width: 24, height: 24, borderRadius: 5, objectFit: "cover",
+                    }} />
+                  )}
+                  <span style={{ whiteSpace: "nowrap" }}>{p.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pool size */}
+        <div style={{
+          fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+          color: AMBER, marginBottom: 12, letterSpacing: 0.5,
+        }}>HOW MANY TO SWIPE?</div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          {POOL_SIZES.map(size => (
+            <button key={size} onClick={() => { haptic(); setPoolSize(size); }} style={{
+              flex: 1, padding: "14px 0", borderRadius: 10, fontSize: 20, fontWeight: 700,
+              fontFamily: "'Permanent Marker', cursive",
+              background: poolSize === size ? "rgba(212,175,55,0.15)" : "rgba(240,235,225,0.04)",
+              border: `1.5px solid ${poolSize === size ? AMBER : "rgba(240,235,225,0.1)"}`,
+              color: poolSize === size ? AMBER : CREAM,
+              cursor: "pointer", opacity: poolSize === size ? 1 : 0.5,
+              transition: "all 0.15s ease",
+            }}>{size}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Go button */}
+      <div style={{
+        padding: "12px 24px calc(env(safe-area-inset-bottom, 16px) + 12px)",
+        borderTop: "1px solid rgba(240,235,225,0.08)",
+        display: "flex", justifyContent: "center", background: DARK,
+      }}>
+        <button onClick={handleGo} disabled={!canGo} style={{
+          background: canGo ? AMBER : "rgba(240,235,225,0.08)",
+          color: canGo ? DARK : CREAM,
+          border: "none", borderRadius: 24, padding: "14px 40px",
+          fontSize: 17, fontWeight: 700, cursor: canGo ? "pointer" : "default",
+          fontFamily: "'Permanent Marker', cursive", letterSpacing: 1,
+          opacity: canGo ? 1 : 0.4,
+        }}>LET'S GO</button>
+      </div>
+    </div>
+  );
+}
+
 function LoadingState() {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
@@ -539,15 +699,18 @@ function LoadingState() {
   );
 }
 
-function EmptyState({ onClose }) {
+function EmptyState({ onClose, onBack }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>📼</div>
-      <div style={{ color: CREAM, fontSize: 16, fontWeight: 600 }}>You've seen everything!</div>
+      <div style={{ color: CREAM, fontSize: 16, fontWeight: 600 }}>No films found!</div>
       <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 8, maxWidth: 260 }}>
-        Your favorite podcasts don't have any unwatched films left for you. Nice work.
+        Try different podcasts or a larger pool size.
       </div>
-      <button onClick={onClose} style={{ ...pillBtnStyle, marginTop: 24 }}>Close</button>
+      <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+        {onBack && <button onClick={onBack} style={{ ...pillBtnStyle, background: "rgba(240,235,225,0.08)", color: CREAM }}>Change settings</button>}
+        <button onClick={onClose} style={pillBtnStyle}>Close</button>
+      </div>
     </div>
   );
 }
