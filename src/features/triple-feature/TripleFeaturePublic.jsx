@@ -105,25 +105,22 @@ const PHASE = { PICKING: 0, REVEALING: 1, RESULT: 2 };
 
 // ── Flavor text ──────────────────────────────────────────────
 
-const FLAVOR = {
-  1: "The best pick on the board.",
-  2: "So close to the top.",
-  3: "Solid instincts.",
-  4: "Middle of the pack.",
-  5: "Middle of the pack.",
-  6: "Middle of the pack.",
-  7: "Rough night at the box office.",
-  8: "Rough night at the box office.",
-  9: "Rough night at the box office.",
-  10: "Literally the worst combo. Wow.",
-};
+function getFlavorText(userScore, maxScore) {
+  if (userScore === maxScore) return "Perfect triple. You nailed it.";
+  const pct = maxScore > 0 ? (userScore / maxScore) * 100 : 0;
+  if (pct >= 95) return "So close to the top.";
+  if (pct >= 85) return "Solid instincts.";
+  if (pct >= 75) return "Not bad — left a little on the table.";
+  if (pct >= 60) return "Rough night at the box office.";
+  return "Oof. Better luck tomorrow.";
+}
 
 // ── Main Component ──────────────────────────────────────────
 
 export default function TripleFeaturePublic() {
   const {
     puzzle, result, loading, error, hasPlayed,
-    submitPlay, getShareText, getTimeUntilNext,
+    submitPlay, getShareText, getTimeUntilNext, scaleScore,
   } = useTripleFeaturePublic();
 
   const [selected, setSelected] = useState(new Set());
@@ -177,7 +174,8 @@ export default function TripleFeaturePublic() {
 
   // Computed result
   const userTotal = puzzle ? selectedArray.reduce((sum, i) => sum + puzzle.movies[i].gross, 0) : 0;
-  const userDiff = puzzle ? Math.abs(userTotal - puzzle.target) : 0;
+  const userScore = scaleScore(result ? result.user_total : userTotal);
+  const maxScore = puzzle ? scaleScore(puzzle.optimalTotal) : 0;
 
   const userRank = (() => {
     if (result) return result.rank;
@@ -187,7 +185,7 @@ export default function TripleFeaturePublic() {
       for (let j = i + 1; j < 5; j++)
         for (let k = j + 1; k < 5; k++)
           combos.push({ indices: [i, j, k], total: puzzle.movies[i].gross + puzzle.movies[j].gross + puzzle.movies[k].gross });
-    const ranked = [...combos].sort((a, b) => Math.abs(a.total - puzzle.target) - Math.abs(b.total - puzzle.target));
+    const ranked = [...combos].sort((a, b) => b.total - a.total);
     const s = new Set(selectedArray);
     return ranked.findIndex((c) => { const cs = new Set(c.indices); return [...s].every((i) => cs.has(i)); }) + 1;
   })();
@@ -258,7 +256,7 @@ export default function TripleFeaturePublic() {
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <div style={S.title}>TRIPLE FEATURE</div>
-          <div style={S.subtitle}>Pick 3 · Hit the target · Domestic gross</div>
+          <div style={S.subtitle}>Pick the 3 highest grossing films</div>
           <div style={{ fontSize: 10, color: "#555", marginTop: 4, fontStyle: "italic" }}>
             Original domestic gross — not adjusted for inflation
           </div>
@@ -267,12 +265,6 @@ export default function TripleFeaturePublic() {
               Puzzle #{getPuzzleNumber(puzzle.date)}
             </div>
           )}
-        </div>
-
-        {/* Target */}
-        <div style={S.targetBox}>
-          <div style={S.label}>Target Domestic Gross</div>
-          <div style={S.targetVal}>{formatMoney(puzzle.target)}</div>
         </div>
 
         {/* Running total during reveal */}
@@ -379,29 +371,27 @@ export default function TripleFeaturePublic() {
         {/* ── Result phase ────────────────────────────────── */}
         {phase === PHASE.RESULT && (
           <div style={{ animation: "tf-slideUp 0.5s ease-out", position: "relative" }}>
-            <GoldConfetti active={userRank === 1} />
+            <GoldConfetti active={userScore === maxScore} />
 
             <div style={S.resultCard}>
               <div style={{ marginBottom: 6 }}>
                 <div style={{
                   fontFamily: "'Playfair Display',serif", fontSize: 40, fontWeight: 900, lineHeight: 1,
-                  color: userRank === 1 ? "#d4af37" : userRank <= 3 ? "#f0ece4" : "#8a8070",
-                }}>#{userRank}</div>
-                <div style={{ fontSize: 12, color: "#666", marginTop: 2 }}>out of 10 possible picks</div>
+                  color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? "#f0ece4" : "#8a8070",
+                }}>{userScore}<span style={{ fontSize: 22, color: "#666" }}>/{maxScore}</span></div>
                 <div style={{
-                  fontSize: 11, fontWeight: 600, marginTop: 4, fontStyle: "italic",
-                  color: userRank === 1 ? "#d4af37" : userRank <= 3 ? "#4ade80" : userRank <= 6 ? "#f59e0b" : "#ef4444",
-                }}>{FLAVOR[userRank] || ""}</div>
+                  fontSize: 11, fontWeight: 600, marginTop: 6, fontStyle: "italic",
+                  color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? "#4ade80" : userScore >= maxScore * 0.75 ? "#f59e0b" : "#ef4444",
+                }}>{getFlavorText(userScore, maxScore)}</div>
               </div>
 
-              <div style={{ fontSize: 12, color: "#8a8070", marginBottom: 2 }}>Your total</div>
-              <div style={S.resultTotal}>{formatMoney(userTotal)}</div>
-              <div style={{
-                fontSize: 13, fontWeight: 600,
-                color: userDiff === 0 ? "#4ade80" : userTotal > puzzle.target ? "#ef4444" : "#f59e0b",
-              }}>
-                {userDiff === 0 ? "PERFECT!" : `${formatMoney(userDiff)} ${userTotal > puzzle.target ? "over" : "under"}`}
-              </div>
+              <div style={{ fontSize: 12, color: "#8a8070", marginBottom: 2, marginTop: 8 }}>Your box office</div>
+              <div style={S.resultTotal}>{formatMoney(result ? result.user_total : userTotal)}</div>
+              {userScore < maxScore && (
+                <div style={{ fontSize: 12, color: "#8a8070", marginTop: 2 }}>
+                  Best was {formatMoney(puzzle.optimalTotal)}
+                </div>
+              )}
             </div>
 
             <button onClick={shareResult} style={S.shareBtn}>

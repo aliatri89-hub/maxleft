@@ -24,17 +24,19 @@ function getCombos(movies) {
   return combos;
 }
 
-function calculateRank(movies, target, selectedIndices) {
+function calculateRank(movies, selectedIndices) {
   const allCombos = getCombos(movies);
-  const ranked = [...allCombos].sort(
-    (a, b) => Math.abs(a.total - target) - Math.abs(b.total - target)
-  );
+  const ranked = [...allCombos].sort((a, b) => b.total - a.total);
   const selectedSet = new Set(selectedIndices);
   const idx = ranked.findIndex((c) => {
     const s = new Set(c.indices);
     return [...selectedSet].every((i) => s.has(i));
   });
   return idx + 1;
+}
+
+function scaleScore(gross) {
+  return Math.round(gross / 10);
 }
 
 // ── localStorage helpers ──────────────────────────────────
@@ -113,7 +115,7 @@ export function useTripleFeaturePublic() {
       const userTotal = selectedArray.reduce(
         (sum, idx) => sum + puzzle.movies[idx].gross, 0
       );
-      const rank = calculateRank(puzzle.movies, puzzle.target, selectedArray);
+      const rank = calculateRank(puzzle.movies, selectedArray);
 
       const resultData = {
         puzzleDate: puzzle.date,
@@ -132,13 +134,13 @@ export function useTripleFeaturePublic() {
   const getShareText = useCallback(() => {
     if (!puzzle || !result) return "";
     const puzzleNum = getPuzzleNumber(puzzle.date);
-    const rankEmoji = result.rank === 1 ? "🏆" : result.rank <= 3 ? "🎯" : result.rank <= 6 ? "🎬" : "😬";
-    const diff = Math.abs(result.user_total - puzzle.target);
-    const diffText = diff === 0 ? "Perfect!" : `$${diff}M off target`;
+    const userScore = scaleScore(result.user_total);
+    const maxScore = scaleScore(puzzle.optimalTotal);
+    const pct = maxScore > 0 ? Math.round((userScore / maxScore) * 100) : 0;
+    const rankEmoji = pct === 100 ? "🏆" : pct >= 90 ? "🎯" : pct >= 75 ? "🎬" : "😬";
 
     let text = `🎬 Triple Feature #${puzzleNum}\n`;
-    text += `${rankEmoji} #${result.rank} out of 10\n`;
-    text += `${diffText}\n`;
+    text += `${rankEmoji} ${userScore}/${maxScore}\n`;
     text += `mymantl.app/play`;
     return text;
   }, [puzzle, result]);
@@ -163,6 +165,7 @@ export function useTripleFeaturePublic() {
     submitPlay,
     getShareText,
     getTimeUntilNext,
+    scaleScore,
     // Not available in public version
     percentile: null,
     playerCount: 0,

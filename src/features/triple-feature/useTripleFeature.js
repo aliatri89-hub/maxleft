@@ -26,19 +26,24 @@ function getCombos(movies) {
 }
 
 /**
- * Calculate rank (1-10) for a given selection
+ * Calculate rank (1-10) for a given selection — highest gross = rank 1
  */
-function calculateRank(movies, target, selectedIndices) {
+function calculateRank(movies, selectedIndices) {
   const allCombos = getCombos(movies);
-  const ranked = [...allCombos].sort(
-    (a, b) => Math.abs(a.total - target) - Math.abs(b.total - target)
-  );
+  const ranked = [...allCombos].sort((a, b) => b.total - a.total);
   const selectedSet = new Set(selectedIndices);
   const idx = ranked.findIndex((c) => {
     const s = new Set(c.indices);
     return [...selectedSet].every((i) => s.has(i));
   });
   return idx + 1;
+}
+
+/**
+ * Scale raw gross total to display score (divide by 10M, round)
+ */
+function scaleScore(gross) {
+  return Math.round(gross / 10);
 }
 
 export function useTripleFeature(userId) {
@@ -107,7 +112,7 @@ export function useTripleFeature(userId) {
       const userTotal = selectedArray.reduce(
         (sum, idx) => sum + puzzle.movies[idx].gross, 0
       );
-      const rank = calculateRank(puzzle.movies, puzzle.target, selectedArray);
+      const rank = calculateRank(puzzle.movies, selectedArray);
 
       const submitted = await submitResult({
         userId,
@@ -147,13 +152,13 @@ export function useTripleFeature(userId) {
   const getShareText = useCallback(() => {
     if (!puzzle || !result) return "";
     const puzzleNum = getPuzzleNumber(puzzle.date);
-    const rankEmoji = result.rank === 1 ? "🏆" : result.rank <= 3 ? "🎯" : result.rank <= 6 ? "🎬" : "😬";
-    const diff = Math.abs(result.user_total - puzzle.target);
-    const diffText = diff === 0 ? "Perfect!" : `$${diff}M off target`;
+    const userScore = scaleScore(result.user_total);
+    const maxScore = scaleScore(puzzle.optimalTotal);
+    const pct = maxScore > 0 ? Math.round((userScore / maxScore) * 100) : 0;
+    const rankEmoji = pct === 100 ? "🏆" : pct >= 90 ? "🎯" : pct >= 75 ? "🎬" : "😬";
 
     let text = `🎬 Triple Feature #${puzzleNum}\n`;
-    text += `${rankEmoji} #${result.rank} out of 10\n`;
-    text += `${diffText}\n`;
+    text += `${rankEmoji} ${userScore}/${maxScore}\n`;
     if (stats?.current_streak > 1) text += `🔥 ${stats.current_streak} day streak\n`;
     if (percentile !== null && playerCount > 1) text += `Top ${Math.round(100 - percentile + 1)}% of players\n`;
     text += `mymantl.app/play`;
@@ -183,5 +188,6 @@ export function useTripleFeature(userId) {
     submitPlay,
     getShareText,
     getTimeUntilNext,
+    scaleScore,
   };
 }
