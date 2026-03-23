@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import BadgeShelf from "../components/shelf/BadgeShelf";
-import MediaShelf from "../components/shelf/MediaShelf";
 import ShelfModals from "../components/modals/ShelfModals";
 
 const accent = "#EF9F27";
@@ -54,119 +53,146 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       {/* ── Badge Shelf Hero ── */}
       <BadgeShelf session={session} />
 
-      {/* ── Movies Shelf ── */}
-      <MediaShelf
-        shelfKey="movies" items={movies} profile={profile}
-        onShelfIt={onShelfIt}
-        onViewItem={(item) => setViewingItem(item)}
-        onOpenDiary={(k) => setDiaryShelf(k)}
-        letterboxdSyncing={letterboxdSyncing} steamSyncing={steamSyncing}
-        isHero
-      />
-
       {/* ── Diary Section ── */}
-      {recentMovies.length > 0 && (
-        <div style={{ padding: "0 16px", marginTop: 8 }}>
-          {/* Header */}
-          <div style={{ textAlign: "center", paddingBottom: 14 }}>
-            <div style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 22, color: accent,
-              letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
-            }}>
-              Diary
-            </div>
-            <div style={{
-              height: 1, margin: "10px 0 0",
-              background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
-            }} />
-          </div>
-
-          {/* Diary entries */}
+      <div style={{ padding: "0 16px", marginTop: 8 }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", paddingBottom: 14 }}>
           <div style={{
-            background: "var(--bg-card)",
-            borderRadius: "var(--radius-md)",
-            overflow: "hidden",
-            border: "1px solid var(--border-subtle)",
+            fontFamily: "'Permanent Marker', cursive",
+            fontSize: 22, color: accent,
+            letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
           }}>
-            {recentMovies.map((movie, i) => (
-              <div
-                key={movie.id}
-                onClick={() => setViewingItem({ ...movie, shelfType: "movies" })}
-                style={{
-                  display: "flex", alignItems: "center", gap: 12,
-                  padding: "11px 14px",
-                  borderBottom: i < recentMovies.length - 1 ? "0.5px solid var(--border-subtle)" : "none",
-                  cursor: "pointer",
-                  transition: "background 0.15s",
-                }}
-              >
-                {/* Date */}
-                <div style={{
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  color: "var(--text-faint)", minWidth: 44,
-                  letterSpacing: "0.02em", fontWeight: 400,
-                  flexShrink: 0,
-                }}>
-                  {formatDiaryDate(movie.watchedAt)}
-                </div>
-
-                {/* Poster thumbnail */}
-                {movie.cover && (
-                  <div style={{
-                    width: 28, height: 40, borderRadius: 3, overflow: "hidden",
-                    flexShrink: 0, background: "rgba(255,255,255,0.04)",
-                    border: `1px solid ${accent}12`,
-                  }}>
-                    <img src={movie.cover} alt="" style={{
-                      width: "100%", height: "100%", objectFit: "cover", display: "block",
-                    }} loading="lazy" />
-                  </div>
-                )}
-
-                {/* Title */}
-                <div style={{
-                  flex: 1, minWidth: 0,
-                  fontFamily: "var(--font-display)", fontSize: 14,
-                  fontWeight: 600, color: "var(--text-secondary)",
-                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                }}>
-                  {movie.title}
-                </div>
-
-                {/* Stars */}
-                <div style={{ flexShrink: 0 }}>
-                  {renderStars(movie.rating)}
-                </div>
-              </div>
-            ))}
+            Diary
           </div>
-
-          {/* See full diary */}
-          {movies.length > 6 && (
-            <div style={{ textAlign: "center", paddingTop: 14 }}>
-              <div
-                onClick={() => setDiaryShelf("movies")}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  fontWeight: 500, letterSpacing: "0.04em",
-                  color: `${accent}cc`,
-                  background: `${accent}0a`,
-                  border: `1px solid ${accent}20`,
-                  borderRadius: 20, padding: "6px 14px",
-                  cursor: "pointer", transition: "all 0.2s",
-                }}
-              >
-                <span>Full diary</span>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            </div>
-          )}
+          <div style={{
+            height: 1, margin: "10px 0 0",
+            background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
+          }} />
+          {/* Count + Sync + Add row */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 14, marginTop: 10, flexWrap: "wrap",
+          }}>
+            {movies.length > 0 && (
+              <span style={{
+                fontFamily: "var(--font-mono)", fontSize: 11,
+                color: "var(--text-faint)", letterSpacing: "0.08em",
+              }}>{movies.length} logged</span>
+            )}
+            {profile.letterboxd_username && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10,
+                color: letterboxdSyncing ? "var(--accent-terra)" : "var(--accent-green)",
+              }}>
+                <span style={{
+                  width: 7, height: 7, borderRadius: "50%",
+                  background: letterboxdSyncing ? "var(--accent-terra)" : "var(--accent-green)",
+                  boxShadow: letterboxdSyncing ? "none" : "0 0 6px rgba(74,222,128,0.35)",
+                }} />
+                <span style={{ fontFamily: "var(--font-mono)" }}>{letterboxdSyncing ? "syncing" : "synced"}</span>
+              </span>
+            )}
+            <button
+              onClick={() => onShelfIt("movie")}
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                fontFamily: "var(--font-mono)", fontSize: 11,
+                fontWeight: 600, letterSpacing: "0.04em",
+                color: "var(--bg-card, #0f0d0b)", background: accent,
+                border: "none", borderRadius: 5,
+                padding: "5px 12px", cursor: "pointer",
+                transition: "opacity 0.15s",
+              }}
+            >+ Add</button>
+          </div>
         </div>
-      )}
+
+        {recentMovies.length > 0 ? (
+          <>
+            {/* Diary entries */}
+            <div style={{
+              background: "var(--bg-card)",
+              borderRadius: "var(--radius-md)",
+              overflow: "hidden",
+              border: "1px solid var(--border-subtle)",
+            }}>
+              {recentMovies.map((movie, i) => (
+                <div
+                  key={movie.id}
+                  onClick={() => setViewingItem({ ...movie, shelfType: "movies" })}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 12,
+                    padding: "11px 14px",
+                    borderBottom: i < recentMovies.length - 1 ? "0.5px solid var(--border-subtle)" : "none",
+                    cursor: "pointer", transition: "background 0.15s",
+                  }}
+                >
+                  <div style={{
+                    fontFamily: "var(--font-mono)", fontSize: 11,
+                    color: "var(--text-faint)", minWidth: 44,
+                    letterSpacing: "0.02em", fontWeight: 400, flexShrink: 0,
+                  }}>
+                    {formatDiaryDate(movie.watchedAt)}
+                  </div>
+                  {movie.cover && (
+                    <div style={{
+                      width: 28, height: 40, borderRadius: 3, overflow: "hidden",
+                      flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                      border: `1px solid ${accent}12`,
+                    }}>
+                      <img src={movie.cover} alt="" style={{
+                        width: "100%", height: "100%", objectFit: "cover", display: "block",
+                      }} loading="lazy" />
+                    </div>
+                  )}
+                  <div style={{
+                    flex: 1, minWidth: 0,
+                    fontFamily: "var(--font-display)", fontSize: 14,
+                    fontWeight: 600, color: "var(--text-secondary)",
+                    whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  }}>
+                    {movie.title}
+                  </div>
+                  <div style={{ flexShrink: 0 }}>
+                    {renderStars(movie.rating)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* See full diary */}
+            {movies.length > 6 && (
+              <div style={{ textAlign: "center", paddingTop: 14 }}>
+                <div
+                  onClick={() => setDiaryShelf("movies")}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    fontFamily: "var(--font-mono)", fontSize: 11,
+                    fontWeight: 500, letterSpacing: "0.04em",
+                    color: `${accent}cc`, background: `${accent}0a`,
+                    border: `1px solid ${accent}20`,
+                    borderRadius: 20, padding: "6px 14px",
+                    cursor: "pointer", transition: "all 0.2s",
+                  }}
+                >
+                  <span>See all {movies.length}</span>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          /* Empty state */
+          <div style={{ textAlign: "center", padding: "32px 16px" }}>
+            <div style={{
+              fontFamily: "var(--font-body)", fontSize: 14,
+              color: "var(--text-muted)", fontStyle: "italic",
+            }}>No films yet</div>
+          </div>
+        )}
+      </div>
 
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(
