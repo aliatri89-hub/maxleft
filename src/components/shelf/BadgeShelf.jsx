@@ -193,7 +193,7 @@ export default function BadgeShelf({ session }) {
         border: "0.5px solid rgba(255,255,255,0.06)",
         borderBottom: "none",
         borderRadius: "12px 12px 0 0",
-        padding: "22px 8px 24px",
+        padding: "22px 8px 16px",
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 14, padding: "8px 0" }}>
@@ -230,23 +230,15 @@ export default function BadgeShelf({ session }) {
           </div>
         )}
 
-        {/* See all badges */}
-        {earnedBadges.length > 0 && (
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              fontFamily: "var(--font-mono)", fontSize: 11,
-              fontWeight: 500, letterSpacing: "0.04em",
-              color: `${accent}cc`, background: `${accent}0a`,
-              border: `1px solid ${accent}20`,
-              borderRadius: 20, padding: "6px 14px",
-              cursor: "pointer", transition: "all 0.2s",
-            }}>
-              <span>See all badges</span>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
+        {/* Nudge to explore communities when shelf isn't full */}
+        {!loading && hasAnyBadges && slots.length < 4 && (
+          <div style={{
+            textAlign: "center", marginTop: 12,
+            fontSize: 11, color: "var(--text-faint)",
+            fontFamily: "var(--font-mono)", letterSpacing: "0.02em",
+            fontStyle: "italic",
+          }}>
+            Explore communities to earn more
           </div>
         )}
       </div>

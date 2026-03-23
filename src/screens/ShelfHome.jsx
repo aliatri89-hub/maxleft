@@ -55,24 +55,11 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
 
       {/* ── Diary Section ── */}
       <div style={{ padding: "0 16px", marginTop: 8 }}>
-        {/* Header */}
-        <div style={{ textAlign: "center", paddingBottom: 14 }}>
-          <div style={{
-            fontFamily: "'Permanent Marker', cursive",
-            fontSize: 22, color: accent,
-            letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
-          }}>
-            Diary
-          </div>
-          <div style={{
-            height: 1, margin: "10px 0 0",
-            background: `linear-gradient(90deg, transparent, ${accent}30, transparent)`,
-          }} />
-          {/* Count + Sync + Add row */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            gap: 14, marginTop: 10, flexWrap: "wrap",
-          }}>
+        {/* Count + Sync + Add row */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 14, paddingBottom: 14, flexWrap: "wrap",
+        }}>
             {movies.length > 0 && (
               <span style={{
                 fontFamily: "var(--font-mono)", fontSize: 11,
@@ -105,7 +92,6 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
               }}
             >+ Add</button>
           </div>
-        </div>
 
         {recentMovies.length > 0 ? (
           <>
