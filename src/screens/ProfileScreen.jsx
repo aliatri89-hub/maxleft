@@ -22,7 +22,7 @@ function Expandable({ open, children }) {
   );
 }
 
-function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe }) {
+function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [wishlist, setWishlist] = useState([]);
@@ -40,28 +40,33 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [steamIdInput, setSteamIdInput] = useState(profile.steam_id || "");
   const [syncOpen, setSyncOpen] = useState(false);
   const [podcastsOpen, setPodcastsOpen] = useState(false);
-  const [allCommunities, setAllCommunities] = useState([]);
-  const [loadingCommunities, setLoadingCommunities] = useState(false);
+  const [allPodcasts, setAllPodcasts] = useState([]);
+  const [loadingPodcasts, setLoadingPodcasts] = useState(false);
   const fileRef = useRef(null);
 
-  // ── Load communities for podcast picker ──
+  // ── Load podcasts for favorite picker ──
   useEffect(() => {
-    if (!podcastsOpen || allCommunities.length > 0) return;
+    if (!podcastsOpen || allPodcasts.length > 0) return;
     let cancelled = false;
-    const isDev = new URLSearchParams(window.location.search).has("dev");
 
     (async () => {
-      setLoadingCommunities(true);
-      const query = supabase
-        .from("community_pages")
-        .select("id, name, slug, description, theme_config")
-        .order("sort_order", { ascending: true });
+      setLoadingPodcasts(true);
+      const { data, error } = await supabase
+        .from("podcasts")
+        .select("id, name, slug, artwork_url, tier, community_page_id")
+        .eq("active", true)
+        .order("name", { ascending: true });
 
-      if (!isDev) query.eq("launched", true);
-
-      const { data, error } = await query;
-      if (!cancelled && !error) setAllCommunities(data || []);
-      if (!cancelled) setLoadingCommunities(false);
+      if (!cancelled && !error) {
+        // Sort: deep-dive pods first, then alphabetical
+        const sorted = (data || []).sort((a, b) => {
+          if (a.tier === "deep" && b.tier !== "deep") return -1;
+          if (a.tier !== "deep" && b.tier === "deep") return 1;
+          return a.name.localeCompare(b.name);
+        });
+        setAllPodcasts(sorted);
+      }
+      if (!cancelled) setLoadingPodcasts(false);
     })();
 
     return () => { cancelled = true; };
@@ -365,94 +370,94 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           <div className="profile-group-row" onClick={() => setPodcastsOpen(!podcastsOpen)}>
             <span className="profile-group-row-text">My Podcasts</span>
             <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {communitySubscriptions?.size > 0 && (
+              {favoritePodcasts?.size > 0 && (
                 <span style={{
                   fontFamily: "var(--font-mono)", fontSize: 9,
                   color: "var(--terracotta)", opacity: 0.7,
-                }}>{communitySubscriptions.size} following</span>
+                }}>{favoritePodcasts.size} favorite{favoritePodcasts.size !== 1 ? "s" : ""}</span>
               )}
               {podcastsOpen ? "▾" : "›"}
             </span>
           </div>
           <Expandable open={podcastsOpen}>
             <div style={{ padding: "4px 14px 12px" }}>
-              {loadingCommunities ? (
+              {loadingPodcasts ? (
                 <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-faint)", fontSize: 12, fontFamily: "var(--font-mono)" }}>
                   Loading...
                 </div>
-              ) : allCommunities.length === 0 ? (
+              ) : allPodcasts.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "16px 0", color: "var(--text-faint)", fontSize: 12, fontFamily: "var(--font-mono)" }}>
-                  No communities available
+                  No podcasts available
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {allCommunities.map(c => {
-                    const theme = c.theme_config || {};
-                    const accent = theme.accent || "#e94560";
-                    const isOn = communitySubscriptions?.has(c.id);
+                  {/* Sort: favorites first, then rest */}
+                  {[...allPodcasts].sort((a, b) => {
+                    const aFav = favoritePodcasts?.has(a.id) ? 0 : 1;
+                    const bFav = favoritePodcasts?.has(b.id) ? 0 : 1;
+                    if (aFav !== bFav) return aFav - bFav;
+                    return 0; // preserve existing sort within groups
+                  }).map(pod => {
+                    const isFav = favoritePodcasts?.has(pod.id);
+                    const accent = isFav ? "var(--terracotta, #c97849)" : "rgba(255,255,255,0.3)";
 
                     return (
                       <div
-                        key={c.id}
-                        onClick={() => {
-                          if (isOn) {
-                            onUnsubscribe(c.id);
-                          } else {
-                            onSubscribe(c.id);
-                          }
-                        }}
+                        key={pod.id}
+                        onClick={() => onToggleFavoritePodcast(pod.id)}
                         style={{
                           display: "flex", alignItems: "center", gap: 12,
-                          padding: "12px 14px",
-                          background: isOn ? `${accent}0c` : "rgba(255,255,255,0.02)",
-                          border: `1.5px solid ${isOn ? `${accent}40` : "var(--border-medium)"}`,
+                          padding: "10px 12px",
+                          background: isFav ? "rgba(201,120,73,0.08)" : "rgba(255,255,255,0.02)",
+                          border: `1.5px solid ${isFav ? "rgba(201,120,73,0.3)" : "var(--border-medium)"}`,
                           borderRadius: 10,
                           cursor: "pointer",
                           transition: "all 0.15s ease",
                         }}
                       >
-                        {/* Accent dot */}
-                        <div style={{
-                          width: 8, height: 8, borderRadius: "50%",
-                          background: isOn ? accent : "var(--border-medium)",
-                          flexShrink: 0,
-                          transition: "background 0.15s",
-                          boxShadow: isOn ? `0 0 6px ${accent}44` : "none",
-                        }} />
+                        {/* Podcast artwork */}
+                        {pod.artwork_url ? (
+                          <img src={pod.artwork_url} alt="" style={{
+                            width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0,
+                            border: isFav ? "1.5px solid rgba(201,120,73,0.3)" : "1.5px solid rgba(255,255,255,0.06)",
+                          }} />
+                        ) : (
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 8, flexShrink: 0,
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1.5px solid rgba(255,255,255,0.06)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 16,
+                          }}>🎙️</div>
+                        )}
 
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
                             fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14,
-                            textTransform: "uppercase", letterSpacing: "0.02em",
-                            color: isOn ? "var(--text-primary)" : "var(--text-muted)",
+                            color: isFav ? "var(--text-primary)" : "var(--text-muted)",
                             lineHeight: 1.2,
-                          }}>{c.name}</div>
-                          {c.description && (
+                            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          }}>{pod.name}</div>
+                          {pod.tier === "deep" && (
                             <div style={{
-                              fontFamily: "var(--font-body)", fontSize: 11, fontStyle: "italic",
-                              color: "var(--text-faint)",
-                              marginTop: 2,
-                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                            }}>{c.description}</div>
+                              fontFamily: "var(--font-mono)", fontSize: 9,
+                              color: "var(--terracotta, #c97849)", opacity: 0.7,
+                              marginTop: 2, letterSpacing: "0.04em",
+                              textTransform: "uppercase",
+                            }}>Deep Dive</div>
                           )}
                         </div>
 
-                        {/* Toggle pill */}
+                        {/* Star toggle */}
                         <div style={{
-                          width: 36, height: 20, borderRadius: 10,
-                          background: isOn ? accent : "rgba(255,255,255,0.08)",
-                          position: "relative",
-                          transition: "background 0.2s ease",
+                          width: 28, height: 28, borderRadius: 8,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: isFav ? "rgba(201,120,73,0.15)" : "rgba(255,255,255,0.04)",
+                          transition: "all 0.2s ease",
                           flexShrink: 0,
+                          fontSize: 14,
                         }}>
-                          <div style={{
-                            width: 16, height: 16, borderRadius: "50%",
-                            background: isOn ? "#fff" : "rgba(255,255,255,0.3)",
-                            position: "absolute",
-                            top: 2,
-                            left: isOn ? 18 : 2,
-                            transition: "left 0.2s ease, background 0.2s ease",
-                          }} />
+                          {isFav ? "★" : "☆"}
                         </div>
                       </div>
                     );
@@ -462,8 +467,9 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                     fontFamily: "var(--font-mono)", fontSize: 9,
                     color: "var(--text-faint)", textAlign: "center",
                     marginTop: 4, letterSpacing: "0.03em",
+                    lineHeight: 1.5,
                   }}>
-                    Toggle podcasts to show in your feed and communities tab
+                    Favorites float to the top when viewing podcast coverage on a film
                   </div>
                 </div>
               )}

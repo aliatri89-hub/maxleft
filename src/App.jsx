@@ -26,6 +26,7 @@ import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
+import { useFavoritePodcasts } from "./hooks/useFavoritePodcasts";
 import { useToast } from "./hooks/useToast";
 import { useBackNav } from "./hooks/useBackNav";
 import { useTabSwipe } from "./hooks/useTabSwipe";
@@ -161,6 +162,11 @@ export default function App() {
     subscribe: subscribeCommunity, unsubscribe: unsubscribeCommunity,
     seedSubscriptions, loaded: subscriptionsLoaded,
   } = useCommunitySubscriptions(session?.user?.id);
+
+  const {
+    favorites: favoritePodcasts,
+    toggle: toggleFavoritePodcast,
+  } = useFavoritePodcasts(session?.user?.id);
 
   const handleSubscribeCommunity = async (communityId) => {
     await subscribeCommunity(communityId);
@@ -494,6 +500,8 @@ export default function App() {
               communitySubscriptions={communitySubscriptions}
               onSubscribe={handleSubscribeCommunity}
               onUnsubscribe={unsubscribeCommunity}
+              favoritePodcasts={favoritePodcasts}
+              onToggleFavoritePodcast={toggleFavoritePodcast}
             />
           </div>
         )}
