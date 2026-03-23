@@ -322,7 +322,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         border: "0.5px solid rgba(255,255,255,0.06)",
         borderBottom: "none",
         borderRadius: "12px 12px 0 0",
-        padding: "22px 8px 4px",
+        padding: "12px 8px 4px",
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 20, padding: "8px 0" }}>
@@ -399,20 +399,6 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
           <div style={{ position: "absolute", top: 4, left: 12, right: 12, height: "0.5px", background: "rgba(255,255,255,0.06)" }} />
           <div style={{ position: "absolute", top: 9, left: 20, right: 20, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
           <div style={{ position: "absolute", top: 14, left: 8, right: 8, height: "0.5px", background: "rgba(255,255,255,0.03)" }} />
-
-          {/* Engraved MANTLPIECE label */}
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <span style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 11, color: "rgba(255,255,255,0.08)",
-              letterSpacing: "0.12em", textTransform: "uppercase",
-            }}>
-              mantlpiece
-            </span>
-          </div>
         </div>
 
         {/* Bottom molding — decorative trim */}
