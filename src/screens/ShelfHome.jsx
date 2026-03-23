@@ -90,43 +90,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
               pointerEvents: "none",
             }} />
 
-            {/* Count + Sync + Add row */}
-            <div style={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              gap: 14, padding: "12px 12px 10px", flexWrap: "wrap",
-            }}>
-              {movies.length > 0 && (
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  color: "var(--text-faint)", letterSpacing: "0.08em",
-                }}>{movies.length} logged</span>
-              )}
-              {profile.letterboxd_username && (
-                <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 5, fontSize: 10,
-                  color: letterboxdSyncing ? "var(--accent-terra)" : "var(--accent-green)",
-                }}>
-                  <span style={{
-                    width: 7, height: 7, borderRadius: "50%",
-                    background: letterboxdSyncing ? "var(--accent-terra)" : "var(--accent-green)",
-                    boxShadow: letterboxdSyncing ? "none" : "0 0 6px rgba(74,222,128,0.35)",
-                  }} />
-                  <span style={{ fontFamily: "var(--font-mono)" }}>{letterboxdSyncing ? "syncing" : "synced"}</span>
-                </span>
-              )}
-              <button
-                onClick={() => onShelfIt("movie")}
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 5,
-                  fontFamily: "var(--font-mono)", fontSize: 11,
-                  fontWeight: 600, letterSpacing: "0.04em",
-                  color: "var(--bg-card, #0f0d0b)", background: accent,
-                  border: "none", borderRadius: 5,
-                  padding: "5px 12px", cursor: "pointer",
-                  transition: "opacity 0.15s",
-                }}
-              >+ Add</button>
-            </div>
+            {/* Top spacer */}
+            <div style={{ height: 10 }} />
 
             {recentMovies.length > 0 ? (
               <>
@@ -182,9 +147,12 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                   </div>
                 </div>
 
-                {/* See full diary */}
-                {movies.length > 6 && (
-                  <div style={{ textAlign: "center", padding: "12px 0" }}>
+                {/* Bottom row: See all + Add */}
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "flex-end",
+                  gap: 10, padding: "12px 8px",
+                }}>
+                  {movies.length > 6 && (
                     <div
                       onClick={() => setDiaryShelf("movies")}
                       style={{
@@ -202,8 +170,20 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                         <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
-                  </div>
-                )}
+                  )}
+                  <button
+                    onClick={() => onShelfIt("movie")}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                      fontFamily: "var(--font-mono)", fontSize: 11,
+                      fontWeight: 600, letterSpacing: "0.04em",
+                      color: "var(--bg-card, #0f0d0b)", background: accent,
+                      border: "none", borderRadius: 5,
+                      padding: "5px 12px", cursor: "pointer",
+                      transition: "opacity 0.15s",
+                    }}
+                  >+ Add</button>
+                </div>
               </>
             ) : (
               <div style={{ textAlign: "center", padding: "32px 16px" }}>
