@@ -51,6 +51,7 @@ export default function CommunitySleeveSheet({
   const network = theme.network || null;
   const podcastAbout = theme.podcast_about || null;
   const sleeveHero = theme.sleeve_hero || null;
+  const sleeveHeroFit = theme.sleeve_hero_fit || "cover";
   const slug = community?.slug || "";
   const abbrev = SLUG_ABBREV[slug] || slug.slice(0, 2).toUpperCase();
 
@@ -189,9 +190,10 @@ export default function CommunitySleeveSheet({
               style={{
                 width: "100%",
                 height: "100%",
-                objectFit: "cover",
+                objectFit: sleeveHeroFit,
                 objectPosition: "center top",
                 display: "block",
+                ...(sleeveHeroFit === "contain" ? { padding: "20px 40px" } : {}),
               }}
             />
             {/* Warm amber overlay */}
