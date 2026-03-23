@@ -744,12 +744,44 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
    ResultCard — unified expand for covered + uncovered
    ═══════════════════════════════════════════════════ */
 
+// Strip HTML tags + podcast promo tails from RSS descriptions
+const SEARCH_PROMO_MARKERS = [
+  /\bJoin our Patreon\b/i,
+  /\bFollow us [@on]/i,
+  /\bBe sure to (?:follow|subscribe)/i,
+  /\bLearn more about your ad choices/i,
+  /\bThanks to our SPONSOR/i,
+  /\bThis episode is (?:brought to you|sponsored) by/i,
+  /\bWeekly Plugs\b/i,
+  /\bProducers?:/i,
+  /\bWatch this episode on/i,
+];
+
+function searchStripHtml(str) {
+  if (!str) return "";
+  let text = str
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ")
+    .replace(/\n{3,}/g, "\n\n").trim();
+  let cutIdx = text.length;
+  for (const marker of SEARCH_PROMO_MARKERS) {
+    const match = text.match(marker);
+    if (match && match.index < cutIdx) cutIdx = match.index;
+  }
+  if (cutIdx < text.length) text = text.slice(0, cutIdx).replace(/[\s\n:—–-]+$/, "").trim();
+  return text;
+}
+
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
   onPlayEpisode, onQueueEpisode, onNotify, notifying, notified, currentEp, isPlaying,
   isAdmin, hiddenEpIds, onUnlinkEpisode,
 }) {
   const hasCoverage = result.podcastCount > 0;
+  const [expandedEpId, setExpandedEpId] = useState(null);
 
   return (
     <div style={{ marginBottom: 2 }}>
@@ -881,25 +913,30 @@ function ResultCard({
           )}
 
           {episodes.filter(ep => !hiddenEpIds?.has(ep.episode_id || ep.id)).map((ep, i) => {
+            const epKey = ep.episode_id || ep.id || i;
             const epUrl = resolveAudioUrl(ep);
             const isCurrent = currentEp &&
               (currentEp.guid === (ep.episode_id || ep.id) || currentEp.enclosureUrl === epUrl);
+            const isActiveAndPlaying = isCurrent && isPlaying;
+            const isEpExpanded = expandedEpId === epKey;
+            const descText = searchStripHtml(ep.episode_description);
 
             return (
-              <div key={ep.id || ep.episode_id || i}
-                onClick={(e) => { e.stopPropagation(); onPlayEpisode?.(ep); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  padding: "7px 8px", borderRadius: 6,
-                  cursor: epUrl ? "pointer" : "default",
-                  transition: "background 0.15s",
-                  background: isCurrent ? "rgba(199,91,63,0.08)" : "transparent",
-                }}>
+              <div key={epKey}>
+                <div
+                  onClick={(e) => { e.stopPropagation(); setExpandedEpId(isEpExpanded ? null : epKey); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "7px 8px", borderRadius: 6,
+                    cursor: "pointer",
+                    transition: "background 0.15s",
+                    background: isEpExpanded ? "rgba(199,91,63,0.08)" : isCurrent ? "rgba(199,91,63,0.05)" : "transparent",
+                  }}>
                 {ep.podcast_artwork_url ? (
                   <img src={ep.podcast_artwork_url} alt={ep.podcast_name}
                     style={{
                       width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                      border: isCurrent ? `1.5px solid ${TC}` : "1px solid rgba(255,255,255,0.06)",
+                      border: isEpExpanded || isCurrent ? `1.5px solid ${TC}` : "1px solid rgba(255,255,255,0.06)",
                     }} />
                 ) : (
                   <div style={{
@@ -913,7 +950,7 @@ function ResultCard({
                   <div style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
                     fontWeight: 700, fontSize: 13,
-                    color: isCurrent ? TC : "rgba(255,255,255,0.7)",
+                    color: isEpExpanded || isCurrent ? TC : "rgba(255,255,255,0.7)",
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{ep.episode_title || "Episode"}</div>
                   <div style={{
@@ -928,6 +965,27 @@ function ResultCard({
 
                 {epUrl ? (
                   <>
+                  {/* Play / Pause button */}
+                  <div
+                    onClick={(e) => { e.stopPropagation(); onPlayEpisode?.(ep); }}
+                    style={{
+                      width: 28, height: 28, borderRadius: "50%",
+                      background: isActiveAndPlaying ? "rgba(199,91,63,0.15)" : "rgba(255,255,255,0.04)",
+                      border: isActiveAndPlaying ? "1px solid rgba(199,91,63,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0, cursor: "pointer",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? TC : "rgba(255,255,255,0.5)"}>
+                      {isActiveAndPlaying ? (
+                        <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                      ) : (
+                        <path d="M8 5v14l11-7z" />
+                      )}
+                    </svg>
+                  </div>
+                  {/* Queue: add to up next */}
                   {onQueueEpisode && !isCurrent && (
                     <div
                       onClick={(e) => { e.stopPropagation(); onQueueEpisode(ep); }}
@@ -963,14 +1021,6 @@ function ResultCard({
                       </svg>
                     </div>
                   )}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill={TC}
-                    opacity={isCurrent && isPlaying ? 1 : 0.5}>
-                    {isCurrent && isPlaying ? (
-                      <g><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></g>
-                    ) : (
-                      <path d="M8 5v14l11-7z" />
-                    )}
-                  </svg>
                   </>
                 ) : (
                   <span style={{
@@ -978,6 +1028,41 @@ function ResultCard({
                     fontSize: 8, color: "rgba(255,255,255,0.15)", textTransform: "uppercase",
                   }}>soon</span>
                 )}
+              </div>
+
+              {/* Inline accordion description */}
+              <div style={{
+                maxHeight: isEpExpanded ? 300 : 0,
+                overflow: "hidden",
+                transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}>
+                {descText ? (() => {
+                  const splitIdx = descText.search(/[.!?](\s|$)/);
+                  const hook = splitIdx > 0 ? descText.slice(0, splitIdx + 1) : descText;
+                  const rest = splitIdx > 0 ? descText.slice(splitIdx + 1).trim() : "";
+                  return (
+                    <div style={{
+                      padding: "4px 8px 10px 50px",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10, lineHeight: 1.55,
+                      color: "rgba(255,255,255,0.45)",
+                      whiteSpace: "pre-wrap",
+                    }}>
+                      <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{hook}</span>
+                      {rest && <>{" "}{rest}</>}
+                    </div>
+                  );
+                })() : isEpExpanded ? (
+                  <div style={{
+                    padding: "4px 8px 10px 50px",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9, fontStyle: "italic",
+                    color: "rgba(255,255,255,0.2)",
+                  }}>
+                    No description available
+                  </div>
+                ) : null}
+              </div>
               </div>
             );
           })}
