@@ -16,7 +16,6 @@
     "@capacitor/core": "^8.2.0",
     "@capacitor/ios": "^8.2.0",
     "@capacitor/push-notifications": "^8.0.0",
-    "@capgo/capacitor-media-session": "^8.0.5",
     "@mediagrid/capacitor-native-audio": "^3.0.0",
     "@supabase/supabase-js": "^2.97.0",
     "cheerio": "^1.2.0",
