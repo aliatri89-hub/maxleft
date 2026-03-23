@@ -376,28 +376,80 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         )}
       </div>
 
-      {/* ── Wood shelf ── */}
-      <div style={{
-        height: 12,
-        background: "linear-gradient(180deg, #6b4c2a 0%, #5a3f22 40%, #4a331c 100%)",
-        borderRadius: "0 0 4px 4px",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-        position: "relative",
-      }}>
-        <div style={{ position: "absolute", top: 3, left: 0, right: 0, height: "0.5px", background: "rgba(255,255,255,0.08)" }} />
-        <div style={{ position: "absolute", top: 7, left: 0, right: 0, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
+      {/* ── Mantlepiece shelf ── */}
+      <div style={{ position: "relative" }}>
+        {/* Top lip / overhang */}
+        <div style={{
+          height: 6,
+          background: "linear-gradient(180deg, #7a5a32 0%, #6b4c2a 100%)",
+          borderRadius: "0 0 2px 2px",
+          margin: "0 -4px",
+          position: "relative", zIndex: 2,
+        }}>
+          <div style={{ position: "absolute", top: 1, left: 8, right: 8, height: "0.5px", background: "rgba(255,255,255,0.10)" }} />
+        </div>
+
+        {/* Main shelf body */}
+        <div style={{
+          height: 22,
+          background: "linear-gradient(180deg, #6b4c2a 0%, #5a3f22 30%, #4e3620 70%, #3d2a16 100%)",
+          position: "relative",
+        }}>
+          {/* Wood grain lines */}
+          <div style={{ position: "absolute", top: 4, left: 12, right: 12, height: "0.5px", background: "rgba(255,255,255,0.06)" }} />
+          <div style={{ position: "absolute", top: 9, left: 20, right: 20, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
+          <div style={{ position: "absolute", top: 14, left: 8, right: 8, height: "0.5px", background: "rgba(255,255,255,0.03)" }} />
+
+          {/* Engraved MANTLPIECE label */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <span style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 11, color: "rgba(255,255,255,0.08)",
+              letterSpacing: "0.12em", textTransform: "uppercase",
+            }}>
+              mantlpiece
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom molding — decorative trim */}
+        <div style={{
+          height: 5,
+          background: "linear-gradient(180deg, #3d2a16 0%, #2e1f10 100%)",
+          borderRadius: "0 0 3px 3px",
+        }}>
+          <div style={{ position: "absolute", bottom: 0, left: 16, right: 16, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
+        </div>
+
+        {/* Corbels / brackets */}
+        <div style={{
+          position: "absolute", bottom: -10, left: 6,
+          width: 14, height: 16,
+          background: "linear-gradient(180deg, #5a3f22, #3d2a16)",
+          clipPath: "polygon(0% 0%, 100% 0%, 100% 40%, 60% 100%, 0% 100%)",
+          borderRadius: "0 0 2px 2px",
+        }} />
+        <div style={{
+          position: "absolute", bottom: -10, right: 6,
+          width: 14, height: 16,
+          background: "linear-gradient(180deg, #5a3f22, #3d2a16)",
+          clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 40% 100%, 0% 40%)",
+          borderRadius: "0 0 2px 2px",
+        }} />
+
+        {/* Shadow underneath */}
+        <div style={{
+          position: "absolute", bottom: -14, left: 20, right: 20,
+          height: 8, borderRadius: "50%",
+          background: "radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)",
+        }} />
       </div>
 
-      {/* ── MANTLPIECE label ── */}
-      <div style={{ textAlign: "center", padding: "12px 0 6px" }}>
-        <div style={{
-          fontFamily: "'Permanent Marker', cursive",
-          fontSize: 18, color: `${accent}88`,
-          letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1,
-        }}>
-          mantlpiece
-        </div>
-      </div>
+      {/* Spacer for corbels */}
+      <div style={{ height: 14 }} />
 
       {/* ── Badge Picker ── */}
       {pickerSlot !== null && (
