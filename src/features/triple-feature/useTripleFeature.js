@@ -40,10 +40,10 @@ function calculateRank(movies, selectedIndices) {
 }
 
 /**
- * Scale raw gross total to display score (divide by 10M, round)
+ * Scale raw gross total to display score (1% — divide by 100M, one decimal)
  */
 function scaleScore(gross) {
-  return Math.round(gross / 10);
+  return Math.round(gross / 10) / 10;
 }
 
 export function useTripleFeature(userId) {

@@ -36,7 +36,7 @@ function calculateRank(movies, selectedIndices) {
 }
 
 function scaleScore(gross) {
-  return Math.round(gross / 10);
+  return Math.round(gross / 10) / 10;
 }
 
 // ── localStorage helpers ──────────────────────────────────
