@@ -8,6 +8,7 @@ import CommunitySleeveSheet from "../components/community/shared/CommunitySleeve
 const PODCAST_ART = {
   "blankcheck": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bb/82/cf/bb82cfa4-0bf8-bbe8-b5a6-407702ab1764/mza_4979053321172937662.jpeg/540x540bb.webp",
   "nowplaying": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/30/57/26/305726f4-a910-986d-af15-9d9630b96722/mza_632554795848485854.jpg/540x540bb.webp",
+  "rewatchables": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/d0/b2/86/d0b286b1-c111-4346-18ab-8c1632551a41/mza_18001309740433796361.jpg/540x540bb.webp",
 };
 
 // ════════════════════════════════════════════════
