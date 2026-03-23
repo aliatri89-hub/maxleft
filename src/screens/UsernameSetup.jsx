@@ -290,38 +290,34 @@ function UsernameSetup({ name, session, onComplete }) {
   const [uploadedFile, setUploadedFile] = useState(null);
   const fileInputRef = useRef(null);
 
-  // ── Community picker ─────────────────────────────────────
-  const [communities, setCommunities] = useState([]);
-  const [selectedCommunities, setSelectedCommunities] = useState({});
-  const [loadingCommunities, setLoadingCommunities] = useState(false);
+  // ── Podcast picker ──────────────────────────────────────
+  const [podcasts, setPodcasts] = useState([]);
+  const [selectedPodcasts, setSelectedPodcasts] = useState({});
+  const [loadingPodcasts, setLoadingPodcasts] = useState(false);
 
   // ── Processing phase ─────────────────────────────────────
   const [processingTasks, setProcessingTasks] = useState([]);
   const [processingDone, setProcessingDone] = useState(false);
   const [savedCommunityIds, setSavedCommunityIds] = useState([]);
 
-  // Load communities
-  const isDev = new URLSearchParams(window.location.search).has("dev");
-  const LIVE_SLUGS = new Set(["blankcheck", "nowplaying"]);
-
+  // Load podcasts (with community launch status)
   useEffect(() => {
     if (phase !== "communities") return;
     let cancelled = false;
     (async () => {
-      setLoadingCommunities(true);
+      setLoadingPodcasts(true);
       const { data, error } = await supabase
-        .from("community_pages")
-        .select("id, name, slug, description, theme_config")
-        .order("sort_order", { ascending: true });
+        .from("podcasts")
+        .select("id, name, slug, artwork_url, community_page_id, community_pages(id, launched)")
+        .eq("active", true)
+        .order("name", { ascending: true });
 
       if (!cancelled && !error && data) {
-        const live = isDev ? data : data.filter(c => LIVE_SLUGS.has(c.slug));
-        setCommunities(live);
-        const defaults = {};
-        live.forEach(c => { defaults[c.id] = true; });
-        setSelectedCommunities(defaults);
+        setPodcasts(data);
+        // Pre-select none — let the user choose
+        setSelectedPodcasts({});
       }
-      if (!cancelled) setLoadingCommunities(false);
+      if (!cancelled) setLoadingPodcasts(false);
     })();
     return () => { cancelled = true; };
   }, [phase]);
@@ -510,17 +506,36 @@ function UsernameSetup({ name, session, onComplete }) {
   //  STEP 2 — Communities
   // ═════════════════════════════════════════════════════════
   if (phase === "communities") {
-    const selectedCount = Object.values(selectedCommunities).filter(Boolean).length;
+    const selectedCount = Object.values(selectedPodcasts).filter(Boolean).length;
 
-    const toggleCommunity = (id) => {
-      setSelectedCommunities(prev => ({ ...prev, [id]: !prev[id] }));
+    const togglePodcast = (id) => {
+      setSelectedPodcasts(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const handleCommunitiesDone = () => {
-      const ids = Object.entries(selectedCommunities)
+    const handleCommunitiesDone = async () => {
+      const selectedPodcastIds = Object.entries(selectedPodcasts)
         .filter(([, on]) => on)
         .map(([id]) => id);
-      setSavedCommunityIds(ids);
+
+      // 1. Save podcast favorites
+      if (selectedPodcastIds.length > 0) {
+        const userId = session.user.id;
+        const rows = selectedPodcastIds.map(pid => ({
+          user_id: userId,
+          podcast_id: pid,
+        }));
+        const { error: favErr } = await supabase
+          .from("user_podcast_favorites")
+          .upsert(rows, { onConflict: "user_id,podcast_id" });
+        if (favErr) console.error("[Onboarding] Failed to save podcast favorites:", favErr);
+      }
+
+      // 2. Derive launched community IDs from selected podcasts
+      const communityIds = podcasts
+        .filter(p => selectedPodcasts[p.id] && p.community_pages?.launched)
+        .map(p => p.community_page_id);
+
+      setSavedCommunityIds(communityIds);
       setPhase("letterboxd");
     };
 
@@ -530,91 +545,99 @@ function UsernameSetup({ name, session, onComplete }) {
         <StepDots total={allSteps.length} current={1} />
         <div className="setup-title">Your Podcasts</div>
         <div className="setup-sub">
-          Which podcast communities do you want to follow? You'll track films alongside each community and unlock badges as you go.
+          Which podcasts do you listen to? We'll connect you to any active communities and tailor your experience.
         </div>
 
-        {loadingCommunities ? (
+        {loadingPodcasts ? (
           <div style={{ textAlign: "center", padding: 40, color: dk.textDim, fontSize: 13 }}>
-            Loading communities...
+            Loading podcasts...
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 24 }}>
-            {communities.map((c, i) => {
-              const theme = c.theme_config || {};
-              const accent = theme.accent || "#e94560";
-              const on = selectedCommunities[c.id];
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 10,
+            marginBottom: 24,
+          }}>
+            {podcasts.map((p, i) => {
+              const on = selectedPodcasts[p.id];
+              const hasLaunchedCommunity = p.community_pages?.launched;
 
               return (
                 <div
-                  key={c.id}
-                  onClick={() => toggleCommunity(c.id)}
+                  key={p.id}
+                  onClick={() => togglePodcast(p.id)}
                   style={{
                     background: on ? dk.cardActive : dk.card,
-                    border: `2px solid ${on ? accent : dk.border}`,
+                    border: `2px solid ${on ? dk.terracotta : dk.border}`,
                     borderRadius: 14,
-                    padding: "14px 16px",
+                    padding: 10,
                     cursor: "pointer",
                     transition: "all 0.15s",
+                    textAlign: "center",
                     position: "relative",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    animation: `fadeSlideUp 0.3s ease ${i * 0.04}s both`,
+                    animation: `fadeSlideUp 0.3s ease ${i * 0.03}s both`,
                   }}
                 >
-                  <div style={{
-                    width: 10, height: 10, borderRadius: "50%",
-                    background: on ? accent : dk.border,
-                    flexShrink: 0,
-                    transition: "background 0.15s",
-                    boxShadow: on ? `0 0 8px ${accent}44` : "none",
-                  }} />
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  {/* Artwork */}
+                  {p.artwork_url ? (
+                    <img
+                      src={p.artwork_url}
+                      alt={p.name}
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1",
+                        objectFit: "cover",
+                        borderRadius: 10,
+                        marginBottom: 8,
+                        opacity: on ? 1 : 0.7,
+                        transition: "opacity 0.15s",
+                      }}
+                    />
+                  ) : (
                     <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 700, fontSize: 15,
-                      textTransform: "uppercase", letterSpacing: "0.02em",
-                      color: on ? "#fff" : dk.text,
-                      lineHeight: 1.2,
-                    }}>{c.name}</div>
-                    {c.description && (
-                      <div style={{
-                        fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
-                        color: on ? "rgba(255,255,255,0.4)" : dk.textDim,
-                        marginTop: 2,
-                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                      }}>{c.description}</div>
-                    )}
-                  </div>
+                      width: "100%", aspectRatio: "1",
+                      background: dk.border, borderRadius: 10,
+                      marginBottom: 8,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 28,
+                    }}>🎙️</div>
+                  )}
 
+                  {/* Name */}
+                  <div style={{
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontWeight: 700, fontSize: 11,
+                    textTransform: "uppercase", letterSpacing: "0.02em",
+                    color: on ? "#fff" : dk.text,
+                    lineHeight: 1.2,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}>{p.name}</div>
+
+                  {/* Community badge */}
+                  {hasLaunchedCommunity && (
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 8,
+                      color: dk.terracotta, marginTop: 3,
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                    }}>Community</div>
+                  )}
+
+                  {/* Check indicator */}
                   {on && (
-                    <div style={{ fontSize: 12, color: accent, flexShrink: 0 }}>✓</div>
+                    <div style={{
+                      position: "absolute", top: 6, right: 6,
+                      width: 18, height: 18, borderRadius: "50%",
+                      background: dk.terracotta,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 10, color: "#fff", fontWeight: 700,
+                    }}>✓</div>
                   )}
                 </div>
               );
             })}
-
-            {/* Coming soon teaser */}
-            <div style={{
-              background: dk.card,
-              border: `2px dashed ${dk.border}`,
-              borderRadius: 14,
-              padding: "20px 16px",
-              textAlign: "center",
-            }}>
-              <div style={{ fontSize: 22, marginBottom: 6 }}>🎙️</div>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 700, fontSize: 14,
-                textTransform: "uppercase", letterSpacing: "0.04em",
-                color: dk.text,
-              }}>More communities coming soon</div>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontStyle: "italic",
-                color: dk.textDim, marginTop: 4,
-              }}>New podcast communities are added regularly.</div>
-            </div>
           </div>
         )}
 
