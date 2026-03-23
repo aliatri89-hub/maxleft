@@ -96,8 +96,9 @@ function createNativeBridge() {
 
         // Apply pending seek if resuming from a saved position
         if (_pendingSeek > 0) {
-          await AudioPlayer.seek({ audioId: AUDIO_ID, timeInSeconds: _pendingSeek });
-          _currentTime = _pendingSeek;
+          const seekTime = Math.round(_pendingSeek);
+          await AudioPlayer.seek({ audioId: AUDIO_ID, timeInSeconds: seekTime });
+          _currentTime = seekTime;
           _pendingSeek = 0;
         }
 
@@ -285,8 +286,10 @@ function createNativeBridge() {
     async seek(timeInSeconds) {
       if (!AudioPlayer || !_created) return;
       try {
-        await AudioPlayer.seek({ audioId: AUDIO_ID, timeInSeconds: Math.max(0, timeInSeconds) });
-        _currentTime = timeInSeconds;
+        // Plugin's Java code uses getInt() internally — must pass integer
+        const t = Math.round(Math.max(0, timeInSeconds));
+        await AudioPlayer.seek({ audioId: AUDIO_ID, timeInSeconds: t });
+        _currentTime = t;
         emitter.emit("timeupdate", { currentTime: _currentTime, duration: _duration });
       } catch (e) {
         console.warn("[AudioBridge] seek failed:", e);
