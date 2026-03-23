@@ -164,6 +164,7 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
   const isDragging = useRef(false);
   const isVertical = useRef(false);
   const hasMoved = useRef(false);
+  const touchHandled = useRef(false); // prevent click from double-firing
   const [offset, setOffset] = useState(0);
   const [exiting, setExiting] = useState(null);
 
@@ -173,6 +174,7 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
     isDragging.current = true;
     isVertical.current = false;
     hasMoved.current = false;
+    touchHandled.current = false;
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
     startTime.current = Date.now();
@@ -195,10 +197,12 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
     const wasTap = !hasMoved.current && (Date.now() - startTime.current) < TAP_MAX_MS;
     if (wasTap) {
       isDragging.current = false; currentX.current = 0; setOffset(0);
+      touchHandled.current = true;
       onPeek(film); return;
     }
     if (!isDragging.current && !currentX.current) return;
     isDragging.current = false;
+    touchHandled.current = true;
     const dx = currentX.current;
     if (Math.abs(dx) > SWIPE_THRESHOLD) {
       const dir = dx > 0 ? "right" : "left";
@@ -207,6 +211,12 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
     } else { setOffset(0); }
     currentX.current = 0;
   }, [onSwipeRight, onSwipeLeft, onPeek, film]);
+
+  // Click fallback for tap — fires after touchend on mobile, primary on desktop
+  const handleClick = useCallback(() => {
+    if (touchHandled.current) { touchHandled.current = false; return; }
+    onPeek(film);
+  }, [onPeek, film]);
 
   const handleBtnLeft = useCallback(() => { haptic(); setExiting("left"); setTimeout(onSwipeLeft, 250); }, [onSwipeLeft]);
   const handleBtnRight = useCallback(() => { haptic(); setExiting("right"); setTimeout(onSwipeRight, 250); }, [onSwipeRight]);
@@ -227,6 +237,7 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
       {/* Card */}
       <div key={film.tmdb_id}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+        onClick={handleClick}
         style={{
           width: "min(280px, 70vw)", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden",
           position: "relative", boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
