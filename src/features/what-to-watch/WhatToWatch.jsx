@@ -2,24 +2,26 @@
 //
 // Full-screen overlay: "What to Watch" — swipe-to-narrow film picker.
 // Pulls unwatched films covered by favorite podcasts.
-// Props: session, onBack, onToast, onPlayEpisode, onQueueEpisode, currentEp, isPlaying
+// Props: session, onBack, onToast
 //
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useWhatToWatch } from "./useWhatToWatch";
 import { useAudioPlayer } from "../../components/community/shared/AudioPlayerProvider";
+import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
 import { upsertMediaLog } from "../../utils/mediaWrite";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const SWIPE_THRESHOLD = 80;
+const TAP_THRESHOLD = 10;
+const TAP_MAX_MS = 300;
 const CREAM = "#f0ebe1";
 const DARK = "#0f0d0b";
 const GREEN = "#4caf50";
 const RED = "#e74c3c";
 const AMBER = "#d4af37";
 
-// ── Haptic helper ──
-function tap() {
+function haptic() {
   try { navigator?.vibrate?.(8); } catch {}
 }
 
@@ -36,62 +38,69 @@ export default function WhatToWatch({ session, onBack, onToast }) {
     start, swipeRight, swipeLeft, nextRound, selectFilm, reset,
   } = useWhatToWatch(userId);
 
-  // Auto-start on mount
+  // ── Coverage peek state ──
+  const [peekFilm, setPeekFilm] = useState(null);
+  const [peekEpisodes, setPeekEpisodes] = useState(null);
+  const [peekLoading, setPeekLoading] = useState(false);
+
   useEffect(() => { if (userId) start(); }, [userId, start]);
 
-  // ── Close handler ──
-  const handleClose = useCallback(() => {
-    reset();
-    onBack();
-  }, [reset, onBack]);
+  const handleClose = useCallback(() => { reset(); onBack(); }, [reset, onBack]);
+
+  // ── Peek at coverage (tap a poster) ──
+  const handlePeek = useCallback(async (film) => {
+    haptic();
+    setPeekFilm(film);
+    setPeekEpisodes(null);
+    setPeekLoading(true);
+    try {
+      const eps = await getEpisodesForFilm(film.tmdb_id);
+      setPeekEpisodes(eps || []);
+    } catch { setPeekEpisodes([]); }
+    setPeekLoading(false);
+  }, []);
+
+  const closePeek = useCallback(() => { setPeekFilm(null); setPeekEpisodes(null); }, []);
+
+  // ── Play/queue helpers ──
+  const handlePlay = useCallback((ep) => {
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep);
+    if (playerEp) playEpisode(playerEp);
+  }, [playEpisode]);
+
+  const handleQueue = useCallback((ep) => {
+    const url = resolveAudioUrl(ep);
+    if (!url) return;
+    const playerEp = toPlayerEpisode(ep);
+    if (playerEp) { addToQueue(playerEp); onToast?.("Added to queue"); }
+  }, [addToQueue, onToast]);
 
   return (
     <div style={{
-      position: "fixed", inset: 0, zIndex: 9000,
-      background: DARK,
-      display: "flex", flexDirection: "column",
-      overflow: "hidden",
+      position: "fixed", inset: 0, zIndex: 9000, background: DARK,
+      display: "flex", flexDirection: "column", overflow: "hidden",
       fontFamily: "'Inter', -apple-system, sans-serif",
     }}>
-      {/* Header */}
-      <Header onClose={handleClose} round={round} phase={phase} remaining={remaining} total={total} />
+      <Header onClose={handleClose} round={round} phase={phase} remaining={remaining} />
 
-      {/* Body */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {phase === "loading" && <LoadingState />}
         {phase === "empty" && <EmptyState onClose={handleClose} />}
         {phase === "swiping" && currentFilm && (
-          <SwipeCard
-            film={currentFilm}
-            onSwipeRight={swipeRight}
-            onSwipeLeft={swipeLeft}
-            onSelect={selectFilm}
-            remaining={remaining}
-            total={total}
-          />
+          <SwipeCard film={currentFilm} onSwipeRight={swipeRight} onSwipeLeft={swipeLeft}
+            onSelect={selectFilm} onPeek={handlePeek} remaining={remaining} total={total} />
         )}
         {phase === "reviewing" && (
-          <ReviewGrid
-            films={kept}
-            round={round}
-            onNextRound={nextRound}
-            onSelect={selectFilm}
-          />
+          <ReviewGrid films={kept} round={round} onNextRound={nextRound}
+            onSelect={selectFilm} onPeek={handlePeek} />
         )}
         {phase === "selected" && selectedFilm && (
-          <SelectedScreen
-            film={selectedFilm}
-            episodes={episodes}
-            epLoading={epLoading}
-            userId={userId}
-            onPlayEpisode={playEpisode}
-            onQueueEpisode={addToQueue}
-            currentEp={currentEp}
-            isPlaying={isPlaying}
-            onToast={onToast}
-            onClose={handleClose}
-            onStartOver={() => start()}
-          />
+          <SelectedScreen film={selectedFilm} episodes={episodes} epLoading={epLoading}
+            userId={userId} onPlayEpisode={handlePlay} onQueueEpisode={handleQueue}
+            currentEp={currentEp} isPlaying={isPlaying} onToast={onToast}
+            onClose={handleClose} onStartOver={() => { closePeek(); start(); }} />
         )}
         {error && (
           <div style={{ padding: 32, textAlign: "center", color: CREAM }}>
@@ -100,6 +109,13 @@ export default function WhatToWatch({ session, onBack, onToast }) {
           </div>
         )}
       </div>
+
+      {/* Coverage peek sheet */}
+      {peekFilm && (
+        <CoverageSheet film={peekFilm} episodes={peekEpisodes} loading={peekLoading}
+          onClose={closePeek} onSelect={() => { closePeek(); selectFilm(peekFilm); }}
+          onPlay={handlePlay} onQueue={handleQueue} currentEp={currentEp} isPlaying={isPlaying} />
+      )}
     </div>
   );
 }
@@ -108,7 +124,7 @@ export default function WhatToWatch({ session, onBack, onToast }) {
 // HEADER
 // ════════════════════════════════════════════════
 
-function Header({ onClose, round, phase, remaining, total }) {
+function Header({ onClose, round, phase, remaining }) {
   return (
     <div style={{
       padding: "env(safe-area-inset-top, 12px) 16px 10px",
@@ -119,7 +135,6 @@ function Header({ onClose, round, phase, remaining, total }) {
         background: "none", border: "none", color: CREAM, fontSize: 16,
         padding: "8px 4px", cursor: "pointer", opacity: 0.7,
       }}>✕</button>
-
       <div style={{ textAlign: "center" }}>
         <div style={{
           fontFamily: "'Permanent Marker', cursive",
@@ -131,39 +146,35 @@ function Header({ onClose, round, phase, remaining, total }) {
           </div>
         )}
       </div>
-
-      <div style={{ width: 32 }} /> {/* spacer for centering */}
+      <div style={{ width: 32 }} />
     </div>
   );
 }
 
 // ════════════════════════════════════════════════
-// SWIPE CARD — the core interaction
+// SWIPE CARD
 // ════════════════════════════════════════════════
 
-function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, remaining, total }) {
-  const cardRef = useRef(null);
+function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remaining, total }) {
   const startX = useRef(0);
   const startY = useRef(0);
+  const startTime = useRef(0);
   const currentX = useRef(0);
   const isDragging = useRef(false);
   const isVertical = useRef(false);
+  const hasMoved = useRef(false);
   const [offset, setOffset] = useState(0);
-  const [exiting, setExiting] = useState(null); // "left" | "right" | null
-  const [animKey, setAnimKey] = useState(film.tmdb_id);
+  const [exiting, setExiting] = useState(null);
 
-  // Reset on new film
-  useEffect(() => {
-    setOffset(0);
-    setExiting(null);
-    setAnimKey(film.tmdb_id);
-  }, [film.tmdb_id]);
+  useEffect(() => { setOffset(0); setExiting(null); }, [film.tmdb_id]);
 
   const handleTouchStart = useCallback((e) => {
     isDragging.current = true;
     isVertical.current = false;
+    hasMoved.current = false;
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
+    startTime.current = Date.now();
     currentX.current = 0;
   }, []);
 
@@ -171,172 +182,91 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, remaining, total
     if (!isDragging.current) return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
-
-    // Lock direction on first significant move
+    if (Math.abs(dx) > TAP_THRESHOLD || Math.abs(dy) > TAP_THRESHOLD) hasMoved.current = true;
     if (!isVertical.current && Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-      isVertical.current = true;
-      isDragging.current = false;
-      setOffset(0);
-      return;
+      isVertical.current = true; isDragging.current = false; setOffset(0); return;
     }
-
     currentX.current = dx;
     setOffset(dx);
   }, []);
 
   const handleTouchEnd = useCallback(() => {
+    const wasTap = !hasMoved.current && (Date.now() - startTime.current) < TAP_MAX_MS;
+    if (wasTap) {
+      isDragging.current = false; currentX.current = 0; setOffset(0);
+      onPeek(film); return;
+    }
     if (!isDragging.current && !currentX.current) return;
     isDragging.current = false;
-
     const dx = currentX.current;
     if (Math.abs(dx) > SWIPE_THRESHOLD) {
       const dir = dx > 0 ? "right" : "left";
-      setExiting(dir);
-      tap();
-      setTimeout(() => {
-        if (dir === "right") onSwipeRight();
-        else onSwipeLeft();
-      }, 250);
-    } else {
-      setOffset(0);
-    }
+      setExiting(dir); haptic();
+      setTimeout(() => { dir === "right" ? onSwipeRight() : onSwipeLeft(); }, 250);
+    } else { setOffset(0); }
     currentX.current = 0;
-  }, [onSwipeRight, onSwipeLeft]);
+  }, [onSwipeRight, onSwipeLeft, onPeek, film]);
 
-  // Button swipes
-  const handleBtnLeft = useCallback(() => {
-    tap();
-    setExiting("left");
-    setTimeout(onSwipeLeft, 250);
-  }, [onSwipeLeft]);
-
-  const handleBtnRight = useCallback(() => {
-    tap();
-    setExiting("right");
-    setTimeout(onSwipeRight, 250);
-  }, [onSwipeRight]);
+  const handleBtnLeft = useCallback(() => { haptic(); setExiting("left"); setTimeout(onSwipeLeft, 250); }, [onSwipeLeft]);
+  const handleBtnRight = useCallback(() => { haptic(); setExiting("right"); setTimeout(onSwipeRight, 250); }, [onSwipeRight]);
 
   const rotation = offset * 0.06;
   const opacity = 1 - Math.min(Math.abs(offset) / 300, 0.5);
   const indicatorOpacity = Math.min(Math.abs(offset) / SWIPE_THRESHOLD, 1);
-
-  const exitTransform = exiting === "left"
-    ? "translateX(-120vw) rotate(-20deg)"
-    : exiting === "right"
-      ? "translateX(120vw) rotate(20deg)"
-      : `translateX(${offset}px) rotate(${rotation}deg)`;
-
+  const exitTransform = exiting === "left" ? "translateX(-120vw) rotate(-20deg)"
+    : exiting === "right" ? "translateX(120vw) rotate(20deg)"
+    : `translateX(${offset}px) rotate(${rotation}deg)`;
   const posterUrl = film.poster_path ? `${TMDB_IMG}/w500${film.poster_path}` : null;
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", position: "relative" }}>
+      {offset < -20 && <div style={{ position: "absolute", top: "25%", left: 24, fontSize: 42, opacity: indicatorOpacity, color: RED, fontWeight: 900, zIndex: 10, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>✕</div>}
+      {offset > 20 && <div style={{ position: "absolute", top: "25%", right: 24, fontSize: 42, opacity: indicatorOpacity, color: GREEN, fontWeight: 900, zIndex: 10, textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>✓</div>}
 
-      {/* Swipe indicators */}
-      {offset < -20 && (
-        <div style={{
-          position: "absolute", top: "25%", left: 24,
-          fontSize: 42, opacity: indicatorOpacity,
-          color: RED, fontWeight: 900, zIndex: 10,
-          textShadow: "0 2px 12px rgba(0,0,0,0.5)",
-        }}>✕</div>
-      )}
-      {offset > 20 && (
-        <div style={{
-          position: "absolute", top: "25%", right: 24,
-          fontSize: 42, opacity: indicatorOpacity,
-          color: GREEN, fontWeight: 900, zIndex: 10,
-          textShadow: "0 2px 12px rgba(0,0,0,0.5)",
-        }}>✓</div>
-      )}
-
-      {/* The card */}
-      <div
-        key={animKey}
-        ref={cardRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+      {/* Card */}
+      <div key={film.tmdb_id}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
         style={{
-          width: "min(280px, 70vw)",
-          aspectRatio: "2/3",
-          borderRadius: 12,
-          overflow: "hidden",
-          position: "relative",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
-          transform: exitTransform,
-          opacity: exiting ? 0.7 : opacity,
-          transition: exiting
-            ? "transform 0.3s ease-out, opacity 0.3s ease-out"
-            : (offset === 0 ? "transform 0.2s ease-out" : "none"),
-          cursor: "grab",
-          userSelect: "none",
-          WebkitUserSelect: "none",
-          touchAction: "pan-y",
-        }}
-      >
-        {posterUrl ? (
-          <img
-            src={posterUrl}
-            alt={film.title}
-            draggable={false}
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-        ) : (
-          <div style={{
-            width: "100%", height: "100%", background: "#1a1612",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: CREAM, opacity: 0.4, fontSize: 14, padding: 16, textAlign: "center",
-          }}>{film.title}</div>
-        )}
-
-        {/* Bottom gradient overlay with title */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          background: "linear-gradient(transparent, rgba(0,0,0,0.85))",
-          padding: "40px 16px 16px",
+          width: "min(280px, 70vw)", aspectRatio: "2/3", borderRadius: 12, overflow: "hidden",
+          position: "relative", boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+          transform: exitTransform, opacity: exiting ? 0.7 : opacity,
+          transition: exiting ? "transform 0.3s ease-out, opacity 0.3s ease-out" : (offset === 0 ? "transform 0.2s ease-out" : "none"),
+          userSelect: "none", WebkitUserSelect: "none", touchAction: "pan-y",
         }}>
-          <div style={{ color: CREAM, fontSize: 18, fontWeight: 700, lineHeight: 1.2 }}>
-            {film.title}
-          </div>
+        {posterUrl ? (
+          <img src={posterUrl} alt={film.title} draggable={false}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        ) : (
+          <div style={{ width: "100%", height: "100%", background: "#1a1612", display: "flex", alignItems: "center", justifyContent: "center", color: CREAM, opacity: 0.4, fontSize: 14, padding: 16, textAlign: "center" }}>{film.title}</div>
+        )}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.85))", padding: "40px 16px 16px" }}>
+          <div style={{ color: CREAM, fontSize: 18, fontWeight: 700, lineHeight: 1.2 }}>{film.title}</div>
           <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>
             {film.year}{film.podcast_count > 1 ? ` · ${film.podcast_count} podcasts` : ""}
           </div>
         </div>
       </div>
 
-      {/* Tap to select hint */}
-      <button
-        onClick={() => { tap(); onSelect(film); }}
-        style={{
-          marginTop: 16, background: "none", border: `1px solid ${AMBER}`,
-          color: AMBER, borderRadius: 20, padding: "8px 20px",
-          fontSize: 13, cursor: "pointer", fontFamily: "'Permanent Marker', cursive",
-          letterSpacing: 0.5,
-        }}
-      >
-        This one →
-      </button>
+      {/* Hints + select */}
+      <div style={{ marginTop: 14, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+        <div style={{ fontSize: 11, color: CREAM, opacity: 0.3 }}>tap poster for coverage · swipe to decide</div>
+        <button onClick={() => { haptic(); onSelect(film); }} style={{
+          background: "none", border: `1px solid ${AMBER}`, color: AMBER, borderRadius: 20,
+          padding: "8px 20px", fontSize: 13, cursor: "pointer",
+          fontFamily: "'Permanent Marker', cursive", letterSpacing: 0.5,
+        }}>This one →</button>
+      </div>
 
       {/* Swipe buttons */}
-      <div style={{ display: "flex", gap: 32, marginTop: 20 }}>
-        <button onClick={handleBtnLeft} style={swipeBtnStyle(RED)}>
-          <span style={{ fontSize: 24 }}>✕</span>
-        </button>
-        <button onClick={handleBtnRight} style={swipeBtnStyle(GREEN)}>
-          <span style={{ fontSize: 24 }}>✓</span>
-        </button>
+      <div style={{ display: "flex", gap: 32, marginTop: 16, alignItems: "center" }}>
+        <button onClick={handleBtnLeft} style={swipeBtnStyle(RED)}><span style={{ fontSize: 24 }}>✕</span></button>
+        <button onClick={handleBtnRight} style={swipeBtnStyle(GREEN)}><span style={{ fontSize: 24 }}>✓</span></button>
       </div>
 
       {/* Progress dots */}
-      <div style={{ display: "flex", gap: 3, marginTop: 16, flexWrap: "wrap", justifyContent: "center", maxWidth: 240 }}>
+      <div style={{ display: "flex", gap: 3, marginTop: 12, flexWrap: "wrap", justifyContent: "center", maxWidth: 240 }}>
         {Array.from({ length: total }, (_, i) => (
-          <div key={i} style={{
-            width: 6, height: 6, borderRadius: 3,
-            background: i < total - remaining
-              ? (i < total - remaining ? AMBER : CREAM)
-              : "rgba(240,235,225,0.15)",
-            transition: "background 0.2s",
-          }} />
+          <div key={i} style={{ width: 6, height: 6, borderRadius: 3, background: i < total - remaining ? AMBER : "rgba(240,235,225,0.15)", transition: "background 0.2s" }} />
         ))}
       </div>
     </div>
@@ -344,211 +274,199 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, remaining, total
 }
 
 // ════════════════════════════════════════════════
-// REVIEW GRID — whittle screen between rounds
+// COVERAGE SHEET — tap a poster to peek at episodes
 // ════════════════════════════════════════════════
 
-function ReviewGrid({ films, round, onNextRound, onSelect }) {
+function CoverageSheet({ film, episodes, loading, onClose, onSelect, onPlay, onQueue, currentEp, isPlaying }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9500, display: "flex", flexDirection: "column" }}>
+      <div onClick={onClose} style={{ flex: 1, background: "rgba(0,0,0,0.6)" }} />
+      <div style={{
+        background: "#1a1612", borderRadius: "16px 16px 0 0", maxHeight: "70vh",
+        display: "flex", flexDirection: "column",
+        animation: "w2w-slide-up 0.25s ease-out",
+      }}>
+        <style>{`@keyframes w2w-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }`}</style>
+
+        {/* Header */}
+        <div style={{
+          padding: "16px 20px 12px", borderBottom: "1px solid rgba(240,235,225,0.08)",
+          display: "flex", alignItems: "center", gap: 14,
+        }}>
+          {film.poster_path && (
+            <img src={`${TMDB_IMG}/w154${film.poster_path}`} alt="" style={{ width: 48, height: 72, borderRadius: 6, objectFit: "cover" }} />
+          )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ color: CREAM, fontSize: 16, fontWeight: 700 }}>{film.title}</div>
+            <div style={{ color: CREAM, opacity: 0.5, fontSize: 12, marginTop: 2 }}>
+              {film.year}{film.genre ? ` · ${film.genre}` : ""}
+            </div>
+          </div>
+          <button onClick={onSelect} style={{
+            background: AMBER, color: DARK, border: "none", borderRadius: 16,
+            padding: "8px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+            fontFamily: "'Permanent Marker', cursive", flexShrink: 0,
+          }}>Pick this</button>
+        </div>
+
+        {/* Episodes */}
+        <div style={{ flex: 1, overflow: "auto", padding: "4px 0 calc(env(safe-area-inset-bottom, 8px) + 8px)" }}>
+          {loading && <div style={{ padding: 24, textAlign: "center", color: CREAM, opacity: 0.4, fontSize: 13 }}>Loading coverage…</div>}
+          {!loading && episodes && episodes.length === 0 && (
+            <div style={{ padding: 24, textAlign: "center", color: CREAM, opacity: 0.4, fontSize: 13 }}>No episodes found</div>
+          )}
+          {episodes && episodes.map((ep, i) => (
+            <EpisodeRow key={ep.episode_id || i} ep={ep}
+              onPlay={() => onPlay(ep)} onQueue={() => onQueue(ep)}
+              isCurrent={currentEp?.id === (ep.episode_id || ep.id)} isPlaying={isPlaying} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════
+// REVIEW GRID
+// ════════════════════════════════════════════════
+
+function ReviewGrid({ films, round, onNextRound, onSelect, onPeek }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ padding: "16px 20px 8px", textAlign: "center" }}>
-        <div style={{
-          fontFamily: "'Permanent Marker', cursive", fontSize: 18,
-          color: AMBER,
-        }}>
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: AMBER }}>
           {films.length === 2 ? "Final two!" : `${films.length} contenders`}
         </div>
         <div style={{ fontSize: 13, color: CREAM, opacity: 0.4, marginTop: 4 }}>
-          Tap a poster to pick it — or keep narrowing
+          Tap to pick · long-press for coverage
         </div>
       </div>
 
       <div style={{
-        flex: 1, overflow: "auto", padding: "8px 16px 100px",
+        flex: 1, overflow: "auto", padding: "8px 16px 16px",
         display: "grid",
         gridTemplateColumns: films.length <= 4 ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
         gap: 12, alignContent: "start",
       }}>
         {films.map(film => (
-          <button
-            key={film.tmdb_id}
-            onClick={() => { tap(); onSelect(film); }}
-            style={{
-              background: "none", border: "none", padding: 0, cursor: "pointer",
-              borderRadius: 8, overflow: "hidden", position: "relative",
-              aspectRatio: "2/3",
-              boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
-            }}
-          >
-            <img
-              src={`${TMDB_IMG}/w342${film.poster_path}`}
-              alt={film.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-            />
-            <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0,
-              background: "linear-gradient(transparent, rgba(0,0,0,0.8))",
-              padding: "24px 8px 8px",
-            }}>
-              <div style={{ color: CREAM, fontSize: 11, fontWeight: 600, lineHeight: 1.2 }}>
-                {film.title}
-              </div>
-            </div>
-          </button>
+          <ReviewPoster key={film.tmdb_id} film={film}
+            onSelect={() => { haptic(); onSelect(film); }}
+            onPeek={() => onPeek(film)} />
         ))}
       </div>
 
-      {/* Keep narrowing button */}
       {films.length > 2 && (
         <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "16px 24px calc(env(safe-area-inset-bottom, 16px) + 16px)",
-          background: `linear-gradient(transparent, ${DARK} 30%)`,
-          display: "flex", justifyContent: "center",
+          padding: "12px 24px calc(env(safe-area-inset-bottom, 12px) + 12px)",
+          borderTop: "1px solid rgba(240,235,225,0.08)",
+          display: "flex", justifyContent: "center", background: DARK, flexShrink: 0,
         }}>
-          <button onClick={() => { tap(); onNextRound(); }} style={{
-            background: AMBER, color: DARK, border: "none",
-            borderRadius: 24, padding: "12px 28px",
-            fontSize: 15, fontWeight: 700, cursor: "pointer",
+          <button onClick={() => { haptic(); onNextRound(); }} style={{
+            background: AMBER, color: DARK, border: "none", borderRadius: 24,
+            padding: "12px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer",
             fontFamily: "'Permanent Marker', cursive", letterSpacing: 0.5,
-          }}>
-            Keep narrowing →
-          </button>
+          }}>Keep narrowing →</button>
         </div>
       )}
     </div>
   );
 }
 
+function ReviewPoster({ film, onSelect, onPeek }) {
+  const timerRef = useRef(null);
+  const didLongPress = useRef(false);
+
+  const handleTouchStart = useCallback(() => {
+    didLongPress.current = false;
+    timerRef.current = setTimeout(() => { didLongPress.current = true; haptic(); onPeek(); }, 500);
+  }, [onPeek]);
+
+  const handleTouchEnd = useCallback(() => {
+    clearTimeout(timerRef.current);
+    if (!didLongPress.current) onSelect();
+  }, [onSelect]);
+
+  const handleTouchMove = useCallback(() => { clearTimeout(timerRef.current); }, []);
+
+  return (
+    <button onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onTouchMove={handleTouchMove}
+      onClick={(e) => e.preventDefault()}
+      style={{
+        background: "none", border: "none", padding: 0, cursor: "pointer",
+        borderRadius: 8, overflow: "hidden", position: "relative",
+        aspectRatio: "2/3", boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+        WebkitUserSelect: "none", userSelect: "none",
+      }}>
+      <img src={`${TMDB_IMG}/w342${film.poster_path}`} alt={film.title} draggable={false}
+        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        background: "linear-gradient(transparent, rgba(0,0,0,0.8))", padding: "24px 8px 8px",
+      }}>
+        <div style={{ color: CREAM, fontSize: 11, fontWeight: 600, lineHeight: 1.2 }}>{film.title}</div>
+      </div>
+    </button>
+  );
+}
+
 // ════════════════════════════════════════════════
-// SELECTED SCREEN — film chosen, show episodes
+// SELECTED SCREEN
 // ════════════════════════════════════════════════
 
 function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, onToast, onClose, onStartOver }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const handleSaveToWatchlist = useCallback(async () => {
+  const handleSave = useCallback(async () => {
     if (!userId || saving || saved) return;
     setSaving(true);
     try {
       await upsertMediaLog(userId, {
-        mediaType: "film",
-        tmdbId: film.tmdb_id,
-        title: film.title,
-        year: film.year,
-        posterPath: film.poster_path,
-        backdropPath: film.backdrop_path,
+        mediaType: "film", tmdbId: film.tmdb_id, title: film.title,
+        year: film.year, posterPath: film.poster_path, backdropPath: film.backdrop_path,
         status: "want_to_watch",
       });
       setSaved(true);
       onToast?.("Added to watchlist");
-    } catch {
-      onToast?.("Couldn't save — try again");
-    }
+    } catch { onToast?.("Couldn't save — try again"); }
     setSaving(false);
   }, [userId, film, saving, saved, onToast]);
-
-  const handlePlay = useCallback((ep) => {
-    if (!onPlayEpisode) return;
-    const url = resolveAudioUrl(ep);
-    if (!url) return;
-    const playerEp = toPlayerEpisode(ep);
-    if (playerEp) onPlayEpisode(playerEp);
-  }, [onPlayEpisode]);
-
-  const handleQueue = useCallback((ep) => {
-    if (!onQueueEpisode) return;
-    const url = resolveAudioUrl(ep);
-    if (!url) return;
-    const playerEp = toPlayerEpisode(ep);
-    if (playerEp) {
-      onQueueEpisode(playerEp);
-      onToast?.("Added to queue");
-    }
-  }, [onQueueEpisode, onToast]);
 
   const posterUrl = film.poster_path ? `${TMDB_IMG}/w500${film.poster_path}` : null;
 
   return (
     <div style={{ flex: 1, overflow: "auto", padding: "0 0 120px" }}>
-      {/* Hero */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 24px 16px" }}>
-        {posterUrl && (
-          <img src={posterUrl} alt={film.title} style={{
-            width: 180, borderRadius: 10,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          }} />
-        )}
-        <div style={{
-          fontFamily: "'Permanent Marker', cursive",
-          fontSize: 14, color: GREEN, marginTop: 16, letterSpacing: 1,
-        }}>TONIGHT'S PICK</div>
-        <div style={{ color: CREAM, fontSize: 22, fontWeight: 700, marginTop: 4, textAlign: "center" }}>
-          {film.title}
-        </div>
-        <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>
-          {film.year}{film.genre ? ` · ${film.genre}` : ""}
-        </div>
-
+        {posterUrl && <img src={posterUrl} alt={film.title} style={{ width: 180, borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} />}
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: GREEN, marginTop: 16, letterSpacing: 1 }}>TONIGHT'S PICK</div>
+        <div style={{ color: CREAM, fontSize: 22, fontWeight: 700, marginTop: 4, textAlign: "center" }}>{film.title}</div>
+        <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>{film.year}{film.genre ? ` · ${film.genre}` : ""}</div>
         {film.overview && (
-          <div style={{
-            color: CREAM, opacity: 0.5, fontSize: 12, marginTop: 12,
-            lineHeight: 1.5, textAlign: "center", maxWidth: 320,
-          }}>
+          <div style={{ color: CREAM, opacity: 0.5, fontSize: 12, marginTop: 12, lineHeight: 1.5, textAlign: "center", maxWidth: 320 }}>
             {film.overview.length > 200 ? film.overview.slice(0, 200) + "…" : film.overview}
           </div>
         )}
-
-        {/* Save button */}
-        <button
-          onClick={handleSaveToWatchlist}
-          disabled={saving || saved}
-          style={{
-            marginTop: 16,
-            background: saved ? "rgba(76,175,80,0.15)" : "rgba(212,175,55,0.12)",
-            border: `1px solid ${saved ? GREEN : AMBER}`,
-            color: saved ? GREEN : AMBER,
-            borderRadius: 20, padding: "10px 24px",
-            fontSize: 14, fontWeight: 600, cursor: saved ? "default" : "pointer",
-            opacity: saving ? 0.5 : 1,
-          }}
-        >
-          {saved ? "✓ On watchlist" : saving ? "Saving…" : "Add to watchlist"}
-        </button>
+        <button onClick={handleSave} disabled={saving || saved} style={{
+          marginTop: 16, background: saved ? "rgba(76,175,80,0.15)" : "rgba(212,175,55,0.12)",
+          border: `1px solid ${saved ? GREEN : AMBER}`, color: saved ? GREEN : AMBER,
+          borderRadius: 20, padding: "10px 24px", fontSize: 14, fontWeight: 600,
+          cursor: saved ? "default" : "pointer", opacity: saving ? 0.5 : 1,
+        }}>{saved ? "✓ On watchlist" : saving ? "Saving…" : "Add to watchlist"}</button>
       </div>
 
-      {/* Episodes */}
       <div style={{ padding: "0 16px" }}>
-        <div style={{
-          fontFamily: "'Permanent Marker', cursive",
-          fontSize: 14, color: AMBER, marginBottom: 12, paddingLeft: 4,
-        }}>PODCAST COVERAGE</div>
-
-        {epLoading && (
-          <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>
-            Loading episodes…
-          </div>
-        )}
-
+        <div style={{ fontFamily: "'Permanent Marker', cursive", fontSize: 14, color: AMBER, marginBottom: 12, paddingLeft: 4 }}>PODCAST COVERAGE</div>
+        {epLoading && <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>Loading episodes…</div>}
         {!epLoading && episodes && episodes.length === 0 && (
-          <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>
-            No episodes found
-          </div>
+          <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>No episodes found</div>
         )}
-
         {episodes && episodes.map((ep, i) => (
-          <EpisodeRow
-            key={ep.episode_id || i}
-            ep={ep}
-            onPlay={() => handlePlay(ep)}
-            onQueue={() => handleQueue(ep)}
-            isCurrent={currentEp?.id === (ep.episode_id || ep.id)}
-            isPlaying={isPlaying}
-          />
+          <EpisodeRow key={ep.episode_id || i} ep={ep}
+            onPlay={() => onPlayEpisode(ep)} onQueue={() => onQueueEpisode(ep)}
+            isCurrent={currentEp?.id === (ep.episode_id || ep.id)} isPlaying={isPlaying} />
         ))}
       </div>
 
-      {/* Bottom actions */}
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
         padding: "12px 24px calc(env(safe-area-inset-bottom, 16px) + 12px)",
@@ -556,14 +474,12 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
         display: "flex", justifyContent: "center", gap: 12,
       }}>
         <button onClick={onStartOver} style={{
-          background: "rgba(240,235,225,0.08)", color: CREAM,
-          border: "none", borderRadius: 20, padding: "10px 20px",
-          fontSize: 13, cursor: "pointer", opacity: 0.7,
+          background: "rgba(240,235,225,0.08)", color: CREAM, border: "none",
+          borderRadius: 20, padding: "10px 20px", fontSize: 13, cursor: "pointer", opacity: 0.7,
         }}>Start over</button>
         <button onClick={onClose} style={{
-          background: AMBER, color: DARK,
-          border: "none", borderRadius: 20, padding: "10px 24px",
-          fontSize: 14, fontWeight: 700, cursor: "pointer",
+          background: AMBER, color: DARK, border: "none", borderRadius: 20,
+          padding: "10px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer",
         }}>Done</button>
       </div>
     </div>
@@ -576,21 +492,12 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
 
 function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 12,
-      padding: "10px 8px",
-      borderBottom: "1px solid rgba(240,235,225,0.06)",
-    }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderBottom: "1px solid rgba(240,235,225,0.06)" }}>
       {ep.podcast_artwork_url && (
-        <img src={ep.podcast_artwork_url} alt="" style={{
-          width: 44, height: 44, borderRadius: 6, objectFit: "cover", flexShrink: 0,
-        }} />
+        <img src={ep.podcast_artwork_url} alt="" style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          color: CREAM, fontSize: 13, fontWeight: 600,
-          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-        }}>
+        <div style={{ color: CREAM, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           {ep.episode_title || ep.podcast_name}
         </div>
         <div style={{ color: CREAM, opacity: 0.4, fontSize: 11, marginTop: 2 }}>
@@ -602,16 +509,11 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
           width: 36, height: 36, borderRadius: 18,
           background: isCurrent ? "rgba(76,175,80,0.15)" : "rgba(240,235,225,0.08)",
           border: "none", color: isCurrent && isPlaying ? GREEN : CREAM,
-          fontSize: 14, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          {isCurrent && isPlaying ? "❚❚" : "▶"}
-        </button>
+          fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+        }}>{isCurrent && isPlaying ? "❚❚" : "▶"}</button>
         <button onClick={onQueue} style={{
-          width: 36, height: 36, borderRadius: 18,
-          background: "rgba(240,235,225,0.08)",
-          border: "none", color: CREAM, opacity: 0.6,
-          fontSize: 12, cursor: "pointer",
+          width: 36, height: 36, borderRadius: 18, background: "rgba(240,235,225,0.08)",
+          border: "none", color: CREAM, opacity: 0.6, fontSize: 12, cursor: "pointer",
           display: "flex", alignItems: "center", justifyContent: "center",
         }} title="Add to queue">+Q</button>
       </div>
@@ -620,21 +522,15 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
 }
 
 // ════════════════════════════════════════════════
-// EMPTY + LOADING states
+// LOADING + EMPTY
 // ════════════════════════════════════════════════
 
 function LoadingState() {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-      <div style={{
-        width: 48, height: 48, border: `3px solid rgba(212,175,55,0.2)`,
-        borderTopColor: AMBER, borderRadius: "50%",
-        animation: "w2w-spin 0.8s linear infinite",
-      }} />
+      <div style={{ width: 48, height: 48, border: "3px solid rgba(212,175,55,0.2)", borderTopColor: AMBER, borderRadius: "50%", animation: "w2w-spin 0.8s linear infinite" }} />
       <style>{`@keyframes w2w-spin { to { transform: rotate(360deg); } }`}</style>
-      <div style={{ color: CREAM, opacity: 0.5, fontSize: 14 }}>
-        Finding suggestions…
-      </div>
+      <div style={{ color: CREAM, opacity: 0.5, fontSize: 14 }}>Finding suggestions…</div>
     </div>
   );
 }
@@ -643,9 +539,7 @@ function EmptyState({ onClose }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 32, textAlign: "center" }}>
       <div style={{ fontSize: 48, marginBottom: 16 }}>📼</div>
-      <div style={{ color: CREAM, fontSize: 16, fontWeight: 600 }}>
-        You've seen everything!
-      </div>
+      <div style={{ color: CREAM, fontSize: 16, fontWeight: 600 }}>You've seen everything!</div>
       <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 8, maxWidth: 260 }}>
         Your favorite podcasts don't have any unwatched films left for you. Nice work.
       </div>
@@ -660,17 +554,13 @@ function EmptyState({ onClose }) {
 
 function swipeBtnStyle(color) {
   return {
-    width: 56, height: 56, borderRadius: 28,
-    background: "rgba(240,235,225,0.06)",
-    border: `2px solid ${color}`,
-    color, fontSize: 20, cursor: "pointer",
+    width: 56, height: 56, borderRadius: 28, background: "rgba(240,235,225,0.06)",
+    border: `2px solid ${color}`, color, fontSize: 20, cursor: "pointer",
     display: "flex", alignItems: "center", justifyContent: "center",
-    transition: "transform 0.1s",
   };
 }
 
 const pillBtnStyle = {
-  background: AMBER, color: DARK,
-  border: "none", borderRadius: 20, padding: "10px 24px",
-  fontSize: 14, fontWeight: 700, cursor: "pointer",
+  background: AMBER, color: DARK, border: "none", borderRadius: 20,
+  padding: "10px 24px", fontSize: 14, fontWeight: 700, cursor: "pointer",
 };
