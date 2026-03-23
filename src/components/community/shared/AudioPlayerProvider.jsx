@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { createControls, updatePlaying, destroyControls, registerActionHandlers } from "../../../utils/nativeMusicControls";
+import { reportDeadAudio, getAudioErrorInfo } from "../../../utils/reportDeadAudio";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
@@ -1481,6 +1482,7 @@ export default function AudioPlayerProvider({ children, session }) {
         stallTimerRef.current = setTimeout(() => {
           setBuffering(false);
           setError("Stream stalled — check your connection");
+          if (currentEp) reportDeadAudio(currentEp, 'waiting_timeout');
         }, STALL_TIMEOUT);
       },
       canplay: () => {
@@ -1516,6 +1518,8 @@ export default function AudioPlayerProvider({ children, session }) {
         setBuffering(false);
         setIsPlaying(false);
         clearTimeout(stallTimerRef.current);
+        // Report dead audio — fire-and-forget
+        if (currentEp) reportDeadAudio(currentEp, getAudioErrorInfo(e));
       },
       stalled: () => {
         // Audio download stalled — start a timer before showing error
@@ -1523,6 +1527,8 @@ export default function AudioPlayerProvider({ children, session }) {
         stallTimerRef.current = setTimeout(() => {
           setBuffering(false);
           setError("Stream stalled — check your connection");
+          // Report dead audio — stall timeout likely means dead/paywalled URL
+          if (currentEp) reportDeadAudio(currentEp, 'stalled_timeout');
         }, STALL_TIMEOUT);
       },
       progress: () => {

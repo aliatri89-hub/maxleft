@@ -51,6 +51,12 @@ export function toPlayerEpisode(ep, overrides = {}) {
       ep.id ||
       ep.guid ||
       `fallback-${resolveAudioUrl(ep)}`,
+    // podcast_episodes.id when available — used for dead audio reporting
+    episodeId:
+      overrides.episodeId ||
+      ep.podcast_episode_id ||
+      ep.episode_id ||
+      null,
     title:
       overrides.title ||
       ep.episode_title ||
