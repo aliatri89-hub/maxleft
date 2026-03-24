@@ -1,31 +1,10 @@
 // ── Push Notifications for Capacitor ──
 // Handles registration, token storage, foreground toasts, and background tap navigation.
-// All functions are no-ops on web — safe to import everywhere.
-//
-// Uses a safe dynamic import because @capacitor/push-notifications may not
-// be bundled in all environments. Fails gracefully — app works without push.
+// All functions are no-ops on web — gated by Capacitor.isNativePlatform().
 
 import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { supabase } from '../supabase';
-
-let _PushNotifications = null;
-let _loadAttempted = false;
-
-// Safely load the push plugin — returns null if unavailable
-async function getPush() {
-  if (_PushNotifications) return _PushNotifications;
-  if (_loadAttempted) return null;
-  _loadAttempted = true;
-
-  try {
-    const mod = await import('@capacitor/push-notifications');
-    _PushNotifications = mod.PushNotifications;
-    return _PushNotifications;
-  } catch (e) {
-    console.warn('Push notifications plugin not available:', e.message);
-    return null;
-  }
-}
 
 /**
  * Initialize push notifications on native platforms.
@@ -34,14 +13,11 @@ async function getPush() {
 export async function initPushNotifications(showToast) {
   if (!Capacitor.isNativePlatform()) return;
 
-  const Push = await getPush();
-  if (!Push) return;
-
   try {
-    let permStatus = await Push.checkPermissions();
+    let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
-      permStatus = await Push.requestPermissions();
+      permStatus = await PushNotifications.requestPermissions();
     }
 
     if (permStatus.receive !== 'granted') {
@@ -49,7 +25,7 @@ export async function initPushNotifications(showToast) {
       return;
     }
 
-    await Push.register();
+    await PushNotifications.register();
   } catch (err) {
     console.error('Push notification init failed:', err);
   }
@@ -59,51 +35,49 @@ export async function initPushNotifications(showToast) {
  * Set up all push notification listeners.
  * Call once on app mount (inside useEffect in App.jsx).
  * Returns a cleanup function to remove listeners.
+ *
+ * IMPORTANT: Uses synchronous addListener so listeners are attached
+ * before the native registration event fires.
  */
 export function setupPushListeners(showToast, navigate) {
   if (!Capacitor.isNativePlatform()) return () => {};
 
   const listeners = [];
 
-  // Load async, set up listeners when ready
-  getPush().then((Push) => {
-    if (!Push) return;
+  listeners.push(
+    PushNotifications.addListener('registration', async (token) => {
+      console.log('Push token received:', token.value);
+      await upsertDeviceToken(token.value);
+    })
+  );
 
-    listeners.push(
-      Push.addListener('registration', async (token) => {
-        console.log('Push token received:', token.value);
-        await upsertDeviceToken(token.value);
-      })
-    );
+  listeners.push(
+    PushNotifications.addListener('registrationError', (error) => {
+      console.error('Push registration error:', error);
+    })
+  );
 
-    listeners.push(
-      Push.addListener('registrationError', (error) => {
-        console.error('Push registration error:', error);
-      })
-    );
+  listeners.push(
+    PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      console.log('Push received in foreground:', notification);
+      if (showToast && notification.body) {
+        showToast(notification.title || 'MANTL', notification.body);
+      }
+    })
+  );
 
-    listeners.push(
-      Push.addListener('pushNotificationReceived', (notification) => {
-        console.log('Push received in foreground:', notification);
-        if (showToast && notification.body) {
-          showToast(notification.title || 'MANTL', notification.body);
-        }
-      })
-    );
-
-    listeners.push(
-      Push.addListener('pushNotificationActionPerformed', (action) => {
-        console.log('Push tapped:', action);
-        const data = action.notification.data;
-        // Switch to feed tab on coverage notification tap
-        if (data?.type === 'new_coverage' && navigate) {
-          navigate('feed');
-        } else if (data?.route && navigate) {
-          navigate(data.route);
-        }
-      })
-    );
-  });
+  listeners.push(
+    PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+      console.log('Push tapped:', action);
+      const data = action.notification.data;
+      // Switch to feed tab on coverage notification tap
+      if (data?.type === 'new_coverage' && navigate) {
+        navigate('feed');
+      } else if (data?.route && navigate) {
+        navigate(data.route);
+      }
+    })
+  );
 
   return () => {
     listeners.forEach((listener) => {
