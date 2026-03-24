@@ -208,6 +208,38 @@ serve(async (req) => {
           ...syncResult,
           elapsed_ms: Date.now() - userStart,
         });
+
+        // Fire "You Watched It" coverage notifications for newly synced films
+        if (syncResult.synced_films.length > 0) {
+          try {
+            const coverageRes = await fetch(
+              `${supabaseUrl}/functions/v1/check-new-film-coverage`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${serviceKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  user_id: uid,
+                  new_films: syncResult.synced_films.map((f) => ({
+                    tmdb_id: f.tmdbId,
+                    title: f.title,
+                  })),
+                }),
+              }
+            );
+            const coverageResult = await coverageRes.json();
+            console.log(
+              `[LBSync:${username}] Coverage check: ${coverageResult.sent || 0} notification(s)`
+            );
+          } catch (notifErr: any) {
+            console.warn(
+              `[LBSync:${username}] Coverage check failed:`,
+              notifErr.message
+            );
+          }
+        }
       } catch (err: any) {
         console.error(`[LBSync] User ${username} failed:`, err.message);
         results.push({
@@ -256,7 +288,7 @@ async function syncUserLetterboxd(
   tmdbKey: string,
   uid: string,
   username: string
-): Promise<{ synced: number; rewatches: number; community_logged: number }> {
+): Promise<{ synced: number; rewatches: number; community_logged: number; synced_films: Array<{ tmdbId: number; title: string }> }> {
   // 1. Fetch RSS directly (no CORS proxy needed server-side)
   const rssUrl = `https://letterboxd.com/${encodeURIComponent(username)}/rss/`;
   const rssRes = await fetch(rssUrl, {
@@ -271,7 +303,7 @@ async function syncUserLetterboxd(
   const rssFilms = parseLetterboxdRSS(rssText);
 
   if (rssFilms.length === 0) {
-    return { synced: 0, rewatches: 0, community_logged: 0 };
+    return { synced: 0, rewatches: 0, community_logged: 0, synced_films: [] };
   }
 
   // 2. Load existing films for this user
@@ -390,7 +422,7 @@ async function syncUserLetterboxd(
     );
   }
 
-  return { synced, rewatches: rewatchCount, community_logged: communityLogged };
+  return { synced, rewatches: rewatchCount, community_logged: communityLogged, synced_films: syncedFilms };
 }
 
 // ── Process a single new film ───────────────────────────────
