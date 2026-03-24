@@ -121,7 +121,7 @@ const GAMES = [
 // ── Styles ──
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Special+Elite&family=Playfair+Display:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Special+Elite&family=Bebas+Neue&display=swap');
 @keyframes gh-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 `;
 
@@ -145,7 +145,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     if (status === "completed") {
       return (
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 1, padding: "3px 8px",
           borderRadius: 6, background: "rgba(76,175,80,0.15)", color: "#4caf50",
         }}>
           ✓ Done
@@ -155,7 +155,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     if (status === "available") {
       return (
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 1, padding: "3px 8px",
           borderRadius: 6, background: `${color}20`, color,
         }}>
           Play
@@ -165,7 +165,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     // For non-daily games
     return (
       <span style={{
-        fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+        fontFamily: "'Bebas Neue', sans-serif", fontSize: 13, letterSpacing: 1, padding: "3px 8px",
         borderRadius: 6, background: `${color}15`, color,
       }}>
         Open
@@ -205,7 +205,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           M▶NTL
         </div>
         <h1 style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 900, color: "#f5f0e8", lineHeight: 1.1,
+          fontFamily: "'Bebas Neue', sans-serif", fontSize: 40, letterSpacing: 2, color: "#f5f0e8", lineHeight: 1.1,
         }}>
           Games
         </h1>
@@ -231,7 +231,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           }} />
         </div>
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 700, color: "#c9a84c", whiteSpace: "nowrap",
+          fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: 1, color: "#c9a84c", whiteSpace: "nowrap",
         }}>
           {completedCount}/{dailyGames.length}
         </span>
@@ -286,7 +286,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
               <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
                 <div style={{
-                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+                  fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 1,
                   color: "#f5f0e8", lineHeight: 1.2,
                 }}>
                   {game.name}
@@ -343,7 +343,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
               </div>
               <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
                 <div style={{
-                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+                  fontFamily: "'Bebas Neue', sans-serif", fontSize: 20, letterSpacing: 1,
                   color: "#f5f0e8", lineHeight: 1.2,
                 }}>
                   {game.name}
