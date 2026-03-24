@@ -5,8 +5,11 @@ import { supabase } from "./supabase";
 import "./styles/App.css";
 
 // ─── NATIVE STATUS BAR CONFIG ─────────────────────────────────
+// Android 15+ (API 35+) enforces edge-to-edge — overlay: false is ignored.
+// Use overlay: true so the WebView correctly reports safe-area insets,
+// then let CSS env(safe-area-inset-top) on .mantl-app handle the padding.
 if (Capacitor.isNativePlatform()) {
-  StatusBar.setOverlaysWebView({ overlay: false });
+  StatusBar.setOverlaysWebView({ overlay: true });
   StatusBar.setBackgroundColor({ color: "#0f0d0b" });
   StatusBar.setStyle({ style: Style.Dark });
 }
