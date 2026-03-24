@@ -136,6 +136,63 @@ function ExternalLinkIcon() {
   );
 }
 
+function FramedIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <rect x="2" y="5" width="22" height="16" rx="2" fill="#8b1a1a" />
+      <text x="13" y="18" textAnchor="middle" fontFamily="'Bebas Neue', sans-serif" fontSize="16" fontWeight="bold" fill="#f5f0e8">F</text>
+    </svg>
+  );
+}
+
+function CinematrixIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      {/* Infinity film strip */}
+      <path d="M5 13C5 10 7 8 9.5 8C12 8 13 10 13 13C13 16 14 18 16.5 18C19 18 21 16 21 13C21 10 19 8 16.5 8C14 8 13 10 13 13C13 16 12 18 9.5 18C7 18 5 16 5 13Z"
+        stroke="#8a7e6b" strokeWidth="1.8" fill="none" />
+      {/* Sprocket holes */}
+      <rect x="6" y="10.5" width="2" height="1.5" rx="0.5" fill="#8a7e6b" opacity="0.5" />
+      <rect x="6" y="14" width="2" height="1.5" rx="0.5" fill="#8a7e6b" opacity="0.5" />
+      <rect x="18" y="10.5" width="2" height="1.5" rx="0.5" fill="#8a7e6b" opacity="0.5" />
+      <rect x="18" y="14" width="2" height="1.5" rx="0.5" fill="#8a7e6b" opacity="0.5" />
+    </svg>
+  );
+}
+
+function BoxOfficeIcon() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      {/* Marquee border */}
+      <rect x="3" y="5" width="20" height="16" rx="2" stroke="#8a7e6b" strokeWidth="1.5" fill="none" />
+      {/* Marquee lights - top */}
+      <circle cx="7" cy="5" r="1" fill="#8a7e6b" opacity="0.6" />
+      <circle cx="11" cy="5" r="1" fill="#8a7e6b" opacity="0.4" />
+      <circle cx="15" cy="5" r="1" fill="#8a7e6b" opacity="0.6" />
+      <circle cx="19" cy="5" r="1" fill="#8a7e6b" opacity="0.4" />
+      {/* Marquee lights - bottom */}
+      <circle cx="7" cy="21" r="1" fill="#8a7e6b" opacity="0.4" />
+      <circle cx="11" cy="21" r="1" fill="#8a7e6b" opacity="0.6" />
+      <circle cx="15" cy="21" r="1" fill="#8a7e6b" opacity="0.4" />
+      <circle cx="19" cy="21" r="1" fill="#8a7e6b" opacity="0.6" />
+      {/* Marquee lights - sides */}
+      <circle cx="3" cy="9" r="1" fill="#8a7e6b" opacity="0.5" />
+      <circle cx="3" cy="13" r="1" fill="#8a7e6b" opacity="0.5" />
+      <circle cx="3" cy="17" r="1" fill="#8a7e6b" opacity="0.5" />
+      <circle cx="23" cy="9" r="1" fill="#8a7e6b" opacity="0.5" />
+      <circle cx="23" cy="13" r="1" fill="#8a7e6b" opacity="0.5" />
+      <circle cx="23" cy="17" r="1" fill="#8a7e6b" opacity="0.5" />
+      <text x="13" y="18" textAnchor="middle" fontFamily="'Bebas Neue', sans-serif" fontSize="14" fontWeight="bold" fill="#8a7e6b">B</text>
+    </svg>
+  );
+}
+
+const EXTERNAL_ICONS = {
+  framed: FramedIcon,
+  cinematrix: CinematrixIcon,
+  boxOffice: BoxOfficeIcon,
+};
+
 // ── Styles ──
 
 const CSS = `
@@ -365,11 +422,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
               animation: `gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${(i + GAMES.length) * 100 + 100}ms backwards`,
             }}
           >
-            <div style={{
-              width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#8a7e6b",
-            }}>
-              {game.name.charAt(0)}
+            <div style={{ flexShrink: 0 }}>
+              {(() => { const Icon = EXTERNAL_ICONS[game.id]; return Icon ? <Icon /> : null; })()}
             </div>
             <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
               <div style={{
