@@ -230,7 +230,7 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
                 src="https://a.ltrbxd.com/logos/letterboxd-decal-dots-neg-rgb-500px.png"
                 alt="Letterboxd"
                 style={{
-                  height: 16,
+                  height: 20,
                   width: "auto",
                   display: "block",
                 }}
@@ -489,7 +489,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                   src="https://a.ltrbxd.com/logos/letterboxd-decal-dots-neg-rgb-500px.png"
                   alt="Letterboxd"
                   style={{
-                    height: 14,
+                    height: 16,
                     width: "auto",
                     display: "block",
                     opacity: 0.7,
@@ -574,7 +574,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     setSheetOpen(true);
     setShowHint(false);
     if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
-    if (!episodes && data.tmdb_id && data.has_podcast_coverage) {
+    if (!episodes && data.tmdb_id) {
       setEpLoading(true);
       const eps = await getEpisodesForFilm(data.tmdb_id);
       setEpisodes(eps);
