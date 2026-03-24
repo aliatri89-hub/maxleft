@@ -4,7 +4,7 @@ import { supabase } from "../../supabase";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
 
 const accent = "#EF9F27";
-const SIZE = 68;
+const SIZE = 76;
 const STROKE = 2.5;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -322,7 +322,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         border: "0.5px solid rgba(255,255,255,0.06)",
         borderBottom: "none",
         borderRadius: 0,
-        padding: "12px 8px 4px",
+        padding: "8px 8px 2px",
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 20, padding: "8px 0" }}>
@@ -430,7 +430,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
       </div>
 
       {/* Spacer for corbels */}
-      <div style={{ height: 14 }} />
+      <div style={{ height: 10 }} />
 
       {/* ── Badge Picker ── */}
       {pickerSlot !== null && (

@@ -118,7 +118,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   }, [!!diaryShelf]);
 
   const movies = shelves.movies || [];
-  const recentMovies = movies.slice(0, 4);
+  const recentMovies = movies.slice(0, 5);
 
   // Count films this week for diary header
   const weekCount = useMemo(() => {
@@ -383,7 +383,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                   gap: 10, padding: "12px 12px",
                   position: "relative", zIndex: 2,
                 }}>
-                  {movies.length > 4 && (
+                  {movies.length > 5 && (
                     <div
                       onClick={() => setDiaryShelf("movies")}
                       style={{
