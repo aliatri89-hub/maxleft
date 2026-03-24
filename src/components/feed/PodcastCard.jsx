@@ -239,7 +239,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10, color: "rgba(255,255,255,0.45)",
-              lineHeight: 1.4, marginBottom: 6,
+              lineHeight: 1.4,
               overflow: "hidden",
               display: "-webkit-box",
               WebkitLineClamp: expanded ? 999 : 2,
@@ -248,11 +248,14 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               {expanded ? fullDesc : desc}
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Bottom: year · podcast | badge */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
+      {/* ── Bottom row: year · podcast | badge — full width ── */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginTop: 8,
+      }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
               <span style={{
                 fontFamily: "'IBM Plex Mono', monospace",
@@ -331,8 +334,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               </div>
             ) : null}
           </div>
-        </div>
-      </div>
 
       {/* Expanded description */}
       {expanded && fullDesc && fullDesc.length > desc.length && (
