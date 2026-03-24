@@ -499,7 +499,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
 // ════════════════════════════════════════════════
 // LOG CARD — main component
 // ════════════════════════════════════════════════
-function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false, pushNav, removeNav }) {
+function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false, pushNav, removeNav, pendingSleeveOpen, setPendingSleeveOpen }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [episodes, setEpisodes] = useState(null);
@@ -582,6 +582,14 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     setSheetOpen(false);
     if (removeNav) removeNav(sleeveNavKey);
   };
+
+  // Auto-open sleeve from push notification deep link
+  useEffect(() => {
+    if (pendingSleeveOpen && data.tmdb_id === pendingSleeveOpen) {
+      openSleeve();
+      if (setPendingSleeveOpen) setPendingSleeveOpen(null);
+    }
+  }, [pendingSleeveOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // First-visit tooltip — truly once ever
   useEffect(() => {

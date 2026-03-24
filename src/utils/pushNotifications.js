@@ -70,11 +70,8 @@ export function setupPushListeners(showToast, navigate) {
     PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
       console.log('Push tapped:', action);
       const data = action.notification.data;
-      // Switch to feed tab on coverage notification tap
-      if (data?.type === 'new_coverage' && navigate) {
-        navigate('feed');
-      } else if (data?.route && navigate) {
-        navigate(data.route);
+      if (navigate) {
+        navigate(data);
       }
     })
   );

@@ -114,6 +114,7 @@ export default function App() {
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
   const [feedMode, setFeedMode] = useState("releases");
+  const [pendingSleeveOpen, setPendingSleeveOpen] = useState(null); // tmdb_id from push notification tap
 
   // ── Profile + shelves ──
   const [profile, setProfile] = useState({
@@ -255,7 +256,20 @@ export default function App() {
 
   // ── PUSH NOTIFICATION LISTENERS (native only, no-op on web) ──
   useEffect(() => {
-    return setupPushListeners(showToast, setActiveTab);
+    const handlePushNav = (data) => {
+      if (data?.type === 'watched_coverage' && data?.tmdb_id) {
+        // Deep link: activity feed → auto-open sleeve for this film
+        setActiveTab("feed");
+        setFeedMode("activity");
+        setPendingSleeveOpen(parseInt(data.tmdb_id));
+      } else if (data?.type === 'new_coverage') {
+        setActiveTab("feed");
+        setFeedMode("activity");
+      } else {
+        setActiveTab("feed");
+      }
+    };
+    return setupPushListeners(showToast, handlePushNav);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signIn = () => signInWithGoogle(showToast);
@@ -443,6 +457,7 @@ export default function App() {
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     feedMode={feedMode} setFeedMode={setFeedMode}
+                    pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen}
                     pushNav={pushNav} removeNav={removeNav} />
                 </div>
                 <div className="tab-pane" key="communities-tab">
