@@ -3,7 +3,7 @@
 // Full-screen overlay game. Rendered by App.jsx when showReelTime === true.
 // Props: session, onBack, onToast
 //
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useReelTime } from "./useReelTime";
 import { getPuzzleNumber } from "./reelTimeApi";
 
@@ -50,6 +50,8 @@ const S = {
   },
   scoreLabel: { color: "#8a7e6b" },
   scoreValue: { fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: "#7cb8e8" },
+
+  // Current movie card — static position (fades when dragging)
   currentCard: {
     width: "100%", maxWidth: 420, marginBottom: 20,
     animation: "rt-slide-down 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
@@ -58,10 +60,12 @@ const S = {
     display: "flex", alignItems: "center", gap: 14, padding: "12px 16px",
     background: "linear-gradient(135deg, rgba(124,184,232,0.10), rgba(124,184,232,0.03))",
     border: "2px dashed rgba(124,184,232,0.5)", borderRadius: 10,
+    userSelect: "none", touchAction: "none",
   },
   currentPoster: {
     width: 52, height: 78, borderRadius: 4, objectFit: "cover",
     flexShrink: 0, boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+    pointerEvents: "none",
   },
   currentLabel: {
     fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
@@ -72,21 +76,36 @@ const S = {
     color: "#f5f0e8", lineHeight: 1.2,
   },
   currentPrompt: { fontSize: 12, color: "#8a7e6b", marginTop: 5 },
+
+  // Drag ghost — follows finger
+  dragGhost: (x, y) => ({
+    position: "fixed", left: 0, top: 0,
+    transform: `translate(${x}px, ${y}px) scale(1.04)`,
+    width: "calc(100% - 48px)", maxWidth: 404,
+    zIndex: 200, pointerEvents: "none",
+    opacity: 0.92, filter: "drop-shadow(0 8px 24px rgba(124,184,232,0.35))",
+    marginLeft: 24,
+  }),
+
   timeline: { width: "100%", maxWidth: 420, position: "relative" },
   timelineLine: {
     position: "absolute", left: 38, top: 0, bottom: 0, width: 2,
     background: "rgba(124,184,232,0.15)",
   },
-  slot: (active) => ({
-    position: "relative", height: 44, display: "flex", alignItems: "center",
-    justifyContent: "center", cursor: "pointer", marginLeft: 30, borderRadius: 8,
-    border: `2px dashed ${active ? "rgba(124,184,232,0.5)" : "transparent"}`,
-    background: active ? "rgba(124,184,232,0.04)" : "transparent",
-    transition: "all 0.15s ease",
+  slot: (active, dragOver) => ({
+    position: "relative", height: dragOver ? 56 : 44,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    cursor: "pointer", marginLeft: 30, borderRadius: 8,
+    border: `2px dashed ${(active || dragOver) ? "rgba(124,184,232,0.6)" : "rgba(124,184,232,0.12)"}`,
+    background: dragOver
+      ? "rgba(124,184,232,0.12)"
+      : active ? "rgba(124,184,232,0.04)" : "transparent",
+    transition: "all 0.2s ease",
   }),
-  slotLabel: (active) => ({
+  slotLabel: (active, dragOver) => ({
     fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5,
-    color: active ? "#7cb8e8" : "transparent", transition: "color 0.15s ease",
+    color: (active || dragOver) ? "#7cb8e8" : "rgba(124,184,232,0.25)",
+    transition: "color 0.15s ease",
   }),
   slotDisabled: { height: 8, marginLeft: 30 },
   placed: {
@@ -106,6 +125,12 @@ const S = {
     color: "#f5f0e8", flex: 1, lineHeight: 1.2,
   },
   placedDate: { fontSize: 11, color: "#7cb8e8", flexShrink: 0, whiteSpace: "nowrap" },
+  timelineLabel: {
+    display: "flex", flexDirection: "column", alignItems: "center",
+    fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
+    color: "rgba(124,184,232,0.4)", fontFamily: "'Special Elite', monospace",
+    padding: "6px 0", marginLeft: 30,
+  },
   flash: (correct) => ({
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
@@ -167,8 +192,125 @@ export default function ReelTime({ session, onBack, onToast }) {
     placeMovie, getShareText, getTimeUntilNext, getPlacementValue,
   } = useReelTime(userId);
 
-  const [hoveredSlot, setHoveredSlot] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  // ── Drag state ──
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
+  const [activeSlot, setActiveSlot] = useState(null);
+  const slotRefs = useRef([]);
+  const cardRef = useRef(null);
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
+
+  // Keep slot refs array sized
+  const slotCount = placedMovies.length + 1;
+  useEffect(() => {
+    slotRefs.current = slotRefs.current.slice(0, slotCount);
+  }, [slotCount]);
+
+  // Find closest slot to a Y coordinate
+  const findActiveSlot = useCallback((clientY) => {
+    let closest = null;
+    let closestDist = Infinity;
+    for (let i = 0; i < slotRefs.current.length; i++) {
+      const el = slotRefs.current[i];
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      const center = rect.top + rect.height / 2;
+      const dist = Math.abs(clientY - center);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
+    }
+    return closest;
+  }, []);
+
+  // ── Touch drag ──
+  const onTouchStart = useCallback((e) => {
+    if (gamePhase !== "playing" || !currentMovie) return;
+    const touch = e.touches[0];
+    const cardRect = cardRef.current?.getBoundingClientRect();
+    if (!cardRect) return;
+    dragOffsetRef.current = {
+      x: touch.clientX - cardRect.left,
+      y: touch.clientY - cardRect.top,
+    };
+    setDragPos({
+      x: touch.clientX - dragOffsetRef.current.x,
+      y: touch.clientY - dragOffsetRef.current.y,
+    });
+    setIsDragging(true);
+    setActiveSlot(findActiveSlot(touch.clientY));
+  }, [gamePhase, currentMovie, findActiveSlot]);
+
+  const onTouchMove = useCallback((e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    setDragPos({
+      x: touch.clientX - dragOffsetRef.current.x,
+      y: touch.clientY - dragOffsetRef.current.y,
+    });
+    setActiveSlot(findActiveSlot(touch.clientY));
+  }, [isDragging, findActiveSlot]);
+
+  const onTouchEnd = useCallback(() => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (activeSlot !== null) {
+      placeMovie(activeSlot);
+    }
+    setActiveSlot(null);
+  }, [isDragging, activeSlot, placeMovie]);
+
+  // ── Mouse drag (desktop) ──
+  const onMouseDown = useCallback((e) => {
+    if (gamePhase !== "playing" || !currentMovie) return;
+    e.preventDefault();
+    const cardRect = cardRef.current?.getBoundingClientRect();
+    if (!cardRect) return;
+    dragOffsetRef.current = {
+      x: e.clientX - cardRect.left,
+      y: e.clientY - cardRect.top,
+    };
+    setDragPos({
+      x: e.clientX - dragOffsetRef.current.x,
+      y: e.clientY - dragOffsetRef.current.y,
+    });
+    setIsDragging(true);
+    setActiveSlot(findActiveSlot(e.clientY));
+  }, [gamePhase, currentMovie, findActiveSlot]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e) => {
+      setDragPos({
+        x: e.clientX - dragOffsetRef.current.x,
+        y: e.clientY - dragOffsetRef.current.y,
+      });
+      setActiveSlot(findActiveSlot(e.clientY));
+    };
+    const onUp = () => {
+      setIsDragging(false);
+      setActiveSlot((slot) => {
+        if (slot !== null) placeMovie(slot);
+        return null;
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [isDragging, findActiveSlot, placeMovie]);
+
+  // Tap fallback
+  const handleSlotTap = useCallback((slotIndex) => {
+    if (isDragging || gamePhase !== "playing") return;
+    placeMovie(slotIndex);
+  }, [isDragging, gamePhase, placeMovie]);
 
   const handleShare = useCallback(() => {
     const text = getShareText();
@@ -205,13 +347,33 @@ export default function ReelTime({ session, onBack, onToast }) {
   }
 
   const puzzleNum = getPuzzleNumber(puzzle.date);
-  const diffStars = "★".repeat(puzzle.difficulty);
+  const diffStars = "\u2605".repeat(puzzle.difficulty);
   const timeUntil = getTimeUntilNext();
   const isPlaying = gamePhase === "playing";
   const isDone = gamePhase === "done";
 
+  const renderSlot = (index) => {
+    if (!isPlaying) return <div style={S.slotDisabled} />;
+    const isDragOver = isDragging && activeSlot === index;
+    return (
+      <div
+        ref={(el) => { slotRefs.current[index] = el; }}
+        style={S.slot(false, isDragOver)}
+        onClick={() => handleSlotTap(index)}
+      >
+        <span style={S.slotLabel(false, isDragOver)}>
+          {isDragOver ? "Drop here" : "Tap to place"}
+        </span>
+      </div>
+    );
+  };
+
   return (
-    <div style={S.page}>
+    <div
+      style={S.page}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <style>{CSS}</style>
 
       {/* Back button */}
@@ -236,18 +398,50 @@ export default function ReelTime({ session, onBack, onToast }) {
         <span style={S.scoreValue}>{isDone ? (result?.score ?? score) : score} / {maxScore}</span>
       </div>
 
-      {/* Current movie card */}
+      {/* Current movie card — fades when dragging */}
       {isPlaying && currentMovie && (
-        <div style={S.currentCard} key={currentMovie.id}>
-          <div style={S.currentInner}>
+        <div
+          style={{
+            ...S.currentCard,
+            opacity: isDragging ? 0.25 : 1,
+            transition: "opacity 0.15s ease",
+          }}
+          key={currentMovie.id}
+        >
+          <div
+            ref={cardRef}
+            style={S.currentInner}
+            onTouchStart={onTouchStart}
+            onMouseDown={onMouseDown}
+          >
             {currentMovie.poster && (
               <img style={S.currentPoster} src={currentMovie.poster} alt={currentMovie.title}
                 onError={(e) => { e.target.style.display = "none"; }} />
             )}
             <div style={{ flex: 1 }}>
-              <div style={S.currentLabel}>Place this film</div>
+              <div style={S.currentLabel}>Drag to place</div>
               <div style={S.currentTitle}>{currentMovie.title}</div>
               <div style={S.currentPrompt}>Worth {getPlacementValue(currentPlacementNum)} pts</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Drag ghost — fixed, follows finger */}
+      {isDragging && currentMovie && (
+        <div style={S.dragGhost(dragPos.x, dragPos.y)}>
+          <div style={{
+            ...S.currentInner,
+            border: "2px solid rgba(124,184,232,0.7)",
+            background: "linear-gradient(135deg, rgba(124,184,232,0.18), rgba(124,184,232,0.06))",
+          }}>
+            {currentMovie.poster && (
+              <img style={S.currentPoster} src={currentMovie.poster} alt={currentMovie.title}
+                onError={(e) => { e.target.style.display = "none"; }} />
+            )}
+            <div style={{ flex: 1 }}>
+              <div style={S.currentLabel}>Drag to place</div>
+              <div style={S.currentTitle}>{currentMovie.title}</div>
             </div>
           </div>
         </div>
@@ -287,7 +481,7 @@ export default function ReelTime({ session, onBack, onToast }) {
       {/* Result flash */}
       {lastPlacement && (
         <div style={S.flash(lastPlacement.correct)} key={lastPlacement.movieId + lastPlacement.correct}>
-          {lastPlacement.correct ? `+${lastPlacement.points}` : "✗"}
+          {lastPlacement.correct ? `+${lastPlacement.points}` : "\u2717"}
         </div>
       )}
 
@@ -295,25 +489,17 @@ export default function ReelTime({ session, onBack, onToast }) {
       <div style={S.timeline}>
         <div style={S.timelineLine} />
 
+        {/* Direction label: Earlier */}
+        <div style={S.timelineLabel}>
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginBottom: 2 }}>
+            <path d="M1 5L5 1L9 5" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Earlier
+        </div>
+
         {placedMovies.map((movie, i) => (
           <div key={`row-${movie.id}`}>
-            {/* Slot before */}
-            {isPlaying ? (
-              <div
-                style={S.slot(hoveredSlot === i)}
-                onClick={() => placeMovie(i)}
-                onMouseEnter={() => setHoveredSlot(i)}
-                onMouseLeave={() => setHoveredSlot(null)}
-                onTouchStart={() => setHoveredSlot(i)}
-                onTouchEnd={() => { placeMovie(i); setHoveredSlot(null); }}
-              >
-                <span style={S.slotLabel(hoveredSlot === i)}>Place here</span>
-              </div>
-            ) : (
-              <div style={S.slotDisabled} />
-            )}
-
-            {/* Placed movie */}
+            {renderSlot(i)}
             <div style={S.placed}>
               <div style={S.dot} />
               {movie.poster && (
@@ -326,21 +512,15 @@ export default function ReelTime({ session, onBack, onToast }) {
           </div>
         ))}
 
-        {/* Final slot after last movie */}
-        {isPlaying ? (
-          <div
-            style={S.slot(hoveredSlot === placedMovies.length)}
-            onClick={() => placeMovie(placedMovies.length)}
-            onMouseEnter={() => setHoveredSlot(placedMovies.length)}
-            onMouseLeave={() => setHoveredSlot(null)}
-            onTouchStart={() => setHoveredSlot(placedMovies.length)}
-            onTouchEnd={() => { placeMovie(placedMovies.length); setHoveredSlot(null); }}
-          >
-            <span style={S.slotLabel(hoveredSlot === placedMovies.length)}>Place here</span>
-          </div>
-        ) : (
-          <div style={S.slotDisabled} />
-        )}
+        {renderSlot(placedMovies.length)}
+
+        {/* Direction label: Later */}
+        <div style={S.timelineLabel}>
+          Later
+          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginTop: 2 }}>
+            <path d="M1 1L5 5L9 1" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
       </div>
     </div>
   );

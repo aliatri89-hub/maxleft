@@ -8,15 +8,18 @@ import {
 } from "./reelTimeApi";
 
 /**
- * Escalating points: placement 1 = 10, placement 2 = 20, etc.
+ * Scoring: seed = 10 gimme, then placements = 10, 20, 20, 30
  */
+const PLACEMENT_VALUES = [10, 20, 20, 30];
 function getPlacementValue(placementNum) {
-  return placementNum * 10;
+  return PLACEMENT_VALUES[placementNum - 1] || 30;
 }
 
+const GIMME_POINTS = 10;
+
 function getMaxScore(totalPlacements) {
-  let sum = 0;
-  for (let i = 1; i <= totalPlacements; i++) sum += i * 10;
+  let sum = GIMME_POINTS;
+  for (let i = 1; i <= totalPlacements; i++) sum += getPlacementValue(i);
   return sum;
 }
 
@@ -77,7 +80,7 @@ export function useReelTime(userId) {
           // Fresh game — set seed movie
           setPlacedMovies([{ ...puzzleData.movies[0], revealed: true }]);
           setCurrentMovieIndex(1);
-          setScore(0);
+          setScore(GIMME_POINTS);
           setPlacementResults([]);
           setGamePhase("playing");
           startTimeRef.current = Date.now();
