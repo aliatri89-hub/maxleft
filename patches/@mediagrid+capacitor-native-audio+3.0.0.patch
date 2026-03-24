@@ -43,3 +43,41 @@ index f4dc858..1227c4b 100644
      }
  
      @Override
+diff --git a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/MediaSessionCallback.java b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/MediaSessionCallback.java
+index ccd6721..8fa3661 100644
+--- a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/MediaSessionCallback.java
++++ b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/MediaSessionCallback.java
+@@ -2,11 +2,14 @@ package us.mediagrid.capacitorjs.plugins.nativeaudio;
+ 
+ import android.os.Bundle;
+ import androidx.annotation.OptIn;
++import androidx.media3.common.Player;
+ import androidx.media3.common.util.UnstableApi;
++import androidx.media3.session.CommandButton;
+ import androidx.media3.session.MediaSession;
+ import androidx.media3.session.SessionCommand;
+ import androidx.media3.session.SessionCommands;
+ import androidx.media3.session.SessionResult;
++import com.google.common.collect.ImmutableList;
+ import com.google.common.util.concurrent.Futures;
+ import com.google.common.util.concurrent.ListenableFuture;
+ 
+@@ -35,6 +38,18 @@ public class MediaSessionCallback implements MediaSession.Callback {
+ 
+         return new MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+             .setAvailableSessionCommands(sessionCommands)
++            .setMediaButtonPreferences(
++                ImmutableList.of(
++                    new CommandButton.Builder(CommandButton.ICON_SEEK_BACK)
++                        .setPlayerCommand(Player.COMMAND_SEEK_BACK)
++                        .setDisplayName("Rewind 15s")
++                        .build(),
++                    new CommandButton.Builder(CommandButton.ICON_SEEK_FORWARD)
++                        .setPlayerCommand(Player.COMMAND_SEEK_FORWARD)
++                        .setDisplayName("Forward 15s")
++                        .build()
++                )
++            )
+             .build();
+     }
+ 
