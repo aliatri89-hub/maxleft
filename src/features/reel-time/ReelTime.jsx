@@ -200,6 +200,7 @@ export default function ReelTime({ session, onBack, onToast }) {
   const [activeSlot, setActiveSlot] = useState(null);
   const slotRefs = useRef([]);
   const cardRef = useRef(null);
+  const timelineRef = useRef(null);
   const dragOffsetRef = useRef({ x: 0, y: 0 });
 
   // Keep slot refs array sized
@@ -208,8 +209,12 @@ export default function ReelTime({ session, onBack, onToast }) {
     slotRefs.current = slotRefs.current.slice(0, slotCount);
   }, [slotCount]);
 
-  // Find closest slot to a Y coordinate
+  // Find closest slot to a Y coordinate — returns null if above timeline (cancel zone)
   const findActiveSlot = useCallback((clientY) => {
+    // Cancel zone: if finger is above the timeline, don't target any slot
+    const tlRect = timelineRef.current?.getBoundingClientRect();
+    if (tlRect && clientY < tlRect.top) return null;
+
     let closest = null;
     let closestDist = Infinity;
     for (let i = 0; i < slotRefs.current.length; i++) {
@@ -486,7 +491,7 @@ export default function ReelTime({ session, onBack, onToast }) {
       )}
 
       {/* Timeline */}
-      <div style={S.timeline}>
+      <div style={S.timeline} ref={timelineRef}>
         <div style={S.timelineLine} />
 
         {/* Direction label: Earlier */}
