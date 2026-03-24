@@ -1702,7 +1702,7 @@
 
   /* ── SHELF HOME ── */
   .shelf-home {
-    padding: 20px 18px;
+    padding: 0;
   }
   .shelf-order-wrap {
     display: flex;
