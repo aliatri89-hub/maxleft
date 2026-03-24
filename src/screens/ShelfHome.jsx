@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
+import { supabase } from "../supabase";
 import BadgeShelf from "../components/shelf/BadgeShelf";
 import ShelfModals from "../components/modals/ShelfModals";
 
@@ -25,47 +26,20 @@ function parseDiaryDate(dateStr) {
 }
 
 /** ── Stats Ribbon ── */
-function StatsRibbon({ movies }) {
-  const stats = useMemo(() => {
-    const total = movies.length;
-    const thisYear = movies.filter(m => {
-      if (!m.watchedAt) return false;
-      return new Date(m.watchedAt).getFullYear() === new Date().getFullYear();
-    }).length;
+function StatsRibbon({ userId }) {
+  const [stats, setStats] = useState(null);
 
-    const rated = movies.filter(m => m.rating);
-    const avg = rated.length > 0
-      ? (rated.reduce((s, m) => s + m.rating, 0) / rated.length).toFixed(1)
-      : "—";
-
-    // Simple streak: count consecutive days from today backwards
-    let streak = 0;
-    if (movies.length > 0) {
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const daySet = new Set();
-      movies.forEach(m => {
-        if (m.watchedAt) {
-          const d = new Date(m.watchedAt);
-          d.setHours(0,0,0,0);
-          daySet.add(d.getTime());
-        }
-      });
-      let check = new Date(today);
-      while (daySet.has(check.getTime())) {
-        streak++;
-        check.setDate(check.getDate() - 1);
-      }
-    }
-
-    return { total, thisYear, avg, streak };
-  }, [movies]);
+  useEffect(() => {
+    if (!userId) return;
+    supabase.rpc("get_mantl_stats", { p_user_id: userId })
+      .then(({ data }) => { if (data) setStats(data); });
+  }, [userId]);
 
   const items = [
-    { value: stats.total.toLocaleString(), label: "FILMS" },
-    { value: stats.thisYear.toString(), label: new Date().getFullYear().toString() },
-    { value: stats.streak > 0 ? `${stats.streak}d` : "—", label: "STREAK", highlight: stats.streak >= 3 },
-    { value: `★ ${stats.avg}`, label: "AVG" },
+    { value: stats ? stats.total_films.toLocaleString() : "—", label: "FILMS" },
+    { value: stats ? stats.badges_earned.toString() : "—", label: "BADGES" },
+    { value: stats ? stats.watchlist_followed_through.toString() : "—", label: "CHECKED OFF" },
+    { value: stats ? stats.series_completed.toString() : "—", label: "SERIES" },
   ];
 
   return (
@@ -82,8 +56,7 @@ function StatsRibbon({ movies }) {
           <div style={{
             fontFamily: "'Playfair Display', serif", fontWeight: 900,
             fontSize: 20, lineHeight: 1,
-            color: s.highlight ? accent : "rgba(255,255,255,0.85)",
-            textShadow: s.highlight ? `0 0 12px ${accent}44` : "none",
+            color: "rgba(255,255,255,0.85)",
           }}>
             {s.value}
           </div>
@@ -158,7 +131,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       <BadgeShelf session={session} profile={profile} onUpdateProfile={onUpdateProfile} onToast={onToast} />
 
       {/* ── Stats Ribbon ── */}
-      <StatsRibbon movies={movies} />
+      <StatsRibbon userId={session?.user?.id} />
 
       {/* ── Fireplace Hearth ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
