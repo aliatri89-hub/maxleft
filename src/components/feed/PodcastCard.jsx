@@ -264,7 +264,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       {/* ── Bottom row: podcast name | badge — full width below art ── */}
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginTop: 6, paddingLeft: 74,
+        marginTop: 6,
       }}>
         <span style={{
           fontFamily: "'Barlow Condensed', sans-serif",
