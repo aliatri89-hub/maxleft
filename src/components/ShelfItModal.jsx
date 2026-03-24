@@ -25,14 +25,13 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
   const addToWishlistFromSearch = async () => {
     if (!session || !selected) return;
     const type = selected.type === "tv" ? "show" : selected.type;
-    const label = type === "book" ? "reading list" : type === "game" ? "play list" : "watch list";
     if (addedToWishlist) {
-      // Remove from wishlist
+      // Remove from watchlist
       const { error } = await supabase.from("wishlist").delete()
         .eq("user_id", session.user.id).eq("title", selected.title).eq("item_type", type);
       if (!error) {
         setAddedToWishlist(false);
-        if (onToast) onToast(`Removed from ${label}`);
+        if (onToast) onToast("Removed from watchlist");
       }
       return;
     }
@@ -46,7 +45,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
     });
     if (!error) {
       setAddedToWishlist(true);
-      if (onToast) onToast(`Added to ${label}!`);
+      if (onToast) onToast("Added to watchlist!");
     }
   };
 
@@ -331,13 +330,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                     📖 Currently Reading
                   </button>
                   <button
-                    className={`book-status-btn${addedToWishlist ? " active" : ""}`}
-                    onClick={addToWishlistFromSearch}
-                    style={addedToWishlist ? { color: "var(--sage)" } : {}}
-                  >
-                    {addedToWishlist ? "✓ Listed" : "📚 Want to Read"}
-                  </button>
-                  <button
                     className={`book-status-btn${bookStatus === "finished" ? " active" : ""}`}
                     onClick={() => setBookStatus("finished")}
                   >
@@ -400,13 +392,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                     onClick={() => setGameStatus("playing")}
                   >
                     Currently Playing
-                  </button>
-                  <button
-                    className={`book-status-btn${addedToWishlist ? " active" : ""}`}
-                    onClick={addToWishlistFromSearch}
-                    style={addedToWishlist ? { color: "var(--sage)" } : {}}
-                  >
-                    {addedToWishlist ? "✓ Listed" : "🎮 Want to Play"}
                   </button>
                   <button
                     className={`book-status-btn${gameStatus === "finished" ? " active" : ""}`}

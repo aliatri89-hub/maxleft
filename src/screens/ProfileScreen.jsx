@@ -25,9 +25,8 @@ function Expandable({ open, children }) {
 function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
-  const [wishlistOpen, setWishlistOpen] = useState(false);
-  const [expandedListType, setExpandedListType] = useState(null);
+  const [watchlist, setWatchlist] = useState([]);
+  const [watchlistOpen, setWatchlistOpen] = useState(false);
   const [editName, setEditName] = useState(profile.name || "");
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -116,17 +115,19 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
     setUploading(false);
   };
 
-  const loadWishlist = async () => {
+  const loadWatchlist = async () => {
     if (!session) return;
     const { data } = await supabase.from("wishlist").select("*")
-      .eq("user_id", session.user.id).order("created_at", { ascending: false });
-    setWishlist(data || []);
+      .eq("user_id", session.user.id)
+      .in("item_type", ["movie", "show"])
+      .order("created_at", { ascending: false });
+    setWatchlist(data || []);
   };
 
-  const removeFromWishlist = async (id) => {
+  const removeFromWatchlist = async (id) => {
     await sb(supabase.from("wishlist").delete().eq("id", id), onToast, "Couldn't delete");
-    setWishlist(prev => prev.filter(w => w.id !== id));
-    onToast("Removed from list");
+    setWatchlist(prev => prev.filter(w => w.id !== id));
+    onToast("Removed from watchlist");
   };
 
   return (
@@ -485,115 +486,77 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
 
           <div className="profile-group-divider" />
 
-          <div className="profile-group-row" onClick={() => { setWishlistOpen(!wishlistOpen); if (!wishlistOpen && wishlist.length === 0) loadWishlist(); }}>
-            <span className="profile-group-row-text">My Lists</span>
-            <span className="profile-group-row-chevron">{wishlistOpen ? "▾" : "›"}</span>
+          <div className="profile-group-row" onClick={() => { setWatchlistOpen(!watchlistOpen); if (!watchlistOpen && watchlist.length === 0) loadWatchlist(); }}>
+            <span className="profile-group-row-text">Watchlist</span>
+            <span className="profile-group-row-chevron">{watchlistOpen ? "▾" : "›"}</span>
           </div>
-          <Expandable open={wishlistOpen}>
+          <Expandable open={watchlistOpen}>
             <div style={{ padding: "8px 0 12px" }}>
-              {wishlist.length === 0 ? (
+              {watchlist.length === 0 ? (
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-faint)", padding: "12px 18px", lineHeight: 1.5 }}>
-                  No items yet. Tap "Want to read/watch/play" on a friend's activity to add items here.
+                  No films yet. Add movies from the swipe game, community pages, or search.
                 </div>
               ) : (
-                ["book", "movie", "show", "game"].map(type => {
-                  const items = wishlist.filter(w => w.item_type === type);
-                  if (items.length === 0) return null;
-                  const label = type === "book" ? "Reading List" : type === "movie" ? "Watch List" : type === "show" ? "Show List" : "Play List";
-                  const isExpanded = expandedListType === type;
-                  const MAX_PREVIEW = 5;
-                  const accent = "#EF9F27";
-
-                  return (
-                    <div key={type} style={{ marginBottom: 4 }}>
-                      {/* Summary row */}
+                <div style={{ padding: "0 14px", display: "flex", flexDirection: "column", gap: 6 }}>
+                  {watchlist.map(item => (
+                    <div key={item.id} style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      padding: "8px 10px",
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(239,159,39,0.08)",
+                      borderRadius: 8,
+                    }}>
+                      {item.cover_url ? (
+                        <img src={item.cover_url} alt="" style={{
+                          width: 34, height: 50, borderRadius: 4, objectFit: "cover",
+                          flexShrink: 0, border: "1px solid rgba(239,159,39,0.1)",
+                        }} />
+                      ) : (
+                        <div style={{
+                          width: 34, height: 50, borderRadius: 4,
+                          background: "rgba(239,159,39,0.06)", border: "1px solid rgba(239,159,39,0.1)",
+                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                        }}>
+                          <span style={{ fontSize: 16, opacity: 0.4 }}>🎬</span>
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
+                          color: "var(--text-primary)", whiteSpace: "nowrap",
+                          overflow: "hidden", textOverflow: "ellipsis",
+                        }}>{item.title}</div>
+                        <div style={{
+                          fontFamily: "var(--font-mono)", fontSize: 10,
+                          color: "var(--text-faint)", marginTop: 2,
+                          display: "flex", alignItems: "center", gap: 6,
+                        }}>
+                          {item.year && <span>{item.year}</span>}
+                          <span style={{
+                            fontSize: 9, color: "rgba(239,159,39,0.5)",
+                            background: "rgba(239,159,39,0.08)",
+                            borderRadius: 4, padding: "1px 5px", textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                          }}>{item.item_type === "show" ? "show" : "film"}</span>
+                        </div>
+                      </div>
                       <div
-                        onClick={() => setExpandedListType(isExpanded ? null : type)}
+                        onClick={(e) => { e.stopPropagation(); removeFromWatchlist(item.id); }}
                         style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "10px 18px", cursor: "pointer",
+                          width: 28, height: 28, borderRadius: 6, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: "rgba(255,255,255,0.02)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                          transition: "all 0.2s",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{
-                            fontFamily: "'Permanent Marker', cursive", fontSize: 14,
-                            color: accent, letterSpacing: "0.04em",
-                          }}>{label}</span>
-                          <span style={{
-                            fontFamily: "var(--font-mono)", fontSize: 10,
-                            color: `${accent}80`, fontWeight: 600,
-                            background: `${accent}12`, borderRadius: 10,
-                            padding: "2px 8px",
-                          }}>{items.length}</span>
-                        </div>
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{
-                          transform: isExpanded ? "rotate(90deg)" : "none",
-                          transition: "transform 0.2s",
-                        }}>
-                          <path d="M4.5 2.5L8 6L4.5 9.5" stroke={`${accent}80`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M3 3l6 6M9 3l-6 6" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round"/>
                         </svg>
                       </div>
-
-                      {/* Expanded items */}
-                      <Expandable open={isExpanded}>
-                        <div style={{ padding: "0 18px 12px", display: "flex", flexDirection: "column", gap: 6 }}>
-                          {items.slice(0, MAX_PREVIEW).map(item => {
-                            return (
-                              <div key={item.id} style={{
-                                display: "flex", alignItems: "center", gap: 10,
-                                padding: "10px 12px",
-                                background: "rgba(255,255,255,0.02)",
-                                border: `1px solid ${accent}10`,
-                                borderRadius: 8,
-                                transition: "all 0.2s",
-                              }}>
-                                {item.cover_url ? (
-                                  <img src={item.cover_url} alt="" style={{ width: 32, height: 48, borderRadius: 4, objectFit: "cover", flexShrink: 0, border: `1px solid ${accent}12` }} />
-                                ) : (
-                                  <div style={{ width: 32, height: 48, borderRadius: 4, background: `${accent}08`, border: `1px solid ${accent}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: `${accent}60` }}>?</span>
-                                  </div>
-                                )}
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</div>
-                                  {item.author && <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-faint)", marginTop: 1 }}>{item.author}</div>}
-                                </div>
-                                <div
-                                  onClick={() => removeFromWishlist(item.id)}
-                                  style={{
-                                    width: 28, height: 28, borderRadius: 6, cursor: "pointer",
-                                    display: "flex", alignItems: "center", justifyContent: "center",
-                                    background: "rgba(255,255,255,0.02)",
-                                    border: "1px solid rgba(255,255,255,0.06)",
-                                    transition: "all 0.2s",
-                                  }}
-                                >
-                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                    <path d="M3 3l6 6M9 3l-6 6" stroke="var(--text-faint)" strokeWidth="1.2" strokeLinecap="round"/>
-                                  </svg>
-                                </div>
-                              </div>
-                            );
-                          })}
-                          {items.length > MAX_PREVIEW && (
-                            <div style={{
-                              textAlign: "center", padding: "10px 0 4px",
-                            }}>
-                              <span style={{
-                                fontFamily: "var(--font-mono)", fontSize: 10,
-                                color: `${accent}90`, letterSpacing: "0.04em",
-                                background: `${accent}0a`, border: `1px solid ${accent}18`,
-                                borderRadius: 16, padding: "4px 12px", cursor: "pointer",
-                              }}>
-                                + {items.length - MAX_PREVIEW} more
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </Expandable>
                     </div>
-                  );
-                })
+                  ))}
+                </div>
               )}
             </div>
           </Expandable>
