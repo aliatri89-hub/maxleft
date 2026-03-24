@@ -180,6 +180,7 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
               onToggle={handleItemTap}
               coverCacheVersion={coverCache}
               filter={filter}
+              hideTracker
             />
           );
         })}

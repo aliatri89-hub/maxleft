@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { ActivityRings, CyclePill, HeroBanner } from "../primitives";
+import { HeroBanner } from "../primitives";
 
 /**
  * HDTGMHero — Hero section for the How Did This Get Made? community.
  *
- * Films only. Single activity ring. No commentary, no books, no games.
- * Single tab so no tab-switching logic needed.
+ * Films only. Simple watched count — no completion ring or fraction.
+ * These movies aren't meant to be "completed" like a franchise.
  *
  * Props:
  *   community    — community_pages row
@@ -25,11 +25,7 @@ export default function HDTGMHero({ community, miniseries, progress }) {
       completed += items.filter((i) => progress[i.id]).length;
     });
 
-    return {
-      total,
-      completed,
-      pct: total > 0 ? (completed / total) * 100 : 0,
-    };
+    return { total, completed };
   }, [miniseries, progress]);
 
   return (
@@ -64,24 +60,20 @@ export default function HDTGMHero({ community, miniseries, progress }) {
           {community?.description}
         </div>
 
-        {/* Ring + pill */}
-        {stats.total > 0 && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24 }}>
-            <ActivityRings
-              filmPct={stats.pct}
-              bookPct={null}
-              gamePct={null}
-              displayPct={Math.round(stats.pct)}
-              ringColors={["#e94560"]}
-            />
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <CyclePill
-                label="Films"
-                value={`${stats.completed}/${stats.total}`}
-                color="#e94560"
-                state="default"
-                onClick={() => {}}
-              />
+        {/* Simple watched count — no completion framing */}
+        {stats.completed > 0 && (
+          <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{
+                fontSize: 28, fontWeight: 800, color: "#e94560",
+                fontFamily: "'Barlow Condensed', sans-serif",
+              }}>{stats.completed}</div>
+              <div style={{
+                fontSize: 9, color: "rgba(255,255,255,0.35)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
+                Films Watched
+              </div>
             </div>
           </div>
         )}

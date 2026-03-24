@@ -87,8 +87,6 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
       .slice(0, 5);
   }, [allItems, progress]);
 
-  const overallPct = totalFilms > 0 ? Math.round((totalCompleted / totalFilms) * 100) : 0;
-
   return (
     <div style={{
       position: "relative",
@@ -275,16 +273,6 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                 }}>{totalFilms}</div>
                 <div style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Films
-                </div>
-              </div>
-              <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
-              <div style={{ textAlign: "center" }}>
-                <div style={{
-                  fontSize: 20, fontWeight: 800, color: "#fff",
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                }}>{overallPct}%</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Complete
                 </div>
               </div>
             </div>
