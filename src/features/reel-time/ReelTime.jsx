@@ -459,6 +459,11 @@ export default function ReelTime({ session, onBack, onToast }) {
           <div style={S.gameoverScore}>{result?.score ?? score}</div>
           <div style={S.gameoverMax}>out of {maxScore} points</div>
           <div style={S.placementDots}>
+            {/* Gimme dot */}
+            <div style={{
+              width: 16, height: 16, borderRadius: 4,
+              background: "#4caf50", opacity: 0.8,
+            }} />
             {placementResults.map((r, i) => (
               <div key={i} style={{
                 width: 16, height: 16, borderRadius: 4,

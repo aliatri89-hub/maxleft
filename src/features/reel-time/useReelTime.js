@@ -172,7 +172,7 @@ export function useReelTime(userId) {
   const getShareText = useCallback(() => {
     if (!puzzle) return "";
     const puzzleNum = getPuzzleNumber(puzzle.date);
-    const blocks = placementResults.map((r) => r ? "🟩" : "🟥").join("");
+    const blocks = "🟩" + placementResults.map((r) => r ? "🟩" : "🟥").join("");
     const finalScore = result?.score ?? score;
     return `🎞 Reel Time #${puzzleNum} (${puzzle.year})\n${finalScore}/${maxScore} pts ${blocks}\n\nmymantl.app/play`;
   }, [puzzle, placementResults, result, score, maxScore]);
