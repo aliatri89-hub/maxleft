@@ -13,11 +13,10 @@ import {
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
-import IngestReviewTool from "../components/feed/IngestReviewTool";
 import BrowseLoadingSplash from "../components/feed/BrowseLoadingSplash";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN — New Releases | Podcast | Activity | Inbox (admin)
+// FEED SCREEN — New Releases | Podcast | Activity
 // ════════════════════════════════════════════════
 
 const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
@@ -27,12 +26,10 @@ const BASE_TABS = [
   { key: "podcast",   label: "Podcast" },
   { key: "activity",  label: "Activity" },
 ];
-const INBOX_TAB = { key: "inbox", label: "Inbox" };
-
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, favoritePodcasts, feedMode, setFeedMode, pendingSleeveOpen, setPendingSleeveOpen, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
-  const FEED_TABS = useMemo(() => isAdmin ? [...BASE_TABS, INBOX_TAB] : BASE_TABS, [isAdmin]);
+  const FEED_TABS = BASE_TABS;
   const {
     activityItems,
     hasMoreActivity,
@@ -561,13 +558,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           </div>
         )}
       </div>
-
-      {/* ── Inbox pane (admin only) ── */}
-      {isAdmin && (
-        <div style={{ display: feedMode === "inbox" ? "block" : "none" }}>
-          <IngestReviewTool userId={userId} onToast={onToast} session={session} />
-        </div>
-      )}
 
       {/* Animations */}
       <style>{`

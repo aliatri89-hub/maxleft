@@ -5,6 +5,7 @@ import { supabase } from "../supabase";
 import { sb } from "../utils/api";
 import InitialAvatar from "../components/InitialAvatar";
 import ImportCSVModal from "../components/ImportCSVModal";
+import IngestReviewTool from "../components/feed/IngestReviewTool";
 
 /** Smooth expand/collapse wrapper using CSS grid trick */
 function Expandable({ open, children }) {
@@ -47,6 +48,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState({ new_coverage: true, favorites_only: false });
   const [notifLoaded, setNotifLoaded] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
 
   useEffect(() => {
     if (!notifOpen || notifLoaded) return;
@@ -701,6 +703,22 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
           </Expandable>
         </div>
       </div>
+
+      {/* ── ADMIN: INBOX ── */}
+      {session?.user?.id === "19410e64-d610-4fab-9c26-d24fafc94696" && (
+        <div className="profile-group">
+          <div className="profile-group-label">Admin</div>
+          <div className="profile-group-row" onClick={() => setInboxOpen(!inboxOpen)}>
+            <span className="profile-group-row-text">Ingest Inbox</span>
+            <span className="profile-group-row-chevron">{inboxOpen ? "▾" : "›"}</span>
+          </div>
+          <Expandable open={inboxOpen}>
+            <div style={{ padding: "4px 0 12px" }}>
+              <IngestReviewTool userId={session.user.id} onToast={onToast} session={session} />
+            </div>
+          </Expandable>
+        </div>
+      )}
 
       {/* ── ACCOUNT GROUP ── */}
       <div className="profile-group">
