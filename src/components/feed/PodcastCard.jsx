@@ -5,12 +5,12 @@ import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 
 // ════════════════════════════════════════════════
-// PODCAST CARD — film title leads, podcast art inline with desc
+// PODCAST CARD
 //
-// Film Title                       [🗑] [+] [▶]
-// Mar 19 · 1h33m
-// [art]  Episode desc…
-//        2025 · PODCAST NAME         ✓ WATCHED
+// Film Title        Mar 18 · 1h24m   [🗑] [+] [▶]
+// [  art  ]  Episode desc…
+// [  art  ]  Episode desc…
+//            2025 · PODCAST NAME       ✓ WATCHED
 // ════════════════════════════════════════════════
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -121,20 +121,49 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         padding: "10px 12px",
       }}
     >
-      {/* ── Row 1: Film title + buttons ── */}
+      {/* ── Row 1: Title | date · duration | buttons ── */}
       <div style={{
-        display: "flex", alignItems: "flex-start",
-        justifyContent: "space-between", gap: 10,
-        marginBottom: 2,
+        display: "flex", alignItems: "center", gap: 8,
+        marginBottom: 8,
       }}>
+        {/* Title */}
         <div style={{
           fontFamily: "'Barlow Condensed', sans-serif",
           fontWeight: 600, fontSize: 16, color: "#f0ebe1",
-          lineHeight: 1.2, flex: 1, minWidth: 0,
-          paddingTop: 2,
+          lineHeight: 1.2, whiteSpace: "nowrap",
+          overflow: "hidden", textOverflow: "ellipsis",
+          flex: 1, minWidth: 0,
         }}>
           {film_title}
         </div>
+
+        {/* Date · duration */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 5,
+          flexShrink: 0,
+        }}>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 9, color: "rgba(255,255,255,0.35)",
+            textTransform: "uppercase", letterSpacing: "0.04em",
+          }}>
+            {fmtDate(episode_air_date)}
+          </span>
+          {duration_seconds > 0 && (
+            <>
+              <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 9, color: "rgba(255,255,255,0.25)",
+                textTransform: "uppercase", letterSpacing: "0.04em",
+              }}>
+                {formatDuration(duration_seconds)}
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           {isAdmin && (
             <div onClick={handleUnlink} title="Unlink" style={{
@@ -184,36 +213,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       </div>
 
-      {/* ── Row 2: date + duration ── */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        marginBottom: 8,
-      }}>
-        <span style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: 9, color: "rgba(255,255,255,0.4)",
-          textTransform: "uppercase", letterSpacing: "0.05em",
-        }}>
-          {fmtDate(episode_air_date)}
-        </span>
-        {duration_seconds > 0 && (
-          <>
-            <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9, color: "rgba(255,255,255,0.3)",
-              textTransform: "uppercase", letterSpacing: "0.04em",
-            }}>
-              {formatDuration(duration_seconds)}
-            </span>
-          </>
-        )}
-      </div>
-
-      {/* ── Row 3: art + description ── */}
+      {/* ── Row 2: art + description ── */}
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
         <div style={{
-          width: 44, height: 44, borderRadius: 8, overflow: "hidden",
+          width: 64, height: 64, borderRadius: 10, overflow: "hidden",
           background: "#2a2520", flexShrink: 0,
         }}>
           {podcast_artwork ? (
@@ -224,7 +227,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               width: "100%", height: "100%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900, fontSize: 7, color: "rgba(255,255,255,0.5)",
+              fontWeight: 900, fontSize: 8, color: "rgba(255,255,255,0.5)",
               textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
             }}>
               {podcast_name}
@@ -333,7 +336,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
       {/* Expanded description */}
       {expanded && fullDesc && fullDesc.length > desc.length && (
-        <div style={{ paddingTop: 8, paddingLeft: 54 }}>
+        <div style={{ paddingTop: 8, paddingLeft: 74 }}>
           <div style={{
             width: "100%", height: 1,
             background: "rgba(255,255,255,0.06)", marginBottom: 8,
