@@ -511,7 +511,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     }
     return null;
   });
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, addToQueue } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
   const { left: brandLeft, right: brandRight } = getVhsBrands(data.title);
@@ -662,6 +662,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       onQueueEpisode={handleQueueEpisode}
       currentEp={currentEp}
       isPlaying={isPlaying}
+      buffering={buffering}
       onTogglePlay={togglePlay}
     />
     </>

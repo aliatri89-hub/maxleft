@@ -330,7 +330,7 @@ export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onN
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetVisible, setSheetVisible] = useState(false);
   const closeTimer = useRef(null);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, addToQueue } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
   const hasPlayButton = data.podcast_count > 0;
 
   const sleeveNavKey = `sleeve-browse-${data.tmdb_id || data.title}`;
@@ -411,6 +411,7 @@ export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onN
         onQueueEpisode={handleQueue}
         currentEp={currentEp}
         isPlaying={isPlaying}
+        buffering={buffering}
         onTogglePlay={togglePlay}
       />
     )}

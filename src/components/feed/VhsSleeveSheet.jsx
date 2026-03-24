@@ -140,7 +140,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, buffering, onTogglePlay }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -472,6 +472,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   return createPortal(
     <>
+      <style>{`@keyframes sleeve-spin { to { transform: rotate(360deg); } }`}</style>
       {/* Backdrop overlay */}
       <div
         onClick={onClose}
@@ -868,6 +869,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     const epUrl = resolveAudioUrl(ep);
                     const isActive = currentEp && epUrl && currentEp.enclosureUrl === epUrl;
                     const isActiveAndPlaying = isActive && isPlaying;
+                    const isActiveBuffering = isActive && buffering && !isPlaying;
                     const isExpanded = expandedEpId === epKey;
                     const descText = stripHtml(ep.episode_description);
                     return (
@@ -927,6 +929,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (isActiveBuffering) return;
                                 if (isActiveAndPlaying) {
                                   onTogglePlay?.();
                                 } else {
@@ -935,19 +938,27 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               }}
                               style={{
                                 width: 32, height: 32, borderRadius: "50%",
-                                background: isActiveAndPlaying ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
-                                border: isActiveAndPlaying ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                                background: (isActiveAndPlaying || isActiveBuffering) ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
+                                border: (isActiveAndPlaying || isActiveBuffering) ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 flexShrink: 0,
                                 transition: "all 0.15s",
+                                cursor: isActiveBuffering ? "default" : "pointer",
                               }}
                             >
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
-                                {isActiveAndPlaying
-                                  ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                                  : <path d="M8 5v14l11-7z" />
-                                }
-                              </svg>
+                              {isActiveBuffering ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ animation: "sleeve-spin 0.8s linear infinite" }}>
+                                  <circle cx="12" cy="12" r="9" stroke="rgba(196,115,79,0.25)" strokeWidth="2.5" />
+                                  <path d="M12 3a9 9 0 0 1 9 9" stroke="#c4734f" strokeWidth="2.5" strokeLinecap="round" />
+                                </svg>
+                              ) : (
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                                  {isActiveAndPlaying
+                                    ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                                    : <path d="M8 5v14l11-7z" />
+                                  }
+                                </svg>
+                              )}
                             </div>
                           )}
                           {/* Queue: add to up next (skip for Patreon eps) */}
