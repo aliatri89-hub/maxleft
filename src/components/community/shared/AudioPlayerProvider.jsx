@@ -13,7 +13,6 @@ export function useAudioPlayer() {
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
 const STORAGE_KEY = "mantl_audio_state";
 const RECENTS_KEY = "mantl_audio_recents";
-const NUDGE_DISMISSED_KEY = "mantl_audio_nudge_dismissed";
 const ACCENT = "#F5C518";
 const SAVE_INTERVAL = 5000;
 const BOOKMARK_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -344,147 +343,6 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
         </div>
       </div>
 
-    </div>
-  );
-}
-
-// ── Resume Nudge ────────────────────────────────────────────
-// Thin, temporary toast that appears when there's a saved position.
-// Tap to resume → becomes mini bar. Auto-dismisses after 8s. Swipe to dismiss.
-
-function ResumeNudge({ recent, onResume, onDismiss, onFade }) {
-  const [exiting, setExiting] = useState(false);
-  const timerRef = useRef(null);
-  const touchStart = useRef(null);
-
-  // Auto-dismiss after 8 seconds — doesn't persist, nudge will return next session
-  useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setExiting(true);
-      setTimeout(onFade, 350);
-    }, 8000);
-    return () => clearTimeout(timerRef.current);
-  }, [onFade]);
-
-  const dismiss = useCallback(() => {
-    clearTimeout(timerRef.current);
-    setExiting(true);
-    setTimeout(onDismiss, 350);
-  }, [onDismiss]);
-
-  const handleTouchStart = (e) => {
-    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!touchStart.current) return;
-    const dx = e.changedTouches[0].clientX - touchStart.current.x;
-    const dy = e.changedTouches[0].clientY - touchStart.current.y;
-    // Swipe down or right to dismiss
-    if (dy > 40 || Math.abs(dx) > 60) dismiss();
-    touchStart.current = null;
-  };
-
-  const remainingMin = recent.duration > 0
-    ? Math.ceil((recent.duration - recent.time) / 60)
-    : null;
-
-  return (
-    <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      style={{
-        position: "fixed",
-        bottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
-        left: 12, right: 12,
-        zIndex: 9998,
-        animation: exiting
-          ? "nudgeSlideOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards"
-          : "nudgeSlideIn 0.4s cubic-bezier(0, 0.8, 0.2, 1) forwards",
-      }}
-    >
-      <div
-        onClick={() => {
-          clearTimeout(timerRef.current);
-          onResume(recent);
-        }}
-        style={{
-          display: "flex", alignItems: "center", gap: 10,
-          padding: "10px 14px",
-          background: "rgba(18,18,30,0.95)",
-          backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-          border: `1px solid ${ACCENT}25`,
-          borderRadius: 14,
-          cursor: "pointer",
-          boxShadow: `0 4px 20px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)`,
-        }}
-      >
-        {/* Play icon */}
-        <div style={{
-          width: 34, height: 34, borderRadius: 10,
-          background: ACCENT,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0a0a"><path d="M8 5v14l11-7z" /></svg>
-        </div>
-
-        {/* Info */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 12, fontWeight: 700,
-            color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
-            textTransform: "uppercase",
-            letterSpacing: "0.02em",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            lineHeight: 1.2,
-          }}>
-            {recent.title}
-          </div>
-          <div style={{
-            fontSize: 10,
-            color: "rgba(255,255,255,0.35)",
-            fontFamily: "'IBM Plex Mono', monospace",
-            marginTop: 2,
-            display: "flex", alignItems: "center", gap: 5,
-          }}>
-            {recent.community && (
-              <span style={{ color: `${ACCENT}88` }}>{recent.community}</span>
-            )}
-            {recent.community && <span style={{ color: "rgba(255,255,255,0.12)" }}>·</span>}
-            <span>{remainingMin ? `${remainingMin} min left` : fmt(recent.time)}</span>
-          </div>
-        </div>
-
-        {/* Dismiss X */}
-        <button
-          onClick={(e) => { e.stopPropagation(); dismiss(); }}
-          aria-label="Dismiss"
-          style={{
-            background: "none", border: "none",
-            cursor: "pointer", padding: 4,
-            color: "rgba(255,255,255,0.2)",
-            fontSize: 14, lineHeight: 1,
-            flexShrink: 0,
-          }}
-        >
-          ✕
-        </button>
-      </div>
-
-      {/* Auto-dismiss progress line */}
-      <div style={{
-        position: "absolute", bottom: 2, left: 20, right: 20, height: 2,
-        borderRadius: 1, overflow: "hidden",
-      }}>
-        <div style={{
-          height: "100%",
-          background: `${ACCENT}40`,
-          borderRadius: 1,
-          animation: exiting ? "none" : "nudgeTimer 8s linear forwards",
-        }} />
-      </div>
     </div>
   );
 }
@@ -1354,14 +1212,6 @@ export default function AudioPlayerProvider({ children, session }) {
   const advanceQueueRef = useRef(null);
   const queueToastRef = useRef(null);
   const [queueToast, setQueueToast] = useState(null); // null | { title }
-  const [nudgeDismissedGuid, setNudgeDismissedGuid] = useState(() => {
-    try { return localStorage.getItem(NUDGE_DISMISSED_KEY) || null; } catch { return null; }
-  });
-  const dismissNudge = useCallback((guid) => {
-    setNudgeDismissedGuid(guid);
-    try { localStorage.setItem(NUDGE_DISMISSED_KEY, guid); } catch {}
-  }, []);
-  const [nudgeFaded, setNudgeFaded] = useState(false); // auto-dismiss this session only
   const [recents, setRecents] = useState(() => loadRecents());
   const recentsRef = useRef(recents);
   const saveThrottle = useRef(0);
@@ -1561,16 +1411,6 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setBufferedPct(0);
 
-    // Active listening intent — clear any nudge dismissal for this episode
-    setNudgeFaded(false);
-    setNudgeDismissedGuid(prev => {
-      if (prev === ep.guid) {
-        try { localStorage.removeItem(NUDGE_DISMISSED_KEY); } catch {}
-        return null;
-      }
-      return prev;
-    });
-
     const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
 
     if (saved && saved.time > 15) {
@@ -1733,7 +1573,6 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
-    setNudgeFaded(true);
   }, [cleanupPendingSeek, clearSleepTimer, clearQueue, bridge]);
 
   // Dismiss — save position to recents so user can resume later, then clean up
@@ -1755,9 +1594,6 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setFullScreen(false);
     setBubbleMode("badge");
-    setNudgeFaded(true);
-    setNudgeDismissedGuid(null);
-    try { localStorage.removeItem(NUDGE_DISMISSED_KEY); } catch {}
   }, [currentEp, speed, updateRecents, cleanupPendingSeek, clearSleepTimer, bridge]);
 
   const openFullScreen = useCallback(() => { setFullScreen(true); }, []);
@@ -1865,10 +1701,6 @@ export default function AudioPlayerProvider({ children, session }) {
           from { opacity: 1; transform: translateY(0); }
           to { opacity: 0; transform: translateY(24px); }
         }
-        @keyframes nudgeTimer {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
       `}</style>
 
       {/* Player bubble — morphs between badge and pill */}
@@ -1892,16 +1724,6 @@ export default function AudioPlayerProvider({ children, session }) {
         document.body
       )}
 
-      {/* Resume nudge — temporary toast when there's a saved position but nothing playing */}
-      {session && !currentEp && !fullScreen && !nudgeFaded && recents.length > 0 && recents[0].guid !== nudgeDismissedGuid && createPortal(
-        <ResumeNudge
-          recent={recents[0]}
-          onResume={(r) => { resumeRecent(r); }}
-          onDismiss={() => dismissNudge(recents[0].guid)}
-          onFade={() => setNudgeFaded(true)}
-        />,
-        document.body
-      )}
 
       {/* Queue toast — brief feedback when episode is added */}
       {queueToast && createPortal(
