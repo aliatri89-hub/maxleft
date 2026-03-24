@@ -127,7 +127,7 @@ const CSS = `
 
 // ── Component ──
 
-export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses = {} }) {
+export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses = {}, isTab = false }) {
   const [loaded, setLoaded] = useState(false);
   const [pressedId, setPressedId] = useState(null);
 
@@ -175,36 +175,40 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0d0b", color: "#f5f0e8",
-      fontFamily: "'IBM Plex Mono', monospace", padding: "0 16px 40px",
+      minHeight: isTab ? "auto" : "100vh", background: "#0f0d0b", color: "#f5f0e8",
+      fontFamily: "'IBM Plex Mono', monospace", padding: isTab ? "0 16px 100px" : "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
-      paddingTop: "env(safe-area-inset-top, 0px)",
+      paddingTop: isTab ? 0 : "env(safe-area-inset-top, 0px)",
     }}>
       <style>{CSS}</style>
 
-      {/* Back button */}
-      <button onClick={onBack} style={{
-        position: "absolute", top: 16, left: 16, width: 36, height: 36,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        cursor: "pointer", zIndex: 10, background: "none", border: "none", padding: 0,
-      }}>
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M13 4L7 10L13 16" stroke="#8a7e6b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
+      {/* Back button — hidden when rendered as a tab */}
+      {!isTab && (
+        <button onClick={onBack} style={{
+          position: "absolute", top: 16, left: 16, width: 36, height: 36,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", zIndex: 10, background: "none", border: "none", padding: 0,
+        }}>
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M13 4L7 10L13 16" stroke="#8a7e6b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      )}
 
       {/* Header */}
       <div style={{
-        textAlign: "center", padding: "24px 0 20px",
+        textAlign: "center", padding: isTab ? "12px 0 20px" : "24px 0 20px",
         opacity: loaded ? 1 : 0, transform: `translateY(${loaded ? 0 : -8}px)`,
         transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
-        <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-          letterSpacing: 4, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
-        }}>
-          M▶NTL
-        </div>
+        {!isTab && (
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
+            letterSpacing: 4, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
+          }}>
+            M▶NTL
+          </div>
+        )}
         <h1 style={{
           fontFamily: "'Bebas Neue', sans-serif", fontSize: 40, letterSpacing: 2, color: "#f5f0e8", lineHeight: 1.1,
         }}>

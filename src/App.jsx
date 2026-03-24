@@ -107,7 +107,6 @@ export default function App() {
   const [showTripleFeature, setShowTripleFeature] = useState(false);
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [showReelTime, setShowReelTime] = useState(false);
-  const [showGamesHub, setShowGamesHub] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
   const [showShelfIt, setShowShelfIt] = useState(false);
@@ -418,25 +417,12 @@ export default function App() {
           <div className="screen-fade">
             {/* Header */}
             <div className="header">
-              <div onClick={() => { tapLight(); setShowGamesHub(true); pushNav("gamesHub", () => setShowGamesHub(false)); }}
+              <div onClick={() => { tapLight(); showToast("Notifications coming soon"); }}
                 style={{ width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                {(tfUnplayed || rtUnplayed) ? (
-                  <svg width="20" height="22" viewBox="0 0 22 22" fill="none" style={{ transform: "rotate(-12deg)", transition: "transform 0.3s ease" }}>
-                    <rect x="3" y="1" width="16" height="20" rx="2" stroke="#d4af37" strokeWidth="1" fill="none"/>
-                    <rect x="6" y="3.5" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/><rect x="6" y="13" width="10" height="5.5" rx="1" fill="#d4af37" opacity="0.12"/>
-                    <line x1="6" y1="11" x2="16" y2="11" stroke="#d4af37" strokeWidth="0.5" opacity="0.4"/>
-                    <circle cx="4.5" cy="4" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="7.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="11" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="14.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="4.5" cy="18" r="0.7" fill="#d4af37" opacity="0.6"/>
-                    <circle cx="17.5" cy="4" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="7.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="11" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="14.5" r="0.7" fill="#d4af37" opacity="0.6"/><circle cx="17.5" cy="18" r="0.7" fill="#d4af37" opacity="0.6"/>
-                  </svg>
-                ) : (
-                  <svg width="18" height="20" viewBox="0 0 18 22" fill="none" style={{ transition: "transform 0.3s ease" }}>
-                    <rect x="1" y="1" width="16" height="20" rx="2" stroke="#9a8ec2" strokeWidth="1" fill="none"/>
-                    <rect x="4.5" y="3.5" width="9" height="5" rx="1" fill="#9a8ec2" opacity="0.15"/><rect x="4.5" y="13.5" width="9" height="5" rx="1" fill="#9a8ec2" opacity="0.15"/>
-                    <line x1="4.5" y1="11" x2="13.5" y2="11" stroke="#9a8ec2" strokeWidth="0.5" opacity="0.3"/>
-                    <circle cx="2.5" cy="3.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="7" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="10.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="14" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="2.5" cy="17.5" r="0.7" fill="#9a8ec2" opacity="0.5"/>
-                    <circle cx="15.5" cy="3.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="7" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="10.5" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="14" r="0.7" fill="#9a8ec2" opacity="0.5"/><circle cx="15.5" cy="17.5" r="0.7" fill="#9a8ec2" opacity="0.5"/>
-                  </svg>
-                )}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a7e6b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
               </div>
               <div onClick={() => { removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
@@ -472,6 +458,30 @@ export default function App() {
                     isActive={activeTab === "communities"} communitySubscriptions={communitySubscriptions}
                     onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded}
                     pushNav={pushNav} removeNav={removeNav} />}
+                </div>
+                <div className="tab-pane" key="games-tab">
+                  {visitedTabs.has("games") && <GamesHub session={session} isTab
+                    onLaunchGame={(gameId) => {
+                      if (gameId === "tripleFeature") {
+                        setShowTripleFeature(true);
+                        pushNav("tripleFeature", () => setShowTripleFeature(false));
+                      } else if (gameId === "reelTime") {
+                        setShowReelTime(true);
+                        pushNav("reelTime", () => setShowReelTime(false));
+                      } else if (gameId === "pickAFlick") {
+                        setShowWhatToWatch(true);
+                        pushNav("whatToWatch", () => setShowWhatToWatch(false));
+                      } else if (gameId === "creditCheck") {
+                        showToast("Credit Check coming soon!");
+                      }
+                    }}
+                    gameStatuses={{
+                      tripleFeature: tfUnplayed ? "available" : "completed",
+                      reelTime: rtUnplayed ? "available" : "completed",
+                      creditCheck: "available",
+                      pickAFlick: "always",
+                    }}
+                  />}
                 </div>
                 <div className="tab-pane" key="search-tab">
                   {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />}
@@ -514,39 +524,6 @@ export default function App() {
         {/* What to Watch */}
         {showWhatToWatch && (
           <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
-        )}
-
-        {/* Games Hub */}
-        {showGamesHub && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <GamesHub
-              session={session}
-              onBack={() => { removeNav("gamesHub"); setShowGamesHub(false); }}
-              pushNav={pushNav} removeNav={removeNav}
-              onLaunchGame={(gameId) => {
-                setShowGamesHub(false);
-                removeNav("gamesHub");
-                if (gameId === "tripleFeature") {
-                  setShowTripleFeature(true);
-                  pushNav("tripleFeature", () => setShowTripleFeature(false));
-                } else if (gameId === "reelTime") {
-                  setShowReelTime(true);
-                  pushNav("reelTime", () => setShowReelTime(false));
-                } else if (gameId === "pickAFlick") {
-                  setShowWhatToWatch(true);
-                  pushNav("whatToWatch", () => setShowWhatToWatch(false));
-                } else if (gameId === "creditCheck") {
-                  showToast("Credit Check coming soon!");
-                }
-              }}
-              gameStatuses={{
-                tripleFeature: tfUnplayed ? "available" : "completed",
-                reelTime: rtUnplayed ? "available" : "completed",
-                creditCheck: "available",
-                pickAFlick: "always",
-              }}
-            />
-          </div>
         )}
 
         {/* Community View */}
@@ -599,14 +576,20 @@ export default function App() {
           </div>
         )}
 
-        {/* Bottom Nav — Communities | Search | Mantl */}
-        {screen === "app" && !activeCommunitySlug && !showGamesHub && !showWhatToWatch && !showTripleFeature && !showReelTime && (
+        {/* Bottom Nav — Communities | Games | Search | Mantl */}
+        {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
               onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
+            </button>
+            <button className={`nav-item${activeTab === "games" ? " active" : ""}`}
+              onTouchStart={() => { if (activeTab !== "games") setPreloadTab("games"); }}
+              onClick={() => { tapLight(); if (activeTab !== "games") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("games"); setPreloadTab(null); }}>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><circle cx="5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div>
+              <div className="nav-label">Games</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
