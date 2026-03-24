@@ -262,7 +262,13 @@ export default function App() {
         setActiveTab("feed");
         setFeedMode("activity");
         setPendingSleeveOpen(parseInt(data.tmdb_id));
-      } else if (data?.type === 'new_coverage') {
+      } else if (data?.type === 'new_coverage' && data?.tmdb_id) {
+        // Single film coverage — open sleeve directly
+        setActiveTab("feed");
+        setFeedMode("activity");
+        setPendingSleeveOpen(parseInt(data.tmdb_id));
+      } else if (data?.type === 'new_coverage_digest') {
+        // Batched coverage digest — land on activity feed
         setActiveTab("feed");
         setFeedMode("activity");
       } else {
