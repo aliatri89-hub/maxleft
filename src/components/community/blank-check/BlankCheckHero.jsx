@@ -385,7 +385,7 @@ function BlankCheck({ director }) {
           }}>🎬</span>
           <span style={{
             fontSize: 22, color: "#1a1a1a",
-            fontFamily: "'Playfair Display', serif", fontWeight: 700,
+            fontFamily: "'Permanent Marker', cursive",
             lineHeight: 1,
           }}>
             {director.views}
@@ -407,7 +407,7 @@ function BlankCheck({ director }) {
         }}>Pay to</span>
         <span style={{
           fontSize: 22, color: "#1a1a1a",
-          fontFamily: "'Playfair Display', serif", fontWeight: 700,
+          fontFamily: "'Permanent Marker', cursive",
           lineHeight: 1,
           whiteSpace: "nowrap",
           marginBottom: -2,
@@ -423,7 +423,7 @@ function BlankCheck({ director }) {
       }}>
         <span style={{
           fontSize: 10, color: "#1a1a1a",
-          fontFamily: "'Playfair Display', serif", fontWeight: 700,
+          fontFamily: "'Permanent Marker', cursive",
         }}>
           {director.seriesTitle}
         </span>
@@ -440,7 +440,7 @@ function BlankCheck({ director }) {
           }}>Memo</span>
           <span style={{
             fontSize: 13, color: "#1a1a1a",
-            fontFamily: "'Playfair Display', serif", fontWeight: 700,
+            fontFamily: "'Permanent Marker', cursive",
             lineHeight: 1,
           }}>
             {director.grossWW > 0
