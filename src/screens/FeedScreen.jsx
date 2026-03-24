@@ -407,7 +407,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               index={i}
               dismissable={false}
             >
-              <PodcastCard item={item} isAdmin={isAdmin} />
+              <PodcastCard item={item} isAdmin={isAdmin} userId={userId} />
             </FeedCard>
           ))}
         </div>

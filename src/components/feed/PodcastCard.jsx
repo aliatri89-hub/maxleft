@@ -7,11 +7,10 @@ import { supabase } from "../../supabase";
 // ════════════════════════════════════════════════
 // PODCAST CARD — episode-first, clean dark card
 //
-// Layout:
-//   [art]  Mar 19  1h33m           [🗑] [+] [▶]
-//          Film Title
-//          Episode desc…
-//          2025 · PODCAST NAME          WATCHED ✓
+// [art]  Mar 19  1h33m           [🗑] [+] [▶]
+//        Film Title
+//        Episode desc…
+//        2025 · PODCAST NAME       ✓ WATCHED
 // ════════════════════════════════════════════════
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -45,16 +44,17 @@ function formatDuration(seconds) {
   return `${m}m`;
 }
 
-function PodcastCard({ item, isAdmin, onUnlinked }) {
+function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
-    tmdb_id, film_title, film_year, watched,
+    tmdb_id, film_title, film_year, poster_path, watched,
   } = item;
 
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [addedToWatchlist, setAddedToWatchlist] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
 
   const epUrl = resolveAudioUrl(item);
@@ -94,6 +94,19 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
     if (playerEp) addToQueue(playerEp);
   };
 
+  const handleWatchlist = async (e) => {
+    e.stopPropagation();
+    if (!userId || addedToWatchlist) return;
+    const { error } = await supabase.from("wishlist").insert({
+      user_id: userId,
+      item_type: "movie",
+      title: film_title,
+      cover_url: poster_path ? `https://image.tmdb.org/t/p/w185${poster_path}` : null,
+      year: film_year || null,
+    });
+    if (!error) setAddedToWatchlist(true);
+  };
+
   if (dismissed) return null;
 
   return (
@@ -105,17 +118,17 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         border: "1px solid rgba(255,255,255,0.08)",
         background: "#1a1714",
         cursor: "pointer",
-        padding: "8px 12px 10px",
+        padding: "10px 12px",
       }}
     >
-      {/* ── Row 1: art + date/duration + buttons ── */}
+      {/* ── Row 1: [art] date duration ... buttons — all centered ── */}
       <div style={{
         display: "flex", alignItems: "center", gap: 10,
-        marginBottom: 6,
+        marginBottom: 8,
       }}>
         {/* Podcast artwork */}
         <div style={{
-          width: 48, height: 48, borderRadius: 8, overflow: "hidden",
+          width: 44, height: 44, borderRadius: 8, overflow: "hidden",
           background: "#2a2520", flexShrink: 0,
         }}>
           {podcast_artwork ? (
@@ -135,7 +148,7 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         </div>
 
         {/* Date + duration */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 9, color: "rgba(255,255,255,0.5)",
@@ -157,11 +170,10 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         {/* Buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           {isAdmin && (
-            <div onClick={handleUnlink} title="Unlink bad match" style={{
+            <div onClick={handleUnlink} title="Unlink" style={{
               width: 26, height: 26, borderRadius: "50%",
               background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
             }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
@@ -169,11 +181,10 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
             </div>
           )}
           {!isPaywall && addToQueue && !isCurrent && (
-            <div onClick={handleQueue} title="Add to Up Next" style={{
+            <div onClick={handleQueue} title="Up Next" style={{
               width: 28, height: 28, borderRadius: "50%",
               background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
             }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -206,9 +217,8 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         </div>
       </div>
 
-      {/* ── Row 2+: title, description, metadata ── */}
-      <div style={{ paddingLeft: 58 }}>
-        {/* Film title */}
+      {/* ── Row 2+: title, desc, metadata — indented past art ── */}
+      <div style={{ paddingLeft: 54 }}>
         <div style={{
           fontFamily: "'Barlow Condensed', sans-serif",
           fontWeight: 600, fontSize: 15, color: "#f0ebe1",
@@ -217,7 +227,6 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
           {film_title}
         </div>
 
-        {/* Episode description */}
         {desc && (
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace",
@@ -232,11 +241,11 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
           </div>
         )}
 
-        {/* Bottom row: year + podcast name | watched badge */}
+        {/* Bottom: year · podcast | badge */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10, color: "rgba(255,255,255,0.3)",
@@ -258,14 +267,14 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
             </span>
           </div>
 
-          {/* Watched badge */}
-          {watched && (
+          {/* Watched / Watchlist badge */}
+          {watched ? (
             <div style={{
               display: "flex", alignItems: "center", gap: 4,
-              padding: "2px 8px 2px 6px",
-              borderRadius: 10,
+              padding: "2px 8px 2px 6px", borderRadius: 10,
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.08)",
+              flexShrink: 0, marginLeft: 8,
             }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
@@ -279,13 +288,56 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
                 Watched
               </span>
             </div>
-          )}
+          ) : addedToWatchlist ? (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "2px 8px 2px 6px", borderRadius: 10,
+              background: "rgba(201,124,93,0.06)",
+              border: "1px solid rgba(201,124,93,0.15)",
+              flexShrink: 0, marginLeft: 8,
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8, fontWeight: 600,
+                color: "rgba(201,124,93,0.5)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
+                Added
+              </span>
+            </div>
+          ) : userId ? (
+            <div
+              onClick={handleWatchlist}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "2px 8px 2px 6px", borderRadius: 10,
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                flexShrink: 0, marginLeft: 8, cursor: "pointer",
+              }}
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8, fontWeight: 600,
+                color: "rgba(255,255,255,0.25)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
+                Watchlist
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      {/* ── Expanded: full description ── */}
+      {/* Expanded description */}
       {expanded && fullDesc && fullDesc.length > desc.length && (
-        <div style={{ paddingTop: 8, paddingLeft: 58 }}>
+        <div style={{ paddingTop: 8, paddingLeft: 54 }}>
           <div style={{
             width: "100%", height: 1,
             background: "rgba(255,255,255,0.06)", marginBottom: 8,

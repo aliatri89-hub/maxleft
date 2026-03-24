@@ -280,7 +280,6 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               </div>
             );
           })()}
-          )}
         </div>
 
         {/* RIGHT — star rating sticker (or empty space) */}
