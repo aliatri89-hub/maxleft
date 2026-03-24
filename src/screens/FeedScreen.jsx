@@ -51,37 +51,46 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   // ── Filter state ──
   const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
   const [selectedPodcast, setSelectedPodcast] = useState(null);
+  const [favoriteSlugs, setFavoriteSlugs] = useState(null); // Set<slug> from FeedFilterBar
 
   // ── Filtered + sorted browse items ──
   const filteredReleases = useMemo(() => {
     let items = releases.items;
-    if (selectedPodcast) {
+    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
+      items = items.filter(m => (m.community_slugs || []).some(s => favoriteSlugs.has(s)));
+    } else if (selectedPodcast) {
       items = items.filter(m => (m.community_slugs || []).includes(selectedPodcast));
     }
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
-  }, [releases.items, selectedPodcast, sortOrder]);
+  }, [releases.items, selectedPodcast, favoriteSlugs, sortOrder]);
 
   const filteredPodcast = useMemo(() => {
     let items = podcast.items;
-    if (selectedPodcast) {
+    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
+      items = items.filter(item => favoriteSlugs.has(item.podcast_slug));
+    } else if (selectedPodcast) {
       items = items.filter(item => item.podcast_slug === selectedPodcast);
     }
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
-  }, [podcast.items, selectedPodcast, sortOrder]);
+  }, [podcast.items, selectedPodcast, favoriteSlugs, sortOrder]);
 
   // ── Filtered + sorted activity items ──
   const filteredActivity = useMemo(() => {
     let items = activityItems;
-    if (selectedPodcast) {
+    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
+      items = items.filter(item =>
+        item.type === "log" && (item.data?.communities || []).some(c => favoriteSlugs.has(c.community_slug))
+      );
+    } else if (selectedPodcast) {
       items = items.filter(item =>
         item.type === "log" && (item.data?.communities || []).some(c => c.community_slug === selectedPodcast)
       );
     }
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
-  }, [activityItems, selectedPodcast, sortOrder]);
+  }, [activityItems, selectedPodcast, favoriteSlugs, sortOrder]);
 
   // ── Pull-to-refresh ──
   const [pullDistance, setPullDistance] = useState(0);
@@ -272,6 +281,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         onPodcastChange={setSelectedPodcast}
         communitySubscriptions={communitySubscriptions}
         favoritePodcasts={favoritePodcasts}
+        onFavoriteSlugsReady={setFavoriteSlugs}
       />
 
       {/* ── New Releases pane ── */}
@@ -295,7 +305,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            No releases covered by this podcast
+            No releases covered by {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"}
           </div>
         )}
         {filteredReleases.slice(0, BROWSE_CAP).map((item) => (
@@ -397,7 +407,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            No recent episodes from this podcast
+            No recent episodes from {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"}
           </div>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
@@ -487,7 +497,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            No activity for this podcast yet
+            No activity for {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"} yet
           </div>
         )}
         {(() => {

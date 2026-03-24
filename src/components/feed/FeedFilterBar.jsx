@@ -15,10 +15,11 @@ const SORT_OPTIONS = [
 export default function FeedFilterBar({
   sortOrder = null,
   onSortChange,
-  selectedPodcast = null,  // null = "All Podcasts"
+  selectedPodcast = null,  // null = "All Podcasts", "__favorites__" = favorites group
   onPodcastChange,
   communitySubscriptions,  // Set of community IDs
   favoritePodcasts,        // Set of podcast UUIDs (from user_podcast_favorites)
+  onFavoriteSlugsReady,    // callback: (Set<slug>) => void
 }) {
   const [podcasts, setPodcasts] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -73,9 +74,22 @@ export default function FeedFilterBar({
   const rest = podcasts.filter(p => !favSet.has(p.podcastId));
   const orderedPodcasts = [...subscribed, ...rest];
 
-  const selectedLabel = selectedPodcast
-    ? (podcasts.find(p => p.slug === selectedPodcast)?.name || selectedPodcast)
-    : "All Podcasts";
+  // ── Report favorite slugs to parent for filtering ──
+  const favSlugsRef = useRef(null);
+  useEffect(() => {
+    if (!onFavoriteSlugsReady || subscribed.length === 0) return;
+    const slugs = new Set(subscribed.map(p => p.slug));
+    // Only fire if the set actually changed
+    if (favSlugsRef.current?.size === slugs.size && [...slugs].every(s => favSlugsRef.current.has(s))) return;
+    favSlugsRef.current = slugs;
+    onFavoriteSlugsReady(slugs);
+  }, [subscribed, onFavoriteSlugsReady]);
+
+  const selectedLabel = selectedPodcast === "__favorites__"
+    ? "Favorites"
+    : selectedPodcast
+      ? (podcasts.find(p => p.slug === selectedPodcast)?.name || selectedPodcast)
+      : "All Podcasts";
 
   return (
     <div style={{
@@ -122,12 +136,22 @@ export default function FeedFilterBar({
             display: "flex", alignItems: "center", gap: 6,
             width: "100%",
             padding: "5px 10px",
-            background: selectedPodcast ? (getCommunityAccent(selectedPodcast) + "18") : "rgba(255,255,255,0.04)",
-            border: selectedPodcast
-              ? `1px solid ${getCommunityAccent(selectedPodcast)}44`
-              : "1px solid rgba(255,255,255,0.06)",
+            background: selectedPodcast === "__favorites__"
+              ? "rgba(251,191,36,0.09)"
+              : selectedPodcast
+                ? (getCommunityAccent(selectedPodcast) + "18")
+                : "rgba(255,255,255,0.04)",
+            border: selectedPodcast === "__favorites__"
+              ? "1px solid rgba(251,191,36,0.27)"
+              : selectedPodcast
+                ? `1px solid ${getCommunityAccent(selectedPodcast)}44`
+                : "1px solid rgba(255,255,255,0.06)",
             borderRadius: 8,
-            color: selectedPodcast ? getCommunityAccent(selectedPodcast) : "var(--text-muted, #8892a8)",
+            color: selectedPodcast === "__favorites__"
+              ? "#fbbf24"
+              : selectedPodcast
+                ? getCommunityAccent(selectedPodcast)
+                : "var(--text-muted, #8892a8)",
             fontSize: 11,
             fontWeight: 600,
             fontFamily: "'Barlow Condensed', sans-serif",
@@ -137,7 +161,7 @@ export default function FeedFilterBar({
             transition: "all 0.2s",
           }}
         >
-          {selectedPodcast && (() => {
+          {selectedPodcast && selectedPodcast !== "__favorites__" && (() => {
             const pod = podcasts.find(p => p.slug === selectedPodcast);
             return pod?.artwork_url ? (
               <img src={pod.artwork_url} alt="" style={{
@@ -145,6 +169,9 @@ export default function FeedFilterBar({
               }} />
             ) : null;
           })()}
+          {selectedPodcast === "__favorites__" && (
+            <span style={{ fontSize: 12, flexShrink: 0, lineHeight: 1 }}>★</span>
+          )}
           <span style={{
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "left",
           }}>
@@ -181,6 +208,17 @@ export default function FeedFilterBar({
               accent="#34d399"
               onClick={() => { onPodcastChange(null); setDropdownOpen(false); }}
             />
+
+            {/* Favorites option — only show when there are favorites */}
+            {subscribed.length > 1 && (
+              <DropdownItem
+                label="Favorites"
+                icon="★"
+                active={selectedPodcast === "__favorites__"}
+                accent="#fbbf24"
+                onClick={() => { onPodcastChange("__favorites__"); setDropdownOpen(false); }}
+              />
+            )}
 
             {/* Subscribed divider */}
             {subscribed.length > 0 && rest.length > 0 && (
@@ -238,7 +276,7 @@ export default function FeedFilterBar({
   );
 }
 
-function DropdownItem({ label, artwork, accent, active, onClick }) {
+function DropdownItem({ label, artwork, icon, accent, active, onClick }) {
   return (
     <button
       onClick={onClick}
@@ -258,6 +296,9 @@ function DropdownItem({ label, artwork, accent, active, onClick }) {
         transition: "all 0.15s",
       }}
     >
+      {icon && (
+        <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+      )}
       {artwork && (
         <img src={artwork} alt="" style={{
           width: 20, height: 20, borderRadius: 4, objectFit: "cover", flexShrink: 0,
