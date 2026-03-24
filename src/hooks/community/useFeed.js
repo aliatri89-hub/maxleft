@@ -6,13 +6,16 @@ import { fetchCoversForItems, getPosterUrl, fetchLogosForItems, getLogoUrl } fro
  * useFeed — Activity feed data hook.
  *
  * Architecture:
- *   1. fetchAllData()        — 4 parallel Supabase queries (down from 10)
- *   2. groupAndMergeLogs()   — dedupe logs by tmdb_id, merge community contexts
- *   3. mergeShelfLogs()      — fold in personal shelf logs not already covered
- *   4. buildActivityFeed()   — pure chronological movie logs
- *   5. enrichMedia()         — background poster + logo patching
+ *   1. fetchAllData()           — 3 parallel Supabase queries
+ *   2. groupAndMergeLogs()      — dedupe logs by tmdb_id
+ *   3. mergeShelfLogs()         — fold in personal shelf logs
+ *   4. enrichPodcastCoverage()  — batch RSS coverage → podcast pills
+ *   5. buildActivityFeed()      — pure chronological sort
+ *   6. enrichMedia()            — background poster + logo patching
  *
- * New Releases + Streaming tabs are powered separately (TMDB client-side).
+ * Podcast coverage uses the same data pipe as New Releases / Streaming:
+ *   podcast_episode_films → podcast_episodes → podcasts
+ * No community tracking data flows into the activity feed.
  */
 
 // ════════════════════════════════════════════════
@@ -47,12 +50,12 @@ function _extractStudios(companies) {
 }
 
 // ════════════════════════════════════════════════
-// DATA FETCHING (4 queries — activity only)
+// DATA FETCHING (3 queries)
 // ════════════════════════════════════════════════
 
 function fetchAllData(userId) {
   return Promise.all([
-    // 1. Recent community logs
+    // 1. Community logs (film metadata only — community columns ignored)
     supabase
       .from("feed_user_logs")
       .select("*")
@@ -60,13 +63,7 @@ function fetchAllData(userId) {
       .order("logged_at", { ascending: false })
       .limit(60),
 
-    // 2. Badge metadata (for log enrichment — community context on cards)
-    supabase
-      .from("badges")
-      .select("id, name, miniseries_id, accent_color, image_url, community_id")
-      .eq("is_active", true),
-
-    // 3. Personal shelf logs
+    // 2. Personal shelf logs
     supabase
       .from("feed_shelf_logs")
       .select("*")
@@ -74,50 +71,19 @@ function fetchAllData(userId) {
       .order("watched_at", { ascending: false, nullsFirst: false })
       .limit(40),
 
-    // 4. Community slug ↔ id mapping
-    supabase
-      .from("community_pages")
-      .select("id, slug"),
-
-    // 5. Podcast id → community_page_id mapping (for favorite filtering)
+    // 3. Podcasts (for artwork/name/slug maps)
     supabase
       .from("podcasts")
-      .select("id, community_page_id, artwork_url, name")
+      .select("id, slug, artwork_url, name")
       .eq("active", true),
   ]);
 }
 
 // ════════════════════════════════════════════════
-// LOG GROUPING & MERGING
+// LOG GROUPING & MERGING (no community logic)
 // ════════════════════════════════════════════════
 
-function buildSlugMaps(communityPages) {
-  const slugToId = new Map();
-  const idToSlug = new Map();
-  for (const cp of communityPages) {
-    slugToId.set(cp.slug, cp.id);
-    idToSlug.set(cp.id, cp.slug);
-  }
-  return { slugToId, idToSlug };
-}
-
-function buildBadgeLookup(rawBadgeLookup) {
-  const badgeByMiniseries = new Map();
-  for (const b of rawBadgeLookup) {
-    if (b.miniseries_id) {
-      badgeByMiniseries.set(b.miniseries_id, {
-        badge_id: b.id,
-        badge_name: b.name,
-        accent_color: b.accent_color,
-        badge_image: b.image_url,
-        miniseries_id: b.miniseries_id,
-      });
-    }
-  }
-  return badgeByMiniseries;
-}
-
-function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToArtwork) {
+function groupAndMergeLogs(rawLogs) {
   const logGroups = new Map();
 
   for (const log of rawLogs) {
@@ -158,29 +124,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToAr
     const group = logGroups.get(groupKey);
     if (!group.backdrop_path && log.backdrop_path) group.backdrop_path = log.backdrop_path;
     if (new Date(effectiveDate) > new Date(group.logged_at)) group.logged_at = effectiveDate;
-
-    if (log.community_name) {
-      // Track coverage from ANY community (before subscription filter)
-      if (log.episode_url) group.has_podcast_coverage = true;
-      if (subscribedSlugs && !subscribedSlugs.has(log.community_slug)) continue;
-      const alreadyAdded = group.communities.some(
-        c => c.community_slug === log.community_slug && c.series_title === log.series_title
-      );
-      if (!alreadyAdded) {
-        const badge = badgeByMiniseries.get(log.miniseries_id) || null;
-        group.communities.push({
-          community_name: log.community_name,
-          community_slug: log.community_slug,
-          community_image: slugToArtwork?.get(log.community_slug) || log.community_image,
-          series_title: log.series_title,
-          series_watched: log.series_watched,
-          series_total: log.series_total,
-          badge,
-          episode_url: log.episode_url || null,
-          episode_title: log.episode_title || null,
-        });
-      }
-    }
+    if (log.rating && (!group.rating || log.rating > group.rating)) group.rating = log.rating;
   }
 
   // Merge groups that share the same tmdb_id across different dates
@@ -197,14 +141,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToAr
       const existing = mergedGroups.get(mKey);
       if (new Date(group.logged_at) > new Date(existing.logged_at)) existing.logged_at = group.logged_at;
       if (group.rating && (!existing.rating || group.rating > existing.rating)) existing.rating = group.rating;
-      for (const c of group.communities) {
-        const dup = existing.communities.some(
-          ec => ec.community_slug === c.community_slug && ec.series_title === c.series_title
-        );
-        if (!dup) existing.communities.push(c);
-      }
       if (!existing.backdrop_path && group.backdrop_path) existing.backdrop_path = group.backdrop_path;
-      if (group.has_podcast_coverage) existing.has_podcast_coverage = true;
     }
   }
 
@@ -212,12 +149,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToAr
 }
 
 function mergeShelfLogs(mergedGroups, rawShelfLogs) {
-  const tmdbSeen = new Set();
-  for (const group of mergedGroups.values()) {
-    if (group.communities.length > 0 && group.tmdb_id) tmdbSeen.add(group.tmdb_id);
-  }
-
-  // First pass: enrich existing community groups with letterboxd_url from shelf logs
+  // Enrich existing groups with letterboxd_url from shelf logs
   for (const shelf of rawShelfLogs) {
     if (!shelf.tmdb_id) continue;
     const lbUrl = shelf.extra_data?.letterboxd_url || null;
@@ -229,12 +161,15 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
     }
   }
 
-  for (const [key, group] of mergedGroups) {
-    if (group.communities.length === 0) mergedGroups.delete(key);
+  // Add shelf-only logs (not already in feed from community logs)
+  const tmdbSeen = new Set();
+  for (const group of mergedGroups.values()) {
+    if (group.tmdb_id) tmdbSeen.add(group.tmdb_id);
   }
 
   for (const shelf of rawShelfLogs) {
     if (shelf.tmdb_id && tmdbSeen.has(shelf.tmdb_id)) continue;
+    if (shelf.tmdb_id) tmdbSeen.add(shelf.tmdb_id);
     const dateKey = shelf.watched_at
       ? new Date(shelf.watched_at).toISOString().slice(0, 10)
       : "unknown";
@@ -275,6 +210,72 @@ function mergeShelfLogs(mergedGroups, rawShelfLogs) {
 }
 
 // ════════════════════════════════════════════════
+// PODCAST COVERAGE (same pipe as browse feeds)
+// ════════════════════════════════════════════════
+
+async function enrichPodcastCoverage(mergedGroups, podcasts, favoritePodcastIds) {
+  // Collect tmdb_ids from all cards
+  const tmdbIds = [];
+  for (const group of mergedGroups.values()) {
+    if (group.tmdb_id) tmdbIds.push(group.tmdb_id);
+  }
+  if (tmdbIds.length === 0) return;
+
+  // Batch query: which podcasts covered which films?
+  const { data: coverage, error } = await supabase.rpc("get_podcast_coverage_for_feed", {
+    p_tmdb_ids: tmdbIds,
+  });
+
+  if (error || !coverage) {
+    console.warn("[Feed] podcast coverage query failed:", error?.message);
+    return;
+  }
+
+  // Build podcast lookup: id → { slug, artwork_url, name }
+  const podcastMap = new Map();
+  for (const p of podcasts) {
+    podcastMap.set(p.id, { slug: p.slug, artwork_url: p.artwork_url, name: p.name });
+  }
+
+  // Group coverage by tmdb_id
+  const coverageByFilm = new Map();
+  for (const row of coverage) {
+    if (!coverageByFilm.has(row.tmdb_id)) coverageByFilm.set(row.tmdb_id, new Set());
+    coverageByFilm.get(row.tmdb_id).add(row.podcast_id);
+  }
+
+  const hasFavorites = favoritePodcastIds && favoritePodcastIds.size > 0;
+
+  // Inject podcast pills into each card
+  for (const group of mergedGroups.values()) {
+    if (!group.tmdb_id) continue;
+    const podcastIds = coverageByFilm.get(group.tmdb_id);
+    if (!podcastIds) continue;
+
+    // Headphone icon: any podcast covered this film
+    group.has_podcast_coverage = true;
+
+    // Pills: only from user's favorite podcasts
+    if (!hasFavorites) continue;
+    for (const pid of podcastIds) {
+      if (!favoritePodcastIds.has(pid)) continue;
+      const pod = podcastMap.get(pid);
+      if (!pod || !pod.artwork_url) continue;
+
+      // Avoid dupes (shouldn't happen, but safe)
+      const already = group.communities.some(c => c.community_slug === pod.slug);
+      if (!already) {
+        group.communities.push({
+          community_name: pod.name,
+          community_slug: pod.slug,
+          community_image: pod.artwork_url,
+        });
+      }
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
 // FEED BUILDER
 // ════════════════════════════════════════════════
 
@@ -285,20 +286,6 @@ function buildActivityFeed(mergedGroups) {
       if (diff !== 0) return diff;
       return new Date(b._created_at || 0) - new Date(a._created_at || 0);
     });
-
-  // Fix series progress: older logs show lower counts
-  const seriesSeenCount = {};
-  for (const log of sorted) {
-    for (const c of log.communities) {
-      const key = `${c.community_slug}_${c.series_title}`;
-      if (!seriesSeenCount[key]) seriesSeenCount[key] = 0;
-      const offset = seriesSeenCount[key];
-      if (offset > 0 && c.series_watched > 0) {
-        c.series_watched = Math.max(0, c.series_watched - offset);
-      }
-      seriesSeenCount[key]++;
-    }
-  }
 
   return sorted.map(data => ({ type: "log", data }));
 }
@@ -409,43 +396,21 @@ export function useFeed(userId, favoritePodcastIds) {
     const thisGen = ++fetchGenRef.current;
 
     try {
-      const [
-        logsRes, badgeLookupRes, shelfRes, communityPagesRes, podcastsRes,
-      ] = await fetchAllData(userId);
+      const [logsRes, shelfRes, podcastsRes] = await fetchAllData(userId);
 
       if (!mountedRef.current) return;
 
       const rawLogs = logsRes.data || [];
-      const rawBadgeLookup = badgeLookupRes.data || [];
       const rawShelfLogs = shelfRes.data || [];
-      const communityPages = communityPagesRes.data || [];
       const podcasts = podcastsRes.data || [];
 
-      const { idToSlug } = buildSlugMaps(communityPages);
-      const badgeByMiniseries = buildBadgeLookup(rawBadgeLookup);
-
-      // Build slug set from favorite podcasts (podcast_id → community_page_id → slug)
-      const hasFavorites = favoritePodcastIds && favoritePodcastIds.size > 0;
-      const subscribedSlugs = hasFavorites
-        ? new Set(
-            podcasts
-              .filter(p => favoritePodcastIds.has(p.id) && p.community_page_id)
-              .map(p => idToSlug.get(p.community_page_id))
-              .filter(Boolean)
-          )
-        : null;
-
-      // Build slug → podcast artwork map (more reliable than community_pages.logo_url)
-      const slugToArtwork = new Map();
-      for (const p of podcasts) {
-        if (p.community_page_id && p.artwork_url) {
-          const slug = idToSlug.get(p.community_page_id);
-          if (slug) slugToArtwork.set(slug, p.artwork_url);
-        }
-      }
-
-      const mergedGroups = groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToArtwork);
+      const mergedGroups = groupAndMergeLogs(rawLogs);
       mergeShelfLogs(mergedGroups, rawShelfLogs);
+
+      // Podcast coverage — same pipe as browse feeds
+      await enrichPodcastCoverage(mergedGroups, podcasts, favoritePodcastIds);
+
+      if (!mountedRef.current) return;
 
       const activityCards = buildActivityFeed(mergedGroups);
 
