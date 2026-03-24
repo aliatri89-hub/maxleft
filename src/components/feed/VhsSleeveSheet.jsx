@@ -790,41 +790,38 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <WatchProviders providers={providers} />
           )}
 
-          {/* ═══ WATCHLIST BUTTON ═══ */}
-          {userIdRef.current && (
-            <div style={{ padding: "8px 0 4px" }}>
+          {/* ═══ WATCHLIST BUTTON — hidden for already-logged films ═══ */}
+          {userIdRef.current && !data?.logged_at && !data?.completed_at && (
+            <div style={{ padding: "6px 0 2px" }}>
               <button
                 onClick={toggleWatchlist}
                 disabled={watchlistSaving}
                 style={{
-                  width: "100%", padding: "12px 0",
-                  background: onWatchlist ? "rgba(76,175,80,0.1)" : "rgba(239,159,39,0.08)",
-                  border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.25)" : "rgba(239,159,39,0.18)"}`,
-                  borderRadius: 10,
-                  color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.7)",
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 13, letterSpacing: "0.04em",
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "5px 14px 5px 10px",
+                  background: onWatchlist ? "rgba(76,175,80,0.08)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
+                  borderRadius: 20,
+                  color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.45)",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 11, fontWeight: 600,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
                   cursor: watchlistSaving ? "wait" : "pointer",
                   transition: "all 0.2s",
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
                 {onWatchlist ? (
-                  <>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    On Watchlist
-                  </>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 ) : (
-                  <>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Add to Watchlist
-                  </>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
                 )}
+                {onWatchlist ? "On Watchlist" : "Watchlist"}
               </button>
             </div>
           )}
