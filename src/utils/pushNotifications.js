@@ -18,7 +18,7 @@ async function getPush() {
   _loadAttempted = true;
 
   try {
-    const mod = await import(/* @vite-ignore */ '@capacitor/push-notifications');
+    const mod = await import('@capacitor/push-notifications');
     _PushNotifications = mod.PushNotifications;
     return _PushNotifications;
   } catch (e) {
