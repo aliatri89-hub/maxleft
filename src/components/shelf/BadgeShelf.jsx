@@ -4,7 +4,7 @@ import { supabase } from "../../supabase";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
 
 const accent = "#EF9F27";
-const SIZE = 76;
+const SIZE = 72;
 const STROKE = 2.5;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -17,7 +17,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
       onClick={onTap}
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        cursor: "pointer", width: 86,
+        cursor: "pointer", width: 78,
         animation: `badgeShelfIn 0.4s ${delay}s ease-out both`,
         opacity: 0,
       }}
@@ -76,7 +76,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
             textTransform: "uppercase",
             textAlign: "center",
             lineHeight: 1.3,
-            maxWidth: 86,
+            maxWidth: 78,
             whiteSpace: "nowrap",
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -93,7 +93,7 @@ function EmptySlot({ delay = 0, onTap }) {
   return (
     <div onClick={onTap} style={{
       display: "flex", flexDirection: "column", alignItems: "center",
-      width: 86, cursor: "pointer",
+      width: 78, cursor: "pointer",
       animation: `badgeShelfIn 0.4s ${delay}s ease-out both`, opacity: 0,
     }}>
       <div style={{
@@ -256,17 +256,17 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
 
   const displayBadges = useMemo(() => {
     if (!isCustomized) {
-      // Default: 3 most recent earned
-      return earnedBadges.slice(0, 3);
+      // Default: 4 most recent earned
+      return earnedBadges.slice(0, 4);
     }
     // Custom: look up each pinned badge ID from earned badges
     const earnedMap = new Map(earnedBadges.map(b => [b.id, b]));
-    return customPicks.slice(0, 3).map(id => earnedMap.get(id) || null);
+    return customPicks.slice(0, 4).map(id => earnedMap.get(id) || null);
   }, [earnedBadges, customPicks, isCustomized]);
 
   // Current slot IDs for the picker (to grey out already-pinned ones)
   const currentSlotIds = useMemo(() => {
-    if (isCustomized) return [...customPicks.slice(0, 3)];
+    if (isCustomized) return [...customPicks.slice(0, 4)];
     return displayBadges.map(b => b?.id || null);
   }, [displayBadges, customPicks, isCustomized]);
 
@@ -291,7 +291,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
   const handlePick = (badgeId) => {
     const newPicks = [...currentSlotIds];
     // Ensure array is 3 long
-    while (newPicks.length < 3) newPicks.push(null);
+    while (newPicks.length < 4) newPicks.push(null);
     newPicks[pickerSlot] = badgeId;
     savePicks(newPicks);
     setPickerSlot(null);
@@ -299,7 +299,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
 
   const handleClear = () => {
     const newPicks = [...currentSlotIds];
-    while (newPicks.length < 3) newPicks.push(null);
+    while (newPicks.length < 4) newPicks.push(null);
     newPicks[pickerSlot] = null;
     // If all slots empty, reset to null (back to default behavior)
     const allEmpty = newPicks.every(id => !id);
@@ -325,8 +325,8 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         padding: "8px 8px 2px",
       }}>
         {loading ? (
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, padding: "8px 0" }}>
-            {[0,1,2].map(i => (
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, padding: "8px 0" }}>
+            {[0,1,2,3].map(i => (
               <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
                 <div className="skeleton-dark" style={{ width: SIZE, height: SIZE, borderRadius: "50%" }} />
                 <div className="skeleton-dark" style={{ width: 28, height: 20, borderRadius: 2 }} />
@@ -343,8 +343,8 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
             </div>
           </div>
         ) : (
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "nowrap" }}>
-            {[0, 1, 2].map(i => {
+          <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "nowrap" }}>
+            {[0, 1, 2, 3].map(i => {
               const badge = displayBadges[i];
               return badge ? (
                 <BadgeSlot
@@ -364,7 +364,7 @@ export default function BadgeShelf({ session, profile, onUpdateProfile, onToast 
         )}
 
         {/* Nudge to explore communities when shelf isn't full */}
-        {!loading && hasAnyBadges && displayBadges.filter(Boolean).length < 3 && (
+        {!loading && hasAnyBadges && displayBadges.filter(Boolean).length < 4 && (
           <div style={{
             textAlign: "center", marginTop: 6,
             fontSize: 11, color: "var(--text-faint)",
