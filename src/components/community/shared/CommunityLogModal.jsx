@@ -640,7 +640,7 @@ export default function CommunityLogModal({
                 />
               </div>
 
-              {/* Already Seen + Want to Watch */}
+              {/* Already Seen + Watch List */}
               <div style={{ display: "flex", gap: 8 }}>
                 <button
                   onClick={handleAlreadySeen}
@@ -657,21 +657,23 @@ export default function CommunityLogModal({
                 >
                   ✓ Already Seen
                 </button>
-                <button
-                  onClick={handleWatchlist}
-                  disabled={saving}
-                  style={{
-                    flex: 1, padding: "11px 0",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 12,
-                    color: "#999", fontSize: 12, fontWeight: 600,
-                    cursor: saving ? "wait" : "pointer",
-                    transition: "background 0.2s",
-                  }}
-                >
-                  {(isFilm || isShow) ? "👁 Watch List" : isBook ? "📚 Read List" : "🎮 Play List"}
-                </button>
+                {(isFilm || isShow) && (
+                  <button
+                    onClick={handleWatchlist}
+                    disabled={saving}
+                    style={{
+                      flex: 1, padding: "11px 0",
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 12,
+                      color: "#999", fontSize: 12, fontWeight: 600,
+                      cursor: saving ? "wait" : "pointer",
+                      transition: "background 0.2s",
+                    }}
+                  >
+                    👁 Watchlist
+                  </button>
+                )}
               </div>
             </>
           )}

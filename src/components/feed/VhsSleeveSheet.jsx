@@ -151,14 +151,56 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [hiddenEpIds, setHiddenEpIds] = useState(new Set()); // admin-deleted episodes
   const [isAdmin, setIsAdmin] = useState(false);
   const [providers, setProviders] = useState(null);
+  const [onWatchlist, setOnWatchlist] = useState(false);
+  const [watchlistSaving, setWatchlistSaving] = useState(false);
+  const userIdRef = useRef(null);
   const prevTmdbId = useRef(null);
 
-  // Admin check (once)
+  // Session check (once)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.id === "19410e64-d610-4fab-9c26-d24fafc94696") setIsAdmin(true);
+      if (session?.user?.id) {
+        userIdRef.current = session.user.id;
+        if (session.user.id === "19410e64-d610-4fab-9c26-d24fafc94696") setIsAdmin(true);
+      }
     });
   }, []);
+
+  // Check watchlist status when card opens
+  useEffect(() => {
+    if (!open || !data?.title || !userIdRef.current) { setOnWatchlist(false); return; }
+    supabase.from("wishlist").select("id")
+      .eq("user_id", userIdRef.current).eq("title", data.title)
+      .in("item_type", ["movie", "show"])
+      .maybeSingle()
+      .then(({ data: row }) => setOnWatchlist(!!row));
+  }, [open, data?.title]);
+
+  const toggleWatchlist = async () => {
+    if (!userIdRef.current || !data?.title || watchlistSaving) return;
+    setWatchlistSaving(true);
+    try {
+      if (onWatchlist) {
+        await supabase.from("wishlist").delete()
+          .eq("user_id", userIdRef.current).eq("title", data.title)
+          .in("item_type", ["movie", "show"]);
+        setOnWatchlist(false);
+      } else {
+        const coverUrl = data.poster_path
+          ? `https://image.tmdb.org/t/p/w342${data.poster_path}`
+          : data.cover_url || null;
+        await supabase.from("wishlist").insert({
+          user_id: userIdRef.current,
+          item_type: "movie",
+          title: data.title,
+          cover_url: coverUrl,
+          year: data.year || null,
+        });
+        setOnWatchlist(true);
+      }
+    } catch (e) { console.warn("[VhsSleeve] Watchlist error:", e); }
+    setWatchlistSaving(false);
+  };
 
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
@@ -169,6 +211,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       setExpandedEpId(null);
       setHiddenEpIds(new Set());
       setProviders(null);
+      setOnWatchlist(false);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -744,6 +787,45 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* ═══ WHERE TO WATCH — streaming feed only ═══ */}
           {providers && (providers.stream.length > 0 || providers.rent.length > 0) && (
             <WatchProviders providers={providers} />
+          )}
+
+          {/* ═══ WATCHLIST BUTTON ═══ */}
+          {userIdRef.current && (
+            <div style={{ padding: "8px 0 4px" }}>
+              <button
+                onClick={toggleWatchlist}
+                disabled={watchlistSaving}
+                style={{
+                  width: "100%", padding: "12px 0",
+                  background: onWatchlist ? "rgba(76,175,80,0.1)" : "rgba(239,159,39,0.08)",
+                  border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.25)" : "rgba(239,159,39,0.18)"}`,
+                  borderRadius: 10,
+                  color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.7)",
+                  fontFamily: "'Permanent Marker', cursive",
+                  fontSize: 13, letterSpacing: "0.04em",
+                  cursor: watchlistSaving ? "wait" : "pointer",
+                  transition: "all 0.2s",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}
+              >
+                {onWatchlist ? (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    On Watchlist
+                  </>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Add to Watchlist
+                  </>
+                )}
+              </button>
+            </div>
           )}
 
           {/* ═══ EPISODE PICKER — when opened from browse cards ═══ */}

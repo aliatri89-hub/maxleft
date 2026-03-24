@@ -238,12 +238,11 @@ export function useCommunityActions(userId, setProgress) {
     }
   }, [userId, setProgress]);
 
-  // --- Add to watchlist ---
+  // --- Add to watchlist (films & shows only) ---
   const addToWatchlist = useCallback(async (item, coverUrl) => {
     if (!userId || !item) return;
 
     const itemType = item.media_type === "film" ? "movie" : item.media_type;
-    const label = itemType === "book" ? "reading list" : itemType === "game" ? "play list" : "watch list";
 
     const { error } = await supabase.from("wishlist").insert({
       user_id: userId,
@@ -258,7 +257,7 @@ export function useCommunityActions(userId, setProgress) {
       throw error;
     }
 
-    console.log(`[Community] Added "${item.title}" to ${label}`);
+    console.log(`[Community] Added "${item.title}" to watchlist`);
   }, [userId]);
 
   return { logItem, logCommentaryOnly, unlogItem, addToWatchlist };

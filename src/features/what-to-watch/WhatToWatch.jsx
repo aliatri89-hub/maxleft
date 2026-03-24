@@ -447,7 +447,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
       });
       if (error) throw error;
       setSaved(true);
-      onToast?.("Added to watch list");
+      onToast?.("Added to watchlist");
     } catch { onToast?.("Couldn't save — try again"); }
     setSaving(false);
   }, [userId, film, saving, saved, onToast]);
