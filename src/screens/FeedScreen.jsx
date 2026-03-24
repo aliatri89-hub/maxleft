@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
+import { usePodcastFeed } from "../hooks/community/usePodcastFeed";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
@@ -8,6 +9,7 @@ import FeedFilterBar from "../components/feed/FeedFilterBar";
 import {
   LogCard,
   BrowseCard,
+  PodcastCard,
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
@@ -15,14 +17,14 @@ import IngestReviewTool from "../components/feed/IngestReviewTool";
 import BrowseLoadingSplash from "../components/feed/BrowseLoadingSplash";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN — New Releases | Streaming | Activity | Inbox (admin)
+// FEED SCREEN — New Releases | Podcast | Activity | Inbox (admin)
 // ════════════════════════════════════════════════
 
 const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 const BASE_TABS = [
   { key: "releases",  label: "New Releases" },
-  { key: "streaming", label: "Streaming" },
+  { key: "podcast",   label: "Podcast" },
   { key: "activity",  label: "Activity" },
 ];
 const INBOX_TAB = { key: "inbox", label: "Inbox" };
@@ -38,7 +40,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     loading, refresh,
   } = useFeed(userId, communitySubscriptions);
   const releases = useBrowseFeed("releases", feedMode === "releases");
-  const streaming = useBrowseFeed("streaming", feedMode === "streaming");
+  const podcast = usePodcastFeed(feedMode === "podcast");
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
@@ -47,7 +49,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [showShareShelf, setShowShareShelf] = useState(false);
   const activitySentinelRef = useRef(null);
   const releasesSentinelRef = useRef(null);
-  const streamingSentinelRef = useRef(null);
+  const podcastSentinelRef = useRef(null);
 
   // ── Filter state ──
   const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
@@ -63,14 +65,14 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     return items;
   }, [releases.items, selectedPodcast, sortOrder]);
 
-  const filteredStreaming = useMemo(() => {
-    let items = streaming.items;
+  const filteredPodcast = useMemo(() => {
+    let items = podcast.items;
     if (selectedPodcast) {
-      items = items.filter(m => (m.community_slugs || []).includes(selectedPodcast));
+      items = items.filter(item => item.podcast_slug === selectedPodcast);
     }
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
-  }, [streaming.items, selectedPodcast, sortOrder]);
+  }, [podcast.items, selectedPodcast, sortOrder]);
 
   // ── Filtered + sorted activity items ──
   const filteredActivity = useMemo(() => {
@@ -156,15 +158,15 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   }, [releases.hasMore, releases.loadMore, releases.items.length, feedMode]);
 
   useEffect(() => {
-    const el = streamingSentinelRef.current;
-    if (!el || !streaming.hasMore || feedMode !== "streaming" || streaming.items.length >= BROWSE_CAP) return;
+    const el = podcastSentinelRef.current;
+    if (!el || !podcast.hasMore || feedMode !== "podcast" || podcast.items.length >= BROWSE_CAP) return;
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) streaming.loadMore(); },
+      ([entry]) => { if (entry.isIntersecting) podcast.loadMore(); },
       { rootMargin: "200px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [streaming.hasMore, streaming.loadMore, streaming.items.length, feedMode]);
+  }, [podcast.hasMore, podcast.loadMore, podcast.items.length, feedMode]);
 
   useEffect(() => {
     const el = activitySentinelRef.current;
@@ -366,35 +368,53 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         )}
       </div>
 
-      {/* ── Streaming pane ── */}
-      <div style={{ display: feedMode === "streaming" ? "block" : "none" }}>
-        {streaming.loading && streaming.items.length === 0 && (
-          <BrowseLoadingSplash mode="streaming" />
+      {/* ── Podcast pane ── */}
+      <div style={{ display: feedMode === "podcast" ? "block" : "none", padding: "0 14px" }}>
+        {podcast.loading && podcast.items.length === 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} style={{
+                height: 100, borderRadius: 14,
+                background: "var(--bg-card, #1a1714)",
+                opacity: 0.5 - i * 0.1,
+                animation: "skeleton-pulse 1.5s ease infinite",
+                animationDelay: `${i * 0.15}s`,
+              }} />
+            ))}
+          </div>
         )}
-        {streaming.items.length === 0 && !streaming.loading && (
+        {podcast.items.length === 0 && !podcast.loading && (
           <div style={{
             padding: "40px 24px", textAlign: "center",
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            <div style={{ fontSize: 28, marginBottom: 10 }}>📺</div>
-            No podcast coverage for streaming films yet
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🎙️</div>
+            No recent podcast coverage yet
           </div>
         )}
-        {streaming.items.length > 0 && filteredStreaming.length === 0 && selectedPodcast && (
+        {podcast.items.length > 0 && filteredPodcast.length === 0 && selectedPodcast && (
           <div style={{
             padding: "40px 24px", textAlign: "center",
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            No streaming films covered by this podcast
+            No recent episodes from this podcast
           </div>
         )}
-        {filteredStreaming.slice(0, BROWSE_CAP).map((item) => (
-          <BrowseCard key={`str-${item.tmdb_id}`} data={item} variant="streaming" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
-        ))}
-        {streaming.hasMore && streaming.items.length < BROWSE_CAP && <div ref={streamingSentinelRef} style={{ height: 1 }} />}
-        {streaming.loading && streaming.items.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
+          {filteredPodcast.slice(0, BROWSE_CAP).map((item, i) => (
+            <FeedCard
+              key={`pod-${item.episode_id}-${item.tmdb_id}`}
+              index={i}
+              dismissable={false}
+            >
+              <PodcastCard item={item} />
+            </FeedCard>
+          ))}
+        </div>
+        {podcast.hasMore && podcast.items.length < BROWSE_CAP && <div ref={podcastSentinelRef} style={{ height: 1 }} />}
+        {podcast.loading && podcast.items.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
             <div style={{
               width: 24, height: 24, borderRadius: "50%",
@@ -404,7 +424,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             }} />
           </div>
         )}
-        {filteredStreaming.length > 0 && !streaming.loading && (
+        {filteredPodcast.length > 0 && !podcast.loading && (
           <div style={{
             padding: "28px 24px 36px", textAlign: "center",
           }}>
@@ -419,7 +439,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
             }}>
-              — end of streaming —
+              — end of podcast —
             </div>
             <div style={{
               marginTop: 16,
@@ -427,7 +447,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
             }}>
-              Looking for something?
+              Looking for something specific?
             </div>
             <div
               onClick={onNavigateSearch}
