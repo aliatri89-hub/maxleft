@@ -9,6 +9,7 @@ import FilmspottingScreen from "../components/community/filmspotting/Filmspottin
 import RewatchablesScreen from "../components/community/rewatchables/RewatchablesScreen";
 import ChapoScreen from "../components/community/chapo/ChapoScreen";
 import GetPlayedScreen from "../components/community/getplayed/GetPlayedScreen";
+import OriginalsScreen from "../components/community/originals/OriginalsScreen";
 
 /**
  * CommunityRouter — replaces CommunityScreen.jsx
@@ -81,6 +82,8 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
       return <ChapoScreen {...sharedProps} />;
     case "getplayed":
       return <GetPlayedScreen {...sharedProps} />;
+    case "originals":
+      return <OriginalsScreen {...sharedProps} />;
     default:
       console.warn(`[CommunityRouter] Unknown community_type "${communityType}" for slug "${slug}". Falling back to BlankCheckScreen.`);
       return <BlankCheckScreen {...sharedProps} />;

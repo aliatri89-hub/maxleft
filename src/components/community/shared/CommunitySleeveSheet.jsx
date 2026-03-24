@@ -25,6 +25,7 @@ const SLUG_ABBREV = {
   blankcheck: "BC", nowplaying: "NP", bigpicture: "BP",
   filmjunk: "FJ", hdtgm: "HD", filmspotting: "FS",
   rewatchables: "RW", chapo: "CT", getplayed: "GP",
+  originals: "MO",
 };
 
 export default function CommunitySleeveSheet({
