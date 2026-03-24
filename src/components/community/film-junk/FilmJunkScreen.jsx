@@ -226,6 +226,7 @@ export default function FilmJunkScreen({ community, miniseries, session, onBack,
     <div style={{
       minHeight: "100vh", background: "#0f0d0b",
       overflowX: "hidden",
+      paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: hasBottomNav ? 72 : "env(safe-area-inset-bottom, 0px)",
     }}>
       {/* Back nav */}

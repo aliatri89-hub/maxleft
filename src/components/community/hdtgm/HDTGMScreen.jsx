@@ -107,6 +107,7 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
     <div style={{
       height: "100dvh", background: "#0f0d0b",
       overflowX: "hidden", overflowY: "auto",
+      paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
     }}>
       {/* Back nav */}

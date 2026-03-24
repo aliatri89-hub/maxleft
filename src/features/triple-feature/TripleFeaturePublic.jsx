@@ -489,6 +489,7 @@ const S = {
     fontFamily: "'Barlow Condensed','Helvetica Neue',sans-serif",
     position: "relative", overflow: "hidden",
     paddingTop: "env(safe-area-inset-top, 0px)",
+    paddingTop: "env(safe-area-inset-top, 0px)",
   },
   inner: { maxWidth: 440, margin: "0 auto", padding: "12px 16px 40px" },
   glowTL: {

@@ -250,6 +250,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     <div style={{
       width: "100%", height: "100dvh", display: "flex", flexDirection: "column",
       background: "#0f0d0b", overflowX: "hidden",
+      paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap');`}</style>
       <style>{`

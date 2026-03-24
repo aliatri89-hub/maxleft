@@ -2040,7 +2040,7 @@ export default function NPPDashboard({ session: sessionProp }) {
   if (loading) return <Skeleton />;
 
   return (
-    <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, paddingTop: "env(safe-area-inset-top, 0px)" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }

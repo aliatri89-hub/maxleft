@@ -67,6 +67,7 @@ export default function FilmspottingScreen({ community, miniseries, session, onB
     <div style={{
       height: "100dvh", background: "#0f0d0b",
       overflowX: "hidden", overflowY: "auto",
+      paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
     }}>
       {/* Back nav */}

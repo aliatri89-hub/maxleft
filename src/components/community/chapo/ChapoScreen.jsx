@@ -103,6 +103,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
     <div style={{
       height: "100dvh", background: "#0f0d0b",
       overflowX: "hidden", overflowY: "auto",
+      paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
     }}>
       <style>{`

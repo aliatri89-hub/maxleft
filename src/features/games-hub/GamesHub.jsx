@@ -178,6 +178,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       minHeight: "100vh", background: "#0f0d0b", color: "#f5f0e8",
       fontFamily: "'IBM Plex Mono', monospace", padding: "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
+      paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       <style>{CSS}</style>
 
