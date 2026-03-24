@@ -254,10 +254,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               lineHeight: 1.4,
               overflow: "hidden",
               display: "-webkit-box",
-              WebkitLineClamp: expanded ? 999 : 2,
+              WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
             }}>
-              {expanded ? fullDesc : desc}
+              {desc}
             </div>
           )}
         </div>
