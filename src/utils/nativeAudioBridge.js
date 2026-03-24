@@ -218,7 +218,7 @@ function createNativeBridge() {
           showSeekBackward: true,
           showSeekForward: true,
           seekBackwardTime: 15,
-          seekForwardTime: 30,
+          seekForwardTime: 15,
         });
         _created = true;
 
@@ -424,7 +424,7 @@ function createWebBridge() {
           play: () => audio.play().catch(() => {}),
           pause: () => audio.pause(),
           seekbackward: (d) => { audio.currentTime = Math.max(0, audio.currentTime - (d.seekOffset || 15)); },
-          seekforward: (d) => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 30)); },
+          seekforward: (d) => { audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (d.seekOffset || 15)); },
           seekto: (d) => { if (d.seekTime != null) audio.currentTime = d.seekTime; },
           stop: () => { audio.pause(); audio.src = ""; },
         };

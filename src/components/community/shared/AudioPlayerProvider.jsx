@@ -869,10 +869,10 @@ function FullScreenPlayer({
             )}
           </button>
 
-          {/* Skip forward 30 */}
+          {/* Skip forward 15 */}
           <button
-            onClick={() => onSkip(30)}
-            aria-label="Forward 30 seconds"
+            onClick={() => onSkip(15)}
+            aria-label="Forward 15 seconds"
             style={{
               background: "none", border: "none", cursor: "pointer",
               color: "rgba(255,255,255,0.5)", padding: 8,
@@ -884,7 +884,7 @@ function FullScreenPlayer({
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
             </svg>
-            <span style={{ fontSize: 9, fontWeight: 700 }}>30</span>
+            <span style={{ fontSize: 9, fontWeight: 700 }}>15</span>
           </button>
 
           {/* Sleep timer */}

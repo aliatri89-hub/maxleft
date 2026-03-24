@@ -1,0 +1,13 @@
+diff --git a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
+index f4dc858..62cfaec 100644
+--- a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
++++ b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
+@@ -36,6 +36,8 @@ public class AudioPlayerService extends MediaSessionService {
+         );
+ 
+         ExoPlayer player = new ExoPlayer.Builder(this)
++            .setSeekBackIncrementMs(15_000)
++            .setSeekForwardIncrementMs(15_000)
+             .setAudioAttributes(
+                 new AudioAttributes.Builder()
+                     .setUsage(C.USAGE_MEDIA)
