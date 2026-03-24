@@ -118,6 +118,24 @@ const GAMES = [
   },
 ];
 
+// ── External games ──
+
+const EXTERNAL_GAMES = [
+  { id: "framed", name: "Framed", tagline: "Guess the movie from stills", url: "https://framed.wtf" },
+  { id: "cinematrix", name: "Cinematrix", tagline: "Fill the film grid", url: "https://cinematrix.app" },
+  { id: "boxOffice", name: "Box Office Game", tagline: "Guess the #1 movie", url: "https://boxofficega.me" },
+];
+
+function ExternalLinkIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path d="M6 3H4C3.44772 3 3 3.44772 3 4V12C3 12.5523 3.44772 13 4 13H12C12.5523 13 13 12.5523 13 12V10" stroke="#6b6256" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M9 3H13V7" stroke="#6b6256" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 3L8 8" stroke="#6b6256" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 // ── Styles ──
 
 const CSS = `
@@ -137,7 +155,6 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
   }, []);
 
   const dailyGames = GAMES.filter((g) => g.daily);
-  const anytimeGames = GAMES.filter((g) => !g.daily);
   const completedCount = dailyGames.filter((g) => gameStatuses[g.id] === "completed").length;
 
   function StatusPill({ gameId, color }) {
@@ -242,16 +259,16 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         </span>
       </div>
 
-      {/* Daily puzzles */}
+      {/* Our Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
         color: "#6b6256", margin: "20px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.3s",
       }}>
-        Daily Puzzles
+        Our Games
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {dailyGames.map((game, i) => {
+        {GAMES.map((game, i) => {
           const Icon = ICONS[game.id];
           const isDone = gameStatuses[game.id] === "completed";
           return (
@@ -312,58 +329,60 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         })}
       </div>
 
-      {/* Anytime */}
+      {/* Other Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
         color: "#6b6256", margin: "24px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.4s",
       }}>
-        Anytime
+        Other Games
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {anytimeGames.map((game, i) => {
-          const Icon = ICONS[game.id];
-          return (
-            <button
-              key={game.id}
-              onClick={() => onLaunchGame(game.id)}
-              onPointerDown={() => setPressedId(game.id)}
-              onPointerUp={() => setPressedId(null)}
-              onPointerLeave={() => setPressedId(null)}
-              style={{
-                display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
-                background: game.bgAccent,
-                border: `1px solid rgba(245,240,232,0.06)`,
-                borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
-                position: "relative", overflow: "hidden",
-                fontFamily: "inherit", color: "inherit", outline: "none",
-                WebkitTapHighlightColor: "transparent",
-                transform: pressedId === game.id ? "scale(0.98)" : "scale(1)",
-                transition: "transform 0.15s ease",
-                animation: `gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${(i + dailyGames.length) * 100 + 100}ms backwards`,
-              }}
-            >
-              <div style={{ flexShrink: 0 }}>
-                {Icon && <Icon color={game.color} />}
-              </div>
-              <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
-                <div style={{
-                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
-                  color: "#f5f0e8", lineHeight: 1.2,
-                }}>
-                  {game.name}
-                </div>
-                <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2 }}>{game.tagline}</div>
-              </div>
-              <StatusPill gameId={game.id} color={game.color} />
+        {EXTERNAL_GAMES.map((game, i) => (
+          <button
+            key={game.id}
+            onClick={() => {
+              const url = game.url;
+              if (window.Capacitor?.isNativePlatform?.()) {
+                import("@capacitor/browser").then(({ Browser }) => Browser.open({ url })).catch(() => window.open(url, "_blank"));
+              } else {
+                window.open(url, "_blank", "noopener");
+              }
+            }}
+            onPointerDown={() => setPressedId(game.id)}
+            onPointerUp={() => setPressedId(null)}
+            onPointerLeave={() => setPressedId(null)}
+            style={{
+              display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+              background: "rgba(138,126,107,0.04)",
+              border: "1px solid rgba(245,240,232,0.06)",
+              borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
+              position: "relative", overflow: "hidden",
+              fontFamily: "inherit", color: "inherit", outline: "none",
+              WebkitTapHighlightColor: "transparent",
+              transform: pressedId === game.id ? "scale(0.98)" : "scale(1)",
+              transition: "transform 0.15s ease",
+              animation: `gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${(i + GAMES.length) * 100 + 100}ms backwards`,
+            }}
+          >
+            <div style={{
+              width: 26, height: 26, display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "'Bebas Neue', sans-serif", fontSize: 18, color: "#8a7e6b",
+            }}>
+              {game.name.charAt(0)}
+            </div>
+            <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
               <div style={{
-                position: "absolute", right: 14, top: "50%",
-                width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
-                transform: "translateY(-50%) rotate(-45deg)",
-              }} />
-            </button>
-          );
-        })}
+                fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+                color: "#f5f0e8", lineHeight: 1.2,
+              }}>
+                {game.name}
+              </div>
+              <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2 }}>{game.tagline}</div>
+            </div>
+            <ExternalLinkIcon />
+          </button>
+        ))}
       </div>
     </div>
   );
