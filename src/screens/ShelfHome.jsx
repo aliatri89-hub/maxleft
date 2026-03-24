@@ -35,10 +35,16 @@ function StatsRibbon({ userId }) {
       .then(({ data }) => { if (data) setStats(data); });
   }, [userId]);
 
+  const watchlistValue = stats
+    ? stats.watchlist_total > 0
+      ? `${stats.watchlist_followed_through}/${stats.watchlist_total}`
+      : "—"
+    : "—";
+
   const items = [
     { value: stats ? stats.total_films.toLocaleString() : "—", label: "FILMS" },
     { value: stats ? stats.badges_earned.toString() : "—", label: "BADGES" },
-    { value: stats ? stats.watchlist_followed_through.toString() : "—", label: "CHECKED OFF" },
+    { value: watchlistValue, label: "WATCHLIST" },
     { value: stats ? stats.series_completed.toString() : "—", label: "SERIES" },
   ];
 
