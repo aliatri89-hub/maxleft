@@ -192,32 +192,8 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         alignItems: "flex-end",
         pointerEvents: "none",
       }}>
-        {/* LEFT — letterboxd link + date sticker */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-          {letterboxdUrl && (
-            <a
-              href={letterboxdUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                pointerEvents: "auto",
-                display: "block",
-                textDecoration: "none",
-                filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
-              }}
-            >
-              <img
-                src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
-                alt="Letterboxd"
-                style={{
-                  height: 30,
-                  width: "auto",
-                  display: "block",
-                }}
-              />
-            </a>
-          )}
+        {/* LEFT — date sticker + letterboxd dots */}
+        <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 6 }}>
           <div style={{
             background: "rgba(240, 235, 225, 0.9)",
             padding: "4px 10px 3px",
@@ -236,6 +212,31 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
               {timeAgo}
             </span>
           </div>
+          {letterboxdUrl && (
+            <a
+              href={letterboxdUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                pointerEvents: "auto",
+                display: "block",
+                textDecoration: "none",
+                filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
+                marginBottom: 1,
+              }}
+            >
+              <img
+                src="https://a.ltrbxd.com/logos/letterboxd-decal-dots-neg-rgb-500px.png"
+                alt="Letterboxd"
+                style={{
+                  height: 16,
+                  width: "auto",
+                  display: "block",
+                }}
+              />
+            </a>
+          )}
         </div>
 
         {/* CENTER — podcast artwork pills (overlapping stack, max 4 + overflow) */}
@@ -462,11 +463,17 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
             </div>
           )}
 
-          {/* Time ago + Letterboxd link — bottom left */}
+          {/* Time ago + Letterboxd dots — bottom left */}
           <div style={{
             position: "absolute", bottom: 4, left: 28,
-            display: "flex", flexDirection: "column", gap: 3,
+            display: "flex", alignItems: "center", gap: 5,
           }}>
+            <div style={{
+              fontFamily: "'Permanent Marker', cursive",
+              fontSize: 10, color: "#2C2824",
+            }}>
+              {timeAgo}
+            </div>
             {letterboxdUrl && (
               <a
                 href={letterboxdUrl}
@@ -479,22 +486,17 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
                 }}
               >
                 <img
-                  src="https://a.ltrbxd.com/logos/letterboxd-logo-v-pos-rgb-1000px.png"
+                  src="https://a.ltrbxd.com/logos/letterboxd-decal-dots-neg-rgb-500px.png"
                   alt="Letterboxd"
                   style={{
-                    height: 26,
+                    height: 14,
                     width: "auto",
                     display: "block",
+                    opacity: 0.7,
                   }}
                 />
               </a>
             )}
-            <div style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 10, color: "#2C2824",
-            }}>
-              {timeAgo}
-            </div>
           </div>
 
           {/* Stars — bottom right */}
