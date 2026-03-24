@@ -70,7 +70,7 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
   });
   const [imgLoaded, setImgLoaded] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
 
   const epUrl = resolveAudioUrl(item);
   const isPaywall = isPatreonUrl(epUrl);
@@ -164,6 +164,23 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
       setDismissed(true);
       if (onUnlinked) onUnlinked(episode_id, tmdb_id);
     }
+  };
+
+  const handleQueue = (e) => {
+    e.stopPropagation();
+    if (!addToQueue || isPaywall || isCurrent) return;
+    const playerEp = toPlayerEpisode({
+      episode_id,
+      episode_title,
+      audio_url,
+      audio_status,
+      podcast_name,
+      duration_seconds,
+    }, {
+      artwork: podcast_artwork,
+      community: podcast_name,
+    });
+    if (playerEp) addToQueue(playerEp);
   };
 
   if (dismissed) return null;
@@ -282,56 +299,76 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
                 </span>
               )}
             </div>
-            {!isPaywall && (
-              <div
-                onClick={handlePlay}
-                style={{
-                  width: 30, height: 30, borderRadius: "50%",
-                  background: isActiveAndPlaying
-                    ? "rgba(201,124,93,0.2)"
-                    : "rgba(201,124,93,0.12)",
-                  border: `1px solid rgba(201,124,93,${isActiveAndPlaying ? "0.5" : "0.3"})`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {isCurrent && buffering ? (
-                  <div style={{
-                    width: 11, height: 11, borderRadius: "50%",
-                    border: "2px solid rgba(201,124,93,0.2)",
-                    borderTopColor: "#c97c5d",
-                    animation: "pcSpin 0.6s linear infinite",
-                  }} />
-                ) : (
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#c97c5d">
-                    {isActiveAndPlaying ? (
-                      <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                    ) : (
-                      <path d="M8 5v14l11-7z" />
-                    )}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {isAdmin && (
+                <div
+                  onClick={handleUnlink}
+                  title="Unlink bad match"
+                  style={{
+                    width: 26, height: 26, borderRadius: "50%",
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, cursor: "pointer",
+                  }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
+                    <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                   </svg>
-                )}
-              </div>
-            )}
-            {isAdmin && (
-              <div
-                onClick={handleUnlink}
-                title="Unlink bad match"
-                style={{
-                  width: 26, height: 26, borderRadius: "50%",
-                  background: "rgba(239,68,68,0.08)",
-                  border: "1px solid rgba(239,68,68,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  flexShrink: 0, cursor: "pointer",
-                }}
-              >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
-                  <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                </svg>
-              </div>
-            )}
+                </div>
+              )}
+              {!isPaywall && addToQueue && !isCurrent && (
+                <div
+                  onClick={handleQueue}
+                  title="Add to Up Next"
+                  style={{
+                    width: 28, height: 28, borderRadius: "50%",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, cursor: "pointer",
+                  }}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.45)" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </div>
+              )}
+              {!isPaywall && (
+                <div
+                  onClick={handlePlay}
+                  style={{
+                    width: 34, height: 34, borderRadius: "50%",
+                    background: isActiveAndPlaying
+                      ? "rgba(201,124,93,0.3)"
+                      : "rgba(201,124,93,0.18)",
+                    border: `1.5px solid rgba(201,124,93,${isActiveAndPlaying ? "0.6" : "0.45"})`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {isCurrent && buffering ? (
+                    <div style={{
+                      width: 13, height: 13, borderRadius: "50%",
+                      border: "2px solid rgba(201,124,93,0.2)",
+                      borderTopColor: "#c97c5d",
+                      animation: "pcSpin 0.6s linear infinite",
+                    }} />
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#c97c5d">
+                      {isActiveAndPlaying ? (
+                        <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                      ) : (
+                        <path d="M8 5v14l11-7z" />
+                      )}
+                    </svg>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
