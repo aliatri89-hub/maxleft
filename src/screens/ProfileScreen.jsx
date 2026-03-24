@@ -44,6 +44,44 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
   const [loadingPodcasts, setLoadingPodcasts] = useState(false);
   const fileRef = useRef(null);
 
+  // ── Notification preferences ──
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState({ new_coverage: true, favorites_only: false });
+  const [notifLoaded, setNotifLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!notifOpen || notifLoaded) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("user_notification_preferences")
+        .select("new_coverage, favorites_only")
+        .eq("user_id", session?.user?.id)
+        .maybeSingle();
+      if (!cancelled) {
+        if (data) setNotifPrefs({ new_coverage: data.new_coverage, favorites_only: data.favorites_only });
+        setNotifLoaded(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [notifOpen, notifLoaded, session?.user?.id]);
+
+  const updateNotifPref = async (key, value) => {
+    const updated = { ...notifPrefs, [key]: value };
+    setNotifPrefs(updated);
+    const { error } = await supabase
+      .from("user_notification_preferences")
+      .upsert({
+        user_id: session?.user?.id,
+        ...updated,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+    if (error) {
+      console.error("Failed to update notification pref:", error);
+      setNotifPrefs(notifPrefs); // revert
+    }
+  };
+
   // ── Load podcasts for favorite picker ──
   useEffect(() => {
     if (!podcastsOpen || allPodcasts.length > 0) return;
@@ -473,6 +511,107 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                   </div>
                 </div>
               )}
+            </div>
+          </Expandable>
+
+          <div className="profile-group-divider" />
+
+          {/* ── Notifications ── */}
+          <div className="profile-group-row" onClick={() => setNotifOpen(!notifOpen)}>
+            <span className="profile-group-row-text">Notifications</span>
+            <span className="profile-group-row-chevron">{notifOpen ? "▾" : "›"}</span>
+          </div>
+          <Expandable open={notifOpen}>
+            <div style={{ padding: "4px 14px 12px", display: "flex", flexDirection: "column", gap: 10 }}>
+              {/* New coverage toggle */}
+              <div
+                onClick={() => updateNotifPref("new_coverage", !notifPrefs.new_coverage)}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "10px 12px",
+                  background: notifPrefs.new_coverage ? "rgba(201,120,73,0.08)" : "rgba(255,255,255,0.02)",
+                  border: `1.5px solid ${notifPrefs.new_coverage ? "rgba(201,120,73,0.3)" : "var(--border-medium)"}`,
+                  borderRadius: 10, cursor: "pointer", transition: "all 0.15s ease",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14,
+                    color: notifPrefs.new_coverage ? "var(--text-primary)" : "var(--text-muted)",
+                  }}>New Coverage Alerts</div>
+                  <div style={{
+                    fontFamily: "var(--font-mono)", fontSize: 9,
+                    color: "var(--text-faint)", marginTop: 3,
+                    lineHeight: 1.4, letterSpacing: "0.03em",
+                  }}>
+                    Get notified when a podcast covers a film you've logged
+                  </div>
+                </div>
+                <div style={{
+                  width: 40, height: 22, borderRadius: 11, flexShrink: 0, marginLeft: 12,
+                  background: notifPrefs.new_coverage ? "var(--terracotta, #c97849)" : "rgba(255,255,255,0.12)",
+                  transition: "background 0.2s ease",
+                  position: "relative",
+                }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: "50%", background: "#fff",
+                    position: "absolute", top: 2,
+                    left: notifPrefs.new_coverage ? 20 : 2,
+                    transition: "left 0.2s ease",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                  }} />
+                </div>
+              </div>
+
+              {/* Favorites only toggle — only visible when coverage alerts are on */}
+              {notifPrefs.new_coverage && (
+                <div
+                  onClick={() => updateNotifPref("favorites_only", !notifPrefs.favorites_only)}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    padding: "10px 12px", marginLeft: 12,
+                    background: notifPrefs.favorites_only ? "rgba(201,120,73,0.06)" : "rgba(255,255,255,0.02)",
+                    border: `1.5px solid ${notifPrefs.favorites_only ? "rgba(201,120,73,0.2)" : "var(--border-medium)"}`,
+                    borderRadius: 10, cursor: "pointer", transition: "all 0.15s ease",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
+                      color: notifPrefs.favorites_only ? "var(--text-primary)" : "var(--text-muted)",
+                    }}>Favorites Only</div>
+                    <div style={{
+                      fontFamily: "var(--font-mono)", fontSize: 9,
+                      color: "var(--text-faint)", marginTop: 3,
+                      lineHeight: 1.4, letterSpacing: "0.03em",
+                    }}>
+                      Only from podcasts you've starred above
+                    </div>
+                  </div>
+                  <div style={{
+                    width: 40, height: 22, borderRadius: 11, flexShrink: 0, marginLeft: 12,
+                    background: notifPrefs.favorites_only ? "var(--terracotta, #c97849)" : "rgba(255,255,255,0.12)",
+                    transition: "background 0.2s ease",
+                    position: "relative",
+                  }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", background: "#fff",
+                      position: "absolute", top: 2,
+                      left: notifPrefs.favorites_only ? 20 : 2,
+                      transition: "left 0.2s ease",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+                    }} />
+                  </div>
+                </div>
+              )}
+
+              <div style={{
+                fontFamily: "var(--font-mono)", fontSize: 9,
+                color: "var(--text-faint)", textAlign: "center",
+                letterSpacing: "0.03em", lineHeight: 1.5,
+              }}>
+                Requires the app installed on your phone
+              </div>
             </div>
           </Expandable>
 

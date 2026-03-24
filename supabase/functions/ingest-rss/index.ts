@@ -130,6 +130,7 @@ serve(async (req) => {
     const details: any[] = [];
     let totalNewEps = 0;
     let totalMatches = 0;
+    const allNewMappings: { episode_id: string; tmdb_id: number; podcast_id: string }[] = [];
 
     // 2. Process each podcast
     for (const podcast of podcasts) {
@@ -269,6 +270,12 @@ serve(async (req) => {
                 for (const m of mappingRows) {
                   if (m.confidence_score >= 0.9) podResult.high_confidence++;
                   else podResult.low_confidence++;
+                  // Collect for push notifications
+                  allNewMappings.push({
+                    episode_id: m.episode_id,
+                    tmdb_id: m.tmdb_id,
+                    podcast_id: podcast.id,
+                  });
                 }
               } else {
                 podResult.errors.push(`Mapping insert: ${mapErr.message}`);
@@ -304,6 +311,30 @@ serve(async (req) => {
     }));
 
     await sb.from("daily_ingest_log").insert(logRows);
+
+    // 6. Fire push notifications for new coverage
+    if (allNewMappings.length > 0) {
+      try {
+        const notifRes = await fetch(
+          `${supabaseUrl}/functions/v1/notify-new-coverage`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${serviceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ new_mappings: allNewMappings }),
+          }
+        );
+        const notifResult = await notifRes.json();
+        console.log(
+          `[Ingest] Push notifications: ${notifResult.sent || 0} sent, ${notifResult.failed || 0} failed`
+        );
+      } catch (notifErr: any) {
+        console.error("[Ingest] Push notification call failed:", notifErr.message);
+        // Non-fatal — ingest still succeeded
+      }
+    }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
     console.log(

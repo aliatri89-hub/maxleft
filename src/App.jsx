@@ -252,7 +252,7 @@ export default function App() {
 
   // ── PUSH NOTIFICATION LISTENERS (native only, no-op on web) ──
   useEffect(() => {
-    return setupPushListeners(showToast);
+    return setupPushListeners(showToast, setActiveTab);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const signIn = () => signInWithGoogle(showToast);
