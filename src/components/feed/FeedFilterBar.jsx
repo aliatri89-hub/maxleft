@@ -18,6 +18,7 @@ export default function FeedFilterBar({
   selectedPodcast = null,  // null = "All Podcasts"
   onPodcastChange,
   communitySubscriptions,  // Set of community IDs
+  favoritePodcasts,        // Set of podcast UUIDs (from user_podcast_favorites)
 }) {
   const [podcasts, setPodcasts] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -42,6 +43,7 @@ export default function FeedFilterBar({
         });
         setPodcasts(sorted.map(p => ({
           id: p.community_page_id || p.id,
+          podcastId: p.id,  // actual podcast UUID for favorite matching
           slug: p.community_pages?.slug || p.slug,
           name: p.name,
           artwork_url: p.artwork_url || null,
@@ -65,10 +67,10 @@ export default function FeedFilterBar({
     return () => document.removeEventListener("pointerdown", handler);
   }, [dropdownOpen]);
 
-  // ── Partition: subscribed first, then rest ──
-  const subSet = communitySubscriptions || new Set();
-  const subscribed = podcasts.filter(p => subSet.has(p.id));
-  const rest = podcasts.filter(p => !subSet.has(p.id));
+  // ── Partition: favorited first, then rest ──
+  const favSet = favoritePodcasts || new Set();
+  const subscribed = podcasts.filter(p => favSet.has(p.podcastId));
+  const rest = podcasts.filter(p => !favSet.has(p.podcastId));
   const orderedPodcasts = [...subscribed, ...rest];
 
   const selectedLabel = selectedPodcast

@@ -448,6 +448,7 @@ export default function App() {
                     onNavigateMantl={() => { tapLight(); if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("shelf"); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
+                    favoritePodcasts={favoritePodcasts}
                     feedMode={feedMode} setFeedMode={setFeedMode}
                     pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen}
                     pushNav={pushNav} removeNav={removeNav} />
