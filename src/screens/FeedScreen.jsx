@@ -35,7 +35,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     hasMoreActivity,
     loadMoreActivity,
     loading, refresh,
-  } = useFeed(userId, communitySubscriptions);
+  } = useFeed(userId, favoritePodcasts);
   const releases = useBrowseFeed("releases", feedMode === "releases");
   const podcast = usePodcastFeed(feedMode === "podcast");
   const wasActive = useRef(isActive);

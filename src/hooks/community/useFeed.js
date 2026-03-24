@@ -78,6 +78,12 @@ function fetchAllData(userId) {
     supabase
       .from("community_pages")
       .select("id, slug"),
+
+    // 5. Podcast id → community_page_id mapping (for favorite filtering)
+    supabase
+      .from("podcasts")
+      .select("id, community_page_id")
+      .eq("active", true),
   ]);
 }
 
@@ -376,7 +382,7 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
 
 const PAGE_SIZE = 15;
 
-export function useFeed(userId, subscribedIds) {
+export function useFeed(userId, favoritePodcastIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const feedBucketRef = useRef([]);
@@ -384,8 +390,8 @@ export function useFeed(userId, subscribedIds) {
   const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
   const [renderTick, setRenderTick] = useState(0);
 
-  const subscribedKey = subscribedIds
-    ? [...subscribedIds].sort().join(",")
+  const subscribedKey = favoritePodcastIds
+    ? [...favoritePodcastIds].sort().join(",")
     : "";
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -404,7 +410,7 @@ export function useFeed(userId, subscribedIds) {
 
     try {
       const [
-        logsRes, badgeLookupRes, shelfRes, communityPagesRes,
+        logsRes, badgeLookupRes, shelfRes, communityPagesRes, podcastsRes,
       ] = await fetchAllData(userId);
 
       if (!mountedRef.current) return;
@@ -413,13 +419,20 @@ export function useFeed(userId, subscribedIds) {
       const rawBadgeLookup = badgeLookupRes.data || [];
       const rawShelfLogs = shelfRes.data || [];
       const communityPages = communityPagesRes.data || [];
+      const podcasts = podcastsRes.data || [];
 
       const { idToSlug } = buildSlugMaps(communityPages);
       const badgeByMiniseries = buildBadgeLookup(rawBadgeLookup);
 
-      const hasSubscriptions = subscribedIds && subscribedIds.size > 0;
-      const subscribedSlugs = hasSubscriptions
-        ? new Set([...subscribedIds].map(id => idToSlug.get(id)).filter(Boolean))
+      // Build slug set from favorite podcasts (podcast_id → community_page_id → slug)
+      const hasFavorites = favoritePodcastIds && favoritePodcastIds.size > 0;
+      const subscribedSlugs = hasFavorites
+        ? new Set(
+            podcasts
+              .filter(p => favoritePodcastIds.has(p.id) && p.community_page_id)
+              .map(p => idToSlug.get(p.community_page_id))
+              .filter(Boolean)
+          )
         : null;
 
       const mergedGroups = groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs);

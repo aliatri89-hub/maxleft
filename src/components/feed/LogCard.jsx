@@ -238,17 +238,14 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
           </div>
         </div>
 
-        {/* CENTER — podcast artwork pills (always centered) */}
+        {/* CENTER — podcast artwork pills (overlapping stack) */}
         <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
           {uniquePods.length > 0 && (
             <div style={{
               display: "flex",
-              flexWrap: "wrap",
               justifyContent: "center",
-              gap: 4,
-              maxWidth: 5 * 28,
             }}>
-              {uniquePods.slice(0, 10).map((c) => (
+              {uniquePods.slice(0, 10).map((c, i) => (
                 <img
                   key={c.community_slug}
                   src={c.community_image}
@@ -259,6 +256,9 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
                     objectFit: "cover",
                     border: "1.5px solid rgba(255,255,255,0.25)",
                     boxShadow: "0 1px 3px rgba(0,0,0,0.4)",
+                    marginLeft: i === 0 ? 0 : -8,
+                    zIndex: uniquePods.length - i,
+                    position: "relative",
                   }}
                 />
               ))}
