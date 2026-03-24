@@ -830,7 +830,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )}
 
           {/* ═══ EPISODE PICKER — when opened from browse cards ═══ */}
-          {(episodes || epLoading) && (
+          {(epLoading || (episodes && episodes.length > 0)) && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               paddingTop: 12, marginBottom: 14,

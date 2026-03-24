@@ -574,7 +574,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     setSheetOpen(true);
     setShowHint(false);
     if (pushNav) pushNav(sleeveNavKey, () => setSheetOpen(false));
-    if (!episodes && data.tmdb_id) {
+    if (!episodes && data.tmdb_id && data.has_podcast_coverage) {
       setEpLoading(true);
       const eps = await getEpisodesForFilm(data.tmdb_id);
       setEpisodes(eps);

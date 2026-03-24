@@ -82,7 +82,7 @@ function fetchAllData(userId) {
     // 5. Podcast id → community_page_id mapping (for favorite filtering)
     supabase
       .from("podcasts")
-      .select("id, community_page_id")
+      .select("id, community_page_id, artwork_url, name")
       .eq("active", true),
   ]);
 }
@@ -117,7 +117,7 @@ function buildBadgeLookup(rawBadgeLookup) {
   return badgeByMiniseries;
 }
 
-function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
+function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToArtwork) {
   const logGroups = new Map();
 
   for (const log of rawLogs) {
@@ -171,7 +171,7 @@ function groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs) {
         group.communities.push({
           community_name: log.community_name,
           community_slug: log.community_slug,
-          community_image: log.community_image,
+          community_image: slugToArtwork?.get(log.community_slug) || log.community_image,
           series_title: log.series_title,
           series_watched: log.series_watched,
           series_total: log.series_total,
@@ -435,7 +435,16 @@ export function useFeed(userId, favoritePodcastIds) {
           )
         : null;
 
-      const mergedGroups = groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs);
+      // Build slug → podcast artwork map (more reliable than community_pages.logo_url)
+      const slugToArtwork = new Map();
+      for (const p of podcasts) {
+        if (p.community_page_id && p.artwork_url) {
+          const slug = idToSlug.get(p.community_page_id);
+          if (slug) slugToArtwork.set(slug, p.artwork_url);
+        }
+      }
+
+      const mergedGroups = groupAndMergeLogs(rawLogs, badgeByMiniseries, subscribedSlugs, slugToArtwork);
       mergeShelfLogs(mergedGroups, rawShelfLogs);
 
       const activityCards = buildActivityFeed(mergedGroups);
