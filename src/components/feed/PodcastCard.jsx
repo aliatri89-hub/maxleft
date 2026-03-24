@@ -3,6 +3,7 @@ import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { apiProxy } from "../../utils/api";
 import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
+import { supabase } from "../../supabase";
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — episode-first card with deep-cut backdrop
@@ -50,13 +51,15 @@ function formatDuration(seconds) {
   return `${m}m`;
 }
 
-function PodcastCard({ item }) {
+function PodcastCard({ item, isAdmin, onUnlinked }) {
   const {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
     tmdb_id, film_title, film_year, backdrop_path,
   } = item;
+
+  const [dismissed, setDismissed] = useState(false);
 
   const [backdropUrl, setBackdropUrl] = useState(() => {
     // Check deep-cut cache synchronously
@@ -148,6 +151,23 @@ function PodcastCard({ item }) {
     if (playerEp) playEpisode(playerEp);
   };
 
+  const handleUnlink = async (e) => {
+    e.stopPropagation();
+    if (!episode_id || !tmdb_id) return;
+    if (!confirm(`Unlink "${film_title}" from "${episode_title}"?`)) return;
+    const { error } = await supabase
+      .from("podcast_episode_films")
+      .delete()
+      .eq("episode_id", episode_id)
+      .eq("tmdb_id", tmdb_id);
+    if (!error) {
+      setDismissed(true);
+      if (onUnlinked) onUnlinked(episode_id, tmdb_id);
+    }
+  };
+
+  if (dismissed) return null;
+
   return (
     <div
       onClick={() => setExpanded(prev => !prev)}
@@ -170,7 +190,7 @@ function PodcastCard({ item }) {
             position: "absolute", inset: 0,
             width: "100%", height: "100%",
             objectFit: "cover",
-            opacity: imgLoaded ? 0.4 : 0,
+            opacity: imgLoaded ? 0.6 : 0,
             transition: "opacity 0.4s ease",
             pointerEvents: "none",
           }}
@@ -179,13 +199,13 @@ function PodcastCard({ item }) {
       {/* Left-to-right gradient: opaque left (podcast art zone), fades right */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(90deg, rgba(15,13,11,0.92) 0%, rgba(15,13,11,0.65) 40%, rgba(15,13,11,0.3) 70%, rgba(15,13,11,0.5) 100%)",
+        background: "linear-gradient(90deg, rgba(15,13,11,0.92) 0%, rgba(15,13,11,0.55) 40%, rgba(15,13,11,0.2) 70%, rgba(15,13,11,0.35) 100%)",
         pointerEvents: "none",
       }} />
       {/* Bottom darken for text readability */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(180deg, rgba(15,13,11,0.05) 0%, rgba(15,13,11,0.55) 100%)",
+        background: "linear-gradient(180deg, rgba(15,13,11,0.0) 0%, rgba(15,13,11,0.45) 100%)",
         pointerEvents: "none",
       }} />
       {/* Warm amber overlay for VHS tone */}
@@ -295,9 +315,24 @@ function PodcastCard({ item }) {
                 )}
               </div>
             )}
+            {isAdmin && (
+              <div
+                onClick={handleUnlink}
+                title="Unlink bad match"
+                style={{
+                  width: 26, height: 26, borderRadius: "50%",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0, cursor: "pointer",
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
+                  <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                </svg>
+              </div>
+            )}
           </div>
-
-          {/* Film title (headline) */}
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 600, fontSize: 15,

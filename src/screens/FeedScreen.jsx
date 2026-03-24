@@ -329,7 +329,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
             }}>
-              — end of new releases —
+              — end of feed —
             </div>
             <div style={{
               marginTop: 16,
@@ -409,7 +409,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               index={i}
               dismissable={false}
             >
-              <PodcastCard item={item} />
+              <PodcastCard item={item} isAdmin={isAdmin} />
             </FeedCard>
           ))}
         </div>
@@ -439,7 +439,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
             }}>
-              — end of podcast —
+              — end of feed —
             </div>
             <div style={{
               marginTop: 16,
@@ -520,7 +520,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
             }}>
-              — end of activity —
+              — end of feed —
             </div>
             <div style={{
               marginTop: 16,
