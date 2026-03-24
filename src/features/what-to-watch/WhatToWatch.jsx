@@ -7,6 +7,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useWhatToWatch } from "./useWhatToWatch";
 import { useAudioPlayer } from "../../components/community/shared/AudioPlayerProvider";
+import { useBackGesture } from "../../hooks/useBackGesture";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
@@ -29,7 +30,7 @@ function haptic() {
 // MAIN COMPONENT
 // ════════════════════════════════════════════════
 
-export default function WhatToWatch({ session, onBack, onToast }) {
+export default function WhatToWatch({ session, onBack, onToast, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const { play: playEpisode, addToQueue, currentEp, isPlaying } = useAudioPlayer();
   const {
@@ -42,6 +43,9 @@ export default function WhatToWatch({ session, onBack, onToast }) {
   const [peekFilm, setPeekFilm] = useState(null);
   const [peekEpisodes, setPeekEpisodes] = useState(null);
   const [peekLoading, setPeekLoading] = useState(false);
+
+  // ── Back gestures ──
+  useBackGesture("wtw-peek", !!peekFilm, () => setPeekFilm(null), pushNav, removeNav);
 
   const handleClose = useCallback(() => { reset(); onBack(); }, [reset, onBack]);
 

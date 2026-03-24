@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
+import { useBackGesture } from "../hooks/useBackGesture";
 import CommunityTapeCard from "../components/community/shared/CommunityTapeCard";
 import CommunitySleeveSheet from "../components/community/shared/CommunitySleeveSheet";
 
@@ -23,6 +24,8 @@ export default function ExploreScreen({
   onSubscribe,
   onUnsubscribe,
   subscriptionsLoaded,
+  pushNav,
+  removeNav,
 }) {
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +33,9 @@ export default function ExploreScreen({
   const [sleeveOpen, setSleeveOpen] = useState(null); // community object or null
   const isDev = new URLSearchParams(window.location.search).has("dev");
   const userId = session?.user?.id;
+
+  // ── Back gesture for sleeve sheet ──
+  useBackGesture("communitySleeve", !!sleeveOpen, () => setSleeveOpen(null), pushNav, removeNav);
 
   // ── Fetch communities ──
   useEffect(() => {

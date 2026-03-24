@@ -446,7 +446,8 @@ export default function App() {
                   {visitedTabs.has("communities") && <ExploreScreen session={session}
                     onOpenCommunity={(slug) => { setScrollToTmdbId(null); setActiveCommunitySlug(slug); }}
                     isActive={activeTab === "communities"} communitySubscriptions={communitySubscriptions}
-                    onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded} />}
+                    onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded}
+                    pushNav={pushNav} removeNav={removeNav} />}
                 </div>
                 <div className="tab-pane" key="search-tab">
                   {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />}
@@ -475,20 +476,20 @@ export default function App() {
         {/* Triple Feature Game */}
         {showTripleFeature && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0a0a0f", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} />
+            <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
           </div>
         )}
 
         {/* Reel Time Game */}
         {showReelTime && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} />
+            <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
           </div>
         )}
 
         {/* What to Watch */}
         {showWhatToWatch && (
-          <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} />
+          <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
         )}
 
         {/* Games Hub */}
@@ -497,6 +498,7 @@ export default function App() {
             <GamesHub
               session={session}
               onBack={() => { removeNav("gamesHub"); setShowGamesHub(false); }}
+              pushNav={pushNav} removeNav={removeNav}
               onLaunchGame={(gameId) => {
                 setShowGamesHub(false);
                 removeNav("gamesHub");
