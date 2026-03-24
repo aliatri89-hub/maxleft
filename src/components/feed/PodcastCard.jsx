@@ -5,12 +5,12 @@ import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 
 // ════════════════════════════════════════════════
-// PODCAST CARD — episode-first, clean dark card
+// PODCAST CARD — film title leads, podcast art inline with desc
 //
-// [art]  Mar 19  1h33m           [🗑] [+] [▶]
-//        Film Title
-//        Episode desc…
-//        2025 · PODCAST NAME       ✓ WATCHED
+// Film Title                       [🗑] [+] [▶]
+// Mar 19 · 1h33m
+// [art]  Episode desc…
+//        2025 · PODCAST NAME         ✓ WATCHED
 // ════════════════════════════════════════════════
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -121,53 +121,20 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         padding: "10px 12px",
       }}
     >
-      {/* ── Row 1: [art] date duration ... buttons — all centered ── */}
+      {/* ── Row 1: Film title + buttons ── */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 10,
-        marginBottom: 8,
+        display: "flex", alignItems: "flex-start",
+        justifyContent: "space-between", gap: 10,
+        marginBottom: 2,
       }}>
-        {/* Podcast artwork */}
         <div style={{
-          width: 44, height: 44, borderRadius: 8, overflow: "hidden",
-          background: "#2a2520", flexShrink: 0,
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600, fontSize: 16, color: "#f0ebe1",
+          lineHeight: 1.2, flex: 1, minWidth: 0,
+          paddingTop: 2,
         }}>
-          {podcast_artwork ? (
-            <img src={podcast_artwork} alt={podcast_name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          ) : (
-            <div style={{
-              width: "100%", height: "100%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900, fontSize: 7, color: "rgba(255,255,255,0.5)",
-              textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
-            }}>
-              {podcast_name}
-            </div>
-          )}
+          {film_title}
         </div>
-
-        {/* Date + duration */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
-          <span style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9, color: "rgba(255,255,255,0.5)",
-            textTransform: "uppercase", letterSpacing: "0.05em",
-          }}>
-            {fmtDate(episode_air_date)}
-          </span>
-          {duration_seconds > 0 && (
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 8, color: "rgba(255,255,255,0.3)",
-              textTransform: "uppercase", letterSpacing: "0.04em",
-            }}>
-              {formatDuration(duration_seconds)}
-            </span>
-          )}
-        </div>
-
-        {/* Buttons */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           {isAdmin && (
             <div onClick={handleUnlink} title="Unlink" style={{
@@ -217,121 +184,150 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       </div>
 
-      {/* ── Row 2+: title, desc, metadata — indented past art ── */}
-      <div style={{ paddingLeft: 54 }}>
-        <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontWeight: 600, fontSize: 15, color: "#f0ebe1",
-          lineHeight: 1.2, marginBottom: 4,
+      {/* ── Row 2: date + duration ── */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        marginBottom: 8,
+      }}>
+        <span style={{
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 9, color: "rgba(255,255,255,0.4)",
+          textTransform: "uppercase", letterSpacing: "0.05em",
         }}>
-          {film_title}
-        </div>
-
-        {desc && (
-          <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10, color: "rgba(255,255,255,0.45)",
-            lineHeight: 1.4, marginBottom: 6,
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: expanded ? 999 : 2,
-            WebkitBoxOrient: "vertical",
-          }}>
-            {expanded ? fullDesc : desc}
-          </div>
-        )}
-
-        {/* Bottom: year · podcast | badge */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+          {fmtDate(episode_air_date)}
+        </span>
+        {duration_seconds > 0 && (
+          <>
+            <span style={{ width: 3, height: 3, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.3)",
-            }}>
-              {film_year}
-            </span>
-            <span style={{
-              width: 3, height: 3, borderRadius: "50%",
-              background: "rgba(255,255,255,0.15)", flexShrink: 0,
-            }} />
-            <span style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 11, fontWeight: 600,
-              color: "rgba(255,255,255,0.35)",
+              fontSize: 9, color: "rgba(255,255,255,0.3)",
               textTransform: "uppercase", letterSpacing: "0.04em",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {formatDuration(duration_seconds)}
+            </span>
+          </>
+        )}
+      </div>
+
+      {/* ── Row 3: art + description ── */}
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 8, overflow: "hidden",
+          background: "#2a2520", flexShrink: 0,
+        }}>
+          {podcast_artwork ? (
+            <img src={podcast_artwork} alt={podcast_name}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          ) : (
+            <div style={{
+              width: "100%", height: "100%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900, fontSize: 7, color: "rgba(255,255,255,0.5)",
+              textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
             }}>
               {podcast_name}
-            </span>
-          </div>
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {desc && (
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10, color: "rgba(255,255,255,0.45)",
+              lineHeight: 1.4, marginBottom: 6,
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: expanded ? 999 : 2,
+              WebkitBoxOrient: "vertical",
+            }}>
+              {expanded ? fullDesc : desc}
+            </div>
+          )}
 
-          {/* Watched / Watchlist badge */}
-          {watched ? (
-            <div style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "2px 8px 2px 6px", borderRadius: 10,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              flexShrink: 0, marginLeft: 8,
-            }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+          {/* Bottom: year · podcast | badge */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
               <span style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 8, fontWeight: 600,
-                color: "rgba(255,255,255,0.3)",
-                textTransform: "uppercase", letterSpacing: "0.06em",
+                fontSize: 10, color: "rgba(255,255,255,0.3)",
               }}>
-                Watched
+                {film_year}
               </span>
-            </div>
-          ) : addedToWatchlist ? (
-            <div style={{
-              display: "flex", alignItems: "center", gap: 4,
-              padding: "2px 8px 2px 6px", borderRadius: 10,
-              background: "rgba(201,124,93,0.06)",
-              border: "1px solid rgba(201,124,93,0.15)",
-              flexShrink: 0, marginLeft: 8,
-            }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
               <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 8, fontWeight: 600,
-                color: "rgba(201,124,93,0.5)",
-                textTransform: "uppercase", letterSpacing: "0.06em",
+                width: 3, height: 3, borderRadius: "50%",
+                background: "rgba(255,255,255,0.15)", flexShrink: 0,
+              }} />
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 11, fontWeight: 600,
+                color: "rgba(255,255,255,0.35)",
+                textTransform: "uppercase", letterSpacing: "0.04em",
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
-                Added
+                {podcast_name}
               </span>
             </div>
-          ) : userId ? (
-            <div
-              onClick={handleWatchlist}
-              style={{
+
+            {watched ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "2px 8px 2px 6px", borderRadius: 10,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                flexShrink: 0, marginLeft: 8,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 8, fontWeight: 600,
+                  color: "rgba(255,255,255,0.3)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>Watched</span>
+              </div>
+            ) : addedToWatchlist ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "2px 8px 2px 6px", borderRadius: 10,
+                background: "rgba(201,124,93,0.06)",
+                border: "1px solid rgba(201,124,93,0.15)",
+                flexShrink: 0, marginLeft: 8,
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 8, fontWeight: 600,
+                  color: "rgba(201,124,93,0.5)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>Added</span>
+              </div>
+            ) : userId ? (
+              <div onClick={handleWatchlist} style={{
                 display: "flex", alignItems: "center", gap: 4,
                 padding: "2px 8px 2px 6px", borderRadius: 10,
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 flexShrink: 0, marginLeft: 8, cursor: "pointer",
-              }}
-            >
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-              <span style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 8, fontWeight: 600,
-                color: "rgba(255,255,255,0.25)",
-                textTransform: "uppercase", letterSpacing: "0.06em",
               }}>
-                Watchlist
-              </span>
-            </div>
-          ) : null}
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 8, fontWeight: 600,
+                  color: "rgba(255,255,255,0.25)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>Watchlist</span>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
 
