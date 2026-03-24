@@ -476,7 +476,7 @@ const S = {
   page: {
     minHeight: "100vh", minHeight: "100dvh",
     background: "#0a0a0f", color: "#f0ece4",
-    fontFamily: "'DM Sans','Helvetica Neue',sans-serif",
+    fontFamily: "'Barlow Condensed','Helvetica Neue',sans-serif",
     position: "relative", overflow: "hidden",
     paddingTop: "env(safe-area-inset-top, 0px)",
   },

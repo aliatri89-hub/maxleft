@@ -31,7 +31,7 @@ export default function BlankCheckHero({ community, miniseries, progress, active
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.dataset.bcSig = "1";
-    link.href = "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Permanent+Marker&display=swap";
+    link.href = "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playfair+Display:wght@400;700;900&display=swap";
     document.head.appendChild(link);
   }, []);
 
@@ -174,7 +174,7 @@ export default function BlankCheckHero({ community, miniseries, progress, active
             </div>
             <div style={{
               fontSize: 22, color: "#fff",
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: "'Playfair Display', serif", fontWeight: 700,
               lineHeight: 1,
             }}>
               ${patreonStats.grossWW.toLocaleString("en-US")}
@@ -385,7 +385,7 @@ function BlankCheck({ director }) {
           }}>🎬</span>
           <span style={{
             fontSize: 22, color: "#1a1a1a",
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: "'Playfair Display', serif", fontWeight: 700,
             lineHeight: 1,
           }}>
             {director.views}
@@ -407,7 +407,7 @@ function BlankCheck({ director }) {
         }}>Pay to</span>
         <span style={{
           fontSize: 22, color: "#1a1a1a",
-          fontFamily: "'Permanent Marker', cursive",
+          fontFamily: "'Playfair Display', serif", fontWeight: 700,
           lineHeight: 1,
           whiteSpace: "nowrap",
           marginBottom: -2,
@@ -423,7 +423,7 @@ function BlankCheck({ director }) {
       }}>
         <span style={{
           fontSize: 10, color: "#1a1a1a",
-          fontFamily: "'Permanent Marker', cursive",
+          fontFamily: "'Playfair Display', serif", fontWeight: 700,
         }}>
           {director.seriesTitle}
         </span>
@@ -440,7 +440,7 @@ function BlankCheck({ director }) {
           }}>Memo</span>
           <span style={{
             fontSize: 13, color: "#1a1a1a",
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: "'Playfair Display', serif", fontWeight: 700,
             lineHeight: 1,
           }}>
             {director.grossWW > 0

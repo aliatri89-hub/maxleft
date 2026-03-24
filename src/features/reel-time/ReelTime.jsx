@@ -17,7 +17,7 @@ function getMonthDay(dateStr) {
 const S = {
   page: {
     minHeight: "100vh", background: "#0f0d0b", color: "#f5f0e8",
-    fontFamily: "'Special Elite', monospace",
+    fontFamily: "'IBM Plex Mono', monospace",
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "0 16px 40px", overflow: "auto", WebkitOverflowScrolling: "touch",
   },
@@ -31,15 +31,15 @@ const S = {
     position: "relative",
   },
   title: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 13,
+    fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
     letterSpacing: 3, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
   },
   year: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 44,
+    fontFamily: "'Bebas Neue', sans-serif", fontSize: 52, letterSpacing: 2,
     color: "#f5f0e8", lineHeight: 1, textShadow: "2px 2px 0 rgba(0,0,0,0.5)",
   },
   subtitle: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 11,
+    fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 12,
     color: "#7cb8e8", marginTop: 4, letterSpacing: 2,
   },
   scoreBar: {
@@ -49,7 +49,7 @@ const S = {
     borderRadius: 8, marginBottom: 16, fontSize: 13,
   },
   scoreLabel: { color: "#8a7e6b" },
-  scoreValue: { fontFamily: "'Permanent Marker', cursive", fontSize: 18, color: "#7cb8e8" },
+  scoreValue: { fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 18, color: "#7cb8e8" },
 
   // Current movie card — static position (fades when dragging)
   currentCard: {
@@ -72,7 +72,7 @@ const S = {
     color: "#7cb8e8", marginBottom: 3,
   },
   currentTitle: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18,
     color: "#f5f0e8", lineHeight: 1.2,
   },
   currentPrompt: { fontSize: 12, color: "#8a7e6b", marginTop: 5 },
@@ -121,20 +121,20 @@ const S = {
     flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
   },
   placedTitle: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 14,
     color: "#f5f0e8", flex: 1, lineHeight: 1.2,
   },
   placedDate: { fontSize: 11, color: "#7cb8e8", flexShrink: 0, whiteSpace: "nowrap" },
   timelineLabel: {
     display: "flex", flexDirection: "column", alignItems: "center",
     fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
-    color: "rgba(124,184,232,0.4)", fontFamily: "'Special Elite', monospace",
+    color: "rgba(124,184,232,0.4)", fontFamily: "'IBM Plex Mono', monospace",
     padding: "6px 0", marginLeft: 30,
   },
   flash: (correct) => ({
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
-    fontFamily: "'Permanent Marker', cursive", fontSize: 48, zIndex: 100,
+    fontFamily: "'Bebas Neue', sans-serif", fontSize: 56, letterSpacing: 2, zIndex: 100,
     pointerEvents: "none", color: correct ? "#4caf50" : "#e74c3c",
     textShadow: `0 0 30px ${correct ? "rgba(76,175,80,0.5)" : "rgba(231,76,60,0.5)"}`,
     animation: "rt-flash 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
@@ -148,25 +148,25 @@ const S = {
     fontSize: 11, textTransform: "uppercase", letterSpacing: 3, color: "#8a7e6b", marginBottom: 6,
   },
   gameoverScore: {
-    fontFamily: "'Permanent Marker', cursive", fontSize: 52, color: "#7cb8e8", lineHeight: 1,
+    fontFamily: "'Bebas Neue', sans-serif", fontSize: 60, letterSpacing: 2, color: "#7cb8e8", lineHeight: 1,
   },
   gameoverMax: { fontSize: 13, color: "#8a7e6b", marginTop: 4 },
   gameoverMsg: { fontSize: 15, color: "#f5f0e8", marginTop: 14, lineHeight: 1.5 },
   shareBtn: {
     marginTop: 18, padding: "11px 28px", background: "#7cb8e8", color: "#0f0d0b",
-    border: "none", borderRadius: 8, fontFamily: "'Permanent Marker', cursive",
+    border: "none", borderRadius: 8, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
     fontSize: 15, cursor: "pointer",
   },
   nextTimer: { fontSize: 12, color: "#8a7e6b", marginTop: 10 },
   loading: {
     minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "#0f0d0b", color: "#8a7e6b", fontFamily: "'Special Elite', monospace",
+    background: "#0f0d0b", color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 15,
   },
   errorWrap: {
     minHeight: "100vh", display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center", background: "#0f0d0b",
-    color: "#8a7e6b", fontFamily: "'Special Elite', monospace", fontSize: 15,
+    color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
     padding: 32, textAlign: "center",
   },
   placementDots: {

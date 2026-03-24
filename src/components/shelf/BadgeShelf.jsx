@@ -154,7 +154,7 @@ function BadgePicker({ earnedBadges, currentIds, slotIndex, onPick, onClear, onC
 
         {/* Title */}
         <div style={{
-          fontFamily: "'Permanent Marker', cursive", fontSize: 16,
+          fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 16,
           color: accent, textAlign: "center", marginBottom: 16,
           letterSpacing: "0.04em",
         }}>

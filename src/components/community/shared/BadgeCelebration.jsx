@@ -96,7 +96,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
       overflow: "hidden",
     }}>
       <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cinzel:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -255,13 +255,13 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
         }}>
           <div style={{
             fontSize: 10, letterSpacing: 6, textTransform: "uppercase",
-            color: accent, fontFamily: "'Cinzel', serif", marginBottom: 12,
+            color: accent, fontFamily: "'Playfair Display', serif", marginBottom: 12,
           }}>
             Badge Unlocked
           </div>
           <div style={{
             fontSize: 32, fontWeight: 700, color: "#fff",
-            fontFamily: "'DM Serif Display', serif",
+            fontFamily: "'Playfair Display', serif",
             textShadow: `0 0 60px ${accent}25`,
             lineHeight: 1.15,
           }}>
@@ -281,7 +281,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{
                   fontSize: 15, color: `${accent}bb`, fontStyle: "italic",
-                  fontFamily: "'Cinzel', serif",
+                  fontFamily: "'Playfair Display', serif",
                 }}>
                   {parts[0]}
                 </div>

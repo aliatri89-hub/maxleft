@@ -54,7 +54,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
       WebkitOverflowScrolling: "touch",
     }}>
       <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cinzel:wght@400;700&family=Barlow+Condensed:wght@600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700;800&display=swap"
         rel="stylesheet"
       />
       <style>{`

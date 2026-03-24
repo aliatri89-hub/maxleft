@@ -88,7 +88,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
           <div style={{ flex: 1 }}>
             <div style={{
-              fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+              fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
               letterSpacing: "0.04em", textTransform: "uppercase",
               color: pct >= 75 ? accentColor : "var(--text-faint, #5a6480)",
               marginBottom: 8,

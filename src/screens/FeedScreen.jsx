@@ -322,7 +322,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
@@ -414,7 +414,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
@@ -495,7 +495,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",

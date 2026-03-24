@@ -94,7 +94,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
     <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36, width: "100%" }}>
       {/* Fallback text — always rendered, fades out when logo is ready */}
       <div style={{
-        fontFamily: "'Permanent Marker', cursive",
+        fontFamily: "'Playfair Display', serif", fontWeight: 700,
         fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
         lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
         letterSpacing: "0.02em", textAlign: "center",
@@ -180,7 +180,7 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
         {dateStr && (
           <div style={{
             position: "absolute", bottom: 5, left: 28,
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: "'Playfair Display', serif", fontWeight: 700,
             fontSize: 8, color: "rgba(44,40,36,0.7)",
             transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
             whiteSpace: "nowrap", pointerEvents: "none",

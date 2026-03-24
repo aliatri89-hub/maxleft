@@ -65,7 +65,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
             <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
             <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column", minHeight: 104 }}>
               <div style={{
-                fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+                fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
                 letterSpacing: "0.04em", textTransform: "uppercase",
                 color: "var(--accent-green, #34d399)",
                 marginBottom: 8,

@@ -80,7 +80,7 @@ function StatsRibbon({ movies }) {
       {items.map((s) => (
         <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
           <div style={{
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: "'Playfair Display', serif", fontWeight: 900,
             fontSize: 20, lineHeight: 1,
             color: s.highlight ? accent : "rgba(255,255,255,0.85)",
             textShadow: s.highlight ? `0 0 12px ${accent}44` : "none",
@@ -227,7 +227,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
               padding: "14px 12px 6px",
             }}>
               <div style={{
-                fontFamily: "'Permanent Marker', cursive",
+                fontFamily: "'Playfair Display', serif", fontWeight: 700,
                 fontSize: 15, color: "var(--text-faint)",
                 letterSpacing: 1,
               }}>
@@ -280,7 +280,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                               {month}
                             </div>
                             <div style={{
-                              fontFamily: "'Permanent Marker', cursive",
+                              fontFamily: "'Playfair Display', serif", fontWeight: 700,
                               fontSize: 18, color: "rgba(255,255,255,0.35)",
                               lineHeight: 1.1,
                             }}>

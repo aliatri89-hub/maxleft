@@ -160,7 +160,7 @@ const EpisodeLink = ({ title, episodeUrl, compact }) => {
           <span style={{ fontSize: compact ? 11 : 13 }}>▶</span>
           <span style={{
             fontSize: compact ? 10 : 11, fontWeight: 700, color: C.gold,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
             letterSpacing: 1, whiteSpace: "nowrap",
           }}>Listen to Episode</span>
         </a>
@@ -234,7 +234,7 @@ const PodcastFooterLinks = () => (
         {svg}
         <span style={{
           fontSize: 11, fontWeight: 600, color: C.textMuted,
-          fontFamily: "'Source Sans 3', sans-serif", whiteSpace: "nowrap",
+          fontFamily: "'Barlow Condensed', sans-serif", whiteSpace: "nowrap",
         }}>{label}</span>
       </a>
     ))}
@@ -386,7 +386,7 @@ const LoginModal = ({ onClose }) => {
     width: "100%", padding: "12px 14px", borderRadius: 8,
     border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)",
     color: "#fff", fontSize: 14, outline: "none", boxSizing: "border-box",
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'Barlow Condensed', sans-serif",
   };
 
   const renderEmailContent = () => {
@@ -403,14 +403,14 @@ const LoginModal = ({ onClose }) => {
             placeholder="00000000"
             onKeyDown={(e) => e.key === "Enter" && otpCode.length === 8 && handleVerifyOtp()}
             style={{ ...inputStyle, textAlign: "center", letterSpacing: "0.25em", fontSize: 20,
-              fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}
+              fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}
           />
           <button onClick={handleVerifyOtp} disabled={loading || otpCode.length < 8} style={{
             width: "100%", padding: "12px 0", borderRadius: 8,
             background: C.gold, border: "none", color: "#000",
             fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
             opacity: loading || otpCode.length < 8 ? 0.5 : 1,
-            fontFamily: "'Source Sans 3', sans-serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
           }}>{loading ? "Verifying..." : "Verify & Sign In"}</button>
           <button onClick={() => { setEmailStep("input"); setOtpCode(""); setError(null); }} style={{
             background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer",
@@ -435,7 +435,7 @@ const LoginModal = ({ onClose }) => {
             background: C.gold, border: "none", color: "#000",
             fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
             opacity: loading || password.length < 6 ? 0.5 : 1,
-            fontFamily: "'Source Sans 3', sans-serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
           }}>{loading ? "Creating account..." : "Create Account"}</button>
           <button onClick={resetEmail} style={{
             background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer",
@@ -450,7 +450,7 @@ const LoginModal = ({ onClose }) => {
           width: "100%", padding: "12px 0", borderRadius: 8,
           background: "transparent", border: "1px solid rgba(255,255,255,0.15)",
           color: C.textMuted, fontSize: 14, fontWeight: 600,
-          fontFamily: "'Source Sans 3', sans-serif", cursor: "pointer",
+          fontFamily: "'Barlow Condensed', sans-serif", cursor: "pointer",
           transition: "all 0.15s",
         }}>Continue with email</button>
       );
@@ -476,7 +476,7 @@ const LoginModal = ({ onClose }) => {
           background: C.gold, border: "none", color: "#000",
           fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
           opacity: loading || !email.trim() || (usePassword && !password) ? 0.5 : 1,
-          fontFamily: "'Source Sans 3', sans-serif",
+          fontFamily: "'Barlow Condensed', sans-serif",
         }}>{loading ? "Sending..." : usePassword ? "Sign In" : "Send sign-in code"}</button>
         <button onClick={() => { setUsePassword(!usePassword); setError(null); }} style={{
           background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer",
@@ -502,7 +502,7 @@ const LoginModal = ({ onClose }) => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h3 style={{
             margin: 0, fontSize: 18, fontWeight: 700, color: C.gold,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
           }}>Sign In</h3>
           <button onClick={onClose} style={{
             background: "none", border: "none", color: C.textDim,
@@ -513,7 +513,7 @@ const LoginModal = ({ onClose }) => {
         {emailStep === "input" && (
           <p style={{
             fontSize: 13, color: C.textMuted, lineHeight: 1.6, marginBottom: 20,
-            fontFamily: "'Source Sans 3', sans-serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
           }}>
             Sign in to track your progress across every franchise.
           </p>
@@ -524,7 +524,7 @@ const LoginModal = ({ onClose }) => {
             <button onClick={handleGoogle} disabled={loading} style={{
               width: "100%", padding: "12px 0", borderRadius: 8,
               background: "#fff", border: "none", color: "#333", fontSize: 14, fontWeight: 600,
-              fontFamily: "'Source Sans 3', sans-serif",
+              fontFamily: "'Barlow Condensed', sans-serif",
               cursor: loading ? "wait" : "pointer",
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
               transition: "opacity 0.15s", opacity: loading ? 0.6 : 1,
@@ -540,7 +540,7 @@ const LoginModal = ({ onClose }) => {
             <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
               <span style={{ fontSize: 10, color: C.textDim, letterSpacing: "0.1em", textTransform: "uppercase",
-                fontFamily: "'JetBrains Mono', monospace" }}>or</span>
+                fontFamily: "'IBM Plex Mono', monospace" }}>or</span>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
             </div>
           </>
@@ -552,13 +552,13 @@ const LoginModal = ({ onClose }) => {
           <div style={{
             marginTop: 12, padding: "8px 12px", borderRadius: 6,
             background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)",
-            fontSize: 12, color: C.red, fontFamily: "'Source Sans 3', sans-serif",
+            fontSize: 12, color: C.red, fontFamily: "'Barlow Condensed', sans-serif",
           }}>{error}</div>
         )}
 
         <div style={{
           marginTop: 16, fontSize: 10, color: C.textDim,
-          fontFamily: "'JetBrains Mono', monospace",
+          fontFamily: "'IBM Plex Mono', monospace",
         }}>powered by MANTL</div>
       </div>
     </div>
@@ -575,13 +575,13 @@ const Toast = ({ message, link, onDone }) => {
       animation: "slideUp 0.25s ease", boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
       display: "flex", alignItems: "center", gap: 12,
     }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: C.text, fontFamily: "'Source Sans 3', sans-serif" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: C.text, fontFamily: "'Barlow Condensed', sans-serif" }}>
         {message}
       </span>
       {link && (
         <a href={link} target="_blank" rel="noopener noreferrer" style={{
           fontSize: 11, fontWeight: 700, color: C.gold, textDecoration: "none",
-          fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+          fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
           letterSpacing: 1, whiteSpace: "nowrap",
           borderLeft: `1px solid ${C.border}`, paddingLeft: 12,
         }}>My Tracker →</a>
@@ -724,12 +724,12 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
         }}>
           <div style={{
             fontSize: hasPoster ? 13 : 15, fontWeight: 700, color: "#fff", lineHeight: 1.25,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 0.5,
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 0.5,
             textShadow: hasPoster ? "0 1px 4px rgba(0,0,0,0.8)" : "none",
           }}>{film.title}</div>
           <div style={{
             fontSize: 11, color: "rgba(255,255,255,0.6)", marginTop: 2,
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'IBM Plex Mono', monospace",
             textShadow: hasPoster ? "0 1px 3px rgba(0,0,0,0.8)" : "none",
           }}>{film.year}</div>
         </div>
@@ -743,7 +743,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
           }}>
             <span style={{
               fontSize: 8, fontWeight: 700, color: C.brown,
-              textTransform: "uppercase", letterSpacing: 2, fontFamily: "'JetBrains Mono', monospace",
+              textTransform: "uppercase", letterSpacing: 2, fontFamily: "'IBM Plex Mono', monospace",
             }}>Cult Favorite</span>
           </div>
         )}
@@ -911,9 +911,9 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{
               margin: 0, fontSize: 22, fontWeight: 700, color: C.text,
-              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
             }}>{film.title}</h2>
-            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: "'JetBrains Mono', monospace" }}>
+            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: "'IBM Plex Mono', monospace" }}>
               {film.year} · {film.miniseries_title || ""}
             </span>
           </div>
@@ -946,7 +946,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           }}>
             <div style={{
               fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase",
-              letterSpacing: 2, marginBottom: 12, fontFamily: "'JetBrains Mono', monospace",
+              letterSpacing: 2, marginBottom: 12, fontFamily: "'IBM Plex Mono', monospace",
               display: "flex", alignItems: "center", gap: 6,
             }}>
               <span style={{ fontSize: 11 }}>⚙</span> Admin Controls
@@ -956,15 +956,15 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div style={{ marginBottom: 14 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
               }}>Host Verdicts</div>
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 {/* Up */}
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hUp, setHUp, C.green, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.green, display: "block", fontFamily: "'JetBrains Mono', monospace" }}>▲</span>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: C.green, fontFamily: "'Oswald', sans-serif" }}>{hUp}</span>
+                    <span style={{ fontSize: 9, color: C.green, display: "block", fontFamily: "'IBM Plex Mono', monospace" }}>▲</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: C.green, fontFamily: "'Bebas Neue', sans-serif" }}>{hUp}</span>
                   </div>
                   {counterBtn(hUp, setHUp, C.green, 1)}
                 </div>
@@ -972,8 +972,8 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hDown, setHDown, C.red, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.red, display: "block", fontFamily: "'JetBrains Mono', monospace" }}>▼</span>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: C.red, fontFamily: "'Oswald', sans-serif" }}>{hDown}</span>
+                    <span style={{ fontSize: 9, color: C.red, display: "block", fontFamily: "'IBM Plex Mono', monospace" }}>▼</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: C.red, fontFamily: "'Bebas Neue', sans-serif" }}>{hDown}</span>
                   </div>
                   {counterBtn(hDown, setHDown, C.red, 1)}
                 </div>
@@ -981,8 +981,8 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hBrown, setHBrown, C.brown, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.brown, display: "block", fontFamily: "'JetBrains Mono', monospace" }}>◆</span>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: C.brown, fontFamily: "'Oswald', sans-serif" }}>{hBrown}</span>
+                    <span style={{ fontSize: 9, color: C.brown, display: "block", fontFamily: "'IBM Plex Mono', monospace" }}>◆</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: C.brown, fontFamily: "'Bebas Neue', sans-serif" }}>{hBrown}</span>
                   </div>
                   {counterBtn(hBrown, setHBrown, C.brown, 1)}
                 </div>
@@ -990,7 +990,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                   marginLeft: "auto", padding: "5px 14px", borderRadius: 6,
                   background: `${C.gold}18`, border: `1px solid ${C.gold}55`,
                   color: C.gold, fontSize: 10, fontWeight: 700, cursor: adminSaving ? "wait" : "pointer",
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1,
+                  fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1,
                   opacity: adminSaving ? 0.5 : 1,
                 }}>Save</button>
               </div>
@@ -1000,7 +1000,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div style={{ marginBottom: 14 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
               }}>Title / Poster (TMDB)</div>
               <input
                 type="text"
@@ -1010,12 +1010,12 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 style={{
                   width: "100%", padding: "7px 10px", borderRadius: 6,
                   background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                  color: C.text, fontSize: 12, fontFamily: "'Source Sans 3', sans-serif",
+                  color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
                   outline: "none", boxSizing: "border-box",
                 }}
               />
               {tmdbSearching && (
-                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>
+                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: "'IBM Plex Mono', monospace" }}>
                   Searching...
                 </div>
               )}
@@ -1047,10 +1047,10 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{
                           fontSize: 12, fontWeight: 600, color: C.text,
-                          fontFamily: "'Source Sans 3', sans-serif",
+                          fontFamily: "'Barlow Condensed', sans-serif",
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>{r.title || r.original_title}</div>
-                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: "'JetBrains Mono', monospace" }}>
+                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace" }}>
                           {r.release_date?.slice(0, 4) || "?"} · ID {r.id}
                         </div>
                       </div>
@@ -1064,7 +1064,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'JetBrains Mono', monospace",
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
               }}>Category</div>
               <div style={{ display: "flex", gap: 6 }}>
                 <select
@@ -1073,7 +1073,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                   style={{
                     flex: 1, padding: "7px 10px", borderRadius: 6,
                     background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                    color: C.text, fontSize: 12, fontFamily: "'Source Sans 3', sans-serif",
+                    color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
                     outline: "none", appearance: "none", WebkitAppearance: "none",
                     cursor: "pointer",
                   }}
@@ -1087,7 +1087,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                   padding: "5px 14px", borderRadius: 6,
                   background: `${C.gold}18`, border: `1px solid ${C.gold}55`,
                   color: C.gold, fontSize: 10, fontWeight: 700, cursor: (adminSaving || newCategory === (film.miniseries_title || "")) ? "default" : "pointer",
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1,
+                  fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1,
                   opacity: (adminSaving || newCategory === (film.miniseries_title || "")) ? 0.35 : 1,
                 }}>Move</button>
               </div>
@@ -1099,7 +1099,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 marginTop: 10, padding: "6px 12px", borderRadius: 6,
                 background: `${C.gold}15`, border: `1px solid ${C.gold}33`,
                 fontSize: 11, fontWeight: 600, color: C.gold,
-                fontFamily: "'JetBrains Mono', monospace", textAlign: "center",
+                fontFamily: "'IBM Plex Mono', monospace", textAlign: "center",
               }}>{adminToast}</div>
             )}
           </div>
@@ -1110,9 +1110,9 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
         <div style={{ textAlign: "center", margin: "24px 0 18px" }}>
           <div style={{
             fontSize: 52, fontWeight: 800, color: C.gold,
-            fontFamily: "'Oswald', sans-serif", lineHeight: 1,
+            fontFamily: "'Bebas Neue', sans-serif", lineHeight: 1,
           }}>{avg > 0 ? Number(avg).toFixed(1) : "—"}</div>
-          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4, fontFamily: "'JetBrains Mono', monospace" }}>
+          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4, fontFamily: "'IBM Plex Mono', monospace" }}>
             {total > 0 ? `avg from ${total.toLocaleString()} logs` : "No logs yet"}
           </div>
         </div>
@@ -1127,7 +1127,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           }}>
             <div style={{
               fontSize: 10, color: C.gold, textTransform: "uppercase",
-              letterSpacing: 2.5, marginBottom: 12, fontFamily: "'Oswald', sans-serif",
+              letterSpacing: 2.5, marginBottom: 12, fontFamily: "'Bebas Neue', sans-serif",
               fontWeight: 700, textAlign: "center",
             }}>Host Verdicts</div>
             <div style={{ display: "flex", justifyContent: "center", gap: 10, alignItems: "center" }}>
@@ -1176,7 +1176,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
         }}>
           <div style={{
             fontSize: 10, color: C.textDim, textTransform: "uppercase",
-            letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Oswald', sans-serif",
+            letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Bebas Neue', sans-serif",
             fontWeight: 700, display: "flex", alignItems: "center", gap: 6,
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1192,7 +1192,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
         {SHOW_COMMUNITY_STATS && (<>
         <div style={{
           fontSize: 10, color: C.textDim, textTransform: "uppercase",
-          letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Oswald', sans-serif",
+          letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Bebas Neue', sans-serif",
           fontWeight: 700,
         }}>Community Verdicts</div>
         <div style={{ marginBottom: 18 }}>
@@ -1212,13 +1212,13 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ color: s.color, fontSize: 13 }}>{s.icon}</span>
-                <span style={{ color: s.color, fontSize: 20, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ color: s.color, fontSize: 20, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>
                   {s.count}
                 </span>
               </div>
               <div style={{
                 fontSize: 9, color: C.textDim, marginTop: 2,
-                textTransform: "uppercase", letterSpacing: 1.2, fontFamily: "'JetBrains Mono', monospace",
+                textTransform: "uppercase", letterSpacing: 1.2, fontFamily: "'IBM Plex Mono', monospace",
               }}>{s.label}</div>
             </div>
           ))}
@@ -1230,7 +1230,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           {isAuthed && (
             <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
               fontSize: 11, color: C.textDim, textDecoration: "none",
-              fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5,
+              fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 0.5,
               transition: "color 0.15s",
             }}
               onMouseEnter={(e) => e.currentTarget.style.color = C.gold}
@@ -1239,7 +1239,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           )}
           <a href={NPP_WEBSITE} target="_blank" rel="noopener noreferrer" style={{
             fontSize: 11, color: C.textDim, textDecoration: "none",
-            fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5,
+            fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 0.5,
             transition: "color 0.15s",
           }}
             onMouseEnter={(e) => e.currentTarget.style.color = C.gold}
@@ -1364,7 +1364,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                 backdropFilter: "blur(4px)",
               }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 10, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace",
                   color: g > r ? C.green : C.red,
                 }}>{Number(avg).toFixed(1)}</span>
               </div>
@@ -1379,12 +1379,12 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontSize: 14, fontWeight: 700, color: isUpcoming ? C.text : "rgba(240,236,228,0.75)",
-                fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                 letterSpacing: 0.3, lineHeight: 1.3,
               }}>{ep.title}</div>
               <div style={{
                 fontSize: 11, color: C.textDim, marginTop: 3,
-                fontFamily: "'JetBrains Mono', monospace",
+                fontFamily: "'IBM Plex Mono', monospace",
                 display: "flex", alignItems: "center", gap: 8,
               }}>
                 <span>{ep.dateDisplay}</span>
@@ -1398,7 +1398,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                 <div style={{
                   background: `${C.gold}22`, borderRadius: 3, padding: "2px 8px",
                   fontSize: 9, fontWeight: 700, color: C.gold,
-                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
+                  fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
                 }}>SOON</div>
               )}
               {/* Admin link button — only when no matched film */}
@@ -1409,7 +1409,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                   borderRadius: 4, padding: "2px 8px", cursor: "pointer",
                   fontSize: 9, fontWeight: 700,
                   color: adminOpen ? C.gold : C.textDim,
-                  fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
+                  fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
                   transition: "all 0.15s",
                 }}>🔗 LINK</button>
               )}
@@ -1422,7 +1422,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
               <ArrowBar green={g} red={r} brown={br} yellow={film.yellow_count || 0} total={total} />
               <div style={{
                 display: "flex", gap: 10, marginTop: 4,
-                fontSize: 10, fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10, fontFamily: "'IBM Plex Mono', monospace",
               }}>
                 <span style={{ color: C.green }}>▲{g}</span>
                 <span style={{ color: C.red }}>▼{r}</span>
@@ -1450,7 +1450,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                   style={{
                     background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`,
                     borderRadius: 4, padding: "4px 8px", cursor: "pointer",
-                    fontSize: 10, color: C.textDim, fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
                     transition: "all 0.15s",
                   }}
                 >{expanded ? "Less" : "Info"}</button>
@@ -1469,7 +1469,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                     borderRadius: 4, padding: "4px 10px",
                     fontSize: 10, fontWeight: 700, textDecoration: "none",
                     color: isUpcoming ? C.gold : C.textMuted,
-                    fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                    fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                     letterSpacing: 1, transition: "all 0.15s",
                   }}
                 >
@@ -1489,7 +1489,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
         }}>
           <div style={{
             fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase",
-            letterSpacing: 2, marginBottom: 8, fontFamily: "'JetBrains Mono', monospace",
+            letterSpacing: 2, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
           }}>Link to TMDB Film</div>
 
           {/* TMDB Search */}
@@ -1502,7 +1502,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
               style={{
                 width: "100%", padding: "7px 10px", borderRadius: 6,
                 background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                color: C.text, fontSize: 12, fontFamily: "'Source Sans 3', sans-serif",
+                color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
                 outline: "none", boxSizing: "border-box",
               }}
             />
@@ -1516,7 +1516,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
 
           {/* GUID info */}
           <div style={{
-            fontSize: 9, color: C.textDim, fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 9, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
             marginBottom: 8, wordBreak: "break-all",
           }}>guid: {ep.guid || "none"}</div>
 
@@ -1550,11 +1550,11 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 600, color: C.text,
-                        fontFamily: "'Source Sans 3', sans-serif",
+                        fontFamily: "'Barlow Condensed', sans-serif",
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{r.title || r.original_title}</div>
                       <div style={{
-                        fontSize: 10, color: C.textDim, fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
                         display: "flex", gap: 8, alignItems: "center",
                       }}>
                         <span>{r.release_date?.slice(0, 4) || "?"}</span>
@@ -1574,7 +1574,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
           )}
 
           {tmdbQuery.length >= 2 && !tmdbSearching && tmdbResults.length === 0 && (
-            <div style={{ fontSize: 11, color: C.textDim, fontFamily: "'JetBrains Mono', monospace" }}>
+            <div style={{ fontSize: 11, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace" }}>
               No results
             </div>
           )}
@@ -1590,7 +1590,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
         }}>
           <p style={{
             fontSize: 12, color: C.textMuted, lineHeight: 1.6,
-            fontFamily: "'Source Sans 3', sans-serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
             margin: "10px 0 0",
           }}>
             {/* Strip HTML from RSS description */}
@@ -2032,7 +2032,7 @@ export default function NPPDashboard({ session: sessionProp }) {
   const tabBtn = (key, label) => ({
     padding: "10px 20px", background: "none", border: "none", cursor: "pointer",
     fontSize: 13, fontWeight: 700, transition: "all 0.2s",
-    fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+    fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
     color: tab === key ? C.gold : C.textDim,
     borderBottom: tab === key ? `2px solid ${C.gold}` : "2px solid transparent",
   });
@@ -2042,7 +2042,7 @@ export default function NPPDashboard({ session: sessionProp }) {
   return (
     <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&family=Barlow+Condensed:wght@400;600;700;800;900&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: ${C.bg}; }
         ::-webkit-scrollbar { height: 3px; width: 3px; }
@@ -2065,8 +2065,8 @@ export default function NPPDashboard({ session: sessionProp }) {
         .pitch-badge-back .backdrop { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.3; }
         .pitch-badge-back .overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(15,13,11,0.5) 0%, rgba(15,13,11,0.9) 100%); }
         .pitch-badge-back img { width: 36px; height: 36px; border-radius: 8px; position: relative; z-index: 1; }
-        .pitch-badge-back .badge-name { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-align: center; line-height: 1.2; position: relative; z-index: 1; }
-        .pitch-badge-back .badge-sub { font-family: 'JetBrains Mono', monospace; font-size: 7px; position: relative; z-index: 1; }
+        .pitch-badge-back .badge-name { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; font-size: 8px; font-weight: 700; letter-spacing: 0.5px; text-align: center; line-height: 1.2; position: relative; z-index: 1; }
+        .pitch-badge-back .badge-sub { font-family: 'IBM Plex Mono', monospace; font-size: 7px; position: relative; z-index: 1; }
       `}</style>
 
       {/* ═══ YELLOW MASTHEAD ═══════════════════════════════════════════ */}
@@ -2088,10 +2088,10 @@ export default function NPPDashboard({ session: sessionProp }) {
           >
             <span style={{
               fontSize: 18, fontWeight: 700, color: C.gold,
-              fontFamily: "'Oswald', sans-serif", letterSpacing: 2, textTransform: "uppercase",
+              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2, textTransform: "uppercase",
             }}>Now Playing</span>
             <span style={{
-              fontSize: 9, color: C.textMuted, fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 9, color: C.textMuted, fontFamily: "'IBM Plex Mono', monospace",
               letterSpacing: 3, textTransform: "uppercase",
             }}>Podcast</span>
           </div>
@@ -2119,7 +2119,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
                 background: C.bgDeep, borderRadius: 4, padding: "5px 12px",
                 fontSize: 11, fontWeight: 700, color: C.gold, cursor: "pointer",
-                fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                 letterSpacing: 1, textDecoration: "none",
                 display: "flex", alignItems: "center", gap: 5,
               }}>My Tracker →</a>
@@ -2146,13 +2146,13 @@ export default function NPPDashboard({ session: sessionProp }) {
               <button onClick={() => setShowLogin(true)} style={{
                 background: "transparent", borderRadius: 4, padding: "5px 12px",
                 fontSize: 11, fontWeight: 700, color: C.bgDeep, cursor: "pointer",
-                fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                 letterSpacing: 1, border: "none",
               }}>Sign In</button>
               <button onClick={() => setShowLogin(true)} style={{
                 background: C.bgDeep, borderRadius: 4, padding: "5px 12px",
                 fontSize: 11, fontWeight: 700, color: C.gold, cursor: "pointer",
-                fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                 letterSpacing: 1, border: "none",
               }}>Join on MANTL</button>
             </>
@@ -2192,19 +2192,19 @@ export default function NPPDashboard({ session: sessionProp }) {
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold, animation: "pulse 2s ease infinite" }} />
             <span style={{
               fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2,
-              textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace",
+              textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
             }}>Live Community{SHOW_COMMUNITY_STATS ? ` · ${memberStats.active_this_week || 0} active this week` : ""}</span>
           </div>
 
           <h1 style={{
             fontSize: 42, fontWeight: 700, lineHeight: 1.05, marginBottom: 10,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
             animation: "slideUp 0.4s ease 0.05s both",
           }}>Community<br /><span style={{ color: C.gold }}>Dashboard</span></h1>
 
           <p style={{
             fontSize: 15, color: C.textMuted, maxWidth: 460, lineHeight: 1.6,
-            fontFamily: "'Source Sans 3', sans-serif",
+            fontFamily: "'Barlow Condensed', sans-serif",
             animation: "slideUp 0.4s ease 0.1s both",
           }}>Arnie, Stuart, Brock, Marjorie, and the crew dive deep into every franchise — from Bond to Marvel to Mad Max — with sharp insight, behind-the-scenes stories, and zero patience for bad movies. <a href={NPP_WEBSITE} target="_blank" rel="noopener noreferrer" style={{ color: C.gold, textDecoration: "none", fontWeight: 600 }}>Since 2007 →</a></p>
 
@@ -2217,10 +2217,10 @@ export default function NPPDashboard({ session: sessionProp }) {
               ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_logs || 0, l: "Total Logs" }] : []),
             ].map((s) => (
               <div key={s.l} style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: "'Oswald', sans-serif" }}>
+                <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: "'Bebas Neue', sans-serif" }}>
                   {s.v.toLocaleString()}
                 </span>
-                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: "'JetBrains Mono', monospace" }}>{s.l}</span>
+                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: "'IBM Plex Mono', monospace" }}>{s.l}</span>
               </div>
             ))}
           </div>
@@ -2230,7 +2230,7 @@ export default function NPPDashboard({ session: sessionProp }) {
             {VOTE_TYPES.map((a) => (
               <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: C.textDim }}>
                 <span style={{ color: a.color, fontSize: 11 }}>{a.icon}</span>
-                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10 }}>{a.label}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10 }}>{a.label}</span>
               </div>
             ))}
           </div>
@@ -2248,16 +2248,16 @@ export default function NPPDashboard({ session: sessionProp }) {
         }}>
           <div style={{
             fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2.5,
-            textTransform: "uppercase", fontFamily: "'Oswald', sans-serif",
+            textTransform: "uppercase", fontFamily: "'Bebas Neue', sans-serif",
             marginBottom: 6,
           }}>Collect</div>
           <div style={{
             fontSize: 20, fontWeight: 700, color: C.text,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
             marginBottom: 6,
           }}>Earn Badges Across Every Franchise</div>
           <p style={{
-            fontSize: 13, color: C.textMuted, fontFamily: "'Source Sans 3', sans-serif",
+            fontSize: 13, color: C.textMuted, fontFamily: "'Barlow Condensed', sans-serif",
             lineHeight: 1.5, marginBottom: 18, maxWidth: 420,
           }}>
             Complete a franchise and unlock its badge. {badgeCount > 0 ? `${badgeCount} badges` : "Badges"} to
@@ -2296,10 +2296,10 @@ export default function NPPDashboard({ session: sessionProp }) {
               padding: "10px 24px", borderRadius: 4,
               background: C.gold, border: "none",
               color: C.bgDeep, fontSize: 13, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
             }}>Start Tracking</button>
             <span style={{
-              fontSize: 11, color: C.textDim, fontFamily: "'Source Sans 3', sans-serif",
+              fontSize: 11, color: C.textDim, fontFamily: "'Barlow Condensed', sans-serif",
             }}>Free to join · Sync with Letterboxd</span>
           </div>
         </div>
@@ -2337,7 +2337,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 style={{
                   width: "100%", padding: "9px 12px 9px 36px", borderRadius: 6,
                   background: "rgba(255,255,255,0.05)", border: `1px solid ${searchQuery ? C.goldBorder : C.border}`,
-                  color: C.text, fontSize: 13, fontFamily: "'Source Sans 3', sans-serif",
+                  color: C.text, fontSize: 13, fontFamily: "'Barlow Condensed', sans-serif",
                   outline: "none", boxSizing: "border-box", transition: "border-color 0.2s",
                 }}
               />
@@ -2361,7 +2361,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 background: !activeBucket ? `${C.gold}18` : `rgba(255,255,255,0.03)`,
                 color: !activeBucket ? C.gold : C.textMuted,
                 fontSize: 12, fontWeight: 700, cursor: "pointer",
-                fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                 letterSpacing: 1.5, transition: "all 0.2s",
               }}>All&ensp;{films.length}</button>
               {buckets.map((b) => {
@@ -2373,13 +2373,13 @@ export default function NPPDashboard({ session: sessionProp }) {
                     background: isActive ? `${C.gold}18` : `rgba(255,255,255,0.03)`,
                     color: isActive ? C.gold : C.textMuted,
                     fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                    fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                     letterSpacing: 1, transition: "all 0.2s",
                     display: "flex", alignItems: "center", gap: 6,
                   }}>
                     <span style={{ fontSize: 14, lineHeight: 1 }}>{b.icon}</span>
                     {b.label}&ensp;<span style={{
-                      fontSize: 10, opacity: 0.6, fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 10, opacity: 0.6, fontFamily: "'IBM Plex Mono', monospace",
                       fontWeight: 400,
                     }}>{b.count}</span>
                   </button>
@@ -2395,7 +2395,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               {activeBucket && franchisesInBucket.length > 1 && (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{
-                    fontSize: 10, color: C.textDim, fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
                     textTransform: "uppercase", letterSpacing: 1,
                   }}>Franchise</span>
                   <select
@@ -2405,7 +2405,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                       padding: "5px 28px 5px 10px", borderRadius: 4,
                       background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
                       color: activeFranchise ? C.gold : C.textMuted,
-                      fontSize: 12, fontFamily: "'Source Sans 3', sans-serif",
+                      fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
                       cursor: "pointer", outline: "none",
                       appearance: "none", WebkitAppearance: "none",
                       backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23F5C518' fill='none' stroke-width='1.5'/%3E%3C/svg%3E")`,
@@ -2426,7 +2426,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               )}
 
               <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: activeBucket && franchisesInBucket.length > 1 ? 0 : 0 }}>
-                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: "'JetBrains Mono', monospace", textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
+                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
                 {[
                   { key: "az", label: sortBy === "za" ? "Z–A" : "A–Z", toggle: true },
                   ...(SHOW_COMMUNITY_STATS ? [
@@ -2445,7 +2445,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                     padding: "4px 10px", borderRadius: 4, border: "none",
                     background: isActive ? `${C.gold}15` : "transparent",
                     color: isActive ? C.gold : C.textDim,
-                    fontSize: 11, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace",
                     transition: "all 0.2s", fontWeight: isActive ? 700 : 400,
                   }}>{s.toggle && sortBy === "za" ? "Z–A" : s.label}</button>
                   );
@@ -2467,7 +2467,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 </svg>
                 <span style={{
                   flex: 1, fontSize: 12, color: C.textMuted,
-                  fontFamily: "'Source Sans 3', sans-serif",
+                  fontFamily: "'Barlow Condensed', sans-serif",
                 }}>
                   Listen to the full <strong style={{ color: C.gold }}>{activeFranchise}</strong> retrospective
                 </span>
@@ -2479,7 +2479,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                     padding: "4px 10px", borderRadius: 4,
                     background: "rgba(29,185,84,0.12)", border: "1px solid rgba(29,185,84,0.25)",
                     textDecoration: "none", fontSize: 10, fontWeight: 700,
-                    color: "#1DB954", fontFamily: "'Oswald', sans-serif",
+                    color: "#1DB954", fontFamily: "'Bebas Neue', sans-serif",
                     textTransform: "uppercase", letterSpacing: 1, flexShrink: 0,
                   }}
                 >
@@ -2496,7 +2496,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                     padding: "4px 10px", borderRadius: 4,
                     background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.25)",
                     textDecoration: "none", fontSize: 10, fontWeight: 700,
-                    color: "#A855F7", fontFamily: "'Oswald', sans-serif",
+                    color: "#A855F7", fontFamily: "'Bebas Neue', sans-serif",
                     textTransform: "uppercase", letterSpacing: 1, flexShrink: 0,
                   }}
                 >
@@ -2509,13 +2509,13 @@ export default function NPPDashboard({ session: sessionProp }) {
             )}
 
             {filtered.length === 0 && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
                 {searchQuery ? `No films matching "${searchQuery}"` : "No films found"}
               </div>
             )}
 
             {searchQuery && filtered.length > 0 && (
-              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: "'JetBrains Mono', monospace", marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 10 }}>
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{searchQuery}"
                 {activeBucket ? ` in ${(BUCKET_LABELS[activeBucket] || {}).label || activeBucket}` : ""}
               </div>
@@ -2537,14 +2537,14 @@ export default function NPPDashboard({ session: sessionProp }) {
                   padding: "10px 32px", borderRadius: 6,
                   background: `${C.gold}12`, border: `1px solid ${C.goldBorder}`,
                   color: C.gold, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+                  fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
                   letterSpacing: 1.5, transition: "all 0.2s",
                 }}>
                   Show More · {filtered.length - visibleCount} remaining
                 </button>
                 <div style={{
                   fontSize: 10, color: C.textDim, marginTop: 8,
-                  fontFamily: "'JetBrains Mono', monospace",
+                  fontFamily: "'IBM Plex Mono', monospace",
                 }}>
                   Showing {visibleCount} of {filtered.length}
                 </div>
@@ -2564,7 +2564,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
                 No upcoming episodes yet
               </div>
             )}
@@ -2575,12 +2575,12 @@ export default function NPPDashboard({ session: sessionProp }) {
         {tab === "recent" && (
           <div style={{ paddingBottom: 48 }}>
             {rssLoading && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}>
                 Loading episodes...
               </div>
             )}
             {rssError && !rssLoading && recent.length === 0 && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}>
                 {rssError}
               </div>
             )}
@@ -2592,7 +2592,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : !rssLoading && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'JetBrains Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
                 No recent episodes
               </div>
             )}
@@ -2617,7 +2617,7 @@ export default function NPPDashboard({ session: sessionProp }) {
         >
           <span style={{
             fontSize: 16, fontWeight: 700, color: C.gold,
-            fontFamily: "'Oswald', sans-serif", textTransform: "uppercase",
+            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
             letterSpacing: 2,
           }}>Now Playing Podcast</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.gold} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
@@ -2627,7 +2627,7 @@ export default function NPPDashboard({ session: sessionProp }) {
           </svg>
         </a>
 
-        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 6, fontFamily: "'Source Sans 3', sans-serif" }}>
+        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif" }}>
           Listen to every retrospective. Subscribe wherever you get podcasts.
         </p>
 
@@ -2637,7 +2637,7 @@ export default function NPPDashboard({ session: sessionProp }) {
           marginTop: 20, paddingTop: 16,
           borderTop: `1px solid ${C.border}`,
         }}>
-          <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: "'Source Sans 3', sans-serif" }}>
+          <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: "'Barlow Condensed', sans-serif" }}>
             {isAuthed
               ? "Track your progress across every franchise on MANTL."
               : "Explore every franchise the hosts have covered."
@@ -2648,19 +2648,19 @@ export default function NPPDashboard({ session: sessionProp }) {
               display: "inline-block", padding: "10px 28px", borderRadius: 4,
               background: C.gold, border: "none", textDecoration: "none",
               color: C.bgDeep, fontSize: 13, fontWeight: 700,
-              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
+              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 2,
             }}>Open My Tracker →</a>
           ) : (
             <button onClick={() => setShowLogin(true)} style={{
               display: "inline-block", padding: "10px 28px", borderRadius: 4,
               background: C.gold, border: "none",
               color: C.bgDeep, fontSize: 13, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Oswald', sans-serif", textTransform: "uppercase", letterSpacing: 2,
+              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 2,
             }}>Join on MANTL</button>
           )}
           <div style={{
             marginTop: 14, fontSize: 10, color: C.textDim,
-            fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1,
+            fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
           }}>
             <a href={NPP_WEBSITE} target="_blank" rel="noopener noreferrer"
               style={{ color: C.textDim, textDecoration: "none", transition: "color 0.15s" }}

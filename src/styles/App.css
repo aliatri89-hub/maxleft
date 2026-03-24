@@ -2970,7 +2970,7 @@
   }
 
   .profile-big-name {
-    font-family: 'Permanent Marker', cursive;
+    font-family: 'Playfair Display', serif; font-weight: 900;
     font-weight: 400;
     font-size: 28px;
     color: #EF9F27;
@@ -3024,7 +3024,7 @@
     margin-top: 28px;
   }
   .profile-group-label {
-    font-family: 'Permanent Marker', cursive;
+    font-family: 'Barlow Condensed', sans-serif;
     font-weight: 400;
     font-size: 13px;
     letter-spacing: 0.08em;
@@ -5736,7 +5736,7 @@
     gap: 2px;
   }
   .toast-msg {
-    font-family: 'Permanent Marker', cursive;
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
     font-size: 19px;
     color: #1a100a;
     text-align: center;

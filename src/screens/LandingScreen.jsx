@@ -1560,7 +1560,7 @@ function LandingScreen({ onSignIn }) {
                           style={{ maxHeight: 60, maxWidth: "70%", objectFit: "contain", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.7))" }}
                           onError={(e) => { e.target.style.display = "none"; if (e.target.nextSibling) e.target.nextSibling.style.display = "block"; }}
                         />
-                        <div style={{ display: "none", fontFamily: "'Permanent Marker', cursive", fontSize: 28, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{movie.title}</div>
+                        <div style={{ display: "none", fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 28, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.8)" }}>{movie.title}</div>
                       </div>
                       {/* Headphones icon + tap hint */}
                       <div style={{

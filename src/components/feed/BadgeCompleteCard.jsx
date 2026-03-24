@@ -80,7 +80,7 @@ function BadgeCompleteCard({ data, onCelebrate }) {
         <div style={{ flex: 1 }}>
           {/* Label */}
           <div style={{
-            fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
             letterSpacing: "0.04em", textTransform: "uppercase",
             color: accent, marginBottom: 8,
           }}>

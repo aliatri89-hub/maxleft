@@ -138,7 +138,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
       WebkitOverflowScrolling: "touch",
     }}>
       <link
-        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Cinzel:wght@400;700&family=Barlow+Condensed:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700&display=swap"
         rel="stylesheet"
       />
       <style>{`
@@ -256,7 +256,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
           }}>
             <div style={{
               fontSize: 28, fontWeight: 700, color: "#fff",
-              fontFamily: "'DM Serif Display', serif",
+              fontFamily: "'Playfair Display', serif",
               lineHeight: 1.15,
             }}>
               {badge.name}
@@ -264,7 +264,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             {isComplete && badge.tagline && (
               <div style={{
                 fontSize: 14, color: `${accent}aa`, fontStyle: "italic",
-                fontFamily: "'Cinzel', serif",
+                fontFamily: "'Playfair Display', serif",
                 marginTop: 8,
               }}>
                 {badge.tagline}
@@ -273,7 +273,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             {!isComplete && badge.progress_tagline && (
               <div style={{
                 fontSize: 13, color: "#ffffff45", fontStyle: "italic",
-                fontFamily: "'Cinzel', serif",
+                fontFamily: "'Playfair Display', serif",
                 marginTop: 8,
               }}>
                 {badge.progress_tagline}

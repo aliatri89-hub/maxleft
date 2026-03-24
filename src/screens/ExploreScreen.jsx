@@ -215,8 +215,8 @@ export default function ExploreScreen({
       {/* Header */}
       <div style={{ padding: "0 20px 16px" }}>
         <div style={{
-          fontSize: 26, color: "var(--text-primary)",
-          fontFamily: "'Permanent Marker', cursive",
+          fontSize: 32, color: "var(--text-primary)",
+          fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
         }}>
           Communities
         </div>
@@ -298,7 +298,7 @@ export default function ExploreScreen({
               border: "1px solid var(--border-subtle)",
             }}>
               <div style={{
-                fontFamily: "'Permanent Marker', cursive",
+                fontFamily: "'Playfair Display', serif", fontWeight: 700,
                 fontSize: 18, color: "var(--text-primary)",
                 marginBottom: 8,
               }}>

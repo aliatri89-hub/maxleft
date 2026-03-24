@@ -65,7 +65,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
         <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
         <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column" }}>
           <div style={{
-            fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
             letterSpacing: "0.04em", textTransform: "uppercase",
             color: accent, marginBottom: 8,
           }}>

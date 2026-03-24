@@ -121,7 +121,7 @@ const GAMES = [
 // ── Styles ──
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Special+Elite&family=Bebas+Neue&family=Playfair+Display:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700;900&family=IBM+Plex+Mono:wght@400;700&display=swap');
 @keyframes gh-card-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 `;
 
@@ -176,7 +176,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
   return (
     <div style={{
       minHeight: "100vh", background: "#0f0d0b", color: "#f5f0e8",
-      fontFamily: "'Special Elite', monospace", padding: "0 16px 40px",
+      fontFamily: "'IBM Plex Mono', monospace", padding: "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
     }}>
       <style>{CSS}</style>
@@ -199,7 +199,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         <div style={{
-          fontFamily: "'Special Elite', monospace", fontSize: 11,
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
           letterSpacing: 4, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
         }}>
           M▶NTL
@@ -275,7 +275,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
                 {game.isNew && (
                   <span style={{
                     position: "absolute", top: -6, right: -10,
-                    fontFamily: "'Special Elite', monospace", fontSize: 7, letterSpacing: 1,
+                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 7, letterSpacing: 1,
                     color: "#0f0d0b", background: "#a8d870",
                     padding: "2px 4px", borderRadius: 3, transform: "rotate(8deg)",
                   }}>

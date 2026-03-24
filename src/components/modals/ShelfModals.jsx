@@ -744,7 +744,7 @@ export default function ShelfModals({
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                   <div style={{
-                    fontFamily: "'Permanent Marker', cursive", fontSize: 24,
+                    fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 24,
                     color: accent, letterSpacing: "0.04em", textTransform: "uppercase",
                   }}>
                     {cfg?.label}
@@ -1010,7 +1010,7 @@ export default function ShelfModals({
                   {cappedGroups.map((group, gi) => (
                     <div key={gi} style={{ marginBottom: 20 }}>
                       <div style={{
-                        fontFamily: "'Permanent Marker', cursive", fontSize: 13,
+                        fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 13,
                         color: `${accent}90`, marginBottom: 10, letterSpacing: "0.04em",
                         paddingBottom: 6,
                         borderBottom: `1px solid ${accent}12`,

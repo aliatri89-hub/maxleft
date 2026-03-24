@@ -106,7 +106,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             <div>
               {isDropped ? (
                 <div style={{
-                  fontFamily: "'Permanent Marker', cursive", fontSize: 18,
+                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
                   letterSpacing: "0.04em", textTransform: "uppercase",
                   color: accent,
                 }}>
@@ -114,7 +114,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 </div>
               ) : (
                 <div style={{
-                  fontFamily: "'Permanent Marker', cursive",
+                  fontFamily: "'Playfair Display', serif", fontWeight: 700,
                   fontSize: 18, lineHeight: 1,
                   color: accent,
                 }}>

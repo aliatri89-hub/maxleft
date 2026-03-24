@@ -50,7 +50,7 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
     <div className="overlay" onClick={() => step !== "importing" && onClose()}>
       <div className="pin-picker" onClick={e => e.stopPropagation()} style={{ maxHeight: "85vh", overflow: "auto" }}>
         <div className="pin-picker-header">
-          <div className="pin-picker-title" style={{ fontFamily: "'Permanent Marker', cursive", color: accent }}>
+          <div className="pin-picker-title" style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, color: accent }}>
             {step === "pick" ? "Import Library" : step === "preview" ? `${FORMAT_LABELS[format]} Import` : step === "importing" ? "Importing..." : "Import Complete"}
           </div>
           {step !== "importing" && (
@@ -198,7 +198,7 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
           {step === "done" && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, padding: "24px 0" }}>
               <div style={{
-                fontFamily: "'Permanent Marker', cursive", fontSize: 32,
+                fontFamily: "'Bebas Neue', sans-serif", fontSize: 36, letterSpacing: 2,
                 color: imported > 0 ? accent : "var(--text-faint)",
               }}>
                 {imported > 0 ? "Done!" : "Hmm"}

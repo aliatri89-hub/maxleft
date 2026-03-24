@@ -26,12 +26,12 @@ const S = {
   section: { padding: "0 16px", marginBottom: 36 },
   headerWrap: { textAlign: "center", padding: "0 0 18px" },
   sharpieLabel: {
-    fontFamily: "'Permanent Marker', cursive",
+    fontFamily: "'Playfair Display', serif", fontWeight: 700,
     fontSize: 22, color: accent,
     letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
   sharpieLabelHero: {
-    fontFamily: "'Permanent Marker', cursive",
+    fontFamily: "'Playfair Display', serif", fontWeight: 700,
     fontSize: 28, color: accent,
     letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
@@ -107,7 +107,7 @@ const S = {
   }),
   seeAll: {
     textAlign: "center", paddingTop: 16,
-    fontFamily: "'Permanent Marker', cursive", fontSize: 14,
+    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 14,
     letterSpacing: "0.04em",
     color: `${accent}80`, cursor: "pointer",
   },
