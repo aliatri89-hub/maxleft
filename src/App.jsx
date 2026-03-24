@@ -239,18 +239,35 @@ export default function App() {
   useEffect(() => {
     initDeepLinkListener(); // Listen for OAuth deep link callbacks on native
     let loadingUserId = null;
+    let callbackTimeout = null;
+
+    // If we landed with auth tokens in the URL, set a fallback timeout
+    // so users don't get stuck on loading if token processing fails
+    const hash = window.location.hash;
+    const isOAuthCallback = hash && (hash.includes("access_token") || hash.includes("refresh_token"));
+    if (isOAuthCallback) {
+      callbackTimeout = setTimeout(() => {
+        setAuthLoading(false);
+        setScreen("landing");
+      }, 5000);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      if (callbackTimeout) { clearTimeout(callbackTimeout); callbackTimeout = null; }
       setSession(s);
       if (s && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         if (loadingUserId === s.user.id) return;
         loadingUserId = s.user.id;
         loadUserData(s.user).finally(() => { loadingUserId = null; });
       } else if (!s) {
+        // If URL has auth tokens, Supabase is still processing the OAuth callback —
+        // stay on loading screen instead of flashing the landing page
+        if (isOAuthCallback) return;
         setAuthLoading(false);
         setScreen("landing");
       }
     });
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); if (callbackTimeout) clearTimeout(callbackTimeout); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── PUSH NOTIFICATION LISTENERS (native only, no-op on web) ──
