@@ -1,6 +1,6 @@
 {
   "appId": "app.mymantl",
-  "appName": "MANTL",
+  "appName": "Mantl",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"
