@@ -1,8 +1,19 @@
 diff --git a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
-index f4dc858..62cfaec 100644
+index f4dc858..1227c4b 100644
 --- a/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
 +++ b/node_modules/@mediagrid/capacitor-native-audio/android/src/main/java/us/mediagrid/capacitorjs/plugins/nativeaudio/AudioPlayerService.java
-@@ -36,6 +36,8 @@ public class AudioPlayerService extends MediaSessionService {
+@@ -11,8 +11,10 @@ import androidx.media3.common.C;
+ import androidx.media3.common.Player;
+ import androidx.media3.common.util.UnstableApi;
+ import androidx.media3.exoplayer.ExoPlayer;
++import androidx.media3.session.CommandButton;
+ import androidx.media3.session.MediaSession;
+ import androidx.media3.session.MediaSessionService;
++import com.google.common.collect.ImmutableList;
+ 
+ public class AudioPlayerService extends MediaSessionService {
+ 
+@@ -36,6 +38,8 @@ public class AudioPlayerService extends MediaSessionService {
          );
  
          ExoPlayer player = new ExoPlayer.Builder(this)
@@ -11,3 +22,24 @@ index f4dc858..62cfaec 100644
              .setAudioAttributes(
                  new AudioAttributes.Builder()
                      .setUsage(C.USAGE_MEDIA)
+@@ -50,6 +54,20 @@ public class AudioPlayerService extends MediaSessionService {
+             .setCallback(new MediaSessionCallback(this))
+             .setSessionActivity(sessionActivityPendingIntent)
+             .build();
++
++        // Show seek back/forward buttons on notification instead of previous/next
++        mediaSession.setMediaButtonPreferences(
++            ImmutableList.of(
++                new CommandButton.Builder(CommandButton.ICON_SEEK_BACK)
++                    .setPlayerCommand(Player.COMMAND_SEEK_BACK)
++                    .setDisplayName("Rewind 15s")
++                    .build(),
++                new CommandButton.Builder(CommandButton.ICON_SEEK_FORWARD)
++                    .setPlayerCommand(Player.COMMAND_SEEK_FORWARD)
++                    .setDisplayName("Forward 15s")
++                    .build()
++            )
++        );
+     }
+ 
+     @Override
