@@ -118,7 +118,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   }, [!!diaryShelf]);
 
   const movies = shelves.movies || [];
-  const recentMovies = movies.slice(0, 6);
+  const recentMovies = movies.slice(0, 4);
 
   // Count films this week for diary header
   const weekCount = useMemo(() => {
@@ -130,8 +130,10 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
   return (
     <div className="shelf-home" style={{
       background: "var(--bg-primary)",
-      minHeight: "100vh",
-      paddingBottom: 100,
+      height: "calc(100dvh - 52px - 64px)",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
     }}>
 
       <style>{`
@@ -159,62 +161,105 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       <StatsRibbon movies={movies} />
 
       {/* ── Fireplace Hearth ── */}
-      <div style={{ padding: 0, marginTop: 0 }}>
-        <div style={{ display: "flex" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
+        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
 
           {/* Left stone column */}
           <div style={{
-            width: 16, flexShrink: 0,
-            background: "linear-gradient(90deg, #2a211a 0%, #221c14 40%, #1a1510 100%)",
-            borderLeft: "0.5px solid rgba(255,255,255,0.04)",
+            width: 22, flexShrink: 0,
+            background: "linear-gradient(90deg, #2e2518 0%, #251e14 30%, #1c1710 70%, #161210 100%)",
+            borderLeft: "0.5px solid rgba(255,255,255,0.05)",
             position: "relative",
+            boxShadow: "inset -6px 0 12px rgba(0,0,0,0.5)",
           }}>
-            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230,250,270,290,310,330].map((t, i) => (
-              <div key={i} style={{
-                position: "absolute", top: t, left: i % 2 === 0 ? 2 : 4,
-                width: i % 2 === 0 ? 11 : 8, height: i % 2 === 0 ? 7 : 5,
-                borderRadius: 1,
-                background: "rgba(255,255,255,0.015)",
-                border: "0.5px solid rgba(255,255,255,0.025)",
-              }} />
-            ))}
+            {/* Stone blocks */}
+            {Array.from({ length: 24 }, (_, i) => {
+              const t = 4 + i * 16;
+              const isWide = i % 2 === 0;
+              return (
+                <div key={i} style={{
+                  position: "absolute", top: t, left: isWide ? 2 : 5,
+                  width: isWide ? 17 : 12, height: isWide ? 10 : 7,
+                  borderRadius: 1,
+                  background: `rgba(255,255,255,${0.012 + (i % 3) * 0.006})`,
+                  border: "0.5px solid rgba(255,255,255,0.03)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.015), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                }} />
+              );
+            })}
+            {/* Inner edge shadow */}
+            <div style={{
+              position: "absolute", top: 0, right: 0, bottom: 0, width: 8,
+              background: "linear-gradient(90deg, transparent, rgba(0,0,0,0.3))",
+              pointerEvents: "none",
+            }} />
           </div>
 
           {/* Hearth opening */}
           <div style={{
             flex: 1,
-            background: "#080706",
+            background: "radial-gradient(ellipse at center 120%, #12100c 0%, #0a0908 40%, #060505 100%)",
             borderTop: "2px solid #1a1510",
             position: "relative",
             overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
           }}>
+            {/* Soot stain at top */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 40,
+              background: "linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%)",
+              pointerEvents: "none", zIndex: 1,
+            }} />
+
+            {/* Side shadow vignette — left */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, bottom: 0, width: 30,
+              background: "linear-gradient(90deg, rgba(0,0,0,0.4) 0%, transparent 100%)",
+              pointerEvents: "none", zIndex: 1,
+            }} />
+            {/* Side shadow vignette — right */}
+            <div style={{
+              position: "absolute", top: 0, right: 0, bottom: 0, width: 30,
+              background: "linear-gradient(270deg, rgba(0,0,0,0.4) 0%, transparent 100%)",
+              pointerEvents: "none", zIndex: 1,
+            }} />
+
             {/* Multi-layer ember glow */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: 80,
-              background: "radial-gradient(ellipse at center bottom, rgba(200,100,20,0.10) 0%, rgba(200,80,10,0.04) 40%, transparent 70%)",
+              position: "absolute", bottom: 0, left: 0, right: 0, height: 120,
+              background: "radial-gradient(ellipse at center bottom, rgba(200,100,20,0.14) 0%, rgba(200,80,10,0.06) 30%, transparent 70%)",
               animation: "hearth-glow 4s ease-in-out infinite",
               pointerEvents: "none",
             }} />
             <div style={{
-              position: "absolute", bottom: -8, left: "15%", right: "15%", height: 40,
-              background: "radial-gradient(ellipse, rgba(234,88,12,0.14) 0%, transparent 70%)",
+              position: "absolute", bottom: -8, left: "10%", right: "10%", height: 60,
+              background: "radial-gradient(ellipse, rgba(234,88,12,0.18) 0%, rgba(200,60,10,0.06) 50%, transparent 80%)",
               animation: "hearth-flicker 2.5s ease-in-out infinite",
               pointerEvents: "none",
             }} />
+            {/* Warm ambient wash on bottom half */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, height: "50%",
+              background: "radial-gradient(ellipse at center bottom, rgba(180,90,20,0.04) 0%, transparent 60%)",
+              pointerEvents: "none",
+            }} />
 
-            {/* Rising ember particles (CSS-only) */}
+            {/* Rising ember particles */}
             {[
               { left: "22%", delay: "0s", size: 3 },
               { left: "45%", delay: "1.4s", size: 2 },
               { left: "68%", delay: "0.7s", size: 3 },
               { left: "35%", delay: "2.1s", size: 2 },
               { left: "58%", delay: "0.3s", size: 2 },
+              { left: "50%", delay: "1.8s", size: 2 },
+              { left: "30%", delay: "0.9s", size: 3 },
             ].map((e, i) => (
               <div key={i} style={{
                 position: "absolute", bottom: 0, left: e.left,
                 width: e.size, height: e.size, borderRadius: "50%",
                 background: accent,
-                boxShadow: `0 0 ${e.size * 2}px ${e.size}px ${accent}44`,
+                boxShadow: `0 0 ${e.size * 3}px ${e.size}px ${accent}55`,
                 opacity: 0,
                 animation: `ember-rise 3.5s ease-out ${e.delay} infinite`,
                 pointerEvents: "none",
@@ -224,7 +269,8 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             {/* ── Diary Header ── */}
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
-              padding: "14px 12px 6px",
+              padding: "14px 16px 6px",
+              position: "relative", zIndex: 2,
             }}>
               <div style={{
                 fontFamily: "'Playfair Display', serif", fontWeight: 700,
@@ -247,7 +293,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
             {recentMovies.length > 0 ? (
               <>
                 {/* Diary entries */}
-                <div style={{ padding: "0 8px 0" }}>
+                <div style={{ padding: "0 12px 0", position: "relative", zIndex: 2 }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
@@ -334,9 +380,10 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
                 {/* Bottom row: See all + Add */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
-                  gap: 10, padding: "12px 8px",
+                  gap: 10, padding: "12px 12px",
+                  position: "relative", zIndex: 2,
                 }}>
-                  {movies.length > 6 && (
+                  {movies.length > 4 && (
                     <div
                       onClick={() => setDiaryShelf("movies")}
                       style={{
@@ -381,31 +428,35 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
 
           {/* Right stone column */}
           <div style={{
-            width: 16, flexShrink: 0,
-            background: "linear-gradient(90deg, #1a1510 0%, #221c14 60%, #2a211a 100%)",
-            borderRight: "0.5px solid rgba(255,255,255,0.04)",
+            width: 22, flexShrink: 0,
+            background: "linear-gradient(90deg, #161210 0%, #1c1710 30%, #251e14 70%, #2e2518 100%)",
+            borderRight: "0.5px solid rgba(255,255,255,0.05)",
             position: "relative",
+            boxShadow: "inset 6px 0 12px rgba(0,0,0,0.5)",
           }}>
-            {[6,22,38,54,70,86,102,118,134,150,170,190,210,230,250,270,290,310,330].map((t, i) => (
-              <div key={i} style={{
-                position: "absolute", top: t, right: i % 2 === 0 ? 2 : 4,
-                width: i % 2 === 0 ? 11 : 8, height: i % 2 === 0 ? 7 : 5,
-                borderRadius: 1,
-                background: "rgba(255,255,255,0.015)",
-                border: "0.5px solid rgba(255,255,255,0.025)",
-              }} />
-            ))}
+            {Array.from({ length: 24 }, (_, i) => {
+              const t = 4 + i * 16;
+              const isWide = i % 2 === 0;
+              return (
+                <div key={i} style={{
+                  position: "absolute", top: t, right: isWide ? 2 : 5,
+                  width: isWide ? 17 : 12, height: isWide ? 10 : 7,
+                  borderRadius: 1,
+                  background: `rgba(255,255,255,${0.012 + (i % 3) * 0.006})`,
+                  border: "0.5px solid rgba(255,255,255,0.03)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.015), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                }} />
+              );
+            })}
+            {/* Inner edge shadow */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, bottom: 0, width: 8,
+              background: "linear-gradient(270deg, transparent, rgba(0,0,0,0.3))",
+              pointerEvents: "none",
+            }} />
           </div>
 
         </div>
-
-        {/* Hearth floor */}
-        <div style={{
-          height: 8, margin: 0,
-          background: "linear-gradient(180deg, #1a1510, #0f0d0b)",
-          border: "0.5px solid rgba(255,255,255,0.03)",
-          borderTop: "none",
-        }} />
       </div>
 
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}

@@ -622,7 +622,7 @@ export default function App() {
                 if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); });
                 setActiveTab("shelf"); setPreloadTab(null);
               }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="8" cy="15" r="2"/><circle cx="16" cy="15" r="2"/></svg></div>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V3H6v6z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><line x1="12" y1="15" x2="12" y2="18"/><path d="M8 21h8"/><path d="M8 21l1-3h6l1 3"/></svg></div>
               <div className="nav-label">Mantl</div>
             </button>
           </div>
