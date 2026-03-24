@@ -27,8 +27,10 @@ function firstSentence(html) {
   if (!html) return "";
   const text = html.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#?\w+;/g, " ").replace(/\s+/g, " ").trim();
   const match = text.match(/^(.+?[.!?])(\s|$)/);
-  const sentence = match ? match[1] : text.slice(0, 140);
-  return sentence.length > 160 ? sentence.slice(0, 157) + "…" : sentence;
+  let sentence = match ? match[1] : text.slice(0, 140);
+  if (sentence.length > 160) sentence = sentence.slice(0, 157) + "…";
+  else if (!/[.!?]$/.test(sentence)) sentence += "…";
+  return sentence;
 }
 
 function stripHtml(html) {
@@ -252,7 +254,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               lineHeight: 1.4,
               overflow: "hidden",
               display: "-webkit-box",
-              WebkitLineClamp: expanded ? 999 : 3,
+              WebkitLineClamp: expanded ? 999 : 2,
               WebkitBoxOrient: "vertical",
             }}>
               {expanded ? fullDesc : desc}
