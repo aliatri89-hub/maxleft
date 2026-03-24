@@ -6,7 +6,12 @@ import { supabase } from "../../supabase";
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — episode-first, clean dark card
-// Podcast art left, episode text right. No poster, no backdrop.
+//
+// Layout:
+//   [art]  Mar 19  1h33m           [🗑] [+] [▶]
+//          Film Title
+//          Episode desc…
+//          2025 · PODCAST NAME          WATCHED ✓
 // ════════════════════════════════════════════════
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -45,7 +50,7 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
-    tmdb_id, film_title, film_year,
+    tmdb_id, film_title, film_year, watched,
   } = item;
 
   const [dismissed, setDismissed] = useState(false);
@@ -100,15 +105,37 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         border: "1px solid rgba(255,255,255,0.08)",
         background: "#1a1714",
         cursor: "pointer",
-        padding: 12,
+        padding: "8px 12px 10px",
       }}
     >
-      {/* ── Top row: date + duration | buttons ── */}
+      {/* ── Row 1: art + date/duration + buttons ── */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: 8,
+        display: "flex", alignItems: "center", gap: 10,
+        marginBottom: 6,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        {/* Podcast artwork */}
+        <div style={{
+          width: 48, height: 48, borderRadius: 8, overflow: "hidden",
+          background: "#2a2520", flexShrink: 0,
+        }}>
+          {podcast_artwork ? (
+            <img src={podcast_artwork} alt={podcast_name}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+          ) : (
+            <div style={{
+              width: "100%", height: "100%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 900, fontSize: 7, color: "rgba(255,255,255,0.5)",
+              textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
+            }}>
+              {podcast_name}
+            </div>
+          )}
+        </div>
+
+        {/* Date + duration */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 9, color: "rgba(255,255,255,0.5)",
@@ -126,13 +153,15 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
             </span>
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+
+        {/* Buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
           {isAdmin && (
             <div onClick={handleUnlink} title="Unlink bad match" style={{
               width: 26, height: 26, borderRadius: "50%",
               background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0, cursor: "pointer",
+              cursor: "pointer",
             }}>
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
@@ -144,7 +173,7 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
               width: 28, height: 28, borderRadius: "50%",
               background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0, cursor: "pointer",
+              cursor: "pointer",
             }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -157,7 +186,7 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
               background: isActiveAndPlaying ? "rgba(201,124,93,0.25)" : "rgba(201,124,93,0.12)",
               border: `1.5px solid rgba(201,124,93,${isActiveAndPlaying ? "0.6" : "0.4"})`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0, cursor: "pointer", transition: "all 0.15s",
+              cursor: "pointer", transition: "all 0.15s",
             }}>
               {isCurrent && buffering ? (
                 <div style={{
@@ -177,51 +206,36 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
         </div>
       </div>
 
-      {/* ── Content: podcast art | text ── */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-        {/* Podcast artwork */}
+      {/* ── Row 2+: title, description, metadata ── */}
+      <div style={{ paddingLeft: 58 }}>
+        {/* Film title */}
         <div style={{
-          width: 64, height: 64, borderRadius: 10, overflow: "hidden",
-          background: "#2a2520", flexShrink: 0,
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600, fontSize: 15, color: "#f0ebe1",
+          lineHeight: 1.2, marginBottom: 4,
         }}>
-          {podcast_artwork ? (
-            <img src={podcast_artwork} alt={podcast_name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          ) : (
-            <div style={{
-              width: "100%", height: "100%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900, fontSize: 8, color: "rgba(255,255,255,0.5)",
-              textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
-            }}>
-              {podcast_name}
-            </div>
-          )}
+          {film_title}
         </div>
 
-        {/* Episode text */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Episode description */}
+        {desc && (
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 600, fontSize: 15, color: "#f0ebe1",
-            lineHeight: 1.2, marginBottom: 4,
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 10, color: "rgba(255,255,255,0.45)",
+            lineHeight: 1.4, marginBottom: 6,
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: expanded ? 999 : 2,
+            WebkitBoxOrient: "vertical",
           }}>
-            {film_title}
+            {expanded ? fullDesc : desc}
           </div>
-          {desc && (
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.45)",
-              lineHeight: 1.4, marginBottom: 6,
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: expanded ? 999 : 2,
-              WebkitBoxOrient: "vertical",
-            }}>
-              {expanded ? fullDesc : desc}
-            </div>
-          )}
+        )}
+
+        {/* Bottom row: year + podcast name | watched badge */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace",
@@ -243,12 +257,35 @@ function PodcastCard({ item, isAdmin, onUnlinked }) {
               {podcast_name}
             </span>
           </div>
+
+          {/* Watched badge */}
+          {watched && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "2px 8px 2px 6px",
+              borderRadius: 10,
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}>
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8, fontWeight: 600,
+                color: "rgba(255,255,255,0.3)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>
+                Watched
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* ── Expanded: full description ── */}
       {expanded && fullDesc && fullDesc.length > desc.length && (
-        <div style={{ paddingTop: 10, marginLeft: 76 }}>
+        <div style={{ paddingTop: 8, paddingLeft: 58 }}>
           <div style={{
             width: "100%", height: 1,
             background: "rgba(255,255,255,0.06)", marginBottom: 8,

@@ -11,7 +11,7 @@ import { supabase } from "../../supabase";
 
 const PAGE_SIZE = 20;
 
-export function usePodcastFeed(active = false) {
+export function usePodcastFeed(active = false, userId = null) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -26,6 +26,7 @@ export function usePodcastFeed(active = false) {
         result_limit: PAGE_SIZE,
         result_offset: offset,
         podcast_slug: null,
+        check_user_id: userId || null,
       });
 
       if (!mountedRef.current) return;
@@ -49,7 +50,7 @@ export function usePodcastFeed(active = false) {
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
   const loadMore = useCallback(() => {
     setItems(prev => {
