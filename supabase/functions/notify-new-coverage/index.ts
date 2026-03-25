@@ -37,15 +37,16 @@ serve(async (req) => {
     if (!logs?.length) return jsonRes({ sent: 0, message: "No users with these films logged" });
 
     const userIds = [...new Set(logs.map((l: any) => l.user_id))];
+
+    // Device tokens — only needed for push, not for inbox
     const { data: tokens } = await sb.from("device_tokens").select("user_id, token, platform").in("user_id", userIds);
-    if (!tokens?.length) return jsonRes({ sent: 0, message: "No device tokens" });
+    const usersWithTokens = new Set((tokens || []).map((t: any) => t.user_id));
 
-    const usersWithTokens = new Set(tokens.map((t: any) => t.user_id));
-
-    const { data: prefs } = await sb.from("user_notification_preferences").select("user_id, new_coverage, favorites_only").in("user_id", [...usersWithTokens]);
+    // Preferences — fetch for ALL users (not just token holders)
+    const { data: prefs } = await sb.from("user_notification_preferences").select("user_id, new_coverage, favorites_only").in("user_id", userIds);
     const prefByUser = new Map((prefs || []).map((p: any) => [p.user_id, p]));
 
-    const favOnlyUsers = [...usersWithTokens].filter((uid) => prefByUser.get(uid)?.favorites_only === true);
+    const favOnlyUsers = userIds.filter((uid: string) => prefByUser.get(uid)?.favorites_only === true);
     let favsByUser = new Map<string, Set<string>>();
     if (favOnlyUsers.length > 0) {
       const { data: favRows } = await sb.from("user_podcast_favorites").select("user_id, podcast_id").in("user_id", favOnlyUsers);
@@ -56,8 +57,12 @@ serve(async (req) => {
     }
 
     const refKeys = new_mappings.map((m: any) => `coverage:${m.episode_id}:${m.tmdb_id}`);
-    const { data: existingNotifs } = await sb.from("push_notification_log").select("user_id, ref_key").in("user_id", [...usersWithTokens]).in("ref_key", refKeys);
+    const { data: existingNotifs } = await sb.from("push_notification_log").select("user_id, ref_key").in("user_id", userIds).in("ref_key", refKeys);
     const sentSet = new Set((existingNotifs || []).map((n: any) => `${n.user_id}::${n.ref_key}`));
+
+    // Also check inbox dedup (for users who never had tokens but got inbox rows on a previous run)
+    const { data: existingInbox } = await sb.from("user_notifications").select("user_id, ref_key").in("user_id", userIds).in("ref_key", refKeys);
+    const inboxSentSet = new Set((existingInbox || []).map((n: any) => `${n.user_id}::${n.ref_key}`));
 
     const mediaToTmdb = new Map((films || []).map((f: any) => [f.id, f.tmdb_id]));
     const userLoggedFilms = new Map<string, Set<number>>();
@@ -90,7 +95,7 @@ serve(async (req) => {
       const artworkUrl = episode.podcasts?.artwork_url || null;
       const refKey = `coverage:${episode_id}:${tmdb_id}`;
 
-      for (const userId of usersWithTokens) {
+      for (const userId of userIds) {
         const logged = userLoggedFilms.get(userId);
         if (!logged?.has(tmdb_id)) continue;
         const pref = prefByUser.get(userId);
@@ -100,7 +105,7 @@ serve(async (req) => {
           if (!favs?.has(podcastId)) continue;
         }
         const dedupKey = `${userId}::${refKey}`;
-        if (sentSet.has(dedupKey)) continue;
+        if (sentSet.has(dedupKey) && inboxSentSet.has(dedupKey)) continue;
 
         if (!userPending.has(userId)) userPending.set(userId, []);
         userPending.get(userId)!.push({
@@ -122,6 +127,7 @@ serve(async (req) => {
     let totalSent = 0;
     let totalFailed = 0;
     const allLogRows: any[] = [];
+    const allInboxRows: any[] = [];
 
     for (const [userId, items] of userPending) {
       // Deduplicate films (multiple episodes may cover the same film)
@@ -167,48 +173,76 @@ serve(async (req) => {
         payload.episode_id = items[0].episode_id;
       }
 
-      // ── Send ONE push per user ──
-      try {
-        const pushBody: Record<string, any> = {
-          user_ids: [userId],
-          title,
-          body,
-          data: payload,
-        };
-        if (image) pushBody.image = image;
+      // ── Send push ONLY to users with device tokens ──
+      if (usersWithTokens.has(userId)) {
+        try {
+          const pushBody: Record<string, any> = {
+            user_ids: [userId],
+            title,
+            body,
+            data: payload,
+          };
+          if (image) pushBody.image = image;
 
-        const pushRes = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
-          body: JSON.stringify(pushBody),
-        });
-        const result = await pushRes.json();
-        if (result.sent > 0) totalSent++; else totalFailed++;
-      } catch (err) {
-        console.error(`[NotifyCoverage] send-push failed for ${userId}:`, (err as Error).message);
-        totalFailed++;
+          const pushRes = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify(pushBody),
+          });
+          const result = await pushRes.json();
+          if (result.sent > 0) totalSent++; else totalFailed++;
+        } catch (err) {
+          console.error(`[NotifyCoverage] send-push failed for ${userId}:`, (err as Error).message);
+          totalFailed++;
+        }
+
+        // Push dedup log — only for token holders
+        for (const item of items) {
+          allLogRows.push({
+            user_id: userId,
+            notif_type: "new_coverage",
+            ref_key: item.ref_key,
+            title,
+            body,
+            payload,
+          });
+        }
       }
 
-      // ── Log ALL individual ref_keys for granular dedup (option B) ──
+      // ── Inbox rows for ALL users (individual items, not batched) ──
       for (const item of items) {
-        allLogRows.push({
+        allInboxRows.push({
           user_id: userId,
           notif_type: "new_coverage",
+          title: "New coverage available",
+          body: `${item.podcast_name} just covered ${item.film_title}`,
+          image_url: item.podcast_artwork,
+          payload: {
+            type: "new_coverage",
+            tmdb_id: String(item.tmdb_id),
+            episode_id: item.episode_id,
+            route: `/?openFilm=${item.tmdb_id}`,
+          },
           ref_key: item.ref_key,
-          title,
-          body,
-          payload,
         });
       }
     }
 
-    // Batch insert all dedup log rows
+    // Batch insert push dedup log rows (token holders only)
     if (allLogRows.length > 0) {
       await sb.from("push_notification_log").insert(allLogRows);
     }
 
-    console.log(`[NotifyCoverage] Done: ${totalSent} sent, ${totalFailed} failed, ${allLogRows.length} dedup rows logged`);
-    return jsonRes({ sent: totalSent, failed: totalFailed, users: userPending.size, dedup_rows: allLogRows.length });
+    // Batch upsert inbox rows (all users) — unique index handles dedup
+    if (allInboxRows.length > 0) {
+      const { error: inboxErr } = await sb
+        .from("user_notifications")
+        .upsert(allInboxRows, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+      if (inboxErr) console.error("[NotifyCoverage] Inbox insert error:", inboxErr.message);
+    }
+
+    console.log(`[NotifyCoverage] Done: ${totalSent} sent, ${totalFailed} failed, ${allLogRows.length} push rows, ${allInboxRows.length} inbox rows`);
+    return jsonRes({ sent: totalSent, failed: totalFailed, users: userPending.size, dedup_rows: allLogRows.length, inbox_rows: allInboxRows.length });
   } catch (err) {
     console.error("[NotifyCoverage] UNCAUGHT:", (err as Error).message);
     return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });

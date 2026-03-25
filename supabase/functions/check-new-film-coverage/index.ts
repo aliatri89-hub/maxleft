@@ -61,16 +61,13 @@ serve(async (req) => {
       return jsonRes({ sent: 0, message: "Notification disabled by user" });
     }
 
-    // ── 2. Check device tokens ──────────────────────────────
+    // ── 2. Check device tokens (for push only, inbox works without) ─
     const { data: tokens } = await sb
       .from("device_tokens")
       .select("token")
       .eq("user_id", user_id);
 
-    if (!tokens?.length) {
-      console.log("[WatchedCoverage] No device tokens for user");
-      return jsonRes({ sent: 0, message: "No device tokens" });
-    }
+    const hasTokens = (tokens?.length || 0) > 0;
 
     // ── 3. Build the user's podcast whitelist ───────────────
     //    Combines: community subscriptions + direct podcast favorites
@@ -91,7 +88,7 @@ serve(async (req) => {
     const { data: coverageRows } = await sb
       .from("podcast_episode_films")
       .select(
-        "tmdb_id, episode_id, podcast_episodes(id, podcast_id, podcasts(id, name, slug))"
+        "tmdb_id, episode_id, podcast_episodes(id, podcast_id, podcasts(id, name, slug, artwork_url))"
       )
       .in("tmdb_id", tmdbIds);
 
@@ -108,8 +105,19 @@ serve(async (req) => {
       .eq("user_id", user_id)
       .in("ref_key", refKeys);
 
-    const sentSet = new Set(
+    const pushSentSet = new Set(
       (existingNotifs || []).map((n: any) => n.ref_key)
+    );
+
+    // Inbox dedup
+    const { data: existingInbox } = await sb
+      .from("user_notifications")
+      .select("ref_key")
+      .eq("user_id", user_id)
+      .in("ref_key", refKeys);
+
+    const inboxSentSet = new Set(
+      (existingInbox || []).map((n: any) => n.ref_key)
     );
 
     // ── 6. Group coverage by film, filter by user's podcasts ─
@@ -154,13 +162,10 @@ serve(async (req) => {
     // ── 7. Build and send notifications ─────────────────────
     let totalSent = 0;
     const logRows: any[] = [];
+    const inboxRows: any[] = [];
 
     for (const [tmdbId, coverage] of coverageByFilm) {
       const refKey = `watched:${tmdbId}`;
-
-      // Skip if already sent
-      if (sentSet.has(refKey)) continue;
-
       const podcastCount = coverage.podcasts.length;
       if (podcastCount === 0) continue;
 
@@ -174,42 +179,71 @@ serve(async (req) => {
         route: `/?openFilm=${tmdbId}`,
       };
 
-      try {
-        const pushRes = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_ids: [user_id],
-            title: "Coverage available",
-            body,
-            data: payload,
-          }),
+      // ── Push: only if user has tokens AND not already sent via push ──
+      if (hasTokens && !pushSentSet.has(refKey)) {
+        try {
+          const pushRes = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${serviceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_ids: [user_id],
+              title: "Coverage available",
+              body,
+              data: payload,
+            }),
+          });
+
+          const result = await pushRes.json();
+          if (result.sent > 0) {
+            totalSent++;
+          }
+        } catch (err: any) {
+          console.error(
+            `[WatchedCoverage] send-push failed for ${coverage.title}:`,
+            err.message
+          );
+        }
+
+        logRows.push({
+          user_id,
+          notif_type: "watched_coverage",
+          ref_key: refKey,
+          title: "Coverage available",
+          body,
+          payload,
         });
 
-        const result = await pushRes.json();
-        if (result.sent > 0) {
-          totalSent++;
-        }
-      } catch (err: any) {
-        console.error(
-          `[WatchedCoverage] send-push failed for ${coverage.title}:`,
-          err.message
-        );
+        pushSentSet.add(refKey);
       }
 
-      logRows.push({
-        user_id,
-        notif_type: "watched_coverage",
-        ref_key: refKey,
-        title: "Coverage available",
-        body,
-        payload,
-      });
+      // ── Inbox: always write (if not already in inbox) ──
+      if (!inboxSentSet.has(refKey)) {
+        // Resolve podcast artwork from join data
+        let artworkUrl: string | null = null;
+        const firstPodcast = coverage.podcasts[0];
+        for (const r of coverageRows || []) {
+          const ep = r.podcast_episodes as any;
+          if (ep?.podcasts?.id === firstPodcast.id && ep?.podcasts?.artwork_url) {
+            artworkUrl = ep.podcasts.artwork_url;
+            break;
+          }
+        }
 
-      sentSet.add(refKey);
+        inboxRows.push({
+          user_id,
+          notif_type: "watched_coverage",
+          title: "Coverage available",
+          body,
+          image_url: artworkUrl,
+          payload,
+          ref_key: refKey,
+        });
+
+        inboxSentSet.add(refKey);
+      }
     }
 
     // ── 8. Log all notifications ────────────────────────────
@@ -220,8 +254,22 @@ serve(async (req) => {
 
       if (logErr) {
         console.error(
-          "[WatchedCoverage] Failed to log notifications:",
+          "[WatchedCoverage] Failed to log push notifications:",
           logErr.message
+        );
+      }
+    }
+
+    // Inbox upsert — unique index handles dedup
+    if (inboxRows.length > 0) {
+      const { error: inboxErr } = await sb
+        .from("user_notifications")
+        .upsert(inboxRows, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+
+      if (inboxErr) {
+        console.error(
+          "[WatchedCoverage] Failed to write inbox notifications:",
+          inboxErr.message
         );
       }
     }
