@@ -23,7 +23,7 @@ const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 const BASE_TABS = [
   { key: "releases",  label: "New Releases" },
-  { key: "podcast",   label: "Podcast" },
+  { key: "podcast",   label: "Podcasts" },
   { key: "activity",  label: "Activity" },
 ];
 export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, favoritePodcasts, feedMode, setFeedMode, pendingSleeveOpen, setPendingSleeveOpen, pushNav, removeNav }) {
