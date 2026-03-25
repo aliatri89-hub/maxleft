@@ -67,9 +67,9 @@ export default function MiniseriesGrid({
       {/* Grid */}
       <div style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
-        gap: 3,
-        padding: "6px 3px 0",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 4,
+        padding: "6px 4px 0",
       }}>
         {filtered.map((s) => (
           <GridTile
