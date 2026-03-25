@@ -19,15 +19,15 @@ import { isComingSoon } from "../../../utils/comingSoon";
  */
 
 const GENRE_META = {
-  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0 },
-  horror:           { label: "Horror",         icon: "🔪", order: 1 },
-  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2 },
-  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3 },
-  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4 },
-  video_games:      { label: "Video Games",    icon: "🎮", order: 5 },
-  directors:        { label: "Directors",      icon: "🎬", order: 6 },
-  comedy:           { label: "Comedy",         icon: "😂", order: 7 },
-  animation_family: { label: "Animation",      icon: "🎨", order: 8 },
+  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f" },
+  horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a" },
+  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d" },
+  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f" },
+  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d" },
+  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a" },
+  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420" },
+  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f" },
+  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d" },
 };
 
 const ALL_KEY = "__all__";
@@ -441,322 +441,341 @@ export default function NowPlayingGenreTab({
     );
   };
 
+  // Whether we're in "grid overview" mode (no genre selected, no active search)
+  const isGridView = activeGenre === ALL_KEY && !(searchQuery || "").trim() && !searchOpen;
+
   return (
     <div style={{ padding: "0 0 100px", overflow: "hidden" }}>
-      {/* ─── Genre + Filter + Search — single row ────────── */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 6,
-        padding: "8px 16px 4px",
-        flexWrap: "nowrap",
-      }}>
-        {/* Genre dropdown — compact */}
-        <div style={{ position: "relative", flexShrink: 0 }}>
-          <select
-            value={activeGenre}
-            onChange={(e) => setActiveGenre(e.target.value)}
-            style={{
-              appearance: "none",
-              WebkitAppearance: "none",
-              background: activeGenre !== ALL_KEY ? `${accent}20` : "rgba(255,255,255,0.06)",
-              border: `1.5px solid ${activeGenre !== ALL_KEY ? accent : "rgba(255,255,255,0.1)"}`,
-              borderRadius: 20,
-              padding: "5px 26px 5px 10px",
-              color: activeGenre !== ALL_KEY ? accent : "rgba(255,255,255,0.6)",
-              fontSize: 11,
-              fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
-              letterSpacing: "0.03em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              outline: "none",
-              transition: "all 0.2s",
-              maxWidth: 140,
-            }}
-          >
-            <option value={ALL_KEY} style={{ background: "#1a1a2e", color: "#e0e0e0" }}>All Genres</option>
-            {genreKeys.map((key) => {
-              const meta = GENRE_META[key] || { label: key, icon: "📌" };
+      <style>{`
+        .cs-search-npp::placeholder { color: rgba(255,255,255,0.25); }
+        .cs-search-npp:focus { border-color: ${accent}66; outline: none; }
+        @keyframes genreTileFadeIn {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
+
+      {isGridView ? (
+        /* ═══════════════════════════════════════════════════════
+           GRID VIEW — Genre tiles + dynamic shelves
+           ═══════════════════════════════════════════════════════ */
+        <>
+          {/* Search toggle — right-aligned, minimal */}
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "flex-end",
+            padding: "8px 16px 0",
+          }}>
+            <button
+              onClick={() => {
+                setSearchOpen(true);
+                // Switch to flat all-genres view for searching
+                // The search input will auto-focus via the existing useEffect
+              }}
+              style={{
+                width: 30, height: 30,
+                borderRadius: "50%",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.04)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", flexShrink: 0,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="rgba(255,255,255,0.4)"
+                strokeWidth="2" strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Dynamic shelves */}
+          {filter === "all" && renderDynamicShelf("Recently Logged", "🕐", recentItems, progressLoading)}
+          {filter === "all" && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
+
+          {/* 3×3 Genre grid */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 3,
+            padding: "8px 3px 0",
+          }}>
+            {genreKeys.map((key, i) => {
+              const meta = GENRE_META[key] || { label: key, icon: "📌", tint: "#1a1a2e" };
               const gs = genreStats[key];
               return (
-                <option key={key} value={key} style={{ background: "#1a1a2e", color: "#e0e0e0" }}>
-                  {meta.icon} {meta.label} ({gs?.completed || 0}/{gs?.total || 0})
-                </option>
+                <GenreGridTile
+                  key={key}
+                  label={meta.label}
+                  icon={meta.icon}
+                  tint={meta.tint || "#1a1a2e"}
+                  completed={gs?.completed || 0}
+                  total={gs?.total || 0}
+                  accent={accent}
+                  delay={i * 0.03}
+                  onTap={() => setActiveGenre(key)}
+                />
               );
             })}
-          </select>
+          </div>
+        </>
+      ) : (
+        /* ═══════════════════════════════════════════════════════
+           DETAIL VIEW — Inside a genre (or searching all)
+           ═══════════════════════════════════════════════════════ */
+        <>
+          {/* ─── Genre header + Filter + Search row ────────── */}
           <div style={{
-            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-            pointerEvents: "none",
-            fontSize: 9, color: activeGenre !== ALL_KEY ? accent : "rgba(255,255,255,0.3)",
-          }}>▼</div>
-        </div>
-
-        {/* Filter pills — inline */}
-        {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
-          <button
-            key={f}
-            onClick={() => onFilterChange(f)}
-            style={{
-              padding: "5px 10px",
-              fontSize: 10, fontWeight: 600,
-              fontFamily: "'Barlow Condensed', sans-serif",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              borderRadius: 20,
-              border: filter === f
-                ? `1.5px solid ${accent}`
-                : "1px solid rgba(255,255,255,0.1)",
-              background: filter === f ? `${accent}18` : "rgba(255,255,255,0.04)",
-              color: filter === f ? accent : "rgba(255,255,255,0.4)",
-              cursor: "pointer",
-              flexShrink: 0,
-              WebkitTapHighlightColor: "transparent",
-              transition: "all 0.2s",
-            }}
-          >
-            {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
-          </button>
-        ))}
-
-        {/* Search toggle — pushed right */}
-        <button
-          onClick={() => {
-            setSearchOpen((o) => {
-              if (o && searchQuery) onSearchChange("");
-              return !o;
-            });
-          }}
-          style={{
-            width: 30, height: 30,
-            borderRadius: "50%",
-            border: searchOpen ? `1.5px solid ${accent}` : "1px solid rgba(255,255,255,0.1)",
-            background: searchOpen ? `${accent}18` : "rgba(255,255,255,0.04)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            cursor: "pointer", marginLeft: "auto", flexShrink: 0,
-            WebkitTapHighlightColor: "transparent",
-            transition: "all 0.2s",
-          }}
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke={searchOpen ? accent : "rgba(255,255,255,0.4)"}
-            strokeWidth="2" strokeLinecap="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-        </button>
-      </div>
-
-      {/* ─── Expandable search input ────────────────────── */}
-      <div style={{
-        overflow: "hidden",
-        maxHeight: searchOpen ? 50 : 0,
-        opacity: searchOpen ? 1 : 0,
-        transition: "max-height 0.25s ease, opacity 0.2s ease",
-        padding: searchOpen ? "6px 16px 0" : "0 16px",
-      }}>
-        <style>{`
-          .cs-search-npp::placeholder { color: rgba(255,255,255,0.25); }
-          .cs-search-npp:focus { border-color: ${accent}66; outline: none; }
-        `}</style>
-        <div style={{ position: "relative" }}>
-          <input
-            ref={searchRef}
-            className="cs-search-npp"
-            type="text"
-            placeholder={activeGenre === ALL_KEY
-              ? "Search all films, directors, years..."
-              : `Search ${GENRE_META[activeGenre]?.label || "genre"}...`}
-            value={searchQuery || ""}
-            onChange={(e) => onSearchChange(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 14px 8px 32px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 10,
-              color: "#e0e0e0",
-              fontSize: 13,
-              fontFamily: "inherit",
-              WebkitAppearance: "none",
-            }}
-          />
-          <div style={{
-            position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-            fontSize: 13, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
-          }}>🔍</div>
-          {searchQuery && (
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "8px 16px 4px",
+            flexWrap: "nowrap",
+          }}>
+            {/* Back to grid */}
             <button
-              onClick={() => onSearchChange("")}
-              style={{
-                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-                background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
-                width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#888", fontSize: 11, cursor: "pointer",
+              onClick={() => {
+                setActiveGenre(ALL_KEY);
+                onSearchChange("");
+                setSearchOpen(false);
+                onFilterChange("all");
               }}
-            >✕</button>
-          )}
-        </div>
-      </div>
+              style={{
+                background: "none", border: "none", color: accent,
+                fontSize: 13, fontWeight: 700, cursor: "pointer",
+                padding: "4px 6px 4px 0",
+                fontFamily: "'Barlow Condensed', sans-serif",
+                letterSpacing: "0.02em",
+                flexShrink: 0,
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              ←
+            </button>
 
-      {/* ─── Dynamic shelves (All Genres + no active search + no filter) ── */}
-      {activeGenre === ALL_KEY && !searchQuery && filter === "all" && renderDynamicShelf("Recently Logged", "🕐", recentItems, progressLoading)}
-      {activeGenre === ALL_KEY && !searchQuery && filter === "all" && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
+            {/* Genre label or "All" for search mode */}
+            {activeGenre !== ALL_KEY && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 4,
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: 14 }}>{GENRE_META[activeGenre]?.icon || "📌"}</span>
+                <span style={{
+                  fontSize: 13, fontWeight: 800, color: "#fff",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  letterSpacing: "0.02em", textTransform: "uppercase",
+                }}>
+                  {GENRE_META[activeGenre]?.label || activeGenre}
+                </span>
+              </div>
+            )}
 
-      {/* ─── Series shelves ─────────────────────────────── */}
-      {filter === "upcoming" ? (
-        /* Flat date-sorted schedule for upcoming */
-        upcomingSchedule.length === 0 ? (
+            {/* Filter pills — inline */}
+            {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
+              <button
+                key={f}
+                onClick={() => onFilterChange(f)}
+                style={{
+                  padding: "5px 10px",
+                  fontSize: 10, fontWeight: 600,
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  borderRadius: 20,
+                  border: filter === f
+                    ? `1.5px solid ${accent}`
+                    : "1px solid rgba(255,255,255,0.1)",
+                  background: filter === f ? `${accent}18` : "rgba(255,255,255,0.04)",
+                  color: filter === f ? accent : "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  flexShrink: 0,
+                  WebkitTapHighlightColor: "transparent",
+                  transition: "all 0.2s",
+                }}
+              >
+                {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
+              </button>
+            ))}
+
+            {/* Search toggle — pushed right */}
+            <button
+              onClick={() => {
+                setSearchOpen((o) => {
+                  if (o && searchQuery) onSearchChange("");
+                  return !o;
+                });
+              }}
+              style={{
+                width: 30, height: 30,
+                borderRadius: "50%",
+                border: searchOpen ? `1.5px solid ${accent}` : "1px solid rgba(255,255,255,0.1)",
+                background: searchOpen ? `${accent}18` : "rgba(255,255,255,0.04)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", marginLeft: "auto", flexShrink: 0,
+                WebkitTapHighlightColor: "transparent",
+                transition: "all 0.2s",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke={searchOpen ? accent : "rgba(255,255,255,0.4)"}
+                strokeWidth="2" strokeLinecap="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </div>
+
+          {/* ─── Expandable search input ────────────────────── */}
           <div style={{
-            textAlign: "center", padding: "40px 0",
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-            color: "rgba(255,255,255,0.25)", fontStyle: "italic",
-          }}>No upcoming items</div>
-        ) : (
-          <div style={{ padding: "16px 0", overflow: "hidden" }}>
-            <div className="hide-scrollbar" style={{
-              display: "flex", overflowX: "auto", gap: 12,
-              paddingLeft: 16, paddingRight: 16,
-            }}>
-              {upcomingSchedule.map((item) => {
-                const Card = NowPlayingItemCard;
-                return (
-                  <div key={item.id} style={{ flexShrink: 0, width: 120 }}>
-                    <Card
-                      item={item}
-                      isCompleted={!!progress[item.id]?.status}
-                      onToggle={() => onToggle?.(item)}
-                      coverCacheVersion={coverCacheVersion}
-                    />
-                    <div style={{
-                      fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      letterSpacing: "0.04em", textTransform: "uppercase",
-                      marginTop: 4,
-                    }}>
-                      {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                    </div>
-                    <div style={{
-                      fontSize: 9, color: "#666", marginTop: 1,
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>
-                      {item._shelfTitle}
-                    </div>
-                  </div>
-                );
-              })}
+            overflow: "hidden",
+            maxHeight: searchOpen ? 50 : 0,
+            opacity: searchOpen ? 1 : 0,
+            transition: "max-height 0.25s ease, opacity 0.2s ease",
+            padding: searchOpen ? "6px 16px 0" : "0 16px",
+          }}>
+            <div style={{ position: "relative" }}>
+              <input
+                ref={searchRef}
+                className="cs-search-npp"
+                type="text"
+                placeholder={activeGenre === ALL_KEY
+                  ? "Search all films, directors, years..."
+                  : `Search ${GENRE_META[activeGenre]?.label || "genre"}...`}
+                value={searchQuery || ""}
+                onChange={(e) => onSearchChange(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "8px 14px 8px 32px",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 10,
+                  color: "#e0e0e0",
+                  fontSize: 13,
+                  fontFamily: "inherit",
+                  WebkitAppearance: "none",
+                }}
+              />
+              <div style={{
+                position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+                fontSize: 13, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
+              }}>🔍</div>
+              {searchQuery && (
+                <button
+                  onClick={() => onSearchChange("")}
+                  style={{
+                    position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                    background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
+                    width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "#888", fontSize: 11, cursor: "pointer",
+                  }}
+                >✕</button>
+              )}
             </div>
           </div>
-        )
-      ) : visibleSeries.length === 0 ? (
-        <div style={{
-          textAlign: "center", padding: "40px 0",
-          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-          color: "rgba(255,255,255,0.25)", fontStyle: "italic",
-        }}>
-          {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}
-        </div>
-      ) : (
-        <div style={{ paddingTop: 12 }}>
-          {/* Genre section headers when showing all */}
-          {activeGenre === ALL_KEY ? (
-            genreKeys.map((key) => {
-              const meta = GENRE_META[key] || { label: key, icon: "📌" };
-              const series = genreGroups[key] || [];
-              const q = (searchQuery || "").trim().toLowerCase();
 
-              const filtered = series
-                .map((s) => {
-                  let items = s.items || [];
+          {/* ─── Genre progress header (inside a genre) ────── */}
+          {activeGenre !== ALL_KEY && (() => {
+            const gs = genreStats[activeGenre];
+            if (!gs) return null;
+            const gPct = gs.total > 0 ? Math.round((gs.completed / gs.total) * 100) : 0;
+            const gDone = gPct === 100 && gs.total > 0;
+            return (
+              <div style={{ padding: "6px 16px 2px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span style={{
+                    fontSize: 12, fontWeight: 700,
+                    color: gDone ? "#4ade80" : accent,
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                  }}>
+                    {gs.completed}/{gs.total} films
+                  </span>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600,
+                    color: "rgba(255,255,255,0.3)",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                  }}>
+                    {gPct}%
+                  </span>
+                </div>
+                <div style={{
+                  height: 3, borderRadius: 2,
+                  background: "rgba(255,255,255,0.08)",
+                  overflow: "hidden",
+                }}>
+                  <div style={{
+                    height: "100%", borderRadius: 2,
+                    width: `${gPct}%`,
+                    background: gDone
+                      ? "linear-gradient(90deg, #4ade80, #22d3ee)"
+                      : `linear-gradient(90deg, ${accent}, #C4734F)`,
+                    transition: "width 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                  }} />
+                </div>
+              </div>
+            );
+          })()}
 
-                  // Media type filter
-                  items = items.filter((i) => isMediaVisible(i.media_type));
-
-                  // Seen/unseen/upcoming filter
-                  if (filter === "seen") {
-                    items = items.filter((i) => progress[i.id]);
-                  } else if (filter === "unseen") {
-                    items = items.filter((i) => !progress[i.id]);
-                  } else if (filter === "upcoming") {
-                    items = items
-                      .filter((i) => isComingSoon(i))
-                      .sort((a, b) => (b.air_date || "").localeCompare(a.air_date || ""));
-                  }
-
-                  if (q.length >= 2) {
-                    const shelfMatch = (s.title || "").toLowerCase().includes(q);
-                    if (!shelfMatch) {
-                      items = items.filter(
-                        (i) =>
-                          i.title.toLowerCase().includes(q) ||
-                          (i.creator || "").toLowerCase().includes(q) ||
-                          String(i.year || "").includes(q)
-                      );
-                    }
-                  }
-
-                  // Dedup within this series only
-                  const seen = new Set();
-                  items = items.filter((i) => {
-                    const dedupKey = `${i.title}::${i.year || ""}`;
-                    if (seen.has(dedupKey)) return false;
-                    seen.add(dedupKey);
-                    return true;
-                  });
-
-                  if (items.length === 0) return null;
-                  return { ...s, items };
-                })
-                .filter(Boolean);
-
-              if (filtered.length === 0) return null;
-
-                const gs = genreStats[key];
-                const done = gs && gs.completed === gs.total && gs.total > 0;
-
-                return (
-                  <div key={key}>
-                    {/* Genre header */}
-                    <div
-                      onClick={() => setActiveGenre(key)}
-                      style={{
-                        display: "flex", alignItems: "center", gap: 8,
-                        padding: "20px 16px 4px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <span style={{ fontSize: 18 }}>{meta.icon}</span>
-                      <span style={{
-                        fontSize: 16, fontWeight: 800, color: "#fff",
-                        fontFamily: "'Barlow Condensed', sans-serif",
-                        letterSpacing: "0.02em", textTransform: "uppercase",
-                      }}>
-                        {meta.label}
-                      </span>
-                      {gs && (
-                        <span style={{
-                          fontSize: 12, fontWeight: 700,
-                          color: done ? "#4ade80" : accent,
+          {/* ─── Series shelves ─────────────────────────────── */}
+          {filter === "upcoming" ? (
+            /* Flat date-sorted schedule for upcoming */
+            upcomingSchedule.length === 0 ? (
+              <div style={{
+                textAlign: "center", padding: "40px 0",
+                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
+                color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+              }}>No upcoming items</div>
+            ) : (
+              <div style={{ padding: "16px 0", overflow: "hidden" }}>
+                <div className="hide-scrollbar" style={{
+                  display: "flex", overflowX: "auto", gap: 12,
+                  paddingLeft: 16, paddingRight: 16,
+                }}>
+                  {upcomingSchedule.map((item) => {
+                    const Card = NowPlayingItemCard;
+                    return (
+                      <div key={item.id} style={{ flexShrink: 0, width: 120 }}>
+                        <Card
+                          item={item}
+                          isCompleted={!!progress[item.id]?.status}
+                          onToggle={() => onToggle?.(item)}
+                          coverCacheVersion={coverCacheVersion}
+                        />
+                        <div style={{
+                          fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
                           fontFamily: "'Barlow Condensed', sans-serif",
-                          marginLeft: "auto",
+                          letterSpacing: "0.04em", textTransform: "uppercase",
+                          marginTop: 4,
                         }}>
-                          {gs.completed}/{gs.total}
-                        </span>
-                      )}
-                      <span style={{ fontSize: 11, color: "#555" }}>›</span>
-                    </div>
-
-                    {filtered.map((s) => renderCatalogueShelf(s))}
-
-                    <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "8px 16px" }} />
-                  </div>
-                );
-            })
+                          {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                        </div>
+                        <div style={{
+                          fontSize: 9, color: "#666", marginTop: 1,
+                          fontFamily: "'Barlow Condensed', sans-serif",
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        }}>
+                          {item._shelfTitle}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )
+          ) : visibleSeries.length === 0 ? (
+            <div style={{
+              textAlign: "center", padding: "40px 0",
+              fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
+              color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+            }}>
+              {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}
+            </div>
           ) : (
-            visibleSeries.map((s) => renderCatalogueShelf(s))
+            <div style={{ paddingTop: 12 }}>
+              {visibleSeries.map((s) => renderCatalogueShelf(s))}
+            </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
@@ -942,6 +961,123 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
           letterSpacing: "0.05em", textTransform: "uppercase",
           marginTop: 2,
         }}>seen</div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   GenreGridTile — Visual tile for a genre in the 3×3 grid
+   ═══════════════════════════════════════════════════════════════ */
+
+function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0, onTap }) {
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const isDone = pct === 100 && total > 0;
+  const hasProgress = completed > 0;
+
+  return (
+    <div
+      onClick={onTap}
+      style={{
+        position: "relative",
+        aspectRatio: "1",
+        cursor: "pointer",
+        overflow: "hidden",
+        WebkitTapHighlightColor: "transparent",
+        background: `linear-gradient(145deg, ${tint}, #0f0d0b)`,
+        animation: `genreTileFadeIn 0.25s ease-out ${delay}s both`,
+      }}
+    >
+      {/* Large emoji — centered, slightly faded */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingBottom: 16,
+      }}>
+        <span style={{
+          fontSize: 36,
+          opacity: 0.6,
+          filter: "saturate(0.8)",
+        }}>{icon}</span>
+      </div>
+
+      {/* Progress pill — top right */}
+      <div style={{
+        position: "absolute",
+        top: 5, right: 5,
+        background: isDone ? "rgba(74,222,128,0.9)" : "rgba(0,0,0,0.7)",
+        backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
+        borderRadius: 6,
+        padding: "2px 6px",
+        display: "flex",
+        alignItems: "center",
+        gap: 3,
+      }}>
+        {isDone && (
+          <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+            <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        <span style={{
+          fontSize: 10, fontWeight: 700,
+          color: isDone ? "#fff" : (hasProgress ? accent : "rgba(255,255,255,0.5)"),
+          fontFamily: "'Barlow Condensed', sans-serif",
+          letterSpacing: "0.03em",
+        }}>
+          {completed}/{total}
+        </span>
+      </div>
+
+      {/* Bottom gradient overlay */}
+      <div style={{
+        position: "absolute",
+        bottom: 0, left: 0, right: 0,
+        height: "50%",
+        background: "linear-gradient(transparent, rgba(0,0,0,0.85))",
+        pointerEvents: "none",
+      }} />
+
+      {/* Bottom info — progress bar + genre label */}
+      <div style={{
+        position: "absolute",
+        bottom: 0, left: 0, right: 0,
+        padding: "0 6px 6px",
+      }}>
+        {/* Progress bar */}
+        {hasProgress && (
+          <div style={{
+            height: 2, borderRadius: 1,
+            background: "rgba(255,255,255,0.15)",
+            marginBottom: 4,
+            overflow: "hidden",
+          }}>
+            <div style={{
+              height: "100%",
+              width: `${pct}%`,
+              background: isDone
+                ? "linear-gradient(90deg, #4ade80, #22d3ee)"
+                : `linear-gradient(90deg, ${accent}, #C4734F)`,
+              borderRadius: 1,
+            }} />
+          </div>
+        )}
+
+        {/* Genre label */}
+        <div style={{
+          fontSize: 11, fontWeight: 800, color: "#fff",
+          fontFamily: "'Barlow Condensed', sans-serif",
+          lineHeight: 1.15,
+          letterSpacing: "0.02em",
+          textTransform: "uppercase",
+          textShadow: "0 1px 4px rgba(0,0,0,0.9)",
+          textAlign: "center",
+        }}>
+          {label}
+        </div>
       </div>
     </div>
   );
