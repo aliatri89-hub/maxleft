@@ -564,6 +564,22 @@ const featureStyles = `
     font-size: 9px;
     font-weight: 700;
   }
+  .tf-card-rank {
+    position: absolute;
+    top: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: #4ade80;
+    background: rgba(10,10,15,0.75);
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+    animation: fadeUp 0.4s ease;
+  }
   .tf-card-gross {
     position: absolute;
     inset: 0;
@@ -1798,10 +1814,10 @@ function LandingScreen({ onSignIn }) {
                           <div style={{ position: 'relative' }}>
                             <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
                             {sel && !tfLocked && <div className="tf-card-check">✓</div>}
+                            {tfLocked && isTop3 && <div className="tf-card-rank">#{rank}</div>}
                             {tfLocked && (sel || isTop3) && (
                               <div className="tf-card-gross">
                                 <div className={`tf-card-gross-val${isTop3 && !sel ? ' optimal-val' : ''}`}>${movie.gross}M</div>
-                                {isTop3 && <div className="tf-card-optimal-tag" style={{ color: '#4ade80' }}>#{rank}</div>}
                               </div>
                             )}
                           </div>
