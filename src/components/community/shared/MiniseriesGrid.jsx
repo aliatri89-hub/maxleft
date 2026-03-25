@@ -54,7 +54,7 @@ export default function MiniseriesGrid({
     // Filter: series-level status
     if (filter === "done") list = list.filter((s) => s._pct === 100 && s._total > 0);
     if (filter === "inprogress") list = list.filter((s) => s._completed > 0 && s._pct < 100);
-    if (filter === "unseen") list = list.filter((s) => s._completed === 0);
+    if (filter === "notstarted" || filter === "unseen") list = list.filter((s) => s._completed === 0);
 
     return list;
   }, [seriesWithProgress, searchQuery, filter]);
