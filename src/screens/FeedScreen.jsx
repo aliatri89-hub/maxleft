@@ -255,34 +255,43 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         </div>
       )}
 
-      {/* Feed tab toggle */}
+      {/* Sticky feed controls — toggle + filter bar pinned on scroll */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "6px 16px 4px", position: "relative",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        background: "var(--bg-primary, #0f0d0b)",
+        paddingBottom: 2,
       }}>
-        <div className="vhs-toggle">
-          {FEED_TABS.map(tab => (
-            <button
-              key={tab.key}
-              className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
-              onClick={() => setFeedMode(tab.key)}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Feed tab toggle */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "6px 16px 4px", position: "relative",
+        }}>
+          <div className="vhs-toggle">
+            {FEED_TABS.map(tab => (
+              <button
+                key={tab.key}
+                className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
+                onClick={() => setFeedMode(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Feed filter bar */}
-      <FeedFilterBar
-        sortOrder={sortOrder}
-        onSortChange={setSortOrder}
-        selectedPodcast={selectedPodcast}
-        onPodcastChange={setSelectedPodcast}
-        communitySubscriptions={communitySubscriptions}
-        favoritePodcasts={favoritePodcasts}
-        onFavoriteSlugsReady={setFavoriteSlugs}
-      />
+        {/* Feed filter bar */}
+        <FeedFilterBar
+          sortOrder={sortOrder}
+          onSortChange={setSortOrder}
+          selectedPodcast={selectedPodcast}
+          onPodcastChange={setSelectedPodcast}
+          communitySubscriptions={communitySubscriptions}
+          favoritePodcasts={favoritePodcasts}
+          onFavoriteSlugsReady={setFavoriteSlugs}
+        />
+      </div>
 
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
