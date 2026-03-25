@@ -1069,7 +1069,7 @@ const TF_DEMO_MOVIES = [
   { title: "Jaws",         year: 1975, poster: "https://image.tmdb.org/t/p/w185/lxM6kqilAdpdhqUl2biYp5frUxE.jpg", gross: 260 },
   { title: "Scream",       year: 1996, poster: "https://image.tmdb.org/t/p/w185/lr9ZIrmuwVmZhpZuTCW8D9g0ZJe.jpg", gross: 103 },
 ];
-const TF_DEMO_TARGET = 360; // optimal = Die Hard + Matrix + Scream = 86+171+103 = 360
+// optimal = Jaws + Matrix + Scream = 260+171+103 = 534 (top 3 grossing)
 
 const DEMO_COMMUNITIES = [
   { name: "Now Playing Podcast", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/1200x1200bf-60.jpg", color: "#C75B3F", stat: "Marvel Infinity Saga", done: 18, total: 23, backdrop: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/Infinityhero.jpeg" },
@@ -1751,39 +1751,42 @@ function LandingScreen({ onSignIn }) {
           <div className="mantl-feature-label">New Puzzles Every Day</div>
           <div className="mantl-feature-title">Triple Feature</div>
           <div className="mantl-feature-desc">
-            Pick 3 of 5 movies. Get as close to the target gross as you can.
+            Pick the 3 highest grossing films. Original domestic gross — not adjusted for inflation.
           </div>
           <div className="tf-demo">
-            <div className="tf-target">
-              <div className="tf-target-label">Target Domestic Gross</div>
-              <div className="tf-target-val">${TF_DEMO_TARGET}M</div>
-            </div>
             {(() => {
-              // Compute optimal combo (needed for both grid highlights and result)
-              const combos = [];
-              for (let a = 0; a < 5; a++)
-                for (let b = a + 1; b < 5; b++)
-                  for (let c = b + 1; c < 5; c++)
-                    combos.push({ idx: [a,b,c], total: TF_DEMO_MOVIES[a].gross + TF_DEMO_MOVIES[b].gross + TF_DEMO_MOVIES[c].gross });
-              const ranked = [...combos].sort((x, y) => Math.abs(x.total - TF_DEMO_TARGET) - Math.abs(y.total - TF_DEMO_TARGET));
-              const optimalSet = new Set(ranked[0].idx);
+              // Compute gross rank for each movie (1 = highest grossing)
+              const grossRanks = TF_DEMO_MOVIES.map((m, i) => ({ idx: i, gross: m.gross }));
+              grossRanks.sort((a, b) => b.gross - a.gross);
+              const rankMap = {};
+              grossRanks.forEach((m, rank) => { rankMap[m.idx] = rank + 1; });
+              // Top 3 grossing = optimal picks
+              const optimalSet = new Set(grossRanks.slice(0, 3).map(m => m.idx));
+              const optimalTotal = grossRanks.slice(0, 3).reduce((s, m) => s + m.gross, 0);
 
               const arr = Array.from(tfSelected);
               const userTotal = arr.reduce((s, i) => s + TF_DEMO_MOVIES[i].gross, 0);
-              const diff = Math.abs(userTotal - TF_DEMO_TARGET);
-              const selSet = new Set(arr);
-              const rank = ranked.findIndex(c => { const cs = new Set(c.idx); return [...selSet].every(i => cs.has(i)); }) + 1;
+              const isPerfect = userTotal === optimalTotal;
+              const pct = optimalTotal > 0 ? Math.round((userTotal / optimalTotal) * 100) : 0;
+
+              const flavorText = isPerfect ? "Perfect triple. You nailed it."
+                : pct >= 95 ? "So close to the top."
+                : pct >= 85 ? "Solid instincts."
+                : pct >= 75 ? "Not bad — left a little on the table."
+                : pct >= 60 ? "Rough night at the box office."
+                : "Oof. Better luck tomorrow.";
 
               return (
                 <>
                   <div className="tf-grid">
                     {TF_DEMO_MOVIES.map((movie, idx) => {
                       const sel = tfSelected.has(idx);
-                      const isOptimal = tfLocked && optimalSet.has(idx);
+                      const rank = rankMap[idx];
+                      const isTop3 = tfLocked && rank <= 3;
                       return (
                         <div
                           key={idx}
-                          className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}${isOptimal ? ' optimal' : ''}`}
+                          className={`tf-card${sel ? ' selected' : ''}${tfLocked ? ' locked' : ''}${isTop3 ? ' optimal' : ''}`}
                           onClick={() => {
                             if (tfLocked) return;
                             const next = new Set(tfSelected);
@@ -1795,15 +1798,15 @@ function LandingScreen({ onSignIn }) {
                           <div style={{ position: 'relative' }}>
                             <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
                             {sel && !tfLocked && <div className="tf-card-check">✓</div>}
-                            {tfLocked && (sel || isOptimal) && (
+                            {tfLocked && (sel || isTop3) && (
                               <div className="tf-card-gross">
-                                <div className={`tf-card-gross-val${isOptimal && !sel ? ' optimal-val' : ''}`}>${movie.gross}M</div>
-                                {isOptimal && !sel && <div className="tf-card-optimal-tag">OPTIMAL</div>}
+                                <div className={`tf-card-gross-val${isTop3 && !sel ? ' optimal-val' : ''}`}>${movie.gross}M</div>
+                                {isTop3 && <div className="tf-card-optimal-tag" style={{ color: '#4ade80' }}>#{rank}</div>}
                               </div>
                             )}
                           </div>
                           <div className="tf-card-info">
-                            <div className="tf-card-title" style={isOptimal && !sel ? { color: '#4ade80' } : undefined}>{movie.title}</div>
+                            <div className="tf-card-title" style={isTop3 && sel ? { color: '#4ade80' } : isTop3 && !sel ? { color: '#4ade80' } : undefined}>{movie.title}</div>
                           </div>
                         </div>
                       );
@@ -1829,14 +1832,20 @@ function LandingScreen({ onSignIn }) {
                     </div>
                   ) : (
                     <div className="tf-result">
-                      <div className="tf-result-rank">#{rank}</div>
-                      <div className="tf-result-sub">out of 10 possible picks</div>
-                      <div className="tf-result-total">${userTotal}M</div>
+                      <div className="tf-result-rank" style={{
+                        color: isPerfect ? '#d4af37' : pct >= 90 ? '#f0ece4' : '#8a8070',
+                      }}>${userTotal}M<span style={{ fontSize: '0.9rem', color: '#666' }}>/${optimalTotal}M</span></div>
                       <div className="tf-result-diff" style={{
-                        color: diff === 0 ? '#4ade80' : userTotal > TF_DEMO_TARGET ? '#ef4444' : '#f59e0b',
+                        color: isPerfect ? '#d4af37' : pct >= 90 ? '#4ade80' : pct >= 75 ? '#f59e0b' : '#ef4444',
+                        fontStyle: 'italic',
                       }}>
-                        {diff === 0 ? 'PERFECT!' : `$${diff}M ${userTotal > TF_DEMO_TARGET ? 'over' : 'under'}`}
+                        {flavorText}
                       </div>
+                      {!isPerfect && (
+                        <div className="tf-result-sub" style={{ marginTop: 4 }}>
+                          Best was ${optimalTotal}M
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
