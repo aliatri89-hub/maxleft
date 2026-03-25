@@ -35,14 +35,36 @@ function stripHtml(str) {
     .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#?\w+;/g, "").trim();
 }
 
-const PROMO_RE = /\b(Join our Patreon|Follow us|Be sure to (?:follow|subscribe)|Learn more about your ad|Thanks to our SPONSOR|This episode is (?:brought to you|sponsored)|Weekly Plugs|Go to hdtgm|Watch this episode on)/i;
+const PROMO_RE = /\b(Join our Patreon|Follow us|Be sure to (?:follow|subscribe)|Learn more about your ad|Thanks to our SPONSOR|This episode is (?:brought to you|sponsored)|Go to hdtgm|Watch this episode on)/i;
+
+// Markers that signal the start of shownotes / useful content after promos
+const SHOWNOTES_RE = /\b(Shownotes|Show notes|Timestamps|Weekly Plugs|What we.ve been watching|Featured Review|Chapters|Segments|Topics)/i;
 
 function cleanDescription(raw) {
   if (!raw) return null;
   let text = stripHtml(raw);
-  // Truncate at first promo marker
-  const match = PROMO_RE.exec(text);
-  if (match) text = text.slice(0, match.index).trim();
+
+  const promoMatch = PROMO_RE.exec(text);
+  if (promoMatch) {
+    const before = text.slice(0, promoMatch.index).trim();
+    const after = text.slice(promoMatch.index);
+
+    // Look for shownotes section or timecodes after the promo
+    const shownotesMatch = SHOWNOTES_RE.exec(after);
+    const hasTimecodes = /\b\d{1,2}:\d{2}(?::\d{2})?\b/.test(after);
+
+    if (shownotesMatch) {
+      // Keep before + shownotes section onward
+      text = before + "\n\n" + after.slice(shownotesMatch.index).trim();
+    } else if (hasTimecodes) {
+      // Timecodes exist but no clear section header — keep everything
+      text = before + "\n\n" + after.trim();
+    } else {
+      // Pure promo, no shownotes — truncate as before
+      text = before;
+    }
+  }
+
   // Collapse whitespace
   text = text.replace(/\n{3,}/g, "\n\n").trim();
   return text || null;
