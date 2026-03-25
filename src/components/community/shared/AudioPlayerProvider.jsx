@@ -1275,6 +1275,7 @@ export default function AudioPlayerProvider({ children, session }) {
   const [queue, setQueue] = useState([]);             // session-only play queue
   const sleepTimerRef = useRef(null);
   const stallTimerRef = useRef(null);
+  const seekTargetRef = useRef(null); // { time, ts } — holds seek position until playback catches up
   const queueRef = useRef([]);
   const advanceQueueRef = useRef(null);
   const queueToastRef = useRef(null);
@@ -1322,6 +1323,19 @@ export default function AudioPlayerProvider({ children, session }) {
   // ── Bridge event listeners ────────────────────────────────
   useEffect(() => {
     const onTimeUpdate = ({ currentTime, duration: dur }) => {
+      // If we're waiting for a seek to land, hold the optimistic position
+      // until playback catches up (within 2s of target) or 8s timeout
+      if (seekTargetRef.current) {
+        const { time: target, ts } = seekTargetRef.current;
+        const caught = Math.abs(currentTime - target) < 2;
+        const expired = Date.now() - ts > 8000;
+        if (caught || expired) {
+          seekTargetRef.current = null;
+        } else {
+          // Suppress this timeupdate — keep showing the seek target
+          return;
+        }
+      }
       setProgress(currentTime);
       setError(null);
       clearTimeout(stallTimerRef.current);
@@ -1508,7 +1522,11 @@ export default function AudioPlayerProvider({ children, session }) {
   }, [bridge, duration]);
 
   const seekTo = useCallback((time) => {
-    bridge.seek(Math.max(0, Math.min(duration || 0, time)));
+    const clamped = Math.max(0, Math.min(duration || 0, time));
+    // Optimistically show the seek target immediately
+    setProgress(clamped);
+    seekTargetRef.current = { time: clamped, ts: Date.now() };
+    bridge.seek(clamped);
   }, [bridge, duration]);
 
   const cycleSpeed = useCallback(() => {
