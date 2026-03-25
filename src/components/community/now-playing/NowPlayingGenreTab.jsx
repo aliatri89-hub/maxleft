@@ -53,6 +53,7 @@ export default function NowPlayingGenreTab({
   upcomingCount = 0,
   pushNav,
   removeNav,
+  genreResetRef,
 }) {
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -62,12 +63,24 @@ export default function NowPlayingGenreTab({
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Back gesture: genre detail → grid
-  useBackGesture("nppGenreDetail", activeGenre !== ALL_KEY || searchOpen, () => {
+  const resetToGrid = useCallback(() => {
     setActiveGenre(ALL_KEY);
     onSearchChange("");
     setSearchOpen(false);
     onFilterChange("all");
-  }, pushNav, removeNav);
+  }, [onSearchChange, onFilterChange]);
+
+  const isInDetail = activeGenre !== ALL_KEY || searchOpen;
+
+  useBackGesture("nppGenreDetail", isInDetail, resetToGrid, pushNav, removeNav);
+
+  // Expose reset function to parent for header back button
+  useEffect(() => {
+    if (genreResetRef) {
+      genreResetRef.current = isInDetail ? resetToGrid : null;
+    }
+    return () => { if (genreResetRef) genreResetRef.current = null; };
+  }, [isInDetail, resetToGrid, genreResetRef]);
 
   // Focus search input only when user explicitly opens search (not on tab mount)
   useEffect(() => {

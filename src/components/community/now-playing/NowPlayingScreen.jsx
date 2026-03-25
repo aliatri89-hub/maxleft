@@ -65,6 +65,9 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
 
+  // Ref for genre tab to expose its "back to grid" function
+  const genreResetRef = useRef(null);
+
   // ── Android back gesture → close modals ─────────────────
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
@@ -268,7 +271,13 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
         display: "flex", alignItems: "center", gap: 8,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
-        <button onClick={onBack} style={{
+        <button onClick={() => {
+          if (genreResetRef.current) {
+            genreResetRef.current();
+          } else {
+            onBack();
+          }
+        }} style={{
           background: "none", border: "none", color: accent,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
@@ -441,6 +450,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 upcomingCount={upcomingCount}
                 pushNav={pushNav}
                 removeNav={removeNav}
+                genreResetRef={genreResetRef}
               />
             )}
           </>
