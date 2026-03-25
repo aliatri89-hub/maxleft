@@ -228,24 +228,30 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         .maybeSingle();
 
       if (cancelled) return;
-      if (d) { setDetail(d); return; }
+      if (d && d.credits) { setDetail(d); return; }
 
-      // Fallback: fetch from TMDB API (browse cards — film not in media table)
+      // Fallback: fetch from TMDB API (browse cards — film not in media table, or credits not cached)
+      const partialDetail = d || null;
       const type = (data.media_type === "show") ? "tv" : "movie";
       const tmdbDetail = await apiProxy("tmdb_details", {
         tmdb_id: String(data.tmdb_id), type, append: "credits",
       });
-      if (cancelled || !tmdbDetail || tmdbDetail.error) return;
+      if (cancelled || !tmdbDetail || tmdbDetail.error) {
+        // Still use partial detail if TMDB fails (has overview/tagline at least)
+        if (!cancelled && partialDetail) setDetail(partialDetail);
+        return;
+      }
       const detailObj = {
-        overview: tmdbDetail.overview || null,
-        tagline: tmdbDetail.tagline || null,
-        budget: tmdbDetail.budget || null,
-        revenue: tmdbDetail.revenue || null,
-        runtime: tmdbDetail.runtime || null,
+        ...(partialDetail || {}),
+        overview: tmdbDetail.overview || partialDetail?.overview || null,
+        tagline: tmdbDetail.tagline || partialDetail?.tagline || null,
+        budget: tmdbDetail.budget || partialDetail?.budget || null,
+        revenue: tmdbDetail.revenue || partialDetail?.revenue || null,
+        runtime: tmdbDetail.runtime || partialDetail?.runtime || null,
         credits: tmdbDetail.credits || null,
-        production_companies: tmdbDetail.production_companies || null,
-        genre: (tmdbDetail.genres || []).slice(0, 2).map(g => g.name).join(", ") || null,
-        still_paths: null,
+        production_companies: tmdbDetail.production_companies || partialDetail?.production_companies || null,
+        genre: (tmdbDetail.genres || []).slice(0, 2).map(g => g.name).join(", ") || partialDetail?.genre || null,
+        still_paths: partialDetail?.still_paths || null,
       };
       setDetail(detailObj);
 
