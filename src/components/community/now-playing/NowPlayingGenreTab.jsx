@@ -20,15 +20,15 @@ import { isComingSoon } from "../../../utils/comingSoon";
  */
 
 const GENRE_META = {
-  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f" },
-  horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a" },
-  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d" },
-  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f" },
-  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d" },
-  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a" },
-  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420" },
-  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f" },
-  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d" },
+  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/8ZFcbZjIdFngvmjAeXbjZeLp6ck.jpg" },
+  horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/d62YzdOrC4LfObyb2q1qGVxUvID.jpg" },
+  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/likvx867SB7dz6hZHpDFEeSxE1c.jpg" },
+  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg" },
+  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/utz4z2SKNywqbob1XeZwCr8pWav.jpg" },
+  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/qy5FtVeAlwNE0kW6lgzvfR3KRVi.jpg" },
+  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg" },
+  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg" },
+  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg" },
 };
 
 const ALL_KEY = "__all__";
@@ -517,6 +517,7 @@ export default function NowPlayingGenreTab({
                   label={meta.label}
                   icon={meta.icon}
                   tint={meta.tint || "#1a1a2e"}
+                  poster={meta.poster}
                   completed={gs?.completed || 0}
                   total={gs?.total || 0}
                   accent={accent}
@@ -977,7 +978,8 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
    GenreGridTile — Visual tile for a genre in the 3×3 grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0, onTap }) {
+function GenreGridTile({ label, icon, tint, poster, completed, total, accent, delay = 0, onTap }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   const isDone = pct === 100 && total > 0;
   const hasProgress = completed > 0;
@@ -995,21 +997,47 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
         animation: `genreTileFadeIn 0.25s ease-out ${delay}s both`,
       }}
     >
-      {/* Large emoji — centered */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        paddingBottom: 24,
-      }}>
-        <span style={{
-          fontSize: 48,
-          opacity: 0.55,
-          filter: "saturate(0.8)",
-        }}>{icon}</span>
-      </div>
+      {/* Poster image */}
+      {poster ? (
+        <img
+          src={poster}
+          alt={label}
+          loading="lazy"
+          onLoad={() => setImgLoaded(true)}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+            opacity: imgLoaded ? 1 : 0,
+            transition: "opacity 0.3s",
+          }}
+        />
+      ) : (
+        /* Fallback: emoji */
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          paddingBottom: 24,
+        }}>
+          <span style={{
+            fontSize: 48,
+            opacity: 0.55,
+            filter: "saturate(0.8)",
+          }}>{icon}</span>
+        </div>
+      )}
+
+      {/* Shimmer while loading */}
+      {poster && !imgLoaded && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "rgba(255,255,255,0.03)",
+        }} />
+      )}
 
       {/* Progress pill — top right */}
       <div style={{
