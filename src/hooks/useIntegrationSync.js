@@ -457,6 +457,18 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         setLetterboxdSyncSignal(Date.now());
         await loadShelves(uid);
         if (syncedFilms.length > 0) {
+          // Fire coverage check (same as cron path) — fire-and-forget
+          fetch("https://api.mymantl.app/functions/v1/check-new-film-coverage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: uid,
+              new_films: syncedFilms.map(f => ({ tmdb_id: f.tmdbId, title: f.title })),
+            }),
+          }).then(r => r.json())
+            .then(r => console.log(`[Letterboxd] Coverage check: ${r.sent || 0} notification(s)`))
+            .catch(err => console.warn("[Letterboxd] Coverage check failed:", err));
+
           setTimeout(async () => {
             await autoLogAndCheckBadges(syncedFilms, uid);
             setAutoLogCompleteSignal(Date.now());
