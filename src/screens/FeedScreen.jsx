@@ -37,6 +37,12 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     loading, refresh,
   } = useFeed(userId, favoritePodcasts);
   const releases = useBrowseFeed("releases", feedMode === "releases");
+
+  // ── Filter state (must be before usePodcastFeed which reads selectedPodcast) ──
+  const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
+  const [selectedPodcast, setSelectedPodcast] = useState(null);
+  const [favoriteSlugs, setFavoriteSlugs] = useState(null); // Set<slug> from FeedFilterBar
+
   const podcastSlugForHook = selectedPodcast && selectedPodcast !== "__favorites__" ? selectedPodcast : null;
   const podcast = usePodcastFeed(feedMode === "podcast", userId, podcastSlugForHook);
   const wasActive = useRef(isActive);
@@ -48,11 +54,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const activitySentinelRef = useRef(null);
   const releasesSentinelRef = useRef(null);
   const podcastSentinelRef = useRef(null);
-
-  // ── Filter state ──
-  const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
-  const [selectedPodcast, setSelectedPodcast] = useState(null);
-  const [favoriteSlugs, setFavoriteSlugs] = useState(null); // Set<slug> from FeedFilterBar
 
   // ── Filtered + sorted browse items ──
   const filteredReleases = useMemo(() => {
