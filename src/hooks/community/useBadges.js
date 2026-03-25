@@ -308,8 +308,38 @@ export function useBadges(communityId, userId) {
           return next;
         });
 
+        // ── Inbox: badge earned notification ──
+        supabase.from("user_notifications").upsert({
+          user_id: userId,
+          notif_type: "badge_earned",
+          title: "Badge unlocked",
+          body: `You earned "${badge.name}"`,
+          image_url: badge.image_url || null,
+          payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+          ref_key: `badge_earned:${badge.id}`,
+        }, { onConflict: "user_id,ref_key", ignoreDuplicates: true }).then(({ error }) => {
+          if (error) console.error("[Badges] Inbox earned error:", error.message);
+        });
+
         return badge;
       }
+
+      // ── Inbox: badge progress notification (upsert — latest state only) ──
+      if (current > 0) {
+        supabase.from("user_notifications").upsert({
+          user_id: userId,
+          notif_type: "badge_progress",
+          title: "Badge progress",
+          body: `${current}/${total} for "${badge.name}"`,
+          image_url: badge.image_url || null,
+          payload: { type: "badge_progress", badge_id: badge.id, community_id: badge.community_id, current, total },
+          ref_key: `badge_progress:${badge.id}`,
+          created_at: new Date().toISOString(),
+        }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
+          if (error) console.error("[Badges] Inbox progress error:", error.message);
+        });
+      }
+
       return null;
     };
 
@@ -466,6 +496,19 @@ export function useBadges(communityId, userId) {
           });
           newlyEarned.push(badge);
           console.log(`[Badges] Auto-earned "${badge.name}" via sync`);
+
+          // ── Inbox: badge earned notification ──
+          supabase.from("user_notifications").upsert({
+            user_id: userId,
+            notif_type: "badge_earned",
+            title: "Badge unlocked",
+            body: `You earned "${badge.name}"`,
+            image_url: badge.image_url || null,
+            payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+            ref_key: `badge_earned:${badge.id}`,
+          }, { onConflict: "user_id,ref_key", ignoreDuplicates: true }).then(({ error }) => {
+            if (error) console.error("[Badges] Inbox earned error:", error.message);
+          });
         }
       }
     };
