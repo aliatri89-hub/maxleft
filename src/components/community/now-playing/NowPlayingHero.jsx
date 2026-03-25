@@ -14,7 +14,6 @@ export default function NowPlayingHero({
 }) {
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
-  const heroDescription = tabHero?.description ?? community?.description;
 
   const isBooks = activeTab === "books";
   const isArcade = activeTab === "arcade";
@@ -121,12 +120,6 @@ export default function NowPlayingHero({
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
           {isArcade ? "Now Playing Arcade" : isBooks ? "Books & Nachos" : (heroTagline || community?.name || "Now Playing")}
-        </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 14px", whiteSpace: "pre-line",
-        }}>
-          {isArcade ? "The Boll and the Beautiful" : isBooks ? "Source novels, tie-ins, and novelisations from the Now Playing universe" : heroDescription}
         </div>
 
         {isArcade ? (

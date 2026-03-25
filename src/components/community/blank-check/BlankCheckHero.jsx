@@ -38,7 +38,6 @@ export default function BlankCheckHero({ community, miniseries, progress, active
   // ── Per-tab hero overrides ────────────────────────────────
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
-  const heroDescription = tabHero?.description ?? community?.description;
   const heroBanner = tabHero?.banner_url ?? community?.banner_url;
 
   // ── Filmography stats ─────────────────────────────────────
@@ -159,8 +158,8 @@ export default function BlankCheckHero({ community, miniseries, progress, active
         }}>
           {heroTagline || community?.name || "Blank Check"}
         </div>
-        {/* Subtitle — box office on patreon, description on filmography */}
-        {isPatreon && patreonStats?.grossWW > 0 ? (
+        {/* Subtitle — box office on patreon */}
+        {isPatreon && patreonStats?.grossWW > 0 && (
           <div style={{ textAlign: "center", margin: "0 auto 20px" }}>
             <div style={{
               fontSize: 13, fontWeight: 700,
@@ -179,13 +178,6 @@ export default function BlankCheckHero({ community, miniseries, progress, active
             }}>
               ${patreonStats.grossWW.toLocaleString("en-US")}
             </div>
-          </div>
-        ) : (
-          <div style={{
-            fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-            maxWidth: 300, margin: "0 auto 20px", whiteSpace: "pre-line",
-          }}>
-            {heroDescription}
           </div>
         )}
 

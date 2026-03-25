@@ -56,12 +56,6 @@ export default function OriginalsHero({ community, miniseries, progress, accent 
         }}>
           MANTL Originals
         </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 20px",
-        }}>
-          {community?.description || "Curated film shelves with editorial context."}
-        </div>
 
         {stats.total > 0 && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24 }}>

@@ -111,12 +111,6 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
         }}>
           {community?.tagline || community?.name || "The Rewatchables"}
         </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 20px",
-        }}>
-          {community?.description}
-        </div>
 
         {/* ═══ REWATCHED + GENRE — side by side ═══ */}
         {(mostRewatched.length > 0 || genreStats.length > 0) && (

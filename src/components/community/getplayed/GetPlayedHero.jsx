@@ -11,7 +11,6 @@ import { HeroBanner } from "../primitives";
 export default function GetPlayedHero({ community, miniseries, progress, activeTab, wpypItems = [], playingNow = [] }) {
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
-  const heroDescription = tabHero?.description ?? community?.description;
   const heroBanner = tabHero?.banner_url ?? community?.banner_url;
 
   const isPlayAlong = activeTab === "playalong";
@@ -83,12 +82,6 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
           {heroTagline || community?.name || "Get Played"}
-        </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 16px", whiteSpace: "pre-line",
-        }}>
-          {heroDescription}
         </div>
 
         {/* ── Stat bars ──────────────────────────────────────── */}

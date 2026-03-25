@@ -16,7 +16,6 @@ export default function FilmspottingHero({ community, miniseries, progress }) {
   // ── Hero config from theme_config ─────────────────────────
   const tabHero = community?.theme_config?.tab_heroes?.awards;
   const heroTagline = tabHero?.tagline ?? community?.tagline;
-  const heroDescription = tabHero?.description ?? community?.description;
   const heroBanner = tabHero?.banner_url ?? community?.banner_url;
 
   // ── Film stats ────────────────────────────────────────────
@@ -65,12 +64,6 @@ export default function FilmspottingHero({ community, miniseries, progress }) {
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
           {heroTagline || community?.name || "Filmspotting"}
-        </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 20px", whiteSpace: "pre-line",
-        }}>
-          {heroDescription}
         </div>
 
         {/* Ring + pill */}

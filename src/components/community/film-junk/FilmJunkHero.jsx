@@ -17,7 +17,6 @@ export default function FilmJunkHero({ community, miniseries, progress, activeTa
   // ── Per-tab hero overrides ────────────────────────────────
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
-  const heroDescription = tabHero?.description ?? community?.description;
   const heroBanner = tabHero?.banner_url ?? community?.banner_url;
 
   // ── Film stats ────────────────────────────────────────────
@@ -66,12 +65,6 @@ export default function FilmJunkHero({ community, miniseries, progress, activeTa
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
           {heroTagline || community?.name || "Film Junk"}
-        </div>
-        <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)", textAlign: "center",
-          maxWidth: 300, margin: "0 auto 20px", whiteSpace: "pre-line",
-        }}>
-          {heroDescription}
         </div>
 
         {/* Ring + pill */}
