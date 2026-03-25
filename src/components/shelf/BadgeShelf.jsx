@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
+import BadgeDetailScreen from "../community/shared/BadgeDetailScreen";
 
 const accent = "#EF9F27";
 const SIZE = 72;
@@ -8,13 +9,14 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 /** Earned badge on a gold pedestal */
-function BadgeSlot({ badge, delay = 0 }) {
+function BadgeSlot({ badge, delay = 0, onTap }) {
   const badgeAccent = badge.accent_color || accent;
   return (
     <div
+      onClick={onTap}
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        width: 78,
+        width: 78, cursor: "pointer",
         animation: `badgeShelfIn 0.4s ${delay}s ease-out both`,
         opacity: 0,
       }}
@@ -83,16 +85,19 @@ function BadgeSlot({ badge, delay = 0 }) {
 }
 
 /** Next-up badge with progress ring on a silver pedestal */
-function NextUpSlot({ badge, delay = 0 }) {
+function NextUpSlot({ badge, delay = 0, onTap }) {
   const badgeAccent = badge.accent_color || accent;
   const progress = badge.total > 0 ? badge.current / badge.total : 0;
   const offset = CIRCUMFERENCE * (1 - progress);
+  // Blur scales inversely with progress: 20px at 0%, down to 6px near completion
+  const blurAmount = Math.round(20 - (progress * 14));
 
   return (
     <div
+      onClick={onTap}
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
-        width: 78,
+        width: 78, cursor: "pointer",
         animation: `badgeShelfIn 0.4s ${delay}s ease-out both`,
         opacity: 0,
       }}
@@ -109,12 +114,12 @@ function NextUpSlot({ badge, delay = 0 }) {
           position: "absolute", top: STROKE + 3, left: STROKE + 3,
           width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
           borderRadius: "50%", overflow: "hidden", background: "#1a1714",
-          opacity: 0.55,
         }}>
           {badge.image_url ? (
             <img src={badge.image_url} alt={badge.name} style={{
               width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.1)",
-              filter: "grayscale(0.4)",
+              filter: `blur(${blurAmount}px) brightness(0.5)`,
+              transition: "filter 0.3s",
             }} />
           ) : (
             <div style={{
@@ -184,12 +189,22 @@ function EmptySlot({ delay = 0 }) {
 export default function BadgeShelf({ session }) {
   const userId = session?.user?.id;
   const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId);
+  const [selectedBadge, setSelectedBadge] = useState(null);
 
   const recentThree = useMemo(() => earnedBadges.slice(0, 3), [earnedBadges]);
   const hasAnyBadges = earnedBadges.length > 0 || closestBadge;
 
   return (
     <div style={{ padding: 0, marginBottom: 0 }}>
+      {/* Badge detail overlay */}
+      {selectedBadge && (
+        <BadgeDetailScreen
+          badge={selectedBadge.badge}
+          userId={userId}
+          earnedAt={selectedBadge.earnedAt}
+          onClose={() => setSelectedBadge(null)}
+        />
+      )}
       <style>{`
         @keyframes badgeShelfIn {
           from { opacity: 0; transform: translateY(10px) scale(0.95); }
@@ -228,13 +243,15 @@ export default function BadgeShelf({ session }) {
             {[0, 1, 2].map(i => {
               const badge = recentThree[i];
               return badge ? (
-                <BadgeSlot key={badge.id} badge={badge} delay={i * 0.08} />
+                <BadgeSlot key={badge.id} badge={badge} delay={i * 0.08}
+                  onTap={() => setSelectedBadge({ badge, earnedAt: badge.earned_at })} />
               ) : (
                 <EmptySlot key={`empty-${i}`} delay={i * 0.08} />
               );
             })}
             {closestBadge ? (
-              <NextUpSlot badge={closestBadge} delay={0.24} />
+              <NextUpSlot badge={closestBadge} delay={0.24}
+                onTap={() => setSelectedBadge({ badge: closestBadge, earnedAt: null })} />
             ) : (
               <EmptySlot key="empty-3" delay={0.24} />
             )}
