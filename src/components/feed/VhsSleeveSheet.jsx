@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 import { resolveAudioUrl } from "../../utils/episodeUrl";
@@ -317,7 +317,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const director = merged?.director || merged?.creator || null;
   const cast = merged?.cast_names || [];
   const studios = merged?.studio_names || [];
-  const [extraBackdrops, setExtraBackdrops] = useState([]);
+  // Stable stills: compute synchronously from cached still_paths to avoid flicker
+  const cachedStills = useMemo(() => {
+    const paths = data?.still_paths || detail?.still_paths;
+    if (!paths?.length) return null;
+    return paths.map(p => p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`);
+  }, [data?.still_paths, detail?.still_paths]);
+
+  const [fetchedStills, setFetchedStills] = useState([]);
+  const fetchedForRef = useRef(null); // track which tmdb_id we fetched for
+
+  const extraBackdrops = cachedStills || fetchedStills;
   // When opened from artwork card, swap hero to avoid duplicating the tape label image
   const heroUrl = artworkHero && extraBackdrops.length > 0 ? extraBackdrops[0] : backdropUrl;
   // Still image: use second pick for artwork (first is hero), first pick otherwise
@@ -338,20 +348,22 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     }
   }, [open, genreFont.family]);
 
-  // Fetch extra backdrops — use cached still_paths when available, else fetch + cache
+  // Fetch extra backdrops only when not cached in DB
   useEffect(() => {
-    setExtraBackdrops([]);
     if (!open || !data?.tmdb_id) return;
-    let cancelled = false;
 
-    // If still_paths are already cached in the DB, use them instantly
-    if (merged.still_paths?.length) {
-      const stills = merged.still_paths.map(p =>
-        p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`
-      );
-      setExtraBackdrops(stills);
-      return;
+    // Already have cached stills from data.still_paths — nothing to fetch
+    if (cachedStills) return;
+
+    // Already fetched for this movie — keep showing those
+    if (fetchedForRef.current === data.tmdb_id && fetchedStills.length > 0) return;
+
+    // Different movie than last fetch — clear stale stills
+    if (fetchedForRef.current !== data.tmdb_id) {
+      setFetchedStills([]);
     }
+
+    let cancelled = false;
 
     (async () => {
       try {
@@ -418,7 +430,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         if (!cancelled && picks.length > 0) {
           const paths = picks.map(p => p.file_path);
           const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
-          setExtraBackdrops(stills);
+          fetchedForRef.current = data.tmdb_id;
+          setFetchedStills(stills);
 
           // Write back to media so next open (by anyone) is instant
           supabase
@@ -430,7 +443,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       } catch {}
     })();
     return () => { cancelled = true; };
-  }, [open, data?.tmdb_id]);
+  }, [open, data?.tmdb_id, cachedStills]);
 
   // Prevent background scroll while sheet is open
   useLayoutEffect(() => {
