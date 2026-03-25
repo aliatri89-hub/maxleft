@@ -255,17 +255,34 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
         ) : (
           <div style={{ width: "100%", height: "100%", background: "#1a1612", display: "flex", alignItems: "center", justifyContent: "center", color: CREAM, opacity: 0.4, fontSize: 14, padding: 16, textAlign: "center" }}>{film.title}</div>
         )}
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.85))", padding: "40px 16px 16px" }}>
-          <div style={{ color: CREAM, fontSize: 18, fontWeight: 700, lineHeight: 1.2 }}>{film.title}</div>
-          <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>
-            {film.year}{film.podcast_count > 1 ? ` · ${film.podcast_count} podcasts` : ""}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "linear-gradient(transparent, rgba(0,0,0,0.85))", padding: "40px 16px 16px", display: "flex", alignItems: "flex-end", gap: 10 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ color: CREAM, fontSize: 18, fontWeight: 700, lineHeight: 1.2 }}>{film.title}</div>
+            <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>
+              {film.year}{film.podcast_count > 1 ? ` · ${film.podcast_count} podcasts` : ""}
+            </div>
           </div>
+          <button
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => { e.stopPropagation(); haptic(); onPeek(film); }}
+            onClick={(e) => { e.stopPropagation(); onPeek(film); }}
+            style={{
+              width: 38, height: 38, borderRadius: 19, flexShrink: 0,
+              background: "rgba(240,235,225,0.12)", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={CREAM} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
+          </button>
         </div>
       </div>
 
       {/* Hints + select */}
       <div style={{ marginTop: 14, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-        <div style={{ fontSize: 11, color: CREAM, opacity: 0.3 }}>tap poster for coverage · swipe to decide</div>
+        <div style={{ fontSize: 11, color: CREAM, opacity: 0.3 }}>swipe to decide</div>
         <button onClick={() => { haptic(); onSelect(film); }} style={{
           background: "none", border: `1px solid ${AMBER}`, color: AMBER, borderRadius: 20,
           padding: "8px 20px", fontSize: 13, cursor: "pointer",
