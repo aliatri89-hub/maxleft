@@ -1,4 +1,5 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
@@ -44,7 +45,7 @@ const DEFAULT_TABS = [{ key: "filmography", label: "Filmography", icon: "🎬" }
  *   onToast          — (msg) => void
  *   onShelvesChanged — () => void
  */
-export default function BlankCheckScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal }) {
+export default function BlankCheckScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -91,6 +92,13 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
+
+  // ── Back gesture handlers (Android / swipe) ──────────────────
+  useBackGesture("bcSeriesDetail", !!selectedSeries, () => setSelectedSeries(null), pushNav, removeNav);
+  useBackGesture("bcLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
+  useBackGesture("bcBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
+  useBackGesture("bcBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
+  useBackGesture("bcTab", activeTab !== (tabs[0]?.key || "filmography"), () => { sliderRef.current?.animateToTab(tabs[0]?.key || "filmography"); setActiveTab(tabs[0]?.key || "filmography"); }, pushNav, removeNav);
 
   // Reset on tab change
   useEffect(() => { setMediaFilter(null); setSearchQuery(""); setSearchOpen(false); setSelectedSeries(null); }, [activeTab]);
