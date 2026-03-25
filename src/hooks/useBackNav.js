@@ -36,5 +36,18 @@ export function useBackNav(activeTab, setActiveTab) {
     return () => window.removeEventListener("popstate", onPop);
   }, [activeTab, setActiveTab]);
 
-  return { pushNav, removeNav };
+  // Dismiss all overlays (everything except "tab" entries) — used by bottom nav
+  const dismissOverlays = useCallback(() => {
+    const remaining = [];
+    backActions.current.forEach(a => {
+      if (a.key === "tab") {
+        remaining.push(a);
+      } else {
+        a.fn();
+      }
+    });
+    backActions.current = remaining;
+  }, []);
+
+  return { pushNav, removeNav, dismissOverlays };
 }

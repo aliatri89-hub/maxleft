@@ -140,7 +140,7 @@ export default function App() {
 
   // ── Extracted hooks ──
   const { toast, toastExiting, toastDuration, showToast } = useToast();
-  const { pushNav, removeNav } = useBackNav(activeTab, setActiveTab);
+  const { pushNav, removeNav, dismissOverlays } = useBackNav(activeTab, setActiveTab);
   const {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
     syncSliderPosition,
@@ -441,7 +441,7 @@ export default function App() {
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
               </div>
-              <div onClick={() => { removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
+              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
               </div>
@@ -599,26 +599,26 @@ export default function App() {
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
-              onClick={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
             </button>
             <button className={`nav-item${activeTab === "games" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "games") setPreloadTab("games"); }}
-              onClick={() => { tapLight(); if (activeTab !== "games") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("games"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "games") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("games"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><circle cx="5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div>
               <div className="nav-label">Games</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
-              onClick={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); setPreloadTab(null); }}>
+              onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
               <div className="nav-label">Search</div>
             </button>
             <button className={`nav-item${activeTab === "shelf" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "shelf") setPreloadTab("shelf"); }}
               onClick={() => {
-                tapLight();
+                tapLight(); dismissOverlays();
                 if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); });
                 setActiveTab("shelf"); setPreloadTab(null);
               }}>
