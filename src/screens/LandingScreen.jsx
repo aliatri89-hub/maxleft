@@ -1092,8 +1092,8 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/nsMnkuWIZCBxkBLPi0ZXuRloYL2.png",
     backdrop: "https://image.tmdb.org/t/p/w780/3N5QNUqS76GFYNoEayfkkJyAyTN.jpg",
     podcasts: [
-      { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_PCHH.ogg" },
-      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BigPicture.ogg" },
+      { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/29/ca/0b/29ca0bf1-aa5b-3da8-9be0-f357793116a7/mza_16337213754400532987.jpg/300x300bb.webp", episode: "Barbie", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_PCHH.ogg" },
+      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/73/12/f9/7312f903-6bdd-344f-5f5f-ccded1d6a6b9/mza_265011236225794238.jpg/300x300bb.webp", episode: "The 'Barbie' Bonanza", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BigPicture.ogg" },
     ],
   },
   {
@@ -1101,7 +1101,7 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/lTXB6JCQ0k8kBcDIwZXuR6orx1w.png",
     backdrop: "https://image.tmdb.org/t/p/w780/AmR3JG1VQVxU8TfAvljUhfSFUOx.jpg",
     podcasts: [
-      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_Rewatchables.ogg" },
+      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/d0/b2/86/d0b286b1-c111-4346-18ab-8c1632551a41/mza_18001309740433796361.jpg/300x300bb.webp", episode: "Alien", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_Rewatchables.ogg" },
       { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_FilmJunk.ogg" },
     ],
   },
