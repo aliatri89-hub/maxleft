@@ -65,6 +65,10 @@ function createNativeBridge() {
   let _listenerCleanups = [];
   let _pendingSeek = 0;      // seek position queued for after onAudioReady
   let _readyResolve = null;  // resolves load() promise when audio is ready
+  // Session recovery — stored so we can re-load if Android kills the service
+  let _lastUrl = null;
+  let _lastMeta = {};
+  let _recovering = false;
 
   // Poll currentTime while playing (~500ms)
   function startPolling() {
@@ -202,6 +206,8 @@ function createNativeBridge() {
       _playing = false;
       _rate = opts.rate || 1;
       _pendingSeek = opts.seekTo || 0;
+      _lastUrl = url;
+      _lastMeta = meta;
       emitter.emit("waiting");
 
       try {
@@ -253,12 +259,43 @@ function createNativeBridge() {
     },
 
     async play() {
-      if (!AudioPlayer || !_created) return;
+      if (!AudioPlayer) return;
+      // If session was killed (e.g. Android stopped foreground service after long pause),
+      // attempt to re-load at the current position
+      if (!_created && _lastUrl && !_recovering) {
+        console.warn("[AudioBridge] Session lost — recovering at", Math.round(_currentTime));
+        _recovering = true;
+        try {
+          await this.load(_lastUrl, _lastMeta, { seekTo: _currentTime, rate: _rate });
+          await AudioPlayer.play({ audioId: AUDIO_ID });
+        } catch (e) {
+          console.warn("[AudioBridge] recovery failed:", e);
+          emitter.emit("error", { message: "Session expired — tap play to retry" });
+        } finally {
+          _recovering = false;
+        }
+        return;
+      }
+      if (!_created) return;
       try {
         await AudioPlayer.play({ audioId: AUDIO_ID });
       } catch (e) {
         console.warn("[AudioBridge] play failed:", e);
-        emitter.emit("error", { message: "Playback failed" });
+        // Attempt recovery on play failure too (session may exist but be broken)
+        if (_lastUrl && !_recovering) {
+          _recovering = true;
+          try {
+            _created = false;
+            await this.load(_lastUrl, _lastMeta, { seekTo: _currentTime, rate: _rate });
+            await AudioPlayer.play({ audioId: AUDIO_ID });
+          } catch (e2) {
+            emitter.emit("error", { message: "Playback failed" });
+          } finally {
+            _recovering = false;
+          }
+        } else {
+          emitter.emit("error", { message: "Playback failed" });
+        }
       }
     },
 
@@ -344,6 +381,8 @@ function createNativeBridge() {
       _playing = false;
       _currentTime = 0;
       _duration = 0;
+      _lastUrl = null;
+      _lastMeta = {};
     },
 
     isNative: true,
@@ -356,6 +395,29 @@ function createWebBridge() {
   const emitter = createEmitter();
   const audio = new Audio();
   audio.preload = "none";
+  let _keepaliveId = null;
+
+  // Update Media Session position state (keeps session alive while paused)
+  function syncPositionState() {
+    if (!("mediaSession" in navigator) || !audio.duration || !isFinite(audio.duration)) return;
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate,
+        position: Math.min(audio.currentTime, audio.duration),
+      });
+    } catch {}
+  }
+
+  function startKeepalive() {
+    stopKeepalive();
+    // Refresh position state every 30s while paused to prevent session timeout
+    _keepaliveId = setInterval(syncPositionState, 30000);
+  }
+
+  function stopKeepalive() {
+    if (_keepaliveId) { clearInterval(_keepaliveId); _keepaliveId = null; }
+  }
 
   // Forward native audio events
   const FORWARDED = ["play", "pause", "ended", "waiting", "canplay", "error", "stalled", "progress"];
@@ -370,8 +432,22 @@ function createWebBridge() {
     });
   });
 
+  // Sync playbackState + position on play/pause
+  audio.addEventListener("play", () => {
+    stopKeepalive();
+    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+    syncPositionState();
+  });
+
+  audio.addEventListener("pause", () => {
+    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
+    syncPositionState();
+    startKeepalive();
+  });
+
   audio.addEventListener("timeupdate", () => {
     emitter.emit("timeupdate", { currentTime: audio.currentTime, duration: audio.duration || 0 });
+    syncPositionState();
   });
 
   audio.addEventListener("durationchange", () => {
@@ -457,6 +533,7 @@ function createWebBridge() {
     async getFreshCurrentTime() { return audio.currentTime; },
 
     async destroy() {
+      stopKeepalive();
       audio.pause();
       audio.src = "";
       if ("mediaSession" in navigator) {
