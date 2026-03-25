@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
 import BadgeDetailScreen from "../community/shared/BadgeDetailScreen";
 
@@ -196,14 +197,15 @@ export default function BadgeShelf({ session }) {
 
   return (
     <div style={{ padding: 0, marginBottom: 0 }}>
-      {/* Badge detail overlay */}
-      {selectedBadge && (
+      {/* Badge detail overlay — portaled to escape tab-pane transform */}
+      {selectedBadge && createPortal(
         <BadgeDetailScreen
           badge={selectedBadge.badge}
           userId={userId}
           earnedAt={selectedBadge.earnedAt}
           onClose={() => setSelectedBadge(null)}
-        />
+        />,
+        document.body
       )}
       <style>{`
         @keyframes badgeShelfIn {
