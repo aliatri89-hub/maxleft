@@ -211,9 +211,6 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     return () => clearTimeout(t);
   }, []);
 
-  const dailyGames = GAMES.filter((g) => g.daily);
-  const completedCount = dailyGames.filter((g) => gameStatuses[g.id] === "completed").length;
-
   function StatusPill({ gameId, color }) {
     const status = gameStatuses[gameId];
     if (status === "completed") {
@@ -289,31 +286,6 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           Games
         </h1>
         <div style={{ fontSize: 13, color: "#8a7e6b", marginTop: 6 }}>{getTodayFormatted()}</div>
-      </div>
-
-      {/* Daily progress */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 10, padding: "10px 16px",
-        background: "rgba(201,168,76,0.05)", border: "1px solid rgba(201,168,76,0.1)",
-        borderRadius: 10, marginBottom: 20,
-        opacity: loaded ? 1 : 0, transform: `translateY(${loaded ? 0 : 8}px)`,
-        transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s",
-      }}>
-        <span style={{ fontSize: 12, color: "#8a7e6b", whiteSpace: "nowrap" }}>Today</span>
-        <div style={{
-          flex: 1, height: 5, background: "rgba(201,168,76,0.1)", borderRadius: 3, overflow: "hidden",
-        }}>
-          <div style={{
-            height: "100%", background: "#c9a84c", borderRadius: 3,
-            width: `${dailyGames.length > 0 ? (completedCount / dailyGames.length) * 100 : 0}%`,
-            transition: "width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s",
-          }} />
-        </div>
-        <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 700, color: "#c9a84c", whiteSpace: "nowrap",
-        }}>
-          {completedCount}/{dailyGames.length}
-        </span>
       </div>
 
       {/* Our Games */}
