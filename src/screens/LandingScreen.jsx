@@ -1072,20 +1072,26 @@ const featureStyles = `
 
 // ── Podcast art for horizontal marquee (two rows) ──
 const PODCAST_ART_ROW1 = [
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", name: "Film Junk" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/4b/6d/ff/4b6dff78-28f3-8a50-a6aa-47c69e0bf797/mza_6072961650790924101.jpeg/300x300bb.webp", name: "Get Played" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", name: "Filmspotting" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/300x300bb.webp", name: "HDTGM" },
-  { src: "https://i1.sndcdn.com/artworks-PVO0X1iIYkoyTfeK-8eSxuA-t500x500.png", name: "Movie Mindset" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/83/47/e2/8347e2b8-a5da-a3b0-d475-19288bdf855d/mza_1646255428613610425.jpeg/300x300bb.webp", name: "Films To Be Buried With" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/30/57/26/305726f4-a910-986d-af15-9d9630b96722/mza_632554795848485854.jpg/600x600bb.webp", name: "Now Playing Podcast" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bb/82/cf/bb82cfa4-0bf8-bbe8-b5a6-407702ab1764/mza_4979053321172937662.jpeg/540x540bb.webp", name: "Blank Check" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/540x540bb.webp", name: "Film Junk" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/540x540bb.webp", name: "Filmspotting" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/540x540bb.webp", name: "HDTGM" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/d0/b2/86/d0b286b1-c111-4346-18ab-8c1632551a41/mza_18001309740433796361.jpg/540x540bb.webp", name: "The Rewatchables" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/73/12/f9/7312f903-6bdd-344f-5f5f-ccded1d6a6b9/mza_265011236225794238.jpg/540x540bb.webp", name: "The Big Picture" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/29/ca/0b/29ca0bf1-aa5b-3da8-9be0-f357793116a7/mza_16337213754400532987.jpg/540x540bb.webp", name: "Pop Culture Happy Hour" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/93/c4/59/93c4595d-f0e6-f9cb-6578-374cd1e6ce20/mza_7318291685223746152.jpg/600x600bb.webp", name: "We Hate Movies" },
 ];
 const PODCAST_ART_ROW2 = [
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/300x300bb.webp", name: "Unspooled" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts125/v4/12/c8/45/12c8453e-02cd-8526-1415-22f2ddc7f864/mza_16416337016232027675.jpg/300x300bb.webp", name: "The Flop House" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/97/02/d0/9702d058-288c-a931-f3b1-55f5697fad0e/mza_11250256298198911552.jpg/300x300bb.webp", name: "Video Archives" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/b3/f9/44b3f953-fbae-4e99-4d82-4c2cc83630e5/mza_1552332279859047099.jpg/300x300bb.webp", name: "Filmcast" },
-  { src: "https://pbcdn1.podbean.com/imglogo/dir-logo/238399/238399_300x300.png", name: "Next Picture Show" },
-  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts112/v4/da/e9/e6/dae9e6d3-6b4e-b600-bb37-0ce7833c24d5/mza_9711243178432328693.jpg/300x300bb.webp", name: "You Must Remember This" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/3c/11/eb/3c11eb85-f49b-da0f-ccf2-28b7b417487e/mza_830543288936089485.jpeg/600x600bb.webp", name: "Unspooled" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/97/02/d0/9702d058-288c-a931-f3b1-55f5697fad0e/mza_11250256298198911552.jpg/600x600bb.webp", name: "The Flop House" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts125/v4/12/c8/45/12c8453e-02cd-8526-1415-22f2ddc7f864/mza_16416337016232027675.jpg/540x540bb.webp", name: "The Filmcast" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/2d/2c/2d/2d2c2d54-1e9b-5bb1-5864-31a183c0de1a/mza_5314311699607555935.jpg/540x540bb.webp", name: "Black Men Can't Jump" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/44/cb/e2/44cbe27f-5b66-5248-8ad0-36434efcaa09/mza_6406640264505080139.jpg/540x540bb.webp", name: "Eye of the Duck" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/65/d8/50/65d85018-7ee1-902d-9028-14b7aa9afc95/mza_3318676276652185584.jpg/540x540bb.webp", name: "Next Best Picture" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts122/v4/c5/c2/ca/c5c2ca3f-21c0-5579-258e-2dfb52121e56/mza_3963697153676465571.jpg/600x600bb.webp", name: "Kinda Funny In Review" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/9a/50/6c/9a506c74-6dfa-70e8-20bf-a247ecd247f6/mza_15282793178977422943.jpg/540x540bb.webp", name: "Project Big Screen" },
+  { src: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/c8/e4/fe/c8e4fed6-653c-5dbb-9219-db03b0bea340/mza_2747040203623055191.jpg/540x540bb.webp", name: "The Director's Cut" },
 ];
 
 /* ── Badge data for the demo (3 in a row) ────────────────── */
@@ -1953,7 +1959,7 @@ function LandingScreen({ onSignIn }) {
               </div>
               <div className="podcast-marquee-overlay" />
             </div>
-            <div className="growing-headline">30+ podcasts<br />and growing</div>
+            <div className="growing-headline">20+ podcasts<br />and growing</div>
             <div className="growing-sub">
               Every film with coverage gets a play button.
             </div>
