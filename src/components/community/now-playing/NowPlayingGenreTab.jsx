@@ -504,7 +504,7 @@ export default function NowPlayingGenreTab({
           {/* 3×3 Genre poster grid */}
           <div style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr 1fr",
+            gridTemplateColumns: "1fr 1fr",
             gap: 3,
             padding: "8px 3px 0",
           }}>
@@ -1066,53 +1066,54 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
         </span>
       </div>
 
-      {/* Bottom gradient overlay */}
+      {/* Center overlay for text readability */}
       <div style={{
         position: "absolute",
-        bottom: 0, left: 0, right: 0,
-        height: "45%",
-        background: "linear-gradient(transparent, rgba(0,0,0,0.88))",
+        inset: 0,
+        background: "radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 100%)",
         pointerEvents: "none",
       }} />
 
-      {/* Bottom info — progress bar + genre label */}
+      {/* Centered genre label */}
       <div style={{
         position: "absolute",
-        bottom: 0, left: 0, right: 0,
-        padding: "0 8px 8px",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
       }}>
-        {/* Progress bar */}
-        {hasProgress && (
-          <div style={{
-            height: 2, borderRadius: 1,
-            background: "rgba(255,255,255,0.15)",
-            marginBottom: 5,
-            overflow: "hidden",
-          }}>
-            <div style={{
-              height: "100%",
-              width: `${pct}%`,
-              background: isDone
-                ? "linear-gradient(90deg, #4ade80, #22d3ee)"
-                : `linear-gradient(90deg, ${accent}, #C4734F)`,
-              borderRadius: 1,
-            }} />
-          </div>
-        )}
-
-        {/* Genre label */}
         <div style={{
-          fontSize: 13, fontWeight: 800, color: "#fff",
+          fontSize: 20, fontWeight: 900, color: "#fff",
           fontFamily: "'Barlow Condensed', sans-serif",
-          lineHeight: 1.15,
-          letterSpacing: "0.03em",
+          lineHeight: 1.1,
+          letterSpacing: "0.06em",
           textTransform: "uppercase",
-          textShadow: "0 1px 5px rgba(0,0,0,0.9)",
+          textShadow: "0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)",
           textAlign: "center",
+          padding: "0 10px",
         }}>
           {label}
         </div>
       </div>
+
+      {/* Bottom progress bar */}
+      {hasProgress && (
+        <div style={{
+          position: "absolute",
+          bottom: 0, left: 0, right: 0,
+          height: 3,
+          background: "rgba(255,255,255,0.1)",
+        }}>
+          <div style={{
+            height: "100%",
+            width: `${pct}%`,
+            background: isDone
+              ? "linear-gradient(90deg, #4ade80, #22d3ee)"
+              : `linear-gradient(90deg, ${accent}, #C4734F)`,
+          }} />
+        </div>
+      )}
     </div>
   );
 }
