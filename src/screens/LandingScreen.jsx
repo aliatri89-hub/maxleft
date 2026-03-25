@@ -1084,7 +1084,7 @@ const DEMO_PLAY_MOVIES = [
     backdrop: "https://image.tmdb.org/t/p/w780/iVped1djsF0tvGkvnHbzsE3ZPTF.jpg",
     podcasts: [
       { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man 3", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BlankCheckTheme_fade.ogg" },
-      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_Filmspotting.ogg" },
+      { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_Filmspotting%20(1).ogg" },
     ],
   },
   {
