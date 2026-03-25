@@ -4,22 +4,23 @@ import { supabase } from "../../supabase";
 /**
  * usePodcastFeed — powers the Podcast tab.
  *
- * Returns one card per episode-film pair, sorted by air_date DESC.
- * All data is local Supabase joins — no external API calls, loads fast.
- * Backdrop deep-cuts are resolved client-side via TMDB images endpoint.
+ * Returns one card per episode-film pair, sorted by air_date.
+ * Supports server-side filtering by podcast slug, sort direction,
+ * and all-time vs recent windowing.
  */
 
 const PAGE_SIZE = 50;
 
-export function usePodcastFeed(active = false, userId = null, podcastSlug = null) {
+export function usePodcastFeed(active = false, userId = null, podcastSlug = null, sortOrder = null) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const mountedRef = useRef(true);
   const fetchedRef = useRef(false);
   const lastSlugRef = useRef(null);
+  const lastSortRef = useRef(null);
 
-  const fetchItems = useCallback(async (offset = 0, append = false, slug = null) => {
+  const fetchItems = useCallback(async (offset = 0, append = false, slug = null, sort = null) => {
     setLoading(true);
     try {
       // When a specific podcast is selected, show all-time; otherwise last 60 days
@@ -31,6 +32,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
         result_offset: offset,
         podcast_slug: slug || null,
         check_user_id: userId || null,
+        sort_asc: sort === "oldest",
       });
 
       if (!mountedRef.current) return;
@@ -58,34 +60,36 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
 
   const loadMore = useCallback(() => {
     setItems(prev => {
-      fetchItems(prev.length, true, podcastSlug);
+      fetchItems(prev.length, true, podcastSlug, sortOrder);
       return prev;
     });
-  }, [fetchItems, podcastSlug]);
+  }, [fetchItems, podcastSlug, sortOrder]);
 
   const refresh = useCallback(() => {
-    fetchItems(0, false, podcastSlug);
-  }, [fetchItems, podcastSlug]);
+    fetchItems(0, false, podcastSlug, sortOrder);
+  }, [fetchItems, podcastSlug, sortOrder]);
 
   // Initial fetch when tab becomes active
   useEffect(() => {
     mountedRef.current = true;
     if (active && !fetchedRef.current) {
-      fetchItems(0, false, podcastSlug);
+      fetchItems(0, false, podcastSlug, sortOrder);
       fetchedRef.current = true;
       lastSlugRef.current = podcastSlug;
+      lastSortRef.current = sortOrder;
     }
     return () => { mountedRef.current = false; };
-  }, [active, fetchItems, podcastSlug]);
+  }, [active, fetchItems, podcastSlug, sortOrder]);
 
-  // Re-fetch when podcast filter changes
+  // Re-fetch when podcast filter or sort order changes
   useEffect(() => {
     if (!active || !fetchedRef.current) return;
-    if (podcastSlug === lastSlugRef.current) return;
+    if (podcastSlug === lastSlugRef.current && sortOrder === lastSortRef.current) return;
     lastSlugRef.current = podcastSlug;
+    lastSortRef.current = sortOrder;
     setItems([]);
-    fetchItems(0, false, podcastSlug);
-  }, [podcastSlug, active, fetchItems]);
+    fetchItems(0, false, podcastSlug, sortOrder);
+  }, [podcastSlug, sortOrder, active, fetchItems]);
 
   return { items, loading, hasMore, loadMore, refresh };
 }

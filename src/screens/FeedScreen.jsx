@@ -44,7 +44,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const [favoriteSlugs, setFavoriteSlugs] = useState(null); // Set<slug> from FeedFilterBar
 
   const podcastSlugForHook = selectedPodcast && selectedPodcast !== "__favorites__" ? selectedPodcast : null;
-  const podcast = usePodcastFeed(feedMode === "podcast", userId, podcastSlugForHook);
+  const podcast = usePodcastFeed(feedMode === "podcast", userId, podcastSlugForHook, sortOrder);
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
@@ -69,13 +69,12 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   const filteredPodcast = useMemo(() => {
     let items = podcast.items;
-    // Server handles slug filtering; client only filters for favorites group
+    // Server handles slug filtering + sort order; client only filters for favorites group
     if (selectedPodcast === "__favorites__" && favoriteSlugs) {
       items = items.filter(item => favoriteSlugs.has(item.podcast_slug));
     }
-    if (sortOrder === "oldest") items = [...items].reverse();
     return items;
-  }, [podcast.items, selectedPodcast, favoriteSlugs, sortOrder]);
+  }, [podcast.items, selectedPodcast, favoriteSlugs]);
 
   // ── Filtered + sorted activity items ──
   const filteredActivity = useMemo(() => {
