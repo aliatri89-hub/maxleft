@@ -686,6 +686,24 @@ const featureStyles = `
     margin-top: 10px;
     letter-spacing: 0.06em;
   }
+  .tf-try-again {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+  }
+  .tf-try-again:hover {
+    color: rgba(255,255,255,0.6);
+  }
 
 
   /* ── COMMUNITY DEMO ──────────────────────────────────────── */
@@ -1886,6 +1904,10 @@ function LandingScreen({ onSignIn }) {
                           Best was ${optimalTotal}M
                         </div>
                       )}
+                      <button
+                        className="tf-try-again"
+                        onClick={() => { setTfSelected(new Set()); setTfLocked(false); }}
+                      >Try again</button>
                     </div>
                   )}
                 </>
