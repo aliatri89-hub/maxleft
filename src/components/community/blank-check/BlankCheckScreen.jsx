@@ -457,36 +457,6 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   accent={accent}
                   searchQuery={searchQuery}
                   filter={filter}
-                  dynamicShelves={
-                    <>
-                      {recentItems.length > 0 && (
-                        <MiniseriesShelf
-                          key="recent-logged"
-                          series={{ id: "recent-logged", title: "⏪ Recently Logged", items: recentItems }}
-                          progress={progress}
-                          onToggle={handleItemTap}
-                          onToggleCommentary={handleToggleCommentary}
-                          CardComponent={BlankCheckItemCard}
-                          coverCacheVersion={coverCache}
-                          filter="all"
-                          hideTracker
-                        />
-                      )}
-                      {recentEpisodeItems.length > 0 && (
-                        <MiniseriesShelf
-                          key="recent-episodes"
-                          series={{ id: "recent-episodes", title: "🎙 New Episodes", items: recentEpisodeItems.map(r => r.item) }}
-                          progress={progress}
-                          onToggle={handleItemTap}
-                          onToggleCommentary={handleToggleCommentary}
-                          CardComponent={BlankCheckItemCard}
-                          coverCacheVersion={coverCache}
-                          filter="all"
-                          hideTracker
-                        />
-                      )}
-                    </>
-                  }
                 />
               </>
             )}

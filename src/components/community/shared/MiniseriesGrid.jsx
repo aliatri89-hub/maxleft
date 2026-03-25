@@ -200,18 +200,18 @@ function GridTile({ series, accent, onTap }) {
         </span>
       </div>
 
-      {/* Bottom info — progress bar + director name */}
+      {/* Bottom info — progress bar + series title + director */}
       <div style={{
         position: "absolute",
         bottom: 0, left: 0, right: 0,
-        padding: "0 6px 5px",
+        padding: "0 5px 5px",
       }}>
         {/* Progress bar */}
         {hasProgress && (
           <div style={{
             height: 2, borderRadius: 1,
             background: "rgba(255,255,255,0.15)",
-            marginBottom: 4,
+            marginBottom: 3,
             overflow: "hidden",
           }}>
             <div style={{
@@ -225,19 +225,38 @@ function GridTile({ series, accent, onTap }) {
           </div>
         )}
 
+        {/* Series title (podcast name) */}
         <div style={{
-          fontSize: 10, fontWeight: 700, color: "#fff",
+          fontSize: 9, fontWeight: 700, color: "#fff",
           fontFamily: "'Barlow Condensed', sans-serif",
           lineHeight: 1.15,
           letterSpacing: "0.01em",
-          textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+          textShadow: "0 1px 4px rgba(0,0,0,0.9)",
+          textAlign: "center",
           overflow: "hidden",
           display: "-webkit-box",
           WebkitLineClamp: 2,
           WebkitBoxOrient: "vertical",
         }}>
-          {series.director_name && series.director_name !== "." ? series.director_name : series.title}
+          {series.title}
         </div>
+
+        {/* Director name (subtitle) */}
+        {series.director_name && series.director_name !== "." && (
+          <div style={{
+            fontSize: 8, fontWeight: 600,
+            color: "rgba(255,255,255,0.5)",
+            fontFamily: "'Barlow Condensed', sans-serif",
+            textAlign: "center",
+            textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+            marginTop: 1,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {series.director_name}
+          </div>
+        )}
       </div>
     </div>
   );
