@@ -11,6 +11,8 @@ import BlankCheckHero from "./BlankCheckHero";
 import BlankCheckPatreonTab from "./BlankCheckPatreonTab";
 import CommunityAwardsTab from "./CommunityAwardsTab";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
+import MiniseriesGrid from "../shared/MiniseriesGrid";
+import SeriesDetailView from "../shared/SeriesDetailView";
 import BlankCheckItemCard from "./BlankCheckItemCard";
 import BlankCheckLogModal from "./BlankCheckLogModal";
 import CommunityBottomNav from "../shared/CommunityBottomNav";
@@ -72,6 +74,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+  const [selectedSeries, setSelectedSeries] = useState(null);
 
   // ── Badge system ──────────────────────────────────────────
   const {
@@ -90,7 +93,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
 
   // Reset on tab change
-  useEffect(() => { setMediaFilter(null); setSearchQuery(""); setSearchOpen(false); }, [activeTab]);
+  useEffect(() => { setMediaFilter(null); setSearchQuery(""); setSearchOpen(false); setSelectedSeries(null); }, [activeTab]);
 
   // ── Tab slider ref (for animated nav taps) ──────────────
   const sliderRef = useRef(null);
@@ -339,7 +342,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
               />
             )}
 
-            {/* Filmography tab (default) */}
+            {/* Filmography tab (default) — Grid view */}
             {tabKey !== "patreon" && tabKey !== "awards" && (
               <>
                 {/* Search + Filter row */}
@@ -348,14 +351,13 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   display: "flex", alignItems: "center", gap: 8,
                 }}>
                   {searchOpen ? (
-                    /* Expanded search input — takes full row */
                     <div style={{ flex: 1, position: "relative" }}>
                       <input
                         ref={searchInputRef}
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search films, directors, years…"
+                        placeholder="Search directors, series…"
                         style={{
                           width: "100%",
                           padding: "8px 36px 8px 34px",
@@ -395,10 +397,32 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                       >✕</button>
                     </div>
                   ) : (
-                    /* Collapsed: filter pills + search icon on right */
                     <>
-                      <div style={{ flex: 1 }}>
-                        <CommunityFilter value={filter} onChange={setFilter} accent={accent} upcomingCount={upcomingCount} />
+                      <div style={{ display: "flex", gap: 5, flex: 1 }}>
+                        {[
+                          { key: "all", label: "All" },
+                          { key: "inprogress", label: "In Progress" },
+                          { key: "done", label: "Done" },
+                          { key: "unseen", label: "New" },
+                        ].map(f => (
+                          <button
+                            key={f.key}
+                            onClick={() => setFilter(f.key)}
+                            style={{
+                              padding: "5px 10px",
+                              background: filter === f.key ? `${accent}22` : "rgba(255,255,255,0.05)",
+                              border: filter === f.key ? `1px solid ${accent}` : "1px solid rgba(255,255,255,0.08)",
+                              borderRadius: 20,
+                              color: filter === f.key ? accent : "#888",
+                              fontSize: 11, fontWeight: 600, cursor: "pointer",
+                              fontFamily: "'Barlow Condensed', sans-serif",
+                              letterSpacing: "0.03em",
+                              textTransform: "uppercase",
+                              transition: "all 0.2s",
+                              WebkitTapHighlightColor: "transparent",
+                            }}
+                          >{f.label}</button>
+                        ))}
                       </div>
                       <button
                         onClick={() => {
@@ -425,130 +449,45 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   )}
                 </div>
 
-
-                {/* Dynamic shelves — only on filmography tab with no search + no filter */}
-                {!searchQuery.trim() && filter === "all" && (
-                  <>
-                    {recentItems.length > 0 && (
-                      <MiniseriesShelf
-                        key="recent-logged"
-                        series={{ id: "recent-logged", title: "⏪ Recently Logged", items: recentItems }}
-                        progress={progress}
-                        onToggle={handleItemTap}
-                        onToggleCommentary={handleToggleCommentary}
-                        CardComponent={BlankCheckItemCard}
-                        coverCacheVersion={coverCache}
-                        filter="all"
-                        hideTracker
-                      />
-                    )}
-                    {recentEpisodeItems.length > 0 && (
-                      <MiniseriesShelf
-                        key="recent-episodes"
-                        series={{ id: "recent-episodes", title: "🎙 New Episodes", items: recentEpisodeItems.map(r => r.item) }}
-                        progress={progress}
-                        onToggle={handleItemTap}
-                        onToggleCommentary={handleToggleCommentary}
-                        CardComponent={BlankCheckItemCard}
-                        coverCacheVersion={coverCache}
-                        filter="all"
-                        hideTracker
-                      />
-                    )}
-                  </>
-                )}
-
-                {filter === "upcoming" ? (
-                  /* Flat date-sorted schedule for upcoming */
-                  upcomingSchedule.length === 0 ? (
-                    <div style={{
-                      textAlign: "center", padding: "40px 0",
-                      fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-                      color: "rgba(255,255,255,0.25)", fontStyle: "italic",
-                    }}>No upcoming items</div>
-                  ) : (
-                    <div style={{ padding: "16px 0", overflow: "hidden" }}>
-                      <div className="hide-scrollbar" style={{
-                        display: "flex", overflowX: "auto", gap: 12,
-                        paddingLeft: 16, paddingRight: 16,
-                      }}>
-                        {upcomingSchedule.map((item) => (
-                          <div key={item.id} style={{ flexShrink: 0, width: 120 }}>
-                            <BlankCheckItemCard
-                              item={item}
-                              isCompleted={!!progress[item.id]?.status}
-                              onToggle={() => handleItemTap(item)}
-                              coverCacheVersion={coverCache}
-                            />
-                            <div style={{
-                              fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
-                              fontFamily: "'Barlow Condensed', sans-serif",
-                              letterSpacing: "0.04em", textTransform: "uppercase",
-                              marginTop: 4,
-                            }}>
-                              {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                            </div>
-                            <div style={{
-                              fontSize: 9, color: "#666", marginTop: 1,
-                              fontFamily: "'Barlow Condensed', sans-serif",
-                              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                            }}>
-                              {item._shelfTitle}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )
-                ) : (
-                <div style={{ paddingTop: 8 }}>
-                  {miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").map((s) => {
-                    const q = searchQuery.trim().toLowerCase();
-                    let items = (s.items || []).filter(i => isMediaVisible(i.media_type));
-                    if (q.length >= 2) {
-                      const seriesMatch =
-                        s.title.toLowerCase().includes(q) ||
-                        (s.director_name || "").toLowerCase().includes(q);
-                      if (!seriesMatch) {
-                        items = items.filter(i =>
-                          i.title.toLowerCase().includes(q) ||
-                          (i.creator || "").toLowerCase().includes(q) ||
-                          String(i.year || "").includes(q)
-                        );
-                      }
-                    }
-                    if (items.length === 0) return null;
-                    return (
-                      <MiniseriesShelf
-                        key={s.id}
-                        series={{ ...s, items }}
-                        progress={progress}
-                        onToggle={handleItemTap}
-                        onToggleCommentary={handleToggleCommentary}
-                        CardComponent={BlankCheckItemCard}
-                        coverCacheVersion={coverCache}
-                        filter={filter}
-                        shelfCap={10}
-                        accent={accent}
-                      />
-                    );
-                  })}
-                </div>
-                )}
-                {searchQuery.trim().length >= 2 &&
-                  miniseries.filter(s => !s.tab_key || s.tab_key === "filmography").every((s) => {
-                    const q = searchQuery.trim().toLowerCase();
-                    const seriesMatch = s.title.toLowerCase().includes(q) || (s.director_name || "").toLowerCase().includes(q);
-                    const items = (s.items || []).filter(i => isMediaVisible(i.media_type));
-                    return !seriesMatch && !items.some(i =>
-                      i.title.toLowerCase().includes(q) || (i.creator || "").toLowerCase().includes(q) || String(i.year || "").includes(q)
-                    );
-                  }) && (
-                    <div style={{ textAlign: "center", padding: "40px 16px", color: "#555", fontSize: 14 }}>
-                      No results for "{searchQuery.trim()}"
-                    </div>
-                  )
-                }
+                {/* Miniseries Grid */}
+                <MiniseriesGrid
+                  miniseries={miniseries.filter(s => !s.tab_key || s.tab_key === "filmography")}
+                  progress={progress}
+                  onSelectSeries={setSelectedSeries}
+                  accent={accent}
+                  searchQuery={searchQuery}
+                  filter={filter}
+                  dynamicShelves={
+                    <>
+                      {recentItems.length > 0 && (
+                        <MiniseriesShelf
+                          key="recent-logged"
+                          series={{ id: "recent-logged", title: "⏪ Recently Logged", items: recentItems }}
+                          progress={progress}
+                          onToggle={handleItemTap}
+                          onToggleCommentary={handleToggleCommentary}
+                          CardComponent={BlankCheckItemCard}
+                          coverCacheVersion={coverCache}
+                          filter="all"
+                          hideTracker
+                        />
+                      )}
+                      {recentEpisodeItems.length > 0 && (
+                        <MiniseriesShelf
+                          key="recent-episodes"
+                          series={{ id: "recent-episodes", title: "🎙 New Episodes", items: recentEpisodeItems.map(r => r.item) }}
+                          progress={progress}
+                          onToggle={handleItemTap}
+                          onToggleCommentary={handleToggleCommentary}
+                          CardComponent={BlankCheckItemCard}
+                          coverCacheVersion={coverCache}
+                          filter="all"
+                          hideTracker
+                        />
+                      )}
+                    </>
+                  }
+                />
               </>
             )}
           </>
@@ -567,6 +506,20 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
         }}
         accent={accent}
       />
+
+      {/* Series detail view (slides in from grid) */}
+      {selectedSeries && (
+        <SeriesDetailView
+          series={selectedSeries}
+          progress={progress}
+          onItemTap={handleItemTap}
+          onToggleCommentary={handleToggleCommentary}
+          onBack={() => setSelectedSeries(null)}
+          CardComponent={BlankCheckItemCard}
+          coverCacheVersion={coverCache}
+          accent={accent}
+        />
+      )}
 
       {modalItem && (
         <BlankCheckLogModal
