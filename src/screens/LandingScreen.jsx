@@ -808,6 +808,17 @@ const featureStyles = `
   .sync-logo-rounded {
     border-radius: 12px;
   }
+  .sync-logo-play {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    background: rgba(15,13,11,0.85);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .sync-info {
     flex: 1;
     min-width: 0;
@@ -1890,6 +1901,18 @@ function LandingScreen({ onSignIn }) {
                 <div className="sync-stat">Films & ratings</div>
               </div>
               <div className="sync-badge">Auto-sync</div>
+            </div>
+            <div className="sync-row">
+              <div className="sync-logo-play">
+                <svg width="18" height="20" viewBox="0 0 16 18" fill="none">
+                  <path d="M2 1.5L14.5 9L2 16.5V1.5Z" fill="#f5f0eb" stroke="#f5f0eb" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="sync-info">
+                <div className="sync-name">No Letterboxd? No problem.</div>
+                <div className="sync-stat">Log movies right inside the app</div>
+              </div>
+              <div className="sync-badge" style={{ color: 'rgba(212,175,55,0.8)', background: 'rgba(212,175,55,0.08)', borderColor: 'rgba(212,175,55,0.15)' }}>Built-in</div>
             </div>
           </div>
         </div>
