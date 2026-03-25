@@ -9,23 +9,27 @@ import { supabase } from "../../supabase";
  * Backdrop deep-cuts are resolved client-side via TMDB images endpoint.
  */
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
-export function usePodcastFeed(active = false, userId = null) {
+export function usePodcastFeed(active = false, userId = null, podcastSlug = null) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const mountedRef = useRef(true);
   const fetchedRef = useRef(false);
+  const lastSlugRef = useRef(null);
 
-  const fetchItems = useCallback(async (offset = 0, append = false) => {
+  const fetchItems = useCallback(async (offset = 0, append = false, slug = null) => {
     setLoading(true);
     try {
+      // When a specific podcast is selected, show all-time; otherwise last 60 days
+      const daysBack = slug ? 0 : 60;
+
       const { data, error } = await supabase.rpc("podcast_feed_items", {
-        days_back: 60,
+        days_back: daysBack,
         result_limit: PAGE_SIZE,
         result_offset: offset,
-        podcast_slug: null,
+        podcast_slug: slug || null,
         check_user_id: userId || null,
       });
 
@@ -54,23 +58,34 @@ export function usePodcastFeed(active = false, userId = null) {
 
   const loadMore = useCallback(() => {
     setItems(prev => {
-      fetchItems(prev.length, true);
+      fetchItems(prev.length, true, podcastSlug);
       return prev;
     });
-  }, [fetchItems]);
+  }, [fetchItems, podcastSlug]);
 
   const refresh = useCallback(() => {
-    fetchItems(0, false);
-  }, [fetchItems]);
+    fetchItems(0, false, podcastSlug);
+  }, [fetchItems, podcastSlug]);
 
+  // Initial fetch when tab becomes active
   useEffect(() => {
     mountedRef.current = true;
     if (active && !fetchedRef.current) {
-      fetchItems(0, false);
+      fetchItems(0, false, podcastSlug);
       fetchedRef.current = true;
+      lastSlugRef.current = podcastSlug;
     }
     return () => { mountedRef.current = false; };
-  }, [active, fetchItems]);
+  }, [active, fetchItems, podcastSlug]);
+
+  // Re-fetch when podcast filter changes
+  useEffect(() => {
+    if (!active || !fetchedRef.current) return;
+    if (podcastSlug === lastSlugRef.current) return;
+    lastSlugRef.current = podcastSlug;
+    setItems([]);
+    fetchItems(0, false, podcastSlug);
+  }, [podcastSlug, active, fetchItems]);
 
   return { items, loading, hasMore, loadMore, refresh };
 }

@@ -37,7 +37,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     loading, refresh,
   } = useFeed(userId, favoritePodcasts);
   const releases = useBrowseFeed("releases", feedMode === "releases");
-  const podcast = usePodcastFeed(feedMode === "podcast", userId);
+  const podcastSlugForHook = selectedPodcast && selectedPodcast !== "__favorites__" ? selectedPodcast : null;
+  const podcast = usePodcastFeed(feedMode === "podcast", userId, podcastSlugForHook);
   const wasActive = useRef(isActive);
   const refreshRef = useRef(refresh);
   refreshRef.current = refresh;
@@ -67,10 +68,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   const filteredPodcast = useMemo(() => {
     let items = podcast.items;
+    // Server handles slug filtering; client only filters for favorites group
     if (selectedPodcast === "__favorites__" && favoriteSlugs) {
       items = items.filter(item => favoriteSlugs.has(item.podcast_slug));
-    } else if (selectedPodcast) {
-      items = items.filter(item => item.podcast_slug === selectedPodcast);
     }
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
@@ -150,6 +150,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   // ── Infinite scroll — all tabs capped at 50 ──
   const BROWSE_CAP = 50;
+  const PODCAST_CAP = 500;
   const ACTIVITY_CAP = 30;
 
   useEffect(() => {
@@ -165,7 +166,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   useEffect(() => {
     const el = podcastSentinelRef.current;
-    if (!el || !podcast.hasMore || feedMode !== "podcast" || podcast.items.length >= BROWSE_CAP) return;
+    if (!el || !podcast.hasMore || feedMode !== "podcast" || podcast.items.length >= PODCAST_CAP) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) podcast.loadMore(); },
       { rootMargin: "200px" }
@@ -418,20 +419,22 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             fontFamily: "var(--font-body)",
           }}>
             <div style={{ fontSize: 28, marginBottom: 10 }}>🎙️</div>
-            No recent podcast coverage yet
+            {selectedPodcast && selectedPodcast !== "__favorites__"
+              ? "No episodes with film coverage for this podcast yet"
+              : "No recent podcast coverage yet"}
           </div>
         )}
-        {podcast.items.length > 0 && filteredPodcast.length === 0 && selectedPodcast && (
+        {podcast.items.length > 0 && filteredPodcast.length === 0 && selectedPodcast === "__favorites__" && (
           <div style={{
             padding: "40px 24px", textAlign: "center",
             color: "var(--text-muted, #8892a8)", fontSize: 13,
             fontFamily: "var(--font-body)",
           }}>
-            No recent episodes from {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"}
+            No episodes from your favorites
           </div>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
-          {filteredPodcast.slice(0, BROWSE_CAP).map((item, i) => (
+          {filteredPodcast.slice(0, PODCAST_CAP).map((item, i) => (
             <FeedCard
               key={`pod-${item.episode_id}-${item.tmdb_id}`}
               index={i}
@@ -441,7 +444,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </FeedCard>
           ))}
         </div>
-        {podcast.hasMore && podcast.items.length < BROWSE_CAP && <div ref={podcastSentinelRef} style={{ height: 1 }} />}
+        {podcast.hasMore && podcast.items.length < PODCAST_CAP && <div ref={podcastSentinelRef} style={{ height: 1 }} />}
         {podcast.loading && podcast.items.length > 0 && (
           <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
             <div style={{
