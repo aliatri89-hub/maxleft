@@ -432,24 +432,30 @@ export default function App() {
         {screen === "app" && (
           <div className="screen-fade">
             {/* Header */}
-            <div className="header">
-              <div onClick={() => { tapLight(); showToast("Notifications coming soon"); }}
-                style={{ width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a7e6b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                </svg>
-              </div>
-              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }} style={{ cursor: "pointer", flex: 1, minWidth: 0, textAlign: "center" }}>
-                <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
-                <div className="header-tagline">press play</div>
-              </div>
-              <AudioPip />
+            <div className="header" style={{ position: "relative" }}>
+              {/* Left: profile avatar */}
               <div className="header-avatar-wrap" onClick={() => { tapLight(); setShowProfile(true); pushNav("profile", () => setShowProfile(false)); }}>
                 <div className="header-profile">
                   {profile.avatarUrl
                     ? <img src={profile.avatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
                     : <InitialAvatar username={profile.username} size={32} />}
+                </div>
+              </div>
+              {/* Center: logo (absolutely centered) */}
+              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }}
+                style={{ cursor: "pointer", position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", zIndex: 1, pointerEvents: "auto" }}>
+                <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
+                <div className="header-tagline">press play</div>
+              </div>
+              {/* Right: audio pip + bell */}
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+                <AudioPip />
+                <div onClick={() => { tapLight(); showToast("Notifications coming soon"); }}
+                  style={{ width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", WebkitTapHighlightColor: "transparent" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a7e6b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
                 </div>
               </div>
             </div>
