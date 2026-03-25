@@ -42,12 +42,16 @@ export default function MiniseriesGrid({
   const filtered = useMemo(() => {
     let list = seriesWithProgress;
 
-    // Search: match on series title or director name
+    // Search: match on series title, director name, OR any film title within the series
     const q = (searchQuery || "").trim().toLowerCase();
     if (q.length >= 2) {
       list = list.filter((s) =>
         s.title.toLowerCase().includes(q) ||
-        (s.director_name || "").toLowerCase().includes(q)
+        (s.director_name || "").toLowerCase().includes(q) ||
+        (s.items || []).some((i) =>
+          i.title.toLowerCase().includes(q) ||
+          String(i.year || "").includes(q)
+        )
       );
     }
 

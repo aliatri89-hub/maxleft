@@ -365,7 +365,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search directors, series…"
+                        placeholder="Search films, directors, series…"
                         style={{
                           width: "100%",
                           padding: "8px 36px 8px 34px",
