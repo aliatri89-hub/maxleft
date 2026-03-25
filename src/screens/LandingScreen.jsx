@@ -541,7 +541,7 @@ const featureStyles = `
     box-shadow: 0 0 0 2px #4ade80, 0 4px 16px rgba(74,222,128,0.4);
   }
   .tf-card.locked:not(.selected):not(.optimal) {
-    opacity: 0.3;
+    opacity: 0.5;
   }
   .tf-card-poster {
     width: 100%;
@@ -580,6 +580,10 @@ const featureStyles = `
     letter-spacing: 0.03em;
     animation: fadeUp 0.4s ease;
   }
+  .tf-card-rank.rank-dim {
+    color: #666;
+    background: rgba(10,10,15,0.6);
+  }
   .tf-card-gross {
     position: absolute;
     inset: 0;
@@ -598,6 +602,9 @@ const featureStyles = `
   }
   .tf-card-gross-val.optimal-val {
     color: #4ade80;
+  }
+  .tf-card-gross-val.dim-val {
+    color: #666;
   }
   .tf-card-optimal-tag {
     font-family: 'IBM Plex Mono', monospace;
@@ -1825,10 +1832,10 @@ function LandingScreen({ onSignIn }) {
                           <div style={{ position: 'relative' }}>
                             <img className="tf-card-poster" src={movie.poster} alt={movie.title} loading="lazy" />
                             {sel && !tfLocked && <div className="tf-card-check">✓</div>}
-                            {tfLocked && isTop3 && <div className="tf-card-rank">#{rank}</div>}
-                            {tfLocked && (sel || isTop3) && (
+                            {tfLocked && <div className={`tf-card-rank${!isTop3 ? ' rank-dim' : ''}`}>#{rank}</div>}
+                            {tfLocked && (
                               <div className="tf-card-gross">
-                                <div className={`tf-card-gross-val${isTop3 && !sel ? ' optimal-val' : ''}`}>${movie.gross}M</div>
+                                <div className={`tf-card-gross-val${isTop3 && !sel ? ' optimal-val' : ''}${!isTop3 && !sel ? ' dim-val' : ''}`}>${movie.gross}M</div>
                               </div>
                             )}
                           </div>
