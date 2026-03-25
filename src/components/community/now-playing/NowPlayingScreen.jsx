@@ -439,6 +439,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 progressLoading={recentLoading}
                 episodesLoading={episodesLoading}
                 upcomingCount={upcomingCount}
+                pushNav={pushNav}
+                removeNav={removeNav}
               />
             )}
           </>

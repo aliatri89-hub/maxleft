@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import NowPlayingItemCard from "./NowPlayingItemCard";
 import { isComingSoon } from "../../../utils/comingSoon";
@@ -50,6 +51,8 @@ export default function NowPlayingGenreTab({
   progressLoading = false,
   episodesLoading = false,
   upcomingCount = 0,
+  pushNav,
+  removeNav,
 }) {
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -57,6 +60,14 @@ export default function NowPlayingGenreTab({
   const [activeGenre, setActiveGenre] = useState(ALL_KEY);
   const [expandedShelves, setExpandedShelves] = useState(new Set());
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Back gesture: genre detail → grid
+  useBackGesture("nppGenreDetail", activeGenre !== ALL_KEY || searchOpen, () => {
+    setActiveGenre(ALL_KEY);
+    onSearchChange("");
+    setSearchOpen(false);
+    onFilterChange("all");
+  }, pushNav, removeNav);
 
   // Focus search input only when user explicitly opens search (not on tab mount)
   useEffect(() => {
@@ -211,19 +222,20 @@ export default function NowPlayingGenreTab({
     return { byType, overallPct };
   }, [activeGenre, filmSeries, genreGroups, progress]);
 
-  // Genre pill stats (for badge counts)
+  // Genre stats — track miniseries completion (not individual movies)
+  // A miniseries is "completed" when every non-upcoming item is logged.
   const genreStats = useMemo(() => {
     const map = {};
     genreKeys.forEach((key) => {
-      const seen = new Set();
-      const items = (genreGroups[key] || []).flatMap((s) => s.items || []).filter((i) => {
-        const k = `${i.title}::${i.year || ""}`;
-        if (seen.has(k)) return false;
-        seen.add(k);
-        return true;
+      const seriesList = genreGroups[key] || [];
+      let completedSeries = 0;
+      seriesList.forEach((s) => {
+        const items = (s.items || []).filter((i) => !isComingSoon(i));
+        if (items.length > 0 && items.every((i) => progress[i.id])) {
+          completedSeries++;
+        }
       });
-      const completed = items.filter((i) => progress[i.id]).length;
-      map[key] = { total: items.length, completed };
+      map[key] = { total: seriesList.length, completed: completedSeries };
     });
     return map;
   }, [genreKeys, genreGroups, progress]);
@@ -457,7 +469,7 @@ export default function NowPlayingGenreTab({
 
       {isGridView ? (
         /* ═══════════════════════════════════════════════════════
-           GRID VIEW — Genre tiles + dynamic shelves
+           GRID VIEW — Genre poster tiles
            ═══════════════════════════════════════════════════════ */
         <>
           {/* Search toggle — right-aligned, minimal */}
@@ -468,8 +480,6 @@ export default function NowPlayingGenreTab({
             <button
               onClick={() => {
                 setSearchOpen(true);
-                // Switch to flat all-genres view for searching
-                // The search input will auto-focus via the existing useEffect
               }}
               style={{
                 width: 30, height: 30,
@@ -491,11 +501,7 @@ export default function NowPlayingGenreTab({
             </button>
           </div>
 
-          {/* Dynamic shelves */}
-          {filter === "all" && renderDynamicShelf("Recently Logged", "🕐", recentItems, progressLoading)}
-          {filter === "all" && renderDynamicShelf("New Episodes", "🎙️", recentEpisodeItems.map((r) => r.item), episodesLoading)}
-
-          {/* 3×3 Genre grid */}
+          {/* 3×3 Genre poster grid */}
           <div style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr 1fr",
@@ -688,7 +694,7 @@ export default function NowPlayingGenreTab({
                     color: gDone ? "#4ade80" : accent,
                     fontFamily: "'Barlow Condensed', sans-serif",
                   }}>
-                    {gs.completed}/{gs.total} films
+                    {gs.completed}/{gs.total} series
                   </span>
                   <span style={{
                     fontSize: 11, fontWeight: 600,
@@ -981,7 +987,7 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
       onClick={onTap}
       style={{
         position: "relative",
-        aspectRatio: "1",
+        aspectRatio: "2/3",
         cursor: "pointer",
         overflow: "hidden",
         WebkitTapHighlightColor: "transparent",
@@ -989,18 +995,18 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
         animation: `genreTileFadeIn 0.25s ease-out ${delay}s both`,
       }}
     >
-      {/* Large emoji — centered, slightly faded */}
+      {/* Large emoji — centered */}
       <div style={{
         position: "absolute",
         inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        paddingBottom: 16,
+        paddingBottom: 24,
       }}>
         <span style={{
-          fontSize: 36,
-          opacity: 0.6,
+          fontSize: 48,
+          opacity: 0.55,
           filter: "saturate(0.8)",
         }}>{icon}</span>
       </div>
@@ -1008,22 +1014,22 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
       {/* Progress pill — top right */}
       <div style={{
         position: "absolute",
-        top: 5, right: 5,
+        top: 6, right: 6,
         background: isDone ? "rgba(74,222,128,0.9)" : "rgba(0,0,0,0.7)",
         backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
         borderRadius: 6,
-        padding: "2px 6px",
+        padding: "3px 7px",
         display: "flex",
         alignItems: "center",
         gap: 3,
       }}>
         {isDone && (
-          <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
             <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         )}
         <span style={{
-          fontSize: 10, fontWeight: 700,
+          fontSize: 11, fontWeight: 700,
           color: isDone ? "#fff" : (hasProgress ? accent : "rgba(255,255,255,0.5)"),
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.03em",
@@ -1036,8 +1042,8 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
       <div style={{
         position: "absolute",
         bottom: 0, left: 0, right: 0,
-        height: "50%",
-        background: "linear-gradient(transparent, rgba(0,0,0,0.85))",
+        height: "45%",
+        background: "linear-gradient(transparent, rgba(0,0,0,0.88))",
         pointerEvents: "none",
       }} />
 
@@ -1045,14 +1051,14 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
       <div style={{
         position: "absolute",
         bottom: 0, left: 0, right: 0,
-        padding: "0 6px 6px",
+        padding: "0 8px 8px",
       }}>
         {/* Progress bar */}
         {hasProgress && (
           <div style={{
             height: 2, borderRadius: 1,
             background: "rgba(255,255,255,0.15)",
-            marginBottom: 4,
+            marginBottom: 5,
             overflow: "hidden",
           }}>
             <div style={{
@@ -1068,12 +1074,12 @@ function GenreGridTile({ label, icon, tint, completed, total, accent, delay = 0,
 
         {/* Genre label */}
         <div style={{
-          fontSize: 11, fontWeight: 800, color: "#fff",
+          fontSize: 13, fontWeight: 800, color: "#fff",
           fontFamily: "'Barlow Condensed', sans-serif",
           lineHeight: 1.15,
-          letterSpacing: "0.02em",
+          letterSpacing: "0.03em",
           textTransform: "uppercase",
-          textShadow: "0 1px 4px rgba(0,0,0,0.9)",
+          textShadow: "0 1px 5px rgba(0,0,0,0.9)",
           textAlign: "center",
         }}>
           {label}
