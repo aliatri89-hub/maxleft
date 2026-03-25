@@ -411,7 +411,6 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                           { key: "all", label: "All" },
                           { key: "inprogress", label: "In Progress" },
                           { key: "done", label: "Done" },
-                          { key: "unseen", label: "New" },
                         ].map(f => (
                           <button
                             key={f.key}
