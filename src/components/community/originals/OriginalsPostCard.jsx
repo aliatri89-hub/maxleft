@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { supabase } from "../../../supabase";
 
 /**
  * OriginalsPostCard — Tappable liner notes card above each miniseries shelf.
  * Fetches the blog post linked to a miniseries, shows title + preview.
- * Tap → expand inline to show full markdown body.
+ * Tap → full-screen reader overlay with readable text sizing.
  */
 export default function OriginalsPostCard({ miniseriesId, accent }) {
   const [post, setPost] = useState(null);
-  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,69 +37,42 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 
   if (loading || !post) return null;
 
-  // Simple markdown → JSX (bold, italic, links, paragraphs)
-  const renderMarkdown = (md) => {
-    const paragraphs = md.split(/\n\n+/).filter(Boolean);
-    return paragraphs.map((p, i) => {
-      // Process inline markdown
-      let html = p
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:' + accent + ';text-decoration:underline" target="_blank" rel="noopener">$1</a>')
-        .replace(/\n/g, '<br/>');
-
-      return (
-        <p
-          key={i}
-          style={{
-            fontSize: 14, lineHeight: 1.65, color: "rgba(255,255,255,0.82)",
-            margin: "0 0 12px",
-          }}
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      );
-    });
-  };
-
   const preview = post.body.split(/\n\n/)[0] || "";
 
   return (
-    <div
-      onClick={() => setExpanded(!expanded)}
-      style={{
-        margin: "0 16px 12px",
-        padding: "14px 16px",
-        background: "rgba(255,255,255,0.04)",
-        border: `1px solid ${expanded ? accent + "40" : "rgba(255,255,255,0.08)"}`,
-        borderRadius: 12,
-        cursor: "pointer",
-        transition: "border-color 0.2s",
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: 8, marginBottom: expanded ? 12 : 0,
-      }}>
-        {/* Liner notes icon */}
-        <div style={{
-          width: 28, height: 28, borderRadius: 6,
-          background: `${accent}20`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}>
-          <span style={{ fontSize: 14 }}>📝</span>
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
+    <>
+      {/* ── Compact card ── */}
+      <div
+        onClick={() => setOpen(true)}
+        style={{
+          margin: "0 16px 12px",
+          padding: "14px 16px",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: 12,
+          cursor: "pointer",
+          transition: "border-color 0.2s",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{
-            fontSize: 13, fontWeight: 700, color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
-            letterSpacing: "0.02em",
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            width: 28, height: 28, borderRadius: 6,
+            background: `${accent}20`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0,
           }}>
-            {post.title}
+            <span style={{ fontSize: 14 }}>📝</span>
           </div>
-          {!expanded && (
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 13, fontWeight: 700, color: "#fff",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              letterSpacing: "0.02em",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {post.title}
+            </div>
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -106,28 +80,180 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
             }}>
               {preview.replace(/\*\*/g, "").replace(/\*/g, "").slice(0, 80)}…
             </div>
-          )}
-        </div>
+          </div>
 
-        <div style={{
-          fontSize: 10, color: accent, fontWeight: 600,
-          fontFamily: "'IBM Plex Mono', monospace",
-          textTransform: "uppercase",
-          flexShrink: 0,
-        }}>
-          {expanded ? "Close" : "Read"}
+          <div style={{
+            fontSize: 10, color: accent, fontWeight: 600,
+            fontFamily: "'IBM Plex Mono', monospace",
+            textTransform: "uppercase",
+            flexShrink: 0,
+          }}>
+            Read
+          </div>
         </div>
       </div>
 
-      {/* Expanded body */}
-      {expanded && (
+      {/* ── Full-screen reader overlay ── */}
+      {open && createPortal(
+        <ReaderOverlay post={post} accent={accent} onClose={() => setOpen(false)} />,
+        document.body
+      )}
+    </>
+  );
+}
+
+
+// ════════════════════════════════════════════════
+// READER OVERLAY — full-screen markdown reader
+// ════════════════════════════════════════════════
+
+function ReaderOverlay({ post, accent, onClose }) {
+  // Lock body scroll
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // Simple markdown → HTML
+  const renderMarkdown = (md) => {
+    const paragraphs = md.split(/\n\n+/).filter(Boolean);
+    return paragraphs.map((p, i) => {
+      let html = p
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff;font-weight:700">$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, `<a href="$2" style="color:${accent};text-decoration:underline" target="_blank" rel="noopener">$1</a>`)
+        .replace(/\n/g, '<br/>');
+
+      return (
+        <p
+          key={i}
+          style={{
+            fontSize: 17, lineHeight: 1.75,
+            color: "rgba(255,255,255,0.78)",
+            margin: "0 0 20px",
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+          }}
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      );
+    });
+  };
+
+  const publishDate = post.published_at
+    ? new Date(post.published_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : null;
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "#0f0d0b",
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* ── Sticky header ── */}
+      <div style={{
+        flexShrink: 0,
+        padding: "12px 16px",
+        paddingTop: "calc(12px + env(safe-area-inset-top, 0px))",
+        background: "rgba(15,13,11,0.97)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            background: "none", border: "none", color: accent,
+            fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0",
+            fontWeight: 600,
+          }}
+        >
+          ← Back
+        </button>
         <div style={{
-          borderTop: "1px solid rgba(255,255,255,0.06)",
-          paddingTop: 12,
+          flex: 1, textAlign: "center",
+          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.35)",
+          fontFamily: "'IBM Plex Mono', monospace",
+          textTransform: "uppercase", letterSpacing: "0.06em",
         }}>
+          MANTL Originals
+        </div>
+        <div style={{ width: 48 }} />
+      </div>
+
+      {/* ── Scrollable content ── */}
+      <div style={{
+        flex: 1, overflowY: "auto", overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+        paddingBottom: "calc(40px + env(safe-area-inset-bottom, 0px))",
+      }}>
+        {/* Title block */}
+        <div style={{ padding: "32px 24px 0" }}>
+          <div style={{
+            fontSize: 28, fontWeight: 800, color: "#fff",
+            fontFamily: "'Barlow Condensed', sans-serif",
+            letterSpacing: "0.01em",
+            lineHeight: 1.15,
+            marginBottom: 12,
+          }}>
+            {post.title}
+          </div>
+
+          <div style={{
+            display: "flex", alignItems: "center", gap: 8,
+            marginBottom: 28,
+          }}>
+            <div style={{
+              fontSize: 11, fontWeight: 600,
+              color: accent,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.03em",
+            }}>
+              by Ali
+            </div>
+            {publishDate && (
+              <>
+                <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+                <div style={{
+                  fontSize: 11, color: "rgba(255,255,255,0.35)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                }}>
+                  {publishDate}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div style={{
+            height: 1,
+            background: `linear-gradient(90deg, ${accent}40, transparent)`,
+            marginBottom: 28,
+          }} />
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "0 24px" }}>
           {renderMarkdown(post.body)}
         </div>
-      )}
+
+        {/* Footer */}
+        <div style={{
+          padding: "32px 24px 0",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          marginTop: 12,
+        }}>
+          <div style={{
+            fontSize: 11, color: "rgba(255,255,255,0.25)",
+            fontFamily: "'IBM Plex Mono', monospace",
+            textAlign: "center",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+          }}>
+            ▶ MANTL Originals
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
