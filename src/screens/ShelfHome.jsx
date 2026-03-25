@@ -134,7 +134,7 @@ function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNa
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <BadgeShelf session={session} profile={profile} onUpdateProfile={onUpdateProfile} onToast={onToast} />
+      <BadgeShelf session={session} />
 
       {/* ── Stats Ribbon ── */}
       <StatsRibbon userId={session?.user?.id} />
