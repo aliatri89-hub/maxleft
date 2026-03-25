@@ -47,6 +47,7 @@ import { useToast } from "./hooks/useToast";
 import { useBackNav } from "./hooks/useBackNav";
 import { useTabSwipe } from "./hooks/useTabSwipe";
 import { useIntegrationSync } from "./hooks/useIntegrationSync";
+import useNotifications from "./hooks/useNotifications";
 
 // Components
 import ShelfItModal from "./components/ShelfItModal";
@@ -55,6 +56,8 @@ import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPip from "./components/AudioPip";
 import AudioPlayerProvider from "./components/community/shared/AudioPlayerProvider";
+import NotificationBell from "./components/NotificationBell";
+import NotificationCenter from "./components/NotificationCenter";
 
 // ─── COMMUNITY LOADING SKELETON ───────────────────────────────
 function CommunityLoadingSkeleton() {
@@ -104,6 +107,7 @@ export default function App() {
   const [visitedTabs, setVisitedTabs] = useState(new Set(["feed"]));
   const [profileInitView, setProfileInitView] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [showTripleFeature, setShowTripleFeature] = useState(false);
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [showReelTime, setShowReelTime] = useState(false);
@@ -188,6 +192,8 @@ export default function App() {
     toggle: toggleFavoritePodcast,
   } = useFavoritePodcasts(session?.user?.id);
 
+  const { notifications, unreadCount, markAllSeen } = useNotifications(session);
+
   const handleSubscribeCommunity = async (communityId) => {
     await subscribeCommunity(communityId);
   };
@@ -270,27 +276,26 @@ export default function App() {
     return () => { subscription.unsubscribe(); if (callbackTimeout) clearTimeout(callbackTimeout); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── PUSH NAVIGATION HANDLER (shared by push listeners + notification center) ──
+  const handlePushNav = useCallback((data) => {
+    if (data?.type === 'watched_coverage' && data?.tmdb_id) {
+      setActiveTab("feed");
+      setFeedMode("activity");
+      setPendingSleeveOpen(parseInt(data.tmdb_id));
+    } else if (data?.type === 'new_coverage' && data?.tmdb_id) {
+      setActiveTab("feed");
+      setFeedMode("activity");
+      setPendingSleeveOpen(parseInt(data.tmdb_id));
+    } else if (data?.type === 'new_coverage_digest') {
+      setActiveTab("feed");
+      setFeedMode("activity");
+    } else {
+      setActiveTab("feed");
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── PUSH NOTIFICATION LISTENERS (native only, no-op on web) ──
   useEffect(() => {
-    const handlePushNav = (data) => {
-      if (data?.type === 'watched_coverage' && data?.tmdb_id) {
-        // Deep link: activity feed → auto-open sleeve for this film
-        setActiveTab("feed");
-        setFeedMode("activity");
-        setPendingSleeveOpen(parseInt(data.tmdb_id));
-      } else if (data?.type === 'new_coverage' && data?.tmdb_id) {
-        // Single film coverage — open sleeve directly
-        setActiveTab("feed");
-        setFeedMode("activity");
-        setPendingSleeveOpen(parseInt(data.tmdb_id));
-      } else if (data?.type === 'new_coverage_digest') {
-        // Batched coverage digest — land on activity feed
-        setActiveTab("feed");
-        setFeedMode("activity");
-      } else {
-        setActiveTab("feed");
-      }
-    };
     return setupPushListeners(showToast, handlePushNav);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -450,13 +455,10 @@ export default function App() {
               {/* Right: audio pip + bell */}
               <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
                 <AudioPip />
-                <div onClick={() => { tapLight(); showToast("Notifications coming soon"); }}
-                  style={{ width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", WebkitTapHighlightColor: "transparent" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a7e6b" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                  </svg>
-                </div>
+                <NotificationBell
+                  unreadCount={unreadCount}
+                  onClick={() => { setShowNotifications(true); pushNav("notifications", () => setShowNotifications(false)); }}
+                />
               </div>
             </div>
 
@@ -597,6 +599,16 @@ export default function App() {
               onToggleFavoritePodcast={toggleFavoritePodcast}
             />
           </div>
+        )}
+
+        {/* Notification center panel */}
+        {showNotifications && (
+          <NotificationCenter
+            notifications={notifications}
+            onClose={() => { removeNav("notifications"); setShowNotifications(false); }}
+            onNavigate={handlePushNav}
+            onOpen={markAllSeen}
+          />
         )}
 
         {/* Bottom Nav — Communities | Games | Search | Mantl */}
