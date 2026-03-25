@@ -101,7 +101,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   const PULL_THRESHOLD = 70;
 
   const handleTouchStart = useCallback((e) => {
-    const el = scrollContainerRef.current?.closest('.tab-pane') ?? scrollContainerRef.current;
+    const el = scrollContainerRef.current;
     const atTop = (el ? el.scrollTop <= 0 : true);
     if (atTop && !refreshing) {
       touchStartY.current = e.touches[0].clientY;
@@ -226,42 +226,19 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
 
   return (
     <div
-      ref={scrollContainerRef}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
       style={{
         background: "var(--bg-primary, #0f0d0b)",
-        paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
       }}
     >
-      {/* Pull-to-refresh indicator */}
-      {(pullDistance > 0 || refreshing) && (
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          height: pullDistance, overflow: "hidden",
-          transition: refreshing ? "none" : "height 0.15s ease-out",
-        }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: "50%",
-            border: pullDistance >= PULL_THRESHOLD
-              ? "2.5px solid var(--accent-green, #34d399)"
-              : "2.5px solid var(--text-faint, #5a6480)",
-            borderTopColor: "transparent",
-            animation: refreshing ? "ptr-spin 0.8s linear infinite" : "none",
-            transform: refreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
-            transition: "border-color 0.2s ease",
-          }} />
-        </div>
-      )}
-
-      {/* Sticky feed controls — toggle + filter bar pinned on scroll */}
+      {/* ── Fixed controls — never scroll ── */}
       <div style={{
-        position: "sticky",
-        top: 0,
+        flexShrink: 0,
         zIndex: 50,
         background: "var(--bg-primary, #0f0d0b)",
-        paddingBottom: 2,
       }}>
         {/* Feed tab toggle */}
         <div style={{
@@ -292,6 +269,40 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           onFavoriteSlugsReady={setFavoriteSlugs}
         />
       </div>
+
+      {/* ── Scrollable feed content ── */}
+      <div
+        ref={scrollContainerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          WebkitOverflowScrolling: "touch",
+          paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
+        }}
+      >
+      {/* Pull-to-refresh indicator */}
+      {(pullDistance > 0 || refreshing) && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          height: pullDistance, overflow: "hidden",
+          transition: refreshing ? "none" : "height 0.15s ease-out",
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: "50%",
+            border: pullDistance >= PULL_THRESHOLD
+              ? "2.5px solid var(--accent-green, #34d399)"
+              : "2.5px solid var(--text-faint, #5a6480)",
+            borderTopColor: "transparent",
+            animation: refreshing ? "ptr-spin 0.8s linear infinite" : "none",
+            transform: refreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
+            transition: "border-color 0.2s ease",
+          }} />
+        </div>
+      )}
 
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
@@ -576,6 +587,9 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             </div>
           </div>
         )}
+      </div>
+
+      {/* Close scrollable content div */}
       </div>
 
       {/* Animations */}
