@@ -1101,7 +1101,7 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/lTXB6JCQ0k8kBcDIwZXuR6orx1w.png",
     backdrop: "https://image.tmdb.org/t/p/w780/AmR3JG1VQVxU8TfAvljUhfSFUOx.jpg",
     podcasts: [
-      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://traffic.megaphone.fm/GLT8474795098.mp3" },
+      { name: "The Rewatchables", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/34/87/28/348728f8-06e7-c834-5a13-eee13e7f6e2e/mza_7588498015474203498.jpg/300x300bb.webp", episode: "Alien", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_Rewatchables.ogg" },
       { name: "Film Junk", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/3c/7c/bb/3c7cbbce-5847-c26c-f3c5-04cbd9e88e5e/mza_18038029828846701875.jpg/300x300bb.webp", episode: "Film Junk Podcast: Alien", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_FilmJunk.ogg" },
     ],
   },
