@@ -72,7 +72,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     if (isPaywall) return;
     if (isCurrent) { togglePlay(); return; }
     const playerEp = toPlayerEpisode({
-      episode_id, episode_title, audio_url, audio_status, podcast_name, duration_seconds,
+      episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
     if (playerEp) playEpisode(playerEp);
   };
@@ -91,7 +91,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     e.stopPropagation();
     if (!addToQueue || isPaywall || isCurrent) return;
     const playerEp = toPlayerEpisode({
-      episode_id, episode_title, audio_url, audio_status, podcast_name, duration_seconds,
+      episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
     if (playerEp) addToQueue(playerEp);
   };

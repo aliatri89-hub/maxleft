@@ -48,6 +48,51 @@ function cleanDescription(raw) {
   return text || null;
 }
 
+/**
+ * Parse timecodes (e.g. 1:23:45, 45:30) in text and return React elements
+ * with tappable spans that call onSeek(seconds).
+ */
+const TIMECODE_RE = /\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g;
+
+function parseTimecodeSeconds(match) {
+  const parts = match.split(":").map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return parts[0] * 60 + parts[1];
+}
+
+function renderWithTimecodes(text, onSeek) {
+  if (!text || !onSeek) return text;
+  const parts = [];
+  let last = 0;
+  let m;
+  const re = new RegExp(TIMECODE_RE.source, "g");
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push(text.slice(last, m.index));
+    const sec = parseTimecodeSeconds(m[0]);
+    const tc = m[0];
+    parts.push(
+      <span
+        key={`tc-${m.index}`}
+        onClick={(e) => { e.stopPropagation(); onSeek(sec); }}
+        style={{
+          color: ACCENT,
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontWeight: 600,
+          cursor: "pointer",
+          textDecoration: "underline",
+          textDecorationColor: `${ACCENT}44`,
+          textUnderlineOffset: 2,
+        }}
+      >
+        {tc}
+      </span>
+    );
+    last = re.lastIndex;
+  }
+  if (last < text.length) parts.push(text.slice(last));
+  return parts.length > 0 ? parts : text;
+}
+
 function fmt(sec) {
   if (!sec || !isFinite(sec)) return "0:00";
   const h = Math.floor(sec / 3600);
@@ -532,7 +577,7 @@ function FullScreenPlayer({
                 display: descExpanded ? "block" : "-webkit-box",
                 whiteSpace: "pre-line",
               }}>
-                {desc}
+                {renderWithTimecodes(desc, onSeek)}
               </div>
               {isLong && (
                 <div style={{
