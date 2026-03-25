@@ -429,6 +429,31 @@ function FullScreenPlayer({
   const [closing, setClosing] = useState(false);
   const [showSleepPicker, setShowSleepPicker] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [skipFlash, setSkipFlash] = useState(null); // null | "back" | "fwd"
+  const lastTapRef = useRef({ time: 0, x: 0 });
+  const skipFlashTimer = useRef(null);
+
+  // Double-tap artwork to skip ±15s
+  const handleArtworkTap = useCallback((e) => {
+    const now = Date.now();
+    const last = lastTapRef.current;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const isLeft = x < rect.width / 2;
+
+    if (now - last.time < 350) {
+      // Double tap detected
+      const delta = isLeft ? -15 : 15;
+      onSkip(delta);
+      const dir = isLeft ? "back" : "fwd";
+      setSkipFlash(dir);
+      clearTimeout(skipFlashTimer.current);
+      skipFlashTimer.current = setTimeout(() => setSkipFlash(null), 600);
+      lastTapRef.current = { time: 0, x: 0 }; // reset so triple-tap doesn't re-fire
+    } else {
+      lastTapRef.current = { time: now, x };
+    }
+  }, [onSkip]);
 
   // Reset description accordion when episode changes
   useEffect(() => { setDescExpanded(false); }, [episode?.guid]);
@@ -536,15 +561,49 @@ function FullScreenPlayer({
         {/* ── Now Playing section (only when an episode is active) ── */}
         {episode && (<>
         <div style={{ padding: "20px 24px 16px", textAlign: "center" }}>
-          {/* Artwork */}
+          {/* Artwork — double-tap left/right to skip ±15s */}
           {episode.artwork && (
-            <div style={{
-              width: 120, height: 120, borderRadius: 16,
-              margin: "0 auto 16px",
-              overflow: "hidden",
-              boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)`,
-            }}>
+            <div
+              onClick={handleArtworkTap}
+              style={{
+                width: 120, height: 120, borderRadius: 16,
+                margin: "0 auto 16px",
+                overflow: "hidden",
+                boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)`,
+                position: "relative",
+                cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
               <img src={episode.artwork} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              {/* Skip flash overlay */}
+              {skipFlash && (
+                <div style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center",
+                  justifyContent: skipFlash === "back" ? "flex-start" : "flex-end",
+                  padding: "0 14px",
+                  background: "rgba(0,0,0,0.45)",
+                  borderRadius: 16,
+                  animation: "skipFlashIn 0.15s ease",
+                }}>
+                  <div style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
+                    color: "#fff", opacity: 0.9,
+                  }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      {skipFlash === "back" ? (<>
+                        <polyline points="1 4 1 10 7 10" />
+                        <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+                      </>) : (<>
+                        <polyline points="23 4 23 10 17 10" />
+                        <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                      </>)}
+                    </svg>
+                    <span style={{ fontSize: 10, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>15s</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {/* Title */}
@@ -712,7 +771,7 @@ function FullScreenPlayer({
             marginTop: -2,
           }}>
             <span>{fmt(displayProgress)}</span>
-            <span>−{fmt(Math.max(0, duration - displayProgress))}</span>
+            <span>−{fmt(Math.max(0, (duration - displayProgress) / speed))}{speed !== 1 ? ` @${speed}×` : ""}</span>
           </div>
         </div>
 
@@ -1785,6 +1844,10 @@ export default function AudioPlayerProvider({ children, session }) {
         @keyframes nudgeSlideOut {
           from { opacity: 1; transform: translateY(0); }
           to { opacity: 0; transform: translateY(24px); }
+        }
+        @keyframes skipFlashIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
 
