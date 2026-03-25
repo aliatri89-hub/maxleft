@@ -1083,7 +1083,7 @@ const DEMO_PLAY_MOVIES = [
     logo: "https://image.tmdb.org/t/p/original/w5ZYdSp1Dut7tGRPEG0Cn1GkwrU.png",
     backdrop: "https://image.tmdb.org/t/p/w780/iVped1djsF0tvGkvnHbzsE3ZPTF.jpg",
     podcasts: [
-      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man 3", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BlankCheckTheme.ogg" },
+      { name: "Blank Check", art: "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/FeedLogoBlankCheck.png", episode: "Iron Man 3", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BlankCheckTheme_fade.ogg" },
       { name: "Filmspotting", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bd/8c/05/bd8c05d9-fd70-e35f-da50-f3d67256d648/mza_6805140787842707960.jpg/300x300bb.webp", episode: "#437: Iron Man 3", audio: "https://podtrac.com/pts/redirect.mp3/traffic.omny.fm/d/clips/e73c998e-6e60-432f-8610-ae210140c5b1/d28227f8-56d8-46d9-b2c5-b3d3012db5ab/aa3432b5-6264-42b9-8f3f-b412011b45a2/audio.mp3" },
     ],
   },
@@ -1093,7 +1093,7 @@ const DEMO_PLAY_MOVIES = [
     backdrop: "https://image.tmdb.org/t/p/w780/3N5QNUqS76GFYNoEayfkkJyAyTN.jpg",
     podcasts: [
       { name: "Pop Culture Happy Hour", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts126/v4/ab/41/b7/ab41b73e-0a94-1c2a-13e0-0d43bbf3f237/mza_11270718702900498122.jpg/300x300bb.webp", episode: "Barbie", audio: "https://play.podtrac.com/npr-510282/npr.simplecastaudio.com/f75261d2-0860-4d61-91c1-a78a2b997ff2/episodes/6f59940b-f4c4-4e76-b843-fd30022b2359/audio/128/default.mp3" },
-      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza", audio: "https://traffic.megaphone.fm/GLT7358892305.mp3" },
+      { name: "The Big Picture", art: "https://is1-ssl.mzstatic.com/image/thumb/Podcasts116/v4/9c/f0/17/9cf01712-63e3-ceae-0613-e6861a621247/mza_17940498907480255498.jpeg/300x300bb.webp", episode: "The 'Barbie' Bonanza", audio: "https://api.mymantl.app/storage/v1/object/public/banners/audio_BigPicture.ogg" },
     ],
   },
   {
