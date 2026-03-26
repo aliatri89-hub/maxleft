@@ -57,7 +57,6 @@ import { useAnalytics } from "./hooks/useAnalytics";
 
 // Components
 import ShelfItModal from "./components/ShelfItModal";
-import BadgeProgressToast from "./components/community/shared/BadgeProgressToast";
 import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPip from "./components/AudioPip";
@@ -720,18 +719,6 @@ export default function App() {
             }} />
         )}
 
-        {sync.syncBadgeToasts.map((t, i) => (
-          <BadgeProgressToast key={`sync-badge-${i}`}
-            badge={t.badge} current={t.current} total={t.total}
-            isComplete={t.isComplete || false} visible={t.visible}
-            bottomOffset={24 + i * 82}
-            onTap={t.slug ? () => {
-              sync.syncBadgeTimers.current.forEach(tid => clearTimeout(tid));
-              sync.syncBadgeTimers.current = [];
-              sync.setSyncBadgeToasts([]);
-              setActiveCommunitySlug(t.slug);
-            } : undefined} />
-        ))}
       </div>
     </AudioPlayerProvider>
   );

@@ -126,6 +126,8 @@ function notifIcon(type) {
       return "🏆";
     case "badge_progress":
       return "📊";
+    case "badge_digest":
+      return "🎯";
     case "episode_drop":
       return "🎙️";
     default:

@@ -83,8 +83,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
     getBadgeForItem, revokeBadgeIfNeeded,
     celebrationBadge, setCelebrationBadge,
     detailBadge, setDetailBadge,
-    badgeToasts, showBadgePage, setShowBadgePage,
-    earnedCount, showSingleBadgeToast, showBadgeProgressToasts,
+    completionToast, showBadgePage, setShowBadgePage,
+    earnedCount, showCompletionToast, handleCompletionToastTap,
   } = useBadgeOrchestrator(community?.id, userId, letterboxdSyncSignal);
 
   // ── Comedy Points (Blank Check exclusive) ──────────────────
@@ -180,35 +180,14 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
       const earnedBadge = await checkForBadge(itemId);
 
       if (earnedBadge) {
-        const progress = badgeProgress[earnedBadge.id];
-        showSingleBadgeToast({
-          badge: earnedBadge,
-          current: progress?.total || 14,
-          total: progress?.total || 14,
-          isComplete: true,
-        }, { delayToCelebration: true, celebrationBadge: earnedBadge });
-      } else {
-        const miniseriesId = item.miniseries_id;
-        if (miniseriesId) {
-          const badge = getBadgeForItem(itemId, miniseriesId, item.media_type);
-          if (badge) {
-            const bp = badgeProgress[badge.id];
-            if (bp && !bp.complete) {
-              showSingleBadgeToast({
-                badge,
-                current: bp.current + 1,
-                total: bp.total,
-                isComplete: false,
-              });
-            }
-          }
-        }
+        showCompletionToast(earnedBadge);
       }
+      // Progress notifications handled by notification center (no toasts)
 
       // ── Comedy Points check (fire-and-forget, doesn't block badge flow) ──
       checkComedyPoints(item);
     }
-  }, [allItems, logItem, onToast, onShelvesChanged, checkForBadge, getBadgeForItem, badgeProgress, showSingleBadgeToast, checkComedyPoints]);
+  }, [allItems, logItem, onToast, onShelvesChanged, checkForBadge, showCompletionToast, checkComedyPoints]);
 
   const handleUnlog = useCallback(async (itemId) => {
     await revokeBadgeIfNeeded(itemId);
@@ -590,18 +569,18 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
         />
       )}
 
-      {/* Badge progress toasts (stacked) */}
-      {badgeToasts.map((t, i) => (
+      {/* Badge completion toast — shows above nav, tap to celebrate */}
+      {completionToast && (
         <BadgeProgressToast
-          key={`badge-toast-${t.badge?.id || i}`}
-          badge={t.badge}
-          current={t.current}
-          total={t.total}
-          isComplete={t.isComplete}
-          visible={t.visible}
-          bottomOffset={24 + i * 82}
+          badge={completionToast.badge}
+          current={completionToast.current}
+          total={completionToast.total}
+          isComplete={true}
+          visible={completionToast.visible}
+          bottomOffset={hasBottomNav ? 80 : 24}
+          onTap={handleCompletionToastTap}
         />
-      ))}
+      )}
 
       {/* Comedy Points toast (BC exclusive) */}
       {comedyToast && (

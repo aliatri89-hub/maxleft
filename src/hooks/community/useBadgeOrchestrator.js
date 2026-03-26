@@ -4,18 +4,15 @@ import { useBadges } from "./useBadges";
 /**
  * useBadgeOrchestrator — manages badge celebration/toast/auto-check lifecycle.
  *
- * Wraps useBadges and adds all the orchestration state that was previously
- * duplicated across BlankCheckScreen and NowPlayingScreen:
- *   - celebrationBadge / detailBadge / badgeToasts / showBadgePage state
- *   - showSingleBadgeToast / showBadgeProgressToasts actions
+ * Wraps useBadges and adds orchestration state:
+ *   - celebrationBadge / detailBadge / completionToast / showBadgePage state
+ *   - showCompletionToast — shows "Badge Unlocked" toast; tap → celebration
  *   - Auto-check on mount (catches completions from dashboard/sync)
  *   - Re-check when Letterboxd sync completes (letterboxdSyncSignal)
  *   - earnedCount for this community's badges
  *
- * Usage:
- *   const badge = useBadgeOrchestrator(community?.id, userId, letterboxdSyncSignal);
- *   // badge.showSingleBadgeToast({ badge, current, total, isComplete }, { delayToCelebration, celebrationBadge });
- *   // badge.celebrationBadge, badge.setCelebrationBadge, etc.
+ * Progress toasts are killed — progress lives in notification center.
+ * Completion toast shows above nav; user taps to celebrate (no auto-interrupt).
  */
 
 export function useBadgeOrchestrator(communityId, userId, letterboxdSyncSignal) {
@@ -28,8 +25,8 @@ export function useBadgeOrchestrator(communityId, userId, letterboxdSyncSignal) 
   // ── Orchestration state ────────────────────────────────────
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [detailBadge, setDetailBadge] = useState(null);
-  const [badgeToasts, setBadgeToasts] = useState([]);
-  const badgeToastTimers = useRef([]);
+  const [completionToast, setCompletionToast] = useState(null); // { badge, current, total, visible }
+  const completionTimer = useRef(null);
   const [showBadgePage, setShowBadgePage] = useState(false);
 
   // Count only badges earned in THIS community
@@ -38,96 +35,65 @@ export function useBadgeOrchestrator(communityId, userId, letterboxdSyncSignal) 
     [badges, earnedBadgeIds]
   );
 
-  // ── Toast helpers ──────────────────────────────────────────
+  // ── Completion toast (replaces all progress toasts) ────────
+  // Shows "Badge Unlocked" toast above nav. Tap → celebration.
+  // Auto-dismisses after 4.5s if not tapped.
 
-  const clearBadgeToastTimers = () => {
-    badgeToastTimers.current.forEach(t => clearTimeout(t));
-    badgeToastTimers.current = [];
-  };
+  const showCompletionToast = useCallback((badge) => {
+    if (completionTimer.current) clearTimeout(completionTimer.current);
 
-  const showSingleBadgeToast = useCallback((toastData, { delayToCelebration, celebrationBadge: celBadge } = {}) => {
-    clearBadgeToastTimers();
-    setBadgeToasts([{ ...toastData, visible: false }]);
+    const total = badgeProgress[badge.id]?.total || 1;
+    setCompletionToast({ badge, current: total, total, visible: false });
 
-    const t0 = setTimeout(() => {
-      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: true })));
+    // Animate in
+    setTimeout(() => {
+      setCompletionToast(prev => prev ? { ...prev, visible: true } : null);
     }, 50);
-    badgeToastTimers.current.push(t0);
 
-    const displayTime = delayToCelebration ? 2000 : 3000;
-    const t1 = setTimeout(() => {
-      setBadgeToasts(prev => prev.map(t => ({ ...t, visible: false })));
-    }, displayTime);
-    badgeToastTimers.current.push(t1);
+    // Auto-dismiss after 4.5s
+    completionTimer.current = setTimeout(() => {
+      setCompletionToast(prev => prev ? { ...prev, visible: false } : null);
+      setTimeout(() => setCompletionToast(null), 500);
+    }, 4500);
+  }, [badgeProgress]);
 
-    const t2 = setTimeout(() => {
-      setBadgeToasts([]);
-      if (delayToCelebration && celBadge) setCelebrationBadge(celBadge);
-    }, displayTime + 500);
-    badgeToastTimers.current.push(t2);
-  }, []);
-
-  const showBadgeProgressToasts = useCallback(() => {
-    const toasts = [];
-    for (const b of badges) {
-      if (earnedBadgeIds.has(b.id)) continue;
-      const bp = badgeProgress[b.id];
-      if (!bp || bp.current === 0) continue;
-      toasts.push({ badge: b, current: bp.current, total: bp.total, isComplete: false });
-    }
-    if (!toasts.length) return;
-
-    toasts.sort((a, b) => (b.current / b.total) - (a.current / a.total));
-    const capped = toasts.slice(0, 3);
-
-    clearBadgeToastTimers();
-    setBadgeToasts(capped.map(t => ({ ...t, visible: false })));
-
-    // Stagger entrance
-    capped.forEach((_, i) => {
-      const tid = setTimeout(() => {
-        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: true } : t));
-      }, i * 350);
-      badgeToastTimers.current.push(tid);
-    });
-
-    // Stagger dismissal
-    capped.forEach((_, i) => {
-      const tid = setTimeout(() => {
-        setBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: false } : t));
-      }, 4000 + i * 250);
-      badgeToastTimers.current.push(tid);
-    });
-
-    const tidClear = setTimeout(() => setBadgeToasts([]), 4000 + capped.length * 250 + 600);
-    badgeToastTimers.current.push(tidClear);
-  }, [badges, earnedBadgeIds, badgeProgress]);
+  const handleCompletionToastTap = useCallback(() => {
+    if (!completionToast?.badge) return;
+    if (completionTimer.current) clearTimeout(completionTimer.current);
+    const badge = completionToast.badge;
+    setCompletionToast(prev => prev ? { ...prev, visible: false } : null);
+    setTimeout(() => {
+      setCompletionToast(null);
+      setCelebrationBadge(badge);
+    }, 400);
+  }, [completionToast]);
 
   // ── Auto-check badges on load ──────────────────────────────
+  // Catches completions from sync/import — shows completion toast, not auto-celebration
   const badgeAutoChecked = useRef(false);
   useEffect(() => {
     if (badgeAutoChecked.current || badgesLoading || badges.length === 0) return;
     badgeAutoChecked.current = true;
     checkAllBadges().then(earned => {
       if (earned.length > 0) {
-        setCelebrationBadge(earned[0]);
+        showCompletionToast(earned[0]);
       }
     });
-  }, [badgesLoading, badges.length, checkAllBadges]);
+  }, [badgesLoading, badges.length, checkAllBadges, showCompletionToast]);
 
   // ── Re-check on Letterboxd sync ────────────────────────────
+  // No more progress toasts — notification center handles progress.
   const prevSyncSignal = useRef(letterboxdSyncSignal);
   useEffect(() => {
     if (!letterboxdSyncSignal || letterboxdSyncSignal === prevSyncSignal.current) return;
     prevSyncSignal.current = letterboxdSyncSignal;
     checkAllBadges().then(earned => {
       if (earned.length > 0) {
-        setCelebrationBadge(earned[0]);
-      } else {
-        showBadgeProgressToasts();
+        showCompletionToast(earned[0]);
       }
+      // Progress is handled by notification center — no toasts
     });
-  }, [letterboxdSyncSignal, checkAllBadges, showBadgeProgressToasts]);
+  }, [letterboxdSyncSignal, checkAllBadges, showCompletionToast]);
 
   return {
     // Badge data (from useBadges)
@@ -145,13 +111,13 @@ export function useBadgeOrchestrator(communityId, userId, letterboxdSyncSignal) 
     setCelebrationBadge,
     detailBadge,
     setDetailBadge,
-    badgeToasts,
+    completionToast,
     showBadgePage,
     setShowBadgePage,
     earnedCount,
 
     // Orchestration actions
-    showSingleBadgeToast,
-    showBadgeProgressToasts,
+    showCompletionToast,
+    handleCompletionToastTap,
   };
 }

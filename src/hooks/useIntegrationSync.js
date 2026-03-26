@@ -25,9 +25,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
 
   const [steamSyncing, setSteamSyncing] = useState(false);
 
-  // ── Badge progress toasts (from Letterboxd sync) ──
-  const [syncBadgeToasts, setSyncBadgeToasts] = useState([]);
-  const syncBadgeTimers = useRef([]);
+  // Badge toasts removed — progress now goes to notification center as a digest
 
   // ── Lock refs (synchronous — prevents race conditions) ──
   const letterboxdLock = useRef(false);
@@ -108,14 +106,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
       const unearned = badges.filter(b => !earnedSet.has(b.id));
       if (!unearned.length) return;
 
-      const communityIds = [...new Set(unearned.map(b => b.community_id).filter(Boolean))];
-      const { data: communityPages } = await supabase
-        .from("community_pages")
-        .select("id, slug")
-        .in("id", communityIds);
-      const slugMap = {};
-      (communityPages || []).forEach(c => { slugMap[c.id] = c.slug; });
-
       const { data: allItems } = await supabase
         .from("community_items")
         .select("id, miniseries_id, media_type")
@@ -130,7 +120,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
 
       const progressSet = new Set((progress || []).map(p => p.item_id));
 
-      const toasts = unearned.map(badge => {
+      const badgeProgress = unearned.map(badge => {
         const items = (allItems || []).filter(i => {
           if (i.miniseries_id !== badge.miniseries_id) return false;
           if (badge.media_type_filter && i.media_type !== badge.media_type_filter) return false;
@@ -138,39 +128,41 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         });
         const total = items.length;
         const current = items.filter(i => progressSet.has(i.id)).length;
-        const isComplete = current === total && total > 0;
-        const slug = slugMap[badge.community_id] || null;
-        return { badge, current, total, isComplete, slug };
+        return { badge, current, total };
       }).filter(t => t.current > 0)
-        .sort((a, b) => {
-          if (a.isComplete !== b.isComplete) return b.isComplete ? 1 : -1;
-          return (b.current / b.total) - (a.current / a.total);
-        })
-        .slice(0, 3);
+        .sort((a, b) => (b.current / b.total) - (a.current / a.total));
 
-      if (!toasts.length) return;
+      if (!badgeProgress.length) return;
 
-      syncBadgeTimers.current.forEach(t => clearTimeout(t));
-      syncBadgeTimers.current = [];
+      // ── Badge digest notification (single notification, not a toast flood) ──
+      const top3 = badgeProgress.slice(0, 3);
+      const remaining = badgeProgress.length - top3.length;
+      const lines = top3.map(t => `${t.current}/${t.total} ${t.badge.name}`);
+      const body = remaining > 0
+        ? `${lines.join(", ")} + ${remaining} more`
+        : lines.join(", ");
 
-      setSyncBadgeToasts(toasts.map(t => ({ ...t, visible: false })));
-
-      toasts.forEach((_, i) => {
-        const tid = setTimeout(() => {
-          setSyncBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: true } : t));
-        }, i * 350);
-        syncBadgeTimers.current.push(tid);
+      supabase.from("user_notifications").upsert({
+        user_id: uid,
+        notif_type: "badge_digest",
+        title: `Progress on ${badgeProgress.length} badge${badgeProgress.length > 1 ? "s" : ""}`,
+        body,
+        image_url: top3[0]?.badge?.image_url || null,
+        payload: {
+          type: "badge_digest",
+          badges: badgeProgress.map(t => ({
+            badge_id: t.badge.id,
+            community_id: t.badge.community_id,
+            current: t.current,
+            total: t.total,
+          })),
+        },
+        ref_key: "badge_digest:sync",
+        created_at: new Date().toISOString(),
+      }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
+        if (error) console.error("[AutoLog] Badge digest notification error:", error.message);
+        else console.log(`[AutoLog] Badge digest: ${badgeProgress.length} badges with progress`);
       });
-
-      toasts.forEach((_, i) => {
-        const tid = setTimeout(() => {
-          setSyncBadgeToasts(prev => prev.map((t, j) => j === i ? { ...t, visible: false } : t));
-        }, 4000 + i * 250);
-        syncBadgeTimers.current.push(tid);
-      });
-
-      const tidClear = setTimeout(() => setSyncBadgeToasts([]), 4000 + toasts.length * 250 + 600);
-      syncBadgeTimers.current.push(tidClear);
     } catch (e) {
       console.warn("[AutoLog] Auto-log + badge check failed:", e);
     }
@@ -870,8 +862,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
     // Steam
     steamSyncing,
     syncSteam, connectSteam, disconnectSteam,
-    // Badge toasts
-    syncBadgeToasts, setSyncBadgeToasts, syncBadgeTimers,
+    // Badge toasts removed — digest goes to notification center
     // Auto-sync
     runInitialSync,
   };
