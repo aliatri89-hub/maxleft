@@ -8,9 +8,11 @@ import RewatchablesHero from "./RewatchablesHero";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import RewatchablesLogModal from "./RewatchablesLogModal";
 import CommunityFilter from "../shared/CommunityFilter";
+import HostChipBar from "../shared/HostChipBar";
 import AddItemTool from "../dashboard/AddItemTool";
 import AdminFab from "../dashboard/AdminFab";
 import RSSSyncTool from "../dashboard/RSSSyncTool";
+import useHostFilter from "../../../hooks/useHostFilter";
 
 /**
  * RewatchablesScreen — The Rewatchables community.
@@ -31,6 +33,17 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
+
+  // ── Host filter (multi-select chip bar) ──
+  const {
+    hosts,
+    selectedHostIds,
+    toggleHost,
+    clearHosts,
+    passesHostFilter,
+    selectedHostNames,
+    hasHostData,
+  } = useHostFilter(community?.id);
 
   // ── Android back gesture → close modals ─────────────────
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
@@ -240,10 +253,38 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
         </div>
       </div>
 
+      {/* Host filter chip bar */}
+      {hasHostData && (
+        <HostChipBar
+          hosts={hosts}
+          selectedHostIds={selectedHostIds}
+          onToggle={toggleHost}
+          onClear={clearHosts}
+          accent={accent}
+          maxVisible={12}
+        />
+      )}
+
+      {/* Active host filter label */}
+      {selectedHostNames && (
+        <div style={{
+          padding: "2px 16px 0",
+          fontSize: 11, color: accent, opacity: 0.7,
+          fontStyle: "italic",
+        }}>
+          Showing episodes with {selectedHostNames}
+        </div>
+      )}
+
       <div style={{ paddingTop: 8 }}>
         {shelves.map((s) => {
           const q = searchQuery.trim().toLowerCase();
           let items = s.items || [];
+          // Host filter
+          if (selectedHostIds.size > 0) {
+            items = items.filter((i) => passesHostFilter(i.id));
+          }
+          // Search filter
           if (q.length >= 2) {
             items = items.filter(i =>
               i.title.toLowerCase().includes(q) ||
