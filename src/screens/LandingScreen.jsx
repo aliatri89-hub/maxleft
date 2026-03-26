@@ -1491,6 +1491,14 @@ function LandingScreen({ onSignIn }) {
         >
           {usePassword ? '← Use email code instead' : 'Use password instead'}
         </button>
+        {usePassword && (
+          <button
+            className="landing-email-back"
+            onClick={() => { setEmailStep('signup'); setEmailError(null); }}
+          >
+            New here? Create an account
+          </button>
+        )}
         <button className="landing-email-back" onClick={resetEmail}>← Back</button>
       </div>
     );
