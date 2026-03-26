@@ -63,6 +63,9 @@ export default function AnalyticsDashboard({ session }) {
         { data: searches },
         { data: feedModes },
         { data: recent },
+        { data: cohorts },
+        { data: zeroResults },
+        { data: uncovered },
       ] = await Promise.all([
         supabase.rpc("analytics_overview", { p_days: days }),
         supabase.rpc("analytics_events_by_type", { p_days: days }),
@@ -72,6 +75,9 @@ export default function AnalyticsDashboard({ session }) {
         supabase.rpc("analytics_top_searches", { p_days: days }),
         supabase.rpc("analytics_feed_modes", { p_days: days }),
         supabase.rpc("analytics_recent_events", { p_limit: 50 }),
+        supabase.rpc("analytics_retention_cohorts", { p_weeks: Math.ceil(days / 7) }),
+        supabase.rpc("analytics_zero_result_searches", { p_days: days }),
+        supabase.rpc("analytics_uncovered_searches", { p_days: days }),
       ]);
 
       setData({
@@ -83,6 +89,9 @@ export default function AnalyticsDashboard({ session }) {
         searches: searches || [],
         feedModes: feedModes || [],
         recent: recent || [],
+        cohorts: cohorts || [],
+        zeroResults: zeroResults || [],
+        uncovered: uncovered || [],
       });
     } catch (err) {
       console.error("[Analytics] Fetch error:", err);
@@ -146,6 +155,7 @@ export default function AnalyticsDashboard({ session }) {
       <div style={styles.tabBar}>
         {[
           { key: "overview", label: "Overview" },
+          { key: "retention", label: "Retention" },
           { key: "engagement", label: "Engagement" },
           { key: "live", label: "Live Stream" },
         ].map(tab => (
@@ -164,6 +174,9 @@ export default function AnalyticsDashboard({ session }) {
 
       {activeTab === "overview" && (
         <OverviewTab data={d} maxByType={maxByType} maxDaily={maxDaily} days={days} />
+      )}
+      {activeTab === "retention" && (
+        <RetentionTab cohorts={d.cohorts} days={days} />
       )}
       {activeTab === "engagement" && (
         <EngagementTab data={d} />
@@ -255,6 +268,134 @@ function OverviewTab({ data, maxByType, maxDaily, days }) {
       </div>
     </>
   );
+}
+
+
+// ═══════════════════════════════════════════════════
+// RETENTION TAB
+// ═══════════════════════════════════════════════════
+
+function RetentionTab({ cohorts, days }) {
+  // Transform flat rows into a nested structure: { cohortWeek -> { weekOffset -> retainedUsers, cohortSize } }
+  const { grid, weeks, maxOffset } = useMemo(() => {
+    if (!cohorts || cohorts.length === 0) return { grid: new Map(), weeks: [], maxOffset: 0 };
+
+    const g = new Map();
+    let max = 0;
+
+    cohorts.forEach(row => {
+      const key = row.cohort_week;
+      if (!g.has(key)) g.set(key, { size: row.cohort_size, offsets: {} });
+      g.get(key).offsets[row.week_offset] = row.retained_users;
+      if (row.week_offset > max) max = row.week_offset;
+    });
+
+    // Sort cohort weeks chronologically
+    const sortedWeeks = [...g.keys()].sort();
+    return { grid: g, weeks: sortedWeeks, maxOffset: max };
+  }, [cohorts]);
+
+  return (
+    <>
+      <SectionHeader title="Retention Cohorts (Weekly)" />
+      <div style={styles.chartCard}>
+        {weeks.length === 0 ? (
+          <div style={styles.emptyState}>
+            Not enough data for retention analysis yet — need at least 2 weeks of events
+          </div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)", marginBottom: 14 }}>
+              Each row is a cohort of users who first appeared that week. Cells show what % returned in subsequent weeks.
+            </div>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={{ ...styles.th, minWidth: 90 }}>Cohort</th>
+                  <th style={{ ...styles.th, textAlign: "center", minWidth: 50 }}>Size</th>
+                  {Array.from({ length: Math.min(maxOffset + 1, 13) }, (_, i) => (
+                    <th key={i} style={{ ...styles.th, textAlign: "center", minWidth: 50 }}>
+                      {i === 0 ? "W0" : `+${i}w`}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {weeks.map(week => {
+                  const cohort = grid.get(week);
+                  const weekLabel = new Date(week + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return (
+                    <tr key={week}>
+                      <td style={{ ...styles.td, fontFamily: "var(--font-mono)", fontSize: 11, whiteSpace: "nowrap" }}>
+                        {weekLabel}
+                      </td>
+                      <td style={{ ...styles.td, textAlign: "center", fontFamily: "var(--font-mono)", fontWeight: 700 }}>
+                        {cohort.size}
+                      </td>
+                      {Array.from({ length: Math.min(maxOffset + 1, 13) }, (_, offset) => {
+                        const retained = cohort.offsets[offset];
+                        if (retained === undefined) {
+                          return <td key={offset} style={{ ...styles.td, textAlign: "center" }}>—</td>;
+                        }
+                        const pct = cohort.size > 0 ? Math.round((retained / cohort.size) * 100) : 0;
+                        return (
+                          <td key={offset} style={{
+                            ...styles.td,
+                            textAlign: "center",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: retentionColor(pct),
+                            background: retentionBg(pct),
+                          }}>
+                            {pct}%
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* ── Interpretation helper ── */}
+      <div style={{
+        marginTop: 16,
+        padding: "14px 18px",
+        background: "rgba(196,115,79,0.04)",
+        border: "1px solid rgba(196,115,79,0.12)",
+        borderRadius: 10,
+        fontSize: 11,
+        fontFamily: "var(--font-mono)",
+        color: "rgba(240,235,225,0.45)",
+        lineHeight: 1.6,
+      }}>
+        <strong style={{ color: "#C4734F" }}>How to read this:</strong> Each row is a group of users who first used MANTL that week. 
+        W0 = the week they arrived (always 100%). +1w = did they come back the next week? 
+        For a subscription app, healthy Week 1 retention is 40%+. If cohorts are getting better over time 
+        (newer rows retain higher than older rows), the product is improving.
+      </div>
+    </>
+  );
+}
+
+function retentionColor(pct) {
+  if (pct >= 80) return "#4ade80";
+  if (pct >= 60) return "#a3e635";
+  if (pct >= 40) return "#fbbf24";
+  if (pct >= 20) return "#fb923c";
+  return "#f87171";
+}
+
+function retentionBg(pct) {
+  if (pct >= 80) return "rgba(74,222,128,0.12)";
+  if (pct >= 60) return "rgba(163,230,53,0.08)";
+  if (pct >= 40) return "rgba(251,191,36,0.08)";
+  if (pct >= 20) return "rgba(251,146,60,0.06)";
+  return "rgba(248,113,113,0.06)";
 }
 
 
@@ -373,6 +514,76 @@ function EngagementTab({ data }) {
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+      {/* ── Zero-Result Searches (feature requests) ── */}
+      <SectionHeader title="Dead-End Searches (0 results)" />
+      <div style={styles.chartCard}>
+        {data.zeroResults.length === 0 ? (
+          <div style={styles.emptyState}>No zero-result searches — nice, users are finding what they want</div>
+        ) : (
+          <>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.3)", marginBottom: 12 }}>
+              Searches that returned nothing. These are implicit feature requests — films or content users expect to find.
+            </div>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Query</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>Times</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>Last Searched</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.zeroResults.map((row, i) => (
+                  <tr key={i}>
+                    <td style={styles.td}>
+                      <span style={{ fontFamily: "var(--font-mono)", color: "#f87171" }}>"{row.query}"</span>
+                    </td>
+                    <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.search_count}</td>
+                    <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,235,225,0.35)" }}>
+                      {new Date(row.last_searched).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+
+      {/* ── Uncovered Searches (TMDB match but no podcast coverage) ── */}
+      <SectionHeader title="Uncovered Searches (found, but no coverage)" />
+      <div style={styles.chartCard}>
+        {data.uncovered.length === 0 ? (
+          <div style={styles.emptyState}>No uncovered searches yet</div>
+        ) : (
+          <>
+            <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.3)", marginBottom: 12 }}>
+              Films that exist in TMDB but aren't covered by any podcast. High counts = demand for coverage.
+            </div>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Query</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>Times</th>
+                  <th style={{ ...styles.th, textAlign: "right" }}>Avg Results</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.uncovered.map((row, i) => (
+                  <tr key={i}>
+                    <td style={styles.td}>
+                      <span style={{ fontFamily: "var(--font-mono)", color: "#fbbf24" }}>"{row.query}"</span>
+                    </td>
+                    <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.search_count}</td>
+                    <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.avg_total_results ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
         )}
       </div>
     </>
