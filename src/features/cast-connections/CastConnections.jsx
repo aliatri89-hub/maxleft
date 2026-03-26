@@ -182,15 +182,47 @@ export default function CastConnections({ session, onBack, onToast }) {
         {solved.map((movieIdx, i) => {
           const movie = puzzle.movies[movieIdx];
           const color = puzzle.colors[movieIdx] || "#4a7c59";
+          const hasBackdrop = !!movie.backdrop_path;
           return (
             <div
               key={movieIdx}
               className="cc-solved-group"
-              style={{ ...S.solvedGroup, backgroundColor: color, animationDelay: `${i * 0.1}s` }}
+              style={{
+                ...S.solvedGroup,
+                backgroundColor: color,
+                animationDelay: `${i * 0.1}s`,
+                overflow: "hidden",
+                position: "relative",
+              }}
             >
-              <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
-              <div style={S.solvedActors}>
-                {movie.actors.map((a) => a.name).join("  •  ")}
+              {hasBackdrop && (
+                <div
+                  className="cc-backdrop-img"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    animationDelay: `${i * 0.1 + 0.3}s`,
+                  }}
+                >
+                  {/* Warm amber overlay + vignette */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(to bottom, rgba(30,20,10,0.35), rgba(15,13,11,0.8))",
+                  }} />
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)",
+                  }} />
+                </div>
+              )}
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
+                <div style={S.solvedActors}>
+                  {movie.actors.map((a) => a.name).join("  •  ")}
+                </div>
               </div>
             </div>
           );
@@ -212,11 +244,37 @@ export default function CastConnections({ session, onBack, onToast }) {
               width: "100%",
               alignSelf: "center",
               animationDelay: `${idx * 0.15}s`,
+              overflow: "hidden",
+              position: "relative",
             }}
           >
-            <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
-            <div style={S.solvedActors}>
-              {movie.actors.map((a) => a.name).join("  •  ")}
+            {movie.backdrop_path && (
+              <div
+                className="cc-backdrop-img"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  animationDelay: `${idx * 0.15 + 0.3}s`,
+                }}
+              >
+                <div style={{
+                  position: "absolute", inset: 0,
+                  background: "linear-gradient(to bottom, rgba(30,20,10,0.35), rgba(15,13,11,0.8))",
+                }} />
+                <div style={{
+                  position: "absolute", inset: 0,
+                  boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)",
+                }} />
+              </div>
+            )}
+            <div style={{ position: "relative", zIndex: 1 }}>
+              <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
+              <div style={S.solvedActors}>
+                {movie.actors.map((a) => a.name).join("  •  ")}
+              </div>
             </div>
           </div>
         )
@@ -374,14 +432,15 @@ const S = {
     fontSize: 20,
     color: "#fff",
     letterSpacing: 1,
-    textShadow: "1px 1px 2px rgba(0,0,0,0.4)",
+    textShadow: "0 1px 3px rgba(0,0,0,0.6), 0 0 12px rgba(0,0,0,0.3)",
   },
   solvedActors: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.85)",
+    color: "rgba(255,255,255,0.9)",
     marginTop: 4,
     letterSpacing: 0.3,
     fontFamily: "'IBM Plex Mono', monospace",
+    textShadow: "0 1px 2px rgba(0,0,0,0.5)",
   },
   grid: {
     display: "grid",
@@ -497,6 +556,15 @@ const CSS = `
     0% { transform: scaleY(0); opacity: 0; }
     60% { transform: scaleY(1.03); }
     100% { transform: scaleY(1); opacity: 1; }
+  }
+
+  .cc-backdrop-img {
+    opacity: 0;
+    animation: cc-backdrop-fade 0.6s ease forwards;
+  }
+  @keyframes cc-backdrop-fade {
+    from { opacity: 0; transform: scale(1.05); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   .cc-reveal-group {
