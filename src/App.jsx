@@ -1,8 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { supabase } from "./supabase";
 import "./styles/App.css";
+
+// ─── ADMIN PANEL (lazy-loaded, desktop-only) ─────────────────
+const AdminShell = lazy(() => import("./admin/AdminShell"));
 
 // ─── NATIVE STATUS BAR CONFIG ─────────────────────────────────
 // Android 15+ (API 35+) enforces edge-to-edge — overlay: false is ignored.
@@ -94,6 +97,17 @@ function CommunityLoadingSkeleton() {
 // ─── MAIN APP ────────────────────────────────────────────────
 
 export default function App() {
+  // Admin panel — lazy-loaded, desktop-only, auth-gated
+  if (window.location.pathname.replace(/\/+$/, "") === "/admin") {
+    const splash = document.getElementById("splash-screen");
+    if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
+    return (
+      <Suspense fallback={<div style={{ background: "#0f0d0b", height: "100vh" }} />}>
+        <AdminShell />
+      </Suspense>
+    );
+  }
+
   // Public routes — bypass auth entirely
   if (window.location.pathname.replace(/\/+$/, "") === "/play") {
     const splash = document.getElementById("splash-screen");
