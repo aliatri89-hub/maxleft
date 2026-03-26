@@ -313,7 +313,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
               maxWidth: 280,
               margin: "12px auto 0",
             }}>
-              No checklists here. Badge names hint at the collection — discovering what counts is part of the fun.
+              Badge names are your clues. Log films to discover and collect.
             </div>
           </div>
         )}

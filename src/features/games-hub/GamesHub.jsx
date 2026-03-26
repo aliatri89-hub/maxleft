@@ -326,7 +326,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
             Badges
           </div>
           <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2, lineHeight: 1.35 }}>
-            Every badge hides a collection. The name is your only clue.
+            A scavenger hunt through the libraries of your favorite podcasts.
           </div>
         </div>
         <span style={{
