@@ -1,8 +1,7 @@
 # MANTL Admin Panel — Handoff Document
 
-**Last updated:** March 27, 2026
-**Built in:** Single session, 4 phases
-**Status:** Core admin panel live at `mymantl.app/admin`
+**Last updated:** March 26, 2026
+**Status:** All 6 admin sections live at `mymantl.app/admin`
 
 ---
 
@@ -10,10 +9,13 @@
 
 ```
 src/admin/
-├── AdminShell.jsx        — Shell layout: sidebar nav, auth gate, lazy routing
-├── MissionControl.jsx    — Phase 1: "is everything running?" dashboard
-├── FeedManager.jsx       — Phase 2: Ingest queue, coming soon, dead audio
-└── CommunityManager.jsx  — Phase 3: Items, shelves, badges CRUD
+├── AdminShell.jsx          — Shell layout: sidebar nav, auth gate, lazy routing
+├── MissionControl.jsx      — "Is everything running?" dashboard
+├── FeedManager.jsx         — Ingest queue, coming soon, dead audio
+├── CommunityManager.jsx    — Items, shelves, badges CRUD
+├── AnalyticsDashboard.jsx  — Behavioral analytics (events, retention, engagement)
+├── GamesManager.jsx        — Puzzle runway, today's preview, recent results
+└── ConfigFlags.jsx         — Server-side feature flags, quick reference
 ```
 
 **Modified files:**
@@ -129,53 +131,90 @@ Community picker dropdown at top switches all three tabs.
 
 6. **Duplicate ingest tool:** FeedManager's Ingest Queue and ProfileScreen's IngestReviewTool are separate implementations of the same workflow. They share RPCs so there's no data risk, but code changes need to be made in both places.
 
+7. **Feature flags not wired to app:** Server-side `feature_flags` table and admin UI exist, but existing hardcoded flags (USE_TITLE_BACKDROPS, SHOW_COMMUNITY_STATS, SHOW_VOTING) haven't been converted to read from the table yet. A `useFeatureFlags()` hook is needed to bridge this.
+
 ---
 
-## Next Priority: Analytics
+## 4. Analytics Dashboard (`AnalyticsDashboard.jsx`)
 
-### The Problem
+Full behavioral analytics powered by the `analytics_events` table and `useAnalytics` hook.
 
-MANTL has no behavioral analytics. There's no way to know which communities get visited, which episodes get listened to, which features get used, or how users move through the app. This data is critical for deciding what to build, what to paywall, and what to drop.
+**Instrumentation (src/hooks/useAnalytics.js):**
+- `useAnalytics(userId)` hook: batches events in memory, flushes to Supabase every 30s or on `visibilitychange`
+- `trackEvent(userId, name, data)` standalone function for use outside React components
+- Session ID generated per app lifecycle (survives tab switches, not refreshes)
 
-### Phase A: Event Instrumentation
+**Events tracked (9 touchpoints across 10 files):**
+- `tab_switch` — App.jsx, all main tab changes with `{from, to}`
+- `community_visit` — CommunityRouter.jsx, `{slug, community_type}`
+- `episode_play` — AudioPlayerProvider.jsx, new episode starts
+- `episode_complete` — AudioPlayerProvider.jsx, episode finishes with duration
+- `media_log` — useCommunityActions.js, film/show/book/game logged
+- `game_played` — all 3 game API files, results with scores
+- `badge_earned` — useBadges.js, badge unlock events
+- `feed_mode_switch` — FeedScreen.jsx, releases/podcast/activity
+- `search` — SearchScreen.jsx, query + result/covered counts
 
-Build a lightweight event tracking layer. Approach:
+**Dashboard tabs:**
 
-1. **Create `analytics_events` table** in Supabase:
-   - `id` (uuid, pk)
-   - `user_id` (uuid, nullable — track anon too)
-   - `event_name` (text) — e.g. `community_visit`, `episode_play`, `badge_earned`, `game_played`
-   - `event_data` (jsonb) — flexible payload: `{ community_slug, tmdb_id, duration_seconds, ... }`
-   - `session_id` (text) — group events into sessions
-   - `created_at` (timestamptz)
-   - Partitioned by month or use `created_at` index for query performance
+**Overview** — DAU/WAU/MAU KPI cards, daily activity bar chart, events-by-type horizontal bars. Time range selector (7d/30d/90d/1y).
 
-2. **Create `useAnalytics` hook** — thin wrapper that batches events and flushes to Supabase on an interval (every 30s or on page unload). Avoids a DB write on every click.
+**Retention** — Weekly cohort heatmap. Each row = users who first appeared that week. Columns = what % returned in subsequent weeks. Color-coded green (80%+) → red (<20%). Interpretation guide included.
 
-3. **Instrument key touchpoints:**
-   - Community screen open → `community_visit` (slug, tab)
-   - Episode play/pause/complete → `episode_play` (podcast_slug, episode_id, duration)
-   - Film log/rate → `film_log` (tmdb_id, community_slug, rating)
-   - Game play → `game_played` (game_type, score, time)
-   - Badge earned → `badge_earned` (badge_id, community_slug)
-   - Feed card tap → `feed_tap` (card_type, tmdb_id)
-   - Tab switch → `tab_switch` (from, to)
-   - Search → `search` (query, result_count)
+**Engagement** — Top communities table (visits + unique users), game stats per game (plays + players), feed mode preference (% breakdown), top searches, dead-end searches (0 results = implicit feature requests), uncovered searches (TMDB match but no podcast coverage = demand signals).
 
-4. **RLS policy:** Insert-only for authenticated users. Admin-only select.
+**Live Stream** — Last 50 events with formatted details, event type pills, session IDs.
 
-### Phase B: Analytics Dashboard
+**SQL functions (11 total, all SECURITY DEFINER STABLE):**
+- `analytics_overview(p_days)` — DAU/WAU/MAU + totals
+- `analytics_events_by_type(p_days)` — grouped counts
+- `analytics_daily_counts(p_days)` — date, event_count, user_count
+- `analytics_top_communities(p_days)` — slug, visits, unique users
+- `analytics_game_stats(p_days)` — game, plays, players
+- `analytics_top_searches(p_days)` — query, count, avg results
+- `analytics_feed_modes(p_days)` — mode, switch count
+- `analytics_recent_events(p_limit)` — raw event stream
+- `analytics_retention_cohorts(p_weeks)` — cohort heatmap data
+- `analytics_zero_result_searches(p_days)` — searches with 0 results
+- `analytics_uncovered_searches(p_days)` — found in TMDB but no coverage
 
-New admin section (the "Diagnostics" nav slot, or rename to "Analytics"):
+---
 
-- **Overview:** DAU/WAU/MAU, sessions per day, events per day (line chart)
-- **Communities:** Ranked by visits, completion rates, avg time. Identify which communities drive engagement.
-- **Podcasts:** Most listened episodes, play-through rates, which podcasts drive the most film logs
-- **Games:** Daily play rates per game, completion rates, avg scores
-- **Funnel:** Landing → sign up → first log → first badge → subscription (when monetized)
-- **Retention:** Cohort-style — are users coming back?
+## 5. Games Manager (`GamesManager.jsx`)
 
-This is a meaningful build. Event instrumentation touches many files across the app (community screens, feed, games, audio player). The dashboard itself is contained to the admin panel. I'd estimate 2 sessions: one for instrumentation, one for the dashboard.
+Read-only monitoring for the three daily games.
+
+**Puzzle Runway** — Color-coded cards per game showing days of puzzles seeded ahead. Green (60+), yellow (14-60), red (<14). Shows last seeded date, total puzzles, total plays.
+
+**Today's Puzzles** — Expandable preview per game. Triple Feature shows movie posters, titles, revenue, target/optimal. Reel Time shows year, movie count, difficulty. Cast Connections shows groups and color categories.
+
+**Recent Results** — Last 10 results per game with player username, date, score/outcome, time.
+
+---
+
+## 6. Config & Flags (`ConfigFlags.jsx`)
+
+**Server-Side Feature Flags** — CRUD UI for the `feature_flags` table. Toggle ON/OFF instantly, add new flags, delete unused ones. Changes take effect on next app load. Initial flags seeded: `SHOW_COMMUNITY_STATS`, `SHOW_VOTING`, `USE_TITLE_BACKDROPS`, `PAYWALL_ENABLED`, `PUSH_NOTIFICATIONS`.
+
+**Hardcoded Flags** — Read-only reference listing constants still defined in component files (LogCard.jsx, NPPDashboard.jsx, BlankCheckDashboard.jsx). Included so you know what exists before converting to server flags.
+
+**Quick Reference** — Supabase project ID, admin user ID, custom domain, Firebase project, GitHub repo, LLC info, RAWG API key.
+
+---
+
+## Post-Launch Analytics Roadmap
+
+These features should be built once there are real users generating meaningful data:
+
+1. **Session replay summary** — Pick a session_id, see the ordered sequence of events as a user journey story. Easy query, high insight.
+
+2. **Conversion funnel** — Landing → signup → first log → first badge → subscription. Requires subscription events once monetization is live.
+
+3. **Weekly digest** — Auto-generated summary pushed to admin (email or notification). "This week: 14 new users, 3 retained, 47 game plays, top search: Criterion."
+
+4. **Episode listen-through rate** — % of started episodes that finish. Identifies stickiest podcast content.
+
+5. **User-level analytics** — Click a user, see their full event history. Useful for debugging and understanding power users vs. churn.
 
 ---
 
@@ -186,17 +225,21 @@ This is a meaningful build. Event instrumentation touches many files across the 
 **Admin user ID:** `19410e64-d610-4fab-9c26-d24fafc94696`
 
 **Key tables queried by admin panel:**
-- `tf_daily_puzzles`, `wt_daily_puzzles`, `cc_daily_puzzles` — game status
+- `tf_daily_puzzles`, `wt_daily_puzzles`, `cc_daily_puzzles` — game puzzles
+- `tf_daily_results`, `wt_daily_results`, `cc_daily_results` — game results
 - `ingest_review_queue` (view), `daily_ingest_summary` (view) — feed ingest
 - `podcast_episode_films` — episode-film mappings
 - `dead_audio_reports` — broken audio
 - `community_pages`, `community_miniseries`, `community_items` — community CRUD
 - `badges`, `badge_items`, `user_badges` — badge system
-- `profiles` — user count
+- `analytics_events` — behavioral analytics
+- `feature_flags` — server-side feature toggles
+- `profiles` — user data
 
 **Key RPCs used:**
 - `approve_ingest_matches(mapping_ids)` — approve ingest queue items
 - `reject_ingest_matches(mapping_ids)` — reject/delete bad matches
+- `analytics_*` — 11 analytics aggregation functions (see section 4)
 
 **Edge functions called:**
 - `ingest-rss` — on-demand RSS sync (Sync Now button)
