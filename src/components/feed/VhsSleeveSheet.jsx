@@ -5,6 +5,7 @@ import { resolveAudioUrl } from "../../utils/episodeUrl";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
+import { logFilm } from "../../utils/mediaWrite";
 
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -153,6 +154,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [providers, setProviders] = useState(null);
   const [onWatchlist, setOnWatchlist] = useState(false);
   const [watchlistSaving, setWatchlistSaving] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+  const [logSaving, setLogSaving] = useState(false);
   const userIdRef = useRef(null);
   const prevTmdbId = useRef(null);
 
@@ -202,6 +205,41 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     setWatchlistSaving(false);
   };
 
+  // Check if film is already logged
+  useEffect(() => {
+    if (!open || !data?.tmdb_id || !userIdRef.current) { setIsLogged(false); return; }
+    supabase.from("user_media_logs").select("id")
+      .eq("user_id", userIdRef.current).eq("tmdb_id", data.tmdb_id)
+      .maybeSingle()
+      .then(({ data: row }) => setIsLogged(!!row));
+  }, [open, data?.tmdb_id]);
+
+  const handleLog = async () => {
+    if (!userIdRef.current || !data?.tmdb_id || logSaving || isLogged) return;
+    setLogSaving(true);
+    try {
+      const coverUrl = data.poster_path
+        ? (data.poster_path.startsWith("http") ? data.poster_path : `https://image.tmdb.org/t/p/w342${data.poster_path}`)
+        : data.cover_url || null;
+      await logFilm(userIdRef.current, {
+        tmdb_id: data.tmdb_id,
+        title: data.title,
+        year: data.year || null,
+        creator: data.director || data.creator || null,
+        poster_path: coverUrl,
+      }, coverUrl, { completed_at: new Date().toISOString().slice(0, 10) });
+      setIsLogged(true);
+      // Also remove from watchlist if it was there
+      if (onWatchlist) {
+        supabase.from("wishlist").delete()
+          .eq("user_id", userIdRef.current).eq("title", data.title)
+          .in("item_type", ["movie", "show"])
+          .then(() => setOnWatchlist(false));
+      }
+    } catch (e) { console.warn("[VhsSleeve] Log error:", e); }
+    setLogSaving(false);
+  };
+
   useEffect(() => {
     if (!open || !data?.tmdb_id) return;
 
@@ -212,6 +250,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       setHiddenEpIds(new Set());
       setProviders(null);
       setOnWatchlist(false);
+      setIsLogged(false);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -809,39 +848,76 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             <WatchProviders providers={providers} />
           )}
 
-          {/* ═══ WATCHLIST BUTTON — hidden for already-logged films ═══ */}
+          {/* ═══ LOG + WATCHLIST BUTTONS ═══ */}
           {userIdRef.current && !data?.logged_at && !data?.completed_at && (
-            <div style={{ padding: "6px 0 2px" }}>
+            <div style={{ padding: "6px 0 2px", display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {/* Log button */}
               <button
-                onClick={toggleWatchlist}
-                disabled={watchlistSaving}
+                onClick={handleLog}
+                disabled={logSaving || isLogged}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "5px 14px 5px 10px",
-                  background: onWatchlist ? "rgba(76,175,80,0.08)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
+                  background: isLogged ? "rgba(76,175,80,0.08)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${isLogged ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
                   borderRadius: 20,
-                  color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.45)",
+                  color: isLogged ? "#81c784" : "rgba(240,235,225,0.45)",
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontSize: 11, fontWeight: 600,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
-                  cursor: watchlistSaving ? "wait" : "pointer",
+                  cursor: logSaving ? "wait" : isLogged ? "default" : "pointer",
                   transition: "all 0.2s",
+                  opacity: logSaving ? 0.5 : 1,
                 }}
               >
-                {onWatchlist ? (
+                {isLogged ? (
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <rect x="5" y="3" width="14" height="18" rx="1" />
+                    <line x1="9" y1="7" x2="15" y2="7" />
+                    <line x1="9" y1="11" x2="15" y2="11" />
+                    <line x1="9" y1="15" x2="12" y2="15" />
                   </svg>
                 )}
-                {onWatchlist ? "On Watchlist" : "Watchlist"}
+                {isLogged ? "Logged" : "Log"}
               </button>
+              {/* Watchlist button — hide once logged */}
+              {!isLogged && (
+                <button
+                  onClick={toggleWatchlist}
+                  disabled={watchlistSaving}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 6,
+                    padding: "5px 14px 5px 10px",
+                    background: onWatchlist ? "rgba(76,175,80,0.08)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
+                    borderRadius: 20,
+                    color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.45)",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: 11, fontWeight: 600,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    cursor: watchlistSaving ? "wait" : "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {onWatchlist ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  )}
+                  {onWatchlist ? "On Watchlist" : "Watchlist"}
+                </button>
+              )}
             </div>
           )}
 
