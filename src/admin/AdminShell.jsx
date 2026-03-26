@@ -13,14 +13,16 @@ const MissionControl = lazy(() => import("./MissionControl"));
 const FeedManager = lazy(() => import("./FeedManager"));
 const CommunityManager = lazy(() => import("./CommunityManager"));
 const AnalyticsDashboard = lazy(() => import("./AnalyticsDashboard"));
+const GamesManager = lazy(() => import("./GamesManager"));
+const ConfigFlags = lazy(() => import("./ConfigFlags"));
 
 const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
   { key: "feed",            label: "Feed & Ingest",   icon: "◈" },
   { key: "communities",     label: "Communities",      icon: "◆" },
-  { key: "games",           label: "Games",            icon: "◇", disabled: true },
-  { key: "analytics",       label: "Analytics",         icon: "◎" },
-  { key: "config",          label: "Config & Flags",   icon: "◐", disabled: true },
+  { key: "games",           label: "Games",            icon: "◇" },
+  { key: "analytics",       label: "Analytics",        icon: "◎" },
+  { key: "config",          label: "Config & Flags",   icon: "◐" },
 ];
 
 export default function AdminShell() {
@@ -142,13 +144,13 @@ export default function AdminShell() {
             <CommunityManager session={session} />
           )}
           {activeSection === "games" && (
-            <PlaceholderSection title="Games Manager" />
+            <GamesManager session={session} />
           )}
           {activeSection === "analytics" && (
             <AnalyticsDashboard session={session} />
           )}
           {activeSection === "config" && (
-            <PlaceholderSection title="Config & Flags" />
+            <ConfigFlags session={session} />
           )}
         </Suspense>
       </main>
