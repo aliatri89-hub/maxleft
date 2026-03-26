@@ -1161,13 +1161,12 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
         alt=""
         style={{
           position: "absolute",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
+          top: "15%", left: "50%",
+          transform: "translateX(-50%)",
           width: "80%",
           objectFit: "contain",
-          opacity: 0.18,
+          opacity: 0.85,
           pointerEvents: "none",
-          filter: "brightness(1.5)",
         }}
       />
 
