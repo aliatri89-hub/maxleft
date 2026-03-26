@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { useEpisodeMatch } from "../../hooks/community/useEpisodeMatch";
 import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
+import QuickLogModal from "./QuickLogModal";
 
 // ════════════════════════════════════════════════
 // EPISODE CARD — unified (dropped + published + upcoming)
@@ -18,7 +20,10 @@ function EpisodeCard({ data, onNavigateCommunity }) {
   const hasBackdrop = !!data.backdrop_path;
   const isDropped = data.status === "dropped" || data.status === "published";
   const isThisPlaying = isThisEpPlaying;
-  const seen = !!data.user_has_watched;
+  const [justLogged, setJustLogged] = useState(false);
+  const [logRating, setLogRating] = useState(null);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const seen = !!data.user_has_watched || justLogged;
 
   const handlePlay = (e) => {
     e.stopPropagation();
@@ -49,6 +54,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
   const accent = "#EF9F27";
 
   return (
+    <>
     <div
       onClick={() => onNavigateCommunity?.(data.community_slug, data.tmdb_id)}
       style={{
@@ -123,25 +129,41 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               )}
             </div>
 
-            {/* Watched status pill — upper right */}
+            {/* Watched status pill — upper right (tappable when unwatched) */}
             {isDropped && (
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 4, flexShrink: 0,
-                background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
-                border: seen ? "1px solid rgba(52,211,153,0.3)" : "1px dashed rgba(255,255,255,0.10)",
-                borderRadius: 20, padding: "4px 10px 4px 6px",
-                transition: "all 0.3s ease",
-              }}>
+              <div
+                onClick={(e) => {
+                  if (!seen) {
+                    e.stopPropagation();
+                    setShowLogModal(true);
+                  }
+                }}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 4, flexShrink: 0,
+                  background: seen ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.03)",
+                  border: seen ? "1px solid rgba(52,211,153,0.3)" : "1px dashed rgba(255,255,255,0.10)",
+                  borderRadius: 20, padding: "4px 10px 4px 6px",
+                  transition: "all 0.3s ease",
+                  cursor: seen ? "default" : "pointer",
+                }}
+              >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="5.5"
                     stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
                     strokeWidth="1.5"
                   />
-                  <polyline points="4.5 7.2 6 8.7 9.5 5.3"
-                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
-                    strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                    fill="none"
-                  />
+                  {seen ? (
+                    <polyline points="4.5 7.2 6 8.7 9.5 5.3"
+                      stroke="#34d399"
+                      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+                      fill="none"
+                    />
+                  ) : (
+                    <>
+                      <line x1="7" y1="4.5" x2="7" y2="9.5" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" />
+                      <line x1="4.5" y1="7" x2="9.5" y2="7" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeLinecap="round" />
+                    </>
+                  )}
                 </svg>
                 <span style={{
                   fontSize: 10, fontWeight: 600, textTransform: "uppercase",
@@ -150,7 +172,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                   fontFamily: "var(--font-mono, monospace)",
                   transition: "color 0.3s ease",
                 }}>
-                  {seen ? "Watched" : "Unwatched"}
+                  {seen ? "Watched" : "Log"}
                 </span>
               </div>
             )}
@@ -173,8 +195,8 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             }}>
               {data.title}
             </div>
-            {isDropped && seen && data.user_rating > 0 && (
-              <Stars rating={data.user_rating} size={12} />
+            {isDropped && seen && (data.user_rating > 0 || logRating > 0) && (
+              <Stars rating={logRating || data.user_rating} size={12} />
             )}
           </div>
 
@@ -282,6 +304,17 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         </div>
       </div>
     </div>
+
+    <QuickLogModal
+      data={data}
+      open={showLogModal}
+      onClose={() => setShowLogModal(false)}
+      onLogged={(rating) => {
+        setJustLogged(true);
+        setLogRating(rating || null);
+      }}
+    />
+    </>
   );
 }
 export default EpisodeCard;
