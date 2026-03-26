@@ -285,7 +285,7 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
   const [blurbAuthor, setBlurbAuthor] = useState(item.extra_data?.blurb_author || "Ali");
   const [saving, setSaving] = useState(false);
 
-  const isOriginals = communitySlug === "originals";
+  const isOriginals = communitySlug === "staff-picks";
 
   const handleSave = async () => {
     setSaving(true);

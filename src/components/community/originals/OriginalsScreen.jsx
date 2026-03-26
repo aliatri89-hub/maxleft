@@ -168,8 +168,8 @@ export default function OriginalsScreen({
             onOpenCommunity?.(slug, tmdbId);
           }}
           config={{
-            communitySlug: "originals",
-            communityName: "MANTL Originals",
+            communitySlug: "staff-picks",
+            communityName: "MANTL Staff Picks",
             platforms: [],
           }}
           renderEditorial={() => {
