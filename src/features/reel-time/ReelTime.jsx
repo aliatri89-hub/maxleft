@@ -180,6 +180,9 @@ const CSS = `
 @keyframes rt-slide-down { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rt-flash { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); } 60% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(0.8) translateY(-20px); } }
 @keyframes rt-fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes rt-seed-enter { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes rt-seed-date { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rt-seed-shrink { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.7) translateY(40px); } }
 `;
 
 // ── Component ────────────────────────────────────────────────
@@ -195,6 +198,22 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
   } = hookFn(userId);
 
   const [copied, setCopied] = useState(false);
+
+  // ── Seed intro animation ──
+  // "card" = big card reveal, "date" = date flips in, "done" = normal game
+  const [seedPhase, setSeedPhase] = useState("card");
+
+  useEffect(() => {
+    // Only run seed intro on fresh games (not resumed/done)
+    if (!puzzle || hasPlayed || gamePhase !== "playing" || currentMovieIndex !== 1) {
+      setSeedPhase("done");
+      return;
+    }
+    // Sequence: card → date reveal → dismiss
+    const t1 = setTimeout(() => setSeedPhase("date"), 1200);
+    const t2 = setTimeout(() => setSeedPhase("done"), 2800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [puzzle, hasPlayed, gamePhase, currentMovieIndex]);
 
   // ── Drag state ──
   const [isDragging, setIsDragging] = useState(false);
@@ -397,16 +416,72 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
         <div style={S.subtitle}>{diffStars} &nbsp; {puzzle.movieCount} films</div>
       </div>
 
+      {/* How to play — only during active play */}
+      {isPlaying && seedPhase === "done" && (
+        <div style={{
+          fontSize: 12, color: "#8a7e6b", textAlign: "center",
+          fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
+          marginBottom: 12, padding: "0 8px", maxWidth: 420,
+        }}>
+          Place each film in chronological order. Drag or tap a slot to place.
+        </div>
+      )}
+
+      {/* Seed intro — big card reveal before game starts */}
+      {isPlaying && seedPhase !== "done" && placedMovies[0] && (
+        <div style={{
+          width: "100%", maxWidth: 420, textAlign: "center",
+          padding: "40px 20px 20px",
+          animation: seedPhase === "card" ? "rt-seed-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)" : undefined,
+        }}>
+          <div style={{
+            fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
+            color: "#7cb8e8", marginBottom: 12,
+          }}>
+            Your starting film
+          </div>
+          <div style={{
+            display: "inline-block", borderRadius: 8, overflow: "hidden",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
+          }}>
+            {placedMovies[0].poster && (
+              <img
+                src={placedMovies[0].poster}
+                alt={placedMovies[0].title}
+                style={{ width: 160, height: 240, objectFit: "cover", display: "block" }}
+              />
+            )}
+          </div>
+          <div style={{
+            fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22,
+            color: "#f5f0e8", marginTop: 14, lineHeight: 1.2,
+          }}>
+            {placedMovies[0].title}
+          </div>
+          {seedPhase === "date" && (
+            <div style={{
+              fontFamily: "'Bebas Neue', sans-serif", fontSize: 28,
+              color: "#7cb8e8", marginTop: 8, letterSpacing: 1,
+              animation: "rt-seed-date 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            }}>
+              {placedMovies[0].display_date || getMonthDay(placedMovies[0].release_date)}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Score bar */}
-      <div style={S.scoreBar}>
-        <span style={S.scoreLabel}>
-          {isDone ? "Final Score" : `Film ${Math.min(currentMovieIndex + 1, puzzle.movies.length)} of ${puzzle.movies.length}`}
-        </span>
-        <span style={S.scoreValue}>{isDone ? (result?.score ?? score) : score} / {maxScore}</span>
-      </div>
+      {seedPhase === "done" && (
+        <div style={S.scoreBar}>
+          <span style={S.scoreLabel}>
+            {isDone ? "Final Score" : `Film ${Math.min(currentMovieIndex + 1, puzzle.movies.length)} of ${puzzle.movies.length}`}
+          </span>
+          <span style={S.scoreValue}>{isDone ? (result?.score ?? score) : score} / {maxScore}</span>
+        </div>
+      )}
 
       {/* Current movie card — fades when dragging */}
-      {isPlaying && currentMovie && (
+      {isPlaying && currentMovie && seedPhase === "done" && (
         <div
           style={{
             ...S.currentCard,
@@ -497,7 +572,8 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
         </div>
       )}
 
-      {/* Timeline */}
+      {/* Timeline — hidden during seed intro */}
+      {seedPhase === "done" && (
       <div style={S.timeline} ref={timelineRef}>
         <div style={S.timelineLine} />
 
@@ -534,6 +610,7 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
           </svg>
         </div>
       </div>
+      )}
     </div>
   );
 }
