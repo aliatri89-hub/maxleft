@@ -32,6 +32,7 @@ const GENRE_META = {
 };
 
 const ALL_KEY = "__all__";
+const UPCOMING_KEY = "__upcoming__";
 const MEDIA_COLORS = { film: "#e94560", book: "#f59e0b", game: "#3b82f6" };
 
 export default function NowPlayingGenreTab({
@@ -255,11 +256,9 @@ export default function NowPlayingGenreTab({
 
   // ── Flat upcoming schedule (all items sorted by air_date) ───
   const upcomingSchedule = useMemo(() => {
-    if (filter !== "upcoming") return [];
     const all = filmSeries.flatMap((s) =>
       (s.items || []).filter((i) => isComingSoon(i)).map((i) => ({ ...i, _shelfTitle: s.title }))
     );
-    // Dedup
     const seen = new Set();
     const deduped = all.filter((i) => {
       const key = `${i.title}::${i.year || ""}`;
@@ -268,7 +267,7 @@ export default function NowPlayingGenreTab({
       return true;
     });
     return deduped.sort((a, b) => (a.air_date || "").localeCompare(b.air_date || ""));
-  }, [filter, filmSeries]);
+  }, [filmSeries]);
 
   // ── Render helpers ─────────────────────────────────────────
 
@@ -539,6 +538,20 @@ export default function NowPlayingGenreTab({
                 />
               );
             })}
+            {/* Upcoming tile — last spot */}
+            {upcomingSchedule.length > 0 && (
+              <GenreGridTile
+                label="Coming Soon"
+                icon="📅"
+                tint="#1a2a1a"
+                completed={upcomingSchedule.length}
+                total={upcomingSchedule.length}
+                accent="rgba(250,204,21,0.8)"
+                delay={genreKeys.length * 0.03}
+                onTap={() => setActiveGenre(UPCOMING_KEY)}
+                hideProgress
+              />
+            )}
           </div>
         </>
       ) : (
@@ -574,7 +587,7 @@ export default function NowPlayingGenreTab({
             </button>
 
             {/* Genre label or "All" for search mode */}
-            {activeGenre !== ALL_KEY && (
+            {activeGenre !== ALL_KEY && activeGenre !== UPCOMING_KEY && (
               <div style={{
                 display: "flex", alignItems: "center", gap: 4,
                 flexShrink: 0,
@@ -589,9 +602,24 @@ export default function NowPlayingGenreTab({
                 </span>
               </div>
             )}
+            {activeGenre === UPCOMING_KEY && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 4,
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: 14 }}>📅</span>
+                <span style={{
+                  fontSize: 13, fontWeight: 800, color: "rgba(250,204,21,0.8)",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  letterSpacing: "0.02em", textTransform: "uppercase",
+                }}>
+                  Coming Soon ({upcomingSchedule.length})
+                </span>
+              </div>
+            )}
 
-            {/* Filter pills — inline */}
-            {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
+            {/* Filter pills — inline (hidden for upcoming view) */}
+            {activeGenre !== UPCOMING_KEY && ["all", "seen", "unseen"].map((f) => (
               <button
                 key={f}
                 onClick={() => onFilterChange(f)}
@@ -613,11 +641,12 @@ export default function NowPlayingGenreTab({
                   transition: "all 0.2s",
                 }}
               >
-                {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
+                {f}
               </button>
             ))}
 
-            {/* Search toggle — pushed right */}
+            {/* Search toggle — pushed right (hidden for upcoming view) */}
+            {activeGenre !== UPCOMING_KEY && (
             <button
               onClick={() => {
                 setSearchOpen((o) => {
@@ -644,9 +673,11 @@ export default function NowPlayingGenreTab({
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
             </button>
+            )}
           </div>
 
-          {/* ─── Expandable search input ────────────────────── */}
+          {/* ─── Expandable search input (hidden for upcoming) ── */}
+          {activeGenre !== UPCOMING_KEY && (
           <div style={{
             overflow: "hidden",
             maxHeight: searchOpen ? 50 : 0,
@@ -693,9 +724,10 @@ export default function NowPlayingGenreTab({
               )}
             </div>
           </div>
+          )}
 
-          {/* ─── Genre progress header (inside a genre) ────── */}
-          {activeGenre !== ALL_KEY && (() => {
+          {/* ─── Genre progress header (inside a genre, not upcoming) ── */}
+          {activeGenre !== ALL_KEY && activeGenre !== UPCOMING_KEY && (() => {
             const gs = genreStats[activeGenre];
             if (!gs) return null;
             const gPct = gs.total > 0 ? Math.round((gs.completed / gs.total) * 100) : 0;
@@ -736,8 +768,50 @@ export default function NowPlayingGenreTab({
             );
           })()}
 
-          {/* ─── Series shelves ─────────────────────────────── */}
-          {filter === "upcoming" ? (
+          {/* ─── Content ─────────────────────────────────── */}
+          {activeGenre === UPCOMING_KEY ? (
+            /* Upcoming schedule — vertical grid with date labels */
+            upcomingSchedule.length === 0 ? (
+              <div style={{
+                textAlign: "center", padding: "40px 0",
+                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
+                color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+              }}>No upcoming items</div>
+            ) : (
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: 8,
+                padding: "14px 10px 100px",
+              }}>
+                {upcomingSchedule.map((item, i) => (
+                  <div key={item.id} style={{ overflow: "hidden" }}>
+                    <NowPlayingItemCard
+                      item={item}
+                      isCompleted={!!progress[item.id]?.status}
+                      onToggle={() => onToggle?.(item.id)}
+                      coverCacheVersion={coverCacheVersion}
+                    />
+                    <div style={{
+                      fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      letterSpacing: "0.04em", textTransform: "uppercase",
+                      marginTop: 4,
+                    }}>
+                      {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </div>
+                    <div style={{
+                      fontSize: 9, color: "#666", marginTop: 1,
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    }}>
+                      {item._shelfTitle}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+          ) : filter === "upcoming" ? (
             /* Flat date-sorted schedule for upcoming */
             upcomingSchedule.length === 0 ? (
               <div style={{
@@ -991,11 +1065,11 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
    GenreGridTile — Visual tile for a genre in the 3×3 grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GenreGridTile({ label, icon, tint, poster, completed, total, accent, delay = 0, onTap }) {
+function GenreGridTile({ label, icon, tint, poster, completed, total, accent, delay = 0, onTap, hideProgress }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   const isDone = pct === 100 && total > 0;
-  const hasProgress = completed > 0;
+  const hasProgress = completed > 0 && !hideProgress;
 
   return (
     <div
@@ -1053,6 +1127,7 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
       )}
 
       {/* Progress pill — top right */}
+      {!hideProgress && (
       <div style={{
         position: "absolute",
         top: 6, right: 6,
@@ -1078,6 +1153,7 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
           {completed}/{total}
         </span>
       </div>
+      )}
 
       {/* Center overlay for text readability */}
       <div style={{
