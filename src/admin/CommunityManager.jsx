@@ -1020,9 +1020,14 @@ const S = {
 
   communitySelect: {
     padding: "8px 14px", borderRadius: 8,
-    background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+    background: "#1a1714", border: "1px solid rgba(255,255,255,0.1)",
     color: "#f0ebe1", fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 700,
     cursor: "pointer", colorScheme: "dark", outline: "none",
+    WebkitAppearance: "none", appearance: "none",
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 10px center",
+    paddingRight: 32,
   },
 
   tabBar: { display: "flex", gap: 2, marginBottom: 24, borderBottom: "1px solid rgba(255,255,255,0.06)" },
@@ -1035,7 +1040,7 @@ const S = {
   toolCount: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)" },
 
   searchInput: { padding: "7px 14px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 13, outline: "none", fontFamily: "var(--font-mono)", width: 220 },
-  filterSelect: { padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, fontFamily: "var(--font-mono)", cursor: "pointer", colorScheme: "dark", outline: "none" },
+  filterSelect: { padding: "7px 10px", borderRadius: 8, background: "#1a1714", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, fontFamily: "var(--font-mono)", cursor: "pointer", colorScheme: "dark", outline: "none" },
 
   addBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.1)", border: "1px solid rgba(196,115,79,0.25)", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
   editBtn: { padding: "4px 10px", borderRadius: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(240,235,225,0.5)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
@@ -1060,14 +1065,14 @@ const S = {
   statusPill: { display: "inline-block", padding: "3px 10px", borderRadius: 4, border: "1px solid", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em" },
 
   inlineInput: { padding: "5px 8px", borderRadius: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#e4e4e7", fontSize: 12, outline: "none", fontFamily: "inherit", width: "100%" },
-  inlineSelect: { padding: "5px 8px", borderRadius: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "inherit" },
+  inlineSelect: { padding: "5px 8px", borderRadius: 6, background: "#1a1714", border: "1px solid rgba(255,255,255,0.1)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "inherit" },
 
   // ── Add form ──
   addForm: { padding: "16px 20px", background: "rgba(196,115,79,0.04)", border: "1px solid rgba(196,115,79,0.15)", borderRadius: 12, marginBottom: 16 },
   addFormHeader: { fontSize: 11, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: "#C4734F", marginBottom: 12 },
   fieldLabel: { display: "block", fontSize: 9, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(240,235,225,0.35)", marginBottom: 4 },
   formInput: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, outline: "none", fontFamily: "var(--font-mono)" },
-  formSelect: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "var(--font-mono)" },
+  formSelect: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "#1a1714", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "var(--font-mono)" },
   formSearchBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.12)", border: "1px solid rgba(196,115,79,0.25)", color: "#c4734f", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer", flexShrink: 0 },
 
   resultGrid: { display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto" },
