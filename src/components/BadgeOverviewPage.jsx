@@ -31,11 +31,17 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         // 1. Get subscribed communities with details
         const { data: subRows } = await supabase
           .from("user_community_subscriptions")
-          .select("community_id, community_pages!inner(id, title, slug, accent_color, image_url)")
+          .select("community_id, community_pages!inner(id, name, slug, logo_url, theme_config)")
           .eq("user_id", userId);
 
         if (cancelled) return;
-        const comms = (subRows || []).map(r => r.community_pages);
+        const comms = (subRows || []).map(r => ({
+          id: r.community_pages.id,
+          title: r.community_pages.name,
+          slug: r.community_pages.slug,
+          accent_color: r.community_pages.theme_config?.accent || "#ff6a00",
+          image_url: r.community_pages.logo_url,
+        }));
         setCommunities(comms);
 
         if (comms.length === 0) { setLoading(false); return; }
