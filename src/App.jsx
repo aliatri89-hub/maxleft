@@ -53,6 +53,7 @@ import { useBackNav } from "./hooks/useBackNav";
 import { useTabSwipe } from "./hooks/useTabSwipe";
 import { useIntegrationSync } from "./hooks/useIntegrationSync";
 import useNotifications from "./hooks/useNotifications";
+import { useAnalytics } from "./hooks/useAnalytics";
 
 // Components
 import ShelfItModal from "./components/ShelfItModal";
@@ -211,6 +212,16 @@ export default function App() {
   } = useFavoritePodcasts(session?.user?.id);
 
   const { notifications, unreadCount, markAllSeen } = useNotifications(session);
+  const { track } = useAnalytics(session?.user?.id);
+
+  // ── Analytics: track tab switches ──
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (prevTabRef.current !== activeTab && session?.user?.id) {
+      track("tab_switch", { from: prevTabRef.current, to: activeTab });
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab, session?.user?.id, track]);
 
   const handleSubscribeCommunity = async (communityId) => {
     await subscribeCommunity(communityId);

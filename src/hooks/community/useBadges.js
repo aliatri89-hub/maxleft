@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
+import { trackEvent } from "../../hooks/useAnalytics";
 
 /**
  * useBadges — Badge system hook.
@@ -319,6 +320,14 @@ export function useBadges(communityId, userId) {
           ref_key: `badge_earned:${badge.id}`,
         }, { onConflict: "user_id,ref_key", ignoreDuplicates: true }).then(({ error }) => {
           if (error) console.error("[Badges] Inbox earned error:", error.message);
+        });
+
+        // Analytics: track badge earned
+        trackEvent(userId, "badge_earned", {
+          badge_id: badge.id,
+          badge_name: badge.name,
+          badge_type: badge.badge_type,
+          community_id: badge.community_id,
         });
 
         return badge;

@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { useCommunityPage } from "../hooks/community";
+import { trackEvent } from "../hooks/useAnalytics";
 import CommunityLoadingScreen from "../components/CommunityLoadingScreen";
 import NowPlayingScreen from "../components/community/now-playing/NowPlayingScreen";
 import BlankCheckScreen from "../components/community/blank-check/BlankCheckScreen";
@@ -38,6 +40,16 @@ import OriginalsScreen from "../components/community/originals/OriginalsScreen";
  */
 export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const { community, miniseries, loading, error } = useCommunityPage(slug);
+
+  // Analytics: track community visit
+  useEffect(() => {
+    if (!loading && community && session?.user?.id) {
+      trackEvent(session.user.id, "community_visit", {
+        slug,
+        community_type: community.theme_config?.community_type,
+      });
+    }
+  }, [slug, loading, !!community, session?.user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return <CommunityLoadingScreen slug={slug} />;

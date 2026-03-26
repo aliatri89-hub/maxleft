@@ -1,5 +1,6 @@
 // src/features/reel-time/reelTimeApi.js
 import { supabase } from "../../supabase";
+import { trackEvent } from "../../hooks/useAnalytics";
 
 const POSTER_BASE = "https://image.tmdb.org/t/p/w342";
 
@@ -98,6 +99,7 @@ export async function submitResult({ userId, puzzleDate, placements, score, tota
     console.error("[ReelTime] Error submitting:", error);
     return null;
   }
+  trackEvent(userId, "game_played", { game: "reel_time", score, total, perfect, time_seconds: timeSeconds, puzzle_date: puzzleDate });
   return data;
 }
 

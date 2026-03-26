@@ -1,5 +1,6 @@
 // src/features/cast-connections/castConnectionsApi.js
 import { supabase } from "../../supabase";
+import { trackEvent } from "../../hooks/useAnalytics";
 
 /**
  * Fetch today's Cast Connections puzzle
@@ -70,6 +71,7 @@ export async function submitResult({ userId, puzzleDate, solved, mistakes, solve
     console.error("[CastConnections] Error submitting:", error);
     return null;
   }
+  trackEvent(userId, "game_played", { game: "cast_connections", solved, mistakes, time_seconds: timeSeconds, puzzle_date: puzzleDate });
   return data;
 }
 

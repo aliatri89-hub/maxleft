@@ -17,6 +17,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { supabase } from "../supabase";
 import { searchTMDB } from "../utils/api";
+import { trackEvent } from "../hooks/useAnalytics";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
 import { toPlayerEpisode, resolveAudioUrl } from "../utils/episodeUrl";
 import { toPosterPath } from "../utils/mediaWrite";
@@ -259,6 +260,13 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         .sort((a, b) => (b.year || 0) - (a.year || 0));
 
       setResults([...covered, ...uncovered]);
+
+      // Analytics: track search
+      trackEvent(session?.user?.id, "search", {
+        query: trimmed,
+        result_count: covered.length + uncovered.length,
+        covered_count: covered.length,
+      });
     } catch (err) {
       console.error("[Search] Error:", err);
       setResults([]);

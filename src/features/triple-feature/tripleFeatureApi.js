@@ -1,5 +1,6 @@
 // src/features/triple-feature/tripleFeatureApi.js
 import { supabase } from "../../supabase";
+import { trackEvent } from "../../hooks/useAnalytics";
 
 const POSTER_BASE = "https://image.tmdb.org/t/p/w342/";
 
@@ -96,6 +97,7 @@ export async function submitResult({ userId, puzzleDate, selectedIndices, userTo
     console.error("[TripleFeature] Error submitting:", error);
     return null;
   }
+  trackEvent(userId, "game_played", { game: "triple_feature", score: userTotal, rank, puzzle_date: puzzleDate });
   return data;
 }
 

@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback, us
 import { createPortal } from "react-dom";
 import { getAudioBridge } from "../../../utils/nativeAudioBridge";
 import { reportDeadAudio } from "../../../utils/reportDeadAudio";
+import { trackEvent } from "../../../hooks/useAnalytics";
 
 const AudioPlayerContext = createContext(null);
 export function useAudioPlayer() {
@@ -1429,6 +1430,15 @@ export default function AudioPlayerProvider({ children, session }) {
     };
     const onEnded = () => {
       clearTimeout(stallTimerRef.current);
+      // Analytics: track episode completion
+      if (currentEp && session?.user?.id) {
+        trackEvent(session.user.id, "episode_complete", {
+          episode_title: currentEp.title,
+          podcast_slug: currentEp.community || null,
+          episode_id: currentEp.guid || null,
+          duration_seconds: Math.round(bridge.duration || 0),
+        });
+      }
       // Sleep timer — end of episode
       if (sleepTimerRef.current?.endOfEpisode) {
         clearTimeout(sleepTimerRef.current.timerId);
@@ -1535,6 +1545,14 @@ export default function AudioPlayerProvider({ children, session }) {
 
     // Clean up any pending seek from a previous rapid switch
     cleanupPendingSeek();
+
+    // Analytics: track new episode play
+    trackEvent(session?.user?.id, "episode_play", {
+      episode_title: ep.title,
+      podcast_slug: ep.community || null,
+      episode_id: ep.guid || null,
+      resumed: !!(recentsRef.current.find(r => r.guid === ep.guid || r.enclosureUrl === ep.enclosureUrl)?.time > 15),
+    });
 
     // Save current episode to recents before switching
     if (currentEp && bridge.currentTime > 15) {

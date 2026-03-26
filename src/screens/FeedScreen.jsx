@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
 import { usePodcastFeed } from "../hooks/community/usePodcastFeed";
+import { trackEvent } from "../hooks/useAnalytics";
 import BadgeCelebration from "../components/community/shared/BadgeCelebration";
 import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
@@ -147,6 +148,15 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   useEffect(() => {
     if (letterboxdSyncSignal) refreshRef.current();
   }, [letterboxdSyncSignal]);
+
+  // Analytics: track feed mode switches
+  const prevFeedModeRef = useRef(feedMode);
+  useEffect(() => {
+    if (prevFeedModeRef.current !== feedMode && userId) {
+      trackEvent(userId, "feed_mode_switch", { from: prevFeedModeRef.current, to: feedMode });
+    }
+    prevFeedModeRef.current = feedMode;
+  }, [feedMode, userId]);
 
   // ── Infinite scroll — all tabs capped at 50 ──
   const BROWSE_CAP = 50;

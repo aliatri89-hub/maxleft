@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { supabase } from "../../supabase";
 import { logFilm, logShow, logBook, logGame } from "../../utils/mediaWrite";
+import { trackEvent } from "../../hooks/useAnalytics";
 
 /**
  * useCommunityActions -- Log, unlog, and watchlist actions.
@@ -131,6 +132,16 @@ export function useCommunityActions(userId, setProgress) {
         } else if (item.media_type === "game") {
           await logGame(userId, item, coverUrl, opts);
         }
+      }
+
+      // Analytics: track media log
+      if (!isUpdate && item) {
+        trackEvent(userId, "media_log", {
+          media_type: item.media_type,
+          title: item.title,
+          tmdb_id: item.tmdb_id || null,
+          rating: rating || null,
+        });
       }
 
     } catch (e) {
