@@ -1,17 +1,20 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useCommunityPage } from "../hooks/community";
 import { trackEvent } from "../hooks/useAnalytics";
 import CommunityLoadingScreen from "../components/CommunityLoadingScreen";
-import NowPlayingScreen from "../components/community/now-playing/NowPlayingScreen";
-import BlankCheckScreen from "../components/community/blank-check/BlankCheckScreen";
-import BigPictureScreen from "../components/community/big-picture/BigPictureScreen";
-import FilmJunkScreen from "../components/community/film-junk/FilmJunkScreen";
-import HDTGMScreen from "../components/community/hdtgm/HDTGMScreen";
-import FilmspottingScreen from "../components/community/filmspotting/FilmspottingScreen";
-import RewatchablesScreen from "../components/community/rewatchables/RewatchablesScreen";
-import ChapoScreen from "../components/community/chapo/ChapoScreen";
-import GetPlayedScreen from "../components/community/getplayed/GetPlayedScreen";
-import OriginalsScreen from "../components/community/originals/OriginalsScreen";
+import ErrorBoundary from "../components/ErrorBoundary";
+
+// ─── LAZY-LOADED COMMUNITY SCREENS ──────────────────────────
+const NowPlayingScreen = lazy(() => import("../components/community/now-playing/NowPlayingScreen"));
+const BlankCheckScreen = lazy(() => import("../components/community/blank-check/BlankCheckScreen"));
+const BigPictureScreen = lazy(() => import("../components/community/big-picture/BigPictureScreen"));
+const FilmJunkScreen = lazy(() => import("../components/community/film-junk/FilmJunkScreen"));
+const HDTGMScreen = lazy(() => import("../components/community/hdtgm/HDTGMScreen"));
+const FilmspottingScreen = lazy(() => import("../components/community/filmspotting/FilmspottingScreen"));
+const RewatchablesScreen = lazy(() => import("../components/community/rewatchables/RewatchablesScreen"));
+const ChapoScreen = lazy(() => import("../components/community/chapo/ChapoScreen"));
+const GetPlayedScreen = lazy(() => import("../components/community/getplayed/GetPlayedScreen"));
+const OriginalsScreen = lazy(() => import("../components/community/originals/OriginalsScreen"));
 
 /**
  * CommunityRouter — replaces CommunityScreen.jsx
@@ -75,29 +78,28 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   const communityType = community.theme_config?.community_type;
   const sharedProps = { community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav };
 
+  let Screen;
   switch (communityType) {
-    case "nowplaying":
-      return <NowPlayingScreen {...sharedProps} />;
-    case "blankcheck":
-      return <BlankCheckScreen {...sharedProps} />;
-    case "bigpicture":
-      return <BigPictureScreen {...sharedProps} />;
-    case "filmjunk":
-      return <FilmJunkScreen {...sharedProps} />;
-    case "hdtgm":
-      return <HDTGMScreen {...sharedProps} />;
-    case "filmspotting":
-      return <FilmspottingScreen {...sharedProps} />;
-    case "rewatchables":
-      return <RewatchablesScreen {...sharedProps} />;
-    case "chapo":
-      return <ChapoScreen {...sharedProps} />;
-    case "getplayed":
-      return <GetPlayedScreen {...sharedProps} />;
-    case "originals":
-      return <OriginalsScreen {...sharedProps} />;
+    case "nowplaying":    Screen = NowPlayingScreen; break;
+    case "blankcheck":    Screen = BlankCheckScreen; break;
+    case "bigpicture":    Screen = BigPictureScreen; break;
+    case "filmjunk":      Screen = FilmJunkScreen; break;
+    case "hdtgm":         Screen = HDTGMScreen; break;
+    case "filmspotting":  Screen = FilmspottingScreen; break;
+    case "rewatchables":  Screen = RewatchablesScreen; break;
+    case "chapo":         Screen = ChapoScreen; break;
+    case "getplayed":     Screen = GetPlayedScreen; break;
+    case "originals":     Screen = OriginalsScreen; break;
     default:
       console.warn(`[CommunityRouter] Unknown community_type "${communityType}" for slug "${slug}". Falling back to BlankCheckScreen.`);
-      return <BlankCheckScreen {...sharedProps} />;
+      Screen = BlankCheckScreen;
   }
+
+  return (
+    <ErrorBoundary name={`Community: ${community.title || slug}`}>
+      <Suspense fallback={<CommunityLoadingScreen slug={slug} />}>
+        <Screen {...sharedProps} />
+      </Suspense>
+    </ErrorBoundary>
+  );
 }

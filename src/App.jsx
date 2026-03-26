@@ -24,27 +24,33 @@ import { tapLight } from "./utils/haptics";
 import { signInWithGoogle, initDeepLinkListener, isNativeAuthPending, clearNativeAuthPending } from "./utils/nativeAuth";
 import { initPushNotifications, setupPushListeners, removeDeviceToken } from "./utils/pushNotifications";
 
-// Screens
+// Screens (eager — critical path)
 import LandingScreen from "./screens/LandingScreen";
 import UsernameSetup from "./screens/UsernameSetup";
-import ShelfHome from "./screens/ShelfHome";
 import FeedScreen from "./screens/FeedScreen";
-import ProfileScreen from "./screens/ProfileScreen";
-import ExploreScreen from "./screens/ExploreScreen";
-import SearchScreen from "./screens/SearchScreen";
 import CommunityRouter from "./screens/CommunityRouter";
-import NPPDashboard from "./components/community/now-playing/NPPDashboard";
-import BlankCheckDashboard from "./components/community/blank-check/BlankCheckDashboard";
-import TripleFeature from "./features/triple-feature/TripleFeature";
-import WhatToWatch from "./features/what-to-watch/WhatToWatch";
-import TripleFeaturePublic from "./features/triple-feature/TripleFeaturePublic";
+
+// Screens (lazy — loaded on demand)
+const ShelfHome = lazy(() => import("./screens/ShelfHome"));
+const ProfileScreen = lazy(() => import("./screens/ProfileScreen"));
+const ExploreScreen = lazy(() => import("./screens/ExploreScreen"));
+const SearchScreen = lazy(() => import("./screens/SearchScreen"));
+
+// Community dashboards (lazy — public routes)
+const NPPDashboard = lazy(() => import("./components/community/now-playing/NPPDashboard"));
+const BlankCheckDashboard = lazy(() => import("./components/community/blank-check/BlankCheckDashboard"));
+
+// Games & features (lazy — overlay screens)
+const TripleFeature = lazy(() => import("./features/triple-feature/TripleFeature"));
+const WhatToWatch = lazy(() => import("./features/what-to-watch/WhatToWatch"));
+const TripleFeaturePublic = lazy(() => import("./features/triple-feature/TripleFeaturePublic"));
 import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
-import ReelTime from "./features/reel-time/ReelTime";
-import GamesHub from "./features/games-hub/GamesHub";
+const ReelTime = lazy(() => import("./features/reel-time/ReelTime"));
+const GamesHub = lazy(() => import("./features/games-hub/GamesHub"));
 import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
-import CastConnections from "./features/cast-connections/CastConnections";
+const CastConnections = lazy(() => import("./features/cast-connections/CastConnections"));
 import { hasPlayedToday as ccHasPlayedToday } from "./features/cast-connections/castConnectionsApi";
-import BadgeOverviewPage from "./components/BadgeOverviewPage";
+const BadgeOverviewPage = lazy(() => import("./components/BadgeOverviewPage"));
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
@@ -57,6 +63,7 @@ import useNotifications from "./hooks/useNotifications";
 import { useAnalytics } from "./hooks/useAnalytics";
 
 // Components
+import ErrorBoundary from "./components/ErrorBoundary";
 import ShelfItModal from "./components/ShelfItModal";
 import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
@@ -113,7 +120,11 @@ export default function App() {
   if (window.location.pathname.replace(/\/+$/, "") === "/play") {
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
-    return <TripleFeaturePublic />;
+    return (
+      <Suspense fallback={<div style={{ background: "#0a0a0f", height: "100vh" }} />}>
+        <TripleFeaturePublic />
+      </Suspense>
+    );
   }
 
   // ── Core state ──
@@ -457,6 +468,7 @@ export default function App() {
   // ── RENDER ──
 
   return (
+    <ErrorBoundary name="MANTL">
     <AudioPlayerProvider session={session}>
       <div className="mantl-app">
 
@@ -524,6 +536,7 @@ export default function App() {
             <div className="main" style={{ touchAction: "pan-y" }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
               <div className="tab-slider" ref={sliderRef}>
                 <div className="tab-pane" key="feed-tab">
+                  <ErrorBoundary name="Feed">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                     onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); }}
@@ -534,16 +547,20 @@ export default function App() {
                     feedMode={feedMode} setFeedMode={setFeedMode}
                     pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen}
                     pushNav={pushNav} removeNav={removeNav} />
+                  </ErrorBoundary>
                 </div>
                 <div className="tab-pane" key="communities-tab">
-                  {visitedTabs.has("communities") && <ExploreScreen session={session}
+                  {visitedTabs.has("communities") && <ErrorBoundary name="Communities"><Suspense fallback={<CommunityLoadingSkeleton />}>
+                    <ExploreScreen session={session}
                     onOpenCommunity={(slug) => { setScrollToTmdbId(null); setActiveCommunitySlug(slug); }}
                     isActive={activeTab === "communities"} communitySubscriptions={communitySubscriptions}
                     onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded}
-                    pushNav={pushNav} removeNav={removeNav} />}
+                    pushNav={pushNav} removeNav={removeNav} />
+                  </Suspense></ErrorBoundary>}
                 </div>
                 <div className="tab-pane" key="games-tab">
-                  {visitedTabs.has("games") && <GamesHub session={session} isTab
+                  {visitedTabs.has("games") && <ErrorBoundary name="Games"><Suspense fallback={<CommunityLoadingSkeleton />}>
+                    <GamesHub session={session} isTab
                     onLaunchGame={(gameId) => {
                       if (gameId === "tripleFeature") {
                         setShowTripleFeature(true);
@@ -568,19 +585,24 @@ export default function App() {
                       castConnections: ccUnplayed ? "available" : "completed",
                       pickAFlick: "always",
                     }}
-                  />}
+                  />
+                  </Suspense></ErrorBoundary>}
                 </div>
                 <div className="tab-pane" key="search-tab">
-                  {visitedTabs.has("search") && <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />}
+                  {visitedTabs.has("search") && <ErrorBoundary name="Search"><Suspense fallback={<CommunityLoadingSkeleton />}>
+                    <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+                  </Suspense></ErrorBoundary>}
                 </div>
                 <div className="tab-pane" key="shelf-tab">
-                  {visitedTabs.has("shelf") && <ShelfHome profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
+                  {visitedTabs.has("shelf") && <ErrorBoundary name="My MANTL"><Suspense fallback={<CommunityLoadingSkeleton />}>
+                    <ShelfHome profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
                     onShelfIt={openShelfIt} session={session} pushNav={pushNav} removeNav={removeNav}
                     onRefresh={async () => { if (session) await loadShelves(session.user.id); }}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
                     goodreadsSyncing={sync.goodreadsSyncing} steamSyncing={sync.steamSyncing}
-                    isActive={activeTab === "shelf"} />}
+                    isActive={activeTab === "shelf"} />
+                  </Suspense></ErrorBoundary>}
                 </div>
               </div>
             </div>
@@ -590,47 +612,71 @@ export default function App() {
         {/* Community Dashboard (public) */}
         {communityDashboard && (
           <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "#1a1a1a", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            {communityDashboard === "blankcheck" ? <BlankCheckDashboard session={session} /> : <NPPDashboard session={session} />}
+            <ErrorBoundary name="Dashboard">
+              <Suspense fallback={<CommunityLoadingSkeleton />}>
+                {communityDashboard === "blankcheck" ? <BlankCheckDashboard session={session} /> : <NPPDashboard session={session} />}
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {/* Triple Feature Game */}
         {showTripleFeature && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0a0a0f", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+            <ErrorBoundary name="Triple Feature">
+              <Suspense fallback={<CommunityLoadingSkeleton />}>
+                <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {/* Reel Time Game */}
         {showReelTime && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+            <ErrorBoundary name="Reel Time">
+              <Suspense fallback={<CommunityLoadingSkeleton />}>
+                <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {/* Cast Connections Game */}
         {showCastConnections && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <CastConnections session={session} onBack={() => { removeNav("castConnections"); setShowCastConnections(false); }} onToast={showToast} />
+            <ErrorBoundary name="Cast Connections">
+              <Suspense fallback={<CommunityLoadingSkeleton />}>
+                <CastConnections session={session} onBack={() => { removeNav("castConnections"); setShowCastConnections(false); }} onToast={showToast} />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
         {/* What to Watch */}
         {showWhatToWatch && (
-          <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+          <ErrorBoundary name="What to Watch">
+            <Suspense fallback={<CommunityLoadingSkeleton />}>
+              <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+            </Suspense>
+          </ErrorBoundary>
         )}
 
         {/* Badge Overview */}
         {showBadgeOverview && (
-          <BadgeOverviewPage
-            userId={session?.user?.id}
-            onClose={() => { removeNav("badgeOverview"); setShowBadgeOverview(false); }}
-            onNavigateCommunity={(slug) => {
-              removeNav("badgeOverview");
-              setShowBadgeOverview(false);
-              setActiveCommunitySlug(slug);
-            }}
-          />
+          <ErrorBoundary name="Badges">
+            <Suspense fallback={<CommunityLoadingSkeleton />}>
+              <BadgeOverviewPage
+                userId={session?.user?.id}
+                onClose={() => { removeNav("badgeOverview"); setShowBadgeOverview(false); }}
+                onNavigateCommunity={(slug) => {
+                  removeNav("badgeOverview");
+                  setShowBadgeOverview(false);
+                  setActiveCommunitySlug(slug);
+                }}
+              />
+            </Suspense>
+          </ErrorBoundary>
         )}
 
         {/* Community View */}
@@ -653,33 +699,37 @@ export default function App() {
         {/* Profile overlay */}
         {showProfile && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
-            <ProfileScreen profile={profile} shelves={shelves} session={session}
-              initialView={profileInitView}
-              pushNav={pushNav} removeNav={removeNav}
-              onBack={() => { removeNav("profile"); setShowProfile(false); setProfileInitView(null); }}
-              onSignOut={signOut} onDeleteAccount={deleteAccount}
-              onUpdateAvatar={(url) => setProfile(prev => ({ ...prev, avatarUrl: url }))}
-              onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
-              onToast={showToast}
-              onLetterboxdConnect={sync.connectLetterboxd}
-              onLetterboxdDisconnect={sync.disconnectLetterboxd}
-              onLetterboxdSync={() => { if (session && profile.letterboxd_username) wrappedSyncLetterboxd(profile.letterboxd_username, session.user.id, true); }}
-              letterboxdSyncing={sync.letterboxdSyncing}
-              onGoodreadsConnect={sync.connectGoodreads}
-              onGoodreadsDisconnect={sync.disconnectGoodreads}
-              onGoodreadsSync={() => { if (session && profile.goodreads_user_id) sync.syncGoodreads(profile.goodreads_user_id, session.user.id, true); }}
-              goodreadsSyncing={sync.goodreadsSyncing}
-              onSteamConnect={sync.connectSteam}
-              onSteamDisconnect={sync.disconnectSteam}
-              onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}
-              steamSyncing={sync.steamSyncing}
-              onImportComplete={() => { if (session) loadShelves(session.user.id); }}
-              communitySubscriptions={communitySubscriptions}
-              onSubscribe={handleSubscribeCommunity}
-              onUnsubscribe={unsubscribeCommunity}
+            <ErrorBoundary name="Profile">
+              <Suspense fallback={<CommunityLoadingSkeleton />}>
+                <ProfileScreen profile={profile} shelves={shelves} session={session}
+                  initialView={profileInitView}
+                  pushNav={pushNav} removeNav={removeNav}
+                  onBack={() => { removeNav("profile"); setShowProfile(false); setProfileInitView(null); }}
+                  onSignOut={signOut} onDeleteAccount={deleteAccount}
+                  onUpdateAvatar={(url) => setProfile(prev => ({ ...prev, avatarUrl: url }))}
+                  onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
+                  onToast={showToast}
+                  onLetterboxdConnect={sync.connectLetterboxd}
+                  onLetterboxdDisconnect={sync.disconnectLetterboxd}
+                  onLetterboxdSync={() => { if (session && profile.letterboxd_username) wrappedSyncLetterboxd(profile.letterboxd_username, session.user.id, true); }}
+                  letterboxdSyncing={sync.letterboxdSyncing}
+                  onGoodreadsConnect={sync.connectGoodreads}
+                  onGoodreadsDisconnect={sync.disconnectGoodreads}
+                  onGoodreadsSync={() => { if (session && profile.goodreads_user_id) sync.syncGoodreads(profile.goodreads_user_id, session.user.id, true); }}
+                  goodreadsSyncing={sync.goodreadsSyncing}
+                  onSteamConnect={sync.connectSteam}
+                  onSteamDisconnect={sync.disconnectSteam}
+                  onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}
+                  steamSyncing={sync.steamSyncing}
+                  onImportComplete={() => { if (session) loadShelves(session.user.id); }}
+                  communitySubscriptions={communitySubscriptions}
+                  onSubscribe={handleSubscribeCommunity}
+                  onUnsubscribe={unsubscribeCommunity}
               favoritePodcasts={favoritePodcasts}
               onToggleFavoritePodcast={toggleFavoritePodcast}
             />
+              </Suspense>
+            </ErrorBoundary>
           </div>
         )}
 
@@ -742,5 +792,6 @@ export default function App() {
 
       </div>
     </AudioPlayerProvider>
+    </ErrorBoundary>
   );
 }
