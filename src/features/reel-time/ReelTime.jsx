@@ -487,7 +487,7 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
               fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
               marginBottom: 12, padding: "0 8px", maxWidth: 420,
             }}>
-              Place each film in chronological order.<br />Drag or tap a slot to place.
+              Place each film in chronological order.<br />Drag or tap to slot in place.
             </div>
           )}
 
