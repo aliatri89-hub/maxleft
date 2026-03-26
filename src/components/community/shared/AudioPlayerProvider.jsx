@@ -1814,13 +1814,13 @@ export default function AudioPlayerProvider({ children, session }) {
   // ── Context value ────────────────────────────────────────
 
   const value = useMemo(() => ({
-    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents, queue,
+    currentEp, isPlaying, speed, buffering, error, recents, queue,
     bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
     addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue,
   }), [
-    currentEp, isPlaying, progress, duration, speed, buffering, error, bufferedPct, recents, queue,
+    currentEp, isPlaying, speed, buffering, error, recents, queue,
     bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimerAction, clearSleepTimer,
