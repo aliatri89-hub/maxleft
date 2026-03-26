@@ -39,6 +39,8 @@ import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
 import ReelTime from "./features/reel-time/ReelTime";
 import GamesHub from "./features/games-hub/GamesHub";
 import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
+import CastConnections from "./features/cast-connections/CastConnections";
+import { hasPlayedToday as ccHasPlayedToday } from "./features/cast-connections/castConnectionsApi";
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
@@ -111,8 +113,10 @@ export default function App() {
   const [showTripleFeature, setShowTripleFeature] = useState(false);
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [showReelTime, setShowReelTime] = useState(false);
+  const [showCastConnections, setShowCastConnections] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
+  const [ccUnplayed, setCcUnplayed] = useState(false);
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
@@ -209,6 +213,12 @@ export default function App() {
     if (!session?.user?.id) return;
     rtHasPlayedToday(session.user.id).then((played) => setRtUnplayed(!played));
   }, [session?.user?.id, showReelTime]);
+
+  // ── Cast Connections unplayed check ──
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    ccHasPlayedToday(session.user.id).then((played) => setCcUnplayed(!played));
+  }, [session?.user?.id, showCastConnections]);
 
   // ── Community slug persistence ──
   useEffect(() => {
@@ -496,14 +506,15 @@ export default function App() {
                       } else if (gameId === "pickAFlick") {
                         setShowWhatToWatch(true);
                         pushNav("whatToWatch", () => setShowWhatToWatch(false));
-                      } else if (gameId === "creditCheck") {
-                        showToast("Credit Check coming soon!");
+                      } else if (gameId === "castConnections") {
+                        setShowCastConnections(true);
+                        pushNav("castConnections", () => setShowCastConnections(false));
                       }
                     }}
                     gameStatuses={{
                       tripleFeature: tfUnplayed ? "available" : "completed",
                       reelTime: rtUnplayed ? "available" : "completed",
-                      creditCheck: "available",
+                      castConnections: ccUnplayed ? "available" : "completed",
                       pickAFlick: "always",
                     }}
                   />}
@@ -543,6 +554,13 @@ export default function App() {
         {showReelTime && (
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+          </div>
+        )}
+
+        {/* Cast Connections Game */}
+        {showCastConnections && (
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+            <CastConnections session={session} onBack={() => { removeNav("castConnections"); setShowCastConnections(false); }} onToast={showToast} />
           </div>
         )}
 
@@ -612,7 +630,7 @@ export default function App() {
         )}
 
         {/* Bottom Nav — Communities | Games | Search | Mantl */}
-        {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && (
+        {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && !showCastConnections && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}

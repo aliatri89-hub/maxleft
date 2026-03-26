@@ -28,14 +28,18 @@ function TripleFeatureIcon({ color }) {
   );
 }
 
-function CreditCheckIcon({ color }) {
+function CastConnectionsIcon({ color }) {
   return (
     <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-      <rect x="5" y="2" width="18" height="24" rx="2" stroke={color} strokeWidth="1.5" fill="none" />
-      <line x1="9" y1="8" x2="19" y2="8" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="9" y1="12.5" x2="17" y2="12.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-      <line x1="9" y1="16.5" x2="15" y2="16.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
-      <line x1="9" y1="20.5" x2="13" y2="20.5" stroke={color} strokeWidth="1.2" strokeLinecap="round" opacity="0.3" />
+      <rect x="3" y="3" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill={color} fillOpacity="0.15" />
+      <rect x="11" y="3" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="19" y="3" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="3" y="11" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="11" y="11" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill={color} fillOpacity="0.15" />
+      <rect x="19" y="11" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="3" y="19" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="11" y="19" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill="none" />
+      <rect x="19" y="19" width="6" height="6" rx="1.5" stroke={color} strokeWidth="1.3" fill={color} fillOpacity="0.15" />
     </svg>
   );
 }
@@ -75,7 +79,7 @@ function FlameIcon({ color, size = 12 }) {
 
 const ICONS = {
   tripleFeature: TripleFeatureIcon,
-  creditCheck: CreditCheckIcon,
+  castConnections: CastConnectionsIcon,
   reelTime: ReelTimeIcon,
   pickAFlick: PickAFlickIcon,
 };
@@ -92,9 +96,9 @@ const GAMES = [
     daily: true,
   },
   {
-    id: "creditCheck",
-    name: "Credit Check",
-    tagline: "Guess the billing order",
+    id: "castConnections",
+    name: "Cast Connections",
+    tagline: "Group actors by movie",
     color: "#e8927c",
     bgAccent: "rgba(232, 146, 124, 0.06)",
     daily: true,
