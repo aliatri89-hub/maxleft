@@ -212,8 +212,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     if (!open || !data?.tmdb_id || !userId) return;
     supabase.from("user_media_logs").select("id")
       .eq("user_id", userId).eq("tmdb_id", data.tmdb_id)
-      .maybeSingle()
-      .then(({ data: row }) => setIsLogged(!!row));
+      .limit(1)
+      .then(({ data: rows }) => setIsLogged(rows && rows.length > 0));
   }, [open, data?.tmdb_id, userId]);
 
   const handleLog = () => {
