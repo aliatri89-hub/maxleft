@@ -59,14 +59,23 @@ export function useCommunityPage(slug) {
 
         let epLookup = {};
         if (episodeUrls.length > 0) {
-          const { data: eps } = await supabase
-            .from("podcast_episodes")
-            .select("audio_url, description, title, air_date, duration_seconds")
-            .in("audio_url", episodeUrls);
-
-          if (eps) {
-            eps.forEach(ep => { epLookup[ep.audio_url] = ep; });
+          // Batch to avoid URL length limits — long megaphone URLs blow past GET limits
+          const BATCH = 30;
+          const batches = [];
+          for (let i = 0; i < episodeUrls.length; i += BATCH) {
+            batches.push(episodeUrls.slice(i, i + BATCH));
           }
+          const results = await Promise.all(
+            batches.map(batch =>
+              supabase
+                .from("podcast_episodes")
+                .select("audio_url, description, title, air_date, duration_seconds")
+                .in("audio_url", batch)
+            )
+          );
+          results.forEach(({ data: eps }) => {
+            if (eps) eps.forEach(ep => { epLookup[ep.audio_url] = ep; });
+          });
         }
 
         // Merge episode metadata into items (fill gaps, don't overwrite existing)
