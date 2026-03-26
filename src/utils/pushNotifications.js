@@ -21,7 +21,6 @@ export async function initPushNotifications(showToast) {
     }
 
     if (permStatus.receive !== 'granted') {
-      console.log('Push permission not granted');
       return;
     }
 
@@ -46,7 +45,6 @@ export function setupPushListeners(showToast, navigate) {
 
   listeners.push(
     PushNotifications.addListener('registration', async (token) => {
-      console.log('Push token received:', token.value);
       await upsertDeviceToken(token.value);
     })
   );
@@ -59,7 +57,6 @@ export function setupPushListeners(showToast, navigate) {
 
   listeners.push(
     PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      console.log('Push received in foreground:', notification);
       if (showToast && notification.body) {
         showToast(notification.title || 'MANTL', notification.body);
       }
@@ -68,7 +65,6 @@ export function setupPushListeners(showToast, navigate) {
 
   listeners.push(
     PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
-      console.log('Push tapped:', action);
       const data = action.notification.data;
       if (navigate) {
         navigate(data);
@@ -104,7 +100,6 @@ async function upsertDeviceToken(token) {
     );
 
     if (error) console.error('Failed to save device token:', error);
-    else console.log('Device token saved');
   } catch (err) {
     console.error('upsertDeviceToken error:', err);
   }

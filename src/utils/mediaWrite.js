@@ -112,7 +112,6 @@ export async function upsertMediaLog(userId, {
     return null;
   }
 
-  console.log(`[mediaWrite] Logged "${title}" -> media + user_media_logs + feed`);
   return data;
 }
 

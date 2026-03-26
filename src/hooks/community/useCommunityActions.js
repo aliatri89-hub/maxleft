@@ -113,7 +113,6 @@ export function useCommunityActions(userId, setProgress) {
           if (sibErr) {
             console.warn("[Community] Cross-community log propagation error:", sibErr.message);
           } else {
-            console.log(`[Community] Propagated log to ${siblingRows.length} sibling(s) via media_id`);
           }
         }
       } catch (e) {
@@ -268,7 +267,6 @@ export function useCommunityActions(userId, setProgress) {
       throw error;
     }
 
-    console.log(`[Community] Added "${item.title}" to watchlist`);
   }, [userId]);
 
   return { logItem, logCommentaryOnly, unlogItem, addToWatchlist };

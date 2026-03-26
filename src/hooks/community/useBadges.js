@@ -504,7 +504,6 @@ export function useBadges(communityId, userId) {
             return next;
           });
           newlyEarned.push(badge);
-          console.log(`[Badges] Auto-earned "${badge.name}" via sync`);
 
           // ── Inbox: badge earned notification ──
           supabase.from("user_notifications").upsert({
@@ -610,7 +609,6 @@ export function useBadges(communityId, userId) {
         [badge.id]: { ...prev[badge.id], complete: false },
       }));
 
-      console.log(`[Badges] Revoked "${badge.name}" — item unlogged`);
     };
 
     // ── Check miniseries_completion badges ──

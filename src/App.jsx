@@ -19,7 +19,6 @@ if (Capacitor.isNativePlatform()) {
 
 // Utils
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
-import { sb } from "./utils/api";
 import { tapLight } from "./utils/haptics";
 import { signInWithGoogle, initDeepLinkListener, isNativeAuthPending, clearNativeAuthPending } from "./utils/nativeAuth";
 import { initPushNotifications, setupPushListeners, removeDeviceToken } from "./utils/pushNotifications";

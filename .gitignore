@@ -35,3 +35,8 @@ ios/App/App/GoogleService-Info.plist
 android/.gradle
 android/app/build
 ios/App/Pods
+
+# Large data artifacts (seed data, scrapes)
+docs/npp-scraper/npp-data.json
+posters.sql
+scripts/bn_episode_urls_full.sql

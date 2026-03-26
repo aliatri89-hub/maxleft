@@ -81,7 +81,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
           .from("community_user_progress")
           .upsert(newRows, { onConflict: "user_id,item_id" });
         if (upsertErr) console.error("[AutoLog] Community progress upsert error:", upsertErr);
-        else console.log(`[AutoLog] Logged ${newRows.length} film(s) into community progress`);
       }
 
       // Badge progress check
@@ -154,7 +153,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         created_at: new Date().toISOString(),
       }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
         if (error) console.error("[AutoLog] Badge digest notification error:", error.message);
-        else console.log(`[AutoLog] Badge digest: ${count} badges with progress`);
       });
     } catch (e) {
       console.warn("[AutoLog] Auto-log + badge check failed:", e);
@@ -173,9 +171,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
   };
 
   const syncLetterboxd = async (username, uid, manual = false) => {
-    console.log("[Letterboxd] syncLetterboxd called", { username, uid, manual, locked: letterboxdLock.current });
     if (!username || !uid || letterboxdLock.current) {
-      console.log("[Letterboxd] BAILED — guard failed", { noUsername: !username, noUid: !uid, locked: letterboxdLock.current });
       return;
     }
     letterboxdLock.current = true;
@@ -206,7 +202,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
       const xml = parser.parseFromString(rssText, "text/xml");
       const items = xml.querySelectorAll("item");
 
-      console.log(`[Letterboxd] RSS returned ${items.length} items`);
 
       if (items.length === 0) {
         showToast("No entries found — check your Letterboxd username is correct and profile is public");
@@ -219,7 +214,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         .select("title, year, tmdb_id, watch_dates").eq("user_id", uid);
       const existingSet = new Set((existingMovies || []).map(m => `${m.title}::${m.year}`));
       const existingMap = new Map((existingMovies || []).map(m => [`${m.title}::${m.year}`, m]));
-      console.log(`[Letterboxd] Existing films in DB: ${existingSet.size}`);
 
       const { data: existingFeed } = await supabase.from("feed_activity")
         .select("title, item_title").eq("user_id", uid).eq("activity_type", "movie");
@@ -292,8 +286,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         workQueue.push({ title, year, rating, ratingFromTitle, watchedDate, dedupKey, rssTmdbId: rssTmdbId ? parseInt(rssTmdbId) : null, reviewUrl });
       }
 
-      console.log(`[Letterboxd] ${workQueue.length} new films to sync, ${rewatchQueue.length} rewatches`);
-      if (workQueue.length > 0) console.log("[Letterboxd] First new:", workQueue.slice(0, 3).map(w => w.title));
       if (workQueue.length === 0 && rewatchQueue.length === 0) {
         // Log first few RSS items to see what was skipped
         const rssItems = [];
@@ -303,7 +295,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
           if (ft) rssItems.push(`${ft.trim()}::${yr}`);
           if (rssItems.length >= 5) break;
         }
-        console.log("[Letterboxd] All RSS items already in DB. First RSS items:", rssItems);
       }
 
       const processMovie = async ({ title, year, ratingFromTitle, watchedDate, rssTmdbId, reviewUrl }) => {
@@ -422,7 +413,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
                 .eq("user_id", uid)
                 .in("item_id", progressItemIds);
 
-              console.log(`[Letterboxd] Updated rewatch in ${progressItemIds.length} community(ies) for "${rw.title}"`);
             }
           }
         } catch (e) {
@@ -430,7 +420,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         }
       }
       if (rewatchCount > 0) {
-        console.log(`[Letterboxd] Updated ${rewatchCount} rewatch(es)`);
       }
 
       setLetterboxdLastSync(new Date());
@@ -451,7 +440,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
               new_films: syncedFilms.map(f => ({ tmdb_id: f.tmdbId, title: f.title })),
             }),
           }).then(r => r.json())
-            .then(r => console.log(`[Letterboxd] Coverage check: ${r.sent || 0} notification(s)`))
             .catch(err => console.warn("[Letterboxd] Coverage check failed:", err));
 
           setTimeout(async () => {
@@ -465,10 +453,8 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         }
         return { synced, rewatchCount };
       } else if (manual) {
-        console.log("[Letterboxd] Sync complete — nothing new found");
         showToast("Letterboxd up to date ✓");
       } else {
-        console.log("[Letterboxd] Auto-sync complete — nothing new found");
       }
       return null;
     } catch (e) {
@@ -534,7 +520,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
       const xml = parser.parseFromString(rssText, "text/xml");
       const items = xml.querySelectorAll("item");
 
-      console.log(`[Goodreads] RSS returned ${items.length} items`);
 
       if (items.length === 0) {
         showToast("No entries found — check your Goodreads user ID and that your profile is public");
@@ -575,7 +560,6 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         workQueue.push({ title, author: authorName, bookId, rating: rating || null, totalPages, userReadAt, coverUrl, isbn });
       }
 
-      console.log(`[Goodreads] ${workQueue.length} new books to sync`);
 
       let synced = 0;
       const BATCH_SIZE = 6;

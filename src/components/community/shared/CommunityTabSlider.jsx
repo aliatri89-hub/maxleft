@@ -39,7 +39,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     const ro = new ResizeObserver((entries) => {
       const w = entries[0]?.contentRect?.width;
       if (w && w > 0) {
-        console.log(`[CSL] ResizeObserver fired — new width: ${w}, old widthRef: ${widthRef.current}, animating: ${sliderRef.current?.classList.contains("csl-animating")}`);
         widthRef.current = w;
         setContainerWidth(prev => {
           if (prev === 0 && sliderRef.current) {
@@ -56,7 +55,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     const timer = setTimeout(() => {
       const w = containerRef.current?.offsetWidth;
       if (w && w > 0 && w !== widthRef.current) {
-        console.log(`[CSL] Safety re-measure corrected width: ${widthRef.current} → ${w}`);
         widthRef.current = w;
         setContainerWidth(w);
       }
@@ -83,13 +81,10 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
     const idx = tabs.findIndex((t) => t.key === activeTab);
     if (idx < 0) return;
     const isAnimating = sliderRef.current.classList.contains("csl-animating");
-    console.log(`[CSL] position effect — activeTab: ${activeTab}, idx: ${idx}, widthRef: ${widthRef.current}, animating: ${isAnimating}`);
     if (!isAnimating) {
       const newTransform = `translateX(-${pxOffset(idx)}px)`;
-      console.log(`[CSL] position effect WRITING transform: ${newTransform}`);
       sliderRef.current.style.transform = newTransform;
     } else {
-      console.log(`[CSL] position effect SKIPPED (animating)`);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, tabs, pxOffset]); // intentionally excludes containerWidth
@@ -103,7 +98,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       // Read width fresh from DOM — avoids stale widthRef from ResizeObserver race
       const liveWidth = containerRef.current.offsetWidth;
       if (!liveWidth) return;
-      console.log(`[CSL] animateToTab(${tabKey}) — liveWidth: ${liveWidth}, widthRef was: ${widthRef.current}, idx: ${idx}`);
       widthRef.current = liveWidth;
       setVisitedTabs((prev) => {
         const next = new Set(prev);
@@ -114,7 +108,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
       sliderRef.current.classList.add("csl-animating");
       sliderRef.current.style.transform = `translateX(-${pxOffset(idx)}px)`;
       const onEnd = () => {
-        console.log(`[CSL] transitionend (animateToTab) — removing csl-animating, transform: ${sliderRef.current?.style.transform}`);
         requestAnimationFrame(() => {
           sliderRef.current?.classList.remove("csl-animating");
         });

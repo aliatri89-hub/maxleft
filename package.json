@@ -20,12 +20,9 @@
     "@capacitor/status-bar": "^8.0.0",
     "@mediagrid/capacitor-native-audio": "^3.0.0",
     "@supabase/supabase-js": "^2.97.0",
-    "cheerio": "^1.2.0",
-    "dotenv": "^17.3.1",
     "html2canvas": "^1.4.1",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "xml2js": "^0.6.2"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
