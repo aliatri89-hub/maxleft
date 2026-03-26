@@ -6,6 +6,7 @@
 import { useState, useEffect } from "react";
 import { useCastConnections } from "./useCastConnections";
 import { getPuzzleNumber } from "./castConnectionsApi";
+import { fetchMovieLogo, getLogoUrl } from "../../utils/communityTmdb";
 
 // ── Confetti ──────────────────────────────────────────────────
 
@@ -72,7 +73,7 @@ function LoadingState() {
 
 // ── Backdrop Reveal Card ─────────────────────────────────────
 
-function BackdropCard({ movie, color, delay, dimmed }) {
+function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
   const hasBackdrop = !!movie.backdrop_path;
   return (
     <div
@@ -99,7 +100,7 @@ function BackdropCard({ movie, color, delay, dimmed }) {
             inset: 0,
             backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center 20%",
             animationDelay: `${delay + 0.3}s`,
           }}
         >
@@ -114,7 +115,25 @@ function BackdropCard({ movie, color, delay, dimmed }) {
           }} />
         </div>
       )}
-      <div style={{ position: "relative", zIndex: 1, padding: "20px 16px", display: "flex", flexDirection: "column", justifyContent: "center", flex: 1 }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "20px 16px", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", flex: 1 }}>
+        {logoUrl ? (
+          <img
+            src={logoUrl}
+            alt={movie.title}
+            style={{
+              maxWidth: "70%",
+              maxHeight: 60,
+              objectFit: "contain",
+              filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.7))",
+              marginBottom: 8,
+            }}
+            onError={(e) => {
+              // Fallback to text if logo fails to load
+              e.target.style.display = "none";
+              e.target.nextSibling.style.display = "block";
+            }}
+          />
+        ) : null}
         <div style={{
           fontFamily: "'Bebas Neue', sans-serif",
           fontSize: 25,
@@ -122,6 +141,7 @@ function BackdropCard({ movie, color, delay, dimmed }) {
           letterSpacing: 1.5,
           textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.3)",
           lineHeight: 1.15,
+          display: logoUrl ? "none" : "block",
         }}>
           {movie.title} ({movie.year})
         </div>
@@ -155,10 +175,34 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [logos, setLogos] = useState({});
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
   }, []);
+
+  // Fetch movie logos when puzzle loads
+  useEffect(() => {
+    if (!puzzle?.movies) return;
+    let cancelled = false;
+
+    async function loadLogos() {
+      const result = {};
+      for (const movie of puzzle.movies) {
+        if (!movie.tmdb_id) continue;
+        // Check cache first
+        let url = getLogoUrl(movie.tmdb_id);
+        if (!url) {
+          url = await fetchMovieLogo(movie.tmdb_id);
+        }
+        if (url) result[movie.tmdb_id] = url;
+      }
+      if (!cancelled) setLogos(result);
+    }
+
+    loadLogos();
+    return () => { cancelled = true; };
+  }, [puzzle]);
 
   useEffect(() => {
     if (won && !result) {
@@ -394,6 +438,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
               color={color}
               delay={i * 0.12}
               dimmed={dimmed}
+              logoUrl={logos[movie.tmdb_id] || null}
             />
           ))}
         </div>
