@@ -154,7 +154,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [providers, setProviders] = useState(null);
   const [onWatchlist, setOnWatchlist] = useState(false);
   const [watchlistSaving, setWatchlistSaving] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState(!!data?.logged_at || !!data?.completed_at);
   const [showLogModal, setShowLogModal] = useState(false);
   const userIdRef = useRef(null);
   const prevTmdbId = useRef(null);
@@ -215,7 +215,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   }, [open, data?.tmdb_id]);
 
   const handleLog = () => {
-    if (!userIdRef.current || !data?.tmdb_id || isLogged) return;
+    if (!userIdRef.current || !data?.tmdb_id) return;
     setShowLogModal(true);
   };
 
@@ -239,7 +239,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       setHiddenEpIds(new Set());
       setProviders(null);
       setOnWatchlist(false);
-      setIsLogged(false);
+      setIsLogged(!!data?.logged_at || !!data?.completed_at);
       setShowLogModal(false);
       prevTmdbId.current = data.tmdb_id;
     }
@@ -834,12 +834,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )}
 
           {/* ═══ LOG + WATCHLIST BUTTONS ═══ */}
-          {userIdRef.current && !data?.logged_at && !data?.completed_at && (
+          {userIdRef.current && (
             <div style={{ padding: "6px 0 2px", display: "flex", gap: 8, flexWrap: "wrap" }}>
               {/* Log button */}
               <button
                 onClick={handleLog}
-                disabled={isLogged}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "5px 14px 5px 10px",
@@ -851,7 +850,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   fontSize: 11, fontWeight: 600,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
-                  cursor: isLogged ? "default" : "pointer",
+                  cursor: "pointer",
                   transition: "all 0.2s",
                 }}
               >
