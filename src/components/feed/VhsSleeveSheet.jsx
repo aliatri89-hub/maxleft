@@ -6,6 +6,7 @@ import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
 import { logFilm } from "../../utils/mediaWrite";
+import StarRating from "../shared/StarRating";
 
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -156,6 +157,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [watchlistSaving, setWatchlistSaving] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [logSaving, setLogSaving] = useState(false);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [logRating, setLogRating] = useState(0);
   const userIdRef = useRef(null);
   const prevTmdbId = useRef(null);
 
@@ -214,8 +217,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       .then(({ data: row }) => setIsLogged(!!row));
   }, [open, data?.tmdb_id]);
 
-  const handleLog = async () => {
-    if (!userIdRef.current || !data?.tmdb_id || logSaving || isLogged) return;
+  const handleLog = () => {
+    if (!userIdRef.current || !data?.tmdb_id || isLogged) return;
+    setLogRating(0);
+    setShowLogModal(true);
+  };
+
+  const confirmLog = async () => {
+    if (!userIdRef.current || !data?.tmdb_id || logSaving) return;
     setLogSaving(true);
     try {
       const coverUrl = data.poster_path
@@ -227,8 +236,38 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         year: data.year || null,
         creator: data.director || data.creator || null,
         poster_path: coverUrl,
-      }, coverUrl, { completed_at: new Date().toISOString().slice(0, 10) });
+      }, coverUrl, {
+        rating: logRating || null,
+        completed_at: new Date().toISOString().slice(0, 10),
+      });
+
+      // Write to feed_activity (dedup with Letterboxd sync)
+      try {
+        const { data: existingFeed } = await supabase.from("feed_activity")
+          .select("id").eq("user_id", userIdRef.current).eq("activity_type", "movie")
+          .eq("item_title", data.title).limit(1);
+
+        if (!existingFeed || existingFeed.length === 0) {
+          await supabase.from("feed_activity").insert({
+            user_id: userIdRef.current,
+            activity_type: "movie",
+            action: "shelved",
+            title: data.title,
+            item_title: data.title,
+            item_cover: coverUrl,
+            item_author: data.director || data.creator || null,
+            item_year: data.year ? parseInt(data.year) : null,
+            rating: logRating ? Math.round(logRating) : null,
+          });
+        } else if (logRating) {
+          await supabase.from("feed_activity")
+            .update({ rating: Math.round(logRating) })
+            .eq("id", existingFeed[0].id);
+        }
+      } catch (e) { console.warn("[VhsSleeve] Feed activity error:", e); }
+
       setIsLogged(true);
+      setShowLogModal(false);
       // Also remove from watchlist if it was there
       if (onWatchlist) {
         supabase.from("wishlist").delete()
@@ -251,6 +290,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       setProviders(null);
       setOnWatchlist(false);
       setIsLogged(false);
+      setShowLogModal(false);
       prevTmdbId.current = data.tmdb_id;
     }
 
@@ -1306,6 +1346,120 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         </div>
       </div>
+
+      {/* ═══ LOG MODAL — rate + confirm overlay ═══ */}
+      {showLogModal && (
+        <>
+          <div
+            onClick={() => setShowLogModal(false)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 1100,
+              background: "rgba(0,0,0,0.6)",
+            }}
+          />
+          <div style={{
+            position: "fixed", zIndex: 1101,
+            left: "50%", top: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "min(320px, 85vw)",
+            background: "#1e1b17",
+            borderRadius: 14,
+            border: "2px solid rgba(240,235,225,0.2)",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.6)",
+            padding: "24px 20px 20px",
+            display: "flex", flexDirection: "column", alignItems: "center",
+            gap: 16,
+          }}>
+            {/* Poster + title */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
+              {(data.poster_path || data.cover_url) && (
+                <img
+                  src={data.poster_path?.startsWith("http") ? data.poster_path : data.poster_path ? `https://image.tmdb.org/t/p/w154${data.poster_path}` : data.cover_url}
+                  alt=""
+                  style={{ width: 48, height: 72, objectFit: "cover", borderRadius: 4, flexShrink: 0 }}
+                />
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontWeight: 700, fontSize: 16,
+                  color: "#f0ebe1",
+                  lineHeight: 1.2,
+                  overflow: "hidden", textOverflow: "ellipsis",
+                  display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                }}>{data.title}</div>
+                {data.year && (
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10, color: "rgba(240,235,225,0.45)",
+                    marginTop: 2,
+                  }}>{data.year}</div>
+                )}
+              </div>
+            </div>
+
+            {/* Star rating */}
+            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <StarRating
+                value={logRating}
+                onChange={setLogRating}
+                size="lg"
+                showValue={false}
+                color="#facc15"
+              />
+            </div>
+
+            {/* Rating display */}
+            {logRating > 0 && (
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 14, fontWeight: 600,
+                color: "#facc15",
+                marginTop: -8,
+              }}>
+                {logRating} / 5
+              </div>
+            )}
+
+            {/* Log button */}
+            <button
+              onClick={confirmLog}
+              disabled={logSaving}
+              style={{
+                width: "100%",
+                padding: "10px 0",
+                borderRadius: 10,
+                border: "none",
+                background: logSaving ? "rgba(240,235,225,0.1)" : "rgba(240,235,225,0.9)",
+                color: logSaving ? "rgba(240,235,225,0.4)" : "#1e1b17",
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 700, fontSize: 14,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                cursor: logSaving ? "wait" : "pointer",
+                transition: "all 0.2s",
+              }}
+            >
+              {logSaving ? "Logging..." : "Log This Film"}
+            </button>
+
+            {/* Skip rating link */}
+            {logRating === 0 && (
+              <div
+                onClick={confirmLog}
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 9, color: "rgba(240,235,225,0.3)",
+                  cursor: "pointer", marginTop: -8,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                or log without rating
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </>,
     document.body
   );
