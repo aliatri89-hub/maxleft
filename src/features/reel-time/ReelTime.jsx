@@ -180,9 +180,14 @@ const CSS = `
 @keyframes rt-slide-down { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes rt-flash { 0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%,-50%) scale(1.1); } 60% { opacity: 1; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(0.8) translateY(-20px); } }
 @keyframes rt-fade-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-@keyframes rt-seed-enter { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-@keyframes rt-seed-date { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes rt-seed-shrink { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.7) translateY(40px); } }
+@keyframes rt-seed-enter { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+@keyframes rt-seed-date { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes rt-seed-shrink {
+  0% { opacity: 1; transform: scale(1) translate(0, 0); }
+  60% { opacity: 0.8; transform: scale(0.35) translate(-40%, 60px); }
+  100% { opacity: 0; transform: scale(0.25) translate(-50%, 80px); }
+}
+@keyframes rt-game-enter { from { opacity: 0; } to { opacity: 1; } }
 `;
 
 // ── Component ────────────────────────────────────────────────
@@ -200,19 +205,25 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
   const [copied, setCopied] = useState(false);
 
   // ── Seed intro animation ──
-  // "card" = big card reveal, "date" = date flips in, "done" = normal game
-  const [seedPhase, setSeedPhase] = useState("card");
+  // "pending" = waiting for puzzle, "card" = big poster, "date" = date reveal,
+  // "shrink" = poster glides to timeline, "done" = normal game
+  const [seedPhase, setSeedPhase] = useState("pending");
 
   useEffect(() => {
-    // Only run seed intro on fresh games (not resumed/done)
-    if (!puzzle || hasPlayed || gamePhase !== "playing" || currentMovieIndex !== 1) {
+    if (!puzzle) return; // still loading
+
+    // Skip intro for resumed/completed games
+    if (hasPlayed || gamePhase !== "playing" || currentMovieIndex !== 1) {
       setSeedPhase("done");
       return;
     }
-    // Sequence: card → date reveal → dismiss
+
+    // Fresh game — run the intro sequence
+    setSeedPhase("card");
     const t1 = setTimeout(() => setSeedPhase("date"), 1200);
-    const t2 = setTimeout(() => setSeedPhase("done"), 2800);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    const t2 = setTimeout(() => setSeedPhase("shrink"), 2600);
+    const t3 = setTimeout(() => setSeedPhase("done"), 3400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [puzzle, hasPlayed, gamePhase, currentMovieIndex]);
 
   // ── Drag state ──
@@ -416,23 +427,16 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
         <div style={S.subtitle}>{diffStars} &nbsp; {puzzle.movieCount} films</div>
       </div>
 
-      {/* How to play — only during active play */}
-      {isPlaying && seedPhase === "done" && (
-        <div style={{
-          fontSize: 12, color: "#8a7e6b", textAlign: "center",
-          fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
-          marginBottom: 12, padding: "0 8px", maxWidth: 420,
-        }}>
-          Place each film in chronological order. Drag or tap a slot to place.
-        </div>
-      )}
-
-      {/* Seed intro — big card reveal before game starts */}
-      {isPlaying && seedPhase !== "done" && placedMovies[0] && (
+      {/* ── Seed intro ── */}
+      {(seedPhase === "card" || seedPhase === "date" || seedPhase === "shrink") && placedMovies[0] && (
         <div style={{
           width: "100%", maxWidth: 420, textAlign: "center",
           padding: "40px 20px 20px",
-          animation: seedPhase === "card" ? "rt-seed-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)" : undefined,
+          animation: seedPhase === "card"
+            ? "rt-seed-enter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)"
+            : seedPhase === "shrink"
+            ? "rt-seed-shrink 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+            : undefined,
         }}>
           <div style={{
             fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
@@ -458,11 +462,11 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
           }}>
             {placedMovies[0].title}
           </div>
-          {seedPhase === "date" && (
+          {(seedPhase === "date" || seedPhase === "shrink") && (
             <div style={{
               fontFamily: "'Bebas Neue', sans-serif", fontSize: 28,
               color: "#7cb8e8", marginTop: 8, letterSpacing: 1,
-              animation: "rt-seed-date 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              animation: seedPhase === "date" ? "rt-seed-date 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" : undefined,
             }}>
               {placedMovies[0].display_date || getMonthDay(placedMovies[0].release_date)}
             </div>
@@ -470,146 +474,161 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
         </div>
       )}
 
-      {/* Score bar */}
+      {/* ── Game UI — only after seed intro completes ── */}
       {seedPhase === "done" && (
-        <div style={S.scoreBar}>
-          <span style={S.scoreLabel}>
-            {isDone ? "Final Score" : `Film ${Math.min(currentMovieIndex + 1, puzzle.movies.length)} of ${puzzle.movies.length}`}
-          </span>
-          <span style={S.scoreValue}>{isDone ? (result?.score ?? score) : score} / {maxScore}</span>
-        </div>
-      )}
-
-      {/* Current movie card — fades when dragging */}
-      {isPlaying && currentMovie && seedPhase === "done" && (
-        <div
-          style={{
-            ...S.currentCard,
-            opacity: isDragging ? 0.25 : 1,
-            transition: "opacity 0.15s ease",
-          }}
-          key={currentMovie.id}
-        >
-          <div
-            ref={cardRef}
-            style={S.currentInner}
-            onTouchStart={onTouchStart}
-            onMouseDown={onMouseDown}
-          >
-            {currentMovie.poster && (
-              <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
-                onError={(e) => { e.target.style.display = "none"; }} />
-            )}
-            <div style={{ flex: 1 }}>
-              <div style={S.currentLabel}>Drag to place</div>
-              <div style={S.currentTitle}>{currentMovie.title}</div>
-              <div style={S.currentPrompt}>Worth {getPlacementValue(currentPlacementNum)} pts</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Drag ghost — fixed, follows finger */}
-      {isDragging && currentMovie && (
-        <div style={S.dragGhost(dragPos.x, dragPos.y)}>
-          <div style={{
-            ...S.currentInner,
-            border: "2px solid rgba(124,184,232,0.7)",
-            background: "linear-gradient(135deg, rgba(124,184,232,0.18), rgba(124,184,232,0.06))",
-          }}>
-            {currentMovie.poster && (
-              <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
-                onError={(e) => { e.target.style.display = "none"; }} />
-            )}
-            <div style={{ flex: 1 }}>
-              <div style={S.currentLabel}>Drag to place</div>
-              <div style={S.currentTitle}>{currentMovie.title}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Game over */}
-      {isDone && (
-        <div style={S.gameover}>
-          <div style={S.gameoverLabel}>Game Over</div>
-          <div style={S.gameoverScore}>{result?.score ?? score}</div>
-          <div style={S.gameoverMax}>out of {maxScore} points</div>
-          <div style={S.placementDots}>
-            {/* Gimme dot */}
+        <div style={{
+          width: "100%", display: "flex", flexDirection: "column", alignItems: "center",
+          animation: "rt-game-enter 0.4s ease",
+        }}>
+          {/* How to play */}
+          {isPlaying && (
             <div style={{
-              width: 16, height: 16, borderRadius: 4,
-              background: "#4caf50", opacity: 0.8,
-            }} />
-            {placementResults.map((r, i) => (
-              <div key={i} style={{
-                width: 16, height: 16, borderRadius: 4,
-                background: r ? "#4caf50" : "#e74c3c",
-                opacity: 0.8,
-              }} />
+              fontSize: 12, color: "#8a7e6b", textAlign: "center",
+              fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
+              marginBottom: 12, padding: "0 8px", maxWidth: 420,
+            }}>
+              Place each film in chronological order. Drag or tap a slot to place.
+            </div>
+          )}
+
+          {/* Score bar */}
+          <div style={S.scoreBar}>
+            <span style={S.scoreLabel}>
+              {isDone ? "Final Score" : `Film ${Math.min(currentMovieIndex + 1, puzzle.movies.length)} of ${puzzle.movies.length}`}
+            </span>
+            <span style={S.scoreValue}>{isDone ? (result?.score ?? score) : score} / {maxScore}</span>
+          </div>
+
+          {/* Current movie card — fades when dragging */}
+          {isPlaying && currentMovie && (
+            <div
+              style={{
+                ...S.currentCard,
+                opacity: isDragging ? 0.25 : 1,
+                transition: "opacity 0.15s ease",
+              }}
+              key={currentMovie.id}
+            >
+              <div
+                ref={cardRef}
+                style={S.currentInner}
+                onTouchStart={onTouchStart}
+                onMouseDown={onMouseDown}
+              >
+                {currentMovie.poster && (
+                  <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
+                    onError={(e) => { e.target.style.display = "none"; }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={S.currentLabel}>Drag to place</div>
+                  <div style={S.currentTitle}>{currentMovie.title}</div>
+                  <div style={S.currentPrompt}>Worth {getPlacementValue(currentPlacementNum)} pts</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Drag ghost — fixed, follows finger */}
+          {isDragging && currentMovie && (
+            <div style={S.dragGhost(dragPos.x, dragPos.y)}>
+              <div style={{
+                ...S.currentInner,
+                border: "2px solid rgba(124,184,232,0.7)",
+                background: "linear-gradient(135deg, rgba(124,184,232,0.18), rgba(124,184,232,0.06))",
+              }}>
+                {currentMovie.poster && (
+                  <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
+                    onError={(e) => { e.target.style.display = "none"; }} />
+                )}
+                <div style={{ flex: 1 }}>
+                  <div style={S.currentLabel}>Drag to place</div>
+                  <div style={S.currentTitle}>{currentMovie.title}</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Game over */}
+          {isDone && (
+            <div style={S.gameover}>
+              <div style={S.gameoverLabel}>Game Over</div>
+              <div style={S.gameoverScore}>{result?.score ?? score}</div>
+              <div style={S.gameoverMax}>out of {maxScore} points</div>
+              <div style={S.placementDots}>
+                {/* Gimme dot */}
+                <div style={{
+                  width: 16, height: 16, borderRadius: 4,
+                  background: "#4caf50", opacity: 0.8,
+                }} />
+                {placementResults.map((r, i) => (
+                  <div key={i} style={{
+                    width: 16, height: 16, borderRadius: 4,
+                    background: r ? "#4caf50" : "#e74c3c",
+                    opacity: 0.8,
+                  }} />
+                ))}
+              </div>
+              <div style={S.gameoverMsg}>
+                {(result?.perfect || placementResults.every(Boolean))
+                  ? "Perfect timeline. You nailed every placement."
+                  : (result?.score ?? score) >= maxScore * 0.7
+                    ? "Nice work, solid timeline instincts."
+                    : "Tough one! Come back tomorrow."}
+              </div>
+              <button onClick={handleShare} style={S.shareBtn}>
+                {copied ? "Copied!" : "Share Result"}
+              </button>
+              <div style={S.nextTimer}>
+                Next puzzle in {timeUntil.hours}h {timeUntil.minutes}m
+              </div>
+            </div>
+          )}
+
+          {/* Result flash */}
+          {lastPlacement && (
+            <div style={S.flash(lastPlacement.correct)} key={lastPlacement.movieId + lastPlacement.correct}>
+              {lastPlacement.correct ? `+${lastPlacement.points}` : "\u2717"}
+            </div>
+          )}
+
+          {/* Timeline */}
+          <div style={S.timeline} ref={timelineRef}>
+            <div style={S.timelineLine} />
+
+            {/* Direction label: Earlier */}
+            <div style={S.timelineLabel}>
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginBottom: 2 }}>
+                <path d="M1 5L5 1L9 5" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Earlier
+            </div>
+
+            {placedMovies.map((movie, i) => (
+              <div key={`row-${movie.id}`}>
+                {renderSlot(i)}
+                <div style={S.placed}>
+                  <div style={S.dot} />
+                  {movie.poster && (
+                    <img style={S.placedPoster} src={movie.poster} loading="lazy" alt={movie.title}
+                      onError={(e) => { e.target.style.display = "none"; }} />
+                  )}
+                  <span style={S.placedTitle}>{movie.title}</span>
+                  <span style={S.placedDate}>{movie.display_date || getMonthDay(movie.release_date)}</span>
+                </div>
+              </div>
             ))}
-          </div>
-          <div style={S.gameoverMsg}>
-            {(result?.perfect || placementResults.every(Boolean))
-              ? "Perfect timeline. You nailed every placement."
-              : (result?.score ?? score) >= maxScore * 0.7
-                ? "Nice work, solid timeline instincts."
-                : "Tough one! Come back tomorrow."}
-          </div>
-          <button onClick={handleShare} style={S.shareBtn}>
-            {copied ? "Copied!" : "Share Result"}
-          </button>
-          <div style={S.nextTimer}>
-            Next puzzle in {timeUntil.hours}h {timeUntil.minutes}m
-          </div>
-        </div>
-      )}
 
-      {/* Result flash */}
-      {lastPlacement && (
-        <div style={S.flash(lastPlacement.correct)} key={lastPlacement.movieId + lastPlacement.correct}>
-          {lastPlacement.correct ? `+${lastPlacement.points}` : "\u2717"}
-        </div>
-      )}
+            {renderSlot(placedMovies.length)}
 
-      {/* Timeline — hidden during seed intro */}
-      {seedPhase === "done" && (
-      <div style={S.timeline} ref={timelineRef}>
-        <div style={S.timelineLine} />
-
-        {/* Direction label: Earlier */}
-        <div style={S.timelineLabel}>
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginBottom: 2 }}>
-            <path d="M1 5L5 1L9 5" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Earlier
-        </div>
-
-        {placedMovies.map((movie, i) => (
-          <div key={`row-${movie.id}`}>
-            {renderSlot(i)}
-            <div style={S.placed}>
-              <div style={S.dot} />
-              {movie.poster && (
-                <img style={S.placedPoster} src={movie.poster} loading="lazy" alt={movie.title}
-                  onError={(e) => { e.target.style.display = "none"; }} />
-              )}
-              <span style={S.placedTitle}>{movie.title}</span>
-              <span style={S.placedDate}>{movie.display_date || getMonthDay(movie.release_date)}</span>
+            {/* Direction label: Later */}
+            <div style={S.timelineLabel}>
+              Later
+              <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginTop: 2 }}>
+                <path d="M1 1L5 5L9 1" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </div>
           </div>
-        ))}
-
-        {renderSlot(placedMovies.length)}
-
-        {/* Direction label: Later */}
-        <div style={S.timelineLabel}>
-          Later
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ marginTop: 2 }}>
-            <path d="M1 1L5 5L9 1" stroke="#7cb8e8" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
         </div>
-      </div>
       )}
     </div>
   );
