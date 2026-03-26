@@ -32,6 +32,7 @@ const TABS = [
   { key: "items", label: "Items" },
   { key: "shelves", label: "Shelves" },
   { key: "badges", label: "Badges" },
+  { key: "posts", label: "Posts" },
 ];
 
 export default function CommunityManager({ session }) {
@@ -101,6 +102,9 @@ export default function CommunityManager({ session }) {
       )}
       {selectedCommunity && activeTab === "badges" && (
         <BadgesPanel community={selectedCommunity} showToast={showToast} />
+      )}
+      {selectedCommunity && activeTab === "posts" && (
+        <PostsPanel community={selectedCommunity} showToast={showToast} />
       )}
     </div>
   );
@@ -223,6 +227,7 @@ function ItemsPanel({ community, showToast }) {
                   key={item.id}
                   item={item}
                   miniseries={miniseries}
+                  communitySlug={community.slug}
                   showToast={showToast}
                   onSaved={() => { setEditingId(null); fetchData(); }}
                   onCancel={() => setEditingId(null)}
@@ -238,7 +243,7 @@ function ItemsPanel({ community, showToast }) {
                       <div style={S.thumbEmpty}>🎬</div>
                     )}
                   </td>
-                  <td style={S.td}><div style={S.cellTitle}>{item.title}</div></td>
+                  <td style={S.td}><div style={S.cellTitle}>{item.title}{item.extra_data?.editorial_blurb ? " 📝" : ""}</div></td>
                   <td style={S.td}><div style={S.cellSub}>{item.year || "—"}</div></td>
                   <td style={S.td}><div style={S.typePill}>{item.media_type}</div></td>
                   <td style={S.td}><div style={S.cellSub}>{shelfName(item.miniseries_id)}</div></td>
@@ -269,14 +274,18 @@ function ItemsPanel({ community, showToast }) {
 
 // ── Inline edit row ──
 
-function EditItemRow({ item, miniseries, showToast, onSaved, onCancel }) {
+function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCancel }) {
   const [title, setTitle] = useState(item.title || "");
   const [year, setYear] = useState(item.year || "");
   const [tmdbId, setTmdbId] = useState(item.tmdb_id || "");
   const [sortOrder, setSortOrder] = useState(item.sort_order ?? "");
   const [shelfId, setShelfId] = useState(item.miniseries_id || "");
   const [creator, setCreator] = useState(item.creator || "");
+  const [blurb, setBlurb] = useState(item.extra_data?.editorial_blurb || "");
+  const [blurbAuthor, setBlurbAuthor] = useState(item.extra_data?.blurb_author || "Ali");
   const [saving, setSaving] = useState(false);
+
+  const isOriginals = communitySlug === "originals";
 
   const handleSave = async () => {
     setSaving(true);
@@ -290,6 +299,19 @@ function EditItemRow({ item, miniseries, showToast, onSaved, onCancel }) {
     if (shelfId && shelfId !== item.miniseries_id) {
       updates.miniseries_id = shelfId;
     }
+    // Merge blurb into extra_data for originals
+    if (isOriginals) {
+      const existingExtra = item.extra_data || {};
+      const newExtra = { ...existingExtra };
+      if (blurb.trim()) {
+        newExtra.editorial_blurb = blurb.trim();
+        newExtra.blurb_author = blurbAuthor.trim() || "Ali";
+      } else {
+        delete newExtra.editorial_blurb;
+        delete newExtra.blurb_author;
+      }
+      updates.extra_data = Object.keys(newExtra).length > 0 ? newExtra : null;
+    }
     const { error } = await supabase.from("community_items").update(updates).eq("id", item.id);
     if (error) { showToast(`Error: ${error.message}`); }
     else { showToast("Updated ✓"); onSaved(); }
@@ -297,29 +319,59 @@ function EditItemRow({ item, miniseries, showToast, onSaved, onCancel }) {
   };
 
   return (
-    <tr style={{ ...S.tr, background: "rgba(196,115,79,0.04)" }}>
-      <td style={S.td}>
-        {item.poster_path ? (
-          <img src={`${TMDB_IMG}/w92${item.poster_path}`} alt="" style={S.thumbPoster} />
-        ) : <div style={S.thumbEmpty}>🎬</div>}
-      </td>
-      <td style={S.td}><input value={title} onChange={e => setTitle(e.target.value)} style={S.inlineInput} /></td>
-      <td style={S.td}><input value={year} onChange={e => setYear(e.target.value)} style={{ ...S.inlineInput, width: 60 }} type="number" /></td>
-      <td style={S.td}><div style={S.typePill}>{item.media_type}</div></td>
-      <td style={S.td}>
-        <select value={shelfId} onChange={e => setShelfId(e.target.value)} style={S.inlineSelect}>
-          {miniseries.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-        </select>
-      </td>
-      <td style={S.td}><input value={tmdbId} onChange={e => setTmdbId(e.target.value)} style={{ ...S.inlineInput, width: 70 }} /></td>
-      <td style={S.td}><input value={sortOrder} onChange={e => setSortOrder(e.target.value)} style={{ ...S.inlineInput, width: 50 }} type="number" /></td>
-      <td style={S.td}>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={handleSave} disabled={saving} style={S.saveBtn}>{saving ? "…" : "Save"}</button>
-          <button onClick={onCancel} style={S.cancelBtn}>Cancel</button>
-        </div>
-      </td>
-    </tr>
+    <>
+      <tr style={{ ...S.tr, background: "rgba(196,115,79,0.04)", borderBottom: isOriginals ? "none" : undefined }}>
+        <td style={S.td}>
+          {item.poster_path ? (
+            <img src={`${TMDB_IMG}/w92${item.poster_path}`} alt="" style={S.thumbPoster} />
+          ) : <div style={S.thumbEmpty}>🎬</div>}
+        </td>
+        <td style={S.td}><input value={title} onChange={e => setTitle(e.target.value)} style={S.inlineInput} /></td>
+        <td style={S.td}><input value={year} onChange={e => setYear(e.target.value)} style={{ ...S.inlineInput, width: 60 }} type="number" /></td>
+        <td style={S.td}><div style={S.typePill}>{item.media_type}</div></td>
+        <td style={S.td}>
+          <select value={shelfId} onChange={e => setShelfId(e.target.value)} style={S.inlineSelect}>
+            {miniseries.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+          </select>
+        </td>
+        <td style={S.td}><input value={tmdbId} onChange={e => setTmdbId(e.target.value)} style={{ ...S.inlineInput, width: 70 }} /></td>
+        <td style={S.td}><input value={sortOrder} onChange={e => setSortOrder(e.target.value)} style={{ ...S.inlineInput, width: 50 }} type="number" /></td>
+        <td style={S.td}>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={handleSave} disabled={saving} style={S.saveBtn}>{saving ? "…" : "Save"}</button>
+            <button onClick={onCancel} style={S.cancelBtn}>Cancel</button>
+          </div>
+        </td>
+      </tr>
+      {/* Editorial blurb row — originals only */}
+      {isOriginals && (
+        <tr style={{ ...S.tr, background: "rgba(196,115,79,0.04)" }}>
+          <td colSpan={8} style={{ ...S.td, paddingTop: 0 }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div style={{ flex: 1 }}>
+                <label style={S.fieldLabel}>Editorial Blurb <span style={S.fieldHint}>— shown in log modal above TMDB synopsis</span></label>
+                <textarea
+                  value={blurb}
+                  onChange={e => setBlurb(e.target.value)}
+                  placeholder="Why this film matters to this shelf…"
+                  rows={3}
+                  style={{ ...S.formInput, resize: "vertical", fontFamily: "'Georgia', serif", fontSize: 13, lineHeight: 1.6 }}
+                />
+              </div>
+              <div style={{ width: 140 }}>
+                <label style={S.fieldLabel}>Blurb Author</label>
+                <input
+                  value={blurbAuthor}
+                  onChange={e => setBlurbAuthor(e.target.value)}
+                  placeholder="Ali"
+                  style={S.formInput}
+                />
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -1058,6 +1110,366 @@ function CreateBadgeForm({ communityId, miniseries, nextSort, showToast, onCreat
       <button onClick={handleCreate} disabled={creating || !name.trim()} style={S.formSearchBtn}>
         {creating ? "Creating…" : "Create Badge"}
       </button>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════
+// POSTS PANEL — Blog editor for originals_posts
+// ═══════════════════════════════════════════════════
+
+function PostsPanel({ community, showToast }) {
+  const [posts, setPosts] = useState([]);
+  const [shelves, setShelves] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingPost, setEditingPost] = useState(null); // null = list view, object = editing
+  const [creating, setCreating] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const [{ data: ms }, { data: ps }] = await Promise.all([
+      supabase.from("community_miniseries").select("id, title, sort_order")
+        .eq("community_id", community.id).order("sort_order"),
+      supabase.from("originals_posts").select("*").order("created_at", { ascending: false }),
+    ]);
+    setShelves(ms || []);
+    // Filter posts to those linked to this community's shelves
+    const msIds = new Set((ms || []).map(m => m.id));
+    setPosts((ps || []).filter(p => msIds.has(p.miniseries_id)));
+    setLoading(false);
+  }, [community.id]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const shelfName = (msId) => shelves.find(m => m.id === msId)?.title || "—";
+
+  const handleNewPost = () => {
+    setEditingPost({
+      id: null,
+      title: "",
+      slug: "",
+      body: "",
+      author: "Ali",
+      miniseries_id: shelves[0]?.id || "",
+      published_at: null,
+      cover_image_url: "",
+    });
+    setCreating(true);
+  };
+
+  if (loading) return <div style={S.emptyState}><div style={S.spinner} /></div>;
+
+  // ── Editor view ──
+  if (editingPost) {
+    return (
+      <PostEditor
+        post={editingPost}
+        shelves={shelves}
+        isNew={creating}
+        showToast={showToast}
+        onSaved={() => { setEditingPost(null); setCreating(false); fetchData(); }}
+        onCancel={() => { setEditingPost(null); setCreating(false); }}
+      />
+    );
+  }
+
+  // ── List view ──
+  return (
+    <div>
+      <div style={S.toolbar}>
+        <div style={S.toolbarLeft}>
+          <span style={S.toolCount}>{posts.length} posts</span>
+        </div>
+        <div style={S.toolbarRight}>
+          <button onClick={handleNewPost} style={S.addBtn}>+ New Post</button>
+        </div>
+      </div>
+
+      {posts.length === 0 && (
+        <div style={S.emptyState}>
+          <div style={{ fontSize: 14, color: "rgba(240,235,225,0.4)", marginBottom: 8 }}>
+            No posts yet for this community.
+          </div>
+          <div style={{ fontSize: 12, color: "rgba(240,235,225,0.25)" }}>
+            Posts are editorial write-ups that appear above each shelf.
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {posts.map(post => (
+          <div
+            key={post.id}
+            onClick={() => { setEditingPost(post); setCreating(false); }}
+            style={{
+              padding: "16px 20px",
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: 12,
+              cursor: "pointer",
+              transition: "border-color 0.15s",
+              display: "flex", alignItems: "center", gap: 16,
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(196,115,79,0.3)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#f0ebe1", fontFamily: "var(--font-display)" }}>
+                  {post.title || "Untitled"}
+                </div>
+                <div style={{
+                  ...S.statusPill,
+                  fontSize: 8,
+                  padding: "2px 8px",
+                  color: post.published_at ? "#4ade80" : "rgba(240,235,225,0.4)",
+                  background: post.published_at ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.04)",
+                  borderColor: post.published_at ? "rgba(74,222,128,0.2)" : "rgba(255,255,255,0.08)",
+                }}>
+                  {post.published_at ? "published" : "draft"}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 12, fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)" }}>
+                <span>📁 {shelfName(post.miniseries_id)}</span>
+                <span>✍ {post.author || "Ali"}</span>
+                <span>{post.body?.length || 0} chars</span>
+                {post.published_at && (
+                  <span>{new Date(post.published_at).toLocaleDateString()}</span>
+                )}
+              </div>
+            </div>
+            <button style={S.editBtn}>Edit</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ── Post Editor — full blog editing tool ──
+
+function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
+  const [title, setTitle] = useState(post.title || "");
+  const [slug, setSlug] = useState(post.slug || "");
+  const [body, setBody] = useState(post.body || "");
+  const [author, setAuthor] = useState(post.author || "Ali");
+  const [shelfId, setShelfId] = useState(post.miniseries_id || "");
+  const [coverUrl, setCoverUrl] = useState(post.cover_image_url || "");
+  const [isPublished, setIsPublished] = useState(!!post.published_at);
+  const [showPreview, setShowPreview] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Auto-generate slug from title
+  const autoSlug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+
+  const handleTitleChange = (val) => {
+    setTitle(val);
+    if (isNew || slug === autoSlug(post.title || "")) {
+      setSlug(autoSlug(val));
+    }
+  };
+
+  const handleSave = async () => {
+    if (!title.trim() || !slug.trim()) {
+      showToast("Title and slug are required");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      title: title.trim(),
+      slug: slug.trim(),
+      body: body,
+      author: author.trim() || "Ali",
+      miniseries_id: shelfId || null,
+      cover_image_url: coverUrl.trim() || null,
+      published_at: isPublished ? (post.published_at || new Date().toISOString()) : null,
+    };
+
+    let error;
+    if (isNew) {
+      ({ error } = await supabase.from("originals_posts").insert(payload));
+    } else {
+      ({ error } = await supabase.from("originals_posts").update(payload).eq("id", post.id));
+    }
+
+    if (error) {
+      showToast(`Error: ${error.message}`);
+    } else {
+      showToast(isNew ? "Post created ✓" : "Post saved ✓");
+      onSaved();
+    }
+    setSaving(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    setDeleting(true);
+    const { error } = await supabase.from("originals_posts").delete().eq("id", post.id);
+    if (error) showToast(`Error: ${error.message}`);
+    else { showToast("Post deleted"); onSaved(); }
+    setDeleting(false);
+  };
+
+  // Simple markdown → HTML for preview
+  const renderPreview = (md) => {
+    if (!md) return "<p style='color:rgba(240,235,225,0.25);font-style:italic'>Start writing…</p>";
+    return md
+      .split(/\n\n+/)
+      .filter(Boolean)
+      .map(p => {
+        let html = p
+          .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#f0ebe1;font-weight:700">$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" style="color:#C4734F;text-decoration:underline">$1</a>')
+          .replace(/\n/g, '<br/>');
+        return `<p style="margin:0 0 16px;line-height:1.75;color:rgba(240,235,225,0.78);font-family:Georgia,serif;font-size:15px">${html}</p>`;
+      })
+      .join("");
+  };
+
+  return (
+    <div>
+      {/* Header bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button onClick={onCancel} style={{ ...S.cancelBtn, padding: "6px 14px", fontSize: 12 }}>← Back to list</button>
+          <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)", color: "#f0ebe1", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            {isNew ? "New Post" : "Edit Post"}
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            style={{ ...S.editBtn, padding: "6px 14px", fontSize: 11 }}
+          >
+            {showPreview ? "Hide Preview" : "Show Preview"}
+          </button>
+          {!isNew && (
+            <button onClick={handleDelete} disabled={deleting} style={{ ...S.deleteBtn, padding: "6px 12px", fontSize: 11 }}>
+              {deleting ? "…" : "Delete"}
+            </button>
+          )}
+          <button onClick={handleSave} disabled={saving} style={{ ...S.formSearchBtn, padding: "6px 20px" }}>
+            {saving ? "Saving…" : isNew ? "Create" : "Save"}
+          </button>
+        </div>
+      </div>
+
+      {/* Metadata fields */}
+      <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+        <div style={{ flex: 2 }}>
+          <label style={S.fieldLabel}>Title</label>
+          <input value={title} onChange={e => handleTitleChange(e.target.value)} style={S.formInput} placeholder="e.g. Why 2002 Is the Best Year in Film" />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={S.fieldLabel}>Slug</label>
+          <input value={slug} onChange={e => setSlug(e.target.value)} style={{ ...S.formInput, fontFamily: "var(--font-mono)" }} placeholder="auto-generated" />
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+        <div style={{ width: 180 }}>
+          <label style={S.fieldLabel}>Author</label>
+          <input value={author} onChange={e => setAuthor(e.target.value)} style={S.formInput} placeholder="Ali" />
+        </div>
+        <div style={{ width: 220 }}>
+          <label style={S.fieldLabel}>Linked Shelf</label>
+          <select value={shelfId} onChange={e => setShelfId(e.target.value)} style={S.formSelect}>
+            <option value="">None</option>
+            {shelves.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+          </select>
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={S.fieldLabel}>Cover Image URL <span style={S.fieldHint}>optional</span></label>
+          <input value={coverUrl} onChange={e => setCoverUrl(e.target.value)} style={S.formInput} placeholder="https://..." />
+        </div>
+        <div style={{ width: 140, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+          <button
+            onClick={() => setIsPublished(!isPublished)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: 8,
+              border: "1px solid",
+              fontSize: 11,
+              fontWeight: 700,
+              fontFamily: "var(--font-display)",
+              textTransform: "uppercase",
+              letterSpacing: "0.04em",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              color: isPublished ? "#4ade80" : "rgba(240,235,225,0.4)",
+              background: isPublished ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.04)",
+              borderColor: isPublished ? "rgba(74,222,128,0.2)" : "rgba(255,255,255,0.08)",
+            }}
+          >
+            {isPublished ? "✓ Published" : "Draft"}
+          </button>
+        </div>
+      </div>
+
+      {/* Body editor + preview */}
+      <div style={{ display: "flex", gap: 16 }}>
+        {/* Editor */}
+        <div style={{ flex: 1 }}>
+          <label style={S.fieldLabel}>Body <span style={S.fieldHint}>— markdown supported (**bold**, *italic*, [links](url))</span></label>
+          <textarea
+            value={body}
+            onChange={e => setBody(e.target.value)}
+            placeholder={"Start writing your post…\n\nUse **bold** for emphasis, *italic* for asides.\n\nDouble newline for new paragraphs."}
+            style={{
+              ...S.formInput,
+              resize: "vertical",
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              fontSize: 14,
+              lineHeight: 1.75,
+              minHeight: 420,
+              padding: "16px 18px",
+              whiteSpace: "pre-wrap",
+            }}
+          />
+          <div style={{ marginTop: 6, fontSize: 10, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.2)" }}>
+            {body.length} characters · {body.split(/\s+/).filter(Boolean).length} words
+          </div>
+        </div>
+
+        {/* Preview */}
+        {showPreview && (
+          <div style={{
+            flex: 1,
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 12,
+            padding: "24px",
+            maxHeight: 520,
+            overflowY: "auto",
+          }}>
+            <div style={{ fontSize: 9, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(240,235,225,0.2)", marginBottom: 16 }}>
+              Preview
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)", color: "#f0ebe1", lineHeight: 1.2, marginBottom: 8 }}>
+              {title || "Untitled"}
+            </div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 20 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#C4734F", fontFamily: "var(--font-mono)" }}>
+                by {author || "Ali"}
+              </span>
+              {isPublished && (
+                <>
+                  <span style={{ color: "rgba(240,235,225,0.15)" }}>·</span>
+                  <span style={{ fontSize: 11, color: "rgba(240,235,225,0.3)", fontFamily: "var(--font-mono)" }}>
+                    {new Date(post.published_at || Date.now()).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  </span>
+                </>
+              )}
+            </div>
+            <div style={{ height: 1, background: "linear-gradient(90deg, rgba(196,115,79,0.3), transparent)", marginBottom: 20 }} />
+            <div dangerouslySetInnerHTML={{ __html: renderPreview(body) }} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -27,6 +27,7 @@ import { toLogTimestamp } from "../../../utils/helpers";
  *   renderRatingExtra  — () => JSX | null  (inline next to stars, e.g. brown arrow)
  *   renderCustomSection— ({ saving }) => JSX | null  (below rating, e.g. commentary toggle)
  *   renderHeroExtra    — () => JSX | null  (below episode number, e.g. website link)
+ *   renderEditorial    — () => JSX | null  (above TMDB overview, e.g. staff pick blurb)
  */
 export default function CommunityLogModal({
   // Standard props (unchanged from individual modals)
@@ -47,6 +48,7 @@ export default function CommunityLogModal({
   renderRatingExtra,
   renderCustomSection,
   renderHeroExtra,
+  renderEditorial,
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
   const [saving, setSaving] = useState(false);
@@ -579,6 +581,9 @@ export default function CommunityLogModal({
             />
           </div>
         )}
+
+        {/* Editorial blurb (e.g. Originals staff pick callout) */}
+        {renderEditorial?.()}
 
         {/* TMDB Overview */}
         {overview && (

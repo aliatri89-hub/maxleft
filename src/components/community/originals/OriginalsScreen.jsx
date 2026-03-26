@@ -172,6 +172,54 @@ export default function OriginalsScreen({
             communityName: "MANTL Originals",
             platforms: [],
           }}
+          renderEditorial={() => {
+            const blurb = modalItem?.extra_data?.editorial_blurb;
+            const blurbAuthor = modalItem?.extra_data?.blurb_author || "Ali";
+            if (!blurb) return null;
+            return (
+              <div style={{
+                marginBottom: 16,
+                padding: "14px 16px",
+                background: "rgba(233,69,96,0.06)",
+                border: "1px solid rgba(233,69,96,0.15)",
+                borderRadius: 12,
+                position: "relative",
+                zIndex: 1,
+                animation: "clmContentFadeIn 0.3s ease",
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  marginBottom: 8,
+                }}>
+                  <span style={{ fontSize: 11 }}>📝</span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 800,
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    color: accent,
+                  }}>
+                    Staff Pick
+                  </span>
+                  <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 600,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    color: "rgba(255,255,255,0.35)",
+                  }}>
+                    {blurbAuthor}
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: 13, lineHeight: 1.65,
+                  color: "rgba(255,255,255,0.72)",
+                  fontFamily: "'Georgia', 'Times New Roman', serif",
+                }}>
+                  {blurb}
+                </div>
+              </div>
+            );
+          }}
         />
       )}
 
