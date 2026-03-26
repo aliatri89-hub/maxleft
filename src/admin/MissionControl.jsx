@@ -24,16 +24,11 @@ export default function MissionControl({ session }) {
         { data: wtToday },
         { data: ccToday },
 
-        // ── Games: runway (how many future puzzles seeded) ──
-        { count: tfRunway },
-        { count: wtRunway },
-        { count: ccRunway },
-
         // ── Ingest queue depth ──
         { count: ingestCount },
         { data: ingestSummary },
 
-        // ── Episodes coming soon ──
+        // ── Episodes coming soon (future air_date) ──
         { count: comingSoonCount },
 
         // ── Community health ──
@@ -50,17 +45,12 @@ export default function MissionControl({ session }) {
         supabase.from("wt_daily_puzzles").select("id").eq("puzzle_date", today).maybeSingle(),
         supabase.from("cc_daily_puzzles").select("id").eq("puzzle_date", today).maybeSingle(),
 
-        // Games runway
-        supabase.from("tf_daily_puzzles").select("*", { count: "exact", head: true }).gte("puzzle_date", today),
-        supabase.from("wt_daily_puzzles").select("*", { count: "exact", head: true }).gte("puzzle_date", today),
-        supabase.from("cc_daily_puzzles").select("*", { count: "exact", head: true }).gte("puzzle_date", today),
-
         // Ingest
         supabase.from("ingest_review_queue").select("*", { count: "exact", head: true }),
         supabase.from("daily_ingest_summary").select("*").order("run_date", { ascending: false }).limit(1),
 
-        // Episodes
-        supabase.from("community_items").select("*", { count: "exact", head: true }).eq("coming_soon", true),
+        // Episodes with future air_date = coming soon
+        supabase.from("community_items").select("*", { count: "exact", head: true }).gt("air_date", today),
 
         // Communities
         supabase.from("community_pages").select("*", { count: "exact", head: true }),
@@ -87,9 +77,9 @@ export default function MissionControl({ session }) {
 
       setData({
         games: {
-          tripleFeature: { hasToday: !!tfToday, runway: tfRunway || 0 },
-          reelTime: { hasToday: !!wtToday, runway: wtRunway || 0 },
-          castConnections: { hasToday: !!ccToday, runway: ccRunway || 0 },
+          tripleFeature: { hasToday: !!tfToday },
+          reelTime: { hasToday: !!wtToday },
+          castConnections: { hasToday: !!ccToday },
         },
         ingest: {
           queueDepth: ingestCount || 0,
@@ -157,19 +147,16 @@ export default function MissionControl({ session }) {
         <GameCard
           name="Triple Feature"
           hasToday={d.games.tripleFeature.hasToday}
-          runway={d.games.tripleFeature.runway}
           accent="#e94560"
         />
         <GameCard
           name="Reel Time"
           hasToday={d.games.reelTime.hasToday}
-          runway={d.games.reelTime.runway}
           accent="#22d3ee"
         />
         <GameCard
           name="Cast Connections"
           hasToday={d.games.castConnections.hasToday}
-          runway={d.games.castConnections.runway}
           accent="#a78bfa"
         />
       </div>
@@ -259,10 +246,7 @@ function SectionHeader({ title }) {
   );
 }
 
-function GameCard({ name, hasToday, runway, accent }) {
-  const runwayWeeks = Math.floor(runway / 7);
-  const runwayStatus = runway > 60 ? "good" : runway > 14 ? "warn" : "action";
-
+function GameCard({ name, hasToday, accent }) {
   return (
     <div style={{
       ...styles.card,
@@ -282,16 +266,6 @@ function GameCard({ name, hasToday, runway, accent }) {
         <div style={styles.bigLabel}>
           {hasToday ? "Today's puzzle live" : "No puzzle today!"}
         </div>
-      </div>
-
-      <div style={{
-        ...styles.runwayBar,
-        borderTopColor: `${statusColor(runwayStatus)}20`,
-      }}>
-        <span style={styles.runwayLabel}>Runway</span>
-        <span style={{ ...styles.runwayValue, color: statusColor(runwayStatus) }}>
-          {runway} days ({runwayWeeks}w)
-        </span>
       </div>
     </div>
   );
@@ -436,27 +410,6 @@ const styles = {
     fontFamily: "var(--font-mono)",
     color: "rgba(240,235,225,0.4)",
     marginTop: 2,
-  },
-  runwayBar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "8px 14px",
-    borderTop: "1px solid rgba(255,255,255,0.04)",
-    background: "rgba(255,255,255,0.01)",
-  },
-  runwayLabel: {
-    fontSize: 10,
-    fontWeight: 700,
-    fontFamily: "var(--font-display)",
-    textTransform: "uppercase",
-    letterSpacing: "0.06em",
-    color: "rgba(240,235,225,0.3)",
-  },
-  runwayValue: {
-    fontSize: 12,
-    fontWeight: 600,
-    fontFamily: "var(--font-mono)",
   },
 
   // ── Stat cards ──
