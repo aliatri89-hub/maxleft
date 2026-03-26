@@ -210,10 +210,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   // Check if film is already logged
   useEffect(() => {
     if (!open || !data?.tmdb_id || !userId) return;
-    supabase.from("user_media_logs").select("id")
+    // Activity feed cards already know they're logged — trust the data
+    if (data.logged_at || data.completed_at) { setIsLogged(true); return; }
+    // Browse/discover cards need a DB check via the films view (has tmdb_id)
+    supabase.from("user_films_v").select("id")
       .eq("user_id", userId).eq("tmdb_id", data.tmdb_id)
       .limit(1)
-      .then(({ data: rows }) => setIsLogged(rows && rows.length > 0));
+      .then(({ data: rows, error }) => {
+        if (error) { console.warn("[VhsSleeve] isLogged check error:", error); return; }
+        setIsLogged(rows && rows.length > 0);
+      });
   }, [open, data?.tmdb_id, userId]);
 
   const handleLog = () => {

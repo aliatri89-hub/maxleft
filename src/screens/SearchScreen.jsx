@@ -75,7 +75,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     const tmdbIds = displayResults.map(r => r.tmdbId).filter(Boolean);
     if (tmdbIds.length === 0) return;
     let cancelled = false;
-    supabase.from("user_media_logs").select("tmdb_id")
+    supabase.from("user_films_v").select("tmdb_id")
       .eq("user_id", userId).in("tmdb_id", tmdbIds)
       .then(({ data }) => {
         if (cancelled || !data) return;
