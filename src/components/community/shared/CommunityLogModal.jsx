@@ -85,6 +85,11 @@ export default function CommunityLogModal({
   // ── Episode matching ──
   const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(item, config.communityName);
 
+  // ── Patreon fallback: when no audio, link out to Patreon if community has one ──
+  const patreonFallbackUrl = !matchedEpisode
+    ? config.platforms?.find(p => p.type === "patreon")?.url || null
+    : null;
+
   // ── Fetch TMDB data on mount ──
   useEffect(() => {
     if (!item.tmdb_id || !["film", "show"].includes(item.media_type)) return;
@@ -133,7 +138,7 @@ export default function CommunityLogModal({
 
   // ── Shared post-log behavior ──
   const afterLog = (wasUpdate) => {
-    if (!wasUpdate && matchedEpisode) {
+    if (!wasUpdate && (matchedEpisode || patreonFallbackUrl)) {
       setSaving(false);
       setEpisodeToast(true);
       setTimeout(() => { setEpisodeToast(false); onClose(); }, 5000);
@@ -497,6 +502,56 @@ export default function CommunityLogModal({
               </a>
             )}
 
+            {/* Listen on Patreon — fallback when no audio in MANTL */}
+            {!matchedEpisode && patreonFallbackUrl && (isFilm || isShow) && (
+              <a
+                href={patreonFallbackUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%", marginTop: 8, padding: "8px 10px",
+                  background: "rgba(249,104,58,0.08)",
+                  border: "1.5px solid rgba(249,104,58,0.25)",
+                  borderRadius: 10,
+                  display: "flex", alignItems: "center", gap: 8,
+                  cursor: "pointer", textDecoration: "none",
+                  transition: "all 0.2s",
+                  WebkitTapHighlightColor: "transparent",
+                }}
+              >
+                <div style={{
+                  width: 28, height: 28, borderRadius: "50%",
+                  background: "rgba(249,104,58,0.15)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                  <div style={{
+                    fontSize: 11, fontWeight: 700, color: "#F96836",
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    textTransform: "uppercase", letterSpacing: 0.5,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                  }}>
+                    Listen on Patreon
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: "rgba(255,255,255,0.4)",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                    marginTop: 1,
+                  }}>Patreon exclusive</div>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <path d="M7 17L17 7" />
+                  <path d="M7 7h10v10" />
+                </svg>
+              </a>
+            )}
+
             {/* Listen On badges */}
             {(isFilm || isShow) && (
               <ListenOnBadges
@@ -840,6 +895,71 @@ export default function CommunityLogModal({
                   fontSize: 10, color: "rgba(255,255,255,0.4)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                 }}>{matchedEpisode.title}</div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <path d="M7 17L17 7" />
+                <path d="M7 7h10v10" />
+              </svg>
+            </a>
+
+            <button
+              onClick={() => { setEpisodeToast(false); onClose(); }}
+              style={{
+                background: "none", border: "none", color: "rgba(255,255,255,0.3)",
+                fontSize: 12, cursor: "pointer", padding: "6px 16px",
+              }}
+            >Not now</button>
+          </div>
+        )}
+        {/* ── Post-log Patreon fallback toast (no audio in MANTL) ── */}
+        {episodeToast && !matchedEpisode && patreonFallbackUrl && (
+          <div style={{
+            position: "fixed", bottom: 0, left: 0, right: 0,
+            padding: "0 16px 24px",
+            background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
+            zIndex: 10,
+            animation: "clmSlideUp 0.3s ease",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
+          }}>
+            <div style={{
+              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontFamily: "'Barlow Condensed', sans-serif",
+              textTransform: "uppercase", letterSpacing: 1.5,
+            }}>Logged! Hear what the hosts thought</div>
+
+            <a
+              href={patreonFallbackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { setEpisodeToast(false); onClose(); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, width: "100%", maxWidth: 360,
+                padding: "12px 16px",
+                background: "rgba(249,104,58,0.12)",
+                border: "1.5px solid rgba(249,104,58,0.3)",
+                borderRadius: 14, cursor: "pointer",
+                WebkitTapHighlightColor: "transparent",
+                textDecoration: "none",
+              }}
+            >
+              <div style={{
+                width: 36, height: 36, borderRadius: "50%", background: "rgba(249,104,58,0.15)",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <div style={{
+                  fontSize: 14, fontWeight: 700, color: "#F96836",
+                  fontFamily: "'Barlow Condensed', sans-serif",
+                  textTransform: "uppercase", letterSpacing: 0.5,
+                }}>Listen on Patreon</div>
+                <div style={{
+                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
+                }}>Patreon exclusive</div>
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <path d="M7 17L17 7" />

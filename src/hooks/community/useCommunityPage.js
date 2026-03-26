@@ -50,9 +50,46 @@ export function useCommunityPage(slug) {
         if (itemsErr) throw itemsErr;
         if (cancelled) return;
 
+        // 4. Enrich items with podcast_episodes data (description, title, artwork)
+        //    Single source of truth: podcast_episodes table holds canonical episode metadata.
+        //    Community items reference via episode_url → podcast_episodes.audio_url.
+        const episodeUrls = (items || [])
+          .map(i => i.episode_url || i.extra_data?.episode_url)
+          .filter(Boolean);
+
+        let epLookup = {};
+        if (episodeUrls.length > 0) {
+          const { data: eps } = await supabase
+            .from("podcast_episodes")
+            .select("audio_url, description, title, air_date, duration_seconds")
+            .in("audio_url", episodeUrls);
+
+          if (eps) {
+            eps.forEach(ep => { epLookup[ep.audio_url] = ep; });
+          }
+        }
+
+        // Merge episode metadata into items (fill gaps, don't overwrite existing)
+        const enrichedItems = (items || []).map(item => {
+          const url = item.episode_url || item.extra_data?.episode_url;
+          const ep = url ? epLookup[url] : null;
+          if (!ep) return item;
+
+          return {
+            ...item,
+            extra_data: {
+              ...item.extra_data,
+              episode_description: item.extra_data?.episode_description || ep.description || null,
+              episode_title: item.extra_data?.episode_title || ep.title || null,
+              episode_air_date: item.extra_data?.episode_air_date || ep.air_date || null,
+              episode_duration: item.extra_data?.episode_duration || ep.duration_seconds || null,
+            },
+          };
+        });
+
         // Group items by miniseries
         const itemsByMs = {};
-        (items || []).forEach((item) => {
+        enrichedItems.forEach((item) => {
           if (!itemsByMs[item.miniseries_id]) itemsByMs[item.miniseries_id] = [];
           itemsByMs[item.miniseries_id].push(item);
         });
