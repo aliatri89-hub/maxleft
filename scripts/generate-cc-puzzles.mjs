@@ -161,17 +161,19 @@ async function main() {
   if (poolErr) { console.error("Pool error:", poolErr); process.exit(1); }
   console.log(`  Movie pool: ${pool.length} movies\n`);
 
-  // 2. Load existing combos to avoid duplicates
+  // 2. Load existing combos and dates to avoid duplicates
   const { data: existing, error: existErr } = await supabase
     .from("cc_daily_puzzles")
-    .select("movies");
+    .select("movies, puzzle_date");
 
   if (existErr) { console.error("Existing puzzle error:", existErr); process.exit(1); }
 
   const usedCombos = new Set();
+  const usedDates = new Set();
   for (const p of existing || []) {
     const key = p.movies.map((m) => m.tmdb_id).sort((a, b) => a - b).join(",");
     usedCombos.add(key);
+    usedDates.add(p.puzzle_date);
   }
   console.log(`  Existing puzzles: ${usedCombos.size} (will avoid duplicates)\n`);
 
@@ -179,8 +181,22 @@ async function main() {
   const puzzles = [];
   let attempts = 0;
   const maxAttempts = COUNT * 200;
+  let dateOffset = 0; // tracks actual calendar day offset
 
-  for (let i = 0; i < COUNT && attempts < maxAttempts; attempts++) {
+  for (let i = 0; i < COUNT && attempts < maxAttempts; ) {
+    // Calculate date for this slot
+    const date = new Date(START_DATE);
+    date.setDate(date.getDate() + dateOffset);
+    const dateStr = date.toISOString().split("T")[0];
+
+    // Skip dates that already have puzzles
+    if (usedDates.has(dateStr)) {
+      dateOffset++;
+      continue;
+    }
+
+    attempts++;
+
     // Pick 3 random movies
     const shuffled = shuffle(pool);
     const trio = shuffled.slice(0, 3);
@@ -189,9 +205,6 @@ async function main() {
     // Skip duplicate combos
     if (usedCombos.has(key)) continue;
 
-    // Calculate difficulty for this date
-    const date = new Date(START_DATE);
-    date.setDate(date.getDate() + i);
     const difficulty = getDifficulty(date);
 
     // Try to build a valid puzzle
@@ -200,8 +213,8 @@ async function main() {
 
     // Success!
     usedCombos.add(key);
+    usedDates.add(dateStr);
 
-    const dateStr = date.toISOString().split("T")[0];
     const colors = COLOR_SETS[i % COLOR_SETS.length];
 
     const puzzleMovies = trio.map((movie, mi) => ({
@@ -229,6 +242,7 @@ async function main() {
       trio.map((m) => m.title).join(" / ")
     );
     i++;
+    dateOffset++;
   }
 
   console.log(`\n  Generated: ${puzzles.length} / ${COUNT} puzzles (${attempts} attempts)\n`);
@@ -244,7 +258,7 @@ async function main() {
       const batch = puzzles.slice(i, i + 20);
       const { error: insertErr } = await supabase
         .from("cc_daily_puzzles")
-        .insert(batch);
+        .upsert(batch, { onConflict: "puzzle_date", ignoreDuplicates: true });
 
       if (insertErr) {
         console.error(`  Insert error (batch ${Math.floor(i / 20) + 1}):`, insertErr.message);
