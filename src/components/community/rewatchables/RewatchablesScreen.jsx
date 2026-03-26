@@ -1,6 +1,6 @@
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
 import { supabase } from "../../../supabase";
@@ -27,6 +27,8 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
   useScrollToItem(scrollToTmdbId, miniseries, accent);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
   const [filter, setFilter] = useState("all");
   const [viewMode, setViewMode] = useState("az");
   const [coverCache, setCoverCache] = useState({});
@@ -49,6 +51,14 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("rwSearch", searchOpen, () => { setSearchOpen(false); setSearchQuery(""); }, pushNav, removeNav);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
 
@@ -213,40 +223,78 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           >{v.label}</button>
         ))}
         <div style={{ flex: 1 }} />
-        <div style={{ position: "relative", flexShrink: 0 }}>
+        <button
+          onClick={() => {
+            if (searchOpen) {
+              setSearchOpen(false);
+              setSearchQuery("");
+            } else {
+              setSearchOpen(true);
+            }
+          }}
+          style={{
+            width: 30, height: 30, borderRadius: "50%",
+            border: searchOpen || searchQuery
+              ? `1.5px solid ${accent}`
+              : "1px solid rgba(255,255,255,0.1)",
+            background: searchOpen || searchQuery
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.04)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", flexShrink: 0,
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke={searchOpen || searchQuery ? accent : "rgba(255,255,255,0.4)"}
+            strokeWidth="2" strokeLinecap="round"
+          >
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+      </div>
+
+      {/* ─── Expandable search input ── */}
+      <div style={{
+        overflow: "hidden",
+        maxHeight: searchOpen ? 50 : 0,
+        opacity: searchOpen ? 1 : 0,
+        transition: "max-height 0.25s ease, opacity 0.2s ease",
+        padding: searchOpen ? "6px 16px 0" : "0 16px",
+      }}>
+        <div style={{ position: "relative" }}>
           <input
+            ref={searchInputRef}
             type="text"
-            placeholder="Search films..."
+            placeholder="Search films, years..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              width: searchQuery ? 160 : 110,
-              background: "rgba(255,255,255,0.06)",
-              border: `1.5px solid ${searchQuery ? accent : "rgba(255,255,255,0.1)"}`,
-              borderRadius: 20,
-              padding: "5px 12px 5px 28px",
-              color: "#fff",
-              fontSize: 12,
-              outline: "none",
-              transition: "all 0.2s",
+              width: "100%",
+              padding: "8px 36px 8px 32px",
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 10,
+              color: "#e0e0e0",
+              fontSize: 13,
               fontFamily: "inherit",
+              outline: "none",
+              boxSizing: "border-box",
+              WebkitAppearance: "none",
             }}
           />
-          <span style={{
+          <div style={{
             position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-            fontSize: 12, color: searchQuery ? accent : "#666",
-            pointerEvents: "none",
-          }}>🔍</span>
+            fontSize: 13, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
+          }}>🔍</div>
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
               style={{
-                position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                background: "rgba(255,255,255,0.1)", border: "none",
-                borderRadius: "50%", width: 16, height: 16,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#888", fontSize: 10, cursor: "pointer",
-                padding: 0, lineHeight: 1,
+                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
+                width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                color: "#888", fontSize: 11, cursor: "pointer",
               }}
             >✕</button>
           )}
