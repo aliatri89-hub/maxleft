@@ -1999,7 +1999,7 @@ function LandingScreen({ onSignIn }) {
 
         {/* ── BOTTOM CTA ───────────────────────────────────────── */}
         <div className="mantl-bottom-cta">
-          <button className="btn-primary" onClick={onSignIn}>
+          <button className="btn-primary" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <svg width="16" height="18" viewBox="0 0 16 18" fill="none" style={{ marginTop: -1 }}>
                 <path d="M2 1.5L14.5 9L2 16.5V1.5Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
