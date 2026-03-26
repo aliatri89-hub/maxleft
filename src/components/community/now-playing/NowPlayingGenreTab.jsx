@@ -20,15 +20,15 @@ import { isComingSoon } from "../../../utils/comingSoon";
  */
 
 const GENRE_META = {
-  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/8ZFcbZjIdFngvmjAeXbjZeLp6ck.jpg" },
-  horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/d62YzdOrC4LfObyb2q1qGVxUvID.jpg" },
-  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/likvx867SB7dz6hZHpDFEeSxE1c.jpg" },
-  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg" },
-  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/utz4z2SKNywqbob1XeZwCr8pWav.jpg" },
-  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/qy5FtVeAlwNE0kW6lgzvfR3KRVi.jpg" },
-  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg" },
-  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg" },
-  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg" },
+  comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/8ZFcbZjIdFngvmjAeXbjZeLp6ck.jpg", logoPos: "top" },
+  horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/d62YzdOrC4LfObyb2q1qGVxUvID.jpg", logoPos: "bottom" },
+  stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/likvx867SB7dz6hZHpDFEeSxE1c.jpg", logoPos: "bottom" },
+  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg", logoPos: "top" },
+  sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/utz4z2SKNywqbob1XeZwCr8pWav.jpg", logoPos: "bottom" },
+  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/qy5FtVeAlwNE0kW6lgzvfR3KRVi.jpg", logoPos: "top" },
+  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg", logoPos: "bottom" },
+  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg", logoPos: "bottom" },
+  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg", logoPos: "bottom" },
 };
 
 const ALL_KEY = "__all__";
@@ -530,8 +530,7 @@ export default function NowPlayingGenreTab({
                   icon={meta.icon}
                   tint={meta.tint || "#1a1a2e"}
                   poster={meta.poster}
-                  completed={gs?.completed || 0}
-                  total={gs?.total || 0}
+                  logoPos={meta.logoPos || "bottom"}
                   accent={accent}
                   delay={i * 0.03}
                   onTap={() => setActiveGenre(key)}
@@ -544,12 +543,10 @@ export default function NowPlayingGenreTab({
                 label="Coming Soon"
                 icon="📅"
                 tint="#1a2a1a"
-                completed={upcomingSchedule.length}
-                total={upcomingSchedule.length}
+                logoPos="bottom"
                 accent="rgba(250,204,21,0.8)"
                 delay={genreKeys.length * 0.03}
                 onTap={() => setActiveGenre(UPCOMING_KEY)}
-                hideProgress
               />
             )}
           </div>
@@ -1065,11 +1062,9 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
    GenreGridTile — Visual tile for a genre in the 3×3 grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GenreGridTile({ label, icon, tint, poster, completed, total, accent, delay = 0, onTap, hideProgress }) {
+function GenreGridTile({ label, icon, tint, poster, logoPos = "bottom", accent, delay = 0, onTap }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const isDone = pct === 100 && total > 0;
-  const hasProgress = completed > 0 && !hideProgress;
+  const isTop = logoPos === "top";
 
   return (
     <div
@@ -1126,47 +1121,21 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
         }} />
       )}
 
-      {/* Progress pill — top right */}
-      {!hideProgress && (
-      <div style={{
-        position: "absolute",
-        top: 6, right: 6,
-        background: isDone ? "rgba(74,222,128,0.9)" : "rgba(0,0,0,0.7)",
-        backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
-        borderRadius: 6,
-        padding: "3px 7px",
-        display: "flex",
-        alignItems: "center",
-        gap: 3,
-      }}>
-        {isDone && (
-          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-            <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
-        <span style={{
-          fontSize: 11, fontWeight: 700,
-          color: isDone ? "#fff" : (hasProgress ? accent : "rgba(255,255,255,0.5)"),
-          fontFamily: "'Barlow Condensed', sans-serif",
-          letterSpacing: "0.03em",
-        }}>
-          {completed}/{total}
-        </span>
-      </div>
-      )}
-
-      {/* NPP filmstrip logo overlay */}
+      {/* NPP filmstrip logo */}
       <img
         src="https://api.mymantl.app/storage/v1/object/public/banners/NPPLogo.png"
         alt=""
         style={{
           position: "absolute",
-          top: "15%", left: "50%",
+          left: "50%",
           transform: "translateX(-50%)",
           width: "80%",
           objectFit: "contain",
           opacity: 0.85,
           pointerEvents: "none",
+          ...(isTop
+            ? { top: "8%" }
+            : { bottom: "8%" }),
         }}
       />
 
@@ -1200,24 +1169,6 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
           {label}
         </div>
       </div>
-
-      {/* Bottom progress bar */}
-      {hasProgress && (
-        <div style={{
-          position: "absolute",
-          bottom: 0, left: 0, right: 0,
-          height: 3,
-          background: "rgba(255,255,255,0.1)",
-        }}>
-          <div style={{
-            height: "100%",
-            width: `${pct}%`,
-            background: isDone
-              ? "linear-gradient(90deg, #4ade80, #22d3ee)"
-              : `linear-gradient(90deg, ${accent}, #C4734F)`,
-          }} />
-        </div>
-      )}
     </div>
   );
 }
