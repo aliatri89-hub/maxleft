@@ -58,9 +58,9 @@ const COLOR_SETS = [
 
 function getDifficulty(date) {
   const dow = date.getDay(); // 0=Sun, 1=Mon...6=Sat
-  if (dow === 5) return "medium";     // Friday
-  if (dow === 6 || dow === 0) return "hard"; // Sat/Sun
-  return "easy";
+  if (dow >= 1 && dow <= 3) return "easy";    // Mon–Wed ★★★
+  if (dow === 4 || dow === 5) return "medium"; // Thu–Fri ★★★★
+  return "hard";                                // Sat–Sun ★★★★★
 }
 
 // ── Puzzle generation ─────────────────────────────────────────

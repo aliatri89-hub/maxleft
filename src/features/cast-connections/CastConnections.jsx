@@ -257,7 +257,8 @@ export default function CastConnections({ session, onBack, onToast }) {
           Cast Connections
         </h1>
         <div style={{ fontSize: 12, color: "#8a7e6b", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
-          {puzzleNumber ? `#${puzzleNumber} · ` : ""}Group the actors by movie
+          {puzzleNumber ? `#${puzzleNumber} · ` : ""}
+          {"★".repeat(puzzle.difficulty === "hard" ? 5 : puzzle.difficulty === "medium" ? 4 : 3)}
         </div>
       </div>
 

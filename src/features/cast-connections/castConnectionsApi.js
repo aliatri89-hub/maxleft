@@ -24,6 +24,7 @@ export async function fetchTodaysPuzzle() {
     date: puzzle.puzzle_date,
     movies: puzzle.movies,
     colors: puzzle.colors || ["#4a7c59", "#b8860b", "#6b4c8a"],
+    difficulty: puzzle.difficulty || "easy",
   };
 }
 
