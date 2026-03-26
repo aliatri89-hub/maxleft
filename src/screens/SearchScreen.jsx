@@ -22,6 +22,7 @@ import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvid
 import { toPlayerEpisode, resolveAudioUrl } from "../utils/episodeUrl";
 import { toPosterPath } from "../utils/mediaWrite";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
+import QuickLogModal from "../components/feed/QuickLogModal";
 
 const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
@@ -64,6 +65,24 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
 
   // ── Audio player ──
   const { play: playEpisode, currentEp, isPlaying, addToQueue } = useAudioPlayer();
+
+  // ── Watched status — batch-check user_media_logs ──
+  const [watchedTmdbIds, setWatchedTmdbIds] = useState(new Set());
+
+  const displayResults = isBrowseMode ? browseResults : results;
+  useEffect(() => {
+    if (!userId || displayResults.length === 0) { setWatchedTmdbIds(new Set()); return; }
+    const tmdbIds = displayResults.map(r => r.tmdbId).filter(Boolean);
+    if (tmdbIds.length === 0) return;
+    let cancelled = false;
+    supabase.from("user_media_logs").select("tmdb_id")
+      .eq("user_id", userId).in("tmdb_id", tmdbIds)
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setWatchedTmdbIds(new Set(data.map(r => r.tmdb_id)));
+      });
+    return () => { cancelled = true; };
+  }, [userId, displayResults.length, displayResults[0]?.tmdbId]);
 
   // ── Admin: unlink bad matches ──
   const isAdmin = userId === "19410e64-d610-4fab-9c26-d24fafc94696";
@@ -476,6 +495,9 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   isAdmin={isAdmin}
                   hiddenEpIds={hiddenEpIds}
                   onUnlinkEpisode={handleUnlinkEpisode}
+                  watched={watchedTmdbIds.has(r.tmdbId)}
+                  userId={userId}
+                  onWatchedChange={(tmdbId) => setWatchedTmdbIds(prev => new Set([...prev, tmdbId]))}
                 />
               ))}
 
@@ -697,6 +719,9 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               isAdmin={isAdmin}
               hiddenEpIds={hiddenEpIds}
               onUnlinkEpisode={handleUnlinkEpisode}
+              watched={watchedTmdbIds.has(r.tmdbId)}
+              userId={userId}
+              onWatchedChange={(tmdbId) => setWatchedTmdbIds(prev => new Set([...prev, tmdbId]))}
             />
           ))}
         </div>
@@ -730,6 +755,9 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               onNotify={() => handleNotify(r)}
               notifying={notifyingId === r.tmdbId}
               notified={notifiedIds.has(r.tmdbId)}
+              watched={watchedTmdbIds.has(r.tmdbId)}
+              userId={userId}
+              onWatchedChange={(tmdbId) => setWatchedTmdbIds(prev => new Set([...prev, tmdbId]))}
             />
           ))}
         </div>
@@ -746,8 +774,6 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     </div>
   );
 }
-
-
 /* ═══════════════════════════════════════════════════
    ResultCard — unified expand for covered + uncovered
    ═══════════════════════════════════════════════════ */
@@ -786,12 +812,16 @@ function searchStripHtml(str) {
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
   onPlayEpisode, onQueueEpisode, onNotify, notifying, notified, currentEp, isPlaying,
-  isAdmin, hiddenEpIds, onUnlinkEpisode,
+  isAdmin, hiddenEpIds, onUnlinkEpisode, watched, userId, onWatchedChange,
 }) {
   const hasCoverage = result.podcastCount > 0;
   const [expandedEpId, setExpandedEpId] = useState(null);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [justLogged, setJustLogged] = useState(false);
+  const isWatched = watched || justLogged;
 
   return (
+    <>
     <div style={{ marginBottom: 2 }}>
       {/* Main row — always tappable */}
       <div
@@ -803,24 +833,37 @@ function ResultCard({
           transition: "background 0.15s",
         }}
       >
-        {/* Poster */}
+        {/* Poster + watched badge */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
         {result.poster ? (
           <img src={result.poster} alt={result.title} loading="lazy"
             style={{
               width: 52, height: 78, borderRadius: 6, objectFit: "cover",
-              border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0,
+              border: "1px solid rgba(255,255,255,0.06)",
             }} />
         ) : (
           <div style={{
             width: 52, height: 78, borderRadius: 6,
             background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(255,255,255,0.06)",
-            flexShrink: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "'IBM Plex Mono', monospace",
             fontSize: 9, color: "rgba(255,255,255,0.15)",
           }}>NO<br />IMG</div>
         )}
+        {isWatched && (
+          <div style={{
+            position: "absolute", bottom: -3, right: -3,
+            width: 16, height: 16, borderRadius: "50%",
+            background: "#0f0d0b", border: "1.5px solid rgba(52,211,153,0.5)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        )}
+        </div>
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -908,6 +951,50 @@ function ResultCard({
       {/* ── Expanded: Episode picker (covered) ── */}
       {isExpanded && hasCoverage && (
         <div style={{ padding: "4px 14px 12px 78px", animation: "searchSlideDown 0.2s ease" }}>
+          {/* Log / Watched pill */}
+          {userId && (
+            <div style={{ marginBottom: 8 }}>
+              {isWatched ? (
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "3px 10px 3px 7px", borderRadius: 10,
+                  background: "rgba(52,211,153,0.08)",
+                  border: "1px solid rgba(52,211,153,0.2)",
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9, fontWeight: 600,
+                    color: "rgba(52,211,153,0.6)",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                  }}>Watched</span>
+                </div>
+              ) : (
+                <div
+                  onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    padding: "3px 10px 3px 7px", borderRadius: 10,
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9, fontWeight: 600,
+                    color: "rgba(255,255,255,0.25)",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                  }}>Log This Film</span>
+                </div>
+              )}
+            </div>
+          )}
           {loadingEpisodes && (
             <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>
               Loading episodes…
@@ -1083,6 +1170,50 @@ function ResultCard({
           padding: "4px 14px 14px 78px",
           animation: "searchSlideDown 0.2s ease",
         }}>
+          {/* Log / Watched pill */}
+          {userId && (
+            <div style={{ marginBottom: 8 }}>
+              {isWatched ? (
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "3px 10px 3px 7px", borderRadius: 10,
+                  background: "rgba(52,211,153,0.08)",
+                  border: "1px solid rgba(52,211,153,0.2)",
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9, fontWeight: 600,
+                    color: "rgba(52,211,153,0.6)",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                  }}>Watched</span>
+                </div>
+              ) : (
+                <div
+                  onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    padding: "3px 10px 3px 7px", borderRadius: 10,
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9, fontWeight: 600,
+                    color: "rgba(255,255,255,0.25)",
+                    textTransform: "uppercase", letterSpacing: "0.06em",
+                  }}>Log This Film</span>
+                </div>
+              )}
+            </div>
+          )}
           <div style={{
             padding: "14px 16px",
             background: "rgba(255,255,255,0.02)",
@@ -1167,5 +1298,21 @@ function ResultCard({
         </div>
       )}
     </div>
+
+    <QuickLogModal
+      data={{
+        tmdb_id: result.tmdbId,
+        title: result.title,
+        year: result.year,
+        poster_path: result.posterPath,
+      }}
+      open={showLogModal}
+      onClose={() => setShowLogModal(false)}
+      onLogged={() => {
+        setJustLogged(true);
+        onWatchedChange?.(result.tmdbId);
+      }}
+    />
+    </>
   );
 }
