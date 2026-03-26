@@ -284,31 +284,27 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       };
       setDetail(detailObj);
 
-      // Cache to media table — next person gets instant load
+      // Cache to media table via RPC — next person gets instant load
       const director = tmdbDetail.credits?.crew?.find(c => c.job === "Director")?.name || null;
       const genre = (tmdbDetail.genres || []).slice(0, 2).map(g => g.name).join(", ") || null;
-      supabase
-        .from("media")
-        .upsert({
-          media_type: "film",
-          tmdb_id: data.tmdb_id,
-          title: data.title || tmdbDetail.title,
-          year: data.year ? parseInt(data.year) : (tmdbDetail.release_date || "").slice(0, 4) ? parseInt((tmdbDetail.release_date || "").slice(0, 4)) : null,
-          creator: director,
-          poster_path: data.poster_path || (tmdbDetail.poster_path ? `https://image.tmdb.org/t/p/w342${tmdbDetail.poster_path}` : null),
-          backdrop_path: data.backdrop_path || (tmdbDetail.backdrop_path ? `https://image.tmdb.org/t/p/w780${tmdbDetail.backdrop_path}` : null),
-          runtime: tmdbDetail.runtime || null,
-          genre,
-          overview: detailObj.overview,
-          tagline: detailObj.tagline,
-          budget: detailObj.budget,
-          revenue: detailObj.revenue,
-          credits: detailObj.credits,
-          production_companies: detailObj.production_companies,
-          certification: tmdbDetail.certification || null,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: "tmdb_id", ignoreDuplicates: false })
-        .then(() => {});
+      supabase.rpc("hydrate_media", {
+        p_tmdb_id: data.tmdb_id,
+        p_media_type: "film",
+        p_title: data.title || tmdbDetail.title || null,
+        p_year: data.year ? parseInt(data.year) : (tmdbDetail.release_date || "").slice(0, 4) ? parseInt((tmdbDetail.release_date || "").slice(0, 4)) : null,
+        p_creator: director,
+        p_poster_path: data.poster_path || (tmdbDetail.poster_path ? `https://image.tmdb.org/t/p/w342${tmdbDetail.poster_path}` : null),
+        p_backdrop_path: data.backdrop_path || (tmdbDetail.backdrop_path ? `https://image.tmdb.org/t/p/w780${tmdbDetail.backdrop_path}` : null),
+        p_runtime: tmdbDetail.runtime || null,
+        p_genre: genre,
+        p_overview: detailObj.overview || null,
+        p_tagline: detailObj.tagline || null,
+        p_budget: detailObj.budget || null,
+        p_revenue: detailObj.revenue || null,
+        p_credits: detailObj.credits || null,
+        p_production_companies: detailObj.production_companies || null,
+        p_certification: tmdbDetail.certification || null,
+      }).then(() => {});
     })();
     return () => { cancelled = true; };
   }, [open, data?.tmdb_id]);
@@ -469,11 +465,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           setFetchedStills(stills);
 
           // Write back to media so next open (by anyone) is instant
-          supabase
-            .from("media")
-            .update({ still_paths: paths })
-            .eq("tmdb_id", data.tmdb_id)
-            .then(() => {});
+          supabase.rpc("hydrate_media", {
+            p_tmdb_id: data.tmdb_id,
+            p_still_paths: paths,
+          }).then(() => {});
         }
       } catch {}
     })();
