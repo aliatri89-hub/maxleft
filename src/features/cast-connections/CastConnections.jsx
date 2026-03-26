@@ -86,6 +86,9 @@ function BackdropCard({ movie, color, delay, dimmed }) {
         position: "relative",
         opacity: dimmed ? 0.65 : 1,
         animationDelay: `${delay}s`,
+        minHeight: 110,
+        display: "flex",
+        alignItems: "stretch",
       }}
     >
       {hasBackdrop && (
@@ -111,7 +114,7 @@ function BackdropCard({ movie, color, delay, dimmed }) {
           }} />
         </div>
       )}
-      <div style={{ position: "relative", zIndex: 1, padding: "25px 16px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "20px 16px", display: "flex", flexDirection: "column", justifyContent: "center", flex: 1 }}>
         <div style={{
           fontFamily: "'Bebas Neue', sans-serif",
           fontSize: 25,
