@@ -10,13 +10,13 @@ const ADMIN_USER_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 // Lazy-load admin pages
 const MissionControl = lazy(() => import("./MissionControl"));
+const FeedManager = lazy(() => import("./FeedManager"));
 // Future phases:
-// const FeedManager = lazy(() => import("./FeedManager"));
 // const CommunityManager = lazy(() => import("./CommunityManager"));
 
 const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
-  { key: "feed",            label: "Feed & Ingest",   icon: "◈", disabled: true },
+  { key: "feed",            label: "Feed & Ingest",   icon: "◈" },
   { key: "communities",     label: "Communities",      icon: "◆", disabled: true },
   { key: "games",           label: "Games",            icon: "◇", disabled: true },
   { key: "diagnostics",     label: "Diagnostics",      icon: "◎", disabled: true },
@@ -88,7 +88,10 @@ export default function AdminShell() {
   // ── Main layout ──
   return (
     <div style={styles.shell}>
-      <style>{`@keyframes admin-spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes admin-spin { to { transform: rotate(360deg); } }
+        @keyframes admin-toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
       {/* Sidebar */}
       <nav style={styles.sidebar}>
         <div style={styles.sidebarHeader}>
@@ -133,7 +136,7 @@ export default function AdminShell() {
             <MissionControl session={session} />
           )}
           {activeSection === "feed" && (
-            <PlaceholderSection title="Feed & Ingest" />
+            <FeedManager session={session} />
           )}
           {activeSection === "communities" && (
             <PlaceholderSection title="Community Manager" />
