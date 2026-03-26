@@ -540,7 +540,7 @@ function UsernameSetup({ name, session, onComplete }) {
     };
 
     return (
-      <div className="setup-screen">
+      <div className="setup-screen" style={{ paddingLeft: 16, paddingRight: 16 }}>
         <style>{DARK_STYLES}</style>
         <StepDots total={allSteps.length} current={1} />
         <div className="setup-title">Your Podcasts</div>
@@ -556,8 +556,10 @@ function UsernameSetup({ name, session, onComplete }) {
           <div style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 10,
+            gap: 8,
             marginBottom: 24,
+            maxWidth: "100%",
+            overflow: "hidden",
           }}>
             {podcasts.map((p, i) => {
               const on = selectedPodcasts[p.id];
@@ -570,12 +572,13 @@ function UsernameSetup({ name, session, onComplete }) {
                   style={{
                     background: on ? dk.cardActive : dk.card,
                     border: `2px solid ${on ? dk.terracotta : dk.border}`,
-                    borderRadius: 14,
-                    padding: 10,
+                    borderRadius: 12,
+                    padding: 6,
                     cursor: "pointer",
                     transition: "all 0.15s",
                     textAlign: "center",
                     position: "relative",
+                    minWidth: 0,
                     animation: `fadeSlideUp 0.3s ease ${i * 0.03}s both`,
                   }}
                 >
@@ -588,8 +591,8 @@ function UsernameSetup({ name, session, onComplete }) {
                         width: "100%",
                         aspectRatio: "1",
                         objectFit: "cover",
-                        borderRadius: 10,
-                        marginBottom: 8,
+                        borderRadius: 8,
+                        marginBottom: 6,
                         opacity: on ? 1 : 0.7,
                         transition: "opacity 0.15s",
                       }}
@@ -597,8 +600,8 @@ function UsernameSetup({ name, session, onComplete }) {
                   ) : (
                     <div style={{
                       width: "100%", aspectRatio: "1",
-                      background: dk.border, borderRadius: 10,
-                      marginBottom: 8,
+                      background: dk.border, borderRadius: 8,
+                      marginBottom: 6,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 28,
                     }}>🎙️</div>
@@ -607,7 +610,7 @@ function UsernameSetup({ name, session, onComplete }) {
                   {/* Name */}
                   <div style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 700, fontSize: 11,
+                    fontWeight: 700, fontSize: 10,
                     textTransform: "uppercase", letterSpacing: "0.02em",
                     color: on ? "#fff" : dk.text,
                     lineHeight: 1.2,
@@ -619,8 +622,8 @@ function UsernameSetup({ name, session, onComplete }) {
                   {/* Community badge */}
                   {hasLaunchedCommunity && (
                     <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 8,
-                      color: dk.terracotta, marginTop: 3,
+                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 7,
+                      color: dk.terracotta, marginTop: 2,
                       letterSpacing: "0.04em", textTransform: "uppercase",
                     }}>Community</div>
                   )}
@@ -628,11 +631,11 @@ function UsernameSetup({ name, session, onComplete }) {
                   {/* Check indicator */}
                   {on && (
                     <div style={{
-                      position: "absolute", top: 6, right: 6,
-                      width: 18, height: 18, borderRadius: "50%",
+                      position: "absolute", top: 4, right: 4,
+                      width: 16, height: 16, borderRadius: "50%",
                       background: dk.terracotta,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 10, color: "#fff", fontWeight: 700,
+                      fontSize: 9, color: "#fff", fontWeight: 700,
                     }}>✓</div>
                   )}
                 </div>
