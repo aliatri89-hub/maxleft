@@ -90,7 +90,14 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
 
                     {/* Text */}
                     <div className="notif-item-text">
-                      {notif.body}
+                      {notif.title && (
+                        <div style={{ fontWeight: 700, marginBottom: 2, fontSize: 13 }}>
+                          {notif.title}
+                        </div>
+                      )}
+                      <div style={{ opacity: notif.title ? 0.65 : 1 }}>
+                        {notif.body}
+                      </div>
                     </div>
 
                     {/* Time */}
@@ -118,20 +125,20 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
 // ── Helpers ──
 
 function notifIcon(type) {
+  const s = { width: 16, height: 16, fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (type) {
     case "new_coverage":
     case "watched_coverage":
-      return "🎧";
+      return <svg viewBox="0 0 24 24" style={s}><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>;
     case "badge_earned":
-      return "🏆";
+      return <svg viewBox="0 0 24 24" style={s}><path d="M6 9a6 6 0 1 0 12 0A6 6 0 0 0 6 9z"/><path d="M12 15l-3.5 6.5L12 19l3.5 2.5L12 15z"/></svg>;
     case "badge_progress":
-      return "📊";
     case "badge_digest":
-      return "🎯";
+      return <svg viewBox="0 0 24 24" style={s}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01z"/></svg>;
     case "episode_drop":
-      return "🎙️";
+      return <svg viewBox="0 0 24 24" style={s}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>;
     default:
-      return "🔔";
+      return <svg viewBox="0 0 24 24" style={s}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
   }
 }
 
