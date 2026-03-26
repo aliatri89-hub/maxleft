@@ -111,10 +111,10 @@ function BackdropCard({ movie, color, delay, dimmed }) {
           }} />
         </div>
       )}
-      <div style={{ position: "relative", zIndex: 1, padding: "22px 16px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "28px 16px" }}>
         <div style={{
           fontFamily: "'Bebas Neue', sans-serif",
-          fontSize: 24,
+          fontSize: 26,
           color: "#fff",
           letterSpacing: 1.5,
           textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.3)",
@@ -123,9 +123,9 @@ function BackdropCard({ movie, color, delay, dimmed }) {
           {movie.title} ({movie.year})
         </div>
         <div style={{
-          fontSize: 12,
+          fontSize: 13,
           color: "rgba(255,255,255,0.9)",
-          marginTop: 6,
+          marginTop: 8,
           letterSpacing: 0.3,
           fontFamily: "'IBM Plex Mono', monospace",
           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
