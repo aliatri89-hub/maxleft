@@ -868,46 +868,100 @@ function EditBadgeRow({ badge, miniseries, showToast, onSaved, onCancel }) {
     setSaving(false);
   };
 
+  const FL = S.fieldLabel;
+  const FI = S.formInput;
+
   return (
-    <tr style={{ ...S.tr, background: "rgba(196,115,79,0.04)" }}>
-      <td style={S.td}>
-        {imageUrl ? <img src={imageUrl} alt="" style={{ width: 32, height: 32, borderRadius: 6, objectFit: "cover" }} /> : <div style={{ width: 32, height: 32, borderRadius: 6, background: accentColor }}>🏆</div>}
-      </td>
-      <td style={S.td} colSpan={2}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <input value={name} onChange={e => setName(e.target.value)} style={S.inlineInput} placeholder="Badge name" />
-          <input value={description} onChange={e => setDescription(e.target.value)} style={S.inlineInput} placeholder="Description" />
-          <input value={tagline} onChange={e => setTagline(e.target.value)} style={S.inlineInput} placeholder="Tagline (on earn)" />
-          <input value={progressTagline} onChange={e => setProgressTagline(e.target.value)} style={S.inlineInput} placeholder="Progress tagline" />
-        </div>
-      </td>
-      <td style={S.td}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <select value={badgeType} onChange={e => setBadgeType(e.target.value)} style={S.inlineSelect}>
-            <option value="miniseries_completion">miniseries_completion</option>
-            <option value="item_set_completion">item_set_completion</option>
-          </select>
-          <select value={msId} onChange={e => setMsId(e.target.value)} style={S.inlineSelect}>
-            <option value="">No shelf link</option>
-            {miniseries.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-          </select>
-        </div>
-      </td>
-      <td style={S.td}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} style={S.inlineInput} placeholder="Image URL" />
-          <input value={audioUrl} onChange={e => setAudioUrl(e.target.value)} style={S.inlineInput} placeholder="Audio URL" />
-          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ width: 24, height: 24, border: "none", background: "none", cursor: "pointer" }} />
-            <input value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ ...S.inlineInput, width: 80 }} />
+    <tr style={S.tr}>
+      <td colSpan={7} style={{ padding: 0 }}>
+        <div style={S.badgeEditCard}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {imageUrl ? (
+                <img src={imageUrl} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "cover" }} />
+              ) : (
+                <div style={{ width: 36, height: 36, borderRadius: 8, background: accentColor, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>🏆</div>
+              )}
+              <div style={S.addFormHeader}>Edit Badge</div>
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={handleSave} disabled={saving} style={S.saveBtn}>{saving ? "…" : "Save"}</button>
+              <button onClick={onCancel} style={S.cancelBtn}>Cancel</button>
+            </div>
           </div>
-        </div>
-      </td>
-      <td style={S.td}><div style={S.cellMono}>{badge.is_active ? "active" : "off"}</div></td>
-      <td style={S.td}>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={handleSave} disabled={saving} style={S.saveBtn}>{saving ? "…" : "Save"}</button>
-          <button onClick={onCancel} style={S.cancelBtn}>Cancel</button>
+
+          {/* Row 1: Name + Sort order */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 2 }}>
+              <label style={FL}>Badge Name</label>
+              <input value={name} onChange={e => setName(e.target.value)} style={FI} placeholder="e.g. Choose Life" />
+            </div>
+            <div style={{ width: 80 }}>
+              <label style={FL}>Order</label>
+              <input value={sortOrder} onChange={e => setSortOrder(e.target.value)} style={FI} type="number" />
+            </div>
+          </div>
+
+          {/* Row 2: Progress tagline */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Progress Tagline <span style={S.fieldHint}>— shown while working toward badge</span></label>
+              <input value={progressTagline} onChange={e => setProgressTagline(e.target.value)} style={FI} placeholder="Making your way through…" />
+            </div>
+          </div>
+
+          {/* Row 3: Earn tagline */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Earn Tagline <span style={S.fieldHint}>— shown when badge is earned</span></label>
+              <input value={tagline} onChange={e => setTagline(e.target.value)} style={FI} placeholder="You survived every night in Haddonfield" />
+            </div>
+          </div>
+
+          {/* Row 4: Description */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Description <span style={S.fieldHint}>— subtitle under badge name</span></label>
+              <input value={description} onChange={e => setDescription(e.target.value)} style={FI} placeholder="Complete all Halloween franchise films" />
+            </div>
+          </div>
+
+          {/* Row 5: Type + Shelf */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Badge Type</label>
+              <select value={badgeType} onChange={e => setBadgeType(e.target.value)} style={S.formSelect}>
+                <option value="miniseries_completion">miniseries_completion</option>
+                <option value="item_set_completion">item_set_completion</option>
+              </select>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Linked Shelf</label>
+              <select value={msId} onChange={e => setMsId(e.target.value)} style={S.formSelect}>
+                <option value="">No shelf link</option>
+                {miniseries.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Row 6: Image + Audio + Color */}
+          <div style={S.badgeEditRow}>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Badge Image URL</label>
+              <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} style={FI} placeholder="https://…/badge.png" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={FL}>Celebration Audio URL</label>
+              <input value={audioUrl} onChange={e => setAudioUrl(e.target.value)} style={FI} placeholder="https://…/celebration.mp3" />
+            </div>
+            <div style={{ width: 120 }}>
+              <label style={FL}>Accent Color</label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ width: 28, height: 28, border: "none", cursor: "pointer", background: "none", padding: 0 }} />
+                <input value={accentColor} onChange={e => setAccentColor(e.target.value)} style={{ ...FI, flex: 1 }} />
+              </div>
+            </div>
+          </div>
         </div>
       </td>
     </tr>
@@ -1074,6 +1128,27 @@ const S = {
   formInput: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, outline: "none", fontFamily: "var(--font-mono)" },
   formSelect: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "#1a1714", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "var(--font-mono)" },
   formSearchBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.12)", border: "1px solid rgba(196,115,79,0.25)", color: "#c4734f", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer", flexShrink: 0 },
+
+  // ── Badge edit card ──
+  badgeEditCard: {
+    padding: "20px 24px",
+    background: "rgba(196,115,79,0.04)",
+    borderTop: "1px solid rgba(196,115,79,0.15)",
+    borderBottom: "1px solid rgba(196,115,79,0.15)",
+  },
+  badgeEditRow: {
+    display: "flex",
+    gap: 12,
+    marginBottom: 12,
+  },
+  fieldHint: {
+    fontWeight: 400,
+    fontStyle: "italic",
+    letterSpacing: "0",
+    textTransform: "none",
+    color: "rgba(240,235,225,0.2)",
+    fontSize: 9,
+  },
 
   resultGrid: { display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto" },
   resultCard: { display: "flex", alignItems: "center", gap: 10, padding: "6px 10px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 8, cursor: "pointer", color: "inherit", transition: "background 0.1s" },
