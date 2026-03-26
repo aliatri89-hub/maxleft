@@ -3,6 +3,7 @@ import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
+import QuickLogModal from "./QuickLogModal";
 
 // ════════════════════════════════════════════════
 // PODCAST CARD
@@ -57,7 +58,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [addedToWatchlist, setAddedToWatchlist] = useState(false);
+  const [showLogModal, setShowLogModal] = useState(false);
+  const [justLogged, setJustLogged] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
+
+  const isWatched = watched || justLogged;
 
   const epUrl = resolveAudioUrl(item);
   const isPaywall = isPatreonUrl(epUrl);
@@ -112,6 +117,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   if (dismissed) return null;
 
   return (
+    <>
     <div
       onClick={() => setExpanded(prev => !prev)}
       style={{
@@ -278,7 +284,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {podcast_name}
         </span>
 
-        {watched ? (
+        {isWatched ? (
           <div style={{
             display: "flex", alignItems: "center", gap: 4,
             padding: "2px 8px 2px 6px", borderRadius: 10,
@@ -296,41 +302,63 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               textTransform: "uppercase", letterSpacing: "0.06em",
             }}>Watched</span>
           </div>
-        ) : addedToWatchlist ? (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 4,
-            padding: "2px 8px 2px 6px", borderRadius: 10,
-            background: "rgba(201,124,93,0.06)",
-            border: "1px solid rgba(201,124,93,0.15)",
-            flexShrink: 0, marginLeft: 8,
-          }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 8, fontWeight: 600,
-              color: "rgba(201,124,93,0.5)",
-              textTransform: "uppercase", letterSpacing: "0.06em",
-            }}>Added</span>
-          </div>
         ) : userId ? (
-          <div onClick={handleWatchlist} style={{
-            display: "flex", alignItems: "center", gap: 4,
-            padding: "2px 8px 2px 6px", borderRadius: 10,
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            flexShrink: 0, marginLeft: 8, cursor: "pointer",
-          }}>
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 8, fontWeight: 600,
-              color: "rgba(255,255,255,0.25)",
-              textTransform: "uppercase", letterSpacing: "0.06em",
-            }}>Watchlist</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginLeft: 8 }}>
+            {/* Log pill */}
+            <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "2px 8px 2px 6px", borderRadius: 10,
+              background: "rgba(76,175,80,0.06)",
+              border: "1px solid rgba(76,175,80,0.15)",
+              cursor: "pointer",
+            }}>
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(76,175,80,0.6)" strokeWidth="2.5" strokeLinecap="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8, fontWeight: 600,
+                color: "rgba(76,175,80,0.5)",
+                textTransform: "uppercase", letterSpacing: "0.06em",
+              }}>Log</span>
+            </div>
+            {/* Watchlist pill */}
+            {addedToWatchlist ? (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "2px 8px 2px 6px", borderRadius: 10,
+                background: "rgba(201,124,93,0.06)",
+                border: "1px solid rgba(201,124,93,0.15)",
+              }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 8, fontWeight: 600,
+                  color: "rgba(201,124,93,0.5)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>Added</span>
+              </div>
+            ) : (
+              <div onClick={handleWatchlist} style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "2px 8px 2px 6px", borderRadius: 10,
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                cursor: "pointer",
+              }}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 8, fontWeight: 600,
+                  color: "rgba(255,255,255,0.25)",
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                }}>Watchlist</span>
+              </div>
+            )}
           </div>
         ) : null}
       </div>
@@ -358,6 +386,22 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         }
       `}</style>
     </div>
+
+    <QuickLogModal
+      data={{
+        tmdb_id: tmdb_id,
+        title: film_title,
+        year: film_year,
+        poster_path: poster_path,
+      }}
+      open={showLogModal}
+      onClose={() => setShowLogModal(false)}
+      onLogged={() => {
+        setJustLogged(true);
+        setAddedToWatchlist(false);
+      }}
+    />
+    </>
   );
 }
 
