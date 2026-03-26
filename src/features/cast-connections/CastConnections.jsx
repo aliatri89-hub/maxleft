@@ -263,7 +263,16 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         </div>
       </div>
 
-      {/* ── GRID AREA: actor grid OR end state ── */}
+      {/* How to play — only shown during active play */}
+      {!gameOver && (
+        <div style={{
+          fontSize: 12, color: "#8a7e6b", textAlign: "center",
+          fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
+          marginBottom: 16, padding: "0 8px",
+        }}>
+          Find three actors who starred in the same film. Select three, then submit.
+        </div>
+      )}
       {gameOver ? (
         <div className="cc-end-state" style={S.endStateBox}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>{won ? "🎬" : "🎞️"}</div>
