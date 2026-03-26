@@ -308,17 +308,17 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{
               display: "flex", alignItems: "center", gap: 4,
               padding: "2px 8px 2px 6px", borderRadius: 10,
-              background: "rgba(76,175,80,0.06)",
-              border: "1px solid rgba(76,175,80,0.15)",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
               cursor: "pointer",
             }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(76,175,80,0.6)" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span style={{
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: 8, fontWeight: 600,
-                color: "rgba(76,175,80,0.5)",
+                color: "rgba(255,255,255,0.25)",
                 textTransform: "uppercase", letterSpacing: "0.06em",
               }}>Log</span>
             </div>
