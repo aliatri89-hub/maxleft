@@ -21,7 +21,7 @@ if (Capacitor.isNativePlatform()) {
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
 import { sb } from "./utils/api";
 import { tapLight } from "./utils/haptics";
-import { signInWithGoogle, initDeepLinkListener } from "./utils/nativeAuth";
+import { signInWithGoogle, initDeepLinkListener, isNativeAuthPending, clearNativeAuthPending } from "./utils/nativeAuth";
 import { initPushNotifications, setupPushListeners, removeDeviceToken } from "./utils/pushNotifications";
 
 // Screens
@@ -270,6 +270,7 @@ export default function App() {
     initDeepLinkListener(); // Listen for OAuth deep link callbacks on native
     let loadingUserId = null;
     let callbackTimeout = null;
+    let nativeAuthTimeout = null;
 
     // If we landed with auth tokens in the URL, set a fallback timeout
     // so users don't get stuck on loading if token processing fails
@@ -284,8 +285,10 @@ export default function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
       if (callbackTimeout) { clearTimeout(callbackTimeout); callbackTimeout = null; }
+      if (nativeAuthTimeout) { clearTimeout(nativeAuthTimeout); nativeAuthTimeout = null; }
       setSession(s);
       if (s && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        clearNativeAuthPending(); // auth succeeded, clear the flag
         if (loadingUserId === s.user.id) return;
         loadingUserId = s.user.id;
         loadUserData(s.user).finally(() => { loadingUserId = null; });
@@ -293,11 +296,27 @@ export default function App() {
         // If URL has auth tokens, Supabase is still processing the OAuth callback —
         // stay on loading screen instead of flashing the landing page
         if (isOAuthCallback) return;
+        // On native, if we just opened the system browser for Google OAuth,
+        // the app resumes with no session before the deep link arrives —
+        // don't flash the landing page during this gap
+        if (isNativeAuthPending()) {
+          // Safety: if the deep link never arrives (user dismissed browser),
+          // fall back to landing after a few seconds
+          if (nativeAuthTimeout) clearTimeout(nativeAuthTimeout);
+          nativeAuthTimeout = setTimeout(() => {
+            if (isNativeAuthPending()) {
+              clearNativeAuthPending();
+              setAuthLoading(false);
+              setScreen("landing");
+            }
+          }, 5000);
+          return;
+        }
         setAuthLoading(false);
         setScreen("landing");
       }
     });
-    return () => { subscription.unsubscribe(); if (callbackTimeout) clearTimeout(callbackTimeout); };
+    return () => { subscription.unsubscribe(); if (callbackTimeout) clearTimeout(callbackTimeout); if (nativeAuthTimeout) clearTimeout(nativeAuthTimeout); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── PUSH NAVIGATION HANDLER (shared by push listeners + notification center) ──

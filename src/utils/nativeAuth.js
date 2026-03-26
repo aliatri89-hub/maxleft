@@ -11,6 +11,17 @@ import { App } from '@capacitor/app';
 import { supabase } from '../supabase';
 
 let _listenerCleanup = null;
+let _nativeAuthPending = false;
+
+/** Check if a native OAuth flow is currently in progress */
+export function isNativeAuthPending() {
+  return _nativeAuthPending;
+}
+
+/** Clear the native auth pending flag (call on timeout or success) */
+export function clearNativeAuthPending() {
+  _nativeAuthPending = false;
+}
 
 /**
  * Start listening for deep link callbacks (call once on app startup)
@@ -47,6 +58,7 @@ export async function initDeepLinkListener() {
     const refreshToken = params.get('refresh_token');
 
     if (accessToken && refreshToken) {
+      _nativeAuthPending = false; // tokens received, clear pending
       // Set the session — this triggers onAuthStateChange in App.jsx
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,
@@ -88,6 +100,7 @@ async function signInWeb(showToast) {
 // ── Native flow (system browser + deep link) ──
 async function signInNative(showToast) {
   try {
+    _nativeAuthPending = true; // flag: don't flash landing when app resumes
     // Get the OAuth URL without redirecting
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -98,6 +111,7 @@ async function signInNative(showToast) {
     });
 
     if (error || !data?.url) {
+      _nativeAuthPending = false;
       if (showToast) showToast('Sign in failed — please try again');
       return;
     }
@@ -105,6 +119,7 @@ async function signInNative(showToast) {
     // Open the OAuth URL in the system browser
     Browser.open({ url: data.url });
   } catch (e) {
+    _nativeAuthPending = false;
     console.error('Native sign in error:', e);
     if (showToast) showToast('Sign in failed — please try again');
   }
