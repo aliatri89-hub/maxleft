@@ -184,14 +184,15 @@ const CSS = `
 
 // ── Component ────────────────────────────────────────────────
 
-export default function ReelTime({ session, onBack, onToast }) {
+export default function ReelTime({ session, onBack, onToast, useHook }) {
   const userId = session?.user?.id;
+  const hookFn = useHook || useReelTime;
   const {
     puzzle, result, loading, error, hasPlayed,
     placedMovies, currentMovie, currentMovieIndex, currentPlacementNum,
     score, maxScore, totalPlacements, placementResults, gamePhase, lastPlacement,
     placeMovie, getShareText, getTimeUntilNext, getPlacementValue,
-  } = useReelTime(userId);
+  } = hookFn(userId);
 
   const [copied, setCopied] = useState(false);
 

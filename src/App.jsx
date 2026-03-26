@@ -44,6 +44,7 @@ const BlankCheckDashboard = lazy(() => import("./components/community/blank-chec
 const TripleFeature = lazy(() => import("./features/triple-feature/TripleFeature"));
 const WhatToWatch = lazy(() => import("./features/what-to-watch/WhatToWatch"));
 const TripleFeaturePublic = lazy(() => import("./features/triple-feature/TripleFeaturePublic"));
+const GamesHubPublic = lazy(() => import("./features/games-hub/GamesHubPublic"));
 import { hasPlayedToday } from "./features/triple-feature/tripleFeatureApi";
 const ReelTime = lazy(() => import("./features/reel-time/ReelTime"));
 const GamesHub = lazy(() => import("./features/games-hub/GamesHub"));
@@ -121,8 +122,8 @@ export default function App() {
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
     return (
-      <Suspense fallback={<div style={{ background: "#0a0a0f", height: "100vh" }} />}>
-        <TripleFeaturePublic />
+      <Suspense fallback={<div style={{ background: "#0f0d0b", height: "100vh" }} />}>
+        <GamesHubPublic />
       </Suspense>
     );
   }

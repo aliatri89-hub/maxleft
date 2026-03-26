@@ -147,13 +147,14 @@ function StatsCard({ stats }) {
 
 // ── Main Component ──────────────────────────────────────────
 
-export default function TripleFeature({ session, onBack, onToast }) {
+export default function TripleFeature({ session, onBack, onToast, useHook }) {
   const userId = session?.user?.id;
+  const hookFn = useHook || useTripleFeature;
   const {
     puzzle, result, percentile, playerCount, stats,
     loading, error, hasPlayed,
     submitPlay, getShareText, getTimeUntilNext, scaleScore,
-  } = useTripleFeature(userId);
+  } = hookFn(userId);
 
   const [selected, setSelected] = useState(new Set());
   const [phase, setPhase] = useState(PHASE.PICKING);

@@ -142,15 +142,16 @@ function BackdropCard({ movie, color, delay, dimmed }) {
 
 // ── Main Component ────────────────────────────────────────────
 
-export default function CastConnections({ session, onBack, onToast }) {
+export default function CastConnections({ session, onBack, onToast, useHook }) {
   const userId = session?.user?.id;
+  const hookFn = useHook || useCastConnections;
   const {
     puzzle, result, loading, error,
     allActors, selected, solved, solvedActorNames, solvedActorMovieIdx,
     mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
-  } = useCastConnections(userId);
+  } = hookFn(userId);
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [loaded, setLoaded] = useState(false);
