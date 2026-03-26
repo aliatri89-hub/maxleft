@@ -70,13 +70,81 @@ function LoadingState() {
   );
 }
 
+// ── Backdrop Reveal Card ─────────────────────────────────────
+
+function BackdropCard({ movie, color, delay, dimmed }) {
+  const hasBackdrop = !!movie.backdrop_path;
+  return (
+    <div
+      className="cc-solved-group"
+      style={{
+        borderRadius: 12,
+        padding: 0,
+        textAlign: "center",
+        backgroundColor: color,
+        overflow: "hidden",
+        position: "relative",
+        opacity: dimmed ? 0.65 : 1,
+        animationDelay: `${delay}s`,
+      }}
+    >
+      {hasBackdrop && (
+        <div
+          className="cc-backdrop-img"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            animationDelay: `${delay + 0.3}s`,
+          }}
+        >
+          {/* Warm amber overlay + vignette */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to bottom, rgba(30,20,10,0.3), rgba(15,13,11,0.75))",
+          }} />
+          <div style={{
+            position: "absolute", inset: 0,
+            boxShadow: "inset 0 0 40px rgba(0,0,0,0.5)",
+          }} />
+        </div>
+      )}
+      <div style={{ position: "relative", zIndex: 1, padding: "22px 16px" }}>
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 24,
+          color: "#fff",
+          letterSpacing: 1.5,
+          textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.3)",
+          lineHeight: 1.15,
+        }}>
+          {movie.title} ({movie.year})
+        </div>
+        <div style={{
+          fontSize: 12,
+          color: "rgba(255,255,255,0.9)",
+          marginTop: 6,
+          letterSpacing: 0.3,
+          fontFamily: "'IBM Plex Mono', monospace",
+          textShadow: "0 1px 3px rgba(0,0,0,0.5)",
+        }}>
+          {movie.actors.map((a) => a.name).join("  •  ")}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────
 
 export default function CastConnections({ session, onBack, onToast }) {
   const userId = session?.user?.id;
   const {
     puzzle, result, loading, error,
-    actors, selected, solved, mistakes, maxMistakes, groupSize,
+    allActors, selected, solved, solvedActorNames, solvedActorMovieIdx,
+    mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
   } = useCastConnections(userId);
@@ -99,12 +167,6 @@ export default function CastConnections({ session, onBack, onToast }) {
   function getShareText() {
     if (!puzzle) return "";
     const pNum = puzzleNumber || "?";
-    const squares = [];
-    // Build result grid
-    const colors = ["🟢", "🟡", "🟣"];
-    if (won) {
-      solved.forEach((_, i) => squares.push(colors[i % 3]));
-    }
     const mistakeDots = "❌".repeat(mistakes);
     return `Cast Connections #${pNum}\n${won ? "Solved" : "Failed"} ${mistakeDots ? `(${mistakeDots})` : "— no mistakes!"}\n\nmymantl.app`;
   }
@@ -146,6 +208,25 @@ export default function CastConnections({ session, onBack, onToast }) {
     );
   }
 
+  // Build reveal card list: solved groups + (on loss) unsolved groups
+  const revealMovies = solved.map((idx) => ({
+    movie: puzzle.movies[idx],
+    color: puzzle.colors[idx] || "#4a7c59",
+    dimmed: false,
+  }));
+
+  if (revealAll) {
+    puzzle.movies.forEach((movie, idx) => {
+      if (!solved.includes(idx)) {
+        revealMovies.push({
+          movie,
+          color: puzzle.colors[idx] || "#4a7c59",
+          dimmed: true,
+        });
+      }
+    });
+  }
+
   return (
     <div style={S.container}>
       <style>{CSS}</style>
@@ -177,181 +258,9 @@ export default function CastConnections({ session, onBack, onToast }) {
         </div>
       </div>
 
-      {/* Solved groups */}
-      <div style={S.solvedArea}>
-        {solved.map((movieIdx, i) => {
-          const movie = puzzle.movies[movieIdx];
-          const color = puzzle.colors[movieIdx] || "#4a7c59";
-          const hasBackdrop = !!movie.backdrop_path;
-          return (
-            <div
-              key={movieIdx}
-              className="cc-solved-group"
-              style={{
-                ...S.solvedGroup,
-                backgroundColor: color,
-                animationDelay: `${i * 0.1}s`,
-                overflow: "hidden",
-                position: "relative",
-              }}
-            >
-              {hasBackdrop && (
-                <div
-                  className="cc-backdrop-img"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                    animationDelay: `${i * 0.1 + 0.3}s`,
-                  }}
-                >
-                  {/* Warm amber overlay + vignette */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "linear-gradient(to bottom, rgba(30,20,10,0.35), rgba(15,13,11,0.8))",
-                  }} />
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)",
-                  }} />
-                </div>
-              )}
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
-                <div style={S.solvedActors}>
-                  {movie.actors.map((a) => a.name).join("  •  ")}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Reveal all on loss */}
-      {revealAll && puzzle.movies.map((movie, idx) =>
-        solved.includes(idx) ? null : (
-          <div
-            key={`reveal-${idx}`}
-            className="cc-reveal-group"
-            style={{
-              ...S.solvedGroup,
-              backgroundColor: puzzle.colors[idx] || "#4a7c59",
-              opacity: 0.7,
-              marginBottom: 8,
-              maxWidth: 420,
-              width: "100%",
-              alignSelf: "center",
-              animationDelay: `${idx * 0.15}s`,
-              overflow: "hidden",
-              position: "relative",
-            }}
-          >
-            {movie.backdrop_path && (
-              <div
-                className="cc-backdrop-img"
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  animationDelay: `${idx * 0.15 + 0.3}s`,
-                }}
-              >
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: "linear-gradient(to bottom, rgba(30,20,10,0.35), rgba(15,13,11,0.8))",
-                }} />
-                <div style={{
-                  position: "absolute", inset: 0,
-                  boxShadow: "inset 0 0 30px rgba(0,0,0,0.5)",
-                }} />
-              </div>
-            )}
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={S.solvedTitle}>{movie.title} ({movie.year})</div>
-              <div style={S.solvedActors}>
-                {movie.actors.map((a) => a.name).join("  •  ")}
-              </div>
-            </div>
-          </div>
-        )
-      )}
-
-      {/* Actor grid */}
-      {!revealAll && actors.length > 0 && (
-        <div
-          className={shaking ? "cc-shake" : ""}
-          style={S.grid}
-        >
-          {actors.map((actor) => {
-            const isSelected = selected.includes(actor.name);
-            return (
-              <button
-                key={actor.name}
-                className="cc-tile"
-                onClick={() => toggleSelect(actor.name)}
-                style={{
-                  ...S.tile,
-                  background: isSelected ? "#2e2518" : "#1a1714",
-                  borderColor: isSelected ? "#e8d3a2" : "#2a2520",
-                  ...(gameOver ? { pointerEvents: "none", opacity: 0.5 } : {}),
-                }}
-              >
-                <span style={S.actorName}>{actor.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Mistakes tracker */}
-      <div style={S.mistakesRow}>
-        <span style={S.mistakesLabel}>Mistakes remaining:</span>
-        <div style={S.dots}>
-          {Array.from({ length: maxMistakes }).map((_, i) => (
-            <div
-              key={i}
-              style={{
-                ...S.dot,
-                backgroundColor: i < maxMistakes - mistakes ? "#e8d3a2" : "#2a2520",
-                transition: "background-color 0.3s ease",
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Controls */}
-      {!gameOver && (
-        <div style={S.controls}>
-          <button className="cc-btn-secondary" onClick={shuffleActors} style={S.btnSecondary}>
-            Shuffle
-          </button>
-          <button
-            className="cc-btn-secondary"
-            onClick={deselectAll}
-            style={{ ...S.btnSecondary, opacity: selected.length === 0 ? 0.3 : 1 }}
-            disabled={selected.length === 0}
-          >
-            Deselect All
-          </button>
-          <button
-            className="cc-btn-primary"
-            onClick={submitGuess}
-            style={{ ...S.btnPrimary, opacity: selected.length !== groupSize ? 0.3 : 1 }}
-            disabled={selected.length !== groupSize}
-          >
-            Submit
-          </button>
-        </div>
-      )}
-
-      {/* End state */}
-      {gameOver && (
-        <div className="cc-end-state" style={S.endState}>
+      {/* ── GRID AREA: actor grid OR end state ── */}
+      {gameOver ? (
+        <div className="cc-end-state" style={S.endStateBox}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>{won ? "🎬" : "🎞️"}</div>
           <div style={{
             fontFamily: "'Bebas Neue', sans-serif", fontSize: 28,
@@ -364,8 +273,6 @@ export default function CastConnections({ session, onBack, onToast }) {
               ? `Solved with ${mistakes === 0 ? "no" : mistakes} mistake${mistakes !== 1 ? "s" : ""}`
               : "Better luck tomorrow"}
           </div>
-
-          {/* Share button */}
           <button
             className="cc-btn-primary"
             onClick={handleShare}
@@ -373,6 +280,102 @@ export default function CastConnections({ session, onBack, onToast }) {
           >
             Share Result
           </button>
+        </div>
+      ) : (
+        <>
+          {/* 3×3 actor grid — solved tiles stay highlighted */}
+          <div className={shaking ? "cc-shake" : ""} style={S.grid}>
+            {allActors.map((actor) => {
+              const isSolved = solvedActorNames.has(actor.name);
+              const isSelected = selected.includes(actor.name);
+              const movieIdx = solvedActorMovieIdx[actor.name];
+              const solvedColor = isSolved ? (puzzle.colors[movieIdx] || "#4a7c59") : null;
+
+              return (
+                <button
+                  key={actor.name}
+                  className={`cc-tile${isSolved ? " cc-tile-solved" : ""}`}
+                  onClick={() => toggleSelect(actor.name)}
+                  style={{
+                    ...S.tile,
+                    ...(isSolved ? {
+                      background: solvedColor,
+                      borderColor: solvedColor,
+                      pointerEvents: "none",
+                    } : isSelected ? {
+                      background: "#2e2518",
+                      borderColor: "#e8d3a2",
+                    } : {
+                      background: "#1a1714",
+                      borderColor: "#2a2520",
+                    }),
+                  }}
+                >
+                  <span style={{
+                    ...S.actorName,
+                    color: isSolved ? "#fff" : "#e8d3a2",
+                  }}>
+                    {actor.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mistakes tracker */}
+          <div style={S.mistakesRow}>
+            <span style={S.mistakesLabel}>Mistakes remaining:</span>
+            <div style={S.dots}>
+              {Array.from({ length: maxMistakes }).map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    ...S.dot,
+                    backgroundColor: i < maxMistakes - mistakes ? "#e8d3a2" : "#2a2520",
+                    transition: "background-color 0.3s ease",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div style={S.controls}>
+            <button className="cc-btn-secondary" onClick={shuffleActors} style={S.btnSecondary}>
+              Shuffle
+            </button>
+            <button
+              className="cc-btn-secondary"
+              onClick={deselectAll}
+              style={{ ...S.btnSecondary, opacity: selected.length === 0 ? 0.3 : 1 }}
+              disabled={selected.length === 0}
+            >
+              Deselect All
+            </button>
+            <button
+              className="cc-btn-primary"
+              onClick={submitGuess}
+              style={{ ...S.btnPrimary, opacity: selected.length !== groupSize ? 0.3 : 1 }}
+              disabled={selected.length !== groupSize}
+            >
+              Submit
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ── BACKDROP REVEAL CARDS — below grid ── */}
+      {revealMovies.length > 0 && (
+        <div style={S.revealArea}>
+          {revealMovies.map(({ movie, color, dimmed }, i) => (
+            <BackdropCard
+              key={movie.tmdb_id}
+              movie={movie}
+              color={color}
+              delay={i * 0.12}
+              dimmed={dimmed}
+            />
+          ))}
         </div>
       )}
 
@@ -414,47 +417,17 @@ const S = {
     color: "#e8d3a2",
     position: "relative",
   },
-  solvedArea: {
-    width: "100%",
-    maxWidth: 420,
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-    marginBottom: 8,
-  },
-  solvedGroup: {
-    borderRadius: 10,
-    padding: "14px 16px",
-    textAlign: "center",
-  },
-  solvedTitle: {
-    fontFamily: "'Bebas Neue', sans-serif",
-    fontSize: 20,
-    color: "#fff",
-    letterSpacing: 1,
-    textShadow: "0 1px 3px rgba(0,0,0,0.6), 0 0 12px rgba(0,0,0,0.3)",
-  },
-  solvedActors: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.9)",
-    marginTop: 4,
-    letterSpacing: 0.3,
-    fontFamily: "'IBM Plex Mono', monospace",
-    textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(3, 1fr)",
     gap: 10,
     width: "100%",
     maxWidth: 420,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   tile: {
-    background: "#1a1714",
     borderWidth: 2,
     borderStyle: "solid",
-    borderColor: "#2a2520",
     borderRadius: 10,
     padding: "22px 8px",
     cursor: "pointer",
@@ -466,14 +439,13 @@ const S = {
     WebkitTapHighlightColor: "transparent",
     fontFamily: "inherit",
     color: "inherit",
-    transition: "all 0.15s ease",
+    transition: "all 0.2s ease",
   },
   actorName: {
     fontSize: 12,
     fontWeight: 700,
     textAlign: "center",
     lineHeight: 1.3,
-    color: "#e8d3a2",
     textTransform: "uppercase",
     letterSpacing: 0.3,
   },
@@ -481,7 +453,7 @@ const S = {
     display: "flex",
     alignItems: "center",
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   mistakesLabel: {
     fontSize: 11,
@@ -504,6 +476,7 @@ const S = {
     gap: 10,
     flexWrap: "wrap",
     justifyContent: "center",
+    marginBottom: 24,
   },
   btnSecondary: {
     fontFamily: "'IBM Plex Mono', monospace",
@@ -534,9 +507,21 @@ const S = {
     WebkitTapHighlightColor: "transparent",
     outline: "none",
   },
-  endState: {
+  revealArea: {
+    width: "100%",
+    maxWidth: 420,
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  endStateBox: {
     textAlign: "center",
-    marginTop: 16,
+    width: "100%",
+    maxWidth: 420,
+    padding: "32px 16px",
+    marginBottom: 8,
   },
 };
 
@@ -567,16 +552,21 @@ const CSS = `
     to { opacity: 1; transform: scale(1); }
   }
 
-  .cc-reveal-group {
-    animation: cc-fade-in 0.4s ease forwards;
+  .cc-tile-solved {
+    animation: cc-tile-lock 0.35s ease;
   }
-  @keyframes cc-fade-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 0.7; transform: translateY(0); }
+  @keyframes cc-tile-lock {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    100% { transform: scale(1); }
   }
 
   .cc-end-state {
     animation: cc-fade-in 0.5s ease;
+  }
+  @keyframes cc-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .cc-shake {
@@ -591,7 +581,7 @@ const CSS = `
   }
 
   .cc-tile {
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
     -webkit-tap-highlight-color: transparent;
   }
   .cc-tile:active {

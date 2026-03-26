@@ -88,9 +88,15 @@ export function useCastConnections(userId) {
     return () => { cancelled = true; };
   }, [userId]);
 
-  // Toggle actor selection
+  // Toggle actor selection — skip solved actors
   const toggleSelect = useCallback((actorName) => {
     if (gameOver) return;
+    // Don't allow selecting solved actors
+    const solvedNames = new Set(
+      solved.flatMap((idx) => puzzle?.movies[idx]?.actors.map((a) => a.name) || [])
+    );
+    if (solvedNames.has(actorName)) return;
+
     setSelected((prev) =>
       prev.includes(actorName)
         ? prev.filter((n) => n !== actorName)
@@ -98,7 +104,7 @@ export function useCastConnections(userId) {
         ? [...prev, actorName]
         : prev
     );
-  }, [gameOver]);
+  }, [gameOver, solved, puzzle]);
 
   // Submit guess
   const submitGuess = useCallback(async () => {
@@ -173,15 +179,26 @@ export function useCastConnections(userId) {
   const won = solved.length === (puzzle?.movies?.length || 0);
   const puzzleNumber = puzzle ? getPuzzleNumber(puzzle.date) : null;
 
+  // Map actor name → movieIdx for solved actors (for coloring)
+  const solvedActorMovieIdx = {};
+  solved.forEach((idx) => {
+    puzzle?.movies[idx]?.actors.forEach((a) => {
+      solvedActorMovieIdx[a.name] = idx;
+    });
+  });
+
   return {
     puzzle,
     result,
     loading,
     error,
     // Game state
+    allActors: actors,
     actors: remainingActors,
     selected,
     solved,
+    solvedActorNames,
+    solvedActorMovieIdx,
     mistakes,
     maxMistakes,
     groupSize,
