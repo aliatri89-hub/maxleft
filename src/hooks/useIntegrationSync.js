@@ -135,33 +135,43 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
       if (!badgeProgress.length) return;
 
       // ── Badge digest notification (single notification, not a toast flood) ──
-      const top3 = badgeProgress.slice(0, 3);
-      const remaining = badgeProgress.length - top3.length;
-      const lines = top3.map(t => `${t.current}/${t.total} ${t.badge.name}`);
-      const body = remaining > 0
-        ? `${lines.join(", ")} + ${remaining} more`
-        : lines.join(", ");
+      // Fetch community slugs for navigation
+      const communityIds = [...new Set(badgeProgress.map(t => t.badge.community_id).filter(Boolean))];
+      let topSlug = null;
+      if (communityIds.length > 0) {
+        const { data: communityPages } = await supabase
+          .from("community_pages")
+          .select("id, slug, title")
+          .in("id", communityIds);
+        if (communityPages?.length) {
+          topSlug = communityPages.find(c => c.id === badgeProgress[0].badge.community_id)?.slug || communityPages[0].slug;
+        }
+      }
+
+      const count = badgeProgress.length;
+      const topPct = Math.round((badgeProgress[0].current / badgeProgress[0].total) * 100);
+      const title = "Your library has a head start!";
+      const body = topPct >= 50
+        ? `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""} — you're over halfway to one. Tap to explore.`
+        : `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""}. Tap to see how close you are.`;
 
       supabase.from("user_notifications").upsert({
         user_id: uid,
         notif_type: "badge_digest",
-        title: `Progress on ${badgeProgress.length} badge${badgeProgress.length > 1 ? "s" : ""}`,
+        title,
         body,
-        image_url: top3[0]?.badge?.image_url || null,
+        image_url: badgeProgress[0]?.badge?.image_url || null,
         payload: {
           type: "badge_digest",
-          badges: badgeProgress.map(t => ({
-            badge_id: t.badge.id,
-            community_id: t.badge.community_id,
-            current: t.current,
-            total: t.total,
-          })),
+          community_slug: topSlug,
+          badge_count: count,
+          top_pct: topPct,
         },
         ref_key: "badge_digest:sync",
         created_at: new Date().toISOString(),
       }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
         if (error) console.error("[AutoLog] Badge digest notification error:", error.message);
-        else console.log(`[AutoLog] Badge digest: ${badgeProgress.length} badges with progress`);
+        else console.log(`[AutoLog] Badge digest: ${count} badges with progress`);
       });
     } catch (e) {
       console.warn("[AutoLog] Auto-log + badge check failed:", e);

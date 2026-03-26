@@ -342,6 +342,8 @@ export default function App() {
     } else if (data?.type === 'new_coverage_digest') {
       setActiveTab("feed");
       setFeedMode("activity");
+    } else if ((data?.type === 'badge_digest' || data?.type === 'badge_earned' || data?.type === 'badge_progress') && data?.community_slug) {
+      setActiveCommunitySlug(data.community_slug);
     } else {
       setActiveTab("feed");
     }
