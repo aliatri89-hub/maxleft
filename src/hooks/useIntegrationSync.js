@@ -135,19 +135,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
       if (!badgeProgress.length) return;
 
       // ── Badge digest notification (single notification, not a toast flood) ──
-      // Fetch community slugs for navigation
-      const communityIds = [...new Set(badgeProgress.map(t => t.badge.community_id).filter(Boolean))];
-      let topSlug = null;
-      if (communityIds.length > 0) {
-        const { data: communityPages } = await supabase
-          .from("community_pages")
-          .select("id, slug, title")
-          .in("id", communityIds);
-        if (communityPages?.length) {
-          topSlug = communityPages.find(c => c.id === badgeProgress[0].badge.community_id)?.slug || communityPages[0].slug;
-        }
-      }
-
+      // Tap opens BadgeOverviewPage — no community_slug needed in payload
       const count = badgeProgress.length;
       const topPct = Math.round((badgeProgress[0].current / badgeProgress[0].total) * 100);
       const title = "Your library has a head start!";
@@ -161,12 +149,7 @@ export function useIntegrationSync({ session, showToast, loadShelves, setProfile
         title,
         body,
         image_url: badgeProgress[0]?.badge?.image_url || null,
-        payload: {
-          type: "badge_digest",
-          community_slug: topSlug,
-          badge_count: count,
-          top_pct: topPct,
-        },
+        payload: { type: "badge_digest", badge_count: count, top_pct: topPct },
         ref_key: "badge_digest:sync",
         created_at: new Date().toISOString(),
       }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
