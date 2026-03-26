@@ -157,6 +157,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [isLogged, setIsLogged] = useState(!!data?.logged_at || !!data?.completed_at);
   const [showLogModal, setShowLogModal] = useState(false);
   const userIdRef = useRef(null);
+  const [userId, setUserId] = useState(null);
   const prevTmdbId = useRef(null);
 
   // Session check (once)
@@ -164,6 +165,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user?.id) {
         userIdRef.current = session.user.id;
+        setUserId(session.user.id);
         if (session.user.id === "19410e64-d610-4fab-9c26-d24fafc94696") setIsAdmin(true);
       }
     });
@@ -171,13 +173,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   // Check watchlist status when card opens
   useEffect(() => {
-    if (!open || !data?.title || !userIdRef.current) { setOnWatchlist(false); return; }
+    if (!open || !data?.title || !userId) { setOnWatchlist(false); return; }
     supabase.from("wishlist").select("id")
-      .eq("user_id", userIdRef.current).eq("title", data.title)
+      .eq("user_id", userId).eq("title", data.title)
       .in("item_type", ["movie", "show"])
       .maybeSingle()
       .then(({ data: row }) => setOnWatchlist(!!row));
-  }, [open, data?.title]);
+  }, [open, data?.title, userId]);
 
   const toggleWatchlist = async () => {
     if (!userIdRef.current || !data?.title || watchlistSaving) return;
@@ -207,12 +209,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   // Check if film is already logged
   useEffect(() => {
-    if (!open || !data?.tmdb_id || !userIdRef.current) { setIsLogged(false); return; }
+    if (!open || !data?.tmdb_id || !userId) return;
     supabase.from("user_media_logs").select("id")
-      .eq("user_id", userIdRef.current).eq("tmdb_id", data.tmdb_id)
+      .eq("user_id", userId).eq("tmdb_id", data.tmdb_id)
       .maybeSingle()
       .then(({ data: row }) => setIsLogged(!!row));
-  }, [open, data?.tmdb_id]);
+  }, [open, data?.tmdb_id, userId]);
 
   const handleLog = () => {
     if (!userIdRef.current || !data?.tmdb_id) return;
@@ -834,7 +836,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )}
 
           {/* ═══ LOG + WATCHLIST BUTTONS ═══ */}
-          {userIdRef.current && (
+          {userId && (
             <div style={{ padding: "6px 0 2px", display: "flex", gap: 8, flexWrap: "wrap" }}>
               {/* Log button */}
               <button
@@ -859,11 +861,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="5" y="3" width="14" height="18" rx="1" />
-                    <line x1="9" y1="7" x2="15" y2="7" />
-                    <line x1="9" y1="11" x2="15" y2="11" />
-                    <line x1="9" y1="15" x2="12" y2="15" />
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 )}
                 {isLogged ? "Logged" : "Log"}
