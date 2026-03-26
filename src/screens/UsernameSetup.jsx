@@ -314,8 +314,10 @@ function UsernameSetup({ name, session, onComplete }) {
 
       if (!cancelled && !error && data) {
         setPodcasts(data);
-        // Pre-select none — let the user choose
-        setSelectedPodcasts({});
+        // Pre-select all — more podcasts = better experience
+        const allSelected = {};
+        data.forEach(p => { allSelected[p.id] = true; });
+        setSelectedPodcasts(allSelected);
       }
       if (!cancelled) setLoadingPodcasts(false);
     })();
@@ -545,7 +547,7 @@ function UsernameSetup({ name, session, onComplete }) {
         <StepDots total={allSteps.length} current={1} />
         <div className="setup-title">Your Podcasts</div>
         <div className="setup-sub">
-          Which podcasts do you listen to? We'll connect you to any active communities and tailor your experience.
+          We've selected all our podcasts. Deselect any you don't listen to.
         </div>
 
         {loadingPodcasts ? (
