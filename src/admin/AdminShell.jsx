@@ -11,13 +11,12 @@ const ADMIN_USER_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 // Lazy-load admin pages
 const MissionControl = lazy(() => import("./MissionControl"));
 const FeedManager = lazy(() => import("./FeedManager"));
-// Future phases:
-// const CommunityManager = lazy(() => import("./CommunityManager"));
+const CommunityManager = lazy(() => import("./CommunityManager"));
 
 const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
   { key: "feed",            label: "Feed & Ingest",   icon: "◈" },
-  { key: "communities",     label: "Communities",      icon: "◆", disabled: true },
+  { key: "communities",     label: "Communities",      icon: "◆" },
   { key: "games",           label: "Games",            icon: "◇", disabled: true },
   { key: "diagnostics",     label: "Diagnostics",      icon: "◎", disabled: true },
   { key: "config",          label: "Config & Flags",   icon: "◐", disabled: true },
@@ -139,7 +138,7 @@ export default function AdminShell() {
             <FeedManager session={session} />
           )}
           {activeSection === "communities" && (
-            <PlaceholderSection title="Community Manager" />
+            <CommunityManager session={session} />
           )}
           {activeSection === "games" && (
             <PlaceholderSection title="Games Manager" />
