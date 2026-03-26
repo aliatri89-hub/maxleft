@@ -44,6 +44,7 @@ import GamesHub from "./features/games-hub/GamesHub";
 import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
 import CastConnections from "./features/cast-connections/CastConnections";
 import { hasPlayedToday as ccHasPlayedToday } from "./features/cast-connections/castConnectionsApi";
+import BadgeOverviewPage from "./components/BadgeOverviewPage";
 
 // Hooks
 import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
@@ -128,6 +129,7 @@ export default function App() {
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [showReelTime, setShowReelTime] = useState(false);
   const [showCastConnections, setShowCastConnections] = useState(false);
+  const [showBadgeOverview, setShowBadgeOverview] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
   const [ccUnplayed, setCcUnplayed] = useState(false);
@@ -342,8 +344,9 @@ export default function App() {
     } else if (data?.type === 'new_coverage_digest') {
       setActiveTab("feed");
       setFeedMode("activity");
-    } else if ((data?.type === 'badge_digest' || data?.type === 'badge_earned' || data?.type === 'badge_progress') && data?.community_slug) {
-      setActiveCommunitySlug(data.community_slug);
+    } else if (data?.type === 'badge_digest' || data?.type === 'badge_earned' || data?.type === 'badge_progress') {
+      setShowBadgeOverview(true);
+      pushNav("badgeOverview", () => setShowBadgeOverview(false));
     } else {
       setActiveTab("feed");
     }
@@ -554,6 +557,9 @@ export default function App() {
                       } else if (gameId === "castConnections") {
                         setShowCastConnections(true);
                         pushNav("castConnections", () => setShowCastConnections(false));
+                      } else if (gameId === "badges") {
+                        setShowBadgeOverview(true);
+                        pushNav("badgeOverview", () => setShowBadgeOverview(false));
                       }
                     }}
                     gameStatuses={{
@@ -612,6 +618,19 @@ export default function App() {
         {/* What to Watch */}
         {showWhatToWatch && (
           <WhatToWatch session={session} onBack={() => { removeNav("whatToWatch"); setShowWhatToWatch(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+        )}
+
+        {/* Badge Overview */}
+        {showBadgeOverview && (
+          <BadgeOverviewPage
+            userId={session?.user?.id}
+            onClose={() => { removeNav("badgeOverview"); setShowBadgeOverview(false); }}
+            onNavigateCommunity={(slug) => {
+              removeNav("badgeOverview");
+              setShowBadgeOverview(false);
+              setActiveCommunitySlug(slug);
+            }}
+          />
         )}
 
         {/* Community View */}
