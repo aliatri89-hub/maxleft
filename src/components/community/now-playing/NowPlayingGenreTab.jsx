@@ -1155,6 +1155,22 @@ function GenreGridTile({ label, icon, tint, poster, completed, total, accent, de
       </div>
       )}
 
+      {/* NPP filmstrip logo overlay */}
+      <img
+        src="https://api.mymantl.app/storage/v1/object/public/banners/NPPLogo.png"
+        alt=""
+        style={{
+          position: "absolute",
+          top: "50%", left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "80%",
+          objectFit: "contain",
+          opacity: 0.18,
+          pointerEvents: "none",
+          filter: "brightness(1.5)",
+        }}
+      />
+
       {/* Center overlay for text readability */}
       <div style={{
         position: "absolute",
