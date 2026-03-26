@@ -4,7 +4,7 @@
 // All games playable without auth. Badges shown as teaser/funnel.
 // Results stored in localStorage only.
 //
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 
 const TripleFeature = lazy(() => import("../triple-feature/TripleFeature"));
 const ReelTime = lazy(() => import("../reel-time/ReelTime"));
@@ -245,14 +245,36 @@ export default function GamesHubPublic() {
   }, []);
 
   // Refresh statuses when returning from a game
-  function handleBack() {
+  const returnToHub = useCallback(() => {
     setActiveGame(null);
     setGameStatuses({
       tripleFeature: getTfStatus(),
       reelTime: getRtStatus(),
       castConnections: getCcStatus(),
     });
+  }, []);
+
+  // In-game back button — just pop history, popstate handler does the rest
+  const handleBack = useCallback(() => {
+    window.history.back();
+  }, []);
+
+  // Launch a game — push history so back gesture returns to hub
+  function launchGame(gameId) {
+    window.history.pushState({ game: gameId }, "", "/play");
+    setActiveGame(gameId);
   }
+
+  // Listen for browser back gesture (popstate)
+  useEffect(() => {
+    function onPopState() {
+      if (activeGame) {
+        returnToHub();
+      }
+    }
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [activeGame, returnToHub]);
 
   // ── Render active game ──
 
@@ -398,7 +420,7 @@ export default function GamesHubPublic() {
           return (
             <button
               key={game.id}
-              onClick={() => setActiveGame(game.id)}
+              onClick={() => launchGame(game.id)}
               onPointerDown={() => setPressedId(game.id)}
               onPointerUp={() => setPressedId(null)}
               onPointerLeave={() => setPressedId(null)}
