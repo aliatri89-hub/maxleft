@@ -237,7 +237,8 @@ export default function CastConnections({ session, onBack, onToast }) {
                 onClick={() => toggleSelect(actor.name)}
                 style={{
                   ...S.tile,
-                  ...(isSelected ? S.tileSelected : {}),
+                  background: isSelected ? "#2e2518" : "#1a1714",
+                  borderColor: isSelected ? "#e8d3a2" : "#2a2520",
                   ...(gameOver ? { pointerEvents: "none", opacity: 0.5 } : {}),
                 }}
               >
@@ -392,7 +393,9 @@ const S = {
   },
   tile: {
     background: "#1a1714",
-    border: "2px solid #2a2520",
+    borderWidth: 2,
+    borderStyle: "solid",
+    borderColor: "#2a2520",
     borderRadius: 10,
     padding: "22px 8px",
     cursor: "pointer",
@@ -405,10 +408,6 @@ const S = {
     fontFamily: "inherit",
     color: "inherit",
     transition: "all 0.15s ease",
-  },
-  tileSelected: {
-    background: "#2e2518",
-    borderColor: "#e8d3a2",
   },
   actorName: {
     fontSize: 12,
