@@ -222,7 +222,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             position: "relative",
           }}>
             {coverUrl ? (
-              <img src={coverUrl} alt={item.title}
+              <img src={coverUrl} loading="lazy" alt={item.title}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }} />
             ) : (
               <div style={{
@@ -282,7 +282,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                     cursor: "pointer",
                   }}
                 >
-                  <img src="https://c5.patreon.com/external/favicon/favicon-32x32.png" alt="" style={{ width: 12, height: 12, borderRadius: 2 }} />
+                  <img loading="lazy" src="https://c5.patreon.com/external/favicon/favicon-32x32.png" alt="" style={{ width: 12, height: 12, borderRadius: 2 }} />
                   Patreon
                 </a>
               )}

@@ -250,7 +250,7 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
           userSelect: "none", WebkitUserSelect: "none", touchAction: "pan-y",
         }}>
         {posterUrl ? (
-          <img src={posterUrl} alt={film.title} draggable={false}
+          <img src={posterUrl} loading="lazy" alt={film.title} draggable={false}
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
         ) : (
           <div style={{ width: "100%", height: "100%", background: "#1a1612", display: "flex", alignItems: "center", justifyContent: "center", color: CREAM, opacity: 0.4, fontSize: 14, padding: 16, textAlign: "center" }}>{film.title}</div>
@@ -327,7 +327,7 @@ function CoverageSheet({ film, episodes, loading, onClose, onSelect, onPlay, onQ
           display: "flex", alignItems: "center", gap: 14,
         }}>
           {film.poster_path && (
-            <img src={`${TMDB_IMG}/w154${film.poster_path}`} alt="" style={{ width: 48, height: 72, borderRadius: 6, objectFit: "cover" }} />
+            <img loading="lazy" src={`${TMDB_IMG}/w154${film.poster_path}`} alt="" style={{ width: 48, height: 72, borderRadius: 6, objectFit: "cover" }} />
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ color: CREAM, fontSize: 16, fontWeight: 700 }}>{film.title}</div>
@@ -430,7 +430,7 @@ function ReviewPoster({ film, onSelect, onPeek }) {
         aspectRatio: "2/3", boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
         WebkitUserSelect: "none", userSelect: "none",
       }}>
-      <img src={`${TMDB_IMG}/w342${film.poster_path}`} alt={film.title} draggable={false}
+      <img loading="lazy" src={`${TMDB_IMG}/w342${film.poster_path}`} alt={film.title} draggable={false}
         style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
@@ -474,7 +474,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
   return (
     <div style={{ flex: 1, overflow: "auto", padding: "0 0 120px" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 24px 16px" }}>
-        {posterUrl && <img src={posterUrl} alt={film.title} style={{ width: 180, borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} />}
+        {posterUrl && <img src={posterUrl} loading="lazy" alt={film.title} style={{ width: 180, borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} />}
         <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: GREEN, marginTop: 16, letterSpacing: 2 }}>TONIGHT'S PICK</div>
         <div style={{ color: CREAM, fontSize: 22, fontWeight: 700, marginTop: 4, textAlign: "center" }}>{film.title}</div>
         <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>{film.year}{film.genre ? ` · ${film.genre}` : ""}</div>
@@ -531,7 +531,7 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderBottom: "1px solid rgba(240,235,225,0.06)" }}>
       {ep.podcast_artwork_url && (
-        <img src={ep.podcast_artwork_url} alt="" style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
+        <img src={ep.podcast_artwork_url} loading="lazy" alt="" style={{ width: 44, height: 44, borderRadius: 6, objectFit: "cover", flexShrink: 0 }} />
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ color: CREAM, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -670,7 +670,7 @@ function SetupScreen({ userId, onStart }) {
                   transition: "all 0.15s ease",
                 }}>
                   {p.artwork_url && (
-                    <img src={p.artwork_url} alt="" style={{
+                    <img src={p.artwork_url} loading="lazy" alt="" style={{
                       width: 24, height: 24, borderRadius: 5, objectFit: "cover",
                     }} />
                   )}

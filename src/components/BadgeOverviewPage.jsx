@@ -352,7 +352,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     overflow: "hidden", flexShrink: 0,
                     border: `1.5px solid ${accent}40`,
                   }}>
-                    <img src={comm.image_url} alt="" style={{
+                    <img loading="lazy" src={comm.image_url} alt="" style={{
                       width: "100%", height: "100%", objectFit: "cover",
                     }} />
                   </div>

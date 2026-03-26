@@ -794,7 +794,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                       onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                     >
                       {r.poster_path ? (
-                        <img src={`${TMDB_IMG}/w92${r.poster_path}`} alt="" style={{
+                        <img loading="lazy" src={`${TMDB_IMG}/w92${r.poster_path}`} alt="" style={{
                           width: 28, height: 42, borderRadius: 3, objectFit: "cover", flexShrink: 0,
                         }} />
                       ) : (

@@ -265,7 +265,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
           <div className="shelf-detail">
             <div className="shelf-detail-hero">
               {(selected.poster || selected.cover) ? (
-                <img src={selected.poster || selected.cover} className="shelf-detail-poster" alt="" />
+                <img src={selected.poster || selected.cover} className="shelf-detail-poster" loading="lazy" alt="" />
               ) : (
                 <div className="shelf-detail-poster" />
               )}
@@ -512,7 +512,7 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
                 onClick={() => setSelected(item)}
               >
                 {(item.posterSmall || item.cover) ? (
-                  <img src={item.posterSmall || item.cover} className="result-poster" alt="" />
+                  <img src={item.posterSmall || item.cover} className="result-poster" loading="lazy" alt="" />
                 ) : (
                   <div className="result-poster" />
                 )}

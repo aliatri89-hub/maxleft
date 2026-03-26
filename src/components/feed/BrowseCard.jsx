@@ -214,7 +214,7 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
         alignItems: "center", padding: "10px 12px", background: "#151210",
       }}>
         {data.backdrop_path && (
-          <img src={data.backdrop_path} alt="" style={{
+          <img src={data.backdrop_path} loading="lazy" alt="" style={{
             position: "absolute", inset: 0, width: "100%", height: "100%",
             objectFit: "cover", objectPosition: "center 25%",
           }} />
@@ -282,7 +282,7 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
       }}>
         {/* Faded celluloid backdrop */}
         {data.backdrop_path && (
-          <img src={data.backdrop_path} alt="" style={{
+          <img src={data.backdrop_path} loading="lazy" alt="" style={{
             position: "absolute", inset: -4,
             width: "calc(100% + 8px)", height: "calc(100% + 8px)",
             objectFit: "cover", objectPosition: "center top",

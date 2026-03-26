@@ -369,7 +369,7 @@ function JunkiesHero({ community, seenStats, accent, yearsCount }) {
     }}>
       {hasBanner ? (
         <>
-          <img src={bannerUrl} alt=""
+          <img loading="lazy" src={bannerUrl} alt=""
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%",

@@ -3,15 +3,16 @@ import { supabase } from "../supabase";
 import { TMDB_IMG, fetchTMDBRaw, searchTMDBRaw } from "../utils/api";
 import { toLogTimestamp } from "../utils/helpers";
 import { upsertMediaLog, toPosterPath, logGame } from "../utils/mediaWrite";
+import { useShelves } from "../contexts/ShelvesProvider";
 
 /**
  * useIntegrationSync — Letterboxd, Goodreads, and Steam sync logic.
  *
  * Extracted from App.jsx. Owns all sync state (syncing flags, last sync times,
- * lock refs, badge toast state). Depends on session, showToast, loadShelves,
- * and setProfile from the parent.
+ * lock refs, badge toast state). Gets loadShelves from ShelvesProvider context.
  */
-export function useIntegrationSync({ session, showToast, loadShelves, setProfile }) {
+export function useIntegrationSync({ session, showToast, setProfile }) {
+  const { loadShelves } = useShelves();
   const userId = session?.user?.id;
 
   // ── Sync state ──

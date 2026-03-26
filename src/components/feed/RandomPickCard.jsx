@@ -97,7 +97,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
               padding: "3px 8px 3px 3px",
             }}>
               {data.community_image && (
-                <img src={data.community_image} alt=""
+                <img loading="lazy" src={data.community_image} alt=""
                   style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
                 />
               )}

@@ -1606,7 +1606,7 @@ function LandingScreen({ onSignIn }) {
                   >
                     {/* ── FRONT: backdrop + logo ── */}
                     <div className="flip-card-front">
-                      <img src={movie.backdrop} alt="" style={{
+                      <img src={movie.backdrop} loading="lazy" alt="" style={{
                         position: "absolute", inset: 0, width: "100%", height: "100%",
                         objectFit: "cover", objectPosition: "center top",
                       }} />
@@ -1662,7 +1662,7 @@ function LandingScreen({ onSignIn }) {
                         const isThisBuffering = demoBuffering && demoPodcast?.name === p.name && demoPodcast?._movieIdx === idx;
                         return (
                           <div key={i} className="flip-card-back-row">
-                            <img className="flip-card-back-art" src={p.art} alt={p.name} />
+                            <img className="flip-card-back-art" src={p.art} loading="lazy" alt={p.name} />
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div className="flip-card-back-name">{p.episode}</div>
                               <div className="flip-card-back-ep">{p.name}</div>
@@ -1792,13 +1792,13 @@ function LandingScreen({ onSignIn }) {
               >
                 <div className="badge-inner">
                   <div className="badge-front">
-                    <img className="badge-front-art" src={badge.art} alt="" />
+                    <img className="badge-front-art" src={badge.art} loading="lazy" alt="" />
                     <span className="badge-front-q">?</span>
                   </div>
                   <div className="badge-back" style={{ borderColor: badge.color + '44' }}>
                     <div className="badge-back-backdrop" style={{ backgroundImage: `url(${badge.backdrop})` }} />
                     <div className="badge-back-backdrop-overlay" style={{ background: `radial-gradient(circle at center, ${badge.bg} 0%, rgba(15,13,11,0.85) 100%)` }} />
-                    <img className="badge-back-art" src={badge.art} alt={badge.name} style={{ borderColor: badge.color + '66' }} />
+                    <img className="badge-back-art" src={badge.art} loading="lazy" alt={badge.name} style={{ borderColor: badge.color + '66' }} />
                     <span className="badge-back-name" style={{ color: badge.color }}>{badge.name}</span>
                     <span className="badge-back-flair" style={{ color: badge.color }}>{badge.sub}</span>
                   </div>
@@ -1938,7 +1938,7 @@ function LandingScreen({ onSignIn }) {
           </div>
           <div className="sync-demo">
             <div className="sync-row">
-              <img className="sync-logo" src="https://a.ltrbxd.com/logos/letterboxd-mac-icon.png" alt="Letterboxd" />
+              <img className="sync-logo" loading="lazy" src="https://a.ltrbxd.com/logos/letterboxd-mac-icon.png" alt="Letterboxd" />
               <div className="sync-info">
                 <div className="sync-name">Letterboxd</div>
                 <div className="sync-stat">Films & ratings</div>
@@ -1973,7 +1973,7 @@ function LandingScreen({ onSignIn }) {
                 <div className="podcast-marquee-track track-left">
                   {[...PODCAST_ART_ROW1, ...PODCAST_ART_ROW1].map((p, i) => (
                     <div key={i} className="podcast-marquee-item">
-                      <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                      <img className="podcast-marquee-thumb" src={p.src} loading="lazy" alt={p.name} />
                     </div>
                   ))}
                 </div>
@@ -1982,7 +1982,7 @@ function LandingScreen({ onSignIn }) {
                 <div className="podcast-marquee-track track-right">
                   {[...PODCAST_ART_ROW2, ...PODCAST_ART_ROW2].map((p, i) => (
                     <div key={`r2-${i}`} className="podcast-marquee-item">
-                      <img className="podcast-marquee-thumb" src={p.src} alt={p.name} />
+                      <img className="podcast-marquee-thumb" src={p.src} loading="lazy" alt={p.name} />
                     </div>
                   ))}
                 </div>

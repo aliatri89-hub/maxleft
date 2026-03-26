@@ -3,6 +3,7 @@ import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { supabase } from "./supabase";
 import "./styles/App.css";
+import { ShelvesProvider, useShelves } from "./contexts/ShelvesProvider";
 
 // ─── ADMIN PANEL (lazy-loaded, desktop-only) ─────────────────
 const AdminShell = lazy(() => import("./admin/AdminShell"));
@@ -126,6 +127,15 @@ export default function App() {
     );
   }
 
+  return (
+    <ShelvesProvider>
+      <AppMain />
+    </ShelvesProvider>
+  );
+}
+
+function AppMain() {
+  const { shelves, shelvesLoaded, loadShelves, refreshShelves, resetShelves } = useShelves();
   // ── Core state ──
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -155,8 +165,6 @@ export default function App() {
     enabledShelves: { ...DEFAULT_ENABLED_SHELVES },
     shelfOrder: [...DEFAULT_SHELF_ORDER],
   });
-  const [shelves, setShelves] = useState({ books: [], movies: [], shows: [], games: [], totalItems: 0 });
-  const [shelvesLoaded, setShelvesLoaded] = useState(false);
 
   // ── Community state ──
   const [communityDashboard, setCommunityDashboard] = useState(() => {
@@ -181,35 +189,7 @@ export default function App() {
     onTouchStart, onTouchMove, onTouchEnd, TABS,
   } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
 
-  const loadShelves = useCallback(async (userId) => {
-    try {
-      const [
-        { data: allBooks }, { data: activeBooks }, { data: allMovies },
-        { data: allShows }, { data: allGames }, { data: allCountries },
-      ] = await Promise.all([
-        supabase.from("user_books_v").select("id, title, author, cover_url, rating, notes, finished_at, source").eq("user_id", userId).eq("status", "finished").order("finished_at", { ascending: false, nullsFirst: false }),
-        supabase.from("user_books_v").select("id, title, author, cover_url, notes, source").eq("user_id", userId).eq("status", "watching"),
-        supabase.from("user_films_v").select("id, title, poster_url, rating, year, director, notes, watched_at").eq("user_id", userId).order("watched_at", { ascending: false, nullsFirst: false }),
-        supabase.from("user_shows_v").select("id, title, poster_url, tmdb_id, show_status, rating, notes, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("user_games_v").select("id, title, cover_url, genre, game_status, rating, notes, source, external_id, steam_app_id, extra_data, created_at").eq("user_id", userId).order("created_at", { ascending: false }),
-        supabase.from("countries").select("id, country_code, country_name, status, visit_month, visit_year, trip_month, trip_year, notes, photo_url").eq("user_id", userId).order("created_at", { ascending: false }),
-      ]);
-
-      const books = (allBooks || []).map(b => ({ id: b.id, title: b.title, author: b.author, cover: b.cover_url, rating: b.rating, notes: b.notes, finishedAt: b.finished_at, source: b.source || "mantl" }));
-      const currentBooks = (activeBooks || []).map(b => ({ id: b.id, title: b.title, author: b.author, cover: b.cover_url, notes: b.notes, isReading: true, source: b.source || "mantl" }));
-      const movies = (allMovies || []).map(m => ({ id: m.id, title: m.title, cover: m.poster_url, rating: m.rating, year: m.year, director: m.director, notes: m.notes, watchedAt: m.watched_at }));
-      const shows = (allShows || []).sort((a, b) => (a.show_status === "watching" ? -1 : 1) - (b.show_status === "watching" ? -1 : 1)).map(s => ({ id: s.id, title: s.title, cover: s.poster_url, tmdbId: s.tmdb_id, status: s.show_status, isWatching: s.show_status === "watching", rating: s.rating, notes: s.notes }));
-      const games = (allGames || []).sort((a, b) => (a.game_status === "playing" ? -1 : 1) - (b.game_status === "playing" ? -1 : 1)).map(g => ({ id: g.id, title: g.title, cover: g.cover_url, platform: g.extra_data?.platform || null, genre: g.genre, status: g.game_status, isPlaying: g.game_status === "playing", isBeat: g.game_status === "beat", rating: g.rating, notes: g.notes, source: g.source || null, externalId: g.external_id || null, steamAppId: g.steam_app_id || null }));
-      const countries = (allCountries || []).map(c => ({ id: c.id, countryCode: c.country_code, countryName: c.country_name, flag: "🏳️", status: c.status, visitMonth: c.visit_month, visitYear: c.visit_year, tripMonth: c.trip_month, tripYear: c.trip_year, notes: c.notes, photoUrl: c.photo_url }));
-
-      setShelves({ books: [...currentBooks, ...books], currentBooks, movies, shows, games, countries, totalItems: books.length + movies.length + shows.length + games.length });
-    } catch (err) {
-      console.error("[Shelves] Failed to load:", err);
-    }
-    setShelvesLoaded(true);
-  }, []);
-
-  const sync = useIntegrationSync({ session, showToast, loadShelves, setProfile });
+  const sync = useIntegrationSync({ session, showToast, setProfile });
 
   const {
     subscriptions: communitySubscriptions, isSubscribed,
@@ -375,8 +355,7 @@ export default function App() {
     setSession(null);
     setScreen("landing");
     setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-    setShelves({ books: [], movies: [], shows: [], games: [], totalItems: 0 });
-    setShelvesLoaded(false);
+    resetShelves();
     setActiveTab("feed");
   };
 
@@ -398,8 +377,7 @@ export default function App() {
       await supabase.auth.signOut();
       setSession(null); setScreen("landing");
       setProfile({ name: "", username: "", avatar: "", bio: "", avatarUrl: "" });
-      setShelves({ books: [], movies: [], shows: [], games: [], totalItems: 0 });
-      setShelvesLoaded(false); setActiveTab("feed");
+      resetShelves(); setActiveTab("feed");
     } catch (err) { console.error("Delete account error:", err); }
   };
 
@@ -594,9 +572,9 @@ export default function App() {
                 </div>
                 <div className="tab-pane" key="shelf-tab">
                   {visitedTabs.has("shelf") && <ErrorBoundary name="My MANTL"><Suspense fallback={<CommunityLoadingSkeleton />}>
-                    <ShelfHome profile={profile} shelves={shelves} shelvesLoaded={shelvesLoaded}
+                    <ShelfHome profile={profile}
                     onShelfIt={openShelfIt} session={session} pushNav={pushNav} removeNav={removeNav}
-                    onRefresh={async () => { if (session) await loadShelves(session.user.id); }}
+                    onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
                     goodreadsSyncing={sync.goodreadsSyncing} steamSyncing={sync.steamSyncing}
@@ -685,7 +663,7 @@ export default function App() {
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
                 onBack={() => { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
-                onShelvesChanged={() => { if (session) loadShelves(session.user.id); }}
+                onShelvesChanged={refreshShelves}
                 communitySubscriptions={communitySubscriptions}
                 onOpenCommunity={(slug, tmdbId) => { setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                 scrollToTmdbId={scrollToTmdbId}
@@ -700,7 +678,7 @@ export default function App() {
           <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <ErrorBoundary name="Profile">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
-                <ProfileScreen profile={profile} shelves={shelves} session={session}
+                <ProfileScreen profile={profile} session={session}
                   initialView={profileInitView}
                   pushNav={pushNav} removeNav={removeNav}
                   onBack={() => { removeNav("profile"); setShowProfile(false); setProfileInitView(null); }}
@@ -720,7 +698,7 @@ export default function App() {
                   onSteamDisconnect={sync.disconnectSteam}
                   onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}
                   steamSyncing={sync.steamSyncing}
-                  onImportComplete={() => { if (session) loadShelves(session.user.id); }}
+                  onImportComplete={refreshShelves}
                   communitySubscriptions={communitySubscriptions}
                   onSubscribe={handleSubscribeCommunity}
                   onUnsubscribe={unsubscribeCommunity}
@@ -782,7 +760,7 @@ export default function App() {
             session={session} onToast={showToast}
             onSaved={async (type, status) => {
               if (session) {
-                await loadShelves(session.user.id);
+                await refreshShelves();
                 const msg = (type === "book" && status === "reading") ? "Reading!" : (type === "tv" && status === "watching") ? "Watching!" : (type === "game" && status === "playing") ? "Playing!" : "Logged!";
                 showToast(msg);
               }

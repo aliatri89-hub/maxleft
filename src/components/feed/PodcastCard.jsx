@@ -137,7 +137,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           background: "#2a2520", flexShrink: 0,
         }}>
           {podcast_artwork ? (
-            <img src={podcast_artwork} alt={podcast_name}
+            <img loading="lazy" src={podcast_artwork} alt={podcast_name}
               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           ) : (
             <div style={{

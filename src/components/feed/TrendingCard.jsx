@@ -101,7 +101,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
                         padding: "3px 8px 3px 3px",
                       }}>
                         {c.community_image && (
-                          <img src={c.community_image} alt=""
+                          <img src={c.community_image} loading="lazy" alt=""
                             style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
                           />
                         )}
@@ -194,7 +194,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
                   title={c.community_name}
                 >
                   {c.community_image ? (
-                    <img src={c.community_image} alt={c.community_name} style={{
+                    <img src={c.community_image} loading="lazy" alt={c.community_name} style={{
                       width: 40, height: 40, borderRadius: 10, objectFit: "cover",
                       border: `2px solid ${cAccent}44`,
                     }} />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
+import { useShelves } from "../contexts/ShelvesProvider";
 import BadgeShelf from "../components/shelf/BadgeShelf";
 import ShelfModals from "../components/modals/ShelfModals";
 
@@ -80,7 +81,8 @@ function StatsRibbon({ userId }) {
   );
 }
 
-function ShelfHome({ profile, shelves, shelvesLoaded, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
+function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
+  const { shelves, shelvesLoaded } = useShelves();
 
   // ── Trigger state (controls which modal/overlay is open) ──
   const [viewingItem, setViewingItem] = useState(null);

@@ -421,7 +421,7 @@ export default function ReelTime({ session, onBack, onToast }) {
             onMouseDown={onMouseDown}
           >
             {currentMovie.poster && (
-              <img style={S.currentPoster} src={currentMovie.poster} alt={currentMovie.title}
+              <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
                 onError={(e) => { e.target.style.display = "none"; }} />
             )}
             <div style={{ flex: 1 }}>
@@ -442,7 +442,7 @@ export default function ReelTime({ session, onBack, onToast }) {
             background: "linear-gradient(135deg, rgba(124,184,232,0.18), rgba(124,184,232,0.06))",
           }}>
             {currentMovie.poster && (
-              <img style={S.currentPoster} src={currentMovie.poster} alt={currentMovie.title}
+              <img style={S.currentPoster} src={currentMovie.poster} loading="lazy" alt={currentMovie.title}
                 onError={(e) => { e.target.style.display = "none"; }} />
             )}
             <div style={{ flex: 1 }}>
@@ -514,7 +514,7 @@ export default function ReelTime({ session, onBack, onToast }) {
             <div style={S.placed}>
               <div style={S.dot} />
               {movie.poster && (
-                <img style={S.placedPoster} src={movie.poster} alt={movie.title}
+                <img style={S.placedPoster} src={movie.poster} loading="lazy" alt={movie.title}
                   onError={(e) => { e.target.style.display = "none"; }} />
               )}
               <span style={S.placedTitle}>{movie.title}</span>

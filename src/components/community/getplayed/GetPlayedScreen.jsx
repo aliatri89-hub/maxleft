@@ -314,7 +314,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                             position: "relative", overflow: "hidden",
                           }}>
                             {resolvedCover ? (
-                              <img src={resolvedCover} alt={item.title}
+                              <img loading="lazy" src={resolvedCover} alt={item.title}
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             ) : (
                               <div style={{

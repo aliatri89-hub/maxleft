@@ -164,7 +164,7 @@ export default function FeedFilterBar({
           {selectedPodcast && selectedPodcast !== "__favorites__" && (() => {
             const pod = podcasts.find(p => p.slug === selectedPodcast);
             return pod?.artwork_url ? (
-              <img src={pod.artwork_url} alt="" style={{
+              <img src={pod.artwork_url} loading="lazy" alt="" style={{
                 width: 16, height: 16, borderRadius: 3, objectFit: "cover", flexShrink: 0,
               }} />
             ) : null;
@@ -300,7 +300,7 @@ function DropdownItem({ label, artwork, icon, accent, active, onClick }) {
         <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
       )}
       {artwork && (
-        <img src={artwork} alt="" style={{
+        <img src={artwork} loading="lazy" alt="" style={{
           width: 20, height: 20, borderRadius: 4, objectFit: "cover", flexShrink: 0,
         }} />
       )}

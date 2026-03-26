@@ -60,7 +60,7 @@ export default function FilmspottingLogModal({
         <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
           <div style={{ position: "relative", width: 60, height: 90, flexShrink: 0 }}>
             {coverUrl && (
-              <img src={coverUrl} alt="" style={{
+              <img loading="lazy" src={coverUrl} alt="" style={{
                 width: 60, height: 90, borderRadius: 6, objectFit: "cover", display: "block",
               }} />
             )}

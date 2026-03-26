@@ -125,7 +125,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
                       boxShadow: "0 0 12px rgba(250,204,21,0.1)",
                     }}>
                       {game.cover_url ? (
-                        <img src={game.cover_url} alt={game.title}
+                        <img loading="lazy" src={game.cover_url} alt={game.title}
                           style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
                         <div style={{

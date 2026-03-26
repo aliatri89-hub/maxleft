@@ -23,7 +23,7 @@ function Expandable({ open, children }) {
   );
 }
 
-function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
+function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [watchlist, setWatchlist] = useState([]);
@@ -458,7 +458,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       >
                         {/* Podcast artwork */}
                         {pod.artwork_url ? (
-                          <img src={pod.artwork_url} alt="" style={{
+                          <img src={pod.artwork_url} loading="lazy" alt="" style={{
                             width: 36, height: 36, borderRadius: 8, objectFit: "cover", flexShrink: 0,
                             border: isFav ? "1.5px solid rgba(201,120,73,0.3)" : "1.5px solid rgba(255,255,255,0.06)",
                           }} />
@@ -648,7 +648,7 @@ function ProfileScreen({ profile, shelves, onBack, onSignOut, onDeleteAccount, s
                       borderRadius: 8,
                     }}>
                       {item.cover_url ? (
-                        <img src={item.cover_url} alt="" style={{
+                        <img src={item.cover_url} loading="lazy" alt="" style={{
                           width: 34, height: 50, borderRadius: 4, objectFit: "cover",
                           flexShrink: 0, border: "1px solid rgba(239,159,39,0.1)",
                         }} />

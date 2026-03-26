@@ -576,7 +576,7 @@ function FullScreenPlayer({
                 WebkitTapHighlightColor: "transparent",
               }}
             >
-              <img src={episode.artwork} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img loading="lazy" src={episode.artwork} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               {/* Skip flash overlay */}
               {skipFlash && (
                 <div style={{

@@ -228,7 +228,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             position: "relative",
           }}>
             {coverUrl ? (
-              <img src={coverUrl} alt={item.title}
+              <img loading="lazy" src={coverUrl} alt={item.title}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }} />
             ) : (
               <div style={{

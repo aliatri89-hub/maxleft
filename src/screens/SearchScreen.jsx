@@ -884,7 +884,7 @@ function ResultCard({
                 <>
                   {result.podcasts.slice(0, 5).map((pod, i) => (
                     pod.artwork ? (
-                      <img key={pod.slug || i} src={pod.artwork} alt={pod.name}
+                      <img key={pod.slug || i} src={pod.artwork} loading="lazy" alt={pod.name}
                         title={pod.name}
                         style={{
                           width: 22, height: 22, borderRadius: 5, objectFit: "cover",
@@ -1028,7 +1028,7 @@ function ResultCard({
                     background: isEpExpanded ? "rgba(199,91,63,0.08)" : isCurrent ? "rgba(199,91,63,0.05)" : "transparent",
                   }}>
                 {ep.podcast_artwork_url ? (
-                  <img src={ep.podcast_artwork_url} alt={ep.podcast_name}
+                  <img src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name}
                     style={{
                       width: 32, height: 32, borderRadius: 8, objectFit: "cover",
                       border: isEpExpanded || isCurrent ? `1.5px solid ${TC}` : "1px solid rgba(255,255,255,0.06)",

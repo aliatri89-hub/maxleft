@@ -35,7 +35,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
           borderRadius: "50%", overflow: "hidden", background: "#1a1714",
         }}>
           {badge.image_url ? (
-            <img src={badge.image_url} alt={badge.name} style={{
+            <img src={badge.image_url} loading="lazy" alt={badge.name} style={{
               width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.1)",
             }} />
           ) : (
@@ -117,7 +117,7 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
           borderRadius: "50%", overflow: "hidden", background: "#1a1714",
         }}>
           {badge.image_url ? (
-            <img src={badge.image_url} alt={badge.name} style={{
+            <img src={badge.image_url} loading="lazy" alt={badge.name} style={{
               width: "100%", height: "100%", objectFit: "cover", transform: "scale(1.1)",
               filter: `blur(${blurAmount}px) brightness(0.5)`,
               transition: "filter 0.3s",

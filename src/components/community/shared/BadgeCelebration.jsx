@@ -207,7 +207,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
           position: "relative",
         }}>
           {badge.image_url ? (
-            <img src={badge.image_url} alt={badge.name}
+            <img loading="lazy" src={badge.image_url} alt={badge.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (

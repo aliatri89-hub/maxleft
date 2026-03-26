@@ -180,7 +180,7 @@ export default function ShelfModals({
                         setPendingVisitYear("");
                       }}
                     >
-                      <img src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`} alt="" style={{ width: 28, borderRadius: 2, flexShrink: 0 }} />
+                      <img loading="lazy" src={`https://flagcdn.com/w40/${c.code.toLowerCase()}.png`} alt="" style={{ width: 28, borderRadius: 2, flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 14 }}>{c.name}</div>
                       </div>
@@ -344,14 +344,14 @@ export default function ShelfModals({
             {viewingCountry.photoUrl && (
               <div className="passport-detail-hero" style={{ backgroundImage: `url(${viewingCountry.photoUrl})` }}>
                 <div className="passport-detail-hero-overlay">
-                  <img src={`https://flagcdn.com/w160/${viewingCountry.countryCode.toLowerCase()}.png`} alt="" className="passport-detail-flag-img" />
+                  <img loading="lazy" src={`https://flagcdn.com/w160/${viewingCountry.countryCode.toLowerCase()}.png`} alt="" className="passport-detail-flag-img" />
                   <div className="passport-detail-name">{viewingCountry.countryName}</div>
                 </div>
               </div>
             )}
             {!viewingCountry.photoUrl && (
               <div style={{ padding: "24px 20px 0", textAlign: "center" }}>
-                <img src={`https://flagcdn.com/w160/${viewingCountry.countryCode.toLowerCase()}.png`} alt="" style={{ width: 64, borderRadius: 4, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }} />
+                <img loading="lazy" src={`https://flagcdn.com/w160/${viewingCountry.countryCode.toLowerCase()}.png`} alt="" style={{ width: 64, borderRadius: 4, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" }} />
                 <div className="passport-detail-name" style={{ color: "var(--charcoal)", marginTop: 8 }}>{viewingCountry.countryName}</div>
               </div>
             )}
@@ -508,7 +508,7 @@ export default function ShelfModals({
                   <div className="passport-map-legend">
                     {homeCode && (
                       <div className="passport-map-legend-item">
-                        <img src={`https://flagcdn.com/w40/${homeCode.toLowerCase()}.png`} alt="" style={{ width: 14, height: 10, borderRadius: 1, objectFit: "cover" }} />
+                        <img loading="lazy" src={`https://flagcdn.com/w40/${homeCode.toLowerCase()}.png`} alt="" style={{ width: 14, height: 10, borderRadius: 1, objectFit: "cover" }} />
                         Home
                       </div>
                     )}
@@ -596,7 +596,7 @@ export default function ShelfModals({
           </div>
           {mapTooltip && (
             <div className="passport-map-country-tooltip" style={{ left: mapTooltip.x, top: mapTooltip.y }}>
-              <img src={`https://flagcdn.com/w40/${mapTooltip.code.toLowerCase()}.png`} alt="" className="tooltip-flag" />
+              <img loading="lazy" src={`https://flagcdn.com/w40/${mapTooltip.code.toLowerCase()}.png`} alt="" className="tooltip-flag" />
               {mapTooltip.name}
               {mapTooltip.status === "home" ? " · Home" : ""}
               {mapTooltip.date ? ` · ${mapTooltip.date}` : ""}

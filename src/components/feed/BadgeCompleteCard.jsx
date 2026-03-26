@@ -64,7 +64,7 @@ function BadgeCompleteCard({ data, onCelebrate }) {
           position: "relative",
         }}>
           {data.badge_image ? (
-            <img src={data.badge_image} alt={data.badge_name}
+            <img loading="lazy" src={data.badge_image} alt={data.badge_name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
