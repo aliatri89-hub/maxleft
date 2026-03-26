@@ -318,6 +318,7 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
                   key={idx}
                   onClick={() => toggleSelect(idx)}
                   style={{
+                    width: "calc((100% - 16px) / 3)",
                     position: "relative", cursor: phase === PHASE.PICKING ? "pointer" : "default",
                     borderRadius: 8, overflow: "hidden",
                     transition: "all 0.3s cubic-bezier(0.4,0,0.2,1)",
@@ -507,7 +508,7 @@ const S = {
   targetVal: { fontFamily: "'Playfair Display',serif", fontSize: 38, fontWeight: 900, color: "#d4af37", lineHeight: 1 },
   runningBox: { textAlign: "center", marginBottom: 20, padding: 10, background: "rgba(212,175,55,0.05)", borderRadius: 8 },
   runningVal: { fontFamily: "'Playfair Display',serif", fontSize: 32, fontWeight: 900, color: "#f0ece4" },
-  grid: { display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 16 },
+  grid: { display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginBottom: 16 },
   check: {
     position: "absolute", top: 4, right: 4, width: 22, height: 22,
     borderRadius: "50%", background: "#d4af37", color: "#0a0a0f",
