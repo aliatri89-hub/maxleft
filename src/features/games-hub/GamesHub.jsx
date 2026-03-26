@@ -110,7 +110,6 @@ const GAMES = [
     color: "#7cb8e8",
     bgAccent: "rgba(124, 184, 232, 0.06)",
     daily: true,
-    isNew: true,
   },
   {
     id: "pickAFlick",

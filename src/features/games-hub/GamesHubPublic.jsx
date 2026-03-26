@@ -200,7 +200,6 @@ const GAMES = [
     color: "#7cb8e8",
     bgAccent: "rgba(124, 184, 232, 0.06)",
     daily: true,
-    isNew: true,
   },
 ];
 
@@ -372,7 +371,7 @@ export default function GamesHubPublic() {
             Badges
           </div>
           <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2, lineHeight: 1.35 }}>
-            A scavenger hunt through your favorite podcasts. Sign up to start earning.
+            A scavenger hunt through your favorite podcasts.
           </div>
         </div>
         <span style={{
@@ -520,7 +519,7 @@ export default function GamesHubPublic() {
           Track your stats. Earn badges. Join the community.
         </div>
         <div style={{ fontSize: 12, color: "#8a7e6b", marginBottom: 14, lineHeight: 1.4 }}>
-          Sign up for MANTL to save your game history, compete on streaks, and unlock badges across your favorite film podcasts.
+          Sign up for MANTL to save your game history, compete on streaks, and unlock badges across your favorite film franchises.
         </div>
         <button
           onClick={() => window.open("https://mymantl.app", "_self")}
