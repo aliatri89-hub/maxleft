@@ -292,6 +292,56 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         <div style={{ fontSize: 13, color: "#8a7e6b", marginTop: 6 }}>{getTodayFormatted()}</div>
       </div>
 
+      {/* Badges — top of hub */}
+      <button
+        onClick={() => onLaunchGame("badges")}
+        onPointerDown={() => setPressedId("badges")}
+        onPointerUp={() => setPressedId(null)}
+        onPointerLeave={() => setPressedId(null)}
+        style={{
+          display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+          background: "rgba(212, 168, 83, 0.06)",
+          border: "1px solid rgba(245,240,232,0.06)",
+          borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
+          position: "relative", overflow: "hidden",
+          fontFamily: "inherit", color: "inherit", outline: "none",
+          WebkitTapHighlightColor: "transparent",
+          transform: pressedId === "badges" ? "scale(0.98)" : "scale(1)",
+          transition: "transform 0.15s ease",
+          animation: "gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 100ms backwards",
+        }}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+            <path d="M14 3L17 9.5L24 10.5L19 15.5L20 22.5L14 19.5L8 22.5L9 15.5L4 10.5L11 9.5L14 3Z"
+              stroke="#d4a853" strokeWidth="1.5" fill="#d4a853" fillOpacity="0.15"
+              strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
+          <div style={{
+            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+            color: "#f5f0e8", lineHeight: 1.2,
+          }}>
+            Badges
+          </div>
+          <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2, lineHeight: 1.35 }}>
+            Every badge hides a collection. The name is your only clue.
+          </div>
+        </div>
+        <span style={{
+          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          borderRadius: 6, background: "rgba(212, 168, 83, 0.15)", color: "#d4a853",
+        }}>
+          View
+        </span>
+        <div style={{
+          position: "absolute", right: 14, top: "50%",
+          width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
+          transform: "translateY(-50%) rotate(-45deg)",
+        }} />
+      </button>
+
       {/* Our Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
@@ -361,61 +411,6 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           );
         })}
       </div>
-
-      {/* Your Progress */}
-      <div style={{
-        fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: "#6b6256", margin: "24px 0 10px 4px",
-        opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.35s",
-      }}>
-        Your Progress
-      </div>
-      <button
-        onClick={() => onLaunchGame("badges")}
-        onPointerDown={() => setPressedId("badges")}
-        onPointerUp={() => setPressedId(null)}
-        onPointerLeave={() => setPressedId(null)}
-        style={{
-          display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
-          background: "rgba(212, 168, 83, 0.06)",
-          border: "1px solid rgba(245,240,232,0.06)",
-          borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
-          position: "relative", overflow: "hidden",
-          fontFamily: "inherit", color: "inherit", outline: "none",
-          WebkitTapHighlightColor: "transparent",
-          transform: pressedId === "badges" ? "scale(0.98)" : "scale(1)",
-          transition: "transform 0.15s ease",
-          animation: `gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${GAMES.length * 100 + 200}ms backwards`,
-        }}
-      >
-        <div style={{ flexShrink: 0 }}>
-          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-            <path d="M14 3L17 9.5L24 10.5L19 15.5L20 22.5L14 19.5L8 22.5L9 15.5L4 10.5L11 9.5L14 3Z"
-              stroke="#d4a853" strokeWidth="1.5" fill="#d4a853" fillOpacity="0.15"
-              strokeLinejoin="round" />
-          </svg>
-        </div>
-        <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
-          <div style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
-            color: "#f5f0e8", lineHeight: 1.2,
-          }}>
-            Badges
-          </div>
-          <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2 }}>Track your progress across communities</div>
-        </div>
-        <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
-          borderRadius: 6, background: "rgba(212, 168, 83, 0.15)", color: "#d4a853",
-        }}>
-          View
-        </span>
-        <div style={{
-          position: "absolute", right: 14, top: "50%",
-          width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
-          transform: "translateY(-50%) rotate(-45deg)",
-        }} />
-      </button>
 
       {/* Other Games */}
       <div style={{
