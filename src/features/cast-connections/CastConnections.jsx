@@ -329,7 +329,13 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                     ...S.actorName,
                     color: isSolved ? "#fff" : "#e8d3a2",
                   }}>
-                    {actor.name}
+                    {(() => {
+                      const parts = actor.name.split(" ");
+                      if (parts.length === 1) return actor.name;
+                      const first = parts.slice(0, -1).join(" ");
+                      const last = parts[parts.length - 1];
+                      return <>{first}<br />{last}</>;
+                    })()}
                   </span>
                 </button>
               );
