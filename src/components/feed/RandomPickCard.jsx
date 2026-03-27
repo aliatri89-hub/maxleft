@@ -1,5 +1,5 @@
 import { t } from "../../theme";
-import { Poster, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
+import { Poster, resolveImg, TMDB_BACKDROP, FadeImg} from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
 // RANDOM PICK CARD — "Have You Seen...?" discovery

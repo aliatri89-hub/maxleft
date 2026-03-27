@@ -1,3 +1,4 @@
+import { FadeImg } from "./FeedPrimitives";
 import { t } from "../../theme";
 // ════════════════════════════════════════════════
 // BADGE NUDGE CARD — mysterious locked treasure

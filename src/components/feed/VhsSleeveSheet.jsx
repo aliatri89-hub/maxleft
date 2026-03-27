@@ -1,7 +1,7 @@
 import { t } from "../../theme";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
+import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
@@ -620,7 +620,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           <div style={{ position: "relative", width: "100%", marginBottom: 0 }}>
             {/* Hero backdrop — z1 (back) */}
             <div style={{ position: "relative", width: "100%", overflow: "hidden", zIndex: 1 }}>
-              <img src={heroUrl} loading="lazy" alt="" style={{
+              <FadeImg src={heroUrl} alt="" style={{
                 width: "100%", height: 200,
                 objectFit: "cover", objectPosition: "center top",
                 display: "block",
@@ -976,7 +976,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           }}
                         >
                           {ep.podcast_artwork_url && (
-                            <img src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name} style={{
+                            <FadeImg src={ep.podcast_artwork_url} alt={ep.podcast_name} style={{
                               width: 32, height: 32, borderRadius: 8, objectFit: "cover",
                               border: isExpanded ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
                               flexShrink: 0,

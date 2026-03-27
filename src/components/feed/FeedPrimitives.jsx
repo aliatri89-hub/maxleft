@@ -6,6 +6,49 @@ import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 export const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
 export const TMDB_BACKDROP = "https://image.tmdb.org/t/p/w780";
 
+// ── FadeImg — drop-in <img> replacement with smooth fade-in on load ──
+// Starts invisible, fades to full opacity once the image is ready.
+// Shows a subtle shimmer placeholder while loading.
+export function FadeImg({ src, alt = "", style = {}, onError, duration = 300, shimmer = true, ...rest }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const imgRef = useRef(null);
+
+  // Handle already-cached images (naturalWidth > 0 means it loaded instantly)
+  useEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+    if (!src) return;
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [src]);
+
+  const handleError = (e) => {
+    setFailed(true);
+    if (onError) onError(e);
+  };
+
+  if (!src || failed) return null;
+
+  return (
+    <img
+      ref={imgRef}
+      src={src}
+      alt={alt}
+      onLoad={() => setLoaded(true)}
+      onError={handleError}
+      style={{
+        ...style,
+        opacity: loaded ? 1 : 0,
+        transition: loaded ? `opacity ${duration}ms ease` : "none",
+      }}
+      {...rest}
+    />
+  );
+}
+
 let _starsIdCounter = 0;
 
 // ── Resolve image URLs — shelf logs use full URLs, community logs use TMDB paths ──
