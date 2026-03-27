@@ -129,7 +129,7 @@
   }
 
   .landing-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.25em;
     color: #e8c4a0;
@@ -245,7 +245,7 @@
   .landing-footer {
     text-align: center;
     margin-top: 16px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: #6a635a;
     letter-spacing: 0.1em;
@@ -299,7 +299,7 @@
   }
 
   .landing-auth-divider-text {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: #6a635a;
     text-transform: uppercase;
@@ -372,7 +372,7 @@
   .landing-email-back {
     background: none;
     border: none;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.1em;
     color: #6a635a;
@@ -569,7 +569,7 @@
     color: var(--charcoal);
   }
   .habit-card-sub {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     letter-spacing: 0.05em;
@@ -625,7 +625,7 @@
     animation: slideInLeft 0.25s ease-out;
   }
   .challenge-counter {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 13px;
     color: rgba(255,255,255,0.7);
     text-align: center;
@@ -650,7 +650,7 @@
     margin-bottom: 4px;
   }
   .challenge-day-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--text-faint);
     letter-spacing: 0.05em;
@@ -849,7 +849,7 @@
     .ch-edit-hint { opacity: 0.35; }
   }
   .challenge-daily-sub {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     letter-spacing: 0.04em;
@@ -959,7 +959,7 @@
   .ch-btn-sm {
     padding: 8px 14px;
     border-radius: 8px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     background: var(--cream-dark);
     border: 1px solid var(--border);
@@ -1238,7 +1238,7 @@
     padding: 8px;
     border: none;
     background: transparent;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.06em;
     color: rgba(255,255,255,0.7);
@@ -1340,7 +1340,7 @@
   }
 
   .field-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.2em;
     color: var(--terracotta);
@@ -1365,14 +1365,14 @@
   .field-input:focus { border-color: var(--terracotta); }
 
   .field-hint {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: var(--text-faint);
     margin-top: 8px;
   }
 
   .field-error {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: #C45043;
     margin-top: 8px;
@@ -1528,7 +1528,7 @@
   }
 
   .header-tagline {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -1562,7 +1562,7 @@
     border-radius: 7px;
     background: var(--terracotta);
     color: var(--cream);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     font-weight: 700;
     display: flex;
@@ -1642,7 +1642,7 @@
     line-height: 1.35;
   }
   .notif-item-time {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: var(--text-faint);
     flex-shrink: 0;
@@ -1689,7 +1689,7 @@
     border-radius: 8px;
     background: var(--terracotta);
     color: #f5f0eb;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     font-weight: 700;
     display: flex;
@@ -1823,7 +1823,7 @@
   }
 
   .profile-handle {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: rgba(255,255,255,0.7);
     margin-top: 2px;
@@ -1847,7 +1847,7 @@
   }
 
   .stat-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -1880,7 +1880,7 @@
   }
 
   .shelf-count {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--text-faint);
     font-weight: 500;
@@ -1930,7 +1930,7 @@
   }
 
   .shelf-empty-cta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: var(--terracotta);
     margin-top: 8px;
@@ -2004,7 +2004,7 @@
   }
 
   .cinema-count {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--text-faint);
     font-weight: 500;
@@ -2102,7 +2102,7 @@
   }
 
   .cinema-tag {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -2233,7 +2233,7 @@
   }
 
   .public-cta-sub {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: rgba(255,255,255,0.7);
     line-height: 1.6;
@@ -2263,7 +2263,7 @@
 
   .public-cta-footer {
     margin-top: 24px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     color: var(--text-faint);
@@ -2280,7 +2280,7 @@
   }
 
   .share-link-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -2289,7 +2289,7 @@
   }
 
   .share-link-url {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 14px;
     color: var(--terracotta);
     font-weight: 600;
@@ -2411,7 +2411,7 @@
   }
   .friends-share-link {
     flex: 1;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: rgba(255,255,255,0.7);
     overflow: hidden;
@@ -2474,7 +2474,7 @@
     color: var(--charcoal);
   }
   .friends-result-username {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: var(--text-faint);
     letter-spacing: 0.02em;
@@ -2510,7 +2510,7 @@
 
   /* Sections */
   .friends-section-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -2711,7 +2711,7 @@
     border-color: var(--terracotta);
   }
   .feed-reaction-count {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     font-weight: 600;
     color: rgba(255,255,255,0.7);
@@ -2778,7 +2778,7 @@
     margin-top: 1px;
   }
   .feed-comment-time {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: var(--text-faint);
     margin-top: 2px;
@@ -2893,7 +2893,7 @@
     justify-content: center;
     font-size: 13px;
     color: white;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     letter-spacing: 0.05em;
   }
 
@@ -2933,7 +2933,7 @@
   }
 
   .settings-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -3337,7 +3337,7 @@
     transform: translateX(18px);
   }
   .shelf-toggle-permanent {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -3417,7 +3417,7 @@
   }
 
   .nav-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -3459,7 +3459,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.14em;
@@ -3503,7 +3503,7 @@
 
   /* ── VHS Section Header ────────────────────────────────── */
   .vhs-section-header {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.18em;
@@ -3549,7 +3549,7 @@
     border: none;
     background: transparent;
     color: rgba(255,255,255,0.7);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -3596,7 +3596,7 @@
   .fab:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(196,115,79,0.3); }
 
   .fab-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -3700,7 +3700,7 @@
     flex-shrink: 0;
     padding: 8px 16px;
     border-radius: 20px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.06em;
     border: 1px solid rgba(255,255,255,0.1);
@@ -3776,14 +3776,14 @@
   }
 
   .result-meta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: rgba(255,255,255,0.7);
     margin-top: 2px;
   }
 
   .result-type-badge {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -3796,7 +3796,7 @@
   .search-loading {
     text-align: center;
     padding: 24px 0;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--text-faint);
   }
@@ -3809,7 +3809,7 @@
   .shelf-detail-back {
     background: none;
     border: none;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.15em;
     color: rgba(255,255,255,0.7);
@@ -3849,7 +3849,7 @@
   }
 
   .shelf-detail-meta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: rgba(255,255,255,0.7);
     margin-bottom: 2px;
@@ -3872,7 +3872,7 @@
   }
 
   .rating-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -3922,7 +3922,7 @@
   }
 
   .rating-display {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: rgba(255,255,255,0.7);
     margin-top: 4px;
@@ -3955,7 +3955,7 @@
   }
 
   .shelf-item-reading-tag {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     color: var(--sage);
     letter-spacing: 0.05em;
@@ -3989,7 +3989,7 @@
   }
 
   .shelf-add-more-text {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -4029,7 +4029,7 @@
   .item-detail-close {
     background: none;
     border: none;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.15em;
     color: rgba(255,255,255,0.7);
@@ -4162,7 +4162,7 @@
     flex: 1;
   }
   .pin-picker-cat {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -4212,7 +4212,7 @@
     text-overflow: ellipsis;
   }
   .pin-picker-item-meta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     margin-top: 2px;
@@ -4235,7 +4235,7 @@
 
   /* Event Form */
   .event-form-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -4257,14 +4257,14 @@
   }
   .event-form-input:focus { border-color: var(--terracotta); }
   .event-form-hint {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: var(--text-faint);
     margin-top: 4px;
     font-style: italic;
   }
   .event-add-goal {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: var(--terracotta);
     cursor: pointer;
@@ -4287,7 +4287,7 @@
   }
   .location-suggestion {
     padding: 8px 12px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--charcoal);
     cursor: pointer;
@@ -4418,7 +4418,7 @@
   }
 
   .training-tile-date {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: rgba(255,255,255,0.7);
     margin-top: 4px;
@@ -4541,7 +4541,7 @@
     text-overflow: ellipsis;
   }
   .passport-row-year {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     letter-spacing: 0.04em;
@@ -4635,7 +4635,7 @@
     line-height: 1;
   }
   .passport-map-stat-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: var(--text-faint);
     text-transform: uppercase;
@@ -4652,7 +4652,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     text-transform: uppercase;
@@ -4668,7 +4668,7 @@
     align-items: center;
     justify-content: center;
     height: 200px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     color: var(--text-faint);
     letter-spacing: 0.04em;
@@ -4812,7 +4812,7 @@
   }
 
   .item-detail-notes-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -4827,7 +4827,7 @@
   }
 
   .reading-log-header {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -4874,7 +4874,7 @@
   }
 
   .log-entry-pages {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     font-weight: 500;
     color: var(--charcoal);
@@ -4882,7 +4882,7 @@
   }
 
   .log-entry-date {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     white-space: nowrap;
@@ -4935,7 +4935,7 @@
     gap: 8px;
     padding: 10px 16px;
     border-radius: 10px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 12px;
     letter-spacing: 0.06em;
     margin-top: 12px;
@@ -4993,7 +4993,7 @@
     background: var(--charcoal);
     color: white;
     border-radius: 100px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     letter-spacing: 0.06em;
     box-shadow: 0 4px 16px rgba(0,0,0,0.2);
@@ -5076,7 +5076,7 @@
     background: var(--bg-primary, #0f0d0b);
     border: 1px solid var(--border-med);
     color: var(--charcoal);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 16px;
     font-weight: 500;
     padding: 10px 12px;
@@ -5101,13 +5101,13 @@
   }
 
   .page-separator {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 14px;
     color: var(--text-faint);
   }
 
   .page-label-text {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: rgba(255,255,255,0.7);
   }
@@ -5197,7 +5197,7 @@
   .event-card-content.has-image .event-card-title { color: white; }
 
   .event-card-detail {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     color: var(--terracotta);
     margin-top: 4px;
@@ -5205,7 +5205,7 @@
   .event-card-content.has-image .event-card-detail { color: rgba(255,255,255,0.85); }
 
   .event-card-date {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: var(--text-faint);
     margin-top: 2px;
@@ -5260,13 +5260,13 @@
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
   .trophy-hero-meta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: rgba(255,255,255,0.65);
     margin-top: 2px;
   }
   .trophy-hero-time {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 15px;
     font-weight: 600;
     color: white;
@@ -5382,7 +5382,7 @@
     text-shadow: 0 1px 3px rgba(0,0,0,0.3);
   }
   .trophy-overlay-meta {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 9px;
     color: rgba(255,255,255,0.65);
     margin-top: 3px;
@@ -5397,7 +5397,7 @@
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 14px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: white;
@@ -5455,13 +5455,13 @@
     background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
   }
   .trophy-repo-hint {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 10px;
     color: rgba(255,255,255,0.8);
     letter-spacing: 0.04em;
   }
   .trophy-repo-btn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 11px;
     font-weight: 600;
     padding: 5px 14px;
@@ -5514,7 +5514,7 @@
     line-height: 1.15;
   }
   .toast-sub {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Barlow Condensed', sans-serif;
     font-size: 8px;
     letter-spacing: 1.5px;
     color: #7a6a50;
