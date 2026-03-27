@@ -1677,6 +1677,8 @@ export default function AudioPlayerProvider({ children, session }) {
     setQueueToast({ title: msg, custom: true });
     queueToastRef.current = setTimeout(() => setQueueToast(null), 2200);
   }, []);
+
+  const addToQueue = useCallback((ep) => {
     if (!ep?.enclosureUrl) return;
     const isDuplicate = queueRef.current.some(q => q.enclosureUrl === ep.enclosureUrl);
     if (!isDuplicate) {
