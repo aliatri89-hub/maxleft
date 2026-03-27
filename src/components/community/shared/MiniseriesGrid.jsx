@@ -233,11 +233,11 @@ function GridTile({ series, accent, onTap }) {
 
         {/* Series title (podcast name) */}
         <div style={{
-          fontSize: 9, fontWeight: 700, color: t.textPrimary,
+          fontSize: 13, fontWeight: 800, color: t.textPrimary,
           fontFamily: t.fontDisplay,
-          lineHeight: 1.15,
+          lineHeight: 1.2,
           letterSpacing: "0.01em",
-          textShadow: "0 1px 4px rgba(0,0,0,0.9)",
+          textShadow: "0 1px 6px rgba(0,0,0,1)",
           textAlign: "center",
           overflow: "hidden",
           display: "-webkit-box",
@@ -250,12 +250,12 @@ function GridTile({ series, accent, onTap }) {
         {/* Director name (subtitle) */}
         {series.director_name && series.director_name !== "." && (
           <div style={{
-            fontSize: 8, fontWeight: 600,
+            fontSize: 10, fontWeight: 600,
             color: t.textSecondary,
             fontFamily: t.fontDisplay,
             textAlign: "center",
             textShadow: "0 1px 3px rgba(0,0,0,0.8)",
-            marginTop: 1,
+            marginTop: 2,
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
