@@ -4,7 +4,7 @@ import { apiProxy } from "../../utils/api";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
-import { Stars, getCommunityAccent, getTimeAgo } from "./FeedPrimitives";
+import { Stars, getCommunityAccent, getTimeAgo, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import VhsSleeveSheet from "./VhsSleeveSheet";
 
@@ -132,10 +132,9 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         overflow: "hidden",
       }}
     >
-      <img
+      <FadeImg
         src={url}
         alt=""
-        loading="lazy"
         style={{
           display: "block",
           width: "100%",

@@ -15,6 +15,42 @@ export function resolveImg(path, base) {
   return `${base}${path}`;
 }
 
+// ── FadeImg — wrapper approach, safe on mobile/Capacitor ──
+// The wrapper shows a placeholder color while the img loads.
+// Image is always visible (opacity:1) — no onLoad visibility gate.
+export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30,22,14,0.9)", className, onLoad, onError, loading = "lazy", ...rest }) {
+  const { objectFit = "cover", objectPosition, flexShrink, borderRadius, boxShadow, ...wrapperStyle } = style;
+  return (
+    <div
+      className={className}
+      style={{
+        ...wrapperStyle,
+        backgroundColor: placeholderColor,
+        overflow: "hidden",
+        flexShrink: flexShrink ?? 0,
+        ...(borderRadius !== undefined && { borderRadius }),
+        ...(boxShadow !== undefined && { boxShadow }),
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading={loading}
+        onLoad={onLoad}
+        onError={onError}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "100%",
+          objectFit,
+          ...(objectPosition ? { objectPosition } : {}),
+        }}
+        {...rest}
+      />
+    </div>
+  );
+}
+
 // ── Star rating display ──
 export function Stars({ rating, size = 14, sharpie = false }) {
   const uid = useMemo(() => `stars-${++_starsIdCounter}`, []);
@@ -115,10 +151,9 @@ export function Poster({ path, title, tmdbId, mediaType, width = 90, height = 13
     );
   }
   return (
-    <img
+    <FadeImg
       src={resolveImg(resolvedPath, TMDB_IMG)}
       alt={title || ""}
-      loading="lazy"
       onError={() => setFailed(true)}
       style={{
         width, height, borderRadius: radius, objectFit: "cover", flexShrink: 0,
