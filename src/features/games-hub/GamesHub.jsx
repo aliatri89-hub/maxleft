@@ -396,7 +396,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
                 }}>
                   {game.name}
                 </div>
-                <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2 }}>{game.tagline}</div>
+                <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2 }}>{game.tagline}</div>
               </div>
 
               <StatusPill gameId={game.id} color={game.color} />
@@ -458,7 +458,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
               }}>
                 {game.name}
               </div>
-              <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2 }}>{game.tagline}</div>
+              <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2 }}>{game.tagline}</div>
             </div>
             <ExternalLinkIcon />
           </button>
