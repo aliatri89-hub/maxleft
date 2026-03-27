@@ -85,7 +85,7 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
-// ── Square play button for MANTL Originals ──
+// ── Square play button for MANTL Staff Picks ──
 function PlayButtonArt({ size = 58 }) {
   return (
     <div style={{
@@ -100,8 +100,36 @@ function PlayButtonArt({ size = 58 }) {
       boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
     }}>
       <svg width={size * 0.45} height={size * 0.45} viewBox="0 0 24 24" fill="none">
-        <polygon points="6,4 20,12 6,20" fill="#34d399" />
+        <polygon points="6,4 20,12 6,20" fill="#ffffff" />
       </svg>
+    </div>
+  );
+}
+
+// ── MANTL Staff Picks custom title ──
+function StaffPicksTitle({ tilt, isSubscribed }) {
+  const size = isSubscribed ? 22 : 20;
+  return (
+    <div style={{ transform: `rotate(${tilt * 0.5}deg)` }}>
+      <div style={{
+        fontFamily: "'Bebas Neue', sans-serif",
+        fontSize: size,
+        color: "#2c2824",
+        letterSpacing: "0.06em",
+        lineHeight: 1,
+      }}>
+        M▶NTL
+      </div>
+      <div style={{
+        fontFamily: "'Permanent Marker', cursive",
+        fontSize: Math.max(10, size * 0.55),
+        color: "rgba(44,40,36,0.75)",
+        letterSpacing: "0.02em",
+        lineHeight: 1.2,
+        marginTop: 2,
+      }}>
+        Staff Picks
+      </div>
     </div>
   );
 }
@@ -221,22 +249,26 @@ export default function CommunityTapeCard({
                   />
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontFamily: t.fontSharpie,
-                    color: t.creamDark,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.02em",
-                    lineHeight: 1.15,
-                    textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
-                    transform: `rotate(${tilt * 0.4}deg)`,
-                  }}>
-                    {tapeTitleLines.map((line, i) => (
-                      <div key={i} style={{
-                        fontSize: i === 0 ? titleSize : Math.max(11, titleSize * 0.6),
-                        opacity: i === 0 ? 1 : 0.6,
-                      }}>{line}</div>
-                    ))}
-                  </div>
+                  {showPlayButton ? (
+                    <StaffPicksTitle tilt={tilt} isSubscribed={true} />
+                  ) : (
+                    <div style={{
+                      fontFamily: t.fontSharpie,
+                      color: t.creamDark,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.02em",
+                      lineHeight: 1.15,
+                      textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
+                      transform: `rotate(${tilt * 0.4}deg)`,
+                    }}>
+                      {tapeTitleLines.map((line, i) => (
+                        <div key={i} style={{
+                          fontSize: i === 0 ? titleSize : Math.max(11, titleSize * 0.6),
+                          opacity: i === 0 ? 1 : 0.6,
+                        }}>{line}</div>
+                      ))}
+                    </div>
+                  )}
                   {/* Minimal stat */}
                   {stats?.totalSeries > 0 && (
                     <div style={{
@@ -313,22 +345,26 @@ export default function CommunityTapeCard({
                   />
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{
-                    fontFamily: t.fontSharpie,
-                    color: t.creamDark,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.02em",
-                    lineHeight: 1.15,
-                    textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
-                    transform: `rotate(${tilt * 0.5}deg)`,
-                  }}>
-                    {tapeTitleLines.map((line, i) => (
-                      <div key={i} style={{
-                        fontSize: i === 0 ? titleSize : Math.max(10, titleSize * 0.6),
-                        opacity: i === 0 ? 1 : 0.6,
-                      }}>{line}</div>
-                    ))}
-                  </div>
+                  {showPlayButton ? (
+                    <StaffPicksTitle tilt={tilt} isSubscribed={false} />
+                  ) : (
+                    <div style={{
+                      fontFamily: t.fontSharpie,
+                      color: t.creamDark,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.02em",
+                      lineHeight: 1.15,
+                      textShadow: "1px 1px 0px rgba(44,40,36,0.08)",
+                      transform: `rotate(${tilt * 0.5}deg)`,
+                    }}>
+                      {tapeTitleLines.map((line, i) => (
+                        <div key={i} style={{
+                          fontSize: i === 0 ? titleSize : Math.max(10, titleSize * 0.6),
+                          opacity: i === 0 ? 1 : 0.6,
+                        }}>{line}</div>
+                      ))}
+                    </div>
+                  )}
                   <div style={{
                     fontFamily: t.fontSharpie,
                     fontSize: 9,
