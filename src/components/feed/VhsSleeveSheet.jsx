@@ -606,6 +606,12 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }} />
         </div>
 
+        {/* ── Content — fades in after sheet slides up ── */}
+        <div style={{
+          opacity: open ? 1 : 0,
+          transition: open ? "opacity 0.25s ease 0.15s" : "opacity 0.1s ease",
+        }}>
+
         {/* ── Tagline — genre-driven typography ── */}
         {merged.tagline && (
           <div style={{
@@ -1328,7 +1334,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           }}>
             THIS CASSETTE IS FOR PRIVATE HOME USE ONLY
           </div>
-        </div>
+        </div>{/* end content fade wrapper */}
+
       </div>
 
       {/* ═══ LOG MODAL ═══ */}
