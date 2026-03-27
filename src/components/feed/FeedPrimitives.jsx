@@ -6,24 +6,72 @@ import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 export const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
 export const TMDB_BACKDROP = "https://image.tmdb.org/t/p/w780";
 
-// ── FadeImg — drop-in <img> replacement with smooth fade-in on load ──
-// Starts invisible, fades to full opacity once the image is ready.
-// Shows a subtle shimmer placeholder while loading.
-export function FadeImg({ src, alt = "", style = {}, onError, duration = 300, shimmer = true, ...rest }) {
+// ── Color cache — localStorage keyed by image src ──
+const COLOR_CACHE_PREFIX = "mantl:imgcolor:";
+const COLOR_CACHE_MAX = 500; // prevent unbounded growth
+
+function getCachedColor(src) {
+  try { return localStorage.getItem(COLOR_CACHE_PREFIX + src) || null; } 
+  catch { return null; }
+}
+
+function setCachedColor(src, color) {
+  try {
+    // Evict oldest if over limit
+    const keys = Object.keys(localStorage).filter(k => k.startsWith(COLOR_CACHE_PREFIX));
+    if (keys.length >= COLOR_CACHE_MAX) localStorage.removeItem(keys[0]);
+    localStorage.setItem(COLOR_CACHE_PREFIX + src, color);
+  } catch {}
+}
+
+function extractDominantColor(imgEl) {
+  try {
+    const canvas = document.createElement("canvas");
+    const size = 8; // sample tiny version for speed
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(imgEl, 0, 0, size, size);
+    const data = ctx.getImageData(0, 0, size, size).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      // Skip very dark or very bright pixels — they skew the color
+      const brightness = (data[i] + data[i+1] + data[i+2]) / 3;
+      if (brightness < 20 || brightness > 235) continue;
+      r += data[i]; g += data[i+1]; b += data[i+2]; count++;
+    }
+    if (count === 0) return null;
+    // Darken the result — we want a muted placeholder, not a garish swatch
+    const factor = 0.4;
+    return `rgb(${Math.round(r/count*factor)},${Math.round(g/count*factor)},${Math.round(b/count*factor)})`;
+  } catch { return null; }
+}
+
+// ── FadeImg — drop-in <img> replacement with smooth fade-in + dominant color placeholder ──
+// First load: fades in from dark. After load: extracts dominant color, caches in localStorage.
+// Subsequent loads: shows the film's color as placeholder before image appears.
+export function FadeImg({ src, alt = "", style = {}, onError, duration = 300, ...rest }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [placeholderColor, setPlaceholderColor] = useState(() => getCachedColor(src));
   const imgRef = useRef(null);
 
-  // Handle already-cached images (naturalWidth > 0 means it loaded instantly)
   useEffect(() => {
     setLoaded(false);
     setFailed(false);
+    setPlaceholderColor(getCachedColor(src));
     if (!src) return;
     const img = imgRef.current;
-    if (img && img.complete && img.naturalWidth > 0) {
-      setLoaded(true);
-    }
+    if (img && img.complete && img.naturalWidth > 0) setLoaded(true);
   }, [src]);
+
+  const handleLoad = (e) => {
+    setLoaded(true);
+    // Extract and cache color if not already stored
+    if (src && !getCachedColor(src)) {
+      const color = extractDominantColor(e.target);
+      if (color) { setCachedColor(src, color); setPlaceholderColor(color); }
+    }
+  };
 
   const handleError = (e) => {
     setFailed(true);
@@ -37,10 +85,12 @@ export function FadeImg({ src, alt = "", style = {}, onError, duration = 300, sh
       ref={imgRef}
       src={src}
       alt={alt}
-      onLoad={() => setLoaded(true)}
+      crossOrigin="anonymous"
+      onLoad={handleLoad}
       onError={handleError}
       style={{
         ...style,
+        backgroundColor: placeholderColor || "rgba(255,255,255,0.04)",
         opacity: loaded ? 1 : 0,
         transition: loaded ? `opacity ${duration}ms ease` : "none",
       }}
