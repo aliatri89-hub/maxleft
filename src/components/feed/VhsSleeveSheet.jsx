@@ -378,8 +378,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const fetchedForRef = useRef(null); // track which tmdb_id we fetched for
 
   const extraBackdrops = cachedStills || fetchedStills;
-  // When opened from artwork card, swap hero to avoid duplicating the tape label image
-  const heroUrl = artworkHero && extraBackdrops.length > 0 ? extraBackdrops[0] : backdropUrl;
+  // When opened from artwork card (artworkHero), the tape label already shows backdropUrl —
+  // so we use extraBackdrops[0] as the hero to show a different image.
+  // Don't fall back to backdropUrl while stills are loading — that causes a two-image flash.
+  // Show null (no hero) until the right image is ready.
+  const heroUrl = artworkHero
+    ? (extraBackdrops.length > 0 ? extraBackdrops[0] : null)
+    : backdropUrl;
   // Still image: use second pick for artwork (first is hero), first pick otherwise
   const stillUrl = artworkHero ? (extraBackdrops[1] || null) : (extraBackdrops[0] || null);
   const genreFont = getGenreFont(merged?.genre);
