@@ -3559,10 +3559,10 @@
     position: relative;
   }
   .vhs-toggle-btn.active {
-    background: rgba(196,115,79,0.15);
-    color: #f5c49a;
-    border: 1px solid rgba(196,115,79,0.35);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    background: rgba(52,211,153,0.12);
+    color: #34d399;
+    border: 1px solid rgba(52,211,153,0.3);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
   }
 
   /* ── VHS Header Enhancement ────────────────────────────── */
