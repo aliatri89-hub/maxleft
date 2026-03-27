@@ -583,6 +583,12 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           coverCacheVersion={coverCache}
           accent={accent}
           userId={userId}
+          onPositionSaved={(seriesId, newPos) => {
+            setSelectedSeries(prev => prev?.id === seriesId
+              ? { ...prev, thumbnail_position: newPos }
+              : prev
+            );
+          }}
         />
       )}
 
