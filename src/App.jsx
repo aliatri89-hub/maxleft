@@ -1,4 +1,4 @@
-import { t } from "../theme";
+import { t } from "./theme";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";

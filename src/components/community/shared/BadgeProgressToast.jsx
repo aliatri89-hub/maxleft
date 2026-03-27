@@ -265,7 +265,7 @@ export default function BadgeProgressToast({ badge, current, total, isComplete, 
           display: "flex", alignItems: "center", gap: 7,
         }}>
           <span>{current}/{total}</span>
-          <span style={{ color: "#ffffff25" }}>·</span>
+          <span style={{ color: t.textFaint }}>·</span>
           <span style={{
             color: `${accent}cc`,
             fontSize: 11, fontWeight: 600,
@@ -275,7 +275,7 @@ export default function BadgeProgressToast({ badge, current, total, isComplete, 
         </div>
         {badge.progress_tagline && (
           <div style={{
-            fontSize: 10, color: "#ffffff45", fontStyle: "italic",
+            fontSize: 10, color: t.textFaint, fontStyle: "italic",
             marginBottom: 4,
             lineHeight: 1.25,
             overflow: "hidden",

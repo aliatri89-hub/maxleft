@@ -112,7 +112,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
           textAlign: "center", marginBottom: 28,
         }}>
           <div style={{
-            fontSize: 11, color: "#ffffff30",
+            fontSize: 11, color: t.textFaint,
             textTransform: "uppercase", letterSpacing: 2.5,
             fontFamily: t.fontDisplay,
           }}>
@@ -124,7 +124,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
         {earned.length > 0 && (
           <div style={{ marginBottom: 36 }}>
             <div style={{
-              fontSize: 10, color: "#ffffff25",
+              fontSize: 10, color: t.textFaint,
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
               fontFamily: t.fontDisplay,
@@ -155,7 +155,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
         {inProgress.length > 0 && (
           <div style={{ marginBottom: 36 }}>
             <div style={{
-              fontSize: 10, color: "#ffffff25",
+              fontSize: 10, color: t.textFaint,
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
               fontFamily: t.fontDisplay,
@@ -186,7 +186,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
         {available.length > 0 && (
           <div>
             <div style={{
-              fontSize: 10, color: "#ffffff25",
+              fontSize: 10, color: t.textFaint,
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
               fontFamily: t.fontDisplay,
@@ -216,7 +216,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
         {badges.length === 0 && (
           <div style={{
             textAlign: "center", padding: "60px 20px",
-            color: "#ffffff20", fontSize: 14,
+            color: t.textFaint, fontSize: 14,
           }}>
             No badges available yet
           </div>
@@ -359,7 +359,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         marginTop: 10,
         fontSize: 11,
         fontWeight: 600,
-        color: isEarned ? "#ffffffcc" : "#ffffff40",
+        color: isEarned ? t.textSecondary : t.textFaint,
         textAlign: "center",
         lineHeight: 1.25,
         maxWidth: size + 8,

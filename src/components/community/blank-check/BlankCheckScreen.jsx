@@ -272,7 +272,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
               <span style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: earnedCount > 0 ? "#ffffffcc" : "#ffffff40",
+                color: earnedCount > 0 ? t.textSecondary : t.textFaint,
                 fontFamily: t.fontDisplay,
               }}>
                 {earnedCount}/{badges.length}

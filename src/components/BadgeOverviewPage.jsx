@@ -296,10 +296,10 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
               fontFamily: t.fontHeadline,
               fontSize: 36, color: t.cream, lineHeight: 1,
             }}>
-              {totalEarned}<span style={{ color: "#ffffff25", fontSize: 22 }}>/{totalBadges}</span>
+              {totalEarned}<span style={{ color: t.textFaint, fontSize: 22 }}>/{totalBadges}</span>
             </div>
             <div style={{
-              fontSize: 10, color: "#ffffff30",
+              fontSize: 10, color: t.textFaint,
               textTransform: "uppercase", letterSpacing: 2.5,
               fontFamily: t.fontMono,
               marginTop: 4,
@@ -307,7 +307,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
               Badges Earned
             </div>
             <div style={{
-              fontSize: 12, color: "#ffffff25",
+              fontSize: 12, color: t.textFaint,
               fontFamily: t.fontDisplay,
               marginTop: 12,
               lineHeight: 1.4,
@@ -323,7 +323,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         {loading && (
           <div style={{
             textAlign: "center", padding: "80px 20px",
-            color: "#ffffff20", fontSize: 13,
+            color: t.textFaint, fontSize: 13,
             fontFamily: t.fontMono,
           }}>
             Loading badges…
@@ -369,7 +369,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                   </div>
                   <div style={{
                     fontFamily: t.fontMono,
-                    fontSize: 10, color: "#ffffff25",
+                    fontSize: 10, color: t.textFaint,
                     letterSpacing: 1,
                   }}>
                     {commEarned}/{commTotal} earned
@@ -430,7 +430,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
               {inProgress.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <div style={{
-                    fontSize: 9, color: "#ffffff20",
+                    fontSize: 9, color: t.textFaint,
                     textTransform: "uppercase", letterSpacing: 2,
                     marginBottom: 10, paddingLeft: 4,
                     fontFamily: t.fontDisplay,
@@ -499,14 +499,14 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
           }}>
             <div style={{ fontSize: 40, marginBottom: 16 }}>🎬</div>
             <div style={{
-              fontSize: 15, color: "#ffffff40",
+              fontSize: 15, color: t.textFaint,
               fontFamily: t.fontDisplay,
               lineHeight: 1.4,
             }}>
               Start logging films in your communities to earn badges!
             </div>
             <div style={{
-              fontSize: 11, color: "#ffffff20",
+              fontSize: 11, color: t.textFaint,
               fontFamily: t.fontMono,
               marginTop: 8,
             }}>
@@ -641,7 +641,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         marginTop: 8,
         fontSize: 10,
         fontWeight: 600,
-        color: isEarned ? "#ffffffcc" : "#ffffff35",
+        color: isEarned ? t.textSecondary : "#ffffff35",
         textAlign: "center",
         lineHeight: 1.2,
         maxWidth: size + 4,
@@ -655,7 +655,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
       {!isEarned && badge.progress_tagline && current > 0 && (
         <div style={{
           fontSize: 8,
-          color: "#ffffff20",
+          color: t.textFaint,
           fontFamily: t.fontMono,
           marginTop: 2,
           textAlign: "center",

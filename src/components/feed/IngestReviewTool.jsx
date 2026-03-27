@@ -264,7 +264,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             padding: "6px 14px", borderRadius: 8,
             background: syncing ? "rgba(255,255,255,0.02)" : "rgba(196,115,79,0.1)",
             border: `1px solid ${syncing ? "rgba(255,255,255,0.06)" : "rgba(196,115,79,0.25)"}`,
-            color: syncing ? "rgba(240,235,225,0.4)" : "#c4734f",
+            color: syncing ? "rgba(240,235,225,0.4)" : t.terra,
             fontSize: 10, fontWeight: 800,
             fontFamily: t.fontDisplay,
             textTransform: "uppercase", letterSpacing: "0.06em",
@@ -386,7 +386,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
               padding: "6px 14px", borderRadius: 8,
               background: selectedCount > 0 ? "rgba(52,211,153,0.1)" : "rgba(255,255,255,0.02)",
               border: `1px solid ${selectedCount > 0 ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.06)"}`,
-              color: selectedCount > 0 ? "#34d399" : "rgba(240,235,225,0.3)",
+              color: selectedCount > 0 ? t.green : "rgba(240,235,225,0.3)",
               fontSize: 11, fontWeight: 800,
               fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.04em",
@@ -513,7 +513,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                 {/* Checkbox */}
                 <div style={{
                   width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-                  border: `2px solid ${isSelected ? "#34d399" : "rgba(255,255,255,0.15)"}`,
+                  border: `2px solid ${isSelected ? t.green : "rgba(255,255,255,0.15)"}`,
                   background: isSelected ? "rgba(52,211,153,0.15)" : "transparent",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "all 0.15s ease",
@@ -609,7 +609,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                     border: "none", borderRadius: 6,
                     width: 26, height: 26, flexShrink: 0,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: rematchId === match.mapping_id ? "#c4734f" : "rgba(240,235,225,0.4)",
+                    color: rematchId === match.mapping_id ? t.terra : "rgba(240,235,225,0.4)",
                     fontSize: 13, cursor: "pointer",
                   }}
                   title="Change TMDB match"

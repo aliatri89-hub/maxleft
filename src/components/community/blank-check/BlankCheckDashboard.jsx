@@ -1688,7 +1688,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         .device-screen { padding: 4px 8px 14px; background: linear-gradient(180deg, #111 0%, #1a1a1a 100%); }
         .ds-header { display: flex; align-items: center; gap: 6px; padding: 8px 0 6px; }
         .ds-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; flex-shrink: 0; }
-        .ds-name { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.48rem; font-weight: 700; color: #f0ece4; }
+        .ds-name { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.48rem; font-weight: 700; color: var(--text-primary); }
         .ds-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 0.32rem; color: rgba(240,236,228,0.4); }
         .ds-shelf-label { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.35rem; font-weight: 600; color: rgba(240,236,228,0.4); margin: 7px 0 4px; }
         .ds-shelf-row { display: flex; gap: 4px; overflow: hidden; }
@@ -1701,7 +1701,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         .ds-rating-name { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.35rem; font-weight: 700; }
         .ds-rating-stars { font-size: 0.38rem; letter-spacing: 1px; }
         .ds-stats { display: flex; justify-content: space-around; margin-top: 8px; padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.04); }
-        .ds-stat-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.5rem; font-weight: 700; color: #f0ece4; line-height: 1; }
+        .ds-stat-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.5rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
         .ds-stat-label { font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.25rem; color: rgba(240,236,228,0.3); margin-top: 2px; }
         .ds-accent { width: 36px; height: 2px; border-radius: 1px; margin-top: 4px; }
         .ds-cta { margin-top: 8px; padding: 5px 0; border-radius: 4px; text-align: center; font-family: 'Bebas Neue', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.33rem; font-weight: 700; cursor: default; }

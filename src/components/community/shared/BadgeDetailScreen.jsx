@@ -241,7 +241,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                 paddingBottom: 10,
               }}>
                 <span style={{
-                  fontSize: 9, color: "#ffffff50",
+                  fontSize: 9, color: t.textFaint,
                   letterSpacing: 1.5, textTransform: "uppercase",
                   fontWeight: 600,
                 }}>
@@ -273,7 +273,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             )}
             {!isComplete && badge.progress_tagline && (
               <div style={{
-                fontSize: 13, color: "#ffffff45", fontStyle: "italic",
+                fontSize: 13, color: t.textFaint, fontStyle: "italic",
                 fontFamily: t.fontSerif,
                 marginTop: 8,
               }}>
@@ -289,7 +289,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
           }}>
             {isComplete && (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: "#ffffff30", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
+                <div style={{ fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
                   Earned
                 </div>
                 <div style={{ fontSize: 13, color: t.green, fontWeight: 600 }}>
@@ -298,7 +298,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
               </div>
             )}
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 10, color: "#ffffff30", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
+              <div style={{ fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
                 Films
               </div>
               <div style={{ fontSize: 13, color: t.textPrimary, fontWeight: 600 }}>
@@ -330,7 +330,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
         {/* ── Film journey list ──────────────────────────── */}
         <div style={{ marginBottom: 20 }}>
           <div style={{
-            fontSize: 10, color: "#ffffff30",
+            fontSize: 10, color: t.textFaint,
             textTransform: "uppercase", letterSpacing: 2,
             marginBottom: 14, paddingLeft: 2,
             fontFamily: t.fontDisplay,
@@ -339,7 +339,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
           </div>
 
           {loading ? (
-            <div style={{ textAlign: "center", padding: 40, color: "#ffffff20" }}>
+            <div style={{ textAlign: "center", padding: 40, color: t.textFaint }}>
               Loading...
             </div>
           ) : (
@@ -378,7 +378,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                       background: isLogged ? `${accent}25` : "transparent",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontSize: 10, fontWeight: 700,
-                      color: isLogged ? accent : "#ffffff20",
+                      color: isLogged ? accent : t.textFaint,
                       flexShrink: 0,
                       zIndex: 1,
                       transition: "all 0.3s",
@@ -390,7 +390,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 13, fontWeight: 600,
-                        color: isLogged ? "#ffffffdd" : "#ffffff40",
+                        color: isLogged ? t.textSecondary : t.textFaint,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>
                         {isComplete || isLogged ? item.title : (
@@ -405,7 +405,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                         )}
                       </div>
                       <div style={{
-                        fontSize: 11, color: "#ffffff25", marginTop: 2,
+                        fontSize: 11, color: t.textFaint, marginTop: 2,
                       }}>
                         {item.year}
                       </div>
@@ -439,7 +439,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             marginBottom: 20,
           }}>
             <div style={{
-              fontSize: 13, color: "#ffffff50",
+              fontSize: 13, color: t.textFaint,
               lineHeight: 1.6, fontStyle: "italic",
             }}>
               {badge.description}

@@ -162,7 +162,7 @@ export default function GetPlayedLogModal({
         .gp-date-input {
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 8px; color: #e0e0e0;
+          border-radius: 8px; color: var(--text-secondary);
           font-size: 13px; padding: 6px 10px;
           font-family: inherit; outline: none;
           color-scheme: dark; cursor: pointer;

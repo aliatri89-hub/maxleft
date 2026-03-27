@@ -287,7 +287,7 @@ export default function NowPlayingGenreTab({
         }}>
           <span style={{ fontSize: 14 }}>{icon}</span>
           <span style={{
-            fontSize: 14, fontWeight: 700, color: "#ffffffcc",
+            fontSize: 14, fontWeight: 700, color: t.textSecondary,
             fontFamily: t.fontDisplay, letterSpacing: 0.3,
           }}>{title}</span>
         </div>

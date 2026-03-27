@@ -103,7 +103,7 @@ const heroEnhancementStyles = `
     font-weight: 800;
     font-size: 15px;
     letter-spacing: 0.22em;
-    color: #f5f0eb;
+    color: var(--text-primary);
     margin-top: 4px;
     padding-left: 68px;
   }
@@ -120,7 +120,7 @@ const heroEnhancementStyles = `
     font-size: 105px;
     line-height: 0.85;
     letter-spacing: 0.02em;
-    color: #f5f0eb;
+    color: var(--text-primary);
     display: inline-block;
     opacity: 0;
     transform: translateY(110%);
@@ -153,7 +153,7 @@ const heroEnhancementStyles = `
   }
   .vhs-play-btn:hover .vhs-play-btn-bg {
     background: rgba(15,13,11,0.9);
-    border-color: rgba(255,255,255,0.22);
+    border-color: var(--border-strong);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.1),
       0 4px 16px rgba(0,0,0,0.4),
@@ -340,13 +340,13 @@ const featureStyles = `
     letter-spacing: 0.04em;
     font-size: 1.35rem;
     font-weight: 700;
-    color: #f5f0eb;
+    color: var(--text-primary);
     margin-bottom: 8px;
   }
   .mantl-feature-desc {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.85rem;
-    color: #9a938a;
+    color: var(--text-muted);
     line-height: 1.65;
     margin-bottom: 12px;
   }
@@ -502,14 +502,14 @@ const featureStyles = `
     font-size: 0.55rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: #8a8070;
+    color: var(--text-muted);
     margin-bottom: 2px;
   }
   .tf-target-val {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1.6rem;
     font-weight: 900;
-    color: #d4af37;
+    color: var(--gold);
     letter-spacing: 0.02em;
   }
   .tf-grid {
@@ -557,7 +557,7 @@ const featureStyles = `
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: #d4af37;
+    background: var(--gold);
     color: #0a0a0f;
     display: flex;
     align-items: center;
@@ -574,7 +574,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.6rem;
     font-weight: 800;
-    color: #4ade80;
+    color: var(--green);
     background: rgba(10,10,15,0.75);
     padding: 1px 5px;
     border-radius: 4px;
@@ -582,7 +582,7 @@ const featureStyles = `
     animation: fadeUp 0.4s ease;
   }
   .tf-card-rank.rank-dim {
-    color: #666;
+    color: var(--text-faint);
     background: rgba(10,10,15,0.6);
   }
   .tf-card-gross {
@@ -599,20 +599,20 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.75rem;
     font-weight: 900;
-    color: #d4af37;
+    color: var(--gold);
   }
   .tf-card-gross-val.optimal-val {
-    color: #4ade80;
+    color: var(--green);
   }
   .tf-card-gross-val.dim-val {
-    color: #666;
+    color: var(--text-faint);
   }
   .tf-card-optimal-tag {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.4rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: #4ade80;
+    color: var(--green);
     margin-top: 1px;
   }
   .tf-card-info {
@@ -624,12 +624,12 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.55rem;
     font-weight: 600;
-    color: #999;
+    color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .tf-card.selected .tf-card-title { color: #d4af37; }
+  .tf-card.selected .tf-card-title { color: var(--gold); }
   .tf-prompt {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
@@ -657,13 +657,13 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1.8rem;
     font-weight: 900;
-    color: #d4af37;
+    color: var(--gold);
     line-height: 1;
   }
   .tf-result-sub {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.55rem;
-    color: #666;
+    color: var(--text-faint);
     margin-top: 2px;
     letter-spacing: 0.04em;
   }
@@ -671,7 +671,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1.2rem;
     font-weight: 900;
-    color: #f0ece4;
+    color: var(--text-primary);
     margin-top: 6px;
   }
   .tf-result-diff {
@@ -683,7 +683,7 @@ const featureStyles = `
   .tf-new-puzzle {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.55rem;
-    color: #555;
+    color: var(--text-faint);
     margin-top: 10px;
     letter-spacing: 0.06em;
   }
@@ -745,7 +745,7 @@ const featureStyles = `
   }
   .community-row:hover {
     background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.1);
+    border-color: var(--border-medium);
   }
   .community-row::before {
     content: '';
@@ -773,12 +773,12 @@ const featureStyles = `
     letter-spacing: 0.06em;
     font-size: 0.78rem;
     font-weight: 700;
-    color: #f5f0eb;
+    color: var(--text-primary);
   }
   .community-stat {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.68rem;
-    color: #9a938a;
+    color: var(--text-muted);
     font-style: italic;
   }
   .community-donut {
@@ -822,7 +822,7 @@ const featureStyles = `
   }
   .sync-row:hover {
     background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.1);
+    border-color: var(--border-medium);
   }
   .sync-logo {
     width: 40px;
@@ -855,12 +855,12 @@ const featureStyles = `
     letter-spacing: 0.06em;
     font-size: 0.78rem;
     font-weight: 700;
-    color: #f5f0eb;
+    color: var(--text-primary);
   }
   .sync-stat {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.68rem;
-    color: #9a938a;
+    color: var(--text-muted);
     font-style: italic;
   }
   .sync-badge {
@@ -968,7 +968,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
-    color: #9a938a;
+    color: var(--text-muted);
     margin-top: 14px;
   }
 
@@ -1075,7 +1075,7 @@ const featureStyles = `
     letter-spacing: 0.06em;
     font-size: 1.25rem;
     font-weight: 700;
-    color: #f5f0eb;
+    color: var(--text-primary);
     line-height: 1.3;
     margin-bottom: 10px;
   }
@@ -1083,7 +1083,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
-    color: #9a938a;
+    color: var(--text-muted);
     line-height: 1.65;
     margin-bottom: 16px;
   }
@@ -1388,13 +1388,13 @@ function LandingScreen({ onSignIn }) {
       return (
         <div className="landing-email-section">
           <div style={{ fontSize: '2rem', marginBottom: 4 }}>🔑</div>
-          <div style={{ color: '#f5f0eb', fontSize: '1rem', fontWeight: 600, marginBottom: 2,
+          <div style={{ color: t.textPrimary, fontSize: '1rem', fontWeight: 600, marginBottom: 2,
             fontFamily: t.fontDisplay, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Enter your code
           </div>
-          <div style={{ color: '#c8c1b8', fontSize: '0.82rem', lineHeight: 1.5, marginBottom: 8,
+          <div style={{ color: t.textSecondary, fontSize: '0.82rem', lineHeight: 1.5, marginBottom: 8,
             fontFamily: t.fontDisplay, fontStyle: 'italic' }}>
-            We sent a code to <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
+            We sent a code to <strong style={{ color: t.textPrimary, fontStyle: 'normal' }}>{email}</strong>
           </div>
           {emailError && <div className="landing-email-error">{emailError}</div>}
           <input
@@ -1430,9 +1430,9 @@ function LandingScreen({ onSignIn }) {
       return (
         <div className="landing-email-section">
           {emailError && <div className="landing-email-error">{emailError}</div>}
-          <div style={{ color: '#c8c1b8', fontSize: '0.82rem',
+          <div style={{ color: t.textSecondary, fontSize: '0.82rem',
             fontFamily: t.fontDisplay, fontStyle: 'italic' }}>
-            Creating account for <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
+            Creating account for <strong style={{ color: t.textPrimary, fontStyle: 'normal' }}>{email}</strong>
           </div>
           <input
             type="password"
@@ -1771,14 +1771,14 @@ function LandingScreen({ onSignIn }) {
             <div style={{
               fontFamily: t.fontDisplay,
               textTransform: 'uppercase', letterSpacing: '0.04em',
-              fontSize: '0.95rem', fontWeight: 700, color: '#f5f0eb',
+              fontSize: '0.95rem', fontWeight: 700, color: t.textPrimary,
               marginBottom: 4,
             }}>Earn Badges</div>
             <div className="tap-hint" style={{ animation: 'none', margin: 0 }}>tap to reveal</div>
           </div>
           <div style={{
             fontFamily: t.fontDisplay,
-            fontSize: '0.82rem', color: '#c8c1b8', lineHeight: 1.5,
+            fontSize: '0.82rem', color: t.textSecondary, lineHeight: 1.5,
             marginBottom: 12,
           }}>
             Complete franchises and collect badges along the way.
@@ -1873,7 +1873,7 @@ function LandingScreen({ onSignIn }) {
                             )}
                           </div>
                           <div className="tf-card-info">
-                            <div className="tf-card-title" style={isTop3 && sel ? { color: '#4ade80' } : isTop3 && !sel ? { color: '#4ade80' } : undefined}>{movie.title}</div>
+                            <div className="tf-card-title" style={isTop3 && sel ? { color: t.green } : isTop3 && !sel ? { color: t.green } : undefined}>{movie.title}</div>
                           </div>
                         </div>
                       );
@@ -1892,7 +1892,7 @@ function LandingScreen({ onSignIn }) {
                         onClick={() => tfSelected.size === 3 && setTfLocked(true)}
                         style={{
                           background: tfSelected.size === 3 ? 'linear-gradient(135deg,#d4af37,#f4d03f)' : 'rgba(255,255,255,0.05)',
-                          color: tfSelected.size === 3 ? '#0a0a0f' : '#444',
+                          color: tfSelected.size === 3 ? '#0a0a0f' : t.textFaint,
                           cursor: tfSelected.size === 3 ? 'pointer' : 'not-allowed',
                         }}
                       >Lock It In</button>
@@ -1900,10 +1900,10 @@ function LandingScreen({ onSignIn }) {
                   ) : (
                     <div className="tf-result">
                       <div className="tf-result-rank" style={{
-                        color: isPerfect ? '#d4af37' : pct >= 90 ? '#f0ece4' : '#8a8070',
-                      }}>${userTotal}M<span style={{ fontSize: '0.9rem', color: '#aaa' }}>/${optimalTotal}M</span></div>
+                        color: isPerfect ? t.gold : pct >= 90 ? t.cream : t.textMuted,
+                      }}>${userTotal}M<span style={{ fontSize: '0.9rem', color: t.textMuted }}>/${optimalTotal}M</span></div>
                       <div className="tf-result-diff" style={{
-                        color: isPerfect ? '#d4af37' : pct >= 90 ? '#4ade80' : pct >= 75 ? '#f59e0b' : '#ef4444',
+                        color: isPerfect ? t.gold : pct >= 90 ? t.green : pct >= 75 ? '#f59e0b' : t.red,
                         fontStyle: 'italic',
                       }}>
                         {flavorText}

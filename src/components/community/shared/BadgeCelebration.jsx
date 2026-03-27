@@ -288,7 +288,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
                 </div>
                 {parts[1] && (
                   <div style={{
-                    fontSize: 11, color: "#ffffff40",
+                    fontSize: 11, color: t.textFaint,
                     marginTop: 10, letterSpacing: 1.2,
                     textTransform: "uppercase",
                     fontFamily: t.fontDisplay,
@@ -301,7 +301,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             );
           })()}
           {badge.description && (
-            <div style={{ fontSize: 12, color: "#ffffff70", marginTop: 14 }}>
+            <div style={{ fontSize: 12, color: t.textMuted, marginTop: 14 }}>
               {badge.description}
             </div>
           )}

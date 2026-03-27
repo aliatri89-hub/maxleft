@@ -145,7 +145,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
           align-items: center;
           justify-content: center;
           font-size: 11px;
-          color: #fff;
+          color: var(--text-primary);
           box-shadow: 0 1px 4px rgba(0,0,0,0.4);
         }
       `}</style>
