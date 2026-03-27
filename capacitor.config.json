@@ -5,6 +5,11 @@
   "server": {
     "androidScheme": "https"
   },
+  "ios": {
+    "allowsLinkPreview": false,
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": true
+  },
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": false,

@@ -45,6 +45,12 @@ const OriginalsScreen = lazy(() => import("../components/community/originals/Ori
 export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
   const { community, miniseries, loading, error } = useCommunityPage(slug);
 
+  // Register community-level back with native back button system
+  useEffect(() => {
+    if (pushNav) pushNav("community", onBack);
+    return () => { if (removeNav) removeNav("community"); };
+  }, [onBack, pushNav, removeNav]);
+
   // Analytics: track community visit
   useEffect(() => {
     if (!loading && community && session?.user?.id) {
