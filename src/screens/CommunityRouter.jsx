@@ -96,7 +96,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
     case "rewatchables":  Screen = RewatchablesScreen; break;
     case "chapo":         Screen = ChapoScreen; break;
     case "getplayed":     Screen = GetPlayedScreen; break;
-    case "originals":     Screen = OriginalsScreen; break;
+    case "staff-picks":   Screen = OriginalsScreen; break;
     default:
       console.warn(`[CommunityRouter] Unknown community_type "${communityType}" for slug "${slug}". Falling back to BlankCheckScreen.`);
       Screen = BlankCheckScreen;

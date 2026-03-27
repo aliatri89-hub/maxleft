@@ -249,7 +249,7 @@ export default function CommunitiesScreen({
                   community={c}
                   isSubscribed={true}
                   artworkUrl={art}
-                  showPlayButton={c.slug === "originals"}
+                  showPlayButton={c.slug === "staff-picks"}
                   accent={accent}
                   stats={stats[c.id]}
                   onTap={() => onOpenCommunity(c.slug)}
@@ -281,7 +281,7 @@ export default function CommunitiesScreen({
                       community={c}
                       isSubscribed={false}
                       artworkUrl={art}
-                      showPlayButton={c.slug === "originals"}
+                      showPlayButton={c.slug === "staff-picks"}
                       accent={accent}
                       stats={stats[c.id]}
                       onTap={() => openSleeve(c)}
