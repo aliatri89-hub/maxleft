@@ -723,6 +723,43 @@ function AppMain() {
         )}
 
         {/* Bottom Nav — Communities | Games | Search | Mantl */}
+        {/* Floating back button — shown on iOS/Android when nav bar is hidden */}
+        {screen === "app" && (activeCommunitySlug || showWhatToWatch || showTripleFeature || showReelTime || showCastConnections) && (
+          <div
+            onClick={() => {
+              if (activeCommunitySlug) { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }
+              else if (showTripleFeature) { removeNav("tripleFeature"); setShowTripleFeature(false); }
+              else if (showReelTime) { removeNav("reelTime"); setShowReelTime(false); }
+              else if (showCastConnections) { removeNav("castConnections"); setShowCastConnections(false); }
+              else if (showWhatToWatch) { removeNav("whatToWatch"); setShowWhatToWatch(false); }
+            }}
+            style={{
+              position: "fixed",
+              top: "calc(env(safe-area-inset-top, 0px) + 12px)",
+              left: 16,
+              zIndex: 9000,
+              display: "flex", alignItems: "center", gap: 4,
+              padding: "7px 12px 7px 8px",
+              background: "rgba(15,13,11,0.75)",
+              backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: 20,
+              cursor: "pointer",
+              userSelect: "none",
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            <span style={{
+              fontSize: 13, fontWeight: 600,
+              fontFamily: "'Barlow Condensed', sans-serif",
+              color: "rgba(255,255,255,0.8)",
+              letterSpacing: "0.02em",
+            }}>Back</span>
+          </div>
+        )}
+
         {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && !showCastConnections && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
