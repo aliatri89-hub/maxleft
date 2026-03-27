@@ -654,7 +654,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               }}>
                 <span style={{
                   fontFamily: t.fontSharpie,
-                  fontSize: 20, color: t.textPrimary,
+                  fontSize: 20, color: t.cream,
                   textShadow: "0 2px 8px rgba(0,0,0,0.9)",
                 }}>
                   {data.title}
@@ -685,7 +685,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             ) : (
               <div style={{
                 fontFamily: t.fontSharpie,
-                fontSize: 22, color: t.textPrimary,
+                fontSize: 22, color: t.cream,
                 lineHeight: 1.2,
               }}>
                 {data.title}
@@ -1188,7 +1188,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       <div style={{
                         fontFamily: t.fontDisplay,
                         fontWeight: 800, fontSize: 11,
-                        color: t.textPrimary,
+                        color: t.cream,
                         letterSpacing: "0.1em", textTransform: "uppercase",
                       }}>
                         {studio.name}
@@ -1258,7 +1258,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 </div>
                 <div style={{
                   fontFamily: t.fontMono,
-                  fontSize: 6, color: t.textPrimary,
+                  fontSize: 6, color: t.cream,
                   letterSpacing: "0.12em",
                 }}>
                   {String(seed).padStart(12, "0").slice(0, 12)}
@@ -1274,7 +1274,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     padding: "2px 6px",
                     fontFamily: t.fontDisplay,
                     fontWeight: 800, fontSize: 11,
-                    color: t.textPrimary,
+                    color: t.cream,
                     letterSpacing: "0.06em",
                     lineHeight: 1,
                   }}>
