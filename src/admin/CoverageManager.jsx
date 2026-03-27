@@ -36,8 +36,10 @@ export default function CoverageManager() {
   const [selectedFilm, setSelectedFilm] = useState(null);
   const [searching, setSearching] = useState(false);
   const [podcastName, setPodcastName] = useState("");
+  const [podcastArtworkUrl, setPodcastArtworkUrl] = useState("");
   const [episodeTitle, setEpisodeTitle] = useState("");
   const [episodeUrl, setEpisodeUrl] = useState("");
+  const [episodeDescription, setEpisodeDescription] = useState("");
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -85,8 +87,10 @@ export default function CoverageManager() {
       film_title: selectedFilm.title,
       poster_path: selectedFilm.poster_path || null,
       podcast_name: podcastName.trim(),
+      podcast_artwork_url: podcastArtworkUrl.trim() || null,
       episode_title: episodeTitle.trim() || null,
       episode_url: episodeUrl.trim() || null,
+      episode_description: episodeDescription.trim() || null,
       notes: notes.trim() || null,
     });
     setSaving(false);
@@ -97,8 +101,10 @@ export default function CoverageManager() {
     setFilmQuery("");
     setFilmResults([]);
     setPodcastName("");
+    setPodcastArtworkUrl("");
     setEpisodeTitle("");
     setEpisodeUrl("");
+    setEpisodeDescription("");
     setNotes("");
     loadLinks();
   };
@@ -198,7 +204,7 @@ export default function CoverageManager() {
           )}
         </div>
 
-        {/* Two-col: podcast name + episode title */}
+        {/* Two-col: podcast name + artwork URL */}
         <div style={styles.twoCol}>
           <div style={styles.fieldGroup}>
             <label style={styles.label}>Podcast Name *</label>
@@ -210,6 +216,29 @@ export default function CoverageManager() {
             />
           </div>
           <div style={styles.fieldGroup}>
+            <label style={styles.label}>Podcast Artwork URL</label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <input
+                value={podcastArtworkUrl}
+                onChange={e => setPodcastArtworkUrl(e.target.value)}
+                placeholder="https://… (podcast cover image)"
+                style={{ ...styles.input, flex: 1 }}
+              />
+              {podcastArtworkUrl && (
+                <img
+                  src={podcastArtworkUrl}
+                  alt="artwork preview"
+                  onError={e => e.target.style.display = "none"}
+                  style={{ width: 36, height: 36, borderRadius: 6, objectFit: "cover", flexShrink: 0, border: "1px solid rgba(240,235,225,0.1)" }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Two-col: episode title + episode URL */}
+        <div style={styles.twoCol}>
+          <div style={styles.fieldGroup}>
             <label style={styles.label}>Episode Title</label>
             <input
               value={episodeTitle}
@@ -218,16 +247,26 @@ export default function CoverageManager() {
               style={styles.input}
             />
           </div>
+          <div style={styles.fieldGroup}>
+            <label style={styles.label}>Episode URL</label>
+            <input
+              value={episodeUrl}
+              onChange={e => setEpisodeUrl(e.target.value)}
+              placeholder="https://…  (optional)"
+              style={styles.input}
+            />
+          </div>
         </div>
 
-        {/* Episode URL */}
+        {/* Episode description */}
         <div style={styles.fieldGroup}>
-          <label style={styles.label}>Episode URL</label>
-          <input
-            value={episodeUrl}
-            onChange={e => setEpisodeUrl(e.target.value)}
-            placeholder="https://…  (optional — direct link to episode)"
-            style={styles.input}
+          <label style={styles.label}>Episode Description</label>
+          <textarea
+            value={episodeDescription}
+            onChange={e => setEpisodeDescription(e.target.value)}
+            placeholder="Paste the episode description / show notes here…"
+            rows={3}
+            style={{ ...styles.input, resize: "vertical", lineHeight: 1.5 }}
           />
         </div>
 

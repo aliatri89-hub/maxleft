@@ -1188,82 +1188,127 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           {/* External coverage links (admin-curated) */}
           {externalLinks.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 4 }}>
-              {externalLinks.map(link => (
-                <div
-                  key={link.id}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 10,
-                    padding: "7px 6px", borderRadius: 6,
-                    background: "transparent",
-                  }}
-                >
-                  {/* Globe icon in place of podcast artwork */}
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                    background: "rgba(240,235,225,0.05)",
-                    border: "1.5px solid rgba(240,235,225,0.1)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="2" y1="12" x2="22" y2="12" />
-                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-                    </svg>
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-                      color: "rgba(240,235,225,0.7)",
-                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                    }}>
-                      {link.episode_title || link.podcast_name}
-                    </div>
-                    <div style={{
-                      fontFamily: t.fontBody, fontSize: 11,
-                      color: "rgba(240,235,225,0.35)",
-                      textTransform: "uppercase", letterSpacing: "0.04em",
-                    }}>
-                      {link.podcast_name} · outside network
-                    </div>
-                  </div>
-                  {/* External link button */}
-                  {link.episode_url ? (
-                    <a
-                      href={link.episode_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={e => e.stopPropagation()}
-                      title="Listen externally"
+              {externalLinks.map(link => {
+                const isExpanded = expandedEpId === `ext-${link.id}`;
+                return (
+                  <div key={link.id}>
+                    <div
+                      onClick={() => setExpandedEpId(isExpanded ? null : `ext-${link.id}`)}
                       style={{
-                        width: 32, height: 32, borderRadius: "50%",
-                        background: "rgba(240,235,225,0.04)",
-                        border: "1px solid rgba(240,235,225,0.08)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        flexShrink: 0, textDecoration: "none",
+                        display: "flex", alignItems: "center", gap: 10,
+                        padding: "7px 6px", borderRadius: 6, cursor: "pointer",
+                        background: isExpanded ? "rgba(240,235,225,0.04)" : "transparent",
+                        transition: "background 0.15s",
                       }}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
-                  ) : (
-                    <div style={{
-                      width: 32, height: 32, borderRadius: "50%",
-                      background: "rgba(240,235,225,0.02)",
-                      border: "1px solid rgba(240,235,225,0.05)",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                      </svg>
+                      {/* Artwork or globe fallback */}
+                      {link.podcast_artwork_url ? (
+                        <img
+                          src={link.podcast_artwork_url}
+                          alt={link.podcast_name}
+                          style={{
+                            width: 32, height: 32, borderRadius: 8, objectFit: "cover",
+                            border: isExpanded ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                            flexShrink: 0,
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          background: "rgba(240,235,225,0.05)",
+                          border: isExpanded ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                          </svg>
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
+                          color: isExpanded ? t.cream : "rgba(240,235,225,0.7)",
+                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                        }}>
+                          {link.episode_title || link.podcast_name}
+                        </div>
+                        <div style={{
+                          fontFamily: t.fontBody, fontSize: 11,
+                          color: "rgba(240,235,225,0.35)",
+                          textTransform: "uppercase", letterSpacing: "0.04em",
+                        }}>
+                          {link.podcast_name} · outside network
+                        </div>
+                      </div>
+                      {/* External link button */}
+                      {link.episode_url ? (
+                        <a
+                          href={link.episode_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          title="Listen externally"
+                          style={{
+                            width: 32, height: 32, borderRadius: "50%",
+                            background: "rgba(240,235,225,0.04)",
+                            border: "1px solid rgba(240,235,225,0.08)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0, textDecoration: "none",
+                          }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                        </a>
+                      ) : (
+                        <div style={{
+                          width: 32, height: 32, borderRadius: "50%",
+                          background: "rgba(240,235,225,0.02)",
+                          border: "1px solid rgba(240,235,225,0.05)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          flexShrink: 0,
+                        }}>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
+                    {/* Accordion description */}
+                    <div style={{
+                      maxHeight: isExpanded ? "none" : 0,
+                      overflow: "hidden",
+                      transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                    }}>
+                      {link.episode_description ? (
+                        <div style={{
+                          padding: "4px 6px 10px 48px",
+                          fontFamily: t.fontSerif,
+                          fontSize: 13, lineHeight: 1.55,
+                          color: "rgba(240,235,225,0.5)",
+                          whiteSpace: "pre-wrap",
+                        }}>
+                          {link.episode_description}
+                        </div>
+                      ) : isExpanded ? (
+                        <div style={{
+                          padding: "4px 6px 10px 48px",
+                          fontFamily: t.fontSerif,
+                          fontSize: 12, fontStyle: "italic",
+                          color: "rgba(240,235,225,0.25)",
+                        }}>
+                          No description available
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
