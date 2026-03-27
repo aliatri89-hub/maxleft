@@ -400,12 +400,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <div style={{ flex: 1 }} />
           {/* Handle / chevron — only when desc exists and collapsed */}
           {hasDesc && !expanded && (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
-              <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
-              <svg width="12" height="7" viewBox="0 0 12 7" fill="none">
-                <path d="M1 1l5 5 5-5" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+            <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.18)", flexShrink: 0 }} />
           )}
           {/* Badges — right */}
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 6 }}>
