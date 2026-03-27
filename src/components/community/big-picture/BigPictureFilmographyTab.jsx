@@ -210,7 +210,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
   const posterUrl = item.poster_path
     ? item.poster_path.startsWith("http")
       ? item.poster_path
-      : `https://image.tmdb.org/t/p/w342${item.poster_path}`
+      : `https://image.tmdb.org/t/p/w185${item.poster_path}`
     : null;
 
   return (

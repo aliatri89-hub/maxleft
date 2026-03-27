@@ -1044,7 +1044,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
             background: C.bgDeep, position: "relative", overflow: "hidden",
           }}>
             <FadeImg
-              src={`${TMDB_IMG}/w342${film.poster_path}`}
+              src={`${TMDB_IMG}/w154${film.poster_path}`}
               alt={film.title}
               loading="lazy"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}

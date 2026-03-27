@@ -334,7 +334,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
   const posterUrl = pick.posterPath
     ? pick.posterPath.startsWith("http")
       ? pick.posterPath
-      : `https://image.tmdb.org/t/p/w342${pick.posterPath}`
+      : `https://image.tmdb.org/t/p/w185${pick.posterPath}`
     : null;
   const isNumber1 = pick.rank === 1;
 
