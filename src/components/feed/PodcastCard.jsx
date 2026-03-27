@@ -118,7 +118,15 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
   const handleWatchlist = async (e) => {
     e.stopPropagation();
-    if (!userId || addedToWatchlist) return;
+    if (!userId) return;
+    if (addedToWatchlist) {
+      // Remove from watchlist
+      const { error } = await supabase.from("wishlist").delete()
+        .eq("user_id", userId).eq("title", film_title)
+        .in("item_type", ["movie", "show"]);
+      if (!error) setAddedToWatchlist(false);
+      return;
+    }
     const { error } = await supabase.from("wishlist").insert({
       user_id: userId,
       item_type: "movie",
@@ -238,11 +246,12 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                     Log
                   </div>
                   {addedToWatchlist ? (
-                    <div style={{
+                    <div onClick={handleWatchlist} style={{
                       ...badgeBase,
                       background: "rgba(201,124,93,0.06)",
                       border: "1px solid rgba(201,124,93,0.15)",
                       color: "rgba(201,124,93,0.5)",
+                      cursor: "pointer",
                     }}>
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="20 6 9 17 4 12" />
