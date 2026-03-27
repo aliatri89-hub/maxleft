@@ -181,7 +181,7 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
           <div style={{
             position: "absolute", bottom: 5, left: 28,
             fontFamily: "'Playfair Display', serif", fontWeight: 700,
-            fontSize: 8, color: "rgba(44,40,36,0.7)",
+            fontSize: 10, color: "rgba(44,40,36,0.7)",
             transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
             whiteSpace: "nowrap", pointerEvents: "none",
           }}>{dateStr}</div>

@@ -224,7 +224,7 @@ export default function FeedFilterBar({
             {subscribed.length > 0 && rest.length > 0 && (
               <div style={{
                 padding: "6px 12px 2px",
-                fontSize: 9, fontWeight: 700,
+                fontSize: 11, fontWeight: 700,
                 fontFamily: "'Barlow Condensed', sans-serif",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -249,7 +249,7 @@ export default function FeedFilterBar({
             {subscribed.length > 0 && rest.length > 0 && (
               <div style={{
                 padding: "6px 12px 2px",
-                fontSize: 9, fontWeight: 700,
+                fontSize: 11, fontWeight: 700,
                 fontFamily: "'Barlow Condensed', sans-serif",
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",

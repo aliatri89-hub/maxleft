@@ -204,7 +204,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             onClick={handleConfirm}
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9, color: "rgba(240,235,225,0.3)",
+              fontSize: 11, color: "rgba(240,235,225,0.3)",
               cursor: "pointer", marginTop: -8,
               letterSpacing: "0.04em",
             }}

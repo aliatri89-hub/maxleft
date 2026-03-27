@@ -125,7 +125,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
                     {data.watch_count}
                   </span>
                   <span style={{
-                    fontFamily: "var(--font-mono)", fontSize: 8,
+                    fontFamily: "var(--font-mono)", fontSize: 10,
                     letterSpacing: "0.08em", textTransform: "uppercase",
                     color: "var(--text-faint, #5a6480)",
                   }}>
@@ -167,7 +167,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
 
           {/* Title */}
           <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700,
+            fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
             color: "rgba(52,211,153,0.4)", letterSpacing: "0.1em", textTransform: "uppercase",
             textAlign: "center", marginBottom: 10,
             paddingBottom: 6, borderBottom: "1px solid rgba(255,255,255,0.06)",

@@ -260,7 +260,7 @@ export default function CommunitySleeveSheet({
           <div style={{ padding: "0 20px" }}>
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 400, fontSize: 8,
+              fontWeight: 400, fontSize: 10,
               color: "rgba(240,235,225,0.4)",
               letterSpacing: "0.1em",
               textTransform: "lowercase",
@@ -289,7 +289,7 @@ export default function CommunitySleeveSheet({
               }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
                 }}>also starring</span>
@@ -309,7 +309,7 @@ export default function CommunitySleeveSheet({
               }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
                 }}>a podcast about</span>
@@ -329,7 +329,7 @@ export default function CommunitySleeveSheet({
               }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
                 }}>produced by</span>
@@ -497,7 +497,7 @@ export default function CommunitySleeveSheet({
               alignItems: "center",
               justifyContent: "center",
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 800, fontSize: 9,
+              fontWeight: 800, fontSize: 11,
               color: "rgba(240,235,225,0.4)",
             }}>{abbrev}</div>
           </div>
@@ -515,7 +515,7 @@ export default function CommunitySleeveSheet({
             </div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 7,
+              fontSize: 9,
               color: "rgba(240,235,225,0.3)",
               textAlign: "center",
               marginTop: 2,

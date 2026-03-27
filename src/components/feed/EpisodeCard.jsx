@@ -166,7 +166,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                   )}
                 </svg>
                 <span style={{
-                  fontSize: 10, fontWeight: 600, textTransform: "uppercase",
+                  fontSize: 12, fontWeight: 600, textTransform: "uppercase",
                   letterSpacing: "0.05em",
                   color: seen ? "rgba(52,211,153,0.7)" : "rgba(255,255,255,0.15)",
                   fontFamily: "var(--font-mono, monospace)",
@@ -210,7 +210,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               <span>{data.miniseries_title}</span>
               {data.sort_order && (
                 <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 10,
+                  fontFamily: "var(--font-mono)", fontSize: 12,
                   color: "var(--text-faint, #5a6480)",
                 }}>
                   #{data.sort_order}
@@ -234,7 +234,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                   style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover" }}
                 />
               )}
-              <span style={{ fontSize: 10, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: 12, color: "var(--text-faint, #5a6480)", whiteSpace: "nowrap" }}>
                 {podName}
               </span>
             </div>

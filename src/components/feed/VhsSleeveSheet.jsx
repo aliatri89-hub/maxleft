@@ -693,7 +693,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             {data.year && (
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9, color: "rgba(240,235,225,0.35)",
+                fontSize: 11, color: "rgba(240,235,225,0.35)",
                 letterSpacing: "0.1em", marginTop: 4,
               }}>
                 {data.year}
@@ -744,7 +744,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               }}>
                 <div style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em", textTransform: "lowercase",
                   marginBottom: 3,
@@ -773,7 +773,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{ marginBottom: 6, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
                 }}>also starring</span>
@@ -791,7 +791,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               }}>
                 <span style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontWeight: 400, fontSize: 8,
+                  fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em", textTransform: "lowercase",
                 }}>directed by</span>
@@ -918,7 +918,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             }}>
               <div style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 800, fontSize: 8,
+                fontWeight: 800, fontSize: 10,
                 color: "rgba(240,235,225,0.4)",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 marginBottom: 8,
@@ -980,7 +980,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             }}>{ep.episode_title || ep.podcast_name}</div>
                             <div style={{
                               fontFamily: "'IBM Plex Mono', monospace",
-                              fontSize: 9, color: "rgba(240,235,225,0.35)",
+                              fontSize: 11, color: "rgba(240,235,225,0.35)",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
@@ -1109,7 +1109,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               <div style={{
                                 padding: "4px 6px 10px 48px",
                                 fontFamily: "'IBM Plex Mono', monospace",
-                                fontSize: 10, lineHeight: 1.55,
+                                fontSize: 12, lineHeight: 1.55,
                                 color: "rgba(240,235,225,0.5)",
                                 whiteSpace: "pre-wrap",
                               }}>
@@ -1121,7 +1121,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             <div style={{
                               padding: "4px 6px 10px 48px",
                               fontFamily: "'IBM Plex Mono', monospace",
-                              fontSize: 9, fontStyle: "italic",
+                              fontSize: 11, fontStyle: "italic",
                               color: "rgba(240,235,225,0.25)",
                             }}>
                               No description available
@@ -1143,7 +1143,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             return !hasAudio && merged.overview ? (
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10, lineHeight: 1.55,
+                fontSize: 12, lineHeight: 1.55,
                 color: "rgba(240,235,225,0.65)",
                 textAlign: "center",
                 marginBottom: 14,
@@ -1186,7 +1186,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     ) : (
                       <div style={{
                         fontFamily: "'Barlow Condensed', sans-serif",
-                        fontWeight: 800, fontSize: 9,
+                        fontWeight: 800, fontSize: 11,
                         color: "#f0ebe1",
                         letterSpacing: "0.1em", textTransform: "uppercase",
                       }}>
@@ -1210,7 +1210,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       <div>
                         <div style={{
                           fontFamily: "'Barlow Condensed', sans-serif",
-                          fontWeight: 800, fontSize: 6,
+                          fontWeight: 800, fontSize: 8,
                           color: "rgba(240,235,225,0.35)",
                           letterSpacing: "0.12em", textTransform: "uppercase",
                         }}>Budget</div>
@@ -1227,7 +1227,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       <div>
                         <div style={{
                           fontFamily: "'Barlow Condensed', sans-serif",
-                          fontWeight: 800, fontSize: 6,
+                          fontWeight: 800, fontSize: 8,
                           color: "rgba(240,235,225,0.35)",
                           letterSpacing: "0.12em", textTransform: "uppercase",
                         }}>WW Gross</div>

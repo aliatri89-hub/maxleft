@@ -152,7 +152,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
             </div>
           </div>
           <div style={{
-            fontFamily: "var(--font-mono)", fontSize: 9,
+            fontFamily: "var(--font-mono)", fontSize: 11,
             color: "var(--text-faint, #5a6480)",
           }}>
             {data.watched_count}/{data.total_count}
