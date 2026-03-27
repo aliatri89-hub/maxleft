@@ -558,7 +558,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
   return createPortal(
     <>
-      <style>{`@keyframes sleeve-spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes sleeve-spin { to { transform: rotate(360deg); } }
+        @keyframes sleeveContentIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes sleeve-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.25; } }
+      `}</style>
       {/* Backdrop overlay */}
       <div
         onClick={onClose}
@@ -669,9 +673,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 display: "flex", justifyContent: "center",
                 zIndex: 3, pointerEvents: "none",
               }}>
-                <img
+                <FadeImg
                   src={data.logo_url}
                   alt={data.title}
+                  placeholderColor="transparent"
                   style={{
                     height: 40,
                     maxWidth: "70%",
@@ -705,15 +710,17 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             textAlign: "center",
           }}>
             {data.logo_url ? (
-              <img
+              <FadeImg
                 src={data.logo_url}
                 alt={data.title}
+                placeholderColor="transparent"
                 style={{
                   height: 44,
                   maxWidth: "75%",
                   objectFit: "contain",
                   filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6))",
                   opacity: 0.95,
+                  margin: "0 auto",
                 }}
               />
             ) : (
@@ -737,6 +744,94 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           </div>
         )}
 
+        {/* ── Content loading skeleton — shows while detail is fetching ── */}
+        {!detail && (
+          <div style={{ padding: "12px 20px 20px" }}>
+            {/* Still + cast placeholder */}
+            <div style={{
+              display: "flex", gap: 10, alignItems: "flex-end",
+              marginTop: heroUrl ? -28 : 0, marginBottom: 14,
+              position: "relative", zIndex: 2,
+            }}>
+              {/* Still placeholder */}
+              <div style={{
+                flex: "0 0 52%", aspectRatio: "16/9",
+                borderRadius: 2, overflow: "hidden",
+                background: "rgba(240,235,225,0.04)",
+                border: "2px solid rgba(240,235,225,0.08)",
+                animation: "sleeve-pulse 1.5s ease infinite",
+              }} />
+              {/* Cast lines placeholder */}
+              <div style={{ flex: 1, paddingBottom: 2 }}>
+                <div style={{
+                  width: 50, height: 8, borderRadius: 2, marginBottom: 6,
+                  background: "rgba(240,235,225,0.06)",
+                  animation: "sleeve-pulse 1.5s ease infinite",
+                }} />
+                {[0, 1, 2].map(i => (
+                  <div key={i} style={{
+                    width: `${75 - i * 10}%`, height: 12, borderRadius: 2,
+                    marginTop: 5,
+                    background: "rgba(240,235,225,0.06)",
+                    animation: "sleeve-pulse 1.5s ease infinite",
+                    animationDelay: `${i * 0.15}s`,
+                  }} />
+                ))}
+              </div>
+            </div>
+            {/* Director placeholder */}
+            <div style={{
+              display: "flex", justifyContent: "center", gap: 8, marginBottom: 16,
+            }}>
+              <div style={{
+                width: 70, height: 8, borderRadius: 2,
+                background: "rgba(240,235,225,0.04)",
+                animation: "sleeve-pulse 1.5s ease infinite",
+                animationDelay: "0.2s",
+              }} />
+              <div style={{
+                width: 120, height: 12, borderRadius: 2,
+                background: "rgba(240,235,225,0.06)",
+                animation: "sleeve-pulse 1.5s ease infinite",
+                animationDelay: "0.3s",
+              }} />
+            </div>
+            {/* Episode rows placeholder */}
+            <div style={{
+              borderTop: "1px solid rgba(240,235,225,0.06)",
+              paddingTop: 12,
+            }}>
+              {[0, 1].map(i => (
+                <div key={i} style={{
+                  display: "flex", gap: 10, alignItems: "center",
+                  padding: "8px 0",
+                }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                    background: "rgba(240,235,225,0.04)",
+                    animation: "sleeve-pulse 1.5s ease infinite",
+                    animationDelay: `${i * 0.15}s`,
+                  }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      width: `${70 + i * 10}%`, height: 11, borderRadius: 2,
+                      background: "rgba(240,235,225,0.05)",
+                      animation: "sleeve-pulse 1.5s ease infinite",
+                      animationDelay: `${i * 0.15}s`,
+                    }} />
+                    <div style={{
+                      width: "40%", height: 8, borderRadius: 2, marginTop: 5,
+                      background: "rgba(240,235,225,0.03)",
+                      animation: "sleeve-pulse 1.5s ease infinite",
+                      animationDelay: `${i * 0.15 + 0.1}s`,
+                    }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Scene still (left) + Cast billing (right) ── */}
         {(stillUrl || cast.length > 0) && (
           <div style={{
@@ -745,6 +840,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             marginTop: heroUrl && stillUrl ? -28 : 0,
             marginBottom: 6,
             position: "relative", zIndex: 2,
+            animation: "sleeveContentIn 0.4s ease both",
           }}>
             {/* Still — left side */}
             {stillUrl && (
@@ -802,6 +898,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         {(director || cast.length > 3) && (
           <div style={{
             padding: "6px 20px 0", textAlign: "center",
+            animation: "sleeveContentIn 0.4s ease 0.1s both",
           }}>
             {cast.length > 3 && (
               <div style={{ marginBottom: 6, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
@@ -846,6 +943,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           flex: 1,
           display: "flex",
           flexDirection: "column",
+          animation: detail ? "sleeveContentIn 0.4s ease 0.15s both" : "none",
         }}>
 
           {/* Cast fallback — only when no stills (cast normally shows next to still) */}
@@ -999,11 +1097,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           }}
                         >
                           {ep.podcast_artwork_url && (
-                            <img src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name} style={{
-                              width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                              border: isExpanded ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
-                              flexShrink: 0,
-                            }} />
+                            <FadeImg src={ep.podcast_artwork_url} alt={ep.podcast_name}
+                              placeholderColor="rgba(240,235,225,0.05)"
+                              style={{
+                                width: 32, height: 32, borderRadius: 8, objectFit: "cover",
+                                border: isExpanded ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                                flexShrink: 0,
+                              }} />
                           )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
@@ -1203,9 +1303,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     >
                       {/* Artwork or globe fallback */}
                       {link.podcast_artwork_url ? (
-                        <img
+                        <FadeImg
                           src={link.podcast_artwork_url}
                           alt={link.podcast_name}
+                          placeholderColor="rgba(240,235,225,0.05)"
                           style={{
                             width: 32, height: 32, borderRadius: 8, objectFit: "cover",
                             border: isExpanded ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
@@ -1348,16 +1449,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                   }}>
                     {studio.logo_url ? (
-                      <img
+                      <FadeImg
                         src={studio.logo_url}
                         alt={studio.name}
+                        placeholderColor="transparent"
                         style={{
                           height: 18, width: "auto", maxWidth: 72,
                           objectFit: "contain",
                           filter: "brightness(0) invert(1)",
                           opacity: 0.85,
                         }}
-                        loading="lazy"
                       />
                     ) : (
                       <div style={{
