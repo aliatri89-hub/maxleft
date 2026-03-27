@@ -189,24 +189,21 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
         </div>
       )}
 
-      {/* Main content */}
-      <div style={{
-        position: "relative", zIndex: 20,
-        display: "flex", flexDirection: "column", alignItems: "center",
-        padding: 40,
-      }}>
-        {/* Badge image */}
+      {/* Badge image — top-right corner when video, centered otherwise */}
+      {/* Badge image — absolute top-right for video */}
+      {isVideo && (
         <div style={{
-          width: 160, height: 160, borderRadius: "50%",
-          overflow: "hidden",
+          position: "absolute", zIndex: 25,
+          top: 56, right: 24,
+          width: 90, height: 90,
+          borderRadius: "50%", overflow: "hidden",
           border: `3px solid ${accent}80`,
           boxShadow: phase >= 2
-            ? `0 0 60px ${accent}30, 0 0 120px ${accent}12, inset 0 0 30px rgba(0,0,0,0.5)`
+            ? `0 0 40px ${accent}30, 0 0 80px ${accent}12, inset 0 0 20px rgba(0,0,0,0.5)`
             : "none",
           opacity: phase >= 1 ? 1 : 0,
           transform: phase >= 1 ? "scale(1)" : "scale(0.4)",
           transition: "all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-          position: "relative",
         }}>
           {badge.image_url ? (
             <FadeImg src={badge.image_url} alt={badge.name}
@@ -218,7 +215,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
               width: "100%", height: "100%",
               background: `radial-gradient(circle, ${accent}30, ${accent}08)`,
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 56,
+              fontSize: 36,
             }}>🏆</div>
           )}
           <div style={{
@@ -226,26 +223,69 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             background: "radial-gradient(circle, transparent 50%, rgba(10,6,0,0.4) 100%)",
           }} />
         </div>
+      )}
 
-        {/* Pulse rings */}
-        {phase >= 2 && (
-          <div style={{
-            position: "absolute", top: 40, left: "50%",
-            width: 160, height: 160,
-            transform: "translateX(-50%)",
-            pointerEvents: "none",
-          }}>
+      {/* Main content */}
+      <div style={{
+        position: "relative", zIndex: 20,
+        display: "flex", flexDirection: "column", alignItems: "center",
+        padding: 40,
+      }}>
+        {/* Badge image — centered in column for non-video */}
+        {!isVideo && (
+          <>
             <div style={{
-              position: "absolute", inset: -10, borderRadius: "50%",
-              border: `1px solid ${accent}35`,
-              animation: "badgeRingPulse 2.5s ease-out infinite",
-            }} />
-            <div style={{
-              position: "absolute", inset: -10, borderRadius: "50%",
-              border: `1px solid ${accent}20`,
-              animation: "badgeRingPulse 2.5s ease-out 0.8s infinite",
-            }} />
-          </div>
+              width: 160, height: 160,
+              borderRadius: "50%", overflow: "hidden",
+              border: `3px solid ${accent}80`,
+              boxShadow: phase >= 2
+                ? `0 0 60px ${accent}30, 0 0 120px ${accent}12, inset 0 0 30px rgba(0,0,0,0.5)`
+                : "none",
+              opacity: phase >= 1 ? 1 : 0,
+              transform: phase >= 1 ? "scale(1)" : "scale(0.4)",
+              transition: "all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+              position: "relative",
+            }}>
+              {badge.image_url ? (
+                <FadeImg src={badge.image_url} alt={badge.name}
+                  placeholderColor={`${accent}15`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              ) : (
+                <div style={{
+                  width: "100%", height: "100%",
+                  background: `radial-gradient(circle, ${accent}30, ${accent}08)`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 56,
+                }}>🏆</div>
+              )}
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "radial-gradient(circle, transparent 50%, rgba(10,6,0,0.4) 100%)",
+              }} />
+            </div>
+
+            {/* Pulse rings */}
+            {phase >= 2 && (
+              <div style={{
+                position: "absolute", top: 40, left: "50%",
+                width: 160, height: 160,
+                transform: "translateX(-50%)",
+                pointerEvents: "none",
+              }}>
+                <div style={{
+                  position: "absolute", inset: -10, borderRadius: "50%",
+                  border: `1px solid ${accent}35`,
+                  animation: "badgeRingPulse 2.5s ease-out infinite",
+                }} />
+                <div style={{
+                  position: "absolute", inset: -10, borderRadius: "50%",
+                  border: `1px solid ${accent}20`,
+                  animation: "badgeRingPulse 2.5s ease-out 0.8s infinite",
+                }} />
+              </div>
+            )}
+          </>
         )}
 
         {/* Badge unlocked text */}
