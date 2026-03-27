@@ -314,7 +314,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
               maxWidth: 280,
               margin: "12px auto 0",
             }}>
-              Badge names are your clues. Log films to discover and collect.
+              Badge names are clues.<br />Log films to discover and collect.
             </div>
           </div>
         )}
