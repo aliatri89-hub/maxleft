@@ -162,6 +162,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const [expandedEpId, setExpandedEpId] = useState(null); // which episode row is expanded
   const [hiddenEpIds, setHiddenEpIds] = useState(new Set()); // admin-deleted episodes
   const [isAdmin, setIsAdmin] = useState(false);
+  const [externalLinks, setExternalLinks] = useState([]); // admin_coverage_links
   const [providers, setProviders] = useState(null);
   const [onWatchlist, setOnWatchlist] = useState(false);
   const [watchlistSaving, setWatchlistSaving] = useState(false);
@@ -181,6 +182,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       }
     });
   }, []);
+
+  // Fetch external coverage links for this film
+  useEffect(() => {
+    if (!open || !data?.tmdb_id) { setExternalLinks([]); return; }
+    supabase
+      .from("admin_coverage_links")
+      .select("*")
+      .eq("tmdb_id", data.tmdb_id)
+      .then(({ data: rows }) => setExternalLinks(rows || []));
+  }, [open, data?.tmdb_id]);
 
   // Check watchlist status when card opens
   useEffect(() => {
@@ -934,7 +945,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           )}
 
           {/* ═══ EPISODE PICKER — when opened from browse cards ═══ */}
-          {(epLoading || (episodes && episodes.length > 0)) && (
+          {(epLoading || (episodes && episodes.length > 0) || externalLinks.length > 0) && (
             <div style={{
               borderTop: "1px solid rgba(240,235,225,0.06)",
               paddingTop: 12, marginBottom: 14,
@@ -1174,10 +1185,92 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             </div>
           )}
 
+          {/* External coverage links (admin-curated) */}
+          {externalLinks.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 4 }}>
+              {externalLinks.map(link => (
+                <div
+                  key={link.id}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "7px 6px", borderRadius: 6,
+                    background: "transparent",
+                  }}
+                >
+                  {/* Globe icon in place of podcast artwork */}
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                    background: "rgba(240,235,225,0.05)",
+                    border: "1.5px solid rgba(240,235,225,0.1)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
+                      color: "rgba(240,235,225,0.7)",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                    }}>
+                      {link.episode_title || link.podcast_name}
+                    </div>
+                    <div style={{
+                      fontFamily: t.fontBody, fontSize: 11,
+                      color: "rgba(240,235,225,0.35)",
+                      textTransform: "uppercase", letterSpacing: "0.04em",
+                    }}>
+                      {link.podcast_name} · outside network
+                    </div>
+                  </div>
+                  {/* External link button */}
+                  {link.episode_url ? (
+                    <a
+                      href={link.episode_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      title="Listen externally"
+                      style={{
+                        width: 32, height: 32, borderRadius: "50%",
+                        background: "rgba(240,235,225,0.04)",
+                        border: "1px solid rgba(240,235,225,0.08)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        flexShrink: 0, textDecoration: "none",
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.45)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                        <polyline points="15 3 21 3 21 9" />
+                        <line x1="10" y1="14" x2="21" y2="3" />
+                      </svg>
+                    </a>
+                  ) : (
+                    <div style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: "rgba(240,235,225,0.02)",
+                      border: "1px solid rgba(240,235,225,0.05)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      flexShrink: 0,
+                    }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.2)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Overview / Synopsis — fallback when no podcast coverage */}
           {(() => {
             const visibleEps = episodes?.filter(ep => !hiddenEpIds.has(ep.episode_id)) || [];
-            const hasAudio = visibleEps.length > 0 || epLoading;
+            const hasAudio = visibleEps.length > 0 || epLoading || externalLinks.length > 0;
             return !hasAudio && merged.overview ? (
               <div style={{
                 fontFamily: t.fontSerif,

@@ -16,12 +16,14 @@ const CommunityManager = lazy(() => import("./CommunityManager"));
 const AnalyticsDashboard = lazy(() => import("./AnalyticsDashboard"));
 const GamesManager = lazy(() => import("./GamesManager"));
 const ConfigFlags = lazy(() => import("./ConfigFlags"));
+const CoverageManager = lazy(() => import("./CoverageManager"));
 
 const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
   { key: "feed",            label: "Feed & Ingest",   icon: "◈" },
   { key: "communities",     label: "Communities",      icon: "◆" },
   { key: "games",           label: "Games",            icon: "◇" },
+  { key: "coverage",        label: "Coverage Links",   icon: "⊕" },
   { key: "analytics",       label: "Analytics",        icon: "◎" },
   { key: "config",          label: "Config & Flags",   icon: "◐" },
 ];
@@ -146,6 +148,9 @@ export default function AdminShell() {
           )}
           {activeSection === "games" && (
             <GamesManager session={session} />
+          )}
+          {activeSection === "coverage" && (
+            <CoverageManager session={session} />
           )}
           {activeSection === "analytics" && (
             <AnalyticsDashboard session={session} />
