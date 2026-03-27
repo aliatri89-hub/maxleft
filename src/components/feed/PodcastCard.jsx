@@ -325,29 +325,20 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             )}
           </div>
 
-          {/* Row 3: About pill or expanded description */}
-          {hasDesc && (
-            expanded ? (
-              <div style={{ fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 2 }}>
-                {fullDesc}
-              </div>
-            ) : (
-              <div style={{
-                display: "inline-flex", alignItems: "center", gap: 4,
-                padding: "3px 9px", borderRadius: 20,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.03)",
-                marginTop: 2, alignSelf: "flex-start",
-              }}>
-                <span style={{ fontFamily: t.fontMono, fontSize: 10, color: t.textFaint, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-                  About this episode
-                </span>
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </div>
-            )
-          )}
+              {hasDesc && (
+                expanded ? (
+                  <div style={{ fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 2 }}>
+                    {fullDesc}
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 6, display: "flex", alignItems: "center" }}>
+                    <div style={{
+                      width: 32, height: 3, borderRadius: 2,
+                      background: "rgba(255,255,255,0.1)",
+                    }} />
+                  </div>
+                )
+              )}
         </div>
       </div>
 
