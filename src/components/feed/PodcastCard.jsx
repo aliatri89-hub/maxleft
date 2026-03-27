@@ -1,11 +1,15 @@
 import { t } from "../../theme";
-import { useState, memo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { renderWithTimecodes } from "../community/shared/AudioPlayerProvider";
 import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
+import { apiProxy } from "../../utils/api";
+
+const TMDB_BD = "https://image.tmdb.org/t/p/w780";
+const _pcBdCache = new Map();
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — redesigned layout
@@ -77,6 +81,32 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
+
+  // ── B&W backdrop fetch — index #7 (sorted by vote), different frame from movies feed ──
+  const [bdUrl, setBdUrl] = useState(() =>
+    tmdb_id && _pcBdCache.has(tmdb_id) ? _pcBdCache.get(tmdb_id) : null
+  );
+  useEffect(() => {
+    if (!tmdb_id) return;
+    if (_pcBdCache.has(tmdb_id)) { setBdUrl(_pcBdCache.get(tmdb_id)); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiProxy("tmdb_images", { tmdb_id: String(tmdb_id), type: "movie" });
+        if (cancelled) return;
+        const picks = (res?.backdrops || [])
+          .filter(b => b.file_path)
+          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        const pick = picks[6] || picks[0] || null;
+        const url = pick ? `${TMDB_BD}${pick.file_path}` : null;
+        _pcBdCache.set(tmdb_id, url);
+        if (!cancelled) setBdUrl(url);
+      } catch {
+        _pcBdCache.set(tmdb_id, null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [tmdb_id]);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
 
   const handleTimecodeSeek = (sec) => {
@@ -182,6 +212,34 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         position: "relative",
       }}
     >
+      {/* B&W backdrop wash — top-anchored, fades toward bottom */}
+      {bdUrl && (
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+          <img
+            src={bdUrl}
+            alt=""
+            loading="lazy"
+            style={{
+              position: "absolute",
+              top: 0, left: 0,
+              width: "100%",
+              height: "150%",
+              objectFit: "cover",
+              objectPosition: "center top",
+              filter: "grayscale(1) contrast(1.05)",
+              opacity: 0.13,
+            }}
+          />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(180deg, transparent 20%, var(--bg-card, #1a1714) 75%)",
+          }} />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 8%, transparent 50%)",
+          }} />
+        </div>
+      )}
       {/* ── Admin X — top left ── */}
       {isAdmin && (
         <div onClick={handleUnlink} title="Unlink" style={{
@@ -197,7 +255,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
 
       {/* ── Art + right column ── */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start", position: "relative", zIndex: 1 }}>
         {/* Podcast artwork */}
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
@@ -331,7 +389,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
       {/* Bottom row: spacer | centered bar | badges right */}
       {(!expanded || !hasDesc) && (
-        <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", marginTop: 8, position: "relative", zIndex: 1 }}>
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
           {/* Handle bar — only when desc exists and collapsed */}
@@ -372,6 +430,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           fontFamily: t.fontSerif, fontSize: 13, color: "var(--text-secondary)",
           lineHeight: 1.5, marginTop: 8,
           animation: "pcFadeSlide 0.2s ease forwards",
+          position: "relative", zIndex: 1,
         }}>
           {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
         </div>
