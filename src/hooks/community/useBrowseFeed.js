@@ -12,7 +12,15 @@ import { fetchLogosForItems, getLogoUrl, isLogoChecked } from "../../utils/commu
 
 const PAGE_SIZE = 20;
 
-function enrichLogos(items, mountedRef, setItems) {
+function patchLogosIntoRef(allItemsRef) {
+  allItemsRef.current = allItemsRef.current.map(item => {
+    if (item.logo_url) return item;
+    const url = getLogoUrl(item.tmdb_id);
+    return url ? { ...item, logo_url: url } : item;
+  });
+}
+
+function enrichLogos(items, mountedRef, setItems, allItemsRef) {
   let patched = false;
   for (const item of items) {
     if (item.logo_url) continue;
@@ -21,6 +29,7 @@ function enrichLogos(items, mountedRef, setItems) {
   }
 
   if (patched && mountedRef.current) {
+    patchLogosIntoRef(allItemsRef);
     setItems(prev => prev.map(item => {
       if (item.logo_url) return item;
       const url = getLogoUrl(item.tmdb_id);
@@ -35,6 +44,7 @@ function enrichLogos(items, mountedRef, setItems) {
   if (logoItems.length > 0) {
     fetchLogosForItems(logoItems, () => {
       if (!mountedRef.current) return;
+      patchLogosIntoRef(allItemsRef);
       setItems(prev => prev.map(item => {
         if (item.logo_url) return item;
         const url = getLogoUrl(item.tmdb_id);
@@ -108,7 +118,7 @@ export function useBrowseFeed(mode, active = false) {
       setHasMore(normalized.length > PAGE_SIZE);
 
       if (normalized.length > 0) {
-        enrichLogos(normalized, mountedRef, setItems);
+        enrichLogos(normalized, mountedRef, setItems, allItemsRef);
       }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
