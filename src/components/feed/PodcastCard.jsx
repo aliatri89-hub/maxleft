@@ -341,8 +341,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             ) : null}
             {userId && !isWatched && (
               addedToWatchlist ? (
-                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(201,124,93,0.06)", border: "1px solid rgba(201,124,93,0.15)", color: "rgba(201,124,93,0.5)", cursor: "pointer" }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)", color: "rgba(52,211,153,0.7)", cursor: "pointer" }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                   Added
                 </div>
               ) : (
