@@ -9,7 +9,7 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../supabase";
 
 const HARDCODED_FLAGS = [
-  { file: "LogCard.jsx", key: "USE_TITLE_BACKDROPS", value: true, note: "TMDB title backdrops on activity feed cards" },
+  { file: "ActivityCard.jsx", key: "USE_TITLE_BACKDROPS", value: true, note: "TMDB title backdrops on activity feed cards" },
   { file: "NPPDashboard.jsx", key: "SHOW_COMMUNITY_STATS", value: false, note: "Member counts on NPP dashboard" },
   { file: "NPPDashboard.jsx", key: "SHOW_VOTING", value: false, note: "Voting UI on NPP film cards" },
   { file: "BlankCheckDashboard.jsx", key: "SHOW_COMMUNITY_STATS", value: false, note: "Member counts on BC dashboard" },

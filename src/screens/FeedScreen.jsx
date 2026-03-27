@@ -1,104 +1,50 @@
-import { t } from "../theme";
-import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useFeed } from "../hooks/community/useFeed";
-import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
-import { usePodcastFeed } from "../hooks/community/usePodcastFeed";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { trackEvent } from "../hooks/useAnalytics";
-import BadgeCelebration from "../components/community/shared/BadgeCelebration";
-import BadgeDetailScreen from "../components/community/shared/BadgeDetailScreen";
 import ShareShelf from "../components/ShareShelf";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
-import {
-  LogCard,
-  BrowseCard,
-  PodcastCard,
-  EmptyFeed,
-  FeedCard,
-} from "../components/feed";
+import MoviesPane from "../components/feed/MoviesPane";
+import PodcastPane from "../components/feed/PodcastPane";
+import ActivityPane from "../components/feed/ActivityPane";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN — Movies | Podcast | Activity
+// FEED SCREEN — Movies | Podcasts | Activity
+// Coordinates tabs, filters, and pull-to-refresh.
+// Each tab's data + rendering lives in its own pane.
 // ════════════════════════════════════════════════
 
 const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
-const BASE_TABS = [
-  { key: "releases",  label: "Movies" },
-  { key: "podcast",   label: "Podcasts" },
-  { key: "activity",  label: "Activity" },
+const FEED_TABS = [
+  { key: "releases", label: "Movies" },
+  { key: "podcast",  label: "Podcasts" },
+  { key: "activity", label: "Activity" },
 ];
-export default function FeedScreen({ session, profile, onToast, isActive, onNavigateCommunity, onNavigateSearch, onNavigateMantl, letterboxdSyncSignal, autoLogCompleteSignal, communitySubscriptions, favoritePodcasts, feedMode, setFeedMode, pendingSleeveOpen, setPendingSleeveOpen, pushNav, removeNav }) {
+
+export default function FeedScreen({
+  session, profile, onToast, isActive,
+  onNavigateCommunity, onNavigateSearch, onNavigateMantl,
+  letterboxdSyncSignal, autoLogCompleteSignal,
+  communitySubscriptions, favoritePodcasts,
+  feedMode, setFeedMode,
+  pendingSleeveOpen, setPendingSleeveOpen,
+  pushNav, removeNav,
+}) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
-  const FEED_TABS = BASE_TABS;
-  const {
-    activityItems,
-    hasMoreActivity,
-    loadMoreActivity,
-    loading, refresh,
-  } = useFeed(userId, favoritePodcasts);
-  const releases = useBrowseFeed("releases", feedMode === "releases");
 
-  // ── Filter state (must be before usePodcastFeed which reads selectedPodcast) ──
-  const [sortOrder, setSortOrder] = useState(null);  // null = default, "recent", "oldest"
+  // ── Shared filter state (passed down to all three panes) ──
+  const [sortOrder, setSortOrder] = useState(null);
   const [selectedPodcast, setSelectedPodcast] = useState(null);
-  const [favoriteSlugs, setFavoriteSlugs] = useState(null); // Set<slug> from FeedFilterBar
+  const [favoriteSlugs, setFavoriteSlugs] = useState(null);
 
-  const podcastSlugForHook = selectedPodcast && selectedPodcast !== "__favorites__" ? selectedPodcast : null;
-  const podcast = usePodcastFeed(feedMode === "podcast", userId, podcastSlugForHook, sortOrder);
-  const wasActive = useRef(isActive);
-  const refreshRef = useRef(refresh);
-  refreshRef.current = refresh;
-  const [celebrationBadge, setCelebrationBadge] = useState(null);
-  const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
-  const [showShareShelf, setShowShareShelf] = useState(false);
-  const activitySentinelRef = useRef(null);
-  const releasesSentinelRef = useRef(null);
-  const podcastSentinelRef = useRef(null);
-
-  // ── Filtered + sorted browse items ──
-  const filteredReleases = useMemo(() => {
-    let items = releases.items;
-    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
-      items = items.filter(m => (m.community_slugs || []).some(s => favoriteSlugs.has(s)));
-    } else if (selectedPodcast) {
-      items = items.filter(m => (m.community_slugs || []).includes(selectedPodcast));
-    }
-    if (sortOrder === "oldest") items = [...items].reverse();
-    return items;
-  }, [releases.items, selectedPodcast, favoriteSlugs, sortOrder]);
-
-  const filteredPodcast = useMemo(() => {
-    let items = podcast.items;
-    // Server handles slug filtering + sort order; client only filters for favorites group
-    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
-      items = items.filter(item => favoriteSlugs.has(item.podcast_slug));
-    }
-    return items;
-  }, [podcast.items, selectedPodcast, favoriteSlugs]);
-
-  // ── Filtered + sorted activity items ──
-  const filteredActivity = useMemo(() => {
-    let items = activityItems;
-    if (selectedPodcast === "__favorites__" && favoriteSlugs) {
-      items = items.filter(item =>
-        item.type === "log" && (item.data?.communities || []).some(c => favoriteSlugs.has(c.community_slug))
-      );
-    } else if (selectedPodcast) {
-      items = items.filter(item =>
-        item.type === "log" && (item.data?.communities || []).some(c => c.community_slug === selectedPodcast)
-      );
-    }
-    if (sortOrder === "oldest") items = [...items].reverse();
-    return items;
-  }, [activityItems, selectedPodcast, favoriteSlugs, sortOrder]);
-
-  // ── Pull-to-refresh ──
+  // ── Pull-to-refresh (wraps the whole scroll container) ──
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [showShareShelf, setShowShareShelf] = useState(false);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
   const scrollContainerRef = useRef(null);
+  const activityRefreshRef = useRef(null); // ActivityPane registers its refresh here
   const PULL_THRESHOLD = 70;
 
   const handleTouchStart = useCallback((e) => {
@@ -127,29 +73,14 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     if (pullDistance >= PULL_THRESHOLD) {
       setRefreshing(true);
       setPullDistance(PULL_THRESHOLD);
-      await refreshRef.current();
+      // ActivityPane exposes its refresh via callback ref
+      if (activityRefreshRef.current) await activityRefreshRef.current();
       setRefreshing(false);
     }
     setPullDistance(0);
   }, [pullDistance]);
 
-  // Refresh feed when tab becomes active
-  useEffect(() => {
-    if (isActive && !wasActive.current) refreshRef.current();
-    wasActive.current = isActive;
-  }, [isActive]);
-
-  // Refresh after autoLogAndCheckBadges
-  useEffect(() => {
-    if (autoLogCompleteSignal) refreshRef.current();
-  }, [autoLogCompleteSignal]);
-
-  // Refresh after Letterboxd sync
-  useEffect(() => {
-    if (letterboxdSyncSignal) refreshRef.current();
-  }, [letterboxdSyncSignal]);
-
-  // Analytics: track feed mode switches
+  // ── Analytics: track tab switches ──
   const prevFeedModeRef = useRef(feedMode);
   useEffect(() => {
     if (prevFeedModeRef.current !== feedMode && userId) {
@@ -158,116 +89,16 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
     prevFeedModeRef.current = feedMode;
   }, [feedMode, userId]);
 
-  // ── Infinite scroll — all tabs capped at 50 ──
-  const BROWSE_CAP = 50;
-  const PODCAST_CAP = 500;
-  const ACTIVITY_CAP = 30;
-
-  useEffect(() => {
-    const el = releasesSentinelRef.current;
-    if (!el || !releases.hasMore || feedMode !== "releases" || releases.items.length >= BROWSE_CAP) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) releases.loadMore(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [releases.hasMore, releases.loadMore, releases.items.length, feedMode]);
-
-  useEffect(() => {
-    const el = podcastSentinelRef.current;
-    if (!el || !podcast.hasMore || feedMode !== "podcast" || podcast.items.length >= PODCAST_CAP) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) podcast.loadMore(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [podcast.hasMore, podcast.loadMore, podcast.items.length, feedMode]);
-
-  useEffect(() => {
-    const el = activitySentinelRef.current;
-    if (!el || !hasMoreActivity || feedMode !== "activity" || activityItems.length >= ACTIVITY_CAP) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
-      { rootMargin: "200px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [hasMoreActivity, loadMoreActivity, activityItems.length, feedMode]);
-
-  // ── Loading skeleton (only for initial activity load — browse tabs use inline loading) ──
-  const showSkeleton = feedMode === "activity" && loading && activityItems.length === 0;
-
-  if (showSkeleton) {
-    return (
-      <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
-        {/* Match LogCard: 16:9 aspect ratio, margin 6px 16px, borderRadius 10, dark bg */}
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} style={{
-            margin: "6px 16px",
-            borderRadius: 10,
-            aspectRatio: "16 / 9",
-            background: "var(--bg-card, #1a1714)",
-            position: "relative",
-            overflow: "hidden",
-            opacity: 0,
-            animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
-          }}>
-            {/* Pulse shimmer */}
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
-              backgroundSize: "200% 100%",
-              animation: `badgeShimmer 2s ease ${i * 0.2}s infinite`,
-            }} />
-            {/* Bottom strip placeholder — mimics date sticker area */}
-            <div style={{
-              position: "absolute", bottom: 10, left: 12,
-              width: 60, height: 18, borderRadius: 3,
-              background: "rgba(240,235,225,0.06)",
-            }} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // ── Render card ──
-  const renderCard = (item, firstLogRef) => {
-    if (!item?.data) return null;
-    const isFirstLog = item.type === "log" && !firstLogRef.current;
-    if (item.type === "log") firstLogRef.current = true;
-
-    if (item.type === "log") {
-      return <LogCard data={item.data} onNavigateCommunity={onNavigateCommunity} onViewBadgeDetail={setViewingBadgeDetail} isFirst={isFirstLog} pushNav={pushNav} removeNav={removeNav} pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen} />;
-    }
-    return null;
-  };
-
-  const getStableKey = (item, i) => {
-    if (!item?.data) return `feed-${i}`;
-    if (item.type === "log") return `log-${item.data.tmdb_id || item.data.title || i}-${(item.data.logged_at || "").slice(0, 10)}`;
-    return `feed-${i}`;
-  };
-
   return (
-    <div
-      style={{
-        background: "var(--bg-primary, #0f0d0b)",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
-    >
-      {/* ── Fixed controls — never scroll ── */}
-      <div style={{
-        flexShrink: 0,
-        zIndex: 50,
-        background: "var(--bg-primary, #0f0d0b)",
-      }}>
-        {/* Feed tab toggle */}
+    <div style={{
+      background: "var(--bg-primary, #0f0d0b)",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      overflow: "hidden",
+    }}>
+      {/* ── Fixed header: tab toggle + filter bar ── */}
+      <div style={{ flexShrink: 0, zIndex: 50, background: "var(--bg-primary, #0f0d0b)" }}>
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "center",
           padding: "6px 16px 4px", position: "relative",
@@ -285,7 +116,6 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           </div>
         </div>
 
-        {/* Feed filter bar */}
         <FeedFilterBar
           sortOrder={sortOrder}
           onSortChange={setSortOrder}
@@ -297,7 +127,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         />
       </div>
 
-      {/* ── Scrollable feed content ── */}
+      {/* ── Scrollable content ── */}
       <div
         ref={scrollContainerRef}
         onTouchStart={handleTouchStart}
@@ -311,391 +141,72 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
         }}
       >
-      {/* Pull-to-refresh indicator */}
-      {(pullDistance > 0 || refreshing) && (
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          height: pullDistance, overflow: "hidden",
-          transition: refreshing ? "none" : "height 0.15s ease-out",
-        }}>
+        {/* Pull-to-refresh indicator */}
+        {(pullDistance > 0 || refreshing) && (
           <div style={{
-            width: 28, height: 28, borderRadius: "50%",
-            border: pullDistance >= PULL_THRESHOLD
-              ? "2.5px solid var(--accent-green, #34d399)"
-              : "2.5px solid var(--text-faint, #5a6480)",
-            borderTopColor: "transparent",
-            animation: refreshing ? "ptr-spin 0.8s linear infinite" : "none",
-            transform: refreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
-            transition: "border-color 0.2s ease",
-          }} />
-        </div>
-      )}
-
-      {/* ── New Releases pane ── */}
-      <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
-        {releases.loading && releases.items.length === 0 && (
-          <div style={{ padding: "4px 0" }}>
-            {[0, 1, 2, 3, 4].map(i => (
-              <div key={i} style={{
-                margin: "6px 16px",
-                borderRadius: 10,
-                minHeight: 80,
-                background: "var(--bg-card, #1a1714)",
-                border: "1px solid rgba(255,255,255,0.04)",
-                position: "relative",
-                overflow: "hidden",
-                opacity: 0,
-                animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
-              }}>
-                {/* Inner tape structure — mimics BrowseCard with tape edges */}
-                <div style={{
-                  display: "flex", minHeight: 80, borderRadius: 9, overflow: "hidden",
-                }}>
-                  <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
-                  <div style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.015)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    position: "relative",
-                  }}>
-                    {/* Shimmer */}
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
-                      backgroundSize: "200% 100%",
-                      animation: "badgeShimmer 2s ease infinite",
-                      animationDelay: `${i * 0.2}s`,
-                    }} />
-                    {/* Title placeholder */}
-                    <div style={{
-                      width: `${50 + (i * 7) % 30}%`, height: 16, borderRadius: 4,
-                      background: "rgba(255,255,255,0.05)",
-                      animation: "skeleton-pulse 1.5s ease infinite",
-                      animationDelay: `${i * 0.15}s`,
-                    }} />
-                  </div>
-                  <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {releases.items.length === 0 && !releases.loading && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            height: pullDistance, overflow: "hidden",
+            transition: refreshing ? "none" : "height 0.15s ease-out",
           }}>
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🎬</div>
-            No podcast coverage for current releases yet
-          </div>
-        )}
-        {releases.items.length > 0 && filteredReleases.length === 0 && selectedPodcast && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
-          }}>
-            No releases covered by {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"}
-          </div>
-        )}
-        {filteredReleases.slice(0, BROWSE_CAP).map((item, i) => (
-          <FeedCard key={`rel-${item.tmdb_id}`} index={i} dismissable={false}>
-            <BrowseCard data={item} variant="releases" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
-          </FeedCard>
-        ))}
-        {releases.hasMore && releases.items.length < BROWSE_CAP && <div ref={releasesSentinelRef} style={{ height: 1 }} />}
-        {releases.loading && releases.items.length > 0 && (
-          <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
             <div style={{
-              width: 24, height: 24, borderRadius: "50%",
-              border: "2.5px solid var(--text-faint, #5a6480)",
+              width: 28, height: 28, borderRadius: "50%",
+              border: pullDistance >= PULL_THRESHOLD
+                ? "2.5px solid var(--accent-green, #34d399)"
+                : "2.5px solid var(--text-faint, #5a6480)",
               borderTopColor: "transparent",
-              animation: "ptr-spin 0.8s linear infinite",
+              animation: refreshing ? "ptr-spin 0.8s linear infinite" : "none",
+              transform: refreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
+              transition: "border-color 0.2s ease",
             }} />
           </div>
         )}
-        {filteredReleases.length > 0 && !releases.loading && (
-          <div style={{
-            padding: "28px 24px 36px", textAlign: "center",
-          }}>
-            <div style={{
-              width: 40, height: 1,
-              background: "var(--border-subtle, rgba(255,255,255,0.08))",
-              margin: "0 auto 14px",
-            }} />
-            <div style={{
-              fontFamily: t.fontHeadline, letterSpacing: 1,
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-              letterSpacing: "0.04em",
-            }}>
-              — end of feed —
-            </div>
-            <div style={{
-              marginTop: 16,
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-            }}>
-              Looking for something?
-            </div>
-            <div
-              onClick={onNavigateSearch}
-              style={{
-                marginTop: 10,
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--accent-terra, #c97c5d)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 18px",
-                borderRadius: 20,
-                border: "1px solid rgba(201,124,93,0.25)",
-                background: "rgba(201,124,93,0.08)",
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              Search all films
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* ── Podcast pane ── */}
-      <div style={{ display: feedMode === "podcast" ? "block" : "none", padding: "0 14px" }}>
-        {podcast.loading && podcast.items.length === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} style={{
-                borderRadius: 14,
-                background: "var(--bg-card, #1a1714)",
-                border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
-                padding: "12px 14px",
-                display: "flex", gap: 12, alignItems: "flex-start",
-                opacity: 0,
-                animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
-              }}>
-                {/* Podcast artwork placeholder */}
-                <div style={{
-                  width: 60, height: 60, borderRadius: 10, flexShrink: 0,
-                  background: "rgba(255,255,255,0.04)",
-                  animation: "skeleton-pulse 1.5s ease infinite",
-                  animationDelay: `${i * 0.15}s`,
-                }} />
-                {/* Text lines placeholder */}
-                <div style={{ flex: 1, paddingTop: 4 }}>
-                  <div style={{
-                    width: "70%", height: 14, borderRadius: 4,
-                    background: "rgba(255,255,255,0.06)",
-                    animation: "skeleton-pulse 1.5s ease infinite",
-                    animationDelay: `${i * 0.15}s`,
-                  }} />
-                  <div style={{
-                    width: "45%", height: 11, borderRadius: 3, marginTop: 8,
-                    background: "rgba(255,255,255,0.04)",
-                    animation: "skeleton-pulse 1.5s ease infinite",
-                    animationDelay: `${i * 0.15 + 0.1}s`,
-                  }} />
-                  <div style={{
-                    width: "85%", height: 10, borderRadius: 3, marginTop: 10,
-                    background: "rgba(255,255,255,0.03)",
-                    animation: "skeleton-pulse 1.5s ease infinite",
-                    animationDelay: `${i * 0.15 + 0.2}s`,
-                  }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        {podcast.items.length === 0 && !podcast.loading && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
-          }}>
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🎙️</div>
-            {selectedPodcast && selectedPodcast !== "__favorites__"
-              ? "No episodes with film coverage for this podcast yet"
-              : "No recent podcast coverage yet"}
-          </div>
-        )}
-        {podcast.items.length > 0 && filteredPodcast.length === 0 && selectedPodcast === "__favorites__" && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
-          }}>
-            No episodes from your favorites
-          </div>
-        )}
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
-          {filteredPodcast.slice(0, PODCAST_CAP).map((item, i) => (
-            <FeedCard
-              key={`pod-${item.episode_id}-${item.tmdb_id}`}
-              index={i}
-              dismissable={false}
-            >
-              <PodcastCard item={item} isAdmin={isAdmin} userId={userId} />
-            </FeedCard>
-          ))}
+        {/* ── Three panes: show/hide by feedMode ── */}
+        <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
+          <MoviesPane
+            isVisible={feedMode === "releases"}
+            selectedPodcast={selectedPodcast}
+            favoriteSlugs={favoriteSlugs}
+            sortOrder={sortOrder}
+            onNavigateSearch={onNavigateSearch}
+            onNavigateCommunity={onNavigateCommunity}
+            pushNav={pushNav}
+            removeNav={removeNav}
+          />
         </div>
-        {podcast.hasMore && podcast.items.length < PODCAST_CAP && <div ref={podcastSentinelRef} style={{ height: 1 }} />}
-        {podcast.loading && podcast.items.length > 0 && (
-          <div style={{ display: "flex", justifyContent: "center", padding: "16px" }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: "50%",
-              border: "2.5px solid var(--text-faint, #5a6480)",
-              borderTopColor: "transparent",
-              animation: "ptr-spin 0.8s linear infinite",
-            }} />
-          </div>
-        )}
-        {filteredPodcast.length > 0 && !podcast.loading && (
-          <div style={{
-            padding: "28px 24px 36px", textAlign: "center",
-          }}>
-            <div style={{
-              width: 40, height: 1,
-              background: "var(--border-subtle, rgba(255,255,255,0.08))",
-              margin: "0 auto 14px",
-            }} />
-            <div style={{
-              fontFamily: t.fontHeadline, letterSpacing: 1,
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-              letterSpacing: "0.04em",
-            }}>
-              — end of feed —
-            </div>
-            <div style={{
-              marginTop: 16,
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-            }}>
-              Looking for something specific?
-            </div>
-            <div
-              onClick={onNavigateSearch}
-              style={{
-                marginTop: 10,
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--accent-terra, #c97c5d)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 18px",
-                borderRadius: 20,
-                border: "1px solid rgba(201,124,93,0.25)",
-                background: "rgba(201,124,93,0.08)",
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              Search all films
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* ── Activity pane ── */}
-      <div style={{ display: feedMode === "activity" ? "block" : "none" }}>
-        {activityItems.length === 0 && !loading && (
-          <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
-        )}
-        {activityItems.length > 0 && filteredActivity.length === 0 && selectedPodcast && (
-          <div style={{
-            padding: "40px 24px", textAlign: "center",
-            color: "var(--text-muted, #8892a8)", fontSize: 13,
-            fontFamily: "var(--font-body)",
-          }}>
-            No activity for {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"} yet
-          </div>
-        )}
-        {(() => {
-          const firstLogRef = { current: false };
-          return filteredActivity.slice(0, ACTIVITY_CAP).map((item, i) => (
-            <FeedCard
-              key={`activity-${getStableKey(item, i)}`}
-              index={i}
-              dismissable={false}
-            >
-              {renderCard(item, firstLogRef)}
-            </FeedCard>
-          ));
-        })()}
-        {hasMoreActivity && activityItems.length < ACTIVITY_CAP && <div ref={activitySentinelRef} style={{ height: 1 }} />}
-        {filteredActivity.length > 0 && !loading && (
-          <div style={{
-            padding: "28px 24px 36px", textAlign: "center",
-          }}>
-            <div style={{
-              width: 40, height: 1,
-              background: "var(--border-subtle, rgba(255,255,255,0.08))",
-              margin: "0 auto 14px",
-            }} />
-            <div style={{
-              fontFamily: t.fontHeadline, letterSpacing: 1,
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-              letterSpacing: "0.04em",
-            }}>
-              — end of feed —
-            </div>
-            <div style={{
-              marginTop: 16,
-              fontFamily: "var(--font-body)",
-              fontSize: 12,
-              color: "var(--text-faint, #5a6480)",
-            }}>
-              Looking for your full watch history?
-            </div>
-            <div
-              onClick={onNavigateMantl}
-              style={{
-                marginTop: 10,
-                fontFamily: "var(--font-body)",
-                fontSize: 13,
-                fontWeight: 600,
-                color: "var(--accent-terra, #c97c5d)",
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 18px",
-                borderRadius: 20,
-                border: "1px solid rgba(201,124,93,0.25)",
-                background: "rgba(201,124,93,0.08)",
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-              View diary on My MANTL
-            </div>
-          </div>
-        )}
-      </div>
+        <div style={{ display: feedMode === "podcast" ? "block" : "none" }}>
+          <PodcastPane
+            isVisible={feedMode === "podcast"}
+            userId={userId}
+            isAdmin={isAdmin}
+            selectedPodcast={selectedPodcast}
+            favoriteSlugs={favoriteSlugs}
+            sortOrder={sortOrder}
+            onNavigateSearch={onNavigateSearch}
+          />
+        </div>
 
-      {/* Close scrollable content div */}
+        <div style={{ display: feedMode === "activity" ? "block" : "none" }}>
+          <ActivityPane
+            isVisible={feedMode === "activity"}
+            userId={userId}
+            profile={profile}
+            favoritePodcasts={favoritePodcasts}
+            selectedPodcast={selectedPodcast}
+            favoriteSlugs={favoriteSlugs}
+            sortOrder={sortOrder}
+            isActive={isActive}
+            letterboxdSyncSignal={letterboxdSyncSignal}
+            autoLogCompleteSignal={autoLogCompleteSignal}
+            onNavigateCommunity={onNavigateCommunity}
+            onNavigateMantl={onNavigateMantl}
+            pushNav={pushNav}
+            removeNav={removeNav}
+            pendingSleeveOpen={pendingSleeveOpen}
+            setPendingSleeveOpen={setPendingSleeveOpen}
+          />
+        </div>
       </div>
 
       {/* Animations */}
@@ -724,51 +235,8 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
         }
       `}</style>
 
-      {/* Badge celebration overlay */}
-      {celebrationBadge && (
-        <BadgeCelebration
-          badge={{
-            name: celebrationBadge.badge_name || celebrationBadge.name,
-            image_url: celebrationBadge.badge_image || celebrationBadge.image_url,
-            accent_color: celebrationBadge.accent_color,
-            audio_url: celebrationBadge.audio_url || null,
-            tagline: celebrationBadge.tagline || null,
-          }}
-          onClose={() => setCelebrationBadge(null)}
-          onViewBadge={() => {
-            const badgeForDetail = {
-              id: celebrationBadge.badge_id || celebrationBadge.id,
-              name: celebrationBadge.badge_name || celebrationBadge.name,
-              image_url: celebrationBadge.badge_image || celebrationBadge.image_url,
-              accent_color: celebrationBadge.accent_color,
-              tagline: celebrationBadge.tagline || null,
-              progress_tagline: celebrationBadge.progress_tagline || null,
-              description: celebrationBadge.description || null,
-              miniseries_id: celebrationBadge.miniseries_id,
-              media_type_filter: celebrationBadge.media_type_filter || null,
-              earned_at: celebrationBadge.earned_at || null,
-            };
-            setCelebrationBadge(null);
-            setViewingBadgeDetail(badgeForDetail);
-          }}
-        />
-      )}
-
-      {viewingBadgeDetail && (
-        <BadgeDetailScreen
-          badge={viewingBadgeDetail}
-          userId={userId}
-          earnedAt={viewingBadgeDetail.earned_at || new Date().toISOString()}
-          onClose={() => setViewingBadgeDetail(null)}
-        />
-      )}
-
       {showShareShelf && (
         <ShareShelf
-          items={activityItems
-            .filter(item => item.type === "log")
-            .slice(0, 6)
-            .map(item => item.data)}
           username={profile?.username}
           onClose={() => setShowShareShelf(false)}
           onToast={onToast}

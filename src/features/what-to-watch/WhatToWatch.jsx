@@ -9,7 +9,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useWhatToWatch } from "./useWhatToWatch";
 import { useAudioPlayer } from "../../components/community/shared/AudioPlayerProvider";
 import { useBackGesture } from "../../hooks/useBackGesture";
-import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 

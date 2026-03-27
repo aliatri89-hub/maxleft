@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { apiProxy } from "../../utils/api";
 import { isLogoChecked } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
-import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 import { Stars, getCommunityAccent, getTimeAgo, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import VhsSleeveSheet from "./VhsSleeveSheet";

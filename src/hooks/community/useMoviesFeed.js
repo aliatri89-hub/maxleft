@@ -66,7 +66,7 @@ export async function getEpisodesForFilm(tmdbId) {
 
 // ── Hook ──
 
-export function useBrowseFeed(mode, active = false) {
+export function useMoviesFeed(mode, active = false) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);

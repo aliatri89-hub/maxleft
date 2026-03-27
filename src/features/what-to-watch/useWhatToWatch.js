@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "../../supabase";
-import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 
 /**
  * useWhatToWatch

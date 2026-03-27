@@ -1,7 +1,7 @@
 import { t } from "../../theme";
 import { useState, useRef, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
-import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
+import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 import { isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import VhsSleeveSheet from "./VhsSleeveSheet";

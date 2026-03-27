@@ -369,7 +369,7 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
 
 const PAGE_SIZE = 15;
 
-export function useFeed(userId, favoritePodcastIds) {
+export function useActivityFeed(userId, favoritePodcastIds) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const feedBucketRef = useRef([]);
