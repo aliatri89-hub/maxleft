@@ -205,11 +205,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       style={{
         borderRadius: 14,
         overflow: "hidden",
-        border: `1px solid ${t.bgHover}`,
+        border: isActiveAndPlaying ? "1px solid rgba(239,159,39,0.35)" : `1px solid ${t.bgHover}`,
         background: t.bgCard,
         cursor: "pointer",
         padding: "12px 14px",
         position: "relative",
+        boxShadow: isActiveAndPlaying ? "0 0 0 1px rgba(239,159,39,0.15), inset 0 0 30px rgba(239,159,39,0.04)" : "none",
+        transition: "border-color 0.3s, box-shadow 0.3s",
       }}
     >
       {/* B&W backdrop wash — full card height */}
@@ -261,6 +263,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
           background: "#2a2520", flexShrink: 0,
+          boxShadow: "0 3px 8px rgba(0,0,0,0.5)",
         }}>
           {podcast_artwork ? (
             <img loading="lazy" src={podcast_artwork} alt={podcast_name}
@@ -395,9 +398,14 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         <div style={{ display: "flex", alignItems: "center", marginTop: 8, position: "relative", zIndex: 1 }}>
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
-          {/* Handle bar — only when desc exists and collapsed */}
+          {/* Handle / chevron — only when desc exists and collapsed */}
           {hasDesc && !expanded && (
-            <div style={{ width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+              <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.15)" }} />
+              <svg width="12" height="7" viewBox="0 0 12 7" fill="none">
+                <path d="M1 1l5 5 5-5" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
           )}
           {/* Badges — right */}
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 6 }}>
@@ -407,8 +415,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 Watched
               </div>
             ) : userId ? (
-              <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{ ...badgeBase, background: "rgba(255,255,255,0.03)", border: `1px solid ${t.bgHover}`, color: t.textFaint, cursor: "pointer" }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 Log
               </div>
             ) : null}
@@ -419,8 +427,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   Added
                 </div>
               ) : (
-                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(255,255,255,0.03)", border: `1px solid ${t.bgHover}`, color: t.textFaint, cursor: "pointer" }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                   Watchlist
                 </div>
               )
