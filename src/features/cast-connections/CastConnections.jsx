@@ -311,8 +311,8 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       {/* How to play — only shown during active play */}
       {!gameOver && (
         <div style={{
-          fontSize: 12, color: t.creamMuted, textAlign: "center",
-          fontFamily: t.fontMono, lineHeight: 1.5,
+          fontSize: 13, color: t.creamMuted, textAlign: "center",
+          fontFamily: t.fontSerif, lineHeight: 1.5,
           marginBottom: 16, padding: "0 8px",
         }}>
           Find three actors who starred in the same film. Select three, then submit.

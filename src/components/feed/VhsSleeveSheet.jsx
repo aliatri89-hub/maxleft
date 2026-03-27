@@ -1168,7 +1168,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             const hasAudio = visibleEps.length > 0 || epLoading;
             return !hasAudio && merged.overview ? (
               <div style={{
-                fontFamily: t.fontMono,
+                fontFamily: t.fontSerif,
                 fontSize: 12, lineHeight: 1.55,
                 color: "rgba(240,235,225,0.65)",
                 textAlign: "center",

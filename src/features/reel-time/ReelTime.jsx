@@ -484,8 +484,8 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
           {/* How to play */}
           {isPlaying && (
             <div style={{
-              fontSize: 12, color: t.creamMuted, textAlign: "center",
-              fontFamily: t.fontMono, lineHeight: 1.5,
+              fontSize: 13, color: t.creamMuted, textAlign: "center",
+              fontFamily: t.fontSerif, lineHeight: 1.5,
               marginBottom: 12, padding: "0 8px", maxWidth: 420,
             }}>
               Place each film in chronological order.<br />Drag or tap to slot in place.

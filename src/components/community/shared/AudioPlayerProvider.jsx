@@ -1098,9 +1098,9 @@ function FullScreenPlayer({
                   padding: "40px 24px", textAlign: "center",
                 }}>
                   <div style={{
-                    fontSize: 12,
+                    fontSize: 13,
                     color: t.textSecondary,
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontSerif,
                     lineHeight: 1.6,
                   }}>
                     Play an episode from any community to start listening

@@ -1139,8 +1139,8 @@ function ResultCard({
                   return (
                     <div style={{
                       padding: "4px 8px 10px 50px",
-                      fontFamily: t.fontMono,
-                      fontSize: 10, lineHeight: 1.55,
+                      fontFamily: t.fontSerif,
+                      fontSize: 13, lineHeight: 1.55,
                       color: t.textMuted,
                       whiteSpace: "pre-wrap",
                     }}>
