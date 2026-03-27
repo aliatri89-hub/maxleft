@@ -419,6 +419,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   accent={accent}
                   searchQuery={searchQuery}
                   filter={filter}
+                  userId={userId}
                 />
               </>
             )}
@@ -549,6 +550,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                   accent={accent}
                   searchQuery={searchQuery}
                   filter={filter}
+                  userId={userId}
                 />
               </>
             )}
@@ -580,6 +582,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           CardComponent={BlankCheckItemCard}
           coverCacheVersion={coverCache}
           accent={accent}
+          userId={userId}
         />
       )}
 

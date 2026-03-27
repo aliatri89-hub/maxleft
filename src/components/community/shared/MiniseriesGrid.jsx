@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
+import AdminImagePositioner from "./AdminImagePositioner";
 
 /**
  * MiniseriesGrid — 3-column visual grid of miniseries tiles.
@@ -26,6 +27,7 @@ export default function MiniseriesGrid({
   searchQuery = "",
   filter = "all",
   dynamicShelves,
+  userId,
 }) {
   // ── Compute per-series progress ────────────────────────────────
   const seriesWithProgress = useMemo(() => {
@@ -81,6 +83,7 @@ export default function MiniseriesGrid({
             key={s.id}
             series={s}
             accent={accent}
+            userId={userId}
             onTap={() => onSelectSeries(s)}
           />
         ))}
@@ -107,8 +110,9 @@ export default function MiniseriesGrid({
    GridTile — Single series tile in the grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GridTile({ series, accent, onTap }) {
+function GridTile({ series, accent, onTap, userId }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [localPosition, setLocalPosition] = useState(series.thumbnail_position || "top center");
   const isDone = series._pct === 100 && series._total > 0;
   const hasProgress = series._completed > 0;
 
@@ -123,6 +127,15 @@ function GridTile({ series, accent, onTap }) {
         WebkitTapHighlightColor: "transparent",
       }}
     >
+      {/* Admin positioner */}
+      <AdminImagePositioner
+        seriesId={series.id}
+        imageUrl={series.thumbnail_url}
+        position={localPosition}
+        userId={userId}
+        accent={accent}
+        onSaved={(newPos) => setLocalPosition(newPos)}
+      />
       {/* Series artwork */}
       {series.thumbnail_url ? (
         <img
@@ -134,7 +147,7 @@ function GridTile({ series, accent, onTap }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: series.thumbnail_position || "top center",
+            objectPosition: localPosition,
             display: "block",
             opacity: imgLoaded ? 1 : 0,
             transition: "opacity 0.3s",

@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
+import AdminImagePositioner from "./AdminImagePositioner";
 
 /**
  * SeriesDetailView — Full-screen overlay showing a single miniseries' items.
@@ -27,9 +28,16 @@ export default function SeriesDetailView({
   CardComponent,
   coverCacheVersion,
   accent = "#e94560",
+  userId,
 }) {
   const [closing, setClosing] = useState(false);
+  const [localPosition, setLocalPosition] = useState(series?.thumbnail_position || "top center");
   const scrollRef = useRef(null);
+
+  // Sync localPosition when series changes
+  useEffect(() => {
+    setLocalPosition(series?.thumbnail_position || "top center");
+  }, [series?.id]);
 
   // Scroll to top on mount
   useEffect(() => {
@@ -137,7 +145,7 @@ export default function SeriesDetailView({
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                objectPosition: series.thumbnail_position || "top center",
+                objectPosition: localPosition,
                 opacity: 0.7,
                 display: "block",
               }}
@@ -146,6 +154,14 @@ export default function SeriesDetailView({
               position: "absolute", inset: 0,
               background: "linear-gradient(transparent 40%, #0f0d0b 100%)",
             }} />
+            <AdminImagePositioner
+              seriesId={series.id}
+              imageUrl={series.thumbnail_url}
+              position={localPosition}
+              userId={userId}
+              accent={accent}
+              onSaved={(newPos) => setLocalPosition(newPos)}
+            />
           </div>
 
           {/* Title / meta below the image */}
