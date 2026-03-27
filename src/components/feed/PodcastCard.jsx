@@ -115,7 +115,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const idx = queue.findIndex(q => q.enclosureUrl === resolveAudioUrl(item));
       if (idx !== -1) removeFromQueue(idx);
       setInQueue(false);
-      showNudge("Removed from Up Next");
+      showNudge("Removed from Up Next", true);
       return;
     }
     const playerEp = toPlayerEpisode({
@@ -132,7 +132,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const { error } = await supabase.from("wishlist").delete()
         .eq("user_id", userId).eq("title", film_title)
         .in("item_type", ["movie", "show"]);
-      if (!error) { setAddedToWatchlist(false); showNudge("Removed from Watchlist"); }
+      if (!error) { setAddedToWatchlist(false); showNudge("Removed from Watchlist", true); }
       return;
     }
     const { error } = await supabase.from("wishlist").insert({
