@@ -1,8 +1,13 @@
 import { t } from "../../theme";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEpisodeMatch } from "../../hooks/community/useEpisodeMatch";
 import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 import QuickLogModal from "./QuickLogModal";
+import { apiProxy } from "../../utils/api";
+
+const TMDB_BD = "https://image.tmdb.org/t/p/w780";
+// Per-session cache — avoids re-fetching on re-renders
+const _epBdCache = new Map();
 
 // ════════════════════════════════════════════════
 // EPISODE CARD — unified (dropped + published + upcoming)
@@ -18,13 +23,43 @@ function EpisodeCard({ data, onNavigateCommunity }) {
     { ...data, id: data.item_id },
     data.community_name || ""
   );
-  const hasBackdrop = !!data.backdrop_path;
   const isDropped = data.status === "dropped" || data.status === "published";
   const isThisPlaying = isThisEpPlaying;
   const [justLogged, setJustLogged] = useState(false);
   const [logRating, setLogRating] = useState(null);
   const [showLogModal, setShowLogModal] = useState(false);
   const seen = !!data.user_has_watched || justLogged;
+
+  // ── Fetch backdrop #7 (index 6) for B&W wash ──
+  const [bdUrl, setBdUrl] = useState(() =>
+    data.tmdb_id && _epBdCache.has(data.tmdb_id) ? _epBdCache.get(data.tmdb_id) : null
+  );
+  useEffect(() => {
+    if (!data.tmdb_id) return;
+    if (_epBdCache.has(data.tmdb_id)) {
+      setBdUrl(_epBdCache.get(data.tmdb_id));
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const type = data.media_type === "show" ? "tv" : "movie";
+        const res = await apiProxy("tmdb_images", { tmdb_id: String(data.tmdb_id), type });
+        if (cancelled) return;
+        const backdrops = (res?.backdrops || [])
+          .filter(b => b.file_path)
+          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        // Use #7 (index 6) — different image than movies feed which uses #1
+        const pick = backdrops[6] || backdrops[0] || null;
+        const url = pick ? `${TMDB_BD}${pick.file_path}` : null;
+        _epBdCache.set(data.tmdb_id, url);
+        if (!cancelled) setBdUrl(url);
+      } catch {
+        _epBdCache.set(data.tmdb_id, null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [data.tmdb_id, data.media_type]);
 
   const handlePlay = (e) => {
     e.stopPropagation();
@@ -69,21 +104,37 @@ function EpisodeCard({ data, onNavigateCommunity }) {
         cursor: "pointer", position: "relative",
       }}
     >
-      {/* Backdrop wash */}
-      {hasBackdrop && (
+      {/* B&W backdrop wash — fetched #7 from TMDB, top-anchored */}
+      {bdUrl && (
         <div style={{
           position: "absolute", inset: 0,
-          backgroundImage: `url(${resolveImg(data.backdrop_path, TMDB_BACKDROP)})`,
-          backgroundSize: "cover", backgroundPosition: "center top",
-          opacity: 0.30,
+          overflow: "hidden",
+          borderRadius: "inherit",
         }}>
+          <img
+            src={bdUrl}
+            alt=""
+            loading="lazy"
+            style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0,
+              width: "100%",
+              height: "160%",
+              objectFit: "cover",
+              objectPosition: "center top",
+              filter: "grayscale(1) contrast(1.05)",
+              opacity: 0.18,
+            }}
+          />
+          {/* Fade out bottom half */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 30%, transparent 80%)",
+            background: "linear-gradient(180deg, transparent 30%, var(--bg-card, #1a1714) 80%)",
           }} />
+          {/* Left-side bleed for poster area */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, transparent 40%, var(--bg-card, #1a1714) 100%)",
+            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 10%, transparent 55%)",
           }} />
         </div>
       )}
