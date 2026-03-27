@@ -406,7 +406,12 @@ function AppMain() {
         };
         setProfile(p);
         await loadShelves(user.id);
-        sync.runInitialSync(p, user.id);
+        sync.runInitialSync(p, user.id, {
+          onLetterboxdSync: async (username, uid) => {
+            const result = await sync.syncLetterboxd(username, uid);
+            if (result) setLetterboxdToast({ synced: result.synced, rewatches: result.rewatchCount });
+          },
+        });
       }
       const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
       if (path && path !== "" && path !== "index.html" && !path.includes("/")) {

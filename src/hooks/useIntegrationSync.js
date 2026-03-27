@@ -820,11 +820,12 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   // SESSION-ONCE AUTO-SYNC
   // ════════════════════════════════════════════════
 
-  const runInitialSync = useCallback((profile, uid) => {
+  const runInitialSync = useCallback((profile, uid, { onLetterboxdSync } = {}) => {
     if (hasSyncedThisSession.current) return;
     const id = uid || userId;
     if (!id) return;
-    if (profile.letterboxd_username) syncLetterboxd(profile.letterboxd_username, id);
+    const letterboxdFn = onLetterboxdSync || syncLetterboxd;
+    if (profile.letterboxd_username) letterboxdFn(profile.letterboxd_username, id);
     if (profile.goodreads_user_id) syncGoodreads(profile.goodreads_user_id, id);
     if (profile.steam_id) syncSteam(profile.steam_id, id);
     hasSyncedThisSession.current = true;
