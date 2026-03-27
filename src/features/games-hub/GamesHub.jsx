@@ -251,7 +251,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
   return (
     <div style={{
       minHeight: isTab ? "auto" : "100vh", background: t.bgPrimary, color: t.cream,
-      fontFamily: t.fontMono, padding: isTab ? "0 16px 100px" : "0 16px 40px",
+      fontFamily: t.fontBody, padding: isTab ? "0 16px 100px" : "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
       paddingTop: isTab ? 0 : "env(safe-area-inset-top, 0px)",
     }}>
@@ -278,7 +278,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       }}>
         {!isTab && (
           <div style={{
-            fontFamily: t.fontMono, fontSize: 11,
+            fontFamily: t.fontHeadline, fontSize: 13,
             letterSpacing: 4, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
           }}>
             M▶NTL
@@ -380,7 +380,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
                 {game.isNew && (
                   <span style={{
                     position: "absolute", top: -6, right: -10,
-                    fontFamily: t.fontMono, fontSize: 7, letterSpacing: 1,
+                    fontFamily: t.fontBody, fontWeight: 700, fontSize: 8, letterSpacing: 1,
                     color: t.bgPrimary, background: "#a8d870",
                     padding: "2px 4px", borderRadius: 3, transform: "rotate(8deg)",
                   }}>
