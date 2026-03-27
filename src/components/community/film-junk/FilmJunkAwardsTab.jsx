@@ -85,7 +85,7 @@ export default function FilmJunkAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#888", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function FilmJunkAwardsTab({
           fontFamily: "'Barlow Condensed', sans-serif",
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 The Junkies</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function FilmJunkAwardsTab({
       {yearData.standard.length === 0 && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
         }}>No picks added for {selectedYear} yet</div>
       )}
     </div>
@@ -210,7 +210,7 @@ function JunkiesCategorySection({ category, isSeen, getItemId, onToggle, isLast,
     <div style={{ marginBottom: isLast ? 0 : 4, paddingBottom: isLast ? 0 : 4 }}>
       {/* Category header */}
       <div style={{
-        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)",
+        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.72)",
         fontFamily: "'IBM Plex Mono', monospace",
         letterSpacing: "0.06em", textTransform: "uppercase",
         marginBottom: 10, paddingLeft: 16,
@@ -301,7 +301,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
               lineHeight: 1.2, textAlign: "center",
             }}>{card.title}</div>
           </div>
@@ -340,7 +340,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
       {/* Subtitle (e.g. actor name for performance categories) */}
       {card.subtitle && (
         <div style={{
-          fontSize: 8, color: "rgba(255,255,255,0.3)", marginTop: 1,
+          fontSize: 8, color: "rgba(255,255,255,0.7)", marginTop: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           fontStyle: "italic",
         }}>{card.subtitle}</div>
@@ -398,7 +398,7 @@ function JunkiesHero({ community, seenStats, accent, yearsCount }) {
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>{heroTagline}</div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)",
+          fontSize: 13, color: "rgba(255,255,255,0.7)",
           textAlign: "center", maxWidth: 300,
           margin: "0 auto 20px",
         }}>{heroDescription}</div>

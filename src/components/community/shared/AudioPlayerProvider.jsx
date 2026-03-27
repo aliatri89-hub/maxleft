@@ -369,7 +369,7 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
             {episode.title}
           </div>
           <div style={{
-            fontSize: 9, color: "rgba(255,255,255,0.3)",
+            fontSize: 9, color: "rgba(255,255,255,0.7)",
             fontFamily: "'IBM Plex Mono', monospace", marginTop: 1,
             display: "flex", alignItems: "center", gap: 4,
           }}>
@@ -390,7 +390,7 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
         {/* Collapse to badge */}
         <button onClick={(e) => { e.stopPropagation(); onCollapse(); }} style={{
           background: "none", border: "none", cursor: "pointer",
-          color: "rgba(255,255,255,0.2)", padding: 6, display: "flex", flexShrink: 0,
+          color: "rgba(255,255,255,0.72)", padding: 6, display: "flex", flexShrink: 0,
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 12 15 18 9" />
@@ -549,7 +549,7 @@ function FullScreenPlayer({
               background: "rgba(255,255,255,0.06)", border: "none",
               borderRadius: "50%", width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(255,255,255,0.5)", cursor: "pointer",
+              color: "rgba(255,255,255,0.7)", cursor: "pointer",
               fontSize: 14,
             }}
           >
@@ -622,7 +622,7 @@ function FullScreenPlayer({
           </div>
           <div style={{
             fontSize: 11,
-            color: "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.72)",
             fontFamily: "'IBM Plex Mono', monospace",
             textTransform: "uppercase",
             letterSpacing: "0.08em",
@@ -650,7 +650,7 @@ function FullScreenPlayer({
             >
               <div style={{
                 fontSize: 12, lineHeight: 1.5,
-                color: "rgba(255,255,255,0.5)",
+                color: "rgba(255,255,255,0.7)",
                 fontFamily: "var(--font-body, system-ui)",
                 overflow: "hidden",
                 maxHeight: descExpanded ? "none" : 42,
@@ -696,7 +696,7 @@ function FullScreenPlayer({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4444" flexShrink="0">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
-            <div style={{ flex: 1, fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "'IBM Plex Mono', monospace" }}>
+            <div style={{ flex: 1, fontSize: 11, color: "rgba(255,255,255,0.78)", fontFamily: "'IBM Plex Mono', monospace" }}>
               {error}
             </div>
             <button onClick={onRetry} style={{
@@ -767,7 +767,7 @@ function FullScreenPlayer({
           <div style={{
             display: "flex", justifyContent: "space-between",
             fontSize: 11,
-            color: "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.72)",
             fontFamily: "'IBM Plex Mono', monospace",
             marginTop: -2,
           }}>
@@ -805,7 +805,7 @@ function FullScreenPlayer({
             aria-label="Back 15 seconds"
             style={{
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.5)", padding: 8,
+              color: "rgba(255,255,255,0.7)", padding: 8,
               display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
               transition: "color 0.15s",
             }}
@@ -860,7 +860,7 @@ function FullScreenPlayer({
             aria-label="Forward 15 seconds"
             style={{
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.5)", padding: 8,
+              color: "rgba(255,255,255,0.7)", padding: 8,
               display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
               transition: "color 0.15s",
             }}
@@ -930,7 +930,7 @@ function FullScreenPlayer({
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.06)",
               borderRadius: 8, padding: "6px 12px",
-              color: "rgba(255,255,255,0.3)",
+              color: "rgba(255,255,255,0.7)",
               fontSize: 11, fontWeight: 700,
               cursor: "pointer",
               fontFamily: "'Barlow Condensed', sans-serif",
@@ -970,7 +970,7 @@ function FullScreenPlayer({
             </div>
             <div style={{
               fontSize: 11,
-              color: "rgba(255,255,255,0.3)",
+              color: "rgba(255,255,255,0.7)",
               fontFamily: "'IBM Plex Mono', monospace",
               marginTop: 4,
             }}>
@@ -1014,7 +1014,7 @@ function FullScreenPlayer({
                 </div>
                 <button onClick={onClearQueue} style={{
                   background: "none", border: "none", cursor: "pointer",
-                  color: "rgba(255,255,255,0.25)", fontSize: 10, fontWeight: 600,
+                  color: "rgba(255,255,255,0.78)", fontSize: 10, fontWeight: 600,
                   fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase",
                   padding: "2px 4px",
                 }}>
@@ -1072,7 +1072,7 @@ function FullScreenPlayer({
                     style={{
                       background: "none", border: "none",
                       cursor: "pointer", padding: 4,
-                      color: "rgba(255,255,255,0.15)",
+                      color: "rgba(255,255,255,0.78)",
                       fontSize: 12, lineHeight: 1,
                       flexShrink: 0,
                     }}
@@ -1098,7 +1098,7 @@ function FullScreenPlayer({
                 }}>
                   <div style={{
                     fontSize: 12,
-                    color: "rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.72)",
                     fontFamily: "'IBM Plex Mono', monospace",
                     lineHeight: 1.6,
                   }}>
@@ -1218,7 +1218,7 @@ function FullScreenPlayer({
                         </div>
                         <span style={{
                           fontSize: 9,
-                          color: "rgba(255,255,255,0.25)",
+                          color: "rgba(255,255,255,0.78)",
                           fontFamily: "'IBM Plex Mono', monospace",
                           whiteSpace: "nowrap",
                         }}>
@@ -1234,7 +1234,7 @@ function FullScreenPlayer({
                       style={{
                         background: "none", border: "none",
                         cursor: "pointer", padding: 4,
-                        color: "rgba(255,255,255,0.15)",
+                        color: "rgba(255,255,255,0.78)",
                         fontSize: 12, lineHeight: 1,
                         flexShrink: 0,
                       }}

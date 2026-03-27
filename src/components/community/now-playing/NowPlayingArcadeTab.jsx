@@ -229,7 +229,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
               {series.title}
             </div>
             {series.description && (
-              <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>
+              <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
                 {series.description}
               </div>
             )}
@@ -266,7 +266,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
             <div style={{
               padding: "0 16px 4px",
               fontSize: 10, fontWeight: 700,
-              color: "rgba(255,255,255,0.3)",
+              color: "rgba(255,255,255,0.7)",
               fontFamily: "'Barlow Condensed', sans-serif",
               letterSpacing: "0.08em",
               textTransform: "uppercase",
@@ -306,7 +306,7 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
           <div style={{
             padding: movies.length > 0 ? "8px 16px 4px" : "0 16px 4px",
             fontSize: 10, fontWeight: 700,
-            color: "rgba(255,255,255,0.3)",
+            color: "rgba(255,255,255,0.7)",
             fontFamily: "'Barlow Condensed', sans-serif",
             letterSpacing: "0.08em",
             textTransform: "uppercase",

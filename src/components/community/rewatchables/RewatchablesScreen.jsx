@@ -285,7 +285,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           />
           <div style={{
             position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-            fontSize: 13, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
+            fontSize: 13, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
           }}>🔍</div>
           {searchQuery && (
             <button
@@ -294,7 +294,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
                 position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
                 background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
                 width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#888", fontSize: 11, cursor: "pointer",
+                color: "#bbb", fontSize: 11, cursor: "pointer",
               }}
             >✕</button>
           )}

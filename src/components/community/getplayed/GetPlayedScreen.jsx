@@ -183,7 +183,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
               }}>
                 We Play, You Play
               </div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.78)", marginBottom: 12 }}>
                 Games the hosts invited listeners to play along with
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                               <div style={{
                                 width: "100%", height: "100%",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 28, color: "rgba(255,255,255,0.15)",
+                                fontSize: 28, color: "rgba(255,255,255,0.78)",
                               }}>🎮</div>
                             )}
 
@@ -381,14 +381,14 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                               {item.title}
                             </div>
                             <div style={{
-                              fontSize: 10, color: "rgba(255,255,255,0.4)",
+                              fontSize: 10, color: "rgba(255,255,255,0.78)",
                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                             }}>
                               {item.creator}{item.year ? ` · ${item.year}` : ""}
                             </div>
                             {item.episode_number && (
                               <div style={{
-                                fontSize: 9, color: "rgba(255,255,255,0.25)", marginTop: 2,
+                                fontSize: 9, color: "rgba(255,255,255,0.78)", marginTop: 2,
                               }}>
                                 {item.episode_number}
                               </div>

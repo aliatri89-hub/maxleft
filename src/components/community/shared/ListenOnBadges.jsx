@@ -83,7 +83,7 @@ export default function ListenOnBadges({ title, communityName, platforms = [], i
   const labelStyle = {
     fontSize: compact ? 10 : 11,
     fontWeight: 600,
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.78)",
     whiteSpace: "nowrap",
   };
 
@@ -98,7 +98,7 @@ export default function ListenOnBadges({ title, communityName, platforms = [], i
     <div style={{ marginTop: compact ? 8 : 0, marginBottom: compact ? 0 : 14 }}>
       {!compact && (
         <div style={{
-          fontSize: 10, fontWeight: 600, color: "#888",
+          fontSize: 10, fontWeight: 600, color: "#bbb",
           textTransform: "uppercase", letterSpacing: "0.08em",
           marginBottom: 8,
         }}>Listen On</div>

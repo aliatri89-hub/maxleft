@@ -131,12 +131,12 @@ export default function ItemCard({
             padding: 8, textAlign: "center",
           }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{MEDIA_ICONS[item.media_type] || "🎬"}</div>
-            <div style={{ fontSize: 10, color: "#ccc", lineHeight: 1.2, fontWeight: 600 }}>{item.title}</div>
+            <div style={{ fontSize: 10, color: "#ddd", lineHeight: 1.2, fontWeight: 600 }}>{item.title}</div>
             {item.creator && (
-              <div style={{ fontSize: 9, color: "#888", marginTop: 2 }}>{item.creator}</div>
+              <div style={{ fontSize: 9, color: "#bbb", marginTop: 2 }}>{item.creator}</div>
             )}
             {!item.creator && item.year && (
-              <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{item.year}</div>
+              <div style={{ fontSize: 9, color: "#aaa", marginTop: 2 }}>{item.year}</div>
             )}
           </div>
         )}
@@ -220,7 +220,7 @@ export default function ItemCard({
       </div>
 
       {/* Year / Creator */}
-      <div style={{ fontSize: 10, color: "#888", marginTop: 2 }}>
+      <div style={{ fontSize: 10, color: "#bbb", marginTop: 2 }}>
         {item.creator || item.year}{item.episode_number ? ` · ${item.episode_number}` : ""}
       </div>
     </div>

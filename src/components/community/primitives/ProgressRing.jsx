@@ -52,7 +52,7 @@ export default function ProgressRing({ pct, accent, size = 110 }) {
           lineHeight: 1,
         }}>{Math.round(pct)}%</div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.4)",
+          fontSize: 9, color: "rgba(255,255,255,0.78)",
           marginTop: 2, letterSpacing: "0.04em",
         }}>{isComplete ? "complete!" : "seen"}</div>
       </div>

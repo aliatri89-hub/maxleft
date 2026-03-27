@@ -98,7 +98,7 @@ export default function NowPlayingLogModal(props) {
         <a href="https://www.nowplayingpodcast.com" target="_blank" rel="noopener noreferrer"
           style={{
             display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 10, color: "#666", textDecoration: "none",
+            fontSize: 10, color: "#aaa", textDecoration: "none",
             marginTop: 4, transition: "color 0.15s",
           }}
           onMouseEnter={(e) => e.currentTarget.style.color = "#F5C518"}

@@ -74,7 +74,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
               {post.title}
             </div>
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontSize: 11, color: "rgba(255,255,255,0.78)",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               marginTop: 2,
             }}>
@@ -172,7 +172,7 @@ function ReaderOverlay({ post, accent, onClose }) {
         </button>
         <div style={{
           flex: 1, textAlign: "center",
-          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.35)",
+          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.72)",
           fontFamily: "'IBM Plex Mono', monospace",
           textTransform: "uppercase", letterSpacing: "0.06em",
         }}>
@@ -213,9 +213,9 @@ function ReaderOverlay({ post, accent, onClose }) {
             </div>
             {publishDate && (
               <>
-                <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+                <span style={{ color: "rgba(255,255,255,0.78)" }}>·</span>
                 <div style={{
-                  fontSize: 11, color: "rgba(255,255,255,0.35)",
+                  fontSize: 11, color: "rgba(255,255,255,0.72)",
                   fontFamily: "'IBM Plex Mono', monospace",
                 }}>
                   {publishDate}
@@ -244,7 +244,7 @@ function ReaderOverlay({ post, accent, onClose }) {
           marginTop: 12,
         }}>
           <div style={{
-            fontSize: 11, color: "rgba(255,255,255,0.25)",
+            fontSize: 11, color: "rgba(255,255,255,0.78)",
             fontFamily: "'IBM Plex Mono', monospace",
             textAlign: "center",
             letterSpacing: "0.05em",

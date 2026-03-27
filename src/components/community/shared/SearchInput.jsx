@@ -21,7 +21,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
   return (
     <div style={{ padding: "12px 16px 0" }}>
       <style>{`
-        .cs-search-${uid}::placeholder { color: rgba(255,255,255,0.25); }
+        .cs-search-${uid}::placeholder { color: rgba(255,255,255,0.78); }
         .cs-search-${uid}:focus { border-color: ${accent ? `${accent}66` : "rgba(255,255,255,0.3)"}; outline: none; }
       `}</style>
       <div style={{ position: "relative" }}>
@@ -46,7 +46,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
         />
         <div style={{
           position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-          fontSize: 14, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
+          fontSize: 14, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
         }}>🔍</div>
         {value && (
           <button
@@ -55,7 +55,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
               position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
               width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#888", fontSize: 12, cursor: "pointer",
+              color: "#bbb", fontSize: 12, cursor: "pointer",
             }}
           >✕</button>
         )}

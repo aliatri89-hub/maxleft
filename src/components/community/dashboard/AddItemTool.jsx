@@ -740,7 +740,7 @@ export default function AddItemTool({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#888",
+              color: "#bbb",
               fontSize: 14,
               cursor: "pointer",
             }}
@@ -982,7 +982,7 @@ export default function AddItemTool({
                     style={{
                       fontSize: 9,
                       fontWeight: 700,
-                      color: "#555",
+                      color: "#aaa",
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                       marginBottom: 6,
@@ -1012,7 +1012,7 @@ export default function AddItemTool({
                         {shelfTitle}
                       </div>
                       {(shelfDirector || shelfEpisodeRange) && (
-                        <div style={{ fontSize: 12, color: "#888" }}>
+                        <div style={{ fontSize: 12, color: "#bbb" }}>
                           {[
                             shelfDirector !== "." && shelfDirector,
                             shelfEpisodeRange,
@@ -1070,7 +1070,7 @@ export default function AddItemTool({
                     fontWeight: 400,
                     textTransform: "none",
                     letterSpacing: 0,
-                    color: "#52525b",
+                    color: "#9a9a9f",
                   }}
                 >
                   — search & tap multiple
@@ -1174,7 +1174,7 @@ export default function AddItemTool({
                   <div
                     style={{
                       fontSize: 11,
-                      color: "#52525b",
+                      color: "#9a9a9f",
                       fontStyle: "italic",
                       padding: "4px 0",
                     }}
@@ -1267,7 +1267,7 @@ export default function AddItemTool({
                 <div
                   style={{
                     fontSize: 12,
-                    color: "#555",
+                    color: "#aaa",
                     marginTop: 6,
                     fontFamily: "'Barlow Condensed', sans-serif",
                   }}
@@ -1337,7 +1337,7 @@ export default function AddItemTool({
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: "#52525b",
+                              color: "#9a9a9f",
                               fontSize: 14,
                               flexShrink: 0,
                             }}
@@ -1409,7 +1409,7 @@ export default function AddItemTool({
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          color: "#52525b",
+                          color: "#9a9a9f",
                           fontSize: 11,
                           flexShrink: 0,
                         }}
@@ -1760,7 +1760,7 @@ export default function AddItemTool({
                           <div
                             style={{
                               fontSize: 11,
-                              color: "#666",
+                              color: "#aaa",
                               padding: 8,
                             }}
                           >
@@ -1858,7 +1858,7 @@ export default function AddItemTool({
                                       {ep.title}
                                     </div>
                                     <div
-                                      style={{ fontSize: 9, color: "#555" }}
+                                      style={{ fontSize: 9, color: "#aaa" }}
                                     >
                                       {ep.pubDate
                                         ? new Date(
@@ -1885,7 +1885,7 @@ export default function AddItemTool({
                                   style={{
                                     padding: 10,
                                     fontSize: 10,
-                                    color: "#555",
+                                    color: "#aaa",
                                     textAlign: "center",
                                   }}
                                 >
@@ -2082,7 +2082,7 @@ function FieldRow({ label, children, style = {} }) {
       <span
         style={{
           fontSize: 10,
-          color: "#52525b",
+          color: "#9a9a9f",
           fontWeight: 600,
           fontFamily: "'Barlow Condensed', sans-serif",
           textTransform: "uppercase",
@@ -2138,7 +2138,7 @@ const smallBtn = {
   borderRadius: 6,
   background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.1)",
-  color: "#ccc",
+  color: "#ddd",
   fontSize: 11,
   fontWeight: 600,
   fontFamily: "'Barlow Condensed', sans-serif",

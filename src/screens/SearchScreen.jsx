@@ -453,7 +453,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   width: 20, height: 20, borderRadius: "50%",
                   background: "rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.5)",
+                  cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.7)",
                   flexShrink: 0,
                 }}>×</div>
             )}
@@ -476,7 +476,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               padding: "32px 16px", textAlign: "center",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.2)",
+              fontSize: 10, color: "rgba(255,255,255,0.72)",
             }}>Loading…</div>
           ) : browseResults.length > 0 ? (
             <>
@@ -541,7 +541,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               padding: "32px 16px", textAlign: "center",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
             }}>No coverage found for this filter</div>
           )}
         </div>
@@ -555,12 +555,12 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700, fontSize: 13,
-              color: "rgba(255,255,255,0.4)",
+              color: "rgba(255,255,255,0.78)",
               textTransform: "uppercase", letterSpacing: "0.08em",
             }}>Recently covered</div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
               marginTop: 2,
             }}>New podcast episodes this month</div>
           </div>
@@ -570,7 +570,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               padding: "20px 16px",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
             }}>Loading…</div>
           ) : recentlyCovered.length > 0 ? (
             <div className="search-hscroll" style={{
@@ -608,7 +608,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                       border: "1px solid rgba(255,255,255,0.06)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       fontFamily: "'Barlow Condensed', sans-serif",
-                      fontSize: 11, color: "rgba(255,255,255,0.2)",
+                      fontSize: 11, color: "rgba(255,255,255,0.72)",
                       textTransform: "uppercase", textAlign: "center",
                       padding: 8, lineHeight: 1.3,
                     }}>{film.title}</div>
@@ -657,7 +657,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               padding: "20px 16px",
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
             }}>No recent coverage found</div>
           )}
 
@@ -669,13 +669,13 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700, fontSize: 14,
-              color: "rgba(255,255,255,0.35)",
+              color: "rgba(255,255,255,0.72)",
               textTransform: "uppercase", letterSpacing: "0.04em",
               marginBottom: 4,
             }}>Or search any film</div>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.15)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
             }}>Find coverage across {recentlyCovered.length > 0
               ? `${recentlyCovered[0]?.podcasts?.length || "all"} podcasts and counting`
               : "all your favorite shows"
@@ -690,13 +690,13 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
             fontWeight: 700, fontSize: 15,
-            color: "rgba(255,255,255,0.35)",
+            color: "rgba(255,255,255,0.72)",
             textTransform: "uppercase", letterSpacing: "0.04em",
             marginBottom: 6,
           }}>No results for "{query}"</div>
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10, color: "rgba(255,255,255,0.15)",
+            fontSize: 10, color: "rgba(255,255,255,0.78)",
           }}>Try a different title or spelling</div>
         </div>
       )}
@@ -736,7 +736,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)" }} />
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9, color: "rgba(255,255,255,0.2)",
+            fontSize: 9, color: "rgba(255,255,255,0.72)",
             textTransform: "uppercase", letterSpacing: "0.1em", whiteSpace: "nowrap",
           }}>no coverage yet</span>
           <div style={{ flex: 1, height: 1, background: "linear-gradient(270deg, rgba(255,255,255,0.06), transparent)" }} />
@@ -848,7 +848,7 @@ function ResultCard({
             border: "1px solid rgba(255,255,255,0.06)",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9, color: "rgba(255,255,255,0.15)",
+            fontSize: 9, color: "rgba(255,255,255,0.78)",
           }}>NO<br />IMG</div>
         )}
         {isWatched && (
@@ -875,7 +875,7 @@ function ResultCard({
           }}>{result.title}</div>
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 2,
+            fontSize: 11, color: "rgba(255,255,255,0.72)", marginTop: 2,
           }}>{result.year || "—"}</div>
 
           {hasCoverage && (
@@ -906,7 +906,7 @@ function ResultCard({
                   {result.podcasts.length > 5 && (
                     <span style={{
                       fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "rgba(255,255,255,0.3)",
+                      fontSize: 9, color: "rgba(255,255,255,0.7)",
                       marginLeft: 4,
                     }}>+{result.podcasts.length - 5}</span>
                   )}
@@ -988,7 +988,7 @@ function ResultCard({
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 9, fontWeight: 600,
-                    color: "rgba(255,255,255,0.25)",
+                    color: "rgba(255,255,255,0.78)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
                   }}>Log This Film</span>
                 </div>
@@ -996,13 +996,13 @@ function ResultCard({
             </div>
           )}
           {loadingEpisodes && (
-            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.2)" }}>
+            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.72)" }}>
               Loading episodes…
             </div>
           )}
 
           {!loadingEpisodes && episodes.length === 0 && (
-            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.15)" }}>
+            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.78)" }}>
               No playable episodes found
             </div>
           )}
@@ -1050,7 +1050,7 @@ function ResultCard({
                   }}>{ep.episode_title || "Episode"}</div>
                   <div style={{
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9, color: "rgba(255,255,255,0.3)",
+                    fontSize: 9, color: "rgba(255,255,255,0.7)",
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>
                     {ep.podcast_name}
@@ -1120,7 +1120,7 @@ function ResultCard({
                 ) : (
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 8, color: "rgba(255,255,255,0.15)", textTransform: "uppercase",
+                    fontSize: 8, color: "rgba(255,255,255,0.78)", textTransform: "uppercase",
                   }}>soon</span>
                 )}
               </div>
@@ -1140,7 +1140,7 @@ function ResultCard({
                       padding: "4px 8px 10px 50px",
                       fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 10, lineHeight: 1.55,
-                      color: "rgba(255,255,255,0.45)",
+                      color: "rgba(255,255,255,0.65)",
                       whiteSpace: "pre-wrap",
                     }}>
                       <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{hook}</span>
@@ -1152,7 +1152,7 @@ function ResultCard({
                     padding: "4px 8px 10px 50px",
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 9, fontStyle: "italic",
-                    color: "rgba(255,255,255,0.2)",
+                    color: "rgba(255,255,255,0.72)",
                   }}>
                     No description available
                   </div>
@@ -1207,7 +1207,7 @@ function ResultCard({
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 9, fontWeight: 600,
-                    color: "rgba(255,255,255,0.25)",
+                    color: "rgba(255,255,255,0.78)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
                   }}>Log This Film</span>
                 </div>
@@ -1222,7 +1222,7 @@ function ResultCard({
           }}>
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.25)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
               textTransform: "uppercase", letterSpacing: "0.06em",
               marginBottom: 10,
             }}>
@@ -1287,7 +1287,7 @@ function ResultCard({
 
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9, color: "rgba(255,255,255,0.15)",
+              fontSize: 9, color: "rgba(255,255,255,0.78)",
               marginTop: 8, lineHeight: 1.4,
             }}>
               {notified

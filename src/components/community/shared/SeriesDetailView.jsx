@@ -157,7 +157,7 @@ export default function SeriesDetailView({
             </div>
             {series.director_name && series.director_name !== "." && (
               <div style={{
-                fontSize: 12, color: "rgba(255,255,255,0.5)",
+                fontSize: 12, color: "rgba(255,255,255,0.7)",
                 fontFamily: "'Barlow Condensed', sans-serif",
                 marginTop: 3,
               }}>
@@ -166,7 +166,7 @@ export default function SeriesDetailView({
             )}
             {series.episode_range && (
               <div style={{
-                fontSize: 11, color: "rgba(255,255,255,0.35)",
+                fontSize: 11, color: "rgba(255,255,255,0.72)",
                 fontFamily: "'Barlow Condensed', sans-serif",
                 marginTop: 2,
               }}>
@@ -208,7 +208,7 @@ export default function SeriesDetailView({
           </div>
           {series.director_name && series.director_name !== "." && (
             <div style={{
-              fontSize: 13, color: "rgba(255,255,255,0.5)",
+              fontSize: 13, color: "rgba(255,255,255,0.7)",
               fontFamily: "'Barlow Condensed', sans-serif",
               marginTop: 3,
             }}>

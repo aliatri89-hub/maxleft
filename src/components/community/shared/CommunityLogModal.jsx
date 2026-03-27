@@ -329,7 +329,7 @@ export default function CommunityLogModal({
               border: "none", borderRadius: "50%",
               width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#888", fontSize: 18, cursor: "pointer",
+              color: "#bbb", fontSize: 18, cursor: "pointer",
               transition: "background 0.2s",
             }}
           >✕</button>
@@ -370,11 +370,11 @@ export default function CommunityLogModal({
               fontFamily: "'Barlow Condensed', sans-serif",
               lineHeight: 1.2, marginBottom: 4,
             }}>{item.title}</div>
-            <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>
+            <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>
               {item.creator}{item.year ? ` · ${item.year}` : ""}
             </div>
             {item.episode_number && (
-              <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+              <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>
                 {item.episode_number}
               </div>
             )}
@@ -442,7 +442,7 @@ export default function CommunityLogModal({
                     {isThisEpPlaying && isPlaying ? "Now Playing" : "Listen on MANTL"}
                   </div>
                   <div style={{
-                    fontSize: 10, color: "rgba(255,255,255,0.4)",
+                    fontSize: 10, color: "rgba(255,255,255,0.78)",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     marginTop: 1,
                   }}>{matchedEpisode.title}</div>
@@ -492,7 +492,7 @@ export default function CommunityLogModal({
                     Listen on Patreon
                   </div>
                   <div style={{
-                    fontSize: 10, color: "rgba(255,255,255,0.4)",
+                    fontSize: 10, color: "rgba(255,255,255,0.78)",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     marginTop: 1,
                   }}>{matchedEpisode.title}</div>
@@ -542,7 +542,7 @@ export default function CommunityLogModal({
                     Listen on Patreon
                   </div>
                   <div style={{
-                    fontSize: 10, color: "rgba(255,255,255,0.4)",
+                    fontSize: 10, color: "rgba(255,255,255,0.78)",
                     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     marginTop: 1,
                   }}>Patreon exclusive</div>
@@ -604,7 +604,7 @@ export default function CommunityLogModal({
             {overview.length > 150 && !overviewExpanded && (
               <div
                 onClick={() => setOverviewExpanded(true)}
-                style={{ fontSize: 11, color: "#666", marginTop: 4, cursor: "pointer" }}
+                style={{ fontSize: 11, color: "#aaa", marginTop: 4, cursor: "pointer" }}
               >
                 more ›
               </div>
@@ -632,7 +632,7 @@ export default function CommunityLogModal({
           {/* Rating */}
           <div style={{ marginBottom: 4 }}>
             <div style={{
-              fontSize: 10, fontWeight: 600, color: "#888",
+              fontSize: 10, fontWeight: 600, color: "#bbb",
               textTransform: "uppercase", letterSpacing: "0.08em",
               marginBottom: 6,
             }}>Your Rating</div>
@@ -648,7 +648,7 @@ export default function CommunityLogModal({
                       <div className="clm-star-zone right" onClick={() => handleStarClick(n, false)} />
                       {isFull ? "★" : isHalf ? (
                         <span style={{ position: "relative", display: "inline-block" }}>
-                          <span style={{ color: "#444" }}>★</span>
+                          <span style={{ color: "#ddd" }}>★</span>
                           <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: "#facc15" }}>★</span>
                         </span>
                       ) : "☆"}
@@ -710,7 +710,7 @@ export default function CommunityLogModal({
                     background: "rgba(255,255,255,0.06)",
                     border: "1px solid rgba(255,255,255,0.1)",
                     borderRadius: 12,
-                    color: "#ccc", fontSize: 12, fontWeight: 600,
+                    color: "#ddd", fontSize: 12, fontWeight: 600,
                     cursor: saving ? "wait" : "pointer",
                     transition: "background 0.2s",
                   }}
@@ -726,7 +726,7 @@ export default function CommunityLogModal({
                       background: "rgba(255,255,255,0.04)",
                       border: "1px solid rgba(255,255,255,0.08)",
                       borderRadius: 12,
-                      color: "#999", fontSize: 12, fontWeight: 600,
+                      color: "#ddd", fontSize: 12, fontWeight: 600,
                       cursor: saving ? "wait" : "pointer",
                       transition: "background 0.2s",
                     }}
@@ -783,7 +783,7 @@ export default function CommunityLogModal({
             style={{
               width: "100%", padding: "10px 0",
               background: "none", border: "none",
-              color: "#666", fontSize: 13,
+              color: "#aaa", fontSize: 13,
               cursor: "pointer",
             }}
           >
@@ -802,7 +802,7 @@ export default function CommunityLogModal({
             display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
           }}>
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontSize: 11, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase", letterSpacing: 1.5,
             }}>Logged! Now hear what the hosts thought</div>
@@ -831,7 +831,7 @@ export default function CommunityLogModal({
                   textTransform: "uppercase", letterSpacing: 0.5,
                 }}>Listen on MANTL</div>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  fontSize: 10, color: "rgba(255,255,255,0.78)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                 }}>{matchedEpisode.title}</div>
               </div>
@@ -844,7 +844,7 @@ export default function CommunityLogModal({
             <button
               onClick={() => { setEpisodeToast(false); onClose(); }}
               style={{
-                background: "none", border: "none", color: "rgba(255,255,255,0.3)",
+                background: "none", border: "none", color: "rgba(255,255,255,0.7)",
                 fontSize: 12, cursor: "pointer", padding: "6px 16px",
               }}
             >Not now</button>
@@ -862,7 +862,7 @@ export default function CommunityLogModal({
             display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
           }}>
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontSize: 11, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase", letterSpacing: 1.5,
             }}>Logged! Hear what the hosts thought</div>
@@ -897,7 +897,7 @@ export default function CommunityLogModal({
                   textTransform: "uppercase", letterSpacing: 0.5,
                 }}>Listen on Patreon</div>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  fontSize: 10, color: "rgba(255,255,255,0.78)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                 }}>{matchedEpisode.title}</div>
               </div>
@@ -910,7 +910,7 @@ export default function CommunityLogModal({
             <button
               onClick={() => { setEpisodeToast(false); onClose(); }}
               style={{
-                background: "none", border: "none", color: "rgba(255,255,255,0.3)",
+                background: "none", border: "none", color: "rgba(255,255,255,0.7)",
                 fontSize: 12, cursor: "pointer", padding: "6px 16px",
               }}
             >Not now</button>
@@ -927,7 +927,7 @@ export default function CommunityLogModal({
             display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
           }}>
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontSize: 11, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase", letterSpacing: 1.5,
             }}>Logged! Hear what the hosts thought</div>
@@ -962,7 +962,7 @@ export default function CommunityLogModal({
                   textTransform: "uppercase", letterSpacing: 0.5,
                 }}>Listen on Patreon</div>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  fontSize: 10, color: "rgba(255,255,255,0.78)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                 }}>Patreon exclusive</div>
               </div>
@@ -975,7 +975,7 @@ export default function CommunityLogModal({
             <button
               onClick={() => { setEpisodeToast(false); onClose(); }}
               style={{
-                background: "none", border: "none", color: "rgba(255,255,255,0.3)",
+                background: "none", border: "none", color: "rgba(255,255,255,0.7)",
                 fontSize: 12, cursor: "pointer", padding: "6px 16px",
               }}
             >Not now</button>

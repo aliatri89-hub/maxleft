@@ -23,7 +23,7 @@ export default function StatPill({ label, value, color }) {
         width: 8, height: 8, borderRadius: "50%",
         background: color, flexShrink: 0,
       }} />
-      <div style={{ fontSize: 12, color: "#888", minWidth: 40 }}>{label}</div>
+      <div style={{ fontSize: 12, color: "#bbb", minWidth: 40 }}>{label}</div>
       <div style={{
         fontSize: 14, fontWeight: 700, color: "#fff",
         fontFamily: "'Barlow Condensed', sans-serif",

@@ -95,7 +95,7 @@ export default function BigPictureHero({ community, miniseries, progress, active
               {stats.totalDrafts > 0 && (
                 <div style={{
                   display: "flex", alignItems: "center", gap: 8,
-                  padding: "4px 14px", fontSize: 11, color: "rgba(255,255,255,0.3)",
+                  padding: "4px 14px", fontSize: 11, color: "rgba(255,255,255,0.7)",
                 }}>
                   🏈 {stats.totalDrafts} drafts
                 </div>

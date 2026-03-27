@@ -28,9 +28,9 @@
 
   /* ── Text ── */
   --text-primary:     #ffffff;
-  --text-secondary:   rgba(255,255,255,0.85);
-  --text-muted:       rgba(255,255,255,0.50);
-  --text-faint:       rgba(255,255,255,0.25);
+  --text-secondary:   rgba(255,255,255,0.92);
+  --text-muted:       rgba(255,255,255,0.65);
+  --text-faint:       rgba(255,255,255,0.40);
 
   /* ── Accent Colors ── */
   --accent-red:       #e94560;

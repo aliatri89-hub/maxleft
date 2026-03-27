@@ -88,7 +88,7 @@ export default function FilmspottingHero({ community, miniseries, progress }) {
               {stats.completedSeries > 0 && (
                 <div style={{
                   display: "flex", alignItems: "center", gap: 8,
-                  padding: "4px 14px", fontSize: 11, color: "rgba(255,255,255,0.3)",
+                  padding: "4px 14px", fontSize: 11, color: "rgba(255,255,255,0.7)",
                 }}>
                   📺 {stats.completedSeries}/{miniseries.length} series
                 </div>

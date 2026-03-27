@@ -94,7 +94,7 @@ export default function NowPlayingBooksTab({
       }}>
         <div style={{
           fontSize: 11, fontWeight: 700,
-          color: "rgba(255,255,255,0.4)",
+          color: "rgba(255,255,255,0.78)",
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.05em",
           textTransform: "uppercase",
@@ -119,7 +119,7 @@ export default function NowPlayingBooksTab({
         <div style={{
           textAlign: "center", padding: "40px 0",
           fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-          color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          color: "rgba(255,255,255,0.78)", fontStyle: "italic",
         }}>
           {searchQuery
             ? "No matching books"

@@ -68,7 +68,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
         <div style={{ color: "#e94560", fontSize: 14 }}>Couldn't load community</div>
         <button onClick={onBack} style={{
           background: "none", border: "1px solid rgba(255,255,255,0.1)",
-          color: "#888", borderRadius: 8, padding: "8px 16px",
+          color: "#bbb", borderRadius: 8, padding: "8px 16px",
           fontSize: 13, cursor: "pointer",
         }}>← Go back</button>
       </div>

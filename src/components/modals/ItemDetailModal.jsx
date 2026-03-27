@@ -48,7 +48,7 @@ export default function ItemDetailModal({
       fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
       fontSize: 10, fontWeight: 600, letterSpacing: "0.08em",
       textTransform: "uppercase", marginBottom: 8,
-      color: "rgba(255,255,255,0.5)",
+      color: "rgba(255,255,255,0.7)",
     }}>{text}</div>
   );
 
@@ -214,16 +214,16 @@ export default function ItemDetailModal({
             textTransform: "uppercase", lineHeight: 1.1, marginBottom: 4,
           }}>{localItem.title}</div>
 
-          {localItem.year && <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>{localItem.year}</div>}
-          {localItem.author && <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>{localItem.author}</div>}
-          {localItem.director && <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>{localItem.director}</div>}
-          {localItem.platform && <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>{localItem.platform}</div>}
-          {shelfType === "games" && localItem.genre && <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>{localItem.genre}</div>}
+          {localItem.year && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.year}</div>}
+          {localItem.author && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.author}</div>}
+          {localItem.director && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.director}</div>}
+          {localItem.platform && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.platform}</div>}
+          {shelfType === "games" && localItem.genre && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.genre}</div>}
 
           {localItem.rating && (
             <div style={{ marginTop: 8 }}>
               {renderStars(localItem.rating)}
-              <span style={{ fontSize: 11, color: "#888", marginLeft: 6 }}>({localItem.rating})</span>
+              <span style={{ fontSize: 11, color: "#bbb", marginLeft: 6 }}>({localItem.rating})</span>
             </div>
           )}
 
@@ -244,8 +244,8 @@ export default function ItemDetailModal({
             <div style={badgeStyle("#4ade80")}>✓ Beat</div>
           )}
 
-          {localItem.watchedAt && <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>Watched {formatDate(localItem.watchedAt)}</div>}
-          {localItem.finishedAt && <div style={{ fontSize: 11, color: "#666", marginTop: 4 }}>Finished {formatDate(localItem.finishedAt)}</div>}
+          {localItem.watchedAt && <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>Watched {formatDate(localItem.watchedAt)}</div>}
+          {localItem.finishedAt && <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>Finished {formatDate(localItem.finishedAt)}</div>}
         </div>
       </div>
 
@@ -301,9 +301,9 @@ export default function ItemDetailModal({
               {achTotal > 0 && (
                 <div style={{ flex: 1, minWidth: 100, padding: "14px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, textAlign: "center" }}>
                   <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono, monospace)" }}>
-                    {achEarned}<span style={{ fontSize: 14, color: "#666" }}>/{achTotal}</span>
+                    {achEarned}<span style={{ fontSize: 14, color: "#aaa" }}>/{achTotal}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>ACHIEVEMENTS</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>ACHIEVEMENTS</div>
                   <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, marginTop: 8, overflow: "hidden" }}>
                     <div style={{ height: "100%", width: `${achPct}%`, background: achPct === 100 ? "#4ade80" : "#a78bfa", borderRadius: 2, transition: "width 0.3s" }} />
                   </div>
@@ -322,7 +322,7 @@ export default function ItemDetailModal({
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { key: "playing", label: "🎮 Playing", bg: "linear-gradient(135deg, #a78bfa, #7c5cc4)", color: "white" },
-              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: "#888" },
+              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: "#bbb" },
               { key: "beat", label: "✓ Beat", bg: "#4ade80", color: "#0a0a0a" },
             ].map(opt => {
               const isActive = (localItem.status || "backlog") === opt.key;
@@ -380,7 +380,7 @@ export default function ItemDetailModal({
           border: "1px solid rgba(233,69,96,0.15)",
           borderRadius: 12,
         }}>
-          <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.5, marginBottom: 12 }}>
+          <div style={{ fontSize: 13, color: "#ddd", lineHeight: 1.5, marginBottom: 12 }}>
             Remove <strong style={{ color: "#fff" }}>{localItem.title}</strong> from your shelf? This will also delete any journal entries and ratings.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -414,7 +414,7 @@ function StatCard({ value, sub }) {
       borderRadius: 10, textAlign: "center",
     }}>
       <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono, monospace)" }}>{value}</div>
-      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>{sub}</div>
+      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>{sub}</div>
     </div>
   );
 }
@@ -444,7 +444,7 @@ const secondaryBtn = {
   flex: 1, width: "100%", padding: "11px 0",
   background: "rgba(255,255,255,0.06)",
   border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 12, color: "#ccc",
+  borderRadius: 12, color: "#ddd",
   fontSize: 13, fontWeight: 600,
   cursor: "pointer", transition: "background 0.15s",
   textAlign: "center",
@@ -463,5 +463,5 @@ const dangerBtn = {
 const ghostBtn = {
   width: "100%", padding: "10px 0", marginTop: 8,
   background: "none", border: "none",
-  color: "#666", fontSize: 13, cursor: "pointer",
+  color: "#aaa", fontSize: 13, cursor: "pointer",
 };

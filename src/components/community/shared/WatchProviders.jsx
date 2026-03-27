@@ -25,7 +25,7 @@ export default function WatchProviders({ providers }) {
   const ProviderRow = ({ items, label }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
       <div style={{
-        fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+        fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
         textTransform: "uppercase", letterSpacing: "0.06em",
         width: 48, flexShrink: 0,
         fontFamily: "'IBM Plex Mono', monospace",
@@ -42,7 +42,7 @@ export default function WatchProviders({ providers }) {
               style={{ width: 20, height: 20, borderRadius: 4 }}
             />
             <span style={{
-              fontSize: 10, color: "rgba(255,255,255,0.6)",
+              fontSize: 10, color: "rgba(255,255,255,0.78)",
               fontWeight: 500, whiteSpace: "nowrap",
             }}>{p.provider_name}</span>
           </a>
@@ -59,7 +59,7 @@ export default function WatchProviders({ providers }) {
       borderRadius: 10,
     }}>
       <div style={{
-        fontSize: 10, fontWeight: 600, color: "#888",
+        fontSize: 10, fontWeight: 600, color: "#bbb",
         textTransform: "uppercase", letterSpacing: "0.08em",
         marginBottom: 8,
       }}>Where to Watch {country && country !== "US" ? `(${country})` : ""}</div>
@@ -68,11 +68,11 @@ export default function WatchProviders({ providers }) {
       {hasBuy && <ProviderRow items={buy} label="Buy" />}
       {link ? (
         <a href={link} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", marginTop: 2, fontStyle: "italic", textDecoration: "none" }}>
+          style={{ fontSize: 8, color: "rgba(255,255,255,0.78)", marginTop: 2, fontStyle: "italic", textDecoration: "none" }}>
           via <span style={{ color: "rgba(255,215,0,0.4)" }}>JustWatch</span>
         </a>
       ) : (
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", marginTop: 2, fontStyle: "italic" }}>
+        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", marginTop: 2, fontStyle: "italic" }}>
           Data from JustWatch via TMDB
         </div>
       )}

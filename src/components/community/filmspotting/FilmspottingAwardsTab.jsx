@@ -135,7 +135,7 @@ export default function FilmspottingAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#888", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function FilmspottingAwardsTab({
           fontFamily: "'Barlow Condensed', sans-serif",
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 {community?.name || "Awards"}</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -177,9 +177,9 @@ export default function FilmspottingAwardsTab({
             transition: "all 0.2s",
           }}
         >
-          <option value="" style={{ background: "#1a1a2e", color: "#ccc" }}>All Years</option>
+          <option value="" style={{ background: "#1a1a2e", color: "#ddd" }}>All Years</option>
           {years.map(y => (
-            <option key={y} value={y} style={{ background: "#1a1a2e", color: "#ccc" }}>{y}</option>
+            <option key={y} value={y} style={{ background: "#1a1a2e", color: "#ddd" }}>{y}</option>
           ))}
         </select>
       </div>
@@ -262,7 +262,7 @@ export default function FilmspottingAwardsTab({
       ) : (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
         }}>No picks {filter !== "all" ? "match this filter" : selectedYear ? `added for ${selectedYear} yet` : "added yet"}</div>
       )}
     </div>
@@ -292,7 +292,7 @@ function FSHostShelf({ host, picks, isSeen, getItemId, onToggle }) {
           letterSpacing: "0.02em", textTransform: "uppercase",
         }}>{host.name}</div>
         <div style={{
-          fontSize: 11, color: "rgba(255,255,255,0.3)",
+          fontSize: 11, color: "rgba(255,255,255,0.7)",
           fontFamily: "'Barlow Condensed', sans-serif",
           marginLeft: "auto",
         }}>{picks.length} picks</div>
@@ -363,7 +363,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
               lineHeight: 1.2, textAlign: "center",
             }}>{pick.title}</div>
           </div>

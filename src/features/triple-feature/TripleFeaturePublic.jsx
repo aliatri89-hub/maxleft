@@ -217,7 +217,7 @@ export default function TripleFeaturePublic() {
           <MantlBrand />
           <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={S.title}>TRIPLE FEATURE</div>
-            <div style={{ fontSize: 14, color: "#8a8070", marginTop: 12 }}>Loading today's puzzle...</div>
+            <div style={{ fontSize: 14, color: "#b5ab9b", marginTop: 12 }}>Loading today's puzzle...</div>
           </div>
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function TripleFeaturePublic() {
           <MantlBrand />
           <div style={{ textAlign: "center", paddingTop: 40 }}>
             <div style={S.title}>TRIPLE FEATURE</div>
-            <div style={{ fontSize: 14, color: "#8a8070", marginTop: 12 }}>{error || "No puzzle available today."}</div>
+            <div style={{ fontSize: 14, color: "#b5ab9b", marginTop: 12 }}>{error || "No puzzle available today."}</div>
           </div>
         </div>
       </div>
@@ -257,11 +257,11 @@ export default function TripleFeaturePublic() {
         <div style={{ textAlign: "center", marginBottom: 16 }}>
           <div style={S.title}>TRIPLE FEATURE</div>
           <div style={S.subtitle}>Pick the 3 highest grossing films</div>
-          <div style={{ fontSize: 10, color: "#555", marginTop: 4, fontStyle: "italic" }}>
+          <div style={{ fontSize: 10, color: "#aaa", marginTop: 4, fontStyle: "italic" }}>
             Original domestic gross — not adjusted for inflation
           </div>
           {puzzle && (
-            <div style={{ fontSize: 11, color: "#555", marginTop: 6 }}>
+            <div style={{ fontSize: 11, color: "#aaa", marginTop: 6 }}>
               Puzzle #{getPuzzleNumber(puzzle.date)}
             </div>
           )}
@@ -347,7 +347,7 @@ export default function TripleFeaturePublic() {
                     <div style={{ fontSize: 10, fontWeight: 600, lineHeight: 1.3, color: sel && isTop3 ? "#4ade80" : sel ? "#d4af37" : "#999" }}>
                       {movie.title}
                     </div>
-                    <div style={{ fontSize: 9, color: "#555", marginTop: 1 }}>{movie.year}</div>
+                    <div style={{ fontSize: 9, color: "#aaa", marginTop: 1 }}>{movie.year}</div>
                   </div>
                 </div>
               );
@@ -358,7 +358,7 @@ export default function TripleFeaturePublic() {
         {/* ── Picking phase ───────────────────────────────── */}
         {phase === PHASE.PICKING && (
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 13, color: "#666", marginBottom: 12 }}>
+            <div style={{ fontSize: 13, color: "#aaa", marginBottom: 12 }}>
               {selected.size === 0 && "Pick 3 movies"}
               {selected.size === 1 && "Pick 2 more"}
               {selected.size === 2 && "Pick 1 more"}
@@ -387,17 +387,17 @@ export default function TripleFeaturePublic() {
                 <div style={{
                   fontFamily: "'Playfair Display',serif", fontSize: 40, fontWeight: 900, lineHeight: 1,
                   color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? "#f0ece4" : "#8a8070",
-                }}>{userScore}<span style={{ fontSize: 22, color: "#666" }}>/{maxScore}</span></div>
+                }}>{userScore}<span style={{ fontSize: 22, color: "#aaa" }}>/{maxScore}</span></div>
                 <div style={{
                   fontSize: 11, fontWeight: 600, marginTop: 6, fontStyle: "italic",
                   color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? "#4ade80" : userScore >= maxScore * 0.75 ? "#f59e0b" : "#ef4444",
                 }}>{getFlavorText(userScore, maxScore)}</div>
               </div>
 
-              <div style={{ fontSize: 12, color: "#8a8070", marginBottom: 2, marginTop: 8 }}>Your box office</div>
+              <div style={{ fontSize: 12, color: "#b5ab9b", marginBottom: 2, marginTop: 8 }}>Your box office</div>
               <div style={S.resultTotal}>{formatMoney(result ? result.user_total : userTotal)}</div>
               {userScore < maxScore && (
-                <div style={{ fontSize: 12, color: "#8a8070", marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: "#b5ab9b", marginTop: 2 }}>
                   Best was {formatMoney(puzzle.optimalTotal)}
                 </div>
               )}
@@ -412,7 +412,7 @@ export default function TripleFeaturePublic() {
               <div style={{ fontSize: 13, fontWeight: 600, color: "#f0ece4", marginBottom: 4 }}>
                 Want to track your stats & streak?
               </div>
-              <div style={{ fontSize: 11, color: "#8a8070", marginBottom: 12, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 11, color: "#b5ab9b", marginBottom: 12, lineHeight: 1.4 }}>
                 Sign up for MANTL to save your scores, compete on leaderboards, and discover what to watch from podcasts you love.
               </div>
               <a href="/signup" style={S.ctaBtn}>
@@ -420,7 +420,7 @@ export default function TripleFeaturePublic() {
               </a>
             </div>
 
-            <div style={{ textAlign: "center", fontSize: 12, color: "#666", marginTop: 12 }}>
+            <div style={{ textAlign: "center", fontSize: 12, color: "#aaa", marginTop: 12 }}>
               New puzzle in <CountdownTimer getTimeUntilNext={getTimeUntilNext} />
             </div>
           </div>
@@ -508,8 +508,8 @@ const S = {
     WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
     marginBottom: 4,
   },
-  subtitle: { fontSize: 11, letterSpacing: "3px", textTransform: "uppercase", color: "#666", fontWeight: 500 },
-  label: { fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#8a8070", marginBottom: 6 },
+  subtitle: { fontSize: 11, letterSpacing: "3px", textTransform: "uppercase", color: "#aaa", fontWeight: 500 },
+  label: { fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#b5ab9b", marginBottom: 6 },
   targetBox: {
     textAlign: "center", marginBottom: 16, padding: "12px 20px",
     background: "linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.03))",
@@ -537,7 +537,7 @@ const S = {
     display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end",
     padding: "8px 4px", animation: "tf-fadeIn 0.6s ease-out",
   },
-  dimGross: { fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 900, color: "#666" },
+  dimGross: { fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 900, color: "#aaa" },
   optOv: {
     position: "absolute", inset: 0, background: "rgba(10,10,15,0.7)",
     display: "flex", alignItems: "center", justifyContent: "center",

@@ -152,7 +152,7 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
           background: "linear-gradient(180deg, #444, #2a2a2a)",
           borderRadius: "0 0 2px 2px",
           fontSize: 8, fontWeight: 700,
-          color: "rgba(255,255,255,0.5)",
+          color: "rgba(255,255,255,0.7)",
           fontFamily: "var(--font-display)",
           letterSpacing: "0.06em",
           textTransform: "uppercase",

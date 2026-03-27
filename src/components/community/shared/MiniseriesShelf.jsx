@@ -81,7 +81,7 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
               {series.title}
             </div>
             {((series.director_name && series.director_name !== ".") || series.episode_range) && (
-              <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>
+              <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
                 {[series.director_name !== "." && series.director_name, series.episode_range].filter(Boolean).join(" · ")}
               </div>
             )}
@@ -217,7 +217,7 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
               <span style={{ fontSize: 20, color: accent, lineHeight: 1 }}>+</span>
             </div>
             <span style={{
-              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)",
+              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
             }}>
               +{remaining}

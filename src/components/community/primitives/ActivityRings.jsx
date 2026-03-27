@@ -73,7 +73,7 @@ export default function ActivityRings({ filmPct, bookPct, gamePct, displayPct, r
           {displayPct}%
         </div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.4)",
+          fontSize: 9, color: "rgba(255,255,255,0.78)",
           marginTop: 2, letterSpacing: "0.04em",
         }}>
           {isComplete ? "complete!" : "seen"}

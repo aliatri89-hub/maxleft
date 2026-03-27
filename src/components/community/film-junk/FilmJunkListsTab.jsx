@@ -129,7 +129,7 @@ export default function FilmJunkListsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#888", fontSize: 13 }}>Loading lists...</div>
+        <div style={{ color: "#bbb", fontSize: 13 }}>Loading lists...</div>
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function FilmJunkListsTab({
       <div style={{ padding: "0 0 100px" }}>
         <ListsHero community={community} seenStats={{ seen: 0, total: 0, pct: 0 }} accent={accent} />
         <div style={{ padding: "40px 16px", textAlign: "center" }}>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
             {error ? "Failed to load lists" : "Lists coming soon"}
           </div>
         </div>
@@ -285,7 +285,7 @@ function HostShelf({ host, films, isSeen, getItemId, onToggle, accent }) {
           letterSpacing: "0.02em", textTransform: "uppercase",
         }}>{host.name}'s List</div>
         <div style={{
-          fontSize: 11, color: "rgba(255,255,255,0.25)",
+          fontSize: 11, color: "rgba(255,255,255,0.78)",
           marginLeft: "auto",
         }}>
           {films.length} films
@@ -364,7 +364,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
               lineHeight: 1.2, textAlign: "center",
             }}>{item.title}</div>
           </div>
@@ -459,7 +459,7 @@ function ListsHero({ community, seenStats, accent }) {
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>{heroTagline}</div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)",
+          fontSize: 13, color: "rgba(255,255,255,0.7)",
           textAlign: "center", maxWidth: 300,
           margin: "0 auto 20px",
         }}>{heroDescription}</div>

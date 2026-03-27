@@ -341,7 +341,7 @@ export default function GamesHubPublic() {
       }}>
         <div style={{
           fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-          letterSpacing: 4, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
+          letterSpacing: 4, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
         }}>
           M▶NTL
         </div>
@@ -350,7 +350,7 @@ export default function GamesHubPublic() {
         }}>
           Games
         </h1>
-        <div style={{ fontSize: 13, color: "#8a7e6b", marginTop: 6 }}>{getTodayFormatted()}</div>
+        <div style={{ fontSize: 13, color: "#b5a994", marginTop: 6 }}>{getTodayFormatted()}</div>
       </div>
 
       {/* Badges teaser — locked state with CTA */}
@@ -392,7 +392,7 @@ export default function GamesHubPublic() {
           }}>
             Badges
           </div>
-          <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2, lineHeight: 1.35 }}>
+          <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2, lineHeight: 1.35 }}>
             A scavenger hunt through your favorite podcasts.
           </div>
         </div>
@@ -459,7 +459,7 @@ export default function GamesHubPublic() {
                 }}>
                   {game.name}
                 </div>
-                <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2 }}>{game.tagline}</div>
+                <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2 }}>{game.tagline}</div>
               </div>
 
               <StatusPill gameId={game.id} color={game.color} />
@@ -519,7 +519,7 @@ export default function GamesHubPublic() {
               }}>
                 {game.name}
               </div>
-              <div style={{ fontSize: 11, color: "#8a7e6b", marginTop: 2 }}>{game.tagline}</div>
+              <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2 }}>{game.tagline}</div>
             </div>
             <ExternalLinkIcon />
           </button>
@@ -540,7 +540,7 @@ export default function GamesHubPublic() {
         }}>
           Track your stats. Earn badges. Join the community.
         </div>
-        <div style={{ fontSize: 12, color: "#8a7e6b", marginBottom: 14, lineHeight: 1.4 }}>
+        <div style={{ fontSize: 12, color: "#b5a994", marginBottom: 14, lineHeight: 1.4 }}>
           Sign up for MANTL to save your game history, compete on streaks, and unlock badges across your favorite film franchises.
         </div>
         <button

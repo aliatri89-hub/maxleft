@@ -189,7 +189,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
         {filteredShelves.length === 0 && (
           <div style={{
             gridColumn: "1 / -1",
-            textAlign: "center", color: "rgba(255,255,255,0.3)",
+            textAlign: "center", color: "rgba(255,255,255,0.7)",
             fontSize: 14, padding: "48px 20px", fontStyle: "italic",
           }}>
             {filter !== "all" ? "No films match this filter" : "No episodes in this season yet"}
@@ -259,7 +259,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                       ) : (
                         <div className="chapo-poster-img" style={{
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 9, color: "#555", textAlign: "center", padding: 4,
+                          fontSize: 9, color: "#aaa", textAlign: "center", padding: 4,
                         }}>
                           {item.title}
                         </div>
@@ -283,7 +283,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}>
-                    {item.title} <span style={{ color: "rgba(255,255,255,0.2)" }}>({item.year})</span>
+                    {item.title} <span style={{ color: "rgba(255,255,255,0.72)" }}>({item.year})</span>
                   </div>
                 ))}
               </div>

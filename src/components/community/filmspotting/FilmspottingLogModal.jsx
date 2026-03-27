@@ -70,13 +70,13 @@ export default function FilmspottingLogModal({
               fontSize: 16, fontWeight: 700, color: "#fff",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{item.title}</div>
-            <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+            <div style={{ fontSize: 12, color: "#bbb", marginTop: 2 }}>
               {item.year}
             </div>
           </div>
           <AdminItemEditor item={item} userId={userId} miniseries={miniseries || []} onSaved={onClose} />
           <button onClick={onClose} style={{
-            background: "none", border: "none", color: "#666",
+            background: "none", border: "none", color: "#aaa",
             fontSize: 20, cursor: "pointer", padding: 4, alignSelf: "flex-start",
           }}>✕</button>
         </div>
@@ -92,7 +92,7 @@ export default function FilmspottingLogModal({
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "#F5C518", textTransform: "uppercase", letterSpacing: "0.04em" }}>{isThisEpPlaying && isPlaying ? "Now Playing" : "Listen on MANTL"}</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{matchedEpisode.title}</div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.78)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{matchedEpisode.title}</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.6)" strokeWidth="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
           </div>
@@ -113,7 +113,7 @@ export default function FilmspottingLogModal({
 
         {/* Star rating */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 11, color: "#bbb", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Rating
           </div>
           <div style={{ display: "flex", gap: 2 }}>
@@ -142,7 +142,7 @@ export default function FilmspottingLogModal({
         </div>
         {/* Date */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: "#888", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 11, color: "#bbb", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Date Watched
           </div>
           <input
@@ -173,7 +173,7 @@ export default function FilmspottingLogModal({
               padding: "12px 16px", borderRadius: 10,
               background: "rgba(255,255,255,0.05)",
               border: "1px solid rgba(255,255,255,0.1)",
-              color: "#888", fontSize: 14, cursor: "pointer",
+              color: "#bbb", fontSize: 14, cursor: "pointer",
             }}>👁</button>
           )}
 

@@ -42,7 +42,7 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
         }}>
           Patreon Commentaries
         </div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 4 }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>
           Track every commentary series from the Patreon feed
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
         <div style={{
           textAlign: "center", padding: "40px 0",
           fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-          color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          color: "rgba(255,255,255,0.78)", fontStyle: "italic",
         }}>
           No commentary series yet
         </div>

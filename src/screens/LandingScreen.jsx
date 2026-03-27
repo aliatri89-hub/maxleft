@@ -418,7 +418,7 @@ const featureStyles = `
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.78);
   }
   .badge-back {
     transform: rotateY(180deg);
@@ -632,7 +632,7 @@ const featureStyles = `
   .tf-prompt {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.78);
     margin-bottom: 8px;
     letter-spacing: 0.04em;
   }
@@ -694,7 +694,7 @@ const featureStyles = `
     border: none;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.6rem;
-    color: rgba(255,255,255,0.35);
+    color: rgba(255,255,255,0.72);
     cursor: pointer;
     letter-spacing: 0.04em;
     text-decoration: underline;
@@ -702,7 +702,7 @@ const featureStyles = `
     transition: color 0.2s ease;
   }
   .tf-try-again:hover {
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.78);
   }
 
 
@@ -927,7 +927,7 @@ const featureStyles = `
   }
   .flip-card-back-ep {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; color: rgba(255,255,255,0.3);
+    font-size: 9px; color: rgba(255,255,255,0.7);
     text-transform: uppercase; letter-spacing: 0.04em;
   }
   .flip-card-play-btn {
@@ -944,7 +944,7 @@ const featureStyles = `
   .flip-nudge {
     text-align: center;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px; color: rgba(255,255,255,0.25);
+    font-size: 10px; color: rgba(255,255,255,0.78);
     letter-spacing: 0.06em; text-transform: uppercase;
     padding: 8px 0 0;
     animation: flipNudgePulse 2.5s ease infinite;
@@ -976,7 +976,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.72rem;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255,255,255,0.78);
     text-align: center;
     margin-top: 10px;
   }
@@ -1058,7 +1058,7 @@ const featureStyles = `
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -1391,7 +1391,7 @@ function LandingScreen({ onSignIn }) {
             fontFamily: "'Barlow Condensed', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Enter your code
           </div>
-          <div style={{ color: '#9a938a', fontSize: '0.82rem', lineHeight: 1.5, marginBottom: 8,
+          <div style={{ color: '#c8c1b8', fontSize: '0.82rem', lineHeight: 1.5, marginBottom: 8,
             fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic' }}>
             We sent a code to <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
           </div>
@@ -1429,7 +1429,7 @@ function LandingScreen({ onSignIn }) {
       return (
         <div className="landing-email-section">
           {emailError && <div className="landing-email-error">{emailError}</div>}
-          <div style={{ color: '#9a938a', fontSize: '0.82rem',
+          <div style={{ color: '#c8c1b8', fontSize: '0.82rem',
             fontFamily: "'Barlow Condensed', sans-serif", fontStyle: 'italic' }}>
             Creating account for <strong style={{ color: '#f5f0eb', fontStyle: 'normal' }}>{email}</strong>
           </div>
@@ -1637,7 +1637,7 @@ function LandingScreen({ onSignIn }) {
                           <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                         </svg>
-                        <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <span style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                           tap to flip
                         </span>
                       </div>
@@ -1646,7 +1646,7 @@ function LandingScreen({ onSignIn }) {
                     {/* ── BACK: podcasts ── */}
                     <div className="flip-card-back" onClick={(e) => e.stopPropagation()}>
                       <div style={{
-                        fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.25)",
+                        fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)",
                         fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase",
                         letterSpacing: "0.08em", marginBottom: 6,
                         display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1654,7 +1654,7 @@ function LandingScreen({ onSignIn }) {
                         <span>{movie.title} — covered by</span>
                         <span
                           onClick={(e) => { e.stopPropagation(); setFlippedCards(prev => { const n = new Set(prev); n.delete(idx); return n; }); }}
-                          style={{ cursor: "pointer", color: "rgba(255,255,255,0.2)", fontSize: 12, padding: "0 2px" }}
+                          style={{ cursor: "pointer", color: "rgba(255,255,255,0.72)", fontSize: 12, padding: "0 2px" }}
                         >✕</span>
                       </div>
                       {movie.podcasts.map((p, i) => {
@@ -1777,7 +1777,7 @@ function LandingScreen({ onSignIn }) {
           </div>
           <div style={{
             fontFamily: "'Barlow Condensed', sans-serif",
-            fontSize: '0.82rem', color: '#9a938a', lineHeight: 1.5,
+            fontSize: '0.82rem', color: '#c8c1b8', lineHeight: 1.5,
             marginBottom: 12,
           }}>
             Complete franchises and collect badges along the way.
@@ -1900,7 +1900,7 @@ function LandingScreen({ onSignIn }) {
                     <div className="tf-result">
                       <div className="tf-result-rank" style={{
                         color: isPerfect ? '#d4af37' : pct >= 90 ? '#f0ece4' : '#8a8070',
-                      }}>${userTotal}M<span style={{ fontSize: '0.9rem', color: '#666' }}>/${optimalTotal}M</span></div>
+                      }}>${userTotal}M<span style={{ fontSize: '0.9rem', color: '#aaa' }}>/${optimalTotal}M</span></div>
                       <div className="tf-result-diff" style={{
                         color: isPerfect ? '#d4af37' : pct >= 90 ? '#4ade80' : pct >= 75 ? '#f59e0b' : '#ef4444',
                         fontStyle: 'italic',

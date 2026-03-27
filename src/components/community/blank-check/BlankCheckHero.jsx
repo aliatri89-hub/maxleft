@@ -163,7 +163,7 @@ export default function BlankCheckHero({ community, miniseries, progress, active
           <div style={{ textAlign: "center", margin: "0 auto 20px" }}>
             <div style={{
               fontSize: 13, fontWeight: 700,
-              color: "rgba(255,255,255,0.55)",
+              color: "rgba(255,255,255,0.72)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase",
               letterSpacing: "0.12em",
@@ -279,7 +279,7 @@ function StatColumn({ value, suffix, label, color, reveal }) {
         }}>
           {value}
           {suffix && (
-            <span style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.3)" }}>
+            <span style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
               {suffix}
             </span>
           )}
@@ -287,7 +287,7 @@ function StatColumn({ value, suffix, label, color, reveal }) {
       </div>
       <div style={{
         fontSize: 10, fontWeight: 600,
-        color: "rgba(255,255,255,0.4)",
+        color: "rgba(255,255,255,0.78)",
         textTransform: "uppercase",
         letterSpacing: "0.1em",
         marginTop: 4,
@@ -322,7 +322,7 @@ function BlankCheck({ director }) {
     }}>
       <div style={{
         fontSize: 10, fontWeight: 700,
-        color: "rgba(255,255,255,0.4)",
+        color: "rgba(255,255,255,0.78)",
         fontFamily: "'Barlow Condensed', sans-serif",
         textTransform: "uppercase",
         letterSpacing: "0.1em",
@@ -527,7 +527,7 @@ function PatreonRings({ stats, accent }) {
           </div>
         </div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.4)",
+          fontSize: 9, color: "rgba(255,255,255,0.78)",
           marginTop: 2, letterSpacing: "0.04em",
         }}>
           watched

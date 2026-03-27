@@ -119,7 +119,7 @@ export default function BigPictureFilmographyTab({
       {visibleSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 20px",
-          color: "rgba(255,255,255,0.3)", fontSize: 14,
+          color: "rgba(255,255,255,0.7)", fontSize: 14,
         }}>
           {filter !== "all" ? "No films match this filter" : "No films found"}
         </div>
@@ -246,7 +246,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: 6,
           }}>
-            <div style={{ fontSize: 10, color: "#888", textAlign: "center", lineHeight: 1.2 }}>
+            <div style={{ fontSize: 10, color: "#bbb", textAlign: "center", lineHeight: 1.2 }}>
               {item.title}
             </div>
           </div>
@@ -309,7 +309,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
         {item.title}
       </div>
       {item.year && (
-        <div style={{ fontSize: 9, color: "#666", marginTop: 2 }}>{item.year}</div>
+        <div style={{ fontSize: 9, color: "#aaa", marginTop: 2 }}>{item.year}</div>
       )}
     </div>
   );

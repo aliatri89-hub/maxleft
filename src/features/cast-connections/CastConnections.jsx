@@ -64,7 +64,7 @@ function LoadingState() {
         borderTopColor: "#e8d3a2", borderRadius: "50%",
         animation: "cc-spin 0.8s linear infinite",
       }} />
-      <div style={{ marginTop: 16, fontSize: 13, color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace" }}>
+      <div style={{ marginTop: 16, fontSize: 13, color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace" }}>
         Loading puzzle...
       </div>
     </div>
@@ -248,7 +248,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         <BackButton onBack={onBack} />
         <div style={{ textAlign: "center", padding: "80px 24px" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎞️</div>
-          <div style={{ fontSize: 15, color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div style={{ fontSize: 15, color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace" }}>
             {error || "No puzzle available today"}
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       }}>
         <div style={{
           fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-          letterSpacing: 4, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
+          letterSpacing: 4, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
         }}>
           M▶NTL
         </div>
@@ -301,7 +301,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         }}>
           Cast Connections
         </h1>
-        <div style={{ fontSize: 12, color: "#8a7e6b", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
+        <div style={{ fontSize: 12, color: "#b5a994", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
           {puzzleNumber ? `#${puzzleNumber} · ` : ""}
           {"★".repeat(puzzle.difficulty === "hard" ? 5 : puzzle.difficulty === "medium" ? 4 : 3)}
         </div>
@@ -310,7 +310,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       {/* How to play — only shown during active play */}
       {!gameOver && (
         <div style={{
-          fontSize: 12, color: "#8a7e6b", textAlign: "center",
+          fontSize: 12, color: "#b5a994", textAlign: "center",
           fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
           marginBottom: 16, padding: "0 8px",
         }}>
@@ -326,7 +326,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
           }}>
             {won ? "Perfect Take!" : "That's a Wrap"}
           </div>
-          <div style={{ fontSize: 13, color: "#8a7e6b", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div style={{ fontSize: 13, color: "#b5a994", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
             {won
               ? `Solved with ${mistakes === 0 ? "no" : mistakes} mistake${mistakes !== 1 ? "s" : ""}`
               : "Better luck tomorrow"}

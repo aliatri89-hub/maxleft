@@ -33,7 +33,7 @@ const S = {
   },
   title: {
     fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-    letterSpacing: 3, textTransform: "uppercase", color: "#8a7e6b", marginBottom: 4,
+    letterSpacing: 3, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
   },
   year: {
     fontFamily: "'Bebas Neue', sans-serif", fontSize: 52, letterSpacing: 2,
@@ -49,7 +49,7 @@ const S = {
     background: "rgba(124,184,232,0.06)", border: "1px solid rgba(124,184,232,0.12)",
     borderRadius: 8, marginBottom: 16, fontSize: 13,
   },
-  scoreLabel: { color: "#8a7e6b" },
+  scoreLabel: { color: "#b5a994" },
   scoreValue: { fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 18, color: "#7cb8e8" },
 
   // Current movie card — static position (fades when dragging)
@@ -76,7 +76,7 @@ const S = {
     fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18,
     color: "#f5f0e8", lineHeight: 1.2,
   },
-  currentPrompt: { fontSize: 12, color: "#8a7e6b", marginTop: 5 },
+  currentPrompt: { fontSize: 12, color: "#b5a994", marginTop: 5 },
 
   // Drag ghost — follows finger
   dragGhost: (x, y) => ({
@@ -146,28 +146,28 @@ const S = {
     borderRadius: 12, marginBottom: 20, animation: "rt-fade-in 0.5s ease",
   },
   gameoverLabel: {
-    fontSize: 11, textTransform: "uppercase", letterSpacing: 3, color: "#8a7e6b", marginBottom: 6,
+    fontSize: 11, textTransform: "uppercase", letterSpacing: 3, color: "#b5a994", marginBottom: 6,
   },
   gameoverScore: {
     fontFamily: "'Bebas Neue', sans-serif", fontSize: 60, letterSpacing: 2, color: "#7cb8e8", lineHeight: 1,
   },
-  gameoverMax: { fontSize: 13, color: "#8a7e6b", marginTop: 4 },
+  gameoverMax: { fontSize: 13, color: "#b5a994", marginTop: 4 },
   gameoverMsg: { fontSize: 15, color: "#f5f0e8", marginTop: 14, lineHeight: 1.5 },
   shareBtn: {
     marginTop: 18, padding: "11px 28px", background: "#7cb8e8", color: "#0f0d0b",
     border: "none", borderRadius: 8, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
     fontSize: 15, cursor: "pointer",
   },
-  nextTimer: { fontSize: 12, color: "#8a7e6b", marginTop: 10 },
+  nextTimer: { fontSize: 12, color: "#b5a994", marginTop: 10 },
   loading: {
     minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "#0f0d0b", color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace",
+    background: "#0f0d0b", color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 15,
   },
   errorWrap: {
     minHeight: "100vh", display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center", background: "#0f0d0b",
-    color: "#8a7e6b", fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
+    color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
     padding: 32, textAlign: "center",
   },
   placementDots: {
@@ -483,7 +483,7 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
           {/* How to play */}
           {isPlaying && (
             <div style={{
-              fontSize: 12, color: "#8a7e6b", textAlign: "center",
+              fontSize: 12, color: "#b5a994", textAlign: "center",
               fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
               marginBottom: 12, padding: "0 8px", maxWidth: 420,
             }}>

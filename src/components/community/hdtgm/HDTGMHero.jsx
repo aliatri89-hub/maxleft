@@ -63,7 +63,7 @@ export default function HDTGMHero({ community, miniseries, progress }) {
                 fontFamily: "'Barlow Condensed', sans-serif",
               }}>{stats.completed}</div>
               <div style={{
-                fontSize: 9, color: "rgba(255,255,255,0.35)",
+                fontSize: 9, color: "rgba(255,255,255,0.72)",
                 textTransform: "uppercase", letterSpacing: "0.06em",
               }}>
                 Films Watched

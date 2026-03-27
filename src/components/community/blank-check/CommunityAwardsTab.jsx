@@ -129,7 +129,7 @@ export default function CommunityAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#888", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function CommunityAwardsTab({
           fontFamily: "'Barlow Condensed', sans-serif",
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 The Blankies</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -163,13 +163,13 @@ export default function CommunityAwardsTab({
           The Blankies
         </div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.5)",
+          fontSize: 13, color: "rgba(255,255,255,0.7)",
           textAlign: "center", marginTop: 4,
         }}>
           The Annual Blank Check Awards
         </div>
         <div style={{
-          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)",
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.08em", textTransform: "uppercase",
           textAlign: "center", marginTop: 10,
@@ -374,7 +374,7 @@ export default function CommunityAwardsTab({
       {allYearsData.every(yd => yd.standard.length === 0 && yd.ben.length === 0) && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
         }}>No picks added{selectedYear !== "all" ? ` for ${selectedYear}` : ""} yet</div>
       )}
     </div>
@@ -450,7 +450,7 @@ function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast,
     <div style={{ marginBottom: isLast ? 0 : 4, paddingBottom: isLast ? 0 : 4 }}>
       {/* Category header */}
       <div style={{
-        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.35)",
+        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.72)",
         fontFamily: "'IBM Plex Mono', monospace",
         letterSpacing: "0.06em", textTransform: "uppercase",
         marginBottom: 10, paddingLeft: 16,
@@ -546,7 +546,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)",
+              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
               lineHeight: 1.2, textAlign: "center",
             }}>{card.title}</div>
           </div>
@@ -592,7 +592,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
       {/* Subtitle for performance categories */}
       {isPerformance && card.subtitle && (
         <div style={{
-          fontSize: 8, color: "rgba(255,255,255,0.3)", marginTop: 1,
+          fontSize: 8, color: "rgba(255,255,255,0.7)", marginTop: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           fontStyle: "italic",
         }}>{card.subtitle}</div>

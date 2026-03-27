@@ -340,7 +340,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           <button onClick={onClose} style={{
             background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8,
             width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#888", fontSize: 14, cursor: "pointer",
+            color: "#bbb", fontSize: 14, cursor: "pointer",
           }}>✕</button>
         </div>
 
@@ -406,7 +406,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
               >{n}</button>
             ))}
             <span style={{
-              fontSize: 10, color: "#52525b",
+              fontSize: 10, color: "#9a9a9f",
               fontFamily: "'Barlow Condensed', sans-serif",
             }}>episodes</span>
           </div>
@@ -433,7 +433,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           {/* Shelf picker (searchable multi-select pills) */}
           {stagedEpisodes.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <Label>Add to shelves <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "#52525b" }}>— search & tap</span></Label>
+              <Label>Add to shelves <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "#9a9a9f" }}>— search & tap</span></Label>
               <input
                 type="text"
                 placeholder="Filter shelves…"
@@ -490,7 +490,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                   );
                 })}
                 {filteredShelfOptions.length === 0 && (
-                  <div style={{ fontSize: 11, color: "#52525b", fontStyle: "italic", padding: "4px 0" }}>
+                  <div style={{ fontSize: 11, color: "#9a9a9f", fontStyle: "italic", padding: "4px 0" }}>
                     No shelves match "{shelfSearch}"
                   </div>
                 )}
@@ -524,7 +524,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
             }}>
               {/* Episode title from RSS */}
               <div style={{
-                fontSize: 10, color: "#52525b", fontWeight: 600,
+                fontSize: 10, color: "#9a9a9f", fontWeight: 600,
                 fontFamily: "'Barlow Condensed', sans-serif",
                 textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6,
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -541,7 +541,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                   <div style={{
                     width: 40, height: 60, borderRadius: 6, background: "#27272a",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#52525b", fontSize: 12, flexShrink: 0,
+                    color: "#9a9a9f", fontSize: 12, flexShrink: 0,
                   }}>?</div>
                 )}
 
@@ -623,7 +623,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                   display: "flex", alignItems: "center", gap: 12,
                 }}>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, color: "#52525b",
+                    fontSize: 9, fontWeight: 700, color: "#9a9a9f",
                     fontFamily: "'Barlow Condensed', sans-serif",
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>Verdicts</span>

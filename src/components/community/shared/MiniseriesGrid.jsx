@@ -88,7 +88,7 @@ export default function MiniseriesGrid({
       {filtered.length === 0 && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          color: "rgba(255,255,255,0.25)", fontSize: 14,
+          color: "rgba(255,255,255,0.78)", fontSize: 14,
           fontFamily: "'Barlow Condensed', sans-serif",
           fontStyle: "italic",
         }}>
@@ -151,7 +151,7 @@ function GridTile({ series, accent, onTap }) {
             <span style={{ fontSize: 28, marginBottom: 4 }}>{series.director_emoji}</span>
           )}
           <div style={{
-            fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)",
+            fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)",
             fontFamily: "'Barlow Condensed', sans-serif",
             textAlign: "center", lineHeight: 1.2,
           }}>
@@ -249,7 +249,7 @@ function GridTile({ series, accent, onTap }) {
         {series.director_name && series.director_name !== "." && (
           <div style={{
             fontSize: 8, fontWeight: 600,
-            color: "rgba(255,255,255,0.5)",
+            color: "rgba(255,255,255,0.7)",
             fontFamily: "'Barlow Condensed', sans-serif",
             textAlign: "center",
             textShadow: "0 1px 3px rgba(0,0,0,0.8)",

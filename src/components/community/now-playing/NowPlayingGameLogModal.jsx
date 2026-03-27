@@ -272,7 +272,7 @@ export default function NowPlayingGameLogModal({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#888",
+              color: "#bbb",
               fontSize: 18,
               cursor: "pointer",
             }}
@@ -333,12 +333,12 @@ export default function NowPlayingGameLogModal({
             >
               {item.title}
             </div>
-            <div style={{ fontSize: 12, color: "#999", marginBottom: 2 }}>
+            <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>
               {item.creator}
               {item.year ? ` · ${item.year}` : ""}
             </div>
             {item.episode_number && (
-              <div style={{ fontSize: 11, color: "#666", marginTop: 2 }}>
+              <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>
                 {item.episode_number}
               </div>
             )}
@@ -488,7 +488,7 @@ export default function NowPlayingGameLogModal({
                     <div
                       style={{
                         fontSize: 10,
-                        color: "rgba(255,255,255,0.4)",
+                        color: "rgba(255,255,255,0.78)",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -557,7 +557,7 @@ export default function NowPlayingGameLogModal({
                       textTransform: "uppercase", letterSpacing: 0.5,
                     }}>Listen on Patreon</div>
                     <div style={{
-                      fontSize: 10, color: "rgba(255,255,255,0.4)",
+                      fontSize: 10, color: "rgba(255,255,255,0.78)",
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                     }}>{matchedEpisode.title}</div>
                   </div>
@@ -687,7 +687,7 @@ export default function NowPlayingGameLogModal({
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#888",
+              color: "#bbb",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 8,
@@ -744,7 +744,7 @@ export default function NowPlayingGameLogModal({
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#888",
+              color: "#bbb",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 8,
@@ -801,7 +801,7 @@ export default function NowPlayingGameLogModal({
             style={{
               fontSize: 10,
               fontWeight: 600,
-              color: "#888",
+              color: "#bbb",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
               marginBottom: 6,
@@ -838,7 +838,7 @@ export default function NowPlayingGameLogModal({
                         display: "inline-block",
                       }}
                     >
-                      <span style={{ color: "#444" }}>★</span>
+                      <span style={{ color: "#ddd" }}>★</span>
                       <span
                         style={{
                           position: "absolute",
@@ -968,7 +968,7 @@ export default function NowPlayingGameLogModal({
               padding: "10px 0",
               background: "none",
               border: "none",
-              color: "#666",
+              color: "#aaa",
               fontSize: 13,
               cursor: "pointer",
             }}
@@ -1001,7 +1001,7 @@ export default function NowPlayingGameLogModal({
             <div
               style={{
                 fontSize: 11,
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.78)",
                 fontFamily: "'Barlow Condensed', sans-serif",
                 textTransform: "uppercase",
                 letterSpacing: 1.5,
@@ -1062,7 +1062,7 @@ export default function NowPlayingGameLogModal({
                 <div
                   style={{
                     fontSize: 10,
-                    color: "rgba(255,255,255,0.4)",
+                    color: "rgba(255,255,255,0.78)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -1096,7 +1096,7 @@ export default function NowPlayingGameLogModal({
               style={{
                 background: "none",
                 border: "none",
-                color: "rgba(255,255,255,0.3)",
+                color: "rgba(255,255,255,0.7)",
                 fontSize: 12,
                 cursor: "pointer",
                 padding: "6px 16px",
@@ -1121,7 +1121,7 @@ export default function NowPlayingGameLogModal({
             }}
           >
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)",
+              fontSize: 11, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
               textTransform: "uppercase", letterSpacing: 1.5,
             }}>Logged! Hear what the hosts thought</div>
@@ -1157,7 +1157,7 @@ export default function NowPlayingGameLogModal({
                   textTransform: "uppercase", letterSpacing: 0.5,
                 }}>Listen on Patreon</div>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.4)",
+                  fontSize: 10, color: "rgba(255,255,255,0.78)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
                 }}>{matchedEpisode.title}</div>
               </div>
@@ -1171,7 +1171,7 @@ export default function NowPlayingGameLogModal({
               onClick={() => { setEpisodeToast(false); onClose(); }}
               style={{
                 background: "none", border: "none",
-                color: "rgba(255,255,255,0.3)",
+                color: "rgba(255,255,255,0.7)",
                 fontSize: 12, cursor: "pointer", padding: "6px 16px",
               }}
             >Not now</button>
@@ -1206,7 +1206,7 @@ function ListenOnBadges({ title, patreonUrl, isPatreon }) {
   const labelStyle = {
     fontSize: 10,
     fontWeight: 600,
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.78)",
     whiteSpace: "nowrap",
   };
 

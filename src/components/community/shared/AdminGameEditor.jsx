@@ -128,7 +128,7 @@ const handleSearch = async () => {
           border: "none", borderRadius: "50%",
           width: 28, height: 28,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#555", fontSize: 14, cursor: "pointer",
+          color: "#aaa", fontSize: 14, cursor: "pointer",
           flexShrink: 0,
         }}
         title="Admin: Edit game"
@@ -154,7 +154,7 @@ const handleSearch = async () => {
           textTransform: "uppercase", letterSpacing: "0.08em",
         }}>Game Editor</div>
         <button onClick={() => setOpen(false)} style={{
-          background: "none", border: "none", color: "#666",
+          background: "none", border: "none", color: "#aaa",
           fontSize: 12, cursor: "pointer",
         }}>close</button>
       </div>
@@ -206,7 +206,7 @@ const handleSearch = async () => {
                     <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {r.name}
                     </div>
-                    <div style={{ fontSize: 9, color: "#888" }}>
+                    <div style={{ fontSize: 9, color: "#bbb" }}>
                       {yr}{platforms ? ` · ${platforms}` : ""} · rawg:{r.id}
                     </div>
                   </div>
@@ -251,7 +251,7 @@ const handleSearch = async () => {
       {rawgId && (
         <div style={{ marginBottom: 8 }}>
           <label style={labelStyle}>RAWG</label>
-          <div style={{ fontSize: 10, color: "#888" }}>
+          <div style={{ fontSize: 10, color: "#bbb" }}>
             ID: {rawgId} · Slug: {rawgSlug}
           </div>
         </div>
@@ -300,7 +300,7 @@ const handleSearch = async () => {
 
       {rawgId && (
         <a href={`https://rawg.io/games/${rawgSlug || rawgId}`} target="_blank" rel="noopener noreferrer"
-          style={{ display: "block", marginTop: 8, fontSize: 9, color: "rgba(255,255,255,0.25)", textDecoration: "none" }}>
+          style={{ display: "block", marginTop: 8, fontSize: 9, color: "rgba(255,255,255,0.78)", textDecoration: "none" }}>
           View on RAWG → rawg.io/games/{rawgSlug || rawgId}
         </a>
       )}
@@ -309,7 +309,7 @@ const handleSearch = async () => {
 }
 
 const labelStyle = {
-  display: "block", fontSize: 9, fontWeight: 600, color: "#888",
+  display: "block", fontSize: 9, fontWeight: 600, color: "#bbb",
   textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3,
 };
 const inputStyle = {
@@ -320,5 +320,5 @@ const inputStyle = {
 const smallBtnStyle = {
   padding: "0 12px", background: "rgba(255,255,255,0.08)",
   border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6,
-  color: "#ccc", fontSize: 11, cursor: "pointer", flexShrink: 0,
+  color: "#ddd", fontSize: 11, cursor: "pointer", flexShrink: 0,
 };

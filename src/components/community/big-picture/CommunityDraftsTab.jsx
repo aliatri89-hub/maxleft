@@ -129,7 +129,7 @@ export default function CommunityDraftsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#888", fontSize: 13 }}>Loading drafts...</div>
+        <div style={{ color: "#bbb", fontSize: 13 }}>Loading drafts...</div>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function CommunityDraftsTab({
         }}>
           📋 Drafts
         </div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.35)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
           {error ? "Failed to load drafts" : "Draft data coming soon"}
         </div>
       </div>
@@ -280,7 +280,7 @@ export default function CommunityDraftsTab({
             textAlign: "center",
             padding: "40px 16px",
             fontSize: 13,
-            color: "rgba(255,255,255,0.25)",
+            color: "rgba(255,255,255,0.78)",
             fontStyle: "italic",
           }}
         >
@@ -389,7 +389,7 @@ function DraftsHero({ community, seenStats, accent, draftTitle }) {
         <div
           style={{
             fontSize: 13,
-            color: "rgba(255,255,255,0.5)",
+            color: "rgba(255,255,255,0.7)",
             textAlign: "center",
             maxWidth: 300,
             margin: "0 auto 20px",
@@ -444,7 +444,7 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.35)",
+          color: "rgba(255,255,255,0.72)",
           marginBottom: 12,
         }}
       >
@@ -589,7 +589,7 @@ function DraftCategoryShelf({
         style={{
           fontSize: 11,
           fontWeight: 700,
-          color: "rgba(255,255,255,0.35)",
+          color: "rgba(255,255,255,0.72)",
           fontFamily: "'IBM Plex Mono', monospace",
           letterSpacing: "0.06em",
           textTransform: "uppercase",
@@ -745,7 +745,7 @@ function DraftCard({ card, isSeen, onTap }) {
               style={{
                 fontSize: 9,
                 fontWeight: 600,
-                color: "rgba(255,255,255,0.3)",
+                color: "rgba(255,255,255,0.7)",
                 lineHeight: 1.2,
               }}
             >
@@ -754,7 +754,7 @@ function DraftCard({ card, isSeen, onTap }) {
             <div
               style={{
                 fontSize: 8,
-                color: "rgba(255,255,255,0.15)",
+                color: "rgba(255,255,255,0.78)",
                 marginTop: 2,
               }}
             >
@@ -809,7 +809,7 @@ function DraftCard({ card, isSeen, onTap }) {
       <div
         style={{
           fontSize: 9,
-          color: "rgba(255,255,255,0.25)",
+          color: "rgba(255,255,255,0.78)",
           marginTop: 2,
         }}
       >

@@ -650,7 +650,7 @@ export default function AdminItemEditor({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#555",
+          color: "#aaa",
           fontSize: 14,
           cursor: "pointer",
           flexShrink: 0,
@@ -847,7 +847,7 @@ export default function AdminItemEditor({
                     value={backdropPath}
                     onChange={(e) => setBackdropPath(e.target.value)}
                     placeholder="/abcdef123.jpg (TMDB path or full URL)"
-                    style={{ ...S.input, fontSize: 10, color: "#999" }}
+                    style={{ ...S.input, fontSize: 10, color: "#ddd" }}
                   />
                 </div>
                 {backdropPath && (
@@ -1002,7 +1002,7 @@ export default function AdminItemEditor({
               <label style={S.label}>
                 Shelf{" "}
                 {currentShelf ? (
-                  <span style={{ color: "#666", fontWeight: 400 }}>
+                  <span style={{ color: "#aaa", fontWeight: 400 }}>
                     (currently: {currentShelf.title})
                   </span>
                 ) : (
@@ -1068,13 +1068,13 @@ export default function AdminItemEditor({
               </div>
 
               {quickMatchLoading && (
-                <div style={{ fontSize: 11, color: "#888", padding: "8px 0" }}>
+                <div style={{ fontSize: 11, color: "#bbb", padding: "8px 0" }}>
                   Loading latest episodes…
                 </div>
               )}
 
               {quickMatchDone && quickMatchEps.length === 0 && (
-                <div style={{ fontSize: 11, color: "#666", padding: "4px 0" }}>
+                <div style={{ fontSize: 11, color: "#aaa", padding: "4px 0" }}>
                   No recent episodes found in feed.
                 </div>
               )}
@@ -1105,7 +1105,7 @@ export default function AdminItemEditor({
                         color: isBest ? "#facc15" : "#ccc",
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{ep.title}</div>
-                      <div style={{ fontSize: 9, color: "#666" }}>
+                      <div style={{ fontSize: 9, color: "#aaa" }}>
                         {ep.pubDate ? new Date(ep.pubDate).toLocaleDateString() : ""}
                         {ep.score > 0 && <span style={{ marginLeft: 6, color: ep.score >= 50 ? "#facc15" : "#555" }}>
                           {ep.score}% match
@@ -1177,7 +1177,7 @@ export default function AdminItemEditor({
               value={rssGuid}
               onChange={(e) => setRssGuid(e.target.value)}
               placeholder="RSS episode GUID"
-              style={{ ...S.input, fontSize: 10, color: "#888" }}
+              style={{ ...S.input, fontSize: 10, color: "#bbb" }}
             />
           </div>
 
@@ -1240,7 +1240,7 @@ export default function AdminItemEditor({
               <div
                 style={{
                   fontSize: 9,
-                  color: "#555",
+                  color: "#aaa",
                   marginBottom: 6,
                   wordBreak: "break-all",
                 }}
@@ -1324,7 +1324,7 @@ export default function AdminItemEditor({
                       style={{
                         padding: 12,
                         fontSize: 11,
-                        color: "#666",
+                        color: "#aaa",
                         textAlign: "center",
                       }}
                     >
@@ -1416,7 +1416,7 @@ export default function AdminItemEditor({
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: "#ccc",
+                color: "#ddd",
                 cursor: "pointer",
                 padding: "6px 0",
               }}
@@ -1428,7 +1428,7 @@ export default function AdminItemEditor({
                 style={{ accentColor: "#facc15" }}
               />
               Commentary Only
-              <span style={{ fontSize: 9, color: "#666" }}>
+              <span style={{ fontSize: 9, color: "#aaa" }}>
                 (Patreon tab — no green card frame)
               </span>
             </label>
@@ -1438,7 +1438,7 @@ export default function AdminItemEditor({
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: "#ccc",
+                color: "#ddd",
                 cursor: "pointer",
                 padding: "6px 0",
               }}
@@ -1450,7 +1450,7 @@ export default function AdminItemEditor({
                 style={{ accentColor: "#facc15" }}
               />
               Coming Soon
-              <span style={{ fontSize: 9, color: "#666" }}>
+              <span style={{ fontSize: 9, color: "#aaa" }}>
                 (episode seeded but not yet aired)
               </span>
             </label>
@@ -1465,7 +1465,7 @@ export default function AdminItemEditor({
             }}
           >
             <label style={S.label}>Debug</label>
-            <div style={{ fontSize: 10, color: "#555", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 10, color: "#aaa", lineHeight: 1.6 }}>
               <div>
                 <strong>ID:</strong>{" "}
                 <span style={{ fontFamily: "monospace", userSelect: "all" }}>
@@ -1492,7 +1492,7 @@ export default function AdminItemEditor({
                   <pre
                     style={{
                       fontSize: 9,
-                      color: "#666",
+                      color: "#aaa",
                       whiteSpace: "pre-wrap",
                       marginTop: 4,
                     }}
@@ -1530,7 +1530,7 @@ export default function AdminItemEditor({
             >
               Delete Item
             </div>
-            <div style={{ fontSize: 10, color: "#999", marginBottom: 10 }}>
+            <div style={{ fontSize: 10, color: "#ddd", marginBottom: 10 }}>
               This will permanently remove "{title}" from this community, including
               all user progress and badge items linked to it.
             </div>
@@ -1616,17 +1616,17 @@ const S = {
   },
   itemId: {
     fontSize: 9,
-    color: "#555",
+    color: "#aaa",
     fontFamily: "monospace",
   },
   timestamp: {
     fontSize: 9,
-    color: "#444",
+    color: "#ddd",
   },
   closeBtn: {
     background: "none",
     border: "none",
-    color: "#666",
+    color: "#aaa",
     fontSize: 14,
     cursor: "pointer",
     padding: "2px 6px",
@@ -1643,7 +1643,7 @@ const S = {
     background: "none",
     border: "none",
     borderBottom: "2px solid transparent",
-    color: "#666",
+    color: "#aaa",
     fontSize: 10,
     fontWeight: 600,
     textTransform: "uppercase",
@@ -1662,7 +1662,7 @@ const S = {
     display: "block",
     fontSize: 9,
     fontWeight: 600,
-    color: "#888",
+    color: "#bbb",
     textTransform: "uppercase",
     letterSpacing: "0.06em",
     marginBottom: 3,
@@ -1684,7 +1684,7 @@ const S = {
     background: "rgba(255,255,255,0.08)",
     border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: 6,
-    color: "#ccc",
+    color: "#ddd",
     fontSize: 11,
     cursor: "pointer",
     flexShrink: 0,
@@ -1728,7 +1728,7 @@ const S = {
   },
   searchMeta: {
     fontSize: 9,
-    color: "#888",
+    color: "#bbb",
   },
   posterRow: {
     display: "flex",
@@ -1744,7 +1744,7 @@ const S = {
   },
   posterLabel: {
     fontSize: 8,
-    color: "#888",
+    color: "#bbb",
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     marginBottom: 4,
@@ -1770,7 +1770,7 @@ const S = {
     display: "block",
     marginTop: 4,
     fontSize: 9,
-    color: "rgba(255,255,255,0.25)",
+    color: "rgba(255,255,255,0.78)",
     textDecoration: "none",
   },
   rssList: {
@@ -1810,6 +1810,6 @@ const S = {
   },
   rssMeta: {
     fontSize: 9,
-    color: "#666",
+    color: "#aaa",
   },
 };

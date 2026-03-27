@@ -120,7 +120,7 @@ export default function OriginalsScreen({
       <div style={{ paddingTop: 8 }}>
         {sortedShelves.length === 0 && (
           <div style={{
-            textAlign: "center", color: "rgba(255,255,255,0.3)",
+            textAlign: "center", color: "rgba(255,255,255,0.7)",
             fontSize: 14, padding: "48px 20px", fontStyle: "italic",
           }}>
             No shelves yet
@@ -201,11 +201,11 @@ export default function OriginalsScreen({
                   }}>
                     Staff Pick
                   </span>
-                  <span style={{ color: "rgba(255,255,255,0.15)" }}>·</span>
+                  <span style={{ color: "rgba(255,255,255,0.78)" }}>·</span>
                   <span style={{
                     fontSize: 9, fontWeight: 600,
                     fontFamily: "'IBM Plex Mono', monospace",
-                    color: "rgba(255,255,255,0.35)",
+                    color: "rgba(255,255,255,0.72)",
                   }}>
                     {blurbAuthor}
                   </span>

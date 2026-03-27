@@ -381,7 +381,7 @@ export default function NowPlayingGenreTab({
                 {s.title}
               </div>
               {((s.director_name && s.director_name !== ".") || s.episode_range) && (
-                <div style={{ fontSize: 12, color: "#888", marginTop: 1 }}>
+                <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
                   {[s.director_name !== "." && s.director_name, s.episode_range].filter(Boolean).join(" · ")}
                 </div>
               )}
@@ -454,7 +454,7 @@ export default function NowPlayingGenreTab({
               <span style={{ fontSize: 20, color: accent, lineHeight: 1 }}>+</span>
             </div>
             <span style={{
-              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.4)",
+              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)",
               fontFamily: "'Barlow Condensed', sans-serif",
             }}>
               +{remaining}
@@ -471,7 +471,7 @@ export default function NowPlayingGenreTab({
   return (
     <div style={{ padding: "0 0 100px", overflow: "hidden" }}>
       <style>{`
-        .cs-search-npp::placeholder { color: rgba(255,255,255,0.25); }
+        .cs-search-npp::placeholder { color: rgba(255,255,255,0.78); }
         .cs-search-npp:focus { border-color: ${accent}66; outline: none; }
         @keyframes genreTileFadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -706,7 +706,7 @@ export default function NowPlayingGenreTab({
               />
               <div style={{
                 position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-                fontSize: 13, color: "rgba(255,255,255,0.25)", pointerEvents: "none",
+                fontSize: 13, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
               }}>🔍</div>
               {searchQuery && (
                 <button
@@ -715,7 +715,7 @@ export default function NowPlayingGenreTab({
                     position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
                     background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
                     width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#888", fontSize: 11, cursor: "pointer",
+                    color: "#bbb", fontSize: 11, cursor: "pointer",
                   }}
                 >✕</button>
               )}
@@ -741,7 +741,7 @@ export default function NowPlayingGenreTab({
                   </span>
                   <span style={{
                     fontSize: 11, fontWeight: 600,
-                    color: "rgba(255,255,255,0.3)",
+                    color: "rgba(255,255,255,0.7)",
                     fontFamily: "'Barlow Condensed', sans-serif",
                   }}>
                     {gPct}%
@@ -772,7 +772,7 @@ export default function NowPlayingGenreTab({
               <div style={{
                 textAlign: "center", padding: "40px 0",
                 fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-                color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+                color: "rgba(255,255,255,0.78)", fontStyle: "italic",
               }}>No upcoming items</div>
             ) : (
               <div style={{
@@ -798,7 +798,7 @@ export default function NowPlayingGenreTab({
                       {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                     </div>
                     <div style={{
-                      fontSize: 9, color: "#666", marginTop: 1,
+                      fontSize: 9, color: "#aaa", marginTop: 1,
                       fontFamily: "'Barlow Condensed', sans-serif",
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
@@ -814,7 +814,7 @@ export default function NowPlayingGenreTab({
               <div style={{
                 textAlign: "center", padding: "40px 0",
                 fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-                color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+                color: "rgba(255,255,255,0.78)", fontStyle: "italic",
               }}>No upcoming items</div>
             ) : (
               <div style={{ padding: "16px 0", overflow: "hidden" }}>
@@ -841,7 +841,7 @@ export default function NowPlayingGenreTab({
                           {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                         </div>
                         <div style={{
-                          fontSize: 9, color: "#666", marginTop: 1,
+                          fontSize: 9, color: "#aaa", marginTop: 1,
                           fontFamily: "'Barlow Condensed', sans-serif",
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>
@@ -857,7 +857,7 @@ export default function NowPlayingGenreTab({
             <div style={{
               textAlign: "center", padding: "40px 0",
               fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-              color: "rgba(255,255,255,0.25)", fontStyle: "italic",
+              color: "rgba(255,255,255,0.78)", fontStyle: "italic",
             }}>
               {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}
             </div>
@@ -1047,7 +1047,7 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
           fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1,
         }}>{centerPct}%</div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.35)",
+          fontSize: 9, color: "rgba(255,255,255,0.72)",
           fontFamily: "'Barlow Condensed', sans-serif",
           letterSpacing: "0.05em", textTransform: "uppercase",
           marginTop: 2,

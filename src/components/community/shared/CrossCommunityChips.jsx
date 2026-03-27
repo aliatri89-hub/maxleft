@@ -109,7 +109,7 @@ export default function CrossCommunityChips({
       <div style={{
         fontSize: 10,
         fontWeight: 600,
-        color: "rgba(255,255,255,0.3)",
+        color: "rgba(255,255,255,0.7)",
         textTransform: "uppercase",
         letterSpacing: "0.08em",
         marginBottom: 8,

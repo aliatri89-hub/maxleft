@@ -123,7 +123,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
             {mostRewatched.length > 0 && (
               <div style={{ flex: "0 0 auto", width: 150 }}>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.55)",
+                  fontSize: 10, color: "rgba(255,255,255,0.72)",
                   textTransform: "uppercase", letterSpacing: "0.1em",
                   marginBottom: 8, fontWeight: 700,
                 }}>
@@ -175,7 +175,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                 {topGenre && topGenre.completed > 0 && (
                   <div style={{ marginBottom: 8 }}>
                     <div style={{
-                      fontSize: 10, color: "rgba(255,255,255,0.55)",
+                      fontSize: 10, color: "rgba(255,255,255,0.72)",
                       textTransform: "uppercase", letterSpacing: "0.1em",
                       fontWeight: 700, marginBottom: 2,
                     }}>
@@ -189,7 +189,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                         {topGenre.name}
                       </div>
                       <div style={{
-                        fontSize: 10, color: "rgba(255,255,255,0.35)",
+                        fontSize: 10, color: "rgba(255,255,255,0.72)",
                         fontFamily: "'IBM Plex Mono', monospace",
                       }}>
                         {topGenre.completed}
@@ -255,7 +255,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                   fontSize: 20, fontWeight: 800, color: "#1DB954",
                   fontFamily: "'Barlow Condensed', sans-serif",
                 }}>{totalCompleted}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Watched
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                   fontSize: 20, fontWeight: 800, color: "#fff",
                   fontFamily: "'Barlow Condensed', sans-serif",
                 }}>{totalFilms}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Films
                 </div>
               </div>

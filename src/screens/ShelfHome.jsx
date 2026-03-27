@@ -308,7 +308,7 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
                             </div>
                             <div style={{
                               fontFamily: "'Playfair Display', serif", fontWeight: 700,
-                              fontSize: 18, color: "rgba(255,255,255,0.35)",
+                              fontSize: 18, color: "rgba(255,255,255,0.72)",
                               lineHeight: 1.1,
                             }}>
                               {day}

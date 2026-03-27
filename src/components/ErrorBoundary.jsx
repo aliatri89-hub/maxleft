@@ -42,7 +42,7 @@ export default class ErrorBoundary extends Component {
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center",
           justifyContent: "center", padding: "48px 24px", minHeight: 200,
-          color: "rgba(255,255,255,0.5)", textAlign: "center",
+          color: "rgba(255,255,255,0.7)", textAlign: "center",
           fontFamily: "'Inter', -apple-system, sans-serif",
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>

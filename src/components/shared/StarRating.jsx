@@ -44,7 +44,7 @@ export default function StarRating({
         <div style={{
           fontSize: s.labelSize,
           fontWeight: 600,
-          color: "rgba(255,255,255,0.5)",
+          color: "rgba(255,255,255,0.7)",
           textTransform: "uppercase",
           letterSpacing: "0.08em",
           marginBottom: 6,
@@ -102,7 +102,7 @@ export default function StarRating({
               {isFull ? "★" : isHalf ? (
                 <span style={{ position: "relative", display: "inline-block", width: "1em", height: "1em" }}>
                   <span style={{ position: "absolute", inset: 0, color, overflow: "hidden", width: "0.5em" }}>★</span>
-                  <span style={{ position: "absolute", inset: 0, color: "#444" }}>☆</span>
+                  <span style={{ position: "absolute", inset: 0, color: "#ddd" }}>☆</span>
                 </span>
               ) : "☆"}
             </div>
