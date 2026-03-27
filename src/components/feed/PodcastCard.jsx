@@ -1,11 +1,11 @@
 import { t } from "../../theme";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
-import { useToast } from "../../hooks/useToast";
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — redesigned layout
@@ -63,7 +63,53 @@ function formatDuration(seconds) {
   return `${m}m`;
 }
 
-function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
+function CardToast({ msg }) {
+  const [exiting, setExiting] = useState(false);
+  useEffect(() => {
+    setExiting(false);
+    const timer = setTimeout(() => setExiting(true), 1800);
+    return () => clearTimeout(timer);
+  }, [msg]);
+  return createPortal(
+    <div style={{
+      position: "fixed",
+      bottom: "calc(114px + env(safe-area-inset-bottom, 0px))",
+      left: "50%", transform: "translateX(-50%)",
+      zIndex: 10000, pointerEvents: "none",
+      animation: exiting
+        ? "nudgeSlideOut 0.35s ease forwards"
+        : "nudgeSlideIn 0.3s cubic-bezier(0, 0.8, 0.2, 1) forwards",
+    }}>
+      <div style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "8px 16px",
+        background: "rgba(18,18,30,0.95)",
+        backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(201,124,93,0.3)",
+        borderRadius: 12,
+        boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+        whiteSpace: "nowrap",
+      }}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c97c5d" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        <span style={{
+          fontSize: 12, fontWeight: 600, color: t.textPrimary,
+          fontFamily: t.fontDisplay, textTransform: "uppercase", letterSpacing: "0.03em",
+        }}>
+          {msg}
+        </span>
+      </div>
+      <style>{`
+        @keyframes nudgeSlideIn { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes nudgeSlideOut { from { opacity:1; transform:translateY(0); } to { opacity:0; transform:translateY(24px); } }
+      `}</style>
+    </div>,
+    document.body
+  );
+}
+
+ item, isAdmin, userId, onUnlinked }) {
   const {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
@@ -79,7 +125,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [inQueue, setInQueue] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue } = useAudioPlayer();
 
-  const { toast, toastExiting, showToast } = useToast();
+  const [cardToast, setCardToast] = useState(null);
+  const showCardToast = (msg) => { setCardToast(null); setTimeout(() => setCardToast(msg), 10); };
   const isWatched = watched || justLogged;
 
   const epUrl = resolveAudioUrl(item);
@@ -117,13 +164,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const idx = queue.findIndex(q => q.enclosureUrl === resolveAudioUrl(item));
       if (idx !== -1) removeFromQueue(idx);
       setInQueue(false);
-      showToast("Removed from Up Next");
+      showCardToast("Removed from Up Next");
       return;
     }
     const playerEp = toPlayerEpisode({
       episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
-    if (playerEp) { addToQueue(playerEp); setInQueue(true); showToast("Added to Up Next"); }
+    if (playerEp) { addToQueue(playerEp); setInQueue(true); }
   };
 
   const handleWatchlist = async (e) => {
@@ -133,7 +180,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const { error } = await supabase.from("wishlist").delete()
         .eq("user_id", userId).eq("title", film_title)
         .in("item_type", ["movie", "show"]);
-      if (!error) { setAddedToWatchlist(false); showToast("Removed from Watchlist"); }
+      if (!error) { setAddedToWatchlist(false); showCardToast("Removed from Watchlist"); }
       return;
     }
     const { error } = await supabase.from("wishlist").insert({
@@ -141,7 +188,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       cover_url: poster_path ? `https://image.tmdb.org/t/p/w185${poster_path}` : null,
       year: film_year || null,
     });
-    if (!error) { setAddedToWatchlist(true); showToast("Added to Watchlist"); }
+    if (!error) { setAddedToWatchlist(true); showCardToast("Added to Watchlist"); }
   };
 
   if (dismissed) return null;
@@ -374,28 +421,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           from { opacity: 0; transform: translateY(-4px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pcToastIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
       `}</style>
-
-      {/* Inline toast */}
-      {toast && (
-        <div style={{
-          position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
-          background: "rgba(30,28,26,0.95)", border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 20, padding: "5px 14px",
-          fontFamily: t.fontMono, fontSize: 11, color: "rgba(255,255,255,0.8)",
-          letterSpacing: "0.04em", textTransform: "uppercase",
-          whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10,
-          animation: "pcToastIn 0.15s ease forwards",
-          opacity: toastExiting ? 0 : 1, transition: toastExiting ? "opacity 0.3s" : "none",
-        }}>
-          {toast}
-        </div>
-      )}
     </div>
+
+    {cardToast && <CardToast key={cardToast + Date.now()} msg={cardToast} />}
 
     <QuickLogModal
       data={{
