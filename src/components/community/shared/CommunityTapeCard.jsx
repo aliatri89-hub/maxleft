@@ -96,7 +96,7 @@ function PlayButtonArt({ size = 58 }) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      border: "1px solid rgba(255,255,255,0.08)",
+      border: "1px solid rgba(190,155,80,0.35)",
       boxShadow: "0 4px 10px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06) inset, 0 -2px 0 rgba(0,0,0,0.3) inset",
     }}>
       <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
@@ -130,7 +130,8 @@ function StaffPicksTitle({ tilt, isSubscribed }) {
           justifyContent: "center",
           width: size * 0.7,
           height: size * 0.8,
-          margin: "0 -1px",
+          marginLeft: -size * 0.06,
+          marginRight: -1,
           position: "relative",
           flexShrink: 0,
         }}>
@@ -138,6 +139,8 @@ function StaffPicksTitle({ tilt, isSubscribed }) {
             position: "absolute", inset: 0,
             background: "#2c2824",
             borderRadius: 2,
+            border: "1px solid rgba(190,155,80,0.35)",
+            boxSizing: "border-box",
           }} />
           <svg style={{ position: "relative", zIndex: 1 }}
             width={size * 0.38} height={size * 0.38} viewBox="0 0 24 24" fill="none">
