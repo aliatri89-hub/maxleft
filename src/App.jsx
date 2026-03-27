@@ -734,13 +734,7 @@ function AppMain() {
         {/* Floating back button — shown on iOS/Android when nav bar is hidden */}
         {screen === "app" && (activeCommunitySlug || showWhatToWatch || showTripleFeature || showReelTime || showCastConnections) && (
           <div
-            onClick={() => {
-              if (activeCommunitySlug) { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }
-              else if (showTripleFeature) { removeNav("tripleFeature"); setShowTripleFeature(false); }
-              else if (showReelTime) { removeNav("reelTime"); setShowReelTime(false); }
-              else if (showCastConnections) { removeNav("castConnections"); setShowCastConnections(false); }
-              else if (showWhatToWatch) { removeNav("whatToWatch"); setShowWhatToWatch(false); }
-            }}
+            onClick={() => { popNav(); }}
             style={{
               position: "fixed",
               top: "calc(env(safe-area-inset-top, 0px) + 12px)",
