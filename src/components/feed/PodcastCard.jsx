@@ -133,11 +133,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
   // ── Shared badge style ──
   const badgeBase = {
-    display: "inline-flex", alignItems: "center", gap: 5,
-    padding: "5px 12px", borderRadius: 16,
-    fontSize: 11, fontWeight: 600,
+    display: "inline-flex", alignItems: "center", gap: 3,
+    padding: "2px 7px 2px 5px", borderRadius: 12,
+    fontSize: 9, fontWeight: 600,
     fontFamily: t.fontMono,
-    textTransform: "uppercase", letterSpacing: "0.05em",
+    textTransform: "uppercase", letterSpacing: "0.06em",
     flexShrink: 0, whiteSpace: "nowrap",
   };
 
@@ -155,11 +155,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       }}
     >
       {/* ── Art + right column ── */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
         {/* Podcast artwork */}
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
-          background: "#2a2520", flexShrink: 0, marginTop: 2,
+          background: "#2a2520", flexShrink: 0,
         }}>
           {podcast_artwork ? (
             <img loading="lazy" src={podcast_artwork} alt={podcast_name}
