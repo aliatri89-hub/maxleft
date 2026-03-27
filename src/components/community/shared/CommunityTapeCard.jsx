@@ -136,7 +136,7 @@ function StaffPicksTitle({ tilt, isSubscribed }) {
           alignSelf: "center",
           position: "relative",
           flexShrink: 0,
-          marginTop: size * 0.02,
+          marginTop: size * 0.08,
         }}>
           <span style={{
             position: "absolute", inset: 0,
