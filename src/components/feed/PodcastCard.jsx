@@ -256,6 +256,33 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   Log
                 </div>
               ) : null}
+              {userId && !isWatched && (
+                addedToWatchlist ? (
+                  <div onClick={handleWatchlist} style={{
+                    ...badgeBase,
+                    background: "rgba(201,124,93,0.06)",
+                    border: "1px solid rgba(201,124,93,0.15)",
+                    color: "rgba(201,124,93,0.5)", cursor: "pointer",
+                  }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Added
+                  </div>
+                ) : (
+                  <div onClick={handleWatchlist} style={{
+                    ...badgeBase,
+                    background: "rgba(255,255,255,0.03)",
+                    border: `1px solid ${t.bgHover}`,
+                    color: t.textFaint, cursor: "pointer",
+                  }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Watchlist
+                  </div>
+                )
+              )}
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
@@ -335,7 +362,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       )}
       {hasDesc && expanded && (
-        <div style={{ fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 8 }}>
+        <div style={{
+          fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)",
+          lineHeight: 1.5, marginTop: 8,
+          animation: "pcFadeSlide 0.2s ease forwards",
+        }}>
           {fullDesc}
         </div>
       )}
@@ -344,6 +375,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         @keyframes pcSpin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        @keyframes pcFadeSlide {
+          from { opacity: 0; transform: translateY(-4px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
