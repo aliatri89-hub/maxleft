@@ -19,6 +19,9 @@ import { createClient } from "@supabase/supabase-js";
 const SUPABASE_URL  = "https://gfjobhkofftvmluocxyw.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmam9iaGtvZmZ0dm1sdW9jeHl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNDc3OTAsImV4cCI6MjA4NjkyMzc5MH0.RJVceNeBCmQLeFD35JKJxNqFuoDF4xXas7A2GCg1LwQ";
+// Service role key — bypasses RLS for the podcasts insert. Rotate after seeding.
+const SUPABASE_SERVICE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdmam9iaGtvZmZ0dm1sdW9jeHl3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTM0Nzc5MCwiZXhwIjoyMDg2OTIzNzkwfQ.SYw4NJr7uXnX0xww4Uw5jfKtdnxbAaW_Kyzu9UIHoBI";
 const INGEST_URL    = "https://api.mymantl.app/functions/v1/ingest-rss";
 
 const PODCAST = {
@@ -37,7 +40,8 @@ const PODCAST = {
 const PARSE_LIMIT = 400;
 
 const COMMIT = process.argv.includes("--commit");
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Use service role for writes (bypasses RLS). Rotate key after seeding.
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 // ── XML helpers ──────────────────────────────────────────────
 function extractTag(xml, tag) {
