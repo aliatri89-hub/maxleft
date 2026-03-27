@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * ActivityRings — Concentric SVG donut rings for community hero sections.
  *
@@ -66,14 +67,14 @@ export default function ActivityRings({ filmPct, bookPct, gamePct, displayPct, r
       }}>
         <div style={{
           fontSize: 26, fontWeight: 800,
-          color: isComplete ? "#4ade80" : "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: isComplete ? t.green : t.textPrimary,
+          fontFamily: t.fontDisplay,
           lineHeight: 1,
         }}>
           {displayPct}%
         </div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.78)",
+          fontSize: 9, color: t.textSecondary,
           marginTop: 2, letterSpacing: "0.04em",
         }}>
           {isComplete ? "complete!" : "seen"}
@@ -99,7 +100,7 @@ function Ring({ cx, cy, r, pct, strokeWidth, color, bgOpacity }) {
       {pct > 0 && (
         <circle
           cx={cx} cy={cy} r={r} fill="none"
-          stroke={isComplete ? "#4ade80" : color}
+          stroke={isComplete ? t.green : color}
           strokeWidth={strokeWidth} strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
           transform={`rotate(-90 ${cx} ${cy})`}

@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 // src/features/cast-connections/CastConnections.jsx
 //
 // Full-screen overlay game. Rendered by App.jsx when showCastConnections === true.
@@ -64,7 +65,7 @@ function LoadingState() {
         borderTopColor: "#e8d3a2", borderRadius: "50%",
         animation: "cc-spin 0.8s linear infinite",
       }} />
-      <div style={{ marginTop: 16, fontSize: 13, color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace" }}>
+      <div style={{ marginTop: 16, fontSize: 13, color: t.creamMuted, fontFamily: t.fontMono }}>
         Loading puzzle...
       </div>
     </div>
@@ -135,9 +136,9 @@ function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
           />
         ) : null}
         <div style={{
-          fontFamily: "'Bebas Neue', sans-serif",
+          fontFamily: t.fontHeadline,
           fontSize: 25,
-          color: "#fff",
+          color: t.textPrimary,
           letterSpacing: 1.5,
           textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 16px rgba(0,0,0,0.3)",
           lineHeight: 1.15,
@@ -147,10 +148,10 @@ function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
         </div>
         <div style={{
           fontSize: 13,
-          color: "rgba(255,255,255,0.9)",
+          color: t.textSecondary,
           marginTop: 8,
           letterSpacing: 0.3,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
         }}>
           {movie.actors.map((a) => a.name).join("  •  ")}
@@ -248,7 +249,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         <BackButton onBack={onBack} />
         <div style={{ textAlign: "center", padding: "80px 24px" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎞️</div>
-          <div style={{ fontSize: 15, color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div style={{ fontSize: 15, color: t.creamMuted, fontFamily: t.fontMono }}>
             {error || "No puzzle available today"}
           </div>
         </div>
@@ -290,18 +291,18 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-          letterSpacing: 4, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
+          fontFamily: t.fontMono, fontSize: 11,
+          letterSpacing: 4, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
         }}>
           M▶NTL
         </div>
         <h1 style={{
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 34,
-          letterSpacing: 2, color: "#f5f0e8", lineHeight: 1.1, margin: 0,
+          fontFamily: t.fontHeadline, fontSize: 34,
+          letterSpacing: 2, color: t.cream, lineHeight: 1.1, margin: 0,
         }}>
           Cast Connections
         </h1>
-        <div style={{ fontSize: 12, color: "#b5a994", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
+        <div style={{ fontSize: 12, color: t.creamMuted, marginTop: 6, fontFamily: t.fontMono }}>
           {puzzleNumber ? `#${puzzleNumber} · ` : ""}
           {"★".repeat(puzzle.difficulty === "hard" ? 5 : puzzle.difficulty === "medium" ? 4 : 3)}
         </div>
@@ -310,8 +311,8 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       {/* How to play — only shown during active play */}
       {!gameOver && (
         <div style={{
-          fontSize: 12, color: "#b5a994", textAlign: "center",
-          fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
+          fontSize: 12, color: t.creamMuted, textAlign: "center",
+          fontFamily: t.fontMono, lineHeight: 1.5,
           marginBottom: 16, padding: "0 8px",
         }}>
           Find three actors who starred in the same film. Select three, then submit.
@@ -321,12 +322,12 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         <div className="cc-end-state" style={S.endStateBox}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>{won ? "🎬" : "🎞️"}</div>
           <div style={{
-            fontFamily: "'Bebas Neue', sans-serif", fontSize: 28,
-            color: "#f5f0e8", letterSpacing: 1,
+            fontFamily: t.fontHeadline, fontSize: 28,
+            color: t.cream, letterSpacing: 1,
           }}>
             {won ? "Perfect Take!" : "That's a Wrap"}
           </div>
-          <div style={{ fontSize: 13, color: "#b5a994", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6, fontFamily: t.fontMono }}>
             {won
               ? `Solved with ${mistakes === 0 ? "no" : mistakes} mistake${mistakes !== 1 ? "s" : ""}`
               : "Better luck tomorrow"}
@@ -364,14 +365,14 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                       background: "#2e2518",
                       borderColor: "#e8d3a2",
                     } : {
-                      background: "#1a1714",
+                      background: t.bgCard,
                       borderColor: "#2a2520",
                     }),
                   }}
                 >
                   <span style={{
                     ...S.actorName,
-                    color: isSolved ? "#fff" : "#e8d3a2",
+                    color: isSolved ? t.textPrimary : "#e8d3a2",
                   }}>
                     {(() => {
                       const parts = actor.name.split(" ");
@@ -471,8 +472,8 @@ function BackButton({ onBack }) {
 
 const S = {
   container: {
-    fontFamily: "'IBM Plex Mono', monospace",
-    background: "#0f0d0b",
+    fontFamily: t.fontMono,
+    background: t.bgPrimary,
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
@@ -522,10 +523,10 @@ const S = {
   },
   mistakesLabel: {
     fontSize: 11,
-    color: "#6b6256",
+    color: t.creamMuted,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: t.fontMono,
   },
   dots: {
     display: "flex",
@@ -544,7 +545,7 @@ const S = {
     marginBottom: 24,
   },
   btnSecondary: {
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: t.fontMono,
     fontSize: 12,
     padding: "10px 18px",
     borderRadius: 24,
@@ -558,13 +559,13 @@ const S = {
     outline: "none",
   },
   btnPrimary: {
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: t.fontMono,
     fontSize: 12,
     padding: "10px 22px",
     borderRadius: 24,
     border: "none",
     background: "#e8d3a2",
-    color: "#0f0d0b",
+    color: t.bgPrimary,
     cursor: "pointer",
     fontWeight: 700,
     textTransform: "uppercase",

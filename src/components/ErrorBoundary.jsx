@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { Component } from "react";
 
 /**
@@ -42,11 +43,11 @@ export default class ErrorBoundary extends Component {
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center",
           justifyContent: "center", padding: "48px 24px", minHeight: 200,
-          color: "rgba(255,255,255,0.7)", textAlign: "center",
+          color: t.textMuted, textAlign: "center",
           fontFamily: "'Inter', -apple-system, sans-serif",
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: "rgba(255,255,255,0.7)" }}>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: t.textMuted }}>
             Something went wrong
           </div>
           <div style={{ fontSize: 13, marginBottom: 20, maxWidth: 280, lineHeight: 1.4 }}>
@@ -56,7 +57,7 @@ export default class ErrorBoundary extends Component {
             onClick={this.handleRetry}
             style={{
               background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)",
-              borderRadius: 10, padding: "10px 24px", color: "rgba(255,255,255,0.8)",
+              borderRadius: 10, padding: "10px 24px", color: t.textSecondary,
               fontSize: 13, fontWeight: 600, cursor: "pointer",
             }}
           >

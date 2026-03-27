@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { Poster, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
@@ -65,7 +66,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
         <Poster path={data.poster_url} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
         <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column" }}>
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.04em", textTransform: "uppercase",
             color: accent, marginBottom: 8,
           }}>
@@ -93,7 +94,7 @@ function RandomPickCard({ data, onNavigateCommunity }) {
           }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 4,
-              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              background: t.bgElevated, borderRadius: 10,
               padding: "3px 8px 3px 3px",
             }}>
               {data.community_image && (

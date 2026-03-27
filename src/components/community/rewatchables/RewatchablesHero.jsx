@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { HeroBanner } from "../primitives";
 import { getCoverUrl } from "../../../utils/communityTmdb";
@@ -90,7 +91,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -104,8 +105,8 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         {/* Title + tagline */}
         <div style={{
-          fontSize: 28, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 28, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -123,7 +124,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
             {mostRewatched.length > 0 && (
               <div style={{ flex: "0 0 auto", width: 150 }}>
                 <div style={{
-                  fontSize: 10, color: "rgba(255,255,255,0.72)",
+                  fontSize: 10, color: t.textMuted,
                   textTransform: "uppercase", letterSpacing: "0.1em",
                   marginBottom: 8, fontWeight: 700,
                 }}>
@@ -149,7 +150,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                       flex: 1,
                       fontSize: idx === 0 ? 13 : 10,
                       fontWeight: idx === 0 ? 800 : 600,
-                      color: idx === 0 ? "#fff" : "rgba(255,255,255,0.5)",
+                      color: idx === 0 ? t.textPrimary : t.textMuted,
                       fontFamily: idx === 0 ? "'Barlow Condensed', sans-serif" : "inherit",
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
@@ -158,8 +159,8 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                     <div style={{
                       fontSize: idx === 0 ? 14 : 11,
                       fontWeight: 900,
-                      color: idx === 0 ? "#facc15" : "rgba(250,204,21,0.5)",
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      color: idx === 0 ? t.gold : "rgba(250,204,21,0.5)",
+                      fontFamily: t.fontDisplay,
                       flexShrink: 0,
                     }}>
                       ×{film.totalWatches}
@@ -175,7 +176,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                 {topGenre && topGenre.completed > 0 && (
                   <div style={{ marginBottom: 8 }}>
                     <div style={{
-                      fontSize: 10, color: "rgba(255,255,255,0.72)",
+                      fontSize: 10, color: t.textMuted,
                       textTransform: "uppercase", letterSpacing: "0.1em",
                       fontWeight: 700, marginBottom: 2,
                     }}>
@@ -184,13 +185,13 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                     <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
                       <div style={{
                         fontSize: 14, fontWeight: 800, color: topGenre.color,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                       }}>
                         {topGenre.name}
                       </div>
                       <div style={{
-                        fontSize: 10, color: "rgba(255,255,255,0.72)",
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 10, color: t.textMuted,
+                        fontFamily: t.fontMono,
                       }}>
                         {topGenre.completed}
                       </div>
@@ -206,14 +207,14 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                         <div style={{
                           width: 70, flexShrink: 0,
                           fontSize: 9, fontWeight: 600,
-                          color: g.completed > 0 ? g.color : "rgba(255,255,255,0.2)",
+                          color: g.completed > 0 ? g.color : t.textFaint,
                           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                         }}>
                           {g.name}
                         </div>
                         <div style={{
                           flex: 1, height: 6,
-                          background: "rgba(255,255,255,0.06)",
+                          background: t.bgInput,
                           borderRadius: 3, overflow: "hidden",
                         }}>
                           <div style={{
@@ -226,9 +227,9 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                         <div style={{
                           width: 24, flexShrink: 0,
                           fontSize: 9, fontWeight: 600,
-                          color: g.completed > 0 ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.15)",
+                          color: g.completed > 0 ? t.textFaint : t.textFaint,
                           textAlign: "right",
-                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontFamily: t.fontMono,
                         }}>
                           {g.completed}
                         </div>
@@ -248,24 +249,24 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
               display: "flex", justifyContent: "center", gap: 16,
               marginTop: 14,
               padding: "10px 0 0",
-              borderTop: "1px solid rgba(255,255,255,0.06)",
+              borderTop: `1px solid ${t.borderSubtle}`,
             }}>
               <div style={{ textAlign: "center" }}>
                 <div style={{
-                  fontSize: 20, fontWeight: 800, color: "#1DB954",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 20, fontWeight: 800, color: t.spotify,
+                  fontFamily: t.fontDisplay,
                 }}>{totalCompleted}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 8, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Watched
                 </div>
               </div>
-              <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ width: 1, background: t.bgHover }} />
               <div style={{ textAlign: "center" }}>
                 <div style={{
-                  fontSize: 20, fontWeight: 800, color: "#fff",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 20, fontWeight: 800, color: t.textPrimary,
+                  fontFamily: t.fontDisplay,
                 }}>{totalFilms}</div>
-                <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 8, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Films
                 </div>
               </div>

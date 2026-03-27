@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { ActivityRings, CyclePill } from "../primitives";
 
@@ -25,7 +26,7 @@ export default function OriginalsHero({ community, miniseries, progress, accent 
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
       background: "linear-gradient(180deg, rgba(233,69,96,0.06) 0%, transparent 100%)",
     }}>
@@ -49,8 +50,8 @@ export default function OriginalsHero({ community, miniseries, progress, accent 
 
         <div style={{
           fontSize: 28,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>

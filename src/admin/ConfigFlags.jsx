@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/ConfigFlags.jsx
 //
 // Feature flags manager + quick reference config.
@@ -118,7 +119,7 @@ export default function ConfigFlags({ session }) {
               {flags.map(flag => (
                 <tr key={flag.key}>
                   <td style={s.td}>
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#f0ebe1", fontWeight: 600 }}>{flag.key}</span>
+                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: t.cream, fontWeight: 600 }}>{flag.key}</span>
                   </td>
                   <td style={{ ...s.td, fontSize: 11, color: "rgba(240,235,225,0.4)" }}>
                     {flag.description || "—"}
@@ -130,7 +131,7 @@ export default function ConfigFlags({ session }) {
                       style={{
                         ...s.toggleBtn,
                         background: flag.enabled ? "rgba(74,222,128,0.15)" : "rgba(248,113,113,0.1)",
-                        color: flag.enabled ? "#4ade80" : "#f87171",
+                        color: flag.enabled ? t.green : t.red,
                         borderColor: flag.enabled ? "rgba(74,222,128,0.3)" : "rgba(248,113,113,0.2)",
                       }}
                     >
@@ -205,7 +206,7 @@ export default function ConfigFlags({ session }) {
                 <td style={{ ...s.td, textAlign: "center" }}>
                   <span style={{
                     fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)",
-                    color: f.value ? "#4ade80" : "#f87171",
+                    color: f.value ? t.green : t.red,
                   }}>
                     {f.value ? "TRUE" : "FALSE"}
                   </span>
@@ -256,22 +257,22 @@ function SectionHeader({ title }) {
 const s = {
   page: { padding: "32px 40px 60px", maxWidth: 1100 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 },
-  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: "#f0ebe1", margin: 0 },
+  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: t.cream, margin: 0 },
   subtitle: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)", marginTop: 6 },
-  refreshBtn: { padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(196,115,79,0.25)", background: "rgba(196,115,79,0.08)", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
+  refreshBtn: { padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(196,115,79,0.25)", background: "rgba(196,115,79,0.08)", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
   sectionHeader: { fontSize: 11, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(240,235,225,0.3)", marginTop: 32, marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.04)" },
   chartCard: { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 18px" },
   helperText: { fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.3)", marginBottom: 12, lineHeight: 1.6 },
-  code: { background: "rgba(196,115,79,0.1)", color: "#C4734F", padding: "1px 6px", borderRadius: 4, fontSize: 11 },
+  code: { background: "rgba(196,115,79,0.1)", color: t.terra, padding: "1px 6px", borderRadius: 4, fontSize: 11 },
   table: { width: "100%", borderCollapse: "collapse" },
   th: { fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(240,235,225,0.3)", textAlign: "left", padding: "6px 10px", borderBottom: "1px solid rgba(255,255,255,0.06)" },
   td: { fontSize: 12, color: "rgba(240,235,225,0.6)", padding: "10px 10px", borderBottom: "1px solid rgba(255,255,255,0.03)" },
   toggleBtn: { padding: "4px 14px", borderRadius: 6, border: "1px solid", fontSize: 10, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.06em", cursor: "pointer", transition: "all 0.15s" },
   deleteBtn: { background: "none", border: "none", color: "rgba(240,235,225,0.2)", fontSize: 18, cursor: "pointer", padding: "2px 6px", lineHeight: 1 },
   addRow: { display: "flex", gap: 8, alignItems: "center" },
-  input: { padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: "#f0ebe1", fontSize: 12, fontFamily: "var(--font-mono)", outline: "none" },
-  addBtn: { padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.1)", color: "#4ade80", fontSize: 11, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
+  input: { padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.03)", color: t.cream, fontSize: 12, fontFamily: "var(--font-mono)", outline: "none" },
+  addBtn: { padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.1)", color: t.green, fontSize: 11, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
   cancelBtn: { padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "rgba(240,235,225,0.4)", fontSize: 11, fontFamily: "var(--font-display)", cursor: "pointer" },
-  addTrigger: { background: "none", border: "none", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", cursor: "pointer", padding: "4px 0" },
+  addTrigger: { background: "none", border: "none", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", cursor: "pointer", padding: "4px 0" },
   emptyState: { textAlign: "center", padding: "24px 0", fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.25)" },
 };

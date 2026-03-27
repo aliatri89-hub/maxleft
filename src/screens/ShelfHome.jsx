@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
@@ -61,9 +62,9 @@ function StatsRibbon({ userId }) {
       {items.map((s) => (
         <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontWeight: 900,
+            fontFamily: t.fontSerif, fontWeight: 900,
             fontSize: 20, lineHeight: 1,
-            color: "rgba(255,255,255,0.85)",
+            color: t.textSecondary,
           }}>
             {s.value}
           </div>
@@ -254,7 +255,7 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
               position: "relative", zIndex: 2,
             }}>
               <div style={{
-                fontFamily: "'Playfair Display', serif", fontWeight: 700,
+                fontFamily: t.fontSerif, fontWeight: 700,
                 fontSize: 15, color: "var(--text-faint)",
                 letterSpacing: 1,
               }}>
@@ -307,8 +308,8 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
                               {month}
                             </div>
                             <div style={{
-                              fontFamily: "'Playfair Display', serif", fontWeight: 700,
-                              fontSize: 18, color: "rgba(255,255,255,0.72)",
+                              fontFamily: t.fontSerif, fontWeight: 700,
+                              fontSize: 18, color: t.textMuted,
                               lineHeight: 1.1,
                             }}>
                               {day}
@@ -319,7 +320,7 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
                           {movie.cover && (
                             <div style={{
                               width: 34, height: 50, borderRadius: 3, overflow: "hidden",
-                              flexShrink: 0, background: "rgba(255,255,255,0.04)",
+                              flexShrink: 0, background: t.bgElevated,
                               boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
                             }}>
                               <img src={movie.cover} alt="" style={{
@@ -332,7 +333,7 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
                               fontFamily: "var(--font-display)", fontSize: 14,
-                              fontWeight: 600, color: "rgba(255,255,255,0.75)",
+                              fontWeight: 600, color: t.textSecondary,
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>
                               {movie.title}

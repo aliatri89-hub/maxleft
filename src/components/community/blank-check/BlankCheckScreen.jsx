@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -218,7 +219,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   return (
     <div style={{
       height: "100dvh", display: "flex", flexDirection: "column",
-      background: "#0f0d0b", overflowX: "hidden",
+      background: t.bgPrimary, overflowX: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       {/* Back nav */}
@@ -235,8 +236,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
@@ -262,7 +263,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                 />
                 <path
                   d="M6 8L7.5 9.5L10.5 6.5"
-                  stroke={earnedCount > 0 ? "#22c55e" : "rgba(255,255,255,0.2)"}
+                  stroke={earnedCount > 0 ? "#22c55e" : t.textFaint}
                   strokeWidth="1.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -272,7 +273,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                 fontSize: 11,
                 fontWeight: 700,
                 color: earnedCount > 0 ? "#ffffffcc" : "#ffffff40",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
               }}>
                 {earnedCount}/{badges.length}
               </span>
@@ -348,14 +349,14 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                         style={{
                           width: "100%",
                           padding: "8px 36px 8px 34px",
-                          background: "rgba(255,255,255,0.06)",
+                          background: t.bgInput,
                           border: `1px solid ${accent}`,
                           borderRadius: 10,
-                          color: "#fff",
+                          color: t.textPrimary,
                           fontSize: 14,
                           outline: "none",
                           boxSizing: "border-box",
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           letterSpacing: "0.01em",
                         }}
                       />
@@ -376,7 +377,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                           position: "absolute", right: 8, top: "50%",
                           transform: "translateY(-50%)",
                           background: "rgba(255,255,255,0.1)", border: "none",
-                          color: "#aaa", fontSize: 12, cursor: "pointer",
+                          color: t.textMuted, fontSize: 12, cursor: "pointer",
                           borderRadius: 20, width: 22, height: 22,
                           display: "flex", alignItems: "center", justifyContent: "center",
                           padding: 0, lineHeight: 1,
@@ -400,9 +401,9 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                               background: filter === f.key ? `${accent}22` : "rgba(255,255,255,0.05)",
                               border: filter === f.key ? `1px solid ${accent}` : "1px solid rgba(255,255,255,0.08)",
                               borderRadius: 20,
-                              color: filter === f.key ? accent : "#888",
+                              color: filter === f.key ? accent : t.textMuted,
                               fontSize: 11, fontWeight: 600, cursor: "pointer",
-                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontFamily: t.fontDisplay,
                               letterSpacing: "0.03em",
                               textTransform: "uppercase",
                               transition: "all 0.2s",
@@ -420,7 +421,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
                           flexShrink: 0,
                           width: 34, height: 34,
                           borderRadius: 10,
-                          background: "rgba(255,255,255,0.06)",
+                          background: t.bgInput,
                           border: "1px solid rgba(255,255,255,0.08)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           cursor: "pointer",

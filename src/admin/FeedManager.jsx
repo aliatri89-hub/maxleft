@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/FeedManager.jsx
 //
 // Phase 2 admin: Feed & Ingest management.
@@ -557,7 +558,7 @@ function ComingSoon() {
                         {ep.poster_path ? (
                           <img src={`${TMDB_IMG}/w92${ep.poster_path}`} alt="" style={{ width: 30, height: 45, borderRadius: 4, objectFit: "cover" }} />
                         ) : (
-                          <div style={{ width: 30, height: 45, borderRadius: 4, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>🎬</div>
+                          <div style={{ width: 30, height: 45, borderRadius: 4, background: t.bgElevated, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>🎬</div>
                         )}
                         <div>
                           <div style={styles.cellTitle}>{ep.title}</div>
@@ -574,7 +575,7 @@ function ComingSoon() {
                       <div style={styles.cellTitle}>{ep.air_date}</div>
                       <div style={{
                         ...styles.cellSub,
-                        color: daysUntil <= 1 ? "#4ade80" : daysUntil <= 7 ? "#fbbf24" : "rgba(240,235,225,0.35)",
+                        color: daysUntil <= 1 ? t.green : daysUntil <= 7 ? t.gold : "rgba(240,235,225,0.35)",
                       }}>
                         {daysUntil === 0 ? "today" : daysUntil === 1 ? "tomorrow" : `in ${daysUntil} days`}
                       </div>
@@ -583,7 +584,7 @@ function ComingSoon() {
                       <div style={{
                         ...styles.audioPill,
                         background: ep.episode_url ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
-                        color: ep.episode_url ? "#4ade80" : "#f87171",
+                        color: ep.episode_url ? t.green : t.red,
                         borderColor: ep.episode_url ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)",
                       }}>
                         {ep.episode_url ? "✓ has audio" : "✗ no audio"}
@@ -698,7 +699,7 @@ function DeadAudio() {
                     <div style={{
                       ...styles.audioPill,
                       background: "rgba(248,113,113,0.08)",
-                      color: "#f87171",
+                      color: t.red,
                       borderColor: "rgba(248,113,113,0.2)",
                     }}>
                       {report.error_info || "unknown"}
@@ -773,7 +774,7 @@ const styles = {
     fontFamily: "var(--font-display)",
     textTransform: "uppercase",
     letterSpacing: "0.04em",
-    color: "#f0ebe1",
+    color: t.cream,
     margin: 0,
   },
 
@@ -799,8 +800,8 @@ const styles = {
     transition: "all 0.15s ease",
   },
   tabActive: {
-    color: "#C4734F",
-    borderBottomColor: "#C4734F",
+    color: t.terra,
+    borderBottomColor: t.terra,
   },
 
   // ── Toolbar ──
@@ -824,7 +825,7 @@ const styles = {
   toolBtn: {
     padding: "6px 14px",
     borderRadius: 6,
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     border: "1px solid rgba(255,255,255,0.08)",
     color: "rgba(240,235,225,0.6)",
     fontSize: 11,
@@ -844,7 +845,7 @@ const styles = {
     borderRadius: 8,
     background: "rgba(196,115,79,0.08)",
     border: "1px solid rgba(196,115,79,0.25)",
-    color: "#C4734F",
+    color: t.terra,
     fontSize: 11,
     fontWeight: 700,
     fontFamily: "var(--font-display)",
@@ -857,7 +858,7 @@ const styles = {
     borderRadius: 8,
     background: "rgba(52,211,153,0.1)",
     border: "1px solid rgba(52,211,153,0.3)",
-    color: "#34d399",
+    color: t.green,
     fontSize: 11,
     fontWeight: 800,
     fontFamily: "var(--font-display)",
@@ -870,7 +871,7 @@ const styles = {
     borderRadius: 8,
     background: "rgba(248,113,113,0.08)",
     border: "1px solid rgba(248,113,113,0.3)",
-    color: "#f87171",
+    color: t.red,
     fontSize: 11,
     fontWeight: 800,
     fontFamily: "var(--font-display)",
@@ -980,7 +981,7 @@ const styles = {
     height: 54,
     borderRadius: 4,
     flexShrink: 0,
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1039,10 +1040,10 @@ const styles = {
   },
   rematchInput: {
     flex: 1,
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     border: "1px solid rgba(255,255,255,0.08)",
     borderRadius: 8,
-    color: "#e4e4e7",
+    color: t.textSecondary,
     padding: "7px 12px",
     fontSize: 12,
     outline: "none",
@@ -1053,7 +1054,7 @@ const styles = {
     borderRadius: 8,
     background: "rgba(196,115,79,0.12)",
     border: "1px solid rgba(196,115,79,0.25)",
-    color: "#c4734f",
+    color: t.terra,
     fontSize: 11,
     fontWeight: 700,
     fontFamily: "var(--font-display)",
@@ -1064,12 +1065,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     border: "1px solid rgba(255,255,255,0.08)",
     borderRadius: 8,
     padding: "4px 10px",
     cursor: "pointer",
-    color: "#e4e4e7",
+    color: t.textSecondary,
     flexShrink: 0,
   },
 
@@ -1130,7 +1131,7 @@ const styles = {
     borderRadius: 6,
     background: "rgba(74,222,128,0.08)",
     border: "1px solid rgba(74,222,128,0.2)",
-    color: "#4ade80",
+    color: t.green,
     fontSize: 10,
     fontWeight: 700,
     fontFamily: "var(--font-display)",
@@ -1141,7 +1142,7 @@ const styles = {
   dismissBtn: {
     padding: "5px 12px",
     borderRadius: 6,
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     border: "1px solid rgba(255,255,255,0.08)",
     color: "rgba(240,235,225,0.5)",
     fontSize: 10,
@@ -1179,7 +1180,7 @@ const styles = {
     height: 28,
     borderRadius: "50%",
     border: "2.5px solid rgba(240,235,225,0.1)",
-    borderTopColor: "#C4734F",
+    borderTopColor: t.terra,
     animation: "admin-spin 0.8s linear infinite",
   },
 
@@ -1192,7 +1193,7 @@ const styles = {
     borderRadius: 10,
     background: "rgba(196,115,79,0.15)",
     border: "1px solid rgba(196,115,79,0.3)",
-    color: "#C4734F",
+    color: t.terra,
     fontSize: 12,
     fontWeight: 700,
     fontFamily: "var(--font-display)",

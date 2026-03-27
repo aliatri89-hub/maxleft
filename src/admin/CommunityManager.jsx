@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/CommunityManager.jsx
 //
 // Phase 3 admin: Community management.
@@ -504,7 +505,7 @@ function AddItemForm({ communityId, miniseries, showToast, onAdded }) {
                 {r.poster_path ? (
                   <img src={`${TMDB_IMG}/w92${r.poster_path}`} alt="" style={{ width: 40, height: 60, borderRadius: 4, objectFit: "cover" }} />
                 ) : (
-                  <div style={{ width: 40, height: 60, borderRadius: 4, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center" }}>🎬</div>
+                  <div style={{ width: 40, height: 60, borderRadius: 4, background: t.bgElevated, display: "flex", alignItems: "center", justifyContent: "center" }}>🎬</div>
                 )}
                 <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "rgba(240,235,225,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
@@ -615,7 +616,7 @@ function ShelvesPanel({ community, showToast }) {
                   <td style={S.td}>
                     <div style={{
                       ...S.statusPill,
-                      color: shelf.status === "active" ? "#4ade80" : shelf.status === "completed" ? "#22d3ee" : "rgba(240,235,225,0.4)",
+                      color: shelf.status === "active" ? t.green : shelf.status === "completed" ? t.cyan : "rgba(240,235,225,0.4)",
                       background: shelf.status === "active" ? "rgba(74,222,128,0.08)" : shelf.status === "completed" ? "rgba(34,211,238,0.08)" : "rgba(255,255,255,0.04)",
                       borderColor: shelf.status === "active" ? "rgba(74,222,128,0.2)" : shelf.status === "completed" ? "rgba(34,211,238,0.2)" : "rgba(255,255,255,0.08)",
                     }}>
@@ -868,7 +869,7 @@ function BadgesPanel({ community, showToast }) {
                       ...S.statusPill,
                       cursor: "pointer",
                       border: "1px solid",
-                      color: badge.is_active ? "#4ade80" : "#f87171",
+                      color: badge.is_active ? t.green : t.red,
                       background: badge.is_active ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
                       borderColor: badge.is_active ? "rgba(74,222,128,0.2)" : "rgba(248,113,113,0.2)",
                     }}>
@@ -1216,14 +1217,14 @@ function PostsPanel({ community, showToast }) {
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#f0ebe1", fontFamily: "var(--font-display)" }}>
+                <div style={{ fontSize: 15, fontWeight: 700, color: t.cream, fontFamily: "var(--font-display)" }}>
                   {post.title || "Untitled"}
                 </div>
                 <div style={{
                   ...S.statusPill,
                   fontSize: 8,
                   padding: "2px 8px",
-                  color: post.published_at ? "#4ade80" : "rgba(240,235,225,0.4)",
+                  color: post.published_at ? t.green : "rgba(240,235,225,0.4)",
                   background: post.published_at ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.04)",
                   borderColor: post.published_at ? "rgba(74,222,128,0.2)" : "rgba(255,255,255,0.08)",
                 }}>
@@ -1336,7 +1337,7 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button onClick={onCancel} style={{ ...S.cancelBtn, padding: "6px 14px", fontSize: 12 }}>← Back to list</button>
-          <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)", color: "#f0ebe1", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          <div style={{ fontSize: 18, fontWeight: 800, fontFamily: "var(--font-display)", color: t.cream, textTransform: "uppercase", letterSpacing: "0.04em" }}>
             {isNew ? "New Post" : "Edit Post"}
           </div>
         </div>
@@ -1400,7 +1401,7 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
               letterSpacing: "0.04em",
               cursor: "pointer",
               transition: "all 0.15s",
-              color: isPublished ? "#4ade80" : "rgba(240,235,225,0.4)",
+              color: isPublished ? t.green : "rgba(240,235,225,0.4)",
               background: isPublished ? "rgba(74,222,128,0.08)" : "rgba(255,255,255,0.04)",
               borderColor: isPublished ? "rgba(74,222,128,0.2)" : "rgba(255,255,255,0.08)",
             }}
@@ -1449,11 +1450,11 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
             <div style={{ fontSize: 9, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(240,235,225,0.2)", marginBottom: 16 }}>
               Preview
             </div>
-            <div style={{ fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)", color: "#f0ebe1", lineHeight: 1.2, marginBottom: 8 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, fontFamily: "var(--font-display)", color: t.cream, lineHeight: 1.2, marginBottom: 8 }}>
               {title || "Untitled"}
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 20 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#C4734F", fontFamily: "var(--font-mono)" }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: t.terra, fontFamily: "var(--font-mono)" }}>
                 by {author || "Ali"}
               </span>
               {isPublished && (
@@ -1482,12 +1483,12 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
 const S = {
   page: { padding: "32px 40px 60px", maxWidth: 1200 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
-  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: "#f0ebe1", margin: 0 },
+  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: t.cream, margin: 0 },
 
   communitySelect: {
     padding: "8px 14px", borderRadius: 8,
-    background: "#1a1714", border: "1px solid rgba(255,255,255,0.1)",
-    color: "#f0ebe1", fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 700,
+    background: t.bgCard, border: "1px solid rgba(255,255,255,0.1)",
+    color: t.cream, fontSize: 14, fontFamily: "var(--font-display)", fontWeight: 700,
     cursor: "pointer", colorScheme: "dark", outline: "none",
     WebkitAppearance: "none", appearance: "none",
     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
@@ -1498,21 +1499,21 @@ const S = {
 
   tabBar: { display: "flex", gap: 2, marginBottom: 24, borderBottom: "1px solid rgba(255,255,255,0.06)" },
   tab: { padding: "10px 20px", background: "transparent", border: "none", borderBottom: "2px solid transparent", color: "rgba(240,235,225,0.4)", fontSize: 13, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.15s ease" },
-  tabActive: { color: "#C4734F", borderBottomColor: "#C4734F" },
+  tabActive: { color: t.terra, borderBottomColor: t.terra },
 
   toolbar: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", marginBottom: 12 },
   toolbarLeft: { display: "flex", alignItems: "center", gap: 12 },
   toolbarRight: { display: "flex", alignItems: "center", gap: 8 },
   toolCount: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)" },
 
-  searchInput: { padding: "7px 14px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 13, outline: "none", fontFamily: "var(--font-mono)", width: 220 },
-  filterSelect: { padding: "7px 10px", borderRadius: 8, background: "#1a1714", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, fontFamily: "var(--font-mono)", cursor: "pointer", colorScheme: "dark", outline: "none" },
+  searchInput: { padding: "7px 14px", borderRadius: 8, background: t.bgElevated, border: "1px solid rgba(255,255,255,0.08)", color: t.textSecondary, fontSize: 13, outline: "none", fontFamily: "var(--font-mono)", width: 220 },
+  filterSelect: { padding: "7px 10px", borderRadius: 8, background: t.bgCard, border: "1px solid rgba(255,255,255,0.08)", color: t.textSecondary, fontSize: 12, fontFamily: "var(--font-mono)", cursor: "pointer", colorScheme: "dark", outline: "none" },
 
-  addBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.1)", border: "1px solid rgba(196,115,79,0.25)", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
-  editBtn: { padding: "4px 10px", borderRadius: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(240,235,225,0.5)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
-  deleteBtn: { padding: "4px 8px", borderRadius: 6, background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.15)", color: "#f87171", fontSize: 11, cursor: "pointer" },
-  saveBtn: { padding: "4px 12px", borderRadius: 6, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.25)", color: "#4ade80", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
-  cancelBtn: { padding: "4px 10px", borderRadius: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(240,235,225,0.4)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
+  addBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.1)", border: "1px solid rgba(196,115,79,0.25)", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
+  editBtn: { padding: "4px 10px", borderRadius: 6, background: t.bgElevated, border: "1px solid rgba(255,255,255,0.08)", color: "rgba(240,235,225,0.5)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
+  deleteBtn: { padding: "4px 8px", borderRadius: 6, background: "rgba(248,113,113,0.06)", border: "1px solid rgba(248,113,113,0.15)", color: t.red, fontSize: 11, cursor: "pointer" },
+  saveBtn: { padding: "4px 12px", borderRadius: 6, background: "rgba(74,222,128,0.1)", border: "1px solid rgba(74,222,128,0.25)", color: t.green, fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
+  cancelBtn: { padding: "4px 10px", borderRadius: 6, background: t.bgElevated, border: "1px solid rgba(255,255,255,0.08)", color: "rgba(240,235,225,0.4)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer" },
 
   tableWrap: { overflowX: "auto", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, background: "rgba(255,255,255,0.015)" },
   table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
@@ -1525,21 +1526,21 @@ const S = {
   cellMono: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.5)" },
 
   thumbPoster: { width: 30, height: 45, borderRadius: 4, objectFit: "cover" },
-  thumbEmpty: { width: 30, height: 45, borderRadius: 4, background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "rgba(240,235,225,0.2)" },
+  thumbEmpty: { width: 30, height: 45, borderRadius: 4, background: t.bgElevated, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "rgba(240,235,225,0.2)" },
 
-  typePill: { display: "inline-block", padding: "2px 8px", borderRadius: 4, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: "rgba(240,235,225,0.45)" },
+  typePill: { display: "inline-block", padding: "2px 8px", borderRadius: 4, background: t.bgElevated, border: "1px solid rgba(255,255,255,0.06)", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: "rgba(240,235,225,0.45)" },
   statusPill: { display: "inline-block", padding: "3px 10px", borderRadius: 4, border: "1px solid", fontSize: 10, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em" },
 
-  inlineInput: { padding: "5px 8px", borderRadius: 6, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", color: "#e4e4e7", fontSize: 12, outline: "none", fontFamily: "inherit", width: "100%" },
-  inlineSelect: { padding: "5px 8px", borderRadius: 6, background: "#1a1714", border: "1px solid rgba(255,255,255,0.1)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "inherit" },
+  inlineInput: { padding: "5px 8px", borderRadius: 6, background: t.bgInput, border: "1px solid rgba(255,255,255,0.1)", color: t.textSecondary, fontSize: 12, outline: "none", fontFamily: "inherit", width: "100%" },
+  inlineSelect: { padding: "5px 8px", borderRadius: 6, background: t.bgCard, border: "1px solid rgba(255,255,255,0.1)", color: t.textSecondary, fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "inherit" },
 
   // ── Add form ──
   addForm: { padding: "16px 20px", background: "rgba(196,115,79,0.04)", border: "1px solid rgba(196,115,79,0.15)", borderRadius: 12, marginBottom: 16 },
-  addFormHeader: { fontSize: 11, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: "#C4734F", marginBottom: 12 },
+  addFormHeader: { fontSize: 11, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.08em", color: t.terra, marginBottom: 12 },
   fieldLabel: { display: "block", fontSize: 9, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.06em", color: "rgba(240,235,225,0.35)", marginBottom: 4 },
-  formInput: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, outline: "none", fontFamily: "var(--font-mono)" },
-  formSelect: { width: "100%", padding: "7px 10px", borderRadius: 8, background: "#1a1714", border: "1px solid rgba(255,255,255,0.08)", color: "#e4e4e7", fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "var(--font-mono)" },
-  formSearchBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.12)", border: "1px solid rgba(196,115,79,0.25)", color: "#c4734f", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer", flexShrink: 0 },
+  formInput: { width: "100%", padding: "7px 10px", borderRadius: 8, background: t.bgElevated, border: "1px solid rgba(255,255,255,0.08)", color: t.textSecondary, fontSize: 12, outline: "none", fontFamily: "var(--font-mono)" },
+  formSelect: { width: "100%", padding: "7px 10px", borderRadius: 8, background: t.bgCard, border: "1px solid rgba(255,255,255,0.08)", color: t.textSecondary, fontSize: 12, cursor: "pointer", colorScheme: "dark", outline: "none", fontFamily: "var(--font-mono)" },
+  formSearchBtn: { padding: "7px 16px", borderRadius: 8, background: "rgba(196,115,79,0.12)", border: "1px solid rgba(196,115,79,0.25)", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", cursor: "pointer", flexShrink: 0 },
 
   // ── Badge edit card ──
   badgeEditCard: {
@@ -1567,6 +1568,6 @@ const S = {
 
   // ── Shared ──
   emptyState: { display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "60px 0", color: "rgba(240,235,225,0.3)" },
-  spinner: { width: 28, height: 28, borderRadius: "50%", border: "2.5px solid rgba(240,235,225,0.1)", borderTopColor: "#C4734F", animation: "admin-spin 0.8s linear infinite" },
-  toast: { position: "fixed", bottom: 24, right: 24, padding: "10px 20px", borderRadius: 10, background: "rgba(196,115,79,0.15)", border: "1px solid rgba(196,115,79,0.3)", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", zIndex: 1000, animation: "admin-toast-in 0.2s ease" },
+  spinner: { width: 28, height: 28, borderRadius: "50%", border: "2.5px solid rgba(240,235,225,0.1)", borderTopColor: t.terra, animation: "admin-spin 0.8s linear infinite" },
+  toast: { position: "fixed", bottom: 24, right: 24, padding: "10px 20px", borderRadius: 10, background: "rgba(196,115,79,0.15)", border: "1px solid rgba(196,115,79,0.3)", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", zIndex: 1000, animation: "admin-toast-in 0.2s ease" },
 };

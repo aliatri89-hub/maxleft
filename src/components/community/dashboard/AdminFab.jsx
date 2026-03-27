@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState } from "react";
 
 /**
@@ -63,8 +64,8 @@ export default function AdminFab({ userId, accent = "#e94560", onAddItem, onRSSS
             background: "#1e1e2a",
             border: `1.5px solid ${accent}60`,
             boxShadow: "0 4px 16px rgba(0,0,0,0.5)",
-            color: "#fff", fontSize: 12, fontWeight: 700,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textPrimary, fontSize: 12, fontWeight: 700,
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.03em", textTransform: "uppercase",
             display: "flex", alignItems: "center", gap: 6,
             padding: "0 14px 0 10px", cursor: "pointer",
@@ -106,7 +107,7 @@ function fabStyle(accent, bottomOffset) {
     width: 52, height: 52, borderRadius: "50%",
     background: accent, border: "none",
     boxShadow: `0 4px 20px ${accent}60, 0 2px 8px rgba(0,0,0,0.4)`,
-    color: "#fff", fontSize: 26, fontWeight: 300,
+    color: t.textPrimary, fontSize: 26, fontWeight: 300,
     display: "flex", alignItems: "center", justifyContent: "center",
     cursor: "pointer", WebkitTapHighlightColor: "transparent",
   };

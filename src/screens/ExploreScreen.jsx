@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 import { useBackGesture } from "../hooks/useBackGesture";
@@ -216,13 +217,13 @@ export default function ExploreScreen({
       <div style={{ padding: "0 20px 16px" }}>
         <div style={{
           fontSize: 32, color: "var(--text-primary)",
-          fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2,
+          fontFamily: t.fontHeadline, letterSpacing: 2,
         }}>
           Communities
         </div>
         <div style={{
           fontSize: 11, color: "var(--text-faint)", marginTop: 4,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
           letterSpacing: "0.04em", textTransform: "uppercase",
         }}>
           Track films, earn badges, complete series
@@ -260,7 +261,7 @@ export default function ExploreScreen({
             {unfollowedCommunities.length > 0 && (
               <>
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: t.fontMono,
                   fontWeight: 500, fontSize: 9,
                   color: "var(--text-faint)",
                   textTransform: "uppercase",
@@ -298,7 +299,7 @@ export default function ExploreScreen({
               border: "1px solid var(--border-subtle)",
             }}>
               <div style={{
-                fontFamily: "'Playfair Display', serif", fontWeight: 700,
+                fontFamily: t.fontSerif, fontWeight: 700,
                 fontSize: 18, color: "var(--text-primary)",
                 marginBottom: 8,
               }}>
@@ -306,7 +307,7 @@ export default function ExploreScreen({
               </div>
               <div style={{
                 fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
               }}>
                 New podcast communities are added regularly.
               </div>

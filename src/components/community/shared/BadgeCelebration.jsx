@@ -256,13 +256,13 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
         }}>
           <div style={{
             fontSize: 10, letterSpacing: 6, textTransform: "uppercase",
-            color: accent, fontFamily: "'Playfair Display', serif", marginBottom: 12,
+            color: accent, fontFamily: t.fontSerif, marginBottom: 12,
           }}>
             Badge Unlocked
           </div>
           <div style={{
             fontSize: 32, fontWeight: 700, color: t.textPrimary,
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: t.fontSerif,
             textShadow: `0 0 60px ${accent}25`,
             lineHeight: 1.15,
           }}>
@@ -282,7 +282,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{
                   fontSize: 15, color: `${accent}bb`, fontStyle: "italic",
-                  fontFamily: "'Playfair Display', serif",
+                  fontFamily: t.fontSerif,
                 }}>
                   {parts[0]}
                 </div>

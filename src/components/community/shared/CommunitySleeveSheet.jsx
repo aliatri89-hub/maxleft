@@ -246,7 +246,7 @@ export default function CommunitySleeveSheet({
             />
           )}
           <div style={{
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: t.fontSharpie,
             fontSize: 24,
             color: "rgba(240,235,225,0.95)",
             lineHeight: 1.15,

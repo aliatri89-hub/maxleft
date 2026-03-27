@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useEffect, lazy, Suspense } from "react";
 import { useCommunityPage } from "../hooks/community";
 import { trackEvent } from "../hooks/useAnalytics";
@@ -61,14 +62,14 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   if (error || !community) {
     return (
       <div style={{
-        height: "100dvh", background: "#0f0d0b",
+        height: "100dvh", background: t.bgPrimary,
         display: "flex", alignItems: "center", justifyContent: "center",
         flexDirection: "column", gap: 12,
       }}>
-        <div style={{ color: "#e94560", fontSize: 14 }}>Couldn't load community</div>
+        <div style={{ color: t.red, fontSize: 14 }}>Couldn't load community</div>
         <button onClick={onBack} style={{
-          background: "none", border: "1px solid rgba(255,255,255,0.1)",
-          color: "#bbb", borderRadius: 8, padding: "8px 16px",
+          background: "none", border: `1px solid ${t.borderMedium}`,
+          color: t.textSecondary, borderRadius: 8, padding: "8px 16px",
           fontSize: 13, cursor: "pointer",
         }}>← Go back</button>
       </div>

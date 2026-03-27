@@ -1,3 +1,4 @@
+import { t } from "../theme";
 /**
  * CommunityLoadingScreen — VHS-branded loading screen per community.
  * Shows community name + M▶NTL play button in community accent color.
@@ -18,7 +19,7 @@ const COMMUNITY_BRANDS = {
   "getplayed":     { name: "Get Played",          accent: "#e91e8c" },
 };
 
-const DEFAULT_BRAND = { name: "MANTL", accent: "#C4734F" };
+const DEFAULT_BRAND = { name: "MANTL", accent: t.terra };
 
 export default function CommunityLoadingScreen({ slug }) {
   const brand = COMMUNITY_BRANDS[slug] || DEFAULT_BRAND;
@@ -38,7 +39,7 @@ export default function CommunityLoadingScreen({ slug }) {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -55,7 +56,7 @@ export default function CommunityLoadingScreen({ slug }) {
       {/* Community name */}
       {!isDefault && (
         <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 800,
           fontSize: 13,
           letterSpacing: "0.2em",
@@ -81,10 +82,10 @@ export default function CommunityLoadingScreen({ slug }) {
         animation: `${uid}-up 0.5s ease 0.15s forwards`,
       }}>
         <span style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 900, fontSize: 48,
           lineHeight: 0.85, letterSpacing: "0.02em",
-          color: "#f5f0eb",
+          color: t.cream,
         }}>M</span>
 
         {/* VHS play button */}
@@ -113,10 +114,10 @@ export default function CommunityLoadingScreen({ slug }) {
         </div>
 
         <span style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 900, fontSize: 48,
           lineHeight: 0.85, letterSpacing: "0.02em",
-          color: "#f5f0eb",
+          color: t.cream,
         }}>NTL</span>
       </div>
 
@@ -134,7 +135,7 @@ export default function CommunityLoadingScreen({ slug }) {
 
       {/* Tagline */}
       <div style={{
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         fontStyle: "italic",
         fontSize: 13,
         color: "#8a7e72",

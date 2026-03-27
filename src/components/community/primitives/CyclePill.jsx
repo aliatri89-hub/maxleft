@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * CyclePill — 3-state media filter pill (solo / hide / all / dimmed)
  *
@@ -25,7 +26,7 @@ export default function CyclePill({ label, value, color, state, onClick, readOnl
           ? `1px solid ${color}44`
           : isHidden
             ? "1px solid rgba(255,255,255,0.03)"
-            : "1px solid rgba(255,255,255,0.06)",
+            : `1px solid ${t.borderSubtle}`,
         cursor: readOnly ? "default" : "pointer",
         transition: "all 0.2s",
         opacity: (isHidden || isDimmed) ? 0.35 : 1,
@@ -36,17 +37,17 @@ export default function CyclePill({ label, value, color, state, onClick, readOnl
     >
       <div style={{
         width: 8, height: 8, borderRadius: "50%",
-        background: isHidden ? "#666" : color,
+        background: isHidden ? t.textFaint : color,
         flexShrink: 0, transition: "background 0.2s",
         boxShadow: isSolo ? `0 0 6px ${color}60` : "none",
       }} />
-      <div style={{ fontSize: 12, color: isHidden ? "#555" : isSolo ? "#ccc" : "#888", minWidth: 40 }}>
+      <div style={{ fontSize: 12, color: isHidden ? t.textFaint : isSolo ? "#ccc" : t.textMuted, minWidth: 40 }}>
         {label}
       </div>
       <div style={{
         fontSize: 14, fontWeight: 700,
-        color: isHidden ? "#555" : "#fff",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: isHidden ? t.textFaint : t.textPrimary,
+        fontFamily: t.fontDisplay,
         textDecoration: isHidden ? "line-through" : "none",
         transition: "color 0.2s",
       }}>

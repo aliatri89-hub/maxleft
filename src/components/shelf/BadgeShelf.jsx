@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useGlobalBadges } from "../../hooks/useGlobalBadges";
@@ -32,7 +33,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
         <div style={{
           position: "absolute", top: STROKE + 3, left: STROKE + 3,
           width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
-          borderRadius: "50%", overflow: "hidden", background: "#1a1714",
+          borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
             <img src={badge.image_url} loading="lazy" alt={badge.name} style={{
@@ -51,7 +52,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
           width: 18, height: 18, borderRadius: "50%",
           background: "#22c55e", border: "2px solid #0f0d0b",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 9, color: "#fff", fontWeight: 700,
+          fontSize: 9, color: t.textPrimary, fontWeight: 700,
         }}>✓</div>
       </div>
 
@@ -114,7 +115,7 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
         <div style={{
           position: "absolute", top: STROKE + 3, left: STROKE + 3,
           width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
-          borderRadius: "50%", overflow: "hidden", background: "#1a1714",
+          borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
             <img src={badge.image_url} loading="lazy" alt={badge.name} style={{
@@ -152,7 +153,7 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
           background: "linear-gradient(180deg, #444, #2a2a2a)",
           borderRadius: "0 0 2px 2px",
           fontSize: 8, fontWeight: 700,
-          color: "rgba(255,255,255,0.7)",
+          color: t.textMuted,
           fontFamily: "var(--font-display)",
           letterSpacing: "0.06em",
           textTransform: "uppercase",
@@ -286,15 +287,15 @@ export default function BadgeShelf({ session }) {
           background: "linear-gradient(180deg, #6b4c2a 0%, #5a3f22 30%, #4e3620 70%, #3d2a16 100%)",
           position: "relative",
         }}>
-          <div style={{ position: "absolute", top: 4, left: 12, right: 12, height: "0.5px", background: "rgba(255,255,255,0.06)" }} />
-          <div style={{ position: "absolute", top: 9, left: 20, right: 20, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
+          <div style={{ position: "absolute", top: 4, left: 12, right: 12, height: "0.5px", background: t.bgInput }} />
+          <div style={{ position: "absolute", top: 9, left: 20, right: 20, height: "0.5px", background: t.bgElevated }} />
           <div style={{ position: "absolute", top: 14, left: 8, right: 8, height: "0.5px", background: "rgba(255,255,255,0.03)" }} />
         </div>
         <div style={{
           height: 5,
           background: "linear-gradient(180deg, #3d2a16 0%, #2e1f10 100%)",
         }}>
-          <div style={{ position: "absolute", bottom: 0, left: 16, right: 16, height: "0.5px", background: "rgba(255,255,255,0.04)" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 16, right: 16, height: "0.5px", background: t.bgElevated }} />
         </div>
         <div style={{
           position: "absolute", bottom: -10, left: 0,

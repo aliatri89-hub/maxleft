@@ -257,7 +257,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
           }}>
             <div style={{
               fontSize: 28, fontWeight: 700, color: t.textPrimary,
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: t.fontSerif,
               lineHeight: 1.15,
             }}>
               {badge.name}
@@ -265,7 +265,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             {isComplete && badge.tagline && (
               <div style={{
                 fontSize: 14, color: `${accent}aa`, fontStyle: "italic",
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: t.fontSerif,
                 marginTop: 8,
               }}>
                 {badge.tagline}
@@ -274,7 +274,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             {!isComplete && badge.progress_tagline && (
               <div style={{
                 fontSize: 13, color: "#ffffff45", fontStyle: "italic",
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: t.fontSerif,
                 marginTop: 8,
               }}>
                 {badge.progress_tagline}

@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 const SHELF_CONFIG = {
   books: { label: "Books", emptyText: "No books yet", modalCat: "book" },
   movies: { label: "Movies", emptyText: "No films yet", modalCat: "movie" },
@@ -26,12 +27,12 @@ const S = {
   section: { padding: "0 16px", marginBottom: 36 },
   headerWrap: { textAlign: "center", padding: "0 0 18px" },
   sharpieLabel: {
-    fontFamily: "'Playfair Display', serif", fontWeight: 700,
+    fontFamily: t.fontSerif, fontWeight: 700,
     fontSize: 22, color: accent,
     letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
   sharpieLabelHero: {
-    fontFamily: "'Playfair Display', serif", fontWeight: 700,
+    fontFamily: t.fontSerif, fontWeight: 700,
     fontSize: 28, color: accent,
     letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1,
   },
@@ -81,7 +82,7 @@ const S = {
   },
   title: {
     fontFamily: "var(--font-display)", fontSize: 13,
-    fontWeight: 600, color: "rgba(255,255,255,0.75)",
+    fontWeight: 600, color: t.textMuted,
     marginTop: 8, lineHeight: 1.25,
     overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
   },
@@ -107,7 +108,7 @@ const S = {
   }),
   seeAll: {
     textAlign: "center", paddingTop: 16,
-    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 14,
+    fontFamily: t.fontSerif, fontWeight: 700, fontSize: 14,
     letterSpacing: "0.04em",
     color: `${accent}80`, cursor: "pointer",
   },

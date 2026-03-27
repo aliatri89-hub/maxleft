@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../../../supabase";
 
@@ -330,17 +331,17 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "16px 20px 12px",
-          borderBottom: "1px solid rgba(255,255,255,0.06)", flexShrink: 0,
+          borderBottom: `1px solid ${t.borderSubtle}`, flexShrink: 0,
         }}>
           <div style={{
-            fontSize: 16, fontWeight: 800, color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 16, fontWeight: 800, color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.02em", textTransform: "uppercase",
           }}>📡 RSS Sync</div>
           <button onClick={onClose} style={{
-            background: "rgba(255,255,255,0.06)", border: "none", borderRadius: 8,
+            background: t.bgInput, border: "none", borderRadius: 8,
             width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#bbb", fontSize: 14, cursor: "pointer",
+            color: t.textSecondary, fontSize: 14, cursor: "pointer",
           }}>✕</button>
         </div>
 
@@ -358,9 +359,9 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
               value={manualUrl}
               onChange={(e) => setManualUrl(e.target.value)}
               style={{
-                flex: 1, background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 10, color: "#e4e4e7",
+                flex: 1, background: t.bgElevated,
+                border: `1px solid ${t.bgHover}`,
+                borderRadius: 10, color: t.textSecondary,
                 padding: "10px 12px", fontSize: 13, fontFamily: "inherit", outline: "none",
               }}
             />
@@ -372,7 +373,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                 background: syncing ? "rgba(255,255,255,0.04)" : `${accent}20`,
                 border: `1.5px solid ${accent}`,
                 color: accent, fontSize: 13, fontWeight: 800,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.03em", textTransform: "uppercase",
                 cursor: syncing ? "wait" : "pointer",
                 opacity: syncing ? 0.5 : 1, whiteSpace: "nowrap",
@@ -386,8 +387,8 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           }}>
             <span style={{
               fontSize: 10, fontWeight: 700, textTransform: "uppercase",
-              letterSpacing: "0.06em", color: "#71717a",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              letterSpacing: "0.06em", color: t.textMuted,
+              fontFamily: t.fontDisplay,
             }}>Fetch latest</span>
             {[3, 5, 10, 30].map(n => (
               <button
@@ -396,18 +397,18 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                 style={{
                   padding: "4px 10px", borderRadius: 6,
                   fontSize: 11, fontWeight: 700,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   border: `1.5px solid ${syncLimit === n ? accent : "rgba(255,255,255,0.08)"}`,
                   background: syncLimit === n ? `${accent}20` : "rgba(255,255,255,0.03)",
-                  color: syncLimit === n ? accent : "rgba(255,255,255,0.45)",
+                  color: syncLimit === n ? accent : t.textFaint,
                   cursor: "pointer", transition: "all 0.15s",
                   WebkitTapHighlightColor: "transparent",
                 }}
               >{n}</button>
             ))}
             <span style={{
-              fontSize: 10, color: "#9a9a9f",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 10, color: t.textMuted,
+              fontFamily: t.fontDisplay,
             }}>episodes</span>
           </div>
 
@@ -415,7 +416,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           {syncProgress && (
             <div style={{
               fontSize: 11, color: accent, marginBottom: 10,
-              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 600,
+              fontFamily: t.fontDisplay, fontWeight: 600,
             }}>{syncProgress}</div>
           )}
 
@@ -423,9 +424,9 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           {error && (
             <div style={{
               padding: "10px 14px", borderRadius: 10, marginBottom: 14,
-              fontSize: 12, fontWeight: 600, fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 12, fontWeight: 600, fontFamily: t.fontDisplay,
               background: error.includes("up to date") ? "rgba(74,222,128,0.1)" : "rgba(239,68,68,0.1)",
-              color: error.includes("up to date") ? "#4ade80" : "#f87171",
+              color: error.includes("up to date") ? t.green : t.red,
               border: `1px solid ${error.includes("up to date") ? "rgba(74,222,128,0.2)" : "rgba(239,68,68,0.2)"}`,
             }}>{error}</div>
           )}
@@ -433,7 +434,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           {/* Shelf picker (searchable multi-select pills) */}
           {stagedEpisodes.length > 0 && (
             <div style={{ marginBottom: 14 }}>
-              <Label>Add to shelves <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: "#9a9a9f" }}>— search & tap</span></Label>
+              <Label>Add to shelves <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0, color: t.textMuted }}>— search & tap</span></Label>
               <input
                 type="text"
                 placeholder="Filter shelves…"
@@ -441,9 +442,9 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                 onChange={(e) => setShelfSearch(e.target.value)}
                 style={{
                   width: "100%", marginBottom: 6,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 8, color: "#e4e4e7",
+                  background: t.bgElevated,
+                  border: `1px solid ${t.bgHover}`,
+                  borderRadius: 8, color: t.textSecondary,
                   padding: "7px 10px", fontSize: 12,
                   fontFamily: "inherit", outline: "none",
                 }}
@@ -460,7 +461,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                         onClick={() => toggleShelf(id)}
                         style={{
                           padding: "3px 8px", borderRadius: 6, fontSize: 10, fontWeight: 700,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           border: `1.5px solid ${accent}`, background: `${accent}20`,
                           color: accent, cursor: "pointer",
                         }}
@@ -479,18 +480,18 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                       style={{
                         padding: "5px 10px", borderRadius: 8,
                         fontSize: 11, fontWeight: 700,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         letterSpacing: "0.02em", cursor: "pointer",
                         border: `1.5px solid ${isActive ? accent : "rgba(255,255,255,0.08)"}`,
                         background: isActive ? `${accent}20` : "rgba(255,255,255,0.03)",
-                        color: isActive ? accent : "rgba(255,255,255,0.45)",
+                        color: isActive ? accent : t.textFaint,
                         transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
                       }}
                     >{isActive ? "✓ " : ""}{s.label}</button>
                   );
                 })}
                 {filteredShelfOptions.length === 0 && (
-                  <div style={{ fontSize: 11, color: "#9a9a9f", fontStyle: "italic", padding: "4px 0" }}>
+                  <div style={{ fontSize: 11, color: t.textMuted, fontStyle: "italic", padding: "4px 0" }}>
                     No shelves match "{shelfSearch}"
                   </div>
                 )}
@@ -505,8 +506,8 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
               style={{
                 width: "100%", padding: "10px 0", marginBottom: 14, borderRadius: 10,
                 background: `${accent}15`, border: `1.5px solid ${accent}`,
-                color: "#fff", fontSize: 13, fontWeight: 800,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                color: t.textPrimary, fontSize: 13, fontWeight: 800,
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase", letterSpacing: "0.03em", cursor: "pointer",
               }}
             >Approve All ({pendingCount})</button>
@@ -524,8 +525,8 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
             }}>
               {/* Episode title from RSS */}
               <div style={{
-                fontSize: 10, color: "#9a9a9f", fontWeight: 600,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 10, color: t.textMuted, fontWeight: 600,
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 6,
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>{entry.episode.title}</div>
@@ -541,7 +542,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                   <div style={{
                     width: 40, height: 60, borderRadius: 6, background: "#27272a",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#9a9a9f", fontSize: 12, flexShrink: 0,
+                    color: t.textMuted, fontSize: 12, flexShrink: 0,
                   }}>?</div>
                 )}
 
@@ -550,27 +551,27 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                   {entry.selectedMatch ? (
                     <>
                       <div style={{
-                        fontSize: 14, fontWeight: 700, color: "#fff",
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontSize: 14, fontWeight: 700, color: t.textPrimary,
+                        fontFamily: t.fontDisplay,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{entry.selectedMatch.title || entry.selectedMatch.name}</div>
-                      <div style={{ fontSize: 11, color: "#71717a" }}>
+                      <div style={{ fontSize: 11, color: t.textMuted }}>
                         {(entry.selectedMatch.release_date || "").split("-")[0]} · TMDB {entry.selectedMatch.id}
                       </div>
                     </>
                   ) : (
-                    <div style={{ fontSize: 12, color: "#71717a", fontStyle: "italic" }}>
+                    <div style={{ fontSize: 12, color: t.textMuted, fontStyle: "italic" }}>
                       No match — "{entry.filmTitle}"
                     </div>
                   )}
 
                   {entry.isDuplicate && (
-                    <span style={{ fontSize: 9, fontWeight: 700, color: "#fbbf24", fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: t.gold, fontFamily: t.fontDisplay, textTransform: "uppercase" }}>
                       ⚠ Already exists
                     </span>
                   )}
                   {approved[idx] && (
-                    <span style={{ fontSize: 9, fontWeight: 700, color: "#4ade80", fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: t.green, fontFamily: t.fontDisplay, textTransform: "uppercase" }}>
                       ✓ Added
                     </span>
                   )}
@@ -587,10 +588,10 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                         setResearchResults(entry.tmdbAlts || []);
                       }}
                       style={{
-                        background: "rgba(255,255,255,0.06)", border: "none",
+                        background: t.bgInput, border: "none",
                         borderRadius: 6, width: 28, height: 28,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        color: researchIndex === idx ? accent : "#888",
+                        color: researchIndex === idx ? accent : t.textMuted,
                         fontSize: 11, cursor: "pointer",
                       }}
                       title="Change TMDB match"
@@ -606,7 +607,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                         background: approving[idx] ? "rgba(255,255,255,0.04)" : `${accent}20`,
                         border: `1.5px solid ${accent}`, borderRadius: 8,
                         padding: "4px 12px", color: accent, fontSize: 11, fontWeight: 800,
-                        fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
+                        fontFamily: t.fontDisplay, textTransform: "uppercase",
                         cursor: approving[idx] || selectedShelves.length === 0 ? "not-allowed" : "pointer",
                         opacity: approving[idx] || selectedShelves.length === 0 ? 0.4 : 1,
                       }}
@@ -619,12 +620,12 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
               {showVerdicts && !approved[idx] && entry.selectedMatch && (
                 <div style={{
                   marginTop: 8, paddingTop: 8,
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
+                  borderTop: `1px solid ${t.borderSubtle}`,
                   display: "flex", alignItems: "center", gap: 12,
                 }}>
                   <span style={{
-                    fontSize: 9, fontWeight: 700, color: "#9a9a9f",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: 9, fontWeight: 700, color: t.textMuted,
+                    fontFamily: t.fontDisplay,
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>Verdicts</span>
                   <div style={{ display: "flex", gap: 10 }}>
@@ -639,7 +640,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
               {researchIndex === idx && !approved[idx] && (
                 <div style={{
                   marginTop: 8, paddingTop: 8,
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
+                  borderTop: `1px solid ${t.borderSubtle}`,
                 }}>
                   <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
                     <input
@@ -649,9 +650,9 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                       onKeyDown={(e) => e.key === "Enter" && handleResearch()}
                       placeholder="Search TMDB…"
                       style={{
-                        flex: 1, background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderRadius: 8, color: "#e4e4e7", padding: "6px 10px",
+                        flex: 1, background: t.bgElevated,
+                        border: `1px solid ${t.bgHover}`,
+                        borderRadius: 8, color: t.textSecondary, padding: "6px 10px",
                         fontSize: 12, outline: "none",
                       }}
                     />
@@ -662,7 +663,7 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                         padding: "6px 10px", borderRadius: 8,
                         background: `${accent}20`, border: `1px solid ${accent}40`,
                         color: accent, fontSize: 11, fontWeight: 700,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         cursor: "pointer",
                       }}
                     >{researching ? "…" : "Search"}</button>
@@ -679,10 +680,10 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
                         }}
                         style={{
                           display: "flex", alignItems: "center", gap: 6,
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          background: t.bgElevated,
+                          border: `1px solid ${t.bgHover}`,
                           borderRadius: 8, padding: "4px 8px",
-                          cursor: "pointer", color: "#e4e4e7", flexShrink: 0,
+                          cursor: "pointer", color: t.textSecondary, flexShrink: 0,
                         }}
                       >
                         {alt.poster_path && (
@@ -704,8 +705,8 @@ export default function RSSSyncTool({ community, miniseries = [], session, onClo
           {approvedCount > 0 && pendingCount === 0 && (
             <div style={{
               textAlign: "center", padding: "20px 0",
-              fontSize: 14, fontWeight: 700, color: "#4ade80",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 14, fontWeight: 700, color: t.green,
+              fontFamily: t.fontDisplay,
             }}>All done! {approvedCount} episode{approvedCount !== 1 ? "s" : ""} added. ✓</div>
           )}
         </div>
@@ -723,8 +724,8 @@ function Label({ children, style = {} }) {
   return (
     <div style={{
       fontSize: 10, fontWeight: 700, textTransform: "uppercase",
-      letterSpacing: "0.06em", color: "#71717a",
-      fontFamily: "'Barlow Condensed', sans-serif",
+      letterSpacing: "0.06em", color: t.textMuted,
+      fontFamily: t.fontDisplay,
       marginBottom: 6, ...style,
     }}>{children}</div>
   );
@@ -741,11 +742,11 @@ function MiniVerdict({ color, arrow, value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         style={{
           width: 36, textAlign: "center",
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: t.bgElevated,
+          border: `1px solid ${t.bgHover}`,
           borderRadius: 6, padding: "4px 2px",
-          color: "#e4e4e7", fontSize: 12,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: t.textSecondary, fontSize: 12,
+          fontFamily: t.fontDisplay,
           fontWeight: 700, outline: "none",
         }}
       />

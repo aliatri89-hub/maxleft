@@ -1,3 +1,4 @@
+import { t } from "../theme";
 /**
  * SearchScreen — Global search with podcast coverage overlay.
  *
@@ -407,13 +408,13 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   return (
     <div style={{
       minHeight: "100vh",
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
     }}>
       {/* ── Sticky search + filter bar ── */}
       <div style={{
         position: "sticky", top: 0,
-        background: "#0f0d0b", zIndex: 10,
+        background: t.bgPrimary, zIndex: 10,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
         <div style={{
@@ -421,12 +422,12 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         }}>
           <div style={{
             display: "flex", alignItems: "center", gap: 10,
-            background: "rgba(255,255,255,0.06)",
+            background: t.bgInput,
             borderRadius: 10, padding: "10px 14px",
-            border: "1px solid rgba(255,255,255,0.08)",
+            border: `1px solid ${t.bgHover}`,
           }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke={searching ? TC : "rgba(255,255,255,0.35)"}
+              stroke={searching ? TC : t.textFaint}
               strokeWidth="2.5" strokeLinecap="round"
               style={{ transition: "stroke 0.2s", flexShrink: 0 }}>
               <circle cx="11" cy="11" r="8" />
@@ -442,8 +443,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               autoCorrect="off"
               style={{
                 flex: 1, background: "none", border: "none", outline: "none",
-                color: "#f5f0eb", fontSize: 15,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                color: t.cream, fontSize: 15,
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.03em",
               }}
             />
@@ -453,7 +454,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   width: 20, height: 20, borderRadius: "50%",
                   background: "rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", fontSize: 12, color: "rgba(255,255,255,0.7)",
+                  cursor: "pointer", fontSize: 12, color: t.textMuted,
                   flexShrink: 0,
                 }}>×</div>
             )}
@@ -475,8 +476,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           {browseLoading ? (
             <div style={{
               padding: "32px 16px", textAlign: "center",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.72)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textMuted,
             }}>Loading…</div>
           ) : browseResults.length > 0 ? (
             <>
@@ -514,7 +515,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                       borderRadius: 8,
                       color: TC,
                       fontSize: 12, fontWeight: 700,
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontFamily: t.fontDisplay,
                       textTransform: "uppercase", letterSpacing: "0.04em",
                       cursor: browseLoadingMore ? "wait" : "pointer",
                       transition: "all 0.15s",
@@ -529,8 +530,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               {!browseHasMore && browseResults.length >= BROWSE_PAGE && (
                 <div style={{
                   padding: "8px 16px 20px", textAlign: "center",
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 9, color: "rgba(255,255,255,0.12)",
+                  fontFamily: t.fontMono,
+                  fontSize: 9, color: t.textFaint,
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>
                   {browseResults.length} films
@@ -540,8 +541,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           ) : (
             <div style={{
               padding: "32px 16px", textAlign: "center",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
             }}>No coverage found for this filter</div>
           )}
         </div>
@@ -553,14 +554,14 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           {/* Section header */}
           <div style={{ padding: "0 16px 12px" }}>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 700, fontSize: 13,
-              color: "rgba(255,255,255,0.78)",
+              color: t.textSecondary,
               textTransform: "uppercase", letterSpacing: "0.08em",
             }}>Recently covered</div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
               marginTop: 2,
             }}>New podcast episodes this month</div>
           </div>
@@ -569,8 +570,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           {recentLoading ? (
             <div style={{
               padding: "20px 16px",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
             }}>Loading…</div>
           ) : recentlyCovered.length > 0 ? (
             <div className="search-hscroll" style={{
@@ -598,17 +599,17 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                       style={{
                         width: 110, height: 165, borderRadius: 8,
                         objectFit: "cover",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        border: `1px solid ${t.borderSubtle}`,
                       }}
                     />
                   ) : (
                     <div style={{
                       width: 110, height: 165, borderRadius: 8,
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.06)",
+                      background: t.bgElevated,
+                      border: `1px solid ${t.borderSubtle}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontSize: 11, color: "rgba(255,255,255,0.72)",
+                      fontFamily: t.fontDisplay,
+                      fontSize: 11, color: t.textMuted,
                       textTransform: "uppercase", textAlign: "center",
                       padding: 8, lineHeight: 1.3,
                     }}>{film.title}</div>
@@ -617,8 +618,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                   {/* Title + podcast avatars */}
                   <div style={{ marginTop: 6 }}>
                     <div style={{
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontWeight: 700, fontSize: 12, color: "#f5f0eb",
+                      fontFamily: t.fontDisplay,
+                      fontWeight: 700, fontSize: 12, color: t.cream,
                       textTransform: "uppercase", letterSpacing: "0.02em",
                       whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                     }}>{film.title}</div>
@@ -643,7 +644,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                           ))}
                         </div>
                         <span style={{
-                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontFamily: t.fontMono,
                           fontSize: 9, color: TC,
                           whiteSpace: "nowrap",
                         }}>{film.year || ""}</span>
@@ -656,8 +657,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           ) : (
             <div style={{
               padding: "20px 16px",
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
             }}>No recent coverage found</div>
           )}
 
@@ -667,15 +668,15 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             borderTop: "1px solid rgba(255,255,255,0.04)",
           }}>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 700, fontSize: 14,
-              color: "rgba(255,255,255,0.72)",
+              color: t.textMuted,
               textTransform: "uppercase", letterSpacing: "0.04em",
               marginBottom: 4,
             }}>Or search any film</div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
             }}>Find coverage across {recentlyCovered.length > 0
               ? `${recentlyCovered[0]?.podcasts?.length || "all"} podcasts and counting`
               : "all your favorite shows"
@@ -688,15 +689,15 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
       {hasSearched && !searching && results.length === 0 && (
         <div style={{ padding: "48px 32px", textAlign: "center" }}>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontWeight: 700, fontSize: 15,
-            color: "rgba(255,255,255,0.72)",
+            color: t.textMuted,
             textTransform: "uppercase", letterSpacing: "0.04em",
             marginBottom: 6,
           }}>No results for "{query}"</div>
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 10, color: "rgba(255,255,255,0.78)",
+            fontFamily: t.fontMono,
+            fontSize: 10, color: t.textSecondary,
           }}>Try a different title or spelling</div>
         </div>
       )}
@@ -735,8 +736,8 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         }}>
           <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)" }} />
           <span style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9, color: "rgba(255,255,255,0.72)",
+            fontFamily: t.fontMono,
+            fontSize: 9, color: t.textMuted,
             textTransform: "uppercase", letterSpacing: "0.1em", whiteSpace: "nowrap",
           }}>no coverage yet</span>
           <div style={{ flex: 1, height: 1, background: "linear-gradient(270deg, rgba(255,255,255,0.06), transparent)" }} />
@@ -839,23 +840,23 @@ function ResultCard({
           <img src={result.poster} alt={result.title} loading="lazy"
             style={{
               width: 52, height: 78, borderRadius: 6, objectFit: "cover",
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: `1px solid ${t.borderSubtle}`,
             }} />
         ) : (
           <div style={{
             width: 52, height: 78, borderRadius: 6,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: t.bgElevated,
+            border: `1px solid ${t.borderSubtle}`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 9, color: "rgba(255,255,255,0.78)",
+            fontFamily: t.fontMono,
+            fontSize: 9, color: t.textSecondary,
           }}>NO<br />IMG</div>
         )}
         {isWatched && (
           <div style={{
             position: "absolute", bottom: -3, right: -3,
             width: 16, height: 16, borderRadius: "50%",
-            background: "#0f0d0b", border: "1.5px solid rgba(52,211,153,0.5)",
+            background: t.bgPrimary, border: "1.5px solid rgba(52,211,153,0.5)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
             <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
@@ -868,14 +869,14 @@ function ResultCard({
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 700, fontSize: 16, color: "#f5f0eb",
+            fontFamily: t.fontDisplay,
+            fontWeight: 700, fontSize: 16, color: t.cream,
             textTransform: "uppercase", letterSpacing: "0.03em",
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>{result.title}</div>
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 11, color: "rgba(255,255,255,0.72)", marginTop: 2,
+            fontFamily: t.fontMono,
+            fontSize: 11, color: t.textMuted, marginTop: 2,
           }}>{result.year || "—"}</div>
 
           {hasCoverage && (
@@ -896,7 +897,7 @@ function ResultCard({
                       <div key={pod.slug || i} title={pod.name}
                         style={{
                           width: 22, height: 22, borderRadius: 5,
-                          background: "rgba(255,255,255,0.06)",
+                          background: t.bgInput,
                           border: "1.5px solid #0f0d0b",
                           marginLeft: i > 0 ? -6 : 0,
                           position: "relative", zIndex: 5 - i,
@@ -905,15 +906,15 @@ function ResultCard({
                   ))}
                   {result.podcasts.length > 5 && (
                     <span style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "rgba(255,255,255,0.7)",
+                      fontFamily: t.fontMono,
+                      fontSize: 9, color: t.textMuted,
                       marginLeft: 4,
                     }}>+{result.podcasts.length - 5}</span>
                   )}
                 </>
               ) : (
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontSize: 11, fontWeight: 600, color: TC,
                   letterSpacing: "0.04em", textTransform: "uppercase",
                 }}>
@@ -936,7 +937,7 @@ function ResultCard({
           }}>
             <svg width="10" height="10" viewBox="0 0 24 24"
               fill="none"
-              stroke={hasCoverage ? TC : "rgba(255,255,255,0.3)"}
+              stroke={hasCoverage ? TC : t.textFaint}
               strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
               style={{
                 transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
@@ -965,7 +966,7 @@ function ResultCard({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 9, fontWeight: 600,
                     color: "rgba(52,211,153,0.6)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -978,7 +979,7 @@ function ResultCard({
                     display: "inline-flex", alignItems: "center", gap: 4,
                     padding: "3px 10px 3px 7px", borderRadius: 10,
                     background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: `1px solid ${t.bgHover}`,
                     cursor: "pointer",
                   }}
                 >
@@ -986,9 +987,9 @@ function ResultCard({
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 9, fontWeight: 600,
-                    color: "rgba(255,255,255,0.78)",
+                    color: t.textSecondary,
                     textTransform: "uppercase", letterSpacing: "0.06em",
                   }}>Log This Film</span>
                 </div>
@@ -996,13 +997,13 @@ function ResultCard({
             </div>
           )}
           {loadingEpisodes && (
-            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.72)" }}>
+            <div style={{ padding: "12px 0", fontFamily: t.fontMono, fontSize: 10, color: t.textMuted }}>
               Loading episodes…
             </div>
           )}
 
           {!loadingEpisodes && episodes.length === 0 && (
-            <div style={{ padding: "12px 0", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "rgba(255,255,255,0.78)" }}>
+            <div style={{ padding: "12px 0", fontFamily: t.fontMono, fontSize: 10, color: t.textSecondary }}>
               No playable episodes found
             </div>
           )}
@@ -1031,26 +1032,26 @@ function ResultCard({
                   <img src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name}
                     style={{
                       width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                      border: isEpExpanded || isCurrent ? `1.5px solid ${TC}` : "1px solid rgba(255,255,255,0.06)",
+                      border: isEpExpanded || isCurrent ? `1.5px solid ${TC}` : `1px solid ${t.borderSubtle}`,
                     }} />
                 ) : (
                   <div style={{
                     width: 32, height: 32, borderRadius: 8,
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: t.bgElevated,
+                    border: `1px solid ${t.borderSubtle}`,
                   }} />
                 )}
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontWeight: 700, fontSize: 13,
-                    color: isEpExpanded || isCurrent ? TC : "rgba(255,255,255,0.7)",
+                    color: isEpExpanded || isCurrent ? TC : t.textMuted,
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{ep.episode_title || "Episode"}</div>
                   <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9, color: "rgba(255,255,255,0.7)",
+                    fontFamily: t.fontMono,
+                    fontSize: 9, color: t.textMuted,
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>
                     {ep.podcast_name}
@@ -1066,13 +1067,13 @@ function ResultCard({
                     style={{
                       width: 28, height: 28, borderRadius: "50%",
                       background: isActiveAndPlaying ? "rgba(199,91,63,0.15)" : "rgba(255,255,255,0.04)",
-                      border: isActiveAndPlaying ? "1px solid rgba(199,91,63,0.3)" : "1px solid rgba(255,255,255,0.08)",
+                      border: isActiveAndPlaying ? "1px solid rgba(199,91,63,0.3)" : `1px solid ${t.bgHover}`,
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0, cursor: "pointer",
                       transition: "all 0.15s",
                     }}
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? TC : "rgba(255,255,255,0.5)"}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? TC : t.textMuted}>
                       {isActiveAndPlaying ? (
                         <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
                       ) : (
@@ -1088,7 +1089,7 @@ function ResultCard({
                       style={{
                         width: 24, height: 24, borderRadius: "50%",
                         background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.06)",
+                        border: `1px solid ${t.borderSubtle}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         flexShrink: 0, cursor: "pointer",
                       }}
@@ -1119,8 +1120,8 @@ function ResultCard({
                   </>
                 ) : (
                   <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 8, color: "rgba(255,255,255,0.78)", textTransform: "uppercase",
+                    fontFamily: t.fontMono,
+                    fontSize: 8, color: t.textSecondary, textTransform: "uppercase",
                   }}>soon</span>
                 )}
               </div>
@@ -1138,21 +1139,21 @@ function ResultCard({
                   return (
                     <div style={{
                       padding: "4px 8px 10px 50px",
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: t.fontMono,
                       fontSize: 10, lineHeight: 1.55,
-                      color: "rgba(255,255,255,0.65)",
+                      color: t.textMuted,
                       whiteSpace: "pre-wrap",
                     }}>
-                      <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>{hook}</span>
+                      <span style={{ color: t.textMuted, fontWeight: 600 }}>{hook}</span>
                       {rest && <>{" "}{rest}</>}
                     </div>
                   );
                 })() : isEpExpanded ? (
                   <div style={{
                     padding: "4px 8px 10px 50px",
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 9, fontStyle: "italic",
-                    color: "rgba(255,255,255,0.72)",
+                    color: t.textMuted,
                   }}>
                     No description available
                   </div>
@@ -1184,7 +1185,7 @@ function ResultCard({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 9, fontWeight: 600,
                     color: "rgba(52,211,153,0.6)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -1197,7 +1198,7 @@ function ResultCard({
                     display: "inline-flex", alignItems: "center", gap: 4,
                     padding: "3px 10px 3px 7px", borderRadius: 10,
                     background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    border: `1px solid ${t.bgHover}`,
                     cursor: "pointer",
                   }}
                 >
@@ -1205,9 +1206,9 @@ function ResultCard({
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 9, fontWeight: 600,
-                    color: "rgba(255,255,255,0.78)",
+                    color: t.textSecondary,
                     textTransform: "uppercase", letterSpacing: "0.06em",
                   }}>Log This Film</span>
                 </div>
@@ -1217,12 +1218,12 @@ function ResultCard({
           <div style={{
             padding: "14px 16px",
             background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: `1px solid ${t.borderSubtle}`,
             borderRadius: 10,
           }}>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 10, color: t.textSecondary,
               textTransform: "uppercase", letterSpacing: "0.06em",
               marginBottom: 10,
             }}>
@@ -1242,7 +1243,7 @@ function ResultCard({
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontSize: 12, fontWeight: 600, color: TC,
                   textTransform: "uppercase", letterSpacing: "0.04em",
                 }}>
@@ -1276,7 +1277,7 @@ function ResultCard({
                   </svg>
                 )}
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontSize: 12, fontWeight: 700, color: TC,
                   textTransform: "uppercase", letterSpacing: "0.04em",
                 }}>
@@ -1286,8 +1287,8 @@ function ResultCard({
             )}
 
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 9, color: "rgba(255,255,255,0.78)",
+              fontFamily: t.fontMono,
+              fontSize: 9, color: t.textSecondary,
               marginTop: 8, lineHeight: 1.4,
             }}>
               {notified

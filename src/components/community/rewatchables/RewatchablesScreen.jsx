@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -171,7 +172,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
 
   return (
     <div style={{
-      height: "100dvh", background: "#0f0d0b",
+      height: "100dvh", background: t.bgPrimary,
       overflowX: "hidden", overflowY: "auto",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -189,8 +190,8 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
@@ -215,7 +216,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
               background: viewMode === v.key ? `${accent}25` : "rgba(255,255,255,0.05)",
               border: `1.5px solid ${viewMode === v.key ? accent : "rgba(255,255,255,0.1)"}`,
               borderRadius: 20, padding: "5px 14px",
-              color: viewMode === v.key ? accent : "#888",
+              color: viewMode === v.key ? accent : t.textMuted,
               fontSize: 12, fontWeight: 600, cursor: "pointer",
               transition: "all 0.2s",
               flexShrink: 0,
@@ -236,7 +237,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
             width: 30, height: 30, borderRadius: "50%",
             border: searchOpen || searchQuery
               ? `1.5px solid ${accent}`
-              : "1px solid rgba(255,255,255,0.1)",
+              : `1px solid ${t.borderMedium}`,
             background: searchOpen || searchQuery
               ? "rgba(255,255,255,0.06)"
               : "rgba(255,255,255,0.04)",
@@ -246,7 +247,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke={searchOpen || searchQuery ? accent : "rgba(255,255,255,0.4)"}
+            stroke={searchOpen || searchQuery ? accent : t.textFaint}
             strokeWidth="2" strokeLinecap="round"
           >
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -273,9 +274,9 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
               width: "100%",
               padding: "8px 36px 8px 32px",
               background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: `1px solid ${t.bgHover}`,
               borderRadius: 10,
-              color: "#e0e0e0",
+              color: t.textSecondary,
               fontSize: 13,
               fontFamily: "inherit",
               outline: "none",
@@ -285,7 +286,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           />
           <div style={{
             position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-            fontSize: 13, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
+            fontSize: 13, color: t.textSecondary, pointerEvents: "none",
           }}>🔍</div>
           {searchQuery && (
             <button
@@ -294,7 +295,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
                 position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
                 background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
                 width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                color: "#bbb", fontSize: 11, cursor: "pointer",
+                color: t.textSecondary, fontSize: 11, cursor: "pointer",
               }}
             >✕</button>
           )}

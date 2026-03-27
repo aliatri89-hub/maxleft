@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../../supabase";
 import { getCommunityAccent } from "./FeedPrimitives";
@@ -99,9 +100,9 @@ export default function FeedFilterBar({
       {/* ── Sort toggle ── */}
       <div style={{
         display: "flex",
-        background: "rgba(255,255,255,0.04)",
+        background: t.bgElevated,
         borderRadius: 8,
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: `1px solid ${t.borderSubtle}`,
         overflow: "hidden",
         flexShrink: 0,
       }}>
@@ -116,7 +117,7 @@ export default function FeedFilterBar({
               color: sortOrder === opt.key ? "var(--text-primary, #e8e0d4)" : "var(--text-muted, #8892a8)",
               fontSize: 11,
               fontWeight: 600,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
               cursor: "pointer",
@@ -145,7 +146,7 @@ export default function FeedFilterBar({
               ? "1px solid rgba(251,191,36,0.27)"
               : selectedPodcast
                 ? `1px solid ${getCommunityAccent(selectedPodcast)}44`
-                : "1px solid rgba(255,255,255,0.06)",
+                : `1px solid ${t.borderSubtle}`,
             borderRadius: 8,
             color: selectedPodcast === "__favorites__"
               ? "#fbbf24"
@@ -154,7 +155,7 @@ export default function FeedFilterBar({
                 : "var(--text-muted, #8892a8)",
             fontSize: 11,
             fontWeight: 600,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.04em",
             textTransform: "uppercase",
             cursor: "pointer",
@@ -193,7 +194,7 @@ export default function FeedFilterBar({
             top: "calc(100% + 4px)",
             left: 0, right: 0,
             background: "var(--bg-card, #1a1714)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: `1px solid ${t.borderMedium}`,
             borderRadius: 10,
             zIndex: 100,
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -225,7 +226,7 @@ export default function FeedFilterBar({
               <div style={{
                 padding: "6px 12px 2px",
                 fontSize: 11, fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 color: "var(--text-faint, #5a6480)",
@@ -250,7 +251,7 @@ export default function FeedFilterBar({
               <div style={{
                 padding: "6px 12px 2px",
                 fontSize: 11, fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
                 color: "var(--text-faint, #5a6480)",

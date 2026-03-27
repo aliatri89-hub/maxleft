@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useEffect } from "react";
 import NowPlayingItemCard from "./NowPlayingItemCard";
 
@@ -25,7 +26,7 @@ export default function NowPlayingArcadeTab({
   filter,
   onFilterChange,
 }) {
-  const arcadeAccent = "#00ffc8";
+  const arcadeAccent = t.mint;
 
   // Dismiss keyboard when this tab mounts — search input in parent may still be focused
   useEffect(() => {
@@ -175,7 +176,7 @@ export default function NowPlayingArcadeTab({
         {visibleSeries.length === 0 ? (
           <div style={{
             textAlign: "center", padding: "40px 0",
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 13,
+            fontFamily: t.fontMono, fontSize: 13,
             color: "rgba(0,255,200,0.2)", fontStyle: "normal",
           }}>
             {searchQuery ? "No matching games" : "No games here yet"}
@@ -221,23 +222,23 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
           {series.director_emoji && <span style={{ fontSize: 20 }}>{series.director_emoji}</span>}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 15, fontWeight: 700, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 15, fontWeight: 700, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.02em",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
               {series.title}
             </div>
             {series.description && (
-              <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
+              <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 1 }}>
                 {series.description}
               </div>
             )}
           </div>
           <div style={{
             fontSize: 13, fontWeight: 700,
-            color: allPct === 100 ? "#4ade80" : accent,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: allPct === 100 ? t.green : accent,
+            fontFamily: t.fontDisplay,
           }}>
             {allCompleted}/{items.length}
           </div>
@@ -266,8 +267,8 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
             <div style={{
               padding: "0 16px 4px",
               fontSize: 10, fontWeight: 700,
-              color: "rgba(255,255,255,0.7)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: t.textMuted,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
             }}>
@@ -306,8 +307,8 @@ function ArcadeShelf({ series, progress, onToggle, coverCacheVersion, accent }) 
           <div style={{
             padding: movies.length > 0 ? "8px 16px 4px" : "0 16px 4px",
             fontSize: 10, fontWeight: 700,
-            color: "rgba(255,255,255,0.7)",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textMuted,
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
           }}>
@@ -407,7 +408,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
           display: "flex", alignItems: "center", justifyContent: "center",
           boxShadow: "0 2px 8px rgba(74,222,128,0.4)",
         }}>
-          <span style={{ fontSize: 12, color: "#fff", lineHeight: 1 }}>✓</span>
+          <span style={{ fontSize: 12, color: t.textPrimary, lineHeight: 1 }}>✓</span>
         </div>
       )}
 
@@ -421,7 +422,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         padding: "2px 5px",
         color: accent,
         fontWeight: 600,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: t.fontMono,
         letterSpacing: "0.03em",
       }}>
        
@@ -438,7 +439,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         }}>
           <span style={{ fontSize: 8 }}>▶</span>
           <span style={{
-            fontSize: 8, fontWeight: 800, color: "#fff",
+            fontSize: 8, fontWeight: 800, color: t.textPrimary,
             textTransform: "uppercase", letterSpacing: "0.06em",
           }}>Playing</span>
         </div>
@@ -455,7 +456,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         }}>
           <span style={{ fontSize: 8 }}>📋</span>
           <span style={{
-            fontSize: 8, fontWeight: 800, color: "#1a1a2e",
+            fontSize: 8, fontWeight: 800, color: t.bgCard,
             textTransform: "uppercase", letterSpacing: "0.06em",
           }}>Backlog</span>
         </div>
@@ -467,8 +468,8 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         padding: "8px 10px",
       }}>
         <div style={{
-          fontSize: 13, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 13, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.02em",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           textShadow: "0 1px 4px rgba(0,0,0,0.8)",
@@ -477,7 +478,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         </div>
         <div style={{
           fontSize: 10, color: "rgba(0,255,200,0.4)",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           marginTop: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>

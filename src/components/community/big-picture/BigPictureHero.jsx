@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { ActivityRings, CyclePill, HeroBanner } from "../primitives";
 import { useMediaFilter } from "../../../hooks/useMediaFilter";
@@ -52,7 +53,7 @@ export default function BigPictureHero({ community, miniseries, progress, active
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -66,8 +67,8 @@ export default function BigPictureHero({ community, miniseries, progress, active
         {/* Title + tagline */}
         <div style={{
           fontSize: heroTagline ? 28 : 22,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -95,7 +96,7 @@ export default function BigPictureHero({ community, miniseries, progress, active
               {stats.totalDrafts > 0 && (
                 <div style={{
                   display: "flex", alignItems: "center", gap: 8,
-                  padding: "4px 14px", fontSize: 11, color: "rgba(255,255,255,0.7)",
+                  padding: "4px 14px", fontSize: 11, color: t.textMuted,
                 }}>
                   🏈 {stats.totalDrafts} drafts
                 </div>

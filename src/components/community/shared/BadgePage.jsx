@@ -296,7 +296,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
           height: size - (strokeWidth + 3) * 2,
           borderRadius: "50%",
           overflow: "hidden",
-          background: "#1a1a2e",
+          background: t.bgCard,
         }}>
           {badge.image_url ? (
             <img
@@ -314,7 +314,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
               width: "100%", height: "100%",
               background: isEarned
                 ? `radial-gradient(circle, ${accent}30, ${accent}10)`
-                : "#1a1a2e",
+                : t.bgCard,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 32,
             }}>
@@ -341,7 +341,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         {!isEarned && current > 0 && (
           <div style={{
             position: "absolute", bottom: -2, right: -2,
-            background: "#1a1a2e",
+            background: t.bgCard,
             border: `1px solid ${accent}40`,
             borderRadius: 8,
             padding: "2px 6px",

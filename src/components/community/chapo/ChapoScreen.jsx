@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -101,7 +102,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
 
   return (
     <div style={{
-      height: "100dvh", background: "#0f0d0b",
+      height: "100dvh", background: t.bgPrimary,
       overflowX: "hidden", overflowY: "auto",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
@@ -163,8 +164,8 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
@@ -189,7 +190,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
         {filteredShelves.length === 0 && (
           <div style={{
             gridColumn: "1 / -1",
-            textAlign: "center", color: "rgba(255,255,255,0.7)",
+            textAlign: "center", color: t.textMuted,
             fontSize: 14, padding: "48px 20px", fontStyle: "italic",
           }}>
             {filter !== "all" ? "No films match this filter" : "No episodes in this season yet"}
@@ -209,7 +210,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                 background: "rgba(255,255,255,0.03)",
                 border: allSeen
                   ? "1px solid rgba(34,197,94,0.25)"
-                  : "1px solid rgba(255,255,255,0.06)",
+                  : `1px solid ${t.borderSubtle}`,
                 borderRadius: 10,
                 padding: 10,
                 display: "flex",
@@ -221,8 +222,8 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
               <div style={{
                 fontSize: 11,
                 fontWeight: 700,
-                color: allSeen ? "#4ade80" : "#fff",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                color: allSeen ? t.green : t.textPrimary,
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase",
                 letterSpacing: "0.04em",
                 lineHeight: 1.2,
@@ -259,7 +260,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                       ) : (
                         <div className="chapo-poster-img" style={{
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: 9, color: "#aaa", textAlign: "center", padding: 4,
+                          fontSize: 9, color: t.textMuted, textAlign: "center", padding: 4,
                         }}>
                           {item.title}
                         </div>
@@ -277,13 +278,13 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                 {items.map((item) => (
                   <div key={item.id} style={{
                     fontSize: 9,
-                    color: progress[item.id] ? "rgba(74,222,128,0.7)" : "rgba(255,255,255,0.4)",
+                    color: progress[item.id] ? "rgba(74,222,128,0.7)" : t.textFaint,
                     lineHeight: 1.3,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
                   }}>
-                    {item.title} <span style={{ color: "rgba(255,255,255,0.72)" }}>({item.year})</span>
+                    {item.title} <span style={{ color: t.textMuted }}>({item.year})</span>
                   </div>
                 ))}
               </div>
@@ -351,7 +352,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
           zIndex: 20,
           background: "rgba(15,13,11,0.97)",
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: `1px solid ${t.borderSubtle}`,
           display: "flex", justifyContent: "center", gap: 0,
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}>
@@ -375,7 +376,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
                 <span style={{ fontSize: 18 }}>{tab.icon}</span>
                 <span style={{
                   fontSize: 9, fontWeight: 700,
-                  color: isActive ? accent : "rgba(255,255,255,0.4)",
+                  color: isActive ? accent : t.textFaint,
                   textTransform: "uppercase",
                   letterSpacing: "0.05em",
                   whiteSpace: "nowrap",

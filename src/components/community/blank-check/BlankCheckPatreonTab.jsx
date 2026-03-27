@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useCallback } from "react";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import SearchInput from "../shared/SearchInput";
@@ -36,13 +37,13 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
       {/* Section header */}
       <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>
         <div style={{
-          fontSize: 22, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 22, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase", letterSpacing: "0.04em",
         }}>
           Patreon Commentaries
         </div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>
+        <div style={{ fontSize: 13, color: t.textMuted, marginTop: 4 }}>
           Track every commentary series from the Patreon feed
         </div>
       </div>
@@ -58,8 +59,8 @@ export default function BlankCheckPatreonTab({ community, progress, onToggle, on
       {patreonSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 0",
-          fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-          color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+          fontFamily: t.fontDisplay, fontSize: 13,
+          color: t.textSecondary, fontStyle: "italic",
         }}>
           No commentary series yet
         </div>

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import CommunityLogModal from "../shared/CommunityLogModal";
 import { useState } from "react";
 
@@ -80,12 +81,12 @@ export default function NowPlayingLogModal(props) {
               transition: "all 0.2s",
             }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path d="M12 4L3 15h6v5h6v-5h6L12 4z" fill={brownArrow ? "rgba(205,133,63,0.9)" : "rgba(255,255,255,0.2)"} />
+                <path d="M12 4L3 15h6v5h6v-5h6L12 4z" fill={brownArrow ? "rgba(205,133,63,0.9)" : t.textFaint} />
               </svg>
             </div>
             <span style={{
               fontSize: 11, fontWeight: 700,
-              color: brownArrow ? "#CD853F" : "#555",
+              color: brownArrow ? "#CD853F" : t.textFaint,
               letterSpacing: "0.03em",
               transition: "color 0.2s",
             }}>
@@ -98,7 +99,7 @@ export default function NowPlayingLogModal(props) {
         <a href="https://www.nowplayingpodcast.com" target="_blank" rel="noopener noreferrer"
           style={{
             display: "inline-flex", alignItems: "center", gap: 4,
-            fontSize: 10, color: "#aaa", textDecoration: "none",
+            fontSize: 10, color: t.textMuted, textDecoration: "none",
             marginTop: 4, transition: "color 0.15s",
           }}
           onMouseEnter={(e) => e.currentTarget.style.color = "#F5C518"}

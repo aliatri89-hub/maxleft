@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { Poster, resolveImg, TMDB_BACKDROP } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
@@ -72,9 +73,9 @@ function UpNextCard({ data, onNavigateCommunity }) {
         <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
         <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column", minHeight: 104 }}>
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.04em", textTransform: "uppercase",
-            color: "#60a5fa", marginBottom: 8,
+            color: t.cyan, marginBottom: 8,
           }}>
             On deck
           </div>
@@ -105,7 +106,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
           <div style={{ marginTop: "auto", paddingTop: 4 }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 4,
-              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              background: t.bgElevated, borderRadius: 10,
               padding: "3px 8px 3px 3px",
             }}>
               {data.community_image && (
@@ -146,7 +147,7 @@ function UpNextCard({ data, onNavigateCommunity }) {
               position: "absolute", inset: 0,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "var(--font-mono)", fontWeight: 700,
-              fontSize: 13, color: "#60a5fa",
+              fontSize: 13, color: t.cyan,
             }}>
               {pct}%
             </div>

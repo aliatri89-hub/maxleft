@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../../supabase";
@@ -136,7 +137,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
           )}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 700, fontSize: 16,
               color: "var(--text-primary)",
               lineHeight: 1.2,
@@ -145,7 +146,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             }}>{data.title}</div>
             {data.year && (
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
                 fontSize: 10, color: "var(--text-muted)",
                 marginTop: 2,
               }}>{data.year}</div>
@@ -167,9 +168,9 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
         {/* Rating display */}
         {rating > 0 && (
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontSize: 14, fontWeight: 600,
-            color: "#facc15",
+            color: t.gold,
             marginTop: -8,
           }}>
             {rating} / 5
@@ -187,7 +188,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             border: "none",
             background: saving ? "rgba(240,235,225,0.1)" : "rgba(240,235,225,0.9)",
             color: saving ? "rgba(240,235,225,0.4)" : "#1e1b17",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontWeight: 700, fontSize: 14,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
@@ -203,7 +204,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
           <div
             onClick={handleConfirm}
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               fontSize: 11, color: "var(--text-muted)",
               cursor: "pointer", marginTop: -8,
               letterSpacing: "0.04em",

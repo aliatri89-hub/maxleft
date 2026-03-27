@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * HeroBanner — background layer for community hero sections.
  *

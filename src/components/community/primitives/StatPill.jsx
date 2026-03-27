@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * StatPill — Compact stat display with colored dot indicator.
  *
@@ -14,19 +15,19 @@ export default function StatPill({ label, value, color }) {
       display: "flex",
       alignItems: "center",
       gap: 8,
-      background: "rgba(255,255,255,0.04)",
+      background: t.bgElevated,
       borderRadius: 20,
       padding: "6px 14px",
-      border: "1px solid rgba(255,255,255,0.06)",
+      border: `1px solid ${t.borderSubtle}`,
     }}>
       <div style={{
         width: 8, height: 8, borderRadius: "50%",
         background: color, flexShrink: 0,
       }} />
-      <div style={{ fontSize: 12, color: "#bbb", minWidth: 40 }}>{label}</div>
+      <div style={{ fontSize: 12, color: t.textSecondary, minWidth: 40 }}>{label}</div>
       <div style={{
-        fontSize: 14, fontWeight: 700, color: "#fff",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontSize: 14, fontWeight: 700, color: t.textPrimary,
+        fontFamily: t.fontDisplay,
       }}>{value}</div>
     </div>
   );

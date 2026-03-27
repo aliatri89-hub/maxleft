@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo, useEffect, useRef, useState } from "react";
 import { HeroBanner, StatPill, CyclePill } from "../primitives";
 import { useMediaFilter } from "../../../hooks/useMediaFilter";
@@ -151,8 +152,8 @@ export default function BlankCheckHero({ community, miniseries, progress, active
         {/* Title + tagline */}
         <div style={{
           fontSize: heroTagline ? 28 : 22,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -163,8 +164,8 @@ export default function BlankCheckHero({ community, miniseries, progress, active
           <div style={{ textAlign: "center", margin: "0 auto 20px" }}>
             <div style={{
               fontSize: 13, fontWeight: 700,
-              color: "rgba(255,255,255,0.72)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: t.textMuted,
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase",
               letterSpacing: "0.12em",
               marginBottom: 2,
@@ -172,8 +173,8 @@ export default function BlankCheckHero({ community, miniseries, progress, active
               WW Box Office
             </div>
             <div style={{
-              fontSize: 22, color: "#fff",
-              fontFamily: "'Playfair Display', serif", fontWeight: 700,
+              fontSize: 22, color: t.textPrimary,
+              fontFamily: t.fontSerif, fontWeight: 700,
               lineHeight: 1,
             }}>
               ${patreonStats.grossWW.toLocaleString("en-US")}
@@ -248,9 +249,9 @@ function HeroStats({ watched, totalFilms, completedSeries, totalSeries, accent }
       gap: 0,
     }}>
       <StatColumn value={watched} label="Watched" color={accent} reveal={watchedRevealed} />
-      <div style={{ width: 1, alignSelf: "stretch", background: "rgba(255,255,255,0.08)", margin: "4px 0" }} />
+      <div style={{ width: 1, alignSelf: "stretch", background: t.bgHover, margin: "4px 0" }} />
       <StatColumn value={totalFilms} label="Films" color="#fff" />
-      <div style={{ width: 1, alignSelf: "stretch", background: "rgba(255,255,255,0.08)", margin: "4px 0" }} />
+      <div style={{ width: 1, alignSelf: "stretch", background: t.bgHover, margin: "4px 0" }} />
       <StatColumn value={completedSeries} label="Filmographies" color="#fff" />
     </div>
   );
@@ -269,7 +270,7 @@ function StatColumn({ value, suffix, label, color, reveal }) {
       }}>
         <div style={{
           fontSize: 36, fontWeight: 800, color,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           lineHeight: 1,
           ...(reveal !== undefined ? {
             transform: reveal ? "translateY(0)" : "translateY(100%)",
@@ -279,7 +280,7 @@ function StatColumn({ value, suffix, label, color, reveal }) {
         }}>
           {value}
           {suffix && (
-            <span style={{ fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>
+            <span style={{ fontSize: 16, fontWeight: 600, color: t.textMuted }}>
               {suffix}
             </span>
           )}
@@ -287,11 +288,11 @@ function StatColumn({ value, suffix, label, color, reveal }) {
       </div>
       <div style={{
         fontSize: 10, fontWeight: 600,
-        color: "rgba(255,255,255,0.78)",
+        color: t.textSecondary,
         textTransform: "uppercase",
         letterSpacing: "0.1em",
         marginTop: 4,
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
       }}>
         {label}
       </div>
@@ -322,8 +323,8 @@ function BlankCheck({ director }) {
     }}>
       <div style={{
         fontSize: 10, fontWeight: 700,
-        color: "rgba(255,255,255,0.78)",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: t.textSecondary,
+        fontFamily: t.fontDisplay,
         textTransform: "uppercase",
         letterSpacing: "0.1em",
         textAlign: "center",
@@ -349,7 +350,7 @@ function BlankCheck({ director }) {
         <div>
           <div style={{
             fontSize: 7.5, fontWeight: 700, color: "#2a4a45",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase", letterSpacing: "0.15em",
             lineHeight: 1,
           }}>
@@ -357,7 +358,7 @@ function BlankCheck({ director }) {
           </div>
           <div style={{
             fontSize: 5.5, color: "#3a5a55", fontWeight: 600,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.1em", textTransform: "uppercase",
             marginTop: 0.5,
           }}>
@@ -366,7 +367,7 @@ function BlankCheck({ director }) {
         </div>
         {/* Amount box */}
         <div style={{
-          background: "rgba(255,255,255,0.4)",
+          background: t.textFaint,
           border: "2px solid rgba(0,0,0,0.18)",
           borderRadius: 4,
           padding: "2px 8px 1px",
@@ -377,7 +378,7 @@ function BlankCheck({ director }) {
           }}>🎬</span>
           <span style={{
             fontSize: 22, color: "#1a1a1a",
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: t.fontSharpie,
             lineHeight: 1,
           }}>
             {director.views}
@@ -394,12 +395,12 @@ function BlankCheck({ director }) {
         <span style={{
           fontSize: 6, color: "#2a4a45", fontWeight: 600, textTransform: "uppercase",
           letterSpacing: "0.06em", flexShrink: 0,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           alignSelf: "flex-end", paddingBottom: 2,
         }}>Pay to</span>
         <span style={{
           fontSize: 22, color: "#1a1a1a",
-          fontFamily: "'Permanent Marker', cursive",
+          fontFamily: t.fontSharpie,
           lineHeight: 1,
           whiteSpace: "nowrap",
           marginBottom: -2,
@@ -415,7 +416,7 @@ function BlankCheck({ director }) {
       }}>
         <span style={{
           fontSize: 10, color: "#1a1a1a",
-          fontFamily: "'Permanent Marker', cursive",
+          fontFamily: t.fontSharpie,
         }}>
           {director.seriesTitle}
         </span>
@@ -428,11 +429,11 @@ function BlankCheck({ director }) {
         <div style={{ display: "flex", alignItems: "baseline", gap: 3 }}>
           <span style={{
             fontSize: 5.5, color: "#2a4a45", fontWeight: 600, textTransform: "uppercase",
-            letterSpacing: "0.06em", fontFamily: "'Barlow Condensed', sans-serif",
+            letterSpacing: "0.06em", fontFamily: t.fontDisplay,
           }}>Memo</span>
           <span style={{
             fontSize: 13, color: "#1a1a1a",
-            fontFamily: "'Permanent Marker', cursive",
+            fontFamily: t.fontSharpie,
             lineHeight: 1,
           }}>
             {director.grossWW > 0
@@ -474,8 +475,8 @@ function PatreonRings({ stats, accent }) {
 
   const rings = [
     { r: 52, pct: stats.seenPct, color: accent },
-    { r: 52 - strokeWidth - gap, pct: stats.listenedPct, color: "#facc15" },
-    { r: 52 - (strokeWidth + gap) * 2, pct: stats.bothPct, color: "#4ade80" },
+    { r: 52 - strokeWidth - gap, pct: stats.listenedPct, color: t.gold },
+    { r: 52 - (strokeWidth + gap) * 2, pct: stats.bothPct, color: t.green },
   ];
 
   return (
@@ -494,7 +495,7 @@ function PatreonRings({ stats, accent }) {
               {ring.pct > 0 && (
                 <circle
                   cx={cx} cy={cy} r={ring.r} fill="none"
-                  stroke={isComplete ? "#4ade80" : ring.color}
+                  stroke={isComplete ? t.green : ring.color}
                   strokeWidth={strokeWidth} strokeLinecap="round"
                   strokeDasharray={circumference} strokeDashoffset={offset}
                   transform={`rotate(-90 ${cx} ${cy})`}
@@ -516,8 +517,8 @@ function PatreonRings({ stats, accent }) {
         <div style={{ overflow: "hidden", height: 30 }}>
           <div style={{
             fontSize: 26, fontWeight: 800,
-            color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             lineHeight: 1,
             transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
             opacity: watchedRevealed ? 1 : 0,
@@ -527,7 +528,7 @@ function PatreonRings({ stats, accent }) {
           </div>
         </div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.78)",
+          fontSize: 9, color: t.textSecondary,
           marginTop: 2, letterSpacing: "0.04em",
         }}>
           watched

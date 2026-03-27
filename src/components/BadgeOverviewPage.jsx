@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "../supabase";
 import BadgeDetailScreen from "./community/shared/BadgeDetailScreen";
@@ -230,7 +231,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
     }}>
@@ -268,13 +269,13 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         <button onClick={onClose} style={{
           background: "none", border: "none", color: "#c9a84c",
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0",
-          fontWeight: 600, fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600, fontFamily: t.fontDisplay,
         }}>
           ← Back
         </button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           letterSpacing: "0.03em", textTransform: "uppercase",
         }}>
@@ -292,22 +293,22 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         {!loading && totalBadges > 0 && (
           <div style={{ textAlign: "center", marginBottom: 28 }}>
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 36, color: "#f5f0e8", lineHeight: 1,
+              fontFamily: t.fontHeadline,
+              fontSize: 36, color: t.cream, lineHeight: 1,
             }}>
               {totalEarned}<span style={{ color: "#ffffff25", fontSize: 22 }}>/{totalBadges}</span>
             </div>
             <div style={{
               fontSize: 10, color: "#ffffff30",
               textTransform: "uppercase", letterSpacing: 2.5,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               marginTop: 4,
             }}>
               Badges Earned
             </div>
             <div style={{
               fontSize: 12, color: "#ffffff25",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               marginTop: 12,
               lineHeight: 1.4,
               maxWidth: 280,
@@ -323,7 +324,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
           <div style={{
             textAlign: "center", padding: "80px 20px",
             color: "#ffffff20", fontSize: 13,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: t.fontMono,
           }}>
             Loading badges…
           </div>
@@ -359,7 +360,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                 )}
                 <div style={{ flex: 1 }}>
                   <div style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontSize: 16, fontWeight: 700, color: accent,
                     letterSpacing: "0.02em",
                     lineHeight: 1.2,
@@ -367,7 +368,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     {comm.title}
                   </div>
                   <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontSize: 10, color: "#ffffff25",
                     letterSpacing: 1,
                   }}>
@@ -383,7 +384,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     padding: "4px 10px",
                     color: accent,
                     fontSize: 10,
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     fontWeight: 600,
                     letterSpacing: 1,
                     cursor: "pointer",
@@ -401,7 +402,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     fontSize: 9, color: "#22c55e60",
                     textTransform: "uppercase", letterSpacing: 2,
                     marginBottom: 10, paddingLeft: 4,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                   }}>
                     Earned
                   </div>
@@ -432,7 +433,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     fontSize: 9, color: "#ffffff20",
                     textTransform: "uppercase", letterSpacing: 2,
                     marginBottom: 10, paddingLeft: 4,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                   }}>
                     In Progress
                   </div>
@@ -463,7 +464,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     fontSize: 9, color: "#ffffff15",
                     textTransform: "uppercase", letterSpacing: 2,
                     marginBottom: 10, paddingLeft: 4,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                   }}>
                     Available
                   </div>
@@ -499,14 +500,14 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
             <div style={{ fontSize: 40, marginBottom: 16 }}>🎬</div>
             <div style={{
               fontSize: 15, color: "#ffffff40",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               lineHeight: 1.4,
             }}>
               Start logging films in your communities to earn badges!
             </div>
             <div style={{
               fontSize: 11, color: "#ffffff20",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               marginTop: 8,
             }}>
               Subscribe to a podcast community to get started.
@@ -577,7 +578,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
           height: size - (strokeWidth + 3) * 2,
           borderRadius: "50%",
           overflow: "hidden",
-          background: "#1a1a2e",
+          background: t.bgCard,
         }}>
           {badge.image_url ? (
             <img
@@ -596,7 +597,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
               width: "100%", height: "100%",
               background: isEarned
                 ? `radial-gradient(circle, ${accent}30, ${accent}10)`
-                : "#1a1a2e",
+                : t.bgCard,
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 28,
             }}>
@@ -613,7 +614,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
             background: "#22c55e",
             border: "2px solid #0f0d0b",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 10, color: "#fff", fontWeight: 700,
+            fontSize: 10, color: t.textPrimary, fontWeight: 700,
           }}>
             ✓
           </div>
@@ -623,13 +624,13 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         {!isEarned && current > 0 && (
           <div style={{
             position: "absolute", bottom: -2, right: -2,
-            background: "#1a1a2e",
+            background: t.bgCard,
             border: `1px solid ${accent}40`,
             borderRadius: 6,
             padding: "1px 5px",
             fontSize: 9, fontWeight: 700,
             color: `${accent}cc`,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
           }}>
             {current}/{total}
           </div>
@@ -644,7 +645,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         textAlign: "center",
         lineHeight: 1.2,
         maxWidth: size + 4,
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         letterSpacing: "0.02em",
       }}>
         {badge.name}
@@ -655,7 +656,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         <div style={{
           fontSize: 8,
           color: "#ffffff20",
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
           marginTop: 2,
           textAlign: "center",
           maxWidth: size + 8,

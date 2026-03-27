@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect } from "react";
 import { getCoverUrl } from "../../../utils/communityTmdb";
 import { isComingSoon } from "../../../utils/comingSoon";
@@ -76,7 +77,7 @@ export default function ItemCard({
   const isBook = item.media_type === "book";
   const isGame = item.media_type === "game";
   const comingSoon = isComingSoon(item);
-  const borderColor = comingSoon ? "rgba(250,204,21,0.3)" : isCompleted ? "#4ade80" : "transparent";
+  const borderColor = comingSoon ? "rgba(250,204,21,0.3)" : isCompleted ? t.green : "transparent";
 
   return (
     <div
@@ -131,12 +132,12 @@ export default function ItemCard({
             padding: 8, textAlign: "center",
           }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{MEDIA_ICONS[item.media_type] || "🎬"}</div>
-            <div style={{ fontSize: 10, color: "#ddd", lineHeight: 1.2, fontWeight: 600 }}>{item.title}</div>
+            <div style={{ fontSize: 10, color: t.textSecondary, lineHeight: 1.2, fontWeight: 600 }}>{item.title}</div>
             {item.creator && (
-              <div style={{ fontSize: 9, color: "#bbb", marginTop: 2 }}>{item.creator}</div>
+              <div style={{ fontSize: 9, color: t.textSecondary, marginTop: 2 }}>{item.creator}</div>
             )}
             {!item.creator && item.year && (
-              <div style={{ fontSize: 9, color: "#aaa", marginTop: 2 }}>{item.year}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, marginTop: 2 }}>{item.year}</div>
             )}
           </div>
         )}
@@ -160,7 +161,7 @@ export default function ItemCard({
               backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)",
             }}>
               <div style={{
-                fontSize: 8, fontWeight: 700, color: "#facc15",
+                fontSize: 8, fontWeight: 700, color: t.gold,
                 textTransform: "uppercase", letterSpacing: "0.1em",
                 textAlign: "center",
               }}>Coming Soon</div>
@@ -190,7 +191,7 @@ export default function ItemCard({
             paddingBottom: bottomOverlay ? 28 : 6,
           }}>
             <div style={{
-              background: "#4ade80", color: "#0a0a0a",
+              background: t.green, color: "#0a0a0a",
               width: 24, height: 24, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 14, fontWeight: 700,
@@ -208,7 +209,7 @@ export default function ItemCard({
         marginTop: 6,
         fontSize: 11,
         fontWeight: 600,
-        color: isCompleted ? "#4ade80" : "#e0e0e0",
+        color: isCompleted ? t.green : "#e0e0e0",
         lineHeight: 1.2,
         overflow: "hidden",
         textOverflow: "ellipsis",
@@ -220,7 +221,7 @@ export default function ItemCard({
       </div>
 
       {/* Year / Creator */}
-      <div style={{ fontSize: 10, color: "#bbb", marginTop: 2 }}>
+      <div style={{ fontSize: 10, color: t.textSecondary, marginTop: 2 }}>
         {item.creator || item.year}{item.episode_number ? ` · ${item.episode_number}` : ""}
       </div>
     </div>

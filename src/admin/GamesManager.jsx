@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/GamesManager.jsx
 //
 // Games admin: puzzle runway, today's preview, recent results.
@@ -10,8 +11,8 @@ const TODAY = () => new Date().toISOString().split("T")[0];
 const POSTER = (path) => path ? `https://image.tmdb.org/t/p/w92${path}` : null;
 
 const GAMES = [
-  { key: "tf", label: "Triple Feature", accent: "#e94560", table: "tf_daily_puzzles", results: "tf_daily_results" },
-  { key: "rt", label: "Reel Time",      accent: "#22d3ee", table: "wt_daily_puzzles", results: "wt_daily_results" },
+  { key: "tf", label: "Triple Feature", accent: t.red, table: "tf_daily_puzzles", results: "tf_daily_results" },
+  { key: "rt", label: "Reel Time",      accent: t.cyan, table: "wt_daily_puzzles", results: "wt_daily_results" },
   { key: "cc", label: "Cast Connections", accent: "#a78bfa", table: "cc_daily_puzzles", results: "cc_daily_results" },
 ];
 
@@ -256,7 +257,7 @@ function TFPreview({ puzzle, movies }) {
             <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "6px 10px", minWidth: 180 }}>
               {m?.poster_path && <img src={POSTER(m.poster_path)} alt="" style={{ width: 32, height: 48, borderRadius: 4, objectFit: "cover" }} />}
               <div>
-                <div style={{ fontSize: 12, color: "#f0ebe1", fontWeight: 600 }}>{m?.title || `ID: ${id}`}</div>
+                <div style={{ fontSize: 12, color: t.cream, fontWeight: 600 }}>{m?.title || `ID: ${id}`}</div>
                 <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)" }}>
                   {m?.year || ""}{m?.revenue ? ` · $${(m.revenue / 1e6).toFixed(1)}M` : ""}
                 </div>
@@ -283,7 +284,7 @@ function RTPreview({ puzzle, movies }) {
             <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "6px 10px", minWidth: 140 }}>
               {m?.poster_path && <img src={POSTER(m.poster_path)} alt="" style={{ width: 32, height: 48, borderRadius: 4, objectFit: "cover" }} />}
               <div>
-                <div style={{ fontSize: 12, color: "#f0ebe1", fontWeight: 600 }}>{m?.title || `ID: ${id}`}</div>
+                <div style={{ fontSize: 12, color: t.cream, fontWeight: 600 }}>{m?.title || `ID: ${id}`}</div>
                 <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)" }}>{m?.year || ""}</div>
               </div>
             </div>
@@ -348,16 +349,16 @@ function statusColor(status) {
 const s = {
   page: { padding: "32px 40px 60px", maxWidth: 1100 },
   header: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 32 },
-  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: "#f0ebe1", margin: 0 },
+  title: { fontSize: 28, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", color: t.cream, margin: 0 },
   subtitle: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.35)", marginTop: 6 },
-  refreshBtn: { padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(196,115,79,0.25)", background: "rgba(196,115,79,0.08)", color: "#C4734F", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
+  refreshBtn: { padding: "8px 18px", borderRadius: 8, border: "1px solid rgba(196,115,79,0.25)", background: "rgba(196,115,79,0.08)", color: t.terra, fontSize: 12, fontWeight: 700, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.04em", cursor: "pointer" },
   sectionHeader: { fontSize: 11, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(240,235,225,0.3)", marginTop: 32, marginBottom: 12, paddingBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.04)" },
   cardRow: { display: "flex", gap: 14, flexWrap: "wrap" },
   card: { flex: "1 1 200px", minWidth: 180, maxWidth: 340, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, overflow: "hidden" },
   cardHeader: { display: "flex", alignItems: "center", gap: 8, padding: "12px 14px 0" },
   cardTitle: { fontSize: 12, fontWeight: 800, fontFamily: "var(--font-display)", textTransform: "uppercase", letterSpacing: "0.06em" },
   cardBody: { padding: "10px 14px 14px" },
-  bigNumber: { fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", color: "#f0ebe1" },
+  bigNumber: { fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", color: t.cream },
   bigLabel: { fontSize: 11, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.4)", marginTop: 2 },
   statusDot: { width: 8, height: 8, borderRadius: "50%", flexShrink: 0 },
   chartCard: { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "14px 18px" },
@@ -367,6 +368,6 @@ const s = {
   td: { fontSize: 12, color: "rgba(240,235,225,0.6)", padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.03)" },
   emptyState: { textAlign: "center", padding: "24px 0", fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.25)" },
   loadingWrap: { display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", gap: 12 },
-  spinner: { width: 28, height: 28, borderRadius: "50%", border: "2.5px solid rgba(240,235,225,0.1)", borderTopColor: "#C4734F", animation: "admin-spin 0.8s linear infinite" },
+  spinner: { width: 28, height: 28, borderRadius: "50%", border: "2.5px solid rgba(240,235,225,0.1)", borderTopColor: t.terra, animation: "admin-spin 0.8s linear infinite" },
   loadingText: { fontSize: 12, fontFamily: "var(--font-mono)", color: "rgba(240,235,225,0.3)" },
 };

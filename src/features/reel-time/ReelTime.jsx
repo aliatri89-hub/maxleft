@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 // src/features/reel-time/ReelTime.jsx
 //
 // Full-screen overlay game. Rendered by App.jsx when showReelTime === true.
@@ -16,8 +17,8 @@ function getMonthDay(dateStr) {
 // ── Styles ──────────────────────────────────────────────────
 const S = {
   page: {
-    minHeight: "100vh", background: "#0f0d0b", color: "#f5f0e8",
-    fontFamily: "'IBM Plex Mono', monospace",
+    minHeight: "100vh", background: t.bgPrimary, color: t.cream,
+    fontFamily: t.fontMono,
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "0 16px 40px", overflow: "auto", WebkitOverflowScrolling: "touch",
     paddingTop: "env(safe-area-inset-top, 0px)",
@@ -32,16 +33,16 @@ const S = {
     position: "relative",
   },
   title: {
-    fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-    letterSpacing: 3, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
+    fontFamily: t.fontMono, fontSize: 11,
+    letterSpacing: 3, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
   },
   year: {
-    fontFamily: "'Bebas Neue', sans-serif", fontSize: 52, letterSpacing: 2,
-    color: "#f5f0e8", lineHeight: 1, textShadow: "2px 2px 0 rgba(0,0,0,0.5)",
+    fontFamily: t.fontHeadline, fontSize: 52, letterSpacing: 2,
+    color: t.cream, lineHeight: 1, textShadow: "2px 2px 0 rgba(0,0,0,0.5)",
   },
   subtitle: {
-    fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 12,
-    color: "#7cb8e8", marginTop: 4, letterSpacing: 2,
+    fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 12,
+    color: t.cyan, marginTop: 4, letterSpacing: 2,
   },
   scoreBar: {
     display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -49,8 +50,8 @@ const S = {
     background: "rgba(124,184,232,0.06)", border: "1px solid rgba(124,184,232,0.12)",
     borderRadius: 8, marginBottom: 16, fontSize: 13,
   },
-  scoreLabel: { color: "#b5a994" },
-  scoreValue: { fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 18, color: "#7cb8e8" },
+  scoreLabel: { color: t.creamMuted },
+  scoreValue: { fontFamily: t.fontSerif, fontWeight: 900, fontSize: 18, color: t.cyan },
 
   // Current movie card — static position (fades when dragging)
   currentCard: {
@@ -70,13 +71,13 @@ const S = {
   },
   currentLabel: {
     fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
-    color: "#7cb8e8", marginBottom: 3,
+    color: t.cyan, marginBottom: 3,
   },
   currentTitle: {
-    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18,
-    color: "#f5f0e8", lineHeight: 1.2,
+    fontFamily: t.fontSerif, fontWeight: 700, fontSize: 18,
+    color: t.cream, lineHeight: 1.2,
   },
-  currentPrompt: { fontSize: 12, color: "#b5a994", marginTop: 5 },
+  currentPrompt: { fontSize: 12, color: t.creamMuted, marginTop: 5 },
 
   // Drag ghost — follows finger
   dragGhost: (x, y) => ({
@@ -114,7 +115,7 @@ const S = {
     marginLeft: 6, position: "relative",
   },
   dot: {
-    width: 12, height: 12, borderRadius: "50%", background: "#7cb8e8",
+    width: 12, height: 12, borderRadius: "50%", background: t.cyan,
     flexShrink: 0, zIndex: 1, marginLeft: 24, boxShadow: "0 0 6px rgba(124,184,232,0.3)",
   },
   placedPoster: {
@@ -122,20 +123,20 @@ const S = {
     flexShrink: 0, boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
   },
   placedTitle: {
-    fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 14,
-    color: "#f5f0e8", flex: 1, lineHeight: 1.2,
+    fontFamily: t.fontSerif, fontWeight: 700, fontSize: 14,
+    color: t.cream, flex: 1, lineHeight: 1.2,
   },
-  placedDate: { fontSize: 11, color: "#7cb8e8", flexShrink: 0, whiteSpace: "nowrap" },
+  placedDate: { fontSize: 11, color: t.cyan, flexShrink: 0, whiteSpace: "nowrap" },
   timelineLabel: {
     display: "flex", flexDirection: "column", alignItems: "center",
     fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
-    color: "rgba(124,184,232,0.4)", fontFamily: "'IBM Plex Mono', monospace",
+    color: "rgba(124,184,232,0.4)", fontFamily: t.fontMono,
     padding: "6px 0", marginLeft: 30,
   },
   flash: (correct) => ({
     position: "fixed", top: "50%", left: "50%",
     transform: "translate(-50%, -50%)",
-    fontFamily: "'Bebas Neue', sans-serif", fontSize: 56, letterSpacing: 2, zIndex: 100,
+    fontFamily: t.fontHeadline, fontSize: 56, letterSpacing: 2, zIndex: 100,
     pointerEvents: "none", color: correct ? "#4caf50" : "#e74c3c",
     textShadow: `0 0 30px ${correct ? "rgba(76,175,80,0.5)" : "rgba(231,76,60,0.5)"}`,
     animation: "rt-flash 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards",
@@ -146,28 +147,28 @@ const S = {
     borderRadius: 12, marginBottom: 20, animation: "rt-fade-in 0.5s ease",
   },
   gameoverLabel: {
-    fontSize: 11, textTransform: "uppercase", letterSpacing: 3, color: "#b5a994", marginBottom: 6,
+    fontSize: 11, textTransform: "uppercase", letterSpacing: 3, color: t.creamMuted, marginBottom: 6,
   },
   gameoverScore: {
-    fontFamily: "'Bebas Neue', sans-serif", fontSize: 60, letterSpacing: 2, color: "#7cb8e8", lineHeight: 1,
+    fontFamily: t.fontHeadline, fontSize: 60, letterSpacing: 2, color: t.cyan, lineHeight: 1,
   },
-  gameoverMax: { fontSize: 13, color: "#b5a994", marginTop: 4 },
-  gameoverMsg: { fontSize: 15, color: "#f5f0e8", marginTop: 14, lineHeight: 1.5 },
+  gameoverMax: { fontSize: 13, color: t.creamMuted, marginTop: 4 },
+  gameoverMsg: { fontSize: 15, color: t.cream, marginTop: 14, lineHeight: 1.5 },
   shareBtn: {
-    marginTop: 18, padding: "11px 28px", background: "#7cb8e8", color: "#0f0d0b",
-    border: "none", borderRadius: 8, fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
+    marginTop: 18, padding: "11px 28px", background: t.cyan, color: t.bgPrimary,
+    border: "none", borderRadius: 8, fontFamily: t.fontDisplay, fontWeight: 700,
     fontSize: 15, cursor: "pointer",
   },
-  nextTimer: { fontSize: 12, color: "#b5a994", marginTop: 10 },
+  nextTimer: { fontSize: 12, color: t.creamMuted, marginTop: 10 },
   loading: {
     minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "#0f0d0b", color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace",
+    background: t.bgPrimary, color: t.creamMuted, fontFamily: t.fontMono,
     fontSize: 15,
   },
   errorWrap: {
     minHeight: "100vh", display: "flex", flexDirection: "column",
-    alignItems: "center", justifyContent: "center", background: "#0f0d0b",
-    color: "#b5a994", fontFamily: "'IBM Plex Mono', monospace", fontSize: 15,
+    alignItems: "center", justifyContent: "center", background: t.bgPrimary,
+    color: t.creamMuted, fontFamily: t.fontMono, fontSize: 15,
     padding: 32, textAlign: "center",
   },
   placementDots: {
@@ -440,7 +441,7 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
         }}>
           <div style={{
             fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-            color: "#7cb8e8", marginBottom: 12,
+            color: t.cyan, marginBottom: 12,
           }}>
             Your starting film
           </div>
@@ -457,15 +458,15 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
             )}
           </div>
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22,
-            color: "#f5f0e8", marginTop: 14, lineHeight: 1.2,
+            fontFamily: t.fontSerif, fontWeight: 700, fontSize: 22,
+            color: t.cream, marginTop: 14, lineHeight: 1.2,
           }}>
             {placedMovies[0].title}
           </div>
           {(seedPhase === "date" || seedPhase === "shrink") && (
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif", fontSize: 28,
-              color: "#7cb8e8", marginTop: 8, letterSpacing: 1,
+              fontFamily: t.fontHeadline, fontSize: 28,
+              color: t.cyan, marginTop: 8, letterSpacing: 1,
               animation: seedPhase === "date" ? "rt-seed-date 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)" : undefined,
             }}>
               {placedMovies[0].display_date || getMonthDay(placedMovies[0].release_date)}
@@ -483,8 +484,8 @@ export default function ReelTime({ session, onBack, onToast, useHook }) {
           {/* How to play */}
           {isPlaying && (
             <div style={{
-              fontSize: 12, color: "#b5a994", textAlign: "center",
-              fontFamily: "'IBM Plex Mono', monospace", lineHeight: 1.5,
+              fontSize: 12, color: t.creamMuted, textAlign: "center",
+              fontFamily: t.fontMono, lineHeight: 1.5,
               marginBottom: 12, padding: "0 8px", maxWidth: 420,
             }}>
               Place each film in chronological order.<br />Drag or tap to slot in place.

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -177,13 +178,13 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
           <>
             <div style={{ padding: "12px 16px 4px" }}>
               <div style={{
-                fontSize: 11, fontWeight: 700, color: "#00d4ff",
+                fontSize: 11, fontWeight: 700, color: t.cyan,
                 textTransform: "uppercase", letterSpacing: "0.1em",
                 marginBottom: 4,
               }}>
                 We Play, You Play
               </div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.78)", marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 12 }}>
                 Games the hosts invited listeners to play along with
               </div>
             </div>
@@ -191,10 +192,10 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
             {/* Status filter pills */}
             <div style={{ display: "flex", gap: 6, padding: "0 16px 12px" }}>
               {[
-                { key: "all", label: "All", color: "#fff" },
-                { key: "beat", label: "Beat", color: "#4ade80" },
-                { key: "playing", label: "Playing", color: "#00d4ff" },
-                { key: "backlog", label: "Backlog", color: "#facc15" },
+                { key: "all", label: "All", color: t.textPrimary },
+                { key: "beat", label: "Beat", color: t.green },
+                { key: "playing", label: "Playing", color: t.cyan },
+                { key: "backlog", label: "Backlog", color: t.gold },
               ].map((f) => (
                 <button
                   key={f.key}
@@ -205,10 +206,10 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                       ? f.key === "all" ? "rgba(255,255,255,0.12)" : `${f.color}18`
                       : "rgba(255,255,255,0.04)",
                     border: `1px solid ${filter === f.key
-                      ? f.key === "all" ? "rgba(255,255,255,0.25)" : `${f.color}50`
+                      ? f.key === "all" ? t.textFaint : `${f.color}50`
                       : "rgba(255,255,255,0.08)"}`,
                     borderRadius: 20,
-                    color: filter === f.key ? f.color : "#666",
+                    color: filter === f.key ? f.color : t.textFaint,
                     fontSize: 12, fontWeight: 600, cursor: "pointer",
                     transition: "all 0.2s",
                     WebkitTapHighlightColor: "transparent",
@@ -246,16 +247,16 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                     marginBottom: 10,
                   }}>
                     <div style={{
-                      fontSize: 15, fontWeight: 700, color: "#fff",
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: 15, fontWeight: 700, color: t.textPrimary,
+                      fontFamily: t.fontDisplay,
                       letterSpacing: "0.02em",
                     }}>
                       {year}
                     </div>
                     <div style={{
                       fontSize: 12, fontWeight: 700,
-                      color: yearCompleted === yearItems.length && yearItems.length > 0 ? "#4ade80" : "#e91e8c",
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      color: yearCompleted === yearItems.length && yearItems.length > 0 ? t.green : "#e91e8c",
+                      fontFamily: t.fontDisplay,
                     }}>
                       {yearCompleted}/{yearItems.length}
                     </div>
@@ -263,7 +264,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
 
                   {/* Progress bar */}
                   <div style={{
-                    height: 3, borderRadius: 2, background: "rgba(255,255,255,0.08)",
+                    height: 3, borderRadius: 2, background: t.bgHover,
                     overflow: "hidden", marginBottom: 12,
                   }}>
                     <div style={{
@@ -294,11 +295,11 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                           key={item.id}
                           onClick={() => handleItemTap(item.id)}
                           style={{
-                            background: "rgba(255,255,255,0.04)",
+                            background: t.bgElevated,
                             border: isBeat ? "2px solid rgba(74,222,128,0.4)"
                               : isPlaying ? "2px solid rgba(0,212,255,0.4)"
                               : isBacklog ? "2px solid rgba(250,204,21,0.4)"
-                              : "1px solid rgba(255,255,255,0.08)",
+                              : `1px solid ${t.bgHover}`,
                             borderRadius: 12,
                             overflow: "hidden",
                             cursor: "pointer",
@@ -320,7 +321,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                               <div style={{
                                 width: "100%", height: "100%",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 28, color: "rgba(255,255,255,0.78)",
+                                fontSize: 28, color: t.textSecondary,
                               }}>🎮</div>
                             )}
 
@@ -331,7 +332,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                                 background: "rgba(74,222,128,0.9)",
                                 width: 22, height: 22, borderRadius: "50%",
                                 display: "flex", alignItems: "center", justifyContent: "center",
-                                fontSize: 11, color: "#fff",
+                                fontSize: 11, color: t.textPrimary,
                               }}>✓</div>
                             )}
 
@@ -343,7 +344,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                                 padding: "3px 0", textAlign: "center",
                               }}>
                                 <span style={{
-                                  fontSize: 9, fontWeight: 800, color: "#fff",
+                                  fontSize: 9, fontWeight: 800, color: t.textPrimary,
                                   textTransform: "uppercase", letterSpacing: "0.08em",
                                 }}>▶ Playing</span>
                               </div>
@@ -355,7 +356,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                                 padding: "3px 0", textAlign: "center",
                               }}>
                                 <span style={{
-                                  fontSize: 9, fontWeight: 800, color: "#1a1a2e",
+                                  fontSize: 9, fontWeight: 800, color: t.bgCard,
                                   textTransform: "uppercase", letterSpacing: "0.08em",
                                 }}>📋 Backlog</span>
                               </div>
@@ -372,8 +373,8 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                           {/* Info */}
                           <div style={{ padding: "8px 10px 10px" }}>
                             <div style={{
-                              fontSize: 13, fontWeight: 700, color: "#fff",
-                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontSize: 13, fontWeight: 700, color: t.textPrimary,
+                              fontFamily: t.fontDisplay,
                               lineHeight: 1.2, marginBottom: 2,
                               overflow: "hidden", textOverflow: "ellipsis",
                               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -381,14 +382,14 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                               {item.title}
                             </div>
                             <div style={{
-                              fontSize: 10, color: "rgba(255,255,255,0.78)",
+                              fontSize: 10, color: t.textSecondary,
                               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                             }}>
                               {item.creator}{item.year ? ` · ${item.year}` : ""}
                             </div>
                             {item.episode_number && (
                               <div style={{
-                                fontSize: 9, color: "rgba(255,255,255,0.78)", marginTop: 2,
+                                fontSize: 9, color: t.textSecondary, marginTop: 2,
                               }}>
                                 {item.episode_number}
                               </div>
@@ -470,7 +471,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0d0b",
+      minHeight: "100vh", background: t.bgPrimary,
       overflowX: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: hasBottomNav ? 72 : "env(safe-area-inset-bottom, 0px)",
@@ -488,8 +489,8 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>

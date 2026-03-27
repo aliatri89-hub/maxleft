@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { HeroBanner } from "../primitives";
 
@@ -31,7 +32,7 @@ export default function HDTGMHero({ community, miniseries, progress }) {
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -46,8 +47,8 @@ export default function HDTGMHero({ community, miniseries, progress }) {
         {/* Title + tagline */}
         <div style={{
           fontSize: 28,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -59,11 +60,11 @@ export default function HDTGMHero({ community, miniseries, progress }) {
           <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
             <div style={{ textAlign: "center" }}>
               <div style={{
-                fontSize: 28, fontWeight: 800, color: "#e94560",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 28, fontWeight: 800, color: t.red,
+                fontFamily: t.fontDisplay,
               }}>{stats.completed}</div>
               <div style={{
-                fontSize: 9, color: "rgba(255,255,255,0.72)",
+                fontSize: 9, color: t.textMuted,
                 textTransform: "uppercase", letterSpacing: "0.06em",
               }}>
                 Films Watched

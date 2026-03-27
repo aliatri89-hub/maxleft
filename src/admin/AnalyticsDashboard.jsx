@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/AnalyticsDashboard.jsx
 //
 // Analytics dashboard — behavioral data from analytics_events.
@@ -373,7 +374,7 @@ function RetentionTab({ cohorts, days }) {
         color: "rgba(240,235,225,0.45)",
         lineHeight: 1.6,
       }}>
-        <strong style={{ color: "#C4734F" }}>How to read this:</strong> Each row is a group of users who first used MANTL that week. 
+        <strong style={{ color: t.terra }}>How to read this:</strong> Each row is a group of users who first used MANTL that week. 
         W0 = the week they arrived (always 100%). +1w = did they come back the next week? 
         For a subscription app, healthy Week 1 retention is 40%+. If cohorts are getting better over time 
         (newer rows retain higher than older rows), the product is improving.
@@ -424,7 +425,7 @@ function EngagementTab({ data }) {
               {data.communities.map((row, i) => (
                 <tr key={i}>
                   <td style={styles.td}>
-                    <span style={{ ...styles.hBarDot, background: "#22d3ee" }} />
+                    <span style={{ ...styles.hBarDot, background: t.cyan }} />
                     {row.slug}
                   </td>
                   <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.visit_count}</td>
@@ -451,8 +452,8 @@ function EngagementTab({ data }) {
               value={row.play_count}
               detail={`${row.unique_players} player${row.unique_players !== 1 ? "s" : ""}`}
               accent={
-                row.game === "triple_feature" ? "#e94560" :
-                row.game === "reel_time" ? "#22d3ee" : "#a78bfa"
+                row.game === "triple_feature" ? t.red :
+                row.game === "reel_time" ? t.cyan : "#a78bfa"
               }
             />
           ))
@@ -469,7 +470,7 @@ function EngagementTab({ data }) {
             {data.feedModes.map((row, i) => {
               const total = data.feedModes.reduce((s, r) => s + parseInt(r.switch_count), 0);
               const pct = total > 0 ? Math.round((row.switch_count / total) * 100) : 0;
-              const colors = { releases: "#22d3ee", podcast: "#F5C518", activity: "#e94560" };
+              const colors = { releases: t.cyan, podcast: "#F5C518", activity: t.red };
               return (
                 <div key={i} style={{ flex: 1, textAlign: "center" }}>
                   <div style={{ fontSize: 28, fontWeight: 700, fontFamily: "var(--font-mono)", color: colors[row.mode] || "#888" }}>
@@ -539,7 +540,7 @@ function EngagementTab({ data }) {
                 {data.zeroResults.map((row, i) => (
                   <tr key={i}>
                     <td style={styles.td}>
-                      <span style={{ fontFamily: "var(--font-mono)", color: "#f87171" }}>"{row.query}"</span>
+                      <span style={{ fontFamily: "var(--font-mono)", color: t.red }}>"{row.query}"</span>
                     </td>
                     <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.search_count}</td>
                     <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(240,235,225,0.35)" }}>
@@ -575,7 +576,7 @@ function EngagementTab({ data }) {
                 {data.uncovered.map((row, i) => (
                   <tr key={i}>
                     <td style={styles.td}>
-                      <span style={{ fontFamily: "var(--font-mono)", color: "#fbbf24" }}>"{row.query}"</span>
+                      <span style={{ fontFamily: "var(--font-mono)", color: t.gold }}>"{row.query}"</span>
                     </td>
                     <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.search_count}</td>
                     <td style={{ ...styles.td, textAlign: "right", fontFamily: "var(--font-mono)" }}>{row.avg_total_results ?? "—"}</td>
@@ -747,7 +748,7 @@ const styles = {
     fontFamily: "var(--font-display)",
     textTransform: "uppercase",
     letterSpacing: "0.04em",
-    color: "#f0ebe1",
+    color: t.cream,
     margin: 0,
   },
   subtitle: {
@@ -761,7 +762,7 @@ const styles = {
     borderRadius: 8,
     border: "1px solid rgba(196,115,79,0.25)",
     background: "rgba(196,115,79,0.08)",
-    color: "#C4734F",
+    color: t.terra,
     fontSize: 12,
     fontWeight: 700,
     fontFamily: "var(--font-display)",
@@ -794,7 +795,7 @@ const styles = {
   },
   rangeBtnActive: {
     background: "rgba(196,115,79,0.15)",
-    color: "#C4734F",
+    color: t.terra,
   },
 
   // ── Tab bar ──
@@ -821,8 +822,8 @@ const styles = {
     marginBottom: -1,
   },
   tabBtnActive: {
-    color: "#C4734F",
-    borderBottomColor: "#C4734F",
+    color: t.terra,
+    borderBottomColor: t.terra,
   },
 
   // ── Section ──
@@ -1001,7 +1002,7 @@ const styles = {
     height: 28,
     borderRadius: "50%",
     border: "2.5px solid rgba(240,235,225,0.1)",
-    borderTopColor: "#C4734F",
+    borderTopColor: t.terra,
     animation: "admin-spin 0.8s linear infinite",
   },
   loadingText: {

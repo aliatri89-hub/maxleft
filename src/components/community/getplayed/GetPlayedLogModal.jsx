@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import AdminGameEditor from "../shared/AdminGameEditor";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState } from "react";
@@ -18,10 +19,10 @@ const PLATFORMS = [
 ];
 
 const STATUSES = [
-  { key: "completed", label: "Completed", icon: "✓", color: "#F5C518" },
-  { key: "playing", label: "Playing", icon: "▶", color: "#00d4ff" },
-  { key: "backlog", label: "Backlog", icon: "📋", color: "#facc15" },
-  { key: "dropped", label: "Dropped", icon: "✕", color: "#e94560" },
+  { key: "completed", label: "Completed", icon: "✓", color: t.imdb },
+  { key: "playing", label: "Playing", icon: "▶", color: t.cyan },
+  { key: "backlog", label: "Backlog", icon: "📋", color: t.gold },
+  { key: "dropped", label: "Dropped", icon: "✕", color: t.red },
 ];
 
 /**
@@ -203,11 +204,11 @@ export default function GetPlayedLogModal({
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.08)",
+              background: t.bgHover,
               border: "none", borderRadius: "50%",
               width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#bbb", fontSize: 18, cursor: "pointer",
+              color: t.textSecondary, fontSize: 18, cursor: "pointer",
             }}
           >✕</button>
         </div>
@@ -234,15 +235,15 @@ export default function GetPlayedLogModal({
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 20, fontWeight: 700, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 20, fontWeight: 700, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               lineHeight: 1.2, marginBottom: 4,
             }}>{item.title}</div>
-            <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>
+            <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>
               {item.creator}{item.year ? ` · ${item.year}` : ""}
             </div>
             {item.episode_number && (
-              <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>
+              <div style={{ fontSize: 11, color: t.textMuted, marginTop: 2 }}>
                 {item.episode_number}
               </div>
             )}
@@ -253,9 +254,9 @@ export default function GetPlayedLogModal({
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: 4,
                   padding: "3px 10px",
-                  background: "rgba(74,222,128,0.1)",
+                  background: t.greenDim,
                   border: "1px solid rgba(74,222,128,0.3)",
-                  borderRadius: 20, fontSize: 11, color: "#4ade80", fontWeight: 600,
+                  borderRadius: 20, fontSize: 11, color: t.green, fontWeight: 600,
                 }}>
                   ✓ {progressData?.status === "playing" ? "Playing" :
                      progressData?.status === "backlog" ? "Backlog" :
@@ -267,7 +268,7 @@ export default function GetPlayedLogModal({
                     padding: "3px 10px",
                     background: "rgba(0,212,255,0.1)",
                     border: "1px solid rgba(0,212,255,0.3)",
-                    borderRadius: 20, fontSize: 11, color: "#00d4ff", fontWeight: 600,
+                    borderRadius: 20, fontSize: 11, color: t.cyan, fontWeight: 600,
                   }}>
                     🎯 Played Along
                   </div>
@@ -279,14 +280,14 @@ export default function GetPlayedLogModal({
             {matchedEpisode && (
               <div onClick={(e) => { e.stopPropagation(); playEpisode(matchedEpisode); }}
                 style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", marginTop: 10, marginBottom: 4, background: "rgba(245,197,24,0.08)", border: "1px solid rgba(245,197,24,0.2)", borderRadius: 10, cursor: "pointer" }}>
-                <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#F5C518", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <div style={{ width: 32, height: 32, borderRadius: "50%", background: t.imdb, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   {isThisEpPlaying && isPlaying
                     ? <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0a0a"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
                     : <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0a0a"><polygon points="5 3 19 12 5 21 5 3"/></svg>}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#F5C518", textTransform: "uppercase", letterSpacing: "0.04em" }}>{isThisEpPlaying && isPlaying ? "Now Playing" : "Listen on MANTL"}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.78)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{matchedEpisode.title}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: t.imdb, textTransform: "uppercase", letterSpacing: "0.04em" }}>{isThisEpPlaying && isPlaying ? "Now Playing" : "Listen on MANTL"}</div>
+                  <div style={{ fontSize: 10, color: t.textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{matchedEpisode.title}</div>
                 </div>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.6)" strokeWidth="1.5"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
               </div>
@@ -312,7 +313,7 @@ export default function GetPlayedLogModal({
         {/* ─── Episode description ─── */}
         {episodeDesc && (
           <div style={{
-            marginBottom: 14, fontSize: 12.5, color: "#aaa", lineHeight: 1.5,
+            marginBottom: 14, fontSize: 12.5, color: t.textMuted, lineHeight: 1.5,
             display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}>
@@ -325,13 +326,13 @@ export default function GetPlayedLogModal({
           <a href={episodeUrl} target="_blank" rel="noopener noreferrer" style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "6px 14px", marginBottom: 14,
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
+            background: t.bgElevated,
+            border: `1px solid ${t.bgHover}`,
             borderRadius: 20, textDecoration: "none",
             transition: "background 0.15s",
           }}>
             <span style={{ fontSize: 13 }}>🎙</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.78)" }}>Listen to Episode</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: t.textSecondary }}>Listen to Episode</span>
           </a>
         )}
 
@@ -340,11 +341,11 @@ export default function GetPlayedLogModal({
           <div style={{
             marginBottom: 14, padding: "10px 12px",
             background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            border: `1px solid ${t.borderSubtle}`,
             borderRadius: 10,
           }}>
             <div style={{
-              fontSize: 10, fontWeight: 600, color: "#bbb",
+              fontSize: 10, fontWeight: 600, color: t.textSecondary,
               textTransform: "uppercase", letterSpacing: "0.08em",
               marginBottom: 8,
             }}>Get This Game</div>
@@ -364,12 +365,12 @@ export default function GetPlayedLogModal({
                 <a href={steamUrl} target="_blank" rel="noopener noreferrer" style={{
                   display: "inline-flex", alignItems: "center", gap: 6,
                   padding: "6px 12px",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: t.bgElevated,
+                  border: `1px solid ${t.bgHover}`,
                   borderRadius: 20, textDecoration: "none",
                 }}>
                   <span style={{ fontSize: 14 }}>🎮</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.78)" }}>Steam</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: t.textSecondary }}>Steam</span>
                 </a>
               )}
             </div>
@@ -379,7 +380,7 @@ export default function GetPlayedLogModal({
         {/* ─── Game Status ─── */}
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontSize: 10, fontWeight: 600, color: "#bbb",
+            fontSize: 10, fontWeight: 600, color: t.textSecondary,
             textTransform: "uppercase", letterSpacing: "0.08em",
             marginBottom: 8,
           }}>Status</div>
@@ -400,7 +401,7 @@ export default function GetPlayedLogModal({
                 <span style={{ fontSize: 14 }}>{s.icon}</span>
                 <span style={{
                   fontSize: 9, fontWeight: 600,
-                  color: status === s.key ? s.color : "#666",
+                  color: status === s.key ? s.color : t.textFaint,
                 }}>{s.label}</span>
               </button>
             ))}
@@ -410,7 +411,7 @@ export default function GetPlayedLogModal({
         {/* ─── Platform ─── */}
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontSize: 10, fontWeight: 600, color: "#bbb",
+            fontSize: 10, fontWeight: 600, color: t.textSecondary,
             textTransform: "uppercase", letterSpacing: "0.08em",
             marginBottom: 8,
           }}>Platform</div>
@@ -431,7 +432,7 @@ export default function GetPlayedLogModal({
                 <span style={{ fontSize: 12 }}>{p.icon}</span>
                 <span style={{
                   fontSize: 10, fontWeight: 600,
-                  color: platform === p.key ? accent : "#888",
+                  color: platform === p.key ? accent : t.textMuted,
                 }}>{p.label}</span>
               </button>
             ))}
@@ -441,7 +442,7 @@ export default function GetPlayedLogModal({
         {/* ─── Rating ─── */}
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontSize: 10, fontWeight: 600, color: "#bbb",
+            fontSize: 10, fontWeight: 600, color: t.textSecondary,
             textTransform: "uppercase", letterSpacing: "0.08em",
             marginBottom: 6,
           }}>Your Rating</div>
@@ -451,20 +452,20 @@ export default function GetPlayedLogModal({
               const isHalf = !isFull && rating >= n - 0.5;
               return (
                 <div key={n} className="gp-star-btn"
-                  style={{ color: isFull ? "#facc15" : isHalf ? "#facc15" : "#444" }}>
+                  style={{ color: isFull ? t.gold : isHalf ? t.gold : t.textFaint }}>
                   <div className="gp-star-zone left" onClick={() => handleStarClick(n, true)} />
                   <div className="gp-star-zone right" onClick={() => handleStarClick(n, false)} />
                   {isFull ? "★" : isHalf ? (
                       <span style={{ position: "relative", display: "inline-block" }}>
-                        <span style={{ color: "#ddd" }}>★</span>
-                        <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: "#facc15" }}>★</span>
+                        <span style={{ color: t.textSecondary }}>★</span>
+                        <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: t.gold }}>★</span>
                       </span>
                     ) : "☆"}
                 </div>
               );
             })}
             {rating > 0 && (
-              <span style={{ fontSize: 12, color: "#facc15", marginLeft: 8, fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: t.gold, marginLeft: 8, fontWeight: 600 }}>
                 {rating} / 5
               </span>
             )}
@@ -488,7 +489,7 @@ export default function GetPlayedLogModal({
                   position: "absolute",
                   top: 2, left: playedAlong ? 20 : 2,
                   width: 18, height: 18, borderRadius: "50%",
-                  background: playedAlong ? "#fff" : "rgba(255,255,255,0.5)",
+                  background: playedAlong ? t.textPrimary : t.textMuted,
                   transition: "left 0.2s, background 0.2s",
                   boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
                 }} />
@@ -496,13 +497,13 @@ export default function GetPlayedLogModal({
               <div style={{ flex: 1 }}>
                 <div style={{
                   fontSize: 13, fontWeight: 600,
-                  color: playedAlong ? "#00d4ff" : "#999",
+                  color: playedAlong ? "#00d4ff" : t.textMuted,
                 }}>
                   🎯 Played Along
                 </div>
                 <div style={{
                   fontSize: 10,
-                  color: playedAlong ? "rgba(0,212,255,0.5)" : "rgba(255,255,255,0.25)",
+                  color: playedAlong ? "rgba(0,212,255,0.5)" : t.textFaint,
                   marginTop: 1,
                 }}>
                   Played this for the We Play, You Play episode
@@ -526,8 +527,8 @@ export default function GetPlayedLogModal({
                     flex: 1, padding: "13px 0",
                     background: `linear-gradient(135deg, ${accent}, #c4157a)`,
                     border: "none", borderRadius: 12,
-                    color: "#fff", fontSize: 15, fontWeight: 700,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    color: t.textPrimary, fontSize: 15, fontWeight: 700,
+                    fontFamily: t.fontDisplay,
                     letterSpacing: "0.02em",
                     cursor: saving || !status ? "default" : "pointer",
                     opacity: saving || !status ? 0.4 : 1,
@@ -552,10 +553,10 @@ export default function GetPlayedLogModal({
                 disabled={saving}
                 style={{
                   width: "100%", padding: "11px 0",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: t.bgElevated,
+                  border: `1px solid ${t.bgHover}`,
                   borderRadius: 12,
-                  color: "#ddd", fontSize: 13, fontWeight: 600,
+                  color: t.textSecondary, fontSize: 13, fontWeight: 600,
                   cursor: saving ? "wait" : "pointer",
                 }}
               >
@@ -574,8 +575,8 @@ export default function GetPlayedLogModal({
                   width: "100%", padding: "13px 0",
                   background: `linear-gradient(135deg, ${accent}, #c4157a)`,
                   border: "none", borderRadius: 12,
-                  color: "#fff", fontSize: 15, fontWeight: 700,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  color: t.textPrimary, fontSize: 15, fontWeight: 700,
+                  fontFamily: t.fontDisplay,
                   cursor: saving ? "wait" : "pointer",
                   opacity: saving ? 0.6 : 1,
                 }}
@@ -592,7 +593,7 @@ export default function GetPlayedLogModal({
                   background: confirmUnlog ? "rgba(233,69,96,0.2)" : "rgba(233,69,96,0.08)",
                   border: confirmUnlog ? "1px solid rgba(233,69,96,0.5)" : "1px solid rgba(233,69,96,0.2)",
                   borderRadius: 12,
-                  color: "#e94560", fontSize: 13, fontWeight: 600,
+                  color: t.red, fontSize: 13, fontWeight: 600,
                   cursor: saving ? "wait" : "pointer",
                 }}
               >
@@ -606,7 +607,7 @@ export default function GetPlayedLogModal({
             style={{
               width: "100%", padding: "10px 0",
               background: "none", border: "none",
-              color: "#aaa", fontSize: 13, cursor: "pointer",
+              color: t.textMuted, fontSize: 13, cursor: "pointer",
             }}
           >
             Cancel
@@ -630,13 +631,13 @@ function ListenOnBadges({ title, compact }) {
   const badgeStyle = {
     display: "inline-flex", alignItems: "center", gap: 4,
     padding: "4px 8px",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: t.bgElevated,
+    border: `1px solid ${t.bgHover}`,
     borderRadius: 14, textDecoration: "none",
     WebkitTapHighlightColor: "transparent",
   };
 
-  const labelStyle = { fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)", whiteSpace: "nowrap" };
+  const labelStyle = { fontSize: 10, fontWeight: 600, color: t.textSecondary, whiteSpace: "nowrap" };
 
   return (
     <div style={{ marginTop: 8 }}>

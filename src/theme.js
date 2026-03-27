@@ -45,10 +45,15 @@ export const t = {
   orange:         '#fc4c02',
   terra:          '#C4734F',
   terraDim:       'rgba(196,115,79,0.12)',
+  mint:           '#00ffc8',
+  sand:           '#d4a574',
 
   // ── Typography ──
   fontDisplay:    "'Barlow Condensed', sans-serif",
   fontBody:       "'Barlow Condensed', sans-serif",
+  fontHeadline:   "'Bebas Neue', sans-serif",
+  fontSharpie:    "'Permanent Marker', cursive",
+  fontSerif:      "'Playfair Display', serif",
   fontMono:       "'IBM Plex Mono', monospace",
 
   // ── Radii ──
@@ -57,6 +62,15 @@ export const t = {
   radiusLg:       16,
   radiusXl:       20,
   radiusFull:     9999,
+
+  // ── Brand Colors (3rd-party services) ──
+  steam:          '#66C0F4',
+  steamDim:       'rgba(102,192,244,0.10)',
+  imdb:           '#F5C518',
+  imdbDim:        'rgba(245,197,24,0.12)',
+  metacritic:     '#F96836',
+  metacriticDim:  'rgba(249,104,54,0.08)',
+  spotify:        '#1DB954',
 
   // ── Cream theme (VHS labels, browse cards) ──
   cream:          '#f0ebe1',

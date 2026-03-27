@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect } from "react";
 import { apiProxy } from "../../utils/api";
 import { isLogoChecked } from "../../utils/communityTmdb";
@@ -21,14 +22,14 @@ const _enBdCache = new Map();
 
 // VHS brand marks — used for cream fallback only
 const VHS_BRANDS = [
-  { bg: "#f0ebe1", color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
-  { bg: "#f0ebe1", color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
-  { bg: "#f0ebe1", color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
-  { bg: "#f0ebe1", color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
-  { bg: "#f0ebe1", color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
-  { bg: "#f0ebe1", color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
+  { bg: t.cream, color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
+  { bg: t.cream, color: t.bgCard, text: "Memorex", sub: "HS", weight: 800 },
+  { bg: t.cream, color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
+  { bg: t.cream, color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
+  { bg: t.cream, color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
+  { bg: t.cream, color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
 ];
-const VHS_LOGO_BRAND = { bg: "#f0ebe1", color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
+const VHS_LOGO_BRAND = { bg: t.cream, color: t.creamDark, text: "VHS", sub: "", weight: 800, isVhs: true };
 
 function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
@@ -73,7 +74,7 @@ function BrandStamp({ brand, side = "right" }) {
         <>
           <div style={{
             writingMode: "vertical-rl",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontWeight: brand.weight,
             fontSize: brandFontSize,
             letterSpacing: "0.05em",
@@ -87,7 +88,7 @@ function BrandStamp({ brand, side = "right" }) {
           {brand.sub && (
             <div style={{
               writingMode: "vertical-rl",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               fontWeight: 600,
               fontSize: 5,
               letterSpacing: "0.06em",
@@ -202,9 +203,9 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
             boxShadow: "0 1px 4px rgba(0,0,0,0.35)",
           }}>
             <span style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: t.fontSharpie,
               fontSize: 11,
-              color: "#2C2824",
+              color: t.creamDark,
               letterSpacing: "0.02em",
               textTransform: "uppercase",
               whiteSpace: "nowrap",
@@ -269,9 +270,9 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
                 ))}
                 {overflow > 0 && (
                   <span style={{
-                    fontFamily: "'Permanent Marker', cursive",
+                    fontFamily: t.fontSharpie,
                     fontSize: 11,
-                    color: "rgba(255,255,255,0.8)",
+                    color: t.textSecondary,
                     marginLeft: 4,
                     textShadow: "0 1px 3px rgba(0,0,0,0.6)",
                     position: "relative",
@@ -331,7 +332,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
         {/* Label — cream center with brand stamps */}
         <div style={{
           flex: 1,
-          background: "#f0ebe1",
+          background: t.cream,
           padding: "10px 12px",
           display: "flex",
           flexDirection: "column",
@@ -429,10 +430,10 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
 
                 {!data.logo_url && !logoLoading && (
                   <div style={{
-                    fontFamily: "'Permanent Marker', cursive",
+                    fontFamily: t.fontSharpie,
                     fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
                     lineHeight: 1.1,
-                    color: "#2C2824",
+                    color: t.creamDark,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
                     position: "relative",
@@ -454,7 +455,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
           {/* Sharpie year */}
           {data.year && (
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: t.fontSharpie,
               fontSize: 10, color: "rgba(44,40,36,0.5)",
               marginTop: 2, position: "relative",
               textAlign: "center",
@@ -469,8 +470,8 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
             display: "flex", alignItems: "center", gap: 5,
           }}>
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
-              fontSize: 10, color: "#2C2824",
+              fontFamily: t.fontSharpie,
+              fontSize: 10, color: t.creamDark,
             }}>
               {timeAgo}
             </div>
@@ -666,7 +667,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         animation: "fadeIn 0.4s ease",
       }}>
         <span style={{
-          fontFamily: "'Permanent Marker', cursive",
+          fontFamily: t.fontSharpie,
           fontSize: 11,
           color: peekColor,
           opacity: 0.7,

@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
@@ -198,8 +199,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
               onChange={e => setEditName(e.target.value)}
               onKeyDown={e => { if (e.key === "Enter") handleSaveName(); if (e.key === "Escape") { setEditingName(false); setEditName(profile.name || ""); } }}
               style={{
-                fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 22,
-                color: "#EF9F27", background: "rgba(255,255,255,0.06)",
+                fontFamily: t.fontSerif, fontWeight: 700, fontSize: 22,
+                color: "#EF9F27", background: t.bgInput,
                 border: "1px solid #EF9F2740", borderRadius: 8,
                 padding: "6px 12px", outline: "none", textAlign: "center",
                 width: 180,
@@ -222,7 +223,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           <div
             className="profile-big-name"
             onClick={() => setEditingName(true)}
-            style={{ cursor: "pointer", fontFamily: "'Playfair Display', serif", fontWeight: 700, color: "#EF9F27" }}
+            style={{ cursor: "pointer", fontFamily: t.fontSerif, fontWeight: 700, color: "#EF9F27" }}
             title="Tap to edit name"
           >
             {profile.name}
@@ -440,7 +441,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                     return 0; // preserve existing sort within groups
                   }).map(pod => {
                     const isFav = favoritePodcasts?.has(pod.id);
-                    const accent = isFav ? "var(--terracotta, #c97849)" : "rgba(255,255,255,0.3)";
+                    const accent = isFav ? "var(--terracotta, #c97849)" : t.textFaint;
 
                     return (
                       <div
@@ -465,7 +466,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                         ) : (
                           <div style={{
                             width: 36, height: 36, borderRadius: 8, flexShrink: 0,
-                            background: "rgba(255,255,255,0.04)",
+                            background: t.bgElevated,
                             border: "1.5px solid rgba(255,255,255,0.06)",
                             display: "flex", alignItems: "center", justifyContent: "center",
                             fontSize: 16,
@@ -557,7 +558,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                   position: "relative",
                 }}>
                   <div style={{
-                    width: 18, height: 18, borderRadius: "50%", background: "#fff",
+                    width: 18, height: 18, borderRadius: "50%", background: t.textPrimary,
                     position: "absolute", top: 2,
                     left: notifPrefs.new_coverage ? 20 : 2,
                     transition: "left 0.2s ease",
@@ -598,7 +599,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                     position: "relative",
                   }}>
                     <div style={{
-                      width: 18, height: 18, borderRadius: "50%", background: "#fff",
+                      width: 18, height: 18, borderRadius: "50%", background: t.textPrimary,
                       position: "absolute", top: 2,
                       left: notifPrefs.favorites_only ? 20 : 2,
                       transition: "left 0.2s ease",
@@ -687,7 +688,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                           width: 28, height: 28, borderRadius: 6, cursor: "pointer",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           background: "rgba(255,255,255,0.02)",
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          border: `1px solid ${t.borderSubtle}`,
                           transition: "all 0.2s",
                         }}
                       >
@@ -733,7 +734,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           </div>
         ) : (
           <div className="profile-delete-confirm">
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "#f87171", marginBottom: 8 }}>Delete your account?</div>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: t.red, marginBottom: 8 }}>Delete your account?</div>
             <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-faint)", marginBottom: 16, lineHeight: 1.5 }}>
               This will permanently delete your profile, library, activity history, and all data. This cannot be undone.
             </div>

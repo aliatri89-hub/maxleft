@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { supabase } from "../../../supabase";
 import { searchTMDBRaw } from "../../../utils/api";
@@ -721,8 +722,8 @@ export default function AddItemTool({
             style={{
               fontSize: 16,
               fontWeight: 800,
-              color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.02em",
               textTransform: "uppercase",
             }}
@@ -732,7 +733,7 @@ export default function AddItemTool({
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.06)",
+              background: t.bgInput,
               border: "none",
               borderRadius: 8,
               width: 32,
@@ -740,7 +741,7 @@ export default function AddItemTool({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#bbb",
+              color: t.textSecondary,
               fontSize: 14,
               cursor: "pointer",
             }}
@@ -755,7 +756,7 @@ export default function AddItemTool({
             display: "flex",
             gap: 0,
             padding: "10px 20px 0",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: `1px solid ${t.borderSubtle}`,
             flexShrink: 0,
           }}
         >
@@ -772,12 +773,12 @@ export default function AddItemTool({
                 background: "none",
                 border: "none",
                 borderBottom: `2px solid ${mode === key ? accent : "transparent"}`,
-                color: mode === key ? accent : "#666",
+                color: mode === key ? accent : t.textFaint,
                 fontSize: 12,
                 fontWeight: 700,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 cursor: "pointer",
                 transition: "all 0.15s",
               }}
@@ -806,13 +807,13 @@ export default function AddItemTool({
                 marginBottom: 14,
                 fontSize: 13,
                 fontWeight: 600,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 background:
                   feedback.type === "success"
                     ? "rgba(74,222,128,0.1)"
                     : "rgba(239,68,68,0.1)",
                 color:
-                  feedback.type === "success" ? "#4ade80" : "#f87171",
+                  feedback.type === "success" ? t.green : t.red,
                 border: `1px solid ${
                   feedback.type === "success"
                     ? "rgba(74,222,128,0.2)"
@@ -832,7 +833,7 @@ export default function AddItemTool({
             <div>
               <Label>
                 Shelf Title{" "}
-                <span style={{ color: "#ef4444" }}>*</span>
+                <span style={{ color: t.red }}>*</span>
               </Label>
               <input
                 value={shelfTitle}
@@ -886,10 +887,10 @@ export default function AddItemTool({
                       padding: "8px 10px",
                     }}
                   >
-                    <option value="filmography" style={{ background: "#1a1a2e" }}>
+                    <option value="filmography" style={{ background: t.bgCard }}>
                       Filmography
                     </option>
-                    <option value="patreon" style={{ background: "#1a1a2e" }}>
+                    <option value="patreon" style={{ background: t.bgCard }}>
                       Patreon
                     </option>
                   </select>
@@ -905,10 +906,10 @@ export default function AddItemTool({
                       padding: "8px 10px",
                     }}
                   >
-                    <option value="active" style={{ background: "#1a1a2e" }}>
+                    <option value="active" style={{ background: t.bgCard }}>
                       Active
                     </option>
-                    <option value="completed" style={{ background: "#1a1a2e" }}>
+                    <option value="completed" style={{ background: t.bgCard }}>
                       Completed
                     </option>
                   </select>
@@ -975,14 +976,14 @@ export default function AddItemTool({
                     padding: 12,
                     background: "rgba(255,255,255,0.03)",
                     borderRadius: 10,
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: `1px solid ${t.borderSubtle}`,
                   }}
                 >
                   <div
                     style={{
                       fontSize: 9,
                       fontWeight: 700,
-                      color: "#aaa",
+                      color: t.textMuted,
                       textTransform: "uppercase",
                       letterSpacing: "0.08em",
                       marginBottom: 6,
@@ -1005,14 +1006,14 @@ export default function AddItemTool({
                         style={{
                           fontSize: 15,
                           fontWeight: 700,
-                          color: "#fff",
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          color: t.textPrimary,
+                          fontFamily: t.fontDisplay,
                         }}
                       >
                         {shelfTitle}
                       </div>
                       {(shelfDirector || shelfEpisodeRange) && (
-                        <div style={{ fontSize: 12, color: "#bbb" }}>
+                        <div style={{ fontSize: 12, color: t.textSecondary }}>
                           {[
                             shelfDirector !== "." && shelfDirector,
                             shelfEpisodeRange,
@@ -1038,10 +1039,10 @@ export default function AddItemTool({
                     ? "rgba(255,255,255,0.04)"
                     : `${accent}18`,
                   border: `2px solid ${accent}`,
-                  color: "#fff",
+                  color: t.textPrimary,
                   fontSize: 15,
                   fontWeight: 800,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.03em",
                   textTransform: "uppercase",
                   cursor:
@@ -1070,7 +1071,7 @@ export default function AddItemTool({
                     fontWeight: 400,
                     textTransform: "none",
                     letterSpacing: 0,
-                    color: "#9a9a9f",
+                    color: t.textMuted,
                   }}
                 >
                   — search & tap multiple
@@ -1084,10 +1085,10 @@ export default function AddItemTool({
                 style={{
                   width: "100%",
                   marginBottom: 6,
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: t.bgElevated,
+                  border: `1px solid ${t.bgHover}`,
                   borderRadius: 8,
-                  color: "#e4e4e7",
+                  color: t.textSecondary,
                   padding: "7px 10px",
                   fontSize: 12,
                   fontFamily: "inherit",
@@ -1117,7 +1118,7 @@ export default function AddItemTool({
                           borderRadius: 6,
                           fontSize: 10,
                           fontWeight: 700,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           border: `1.5px solid ${accent}`,
                           background: `${accent}20`,
                           color: accent,
@@ -1151,7 +1152,7 @@ export default function AddItemTool({
                         borderRadius: 8,
                         fontSize: 11,
                         fontWeight: 700,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         letterSpacing: "0.02em",
                         cursor: "pointer",
                         border: `1.5px solid ${
@@ -1160,7 +1161,7 @@ export default function AddItemTool({
                         background: isActive
                           ? `${accent}20`
                           : "rgba(255,255,255,0.03)",
-                        color: isActive ? accent : "rgba(255,255,255,0.45)",
+                        color: isActive ? accent : t.textFaint,
                         transition: "all 0.15s",
                         WebkitTapHighlightColor: "transparent",
                       }}
@@ -1174,7 +1175,7 @@ export default function AddItemTool({
                   <div
                     style={{
                       fontSize: 11,
-                      color: "#9a9a9f",
+                      color: t.textMuted,
                       fontStyle: "italic",
                       padding: "4px 0",
                     }}
@@ -1230,13 +1231,13 @@ export default function AddItemTool({
                     flexShrink: 0,
                   }}
                 >
-                  <option value="movie" style={{ background: "#1a1a2e" }}>
+                  <option value="movie" style={{ background: t.bgCard }}>
                     Film
                   </option>
-                  <option value="tv" style={{ background: "#1a1a2e" }}>
+                  <option value="tv" style={{ background: t.bgCard }}>
                     TV
                   </option>
-                  <option value="manual" style={{ background: "#1a1a2e" }}>
+                  <option value="manual" style={{ background: t.bgCard }}>
                     Manual
                   </option>
                 </select>
@@ -1255,7 +1256,7 @@ export default function AddItemTool({
                     color: accent,
                     fontSize: 12,
                     fontWeight: 700,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     cursor: "pointer",
                   }}
                 >
@@ -1267,9 +1268,9 @@ export default function AddItemTool({
                 <div
                   style={{
                     fontSize: 12,
-                    color: "#aaa",
+                    color: t.textMuted,
                     marginTop: 6,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                   }}
                 >
                   Searching…
@@ -1281,7 +1282,7 @@ export default function AddItemTool({
                 <div
                   style={{
                     marginTop: 8,
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: `1px solid ${t.borderSubtle}`,
                     borderRadius: 12,
                     overflow: "hidden",
                     maxHeight: 280,
@@ -1312,7 +1313,7 @@ export default function AddItemTool({
                           padding: "8px 12px",
                           cursor: "pointer",
                           textAlign: "left",
-                          color: "#e4e4e7",
+                          color: t.textSecondary,
                         }}
                       >
                         {r.poster_path ? (
@@ -1337,7 +1338,7 @@ export default function AddItemTool({
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              color: "#9a9a9f",
+                              color: t.textMuted,
                               fontSize: 14,
                               flexShrink: 0,
                             }}
@@ -1357,7 +1358,7 @@ export default function AddItemTool({
                           >
                             {rTitle}
                           </span>
-                          <span style={{ fontSize: 11, color: "#71717a" }}>
+                          <span style={{ fontSize: 11, color: t.textMuted }}>
                             {yr}
                             {yr ? " · " : ""}
                             {isTV ? "TV" : "Film"} · TMDB {r.id}
@@ -1377,7 +1378,7 @@ export default function AddItemTool({
                     background: "#18181b",
                     borderRadius: 14,
                     padding: 16,
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: `1px solid ${t.borderSubtle}`,
                   }}
                 >
                   <div
@@ -1409,7 +1410,7 @@ export default function AddItemTool({
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          color: "#9a9a9f",
+                          color: t.textMuted,
                           fontSize: 11,
                           flexShrink: 0,
                         }}
@@ -1435,12 +1436,12 @@ export default function AddItemTool({
                             background: editMode
                               ? "rgba(34,211,238,0.1)"
                               : "rgba(251,191,36,0.1)",
-                            color: editMode ? "#22d3ee" : "#fbbf24",
+                            color: editMode ? t.cyan : t.gold,
                             padding: "6px 10px",
                             borderRadius: 8,
                             fontSize: 11,
                             fontWeight: 600,
-                            fontFamily: "'Barlow Condensed', sans-serif",
+                            fontFamily: t.fontDisplay,
                             cursor: editMode ? "default" : "pointer",
                           }}
                         >
@@ -1454,10 +1455,10 @@ export default function AddItemTool({
                       {existingCheck?.status === "clear" && (
                         <div
                           style={{
-                            color: "#4ade80",
+                            color: t.green,
                             fontSize: 11,
                             fontWeight: 600,
-                            fontFamily: "'Barlow Condensed', sans-serif",
+                            fontFamily: t.fontDisplay,
                           }}
                         >
                           ✓ Not in community yet
@@ -1517,7 +1518,7 @@ export default function AddItemTool({
                         <span
                           style={{
                             fontSize: 12,
-                            color: "#71717a",
+                            color: t.textMuted,
                             fontFamily: "monospace",
                           }}
                         >
@@ -1534,7 +1535,7 @@ export default function AddItemTool({
                   {/* ── Optional fields ─── */}
                   <div
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      borderTop: `1px solid ${t.borderSubtle}`,
                       paddingTop: 12,
                       marginTop: 4,
                       display: "flex",
@@ -1600,7 +1601,7 @@ export default function AddItemTool({
                   {/* ── Meta fields ─── */}
                   <div
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      borderTop: `1px solid ${t.borderSubtle}`,
                       paddingTop: 12,
                       marginTop: 12,
                       display: "flex",
@@ -1637,7 +1638,7 @@ export default function AddItemTool({
                   {/* ── Audio / RSS ─── */}
                   <div
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.06)",
+                      borderTop: `1px solid ${t.borderSubtle}`,
                       paddingTop: 12,
                       marginTop: 12,
                     }}
@@ -1653,7 +1654,7 @@ export default function AddItemTool({
                       <Label style={{ marginBottom: 0 }}>
                         Episode Audio{" "}
                         {episodeUrl && (
-                          <span style={{ color: "#22c55e" }}>🎧</span>
+                          <span style={{ color: t.green }}>🎧</span>
                         )}
                       </Label>
                       {feedUrl && (
@@ -1671,10 +1672,10 @@ export default function AddItemTool({
                             border: `1px solid ${
                               rssOpen ? `${accent}40` : "rgba(255,255,255,0.1)"
                             }`,
-                            color: rssOpen ? accent : "#888",
+                            color: rssOpen ? accent : t.textMuted,
                             fontSize: 10,
                             fontWeight: 700,
-                            fontFamily: "'Barlow Condensed', sans-serif",
+                            fontFamily: t.fontDisplay,
                             cursor: "pointer",
                           }}
                         >
@@ -1735,7 +1736,7 @@ export default function AddItemTool({
                             }}
                             style={{
                               ...smallBtn,
-                              color: "#e94560",
+                              color: t.red,
                               borderColor: "rgba(233,69,96,0.2)",
                             }}
                           >
@@ -1753,14 +1754,14 @@ export default function AddItemTool({
                           background: "rgba(0,0,0,0.2)",
                           borderRadius: 8,
                           padding: 8,
-                          border: "1px solid rgba(255,255,255,0.06)",
+                          border: `1px solid ${t.borderSubtle}`,
                         }}
                       >
                         {rssLoading && (
                           <div
                             style={{
                               fontSize: 11,
-                              color: "#aaa",
+                              color: t.textMuted,
                               padding: 8,
                             }}
                           >
@@ -1771,7 +1772,7 @@ export default function AddItemTool({
                           <div
                             style={{
                               fontSize: 11,
-                              color: "#e94560",
+                              color: t.red,
                               padding: 8,
                             }}
                           >
@@ -1822,9 +1823,9 @@ export default function AddItemTool({
                                       width: 22,
                                       height: 22,
                                       borderRadius: "50%",
-                                      background: "rgba(255,255,255,0.06)",
+                                      background: t.bgInput,
                                       border:
-                                        "1px solid rgba(255,255,255,0.1)",
+                                        `1px solid ${t.borderMedium}`,
                                       color: accent,
                                       fontSize: 9,
                                       cursor: "pointer",
@@ -1849,7 +1850,7 @@ export default function AddItemTool({
                                     <div
                                       style={{
                                         fontSize: 10,
-                                        color: "#ddd",
+                                        color: t.textSecondary,
                                         overflow: "hidden",
                                         textOverflow: "ellipsis",
                                         whiteSpace: "nowrap",
@@ -1858,7 +1859,7 @@ export default function AddItemTool({
                                       {ep.title}
                                     </div>
                                     <div
-                                      style={{ fontSize: 9, color: "#aaa" }}
+                                      style={{ fontSize: 9, color: t.textMuted }}
                                     >
                                       {ep.pubDate
                                         ? new Date(
@@ -1885,7 +1886,7 @@ export default function AddItemTool({
                                   style={{
                                     padding: 10,
                                     fontSize: 10,
-                                    color: "#aaa",
+                                    color: t.textMuted,
                                     textAlign: "center",
                                   }}
                                 >
@@ -1903,7 +1904,7 @@ export default function AddItemTool({
                   {(showVerdicts || editMode) && (
                     <div
                       style={{
-                        borderTop: "1px solid rgba(255,255,255,0.06)",
+                        borderTop: `1px solid ${t.borderSubtle}`,
                         paddingTop: 12,
                         marginTop: 12,
                       }}
@@ -1947,10 +1948,10 @@ export default function AddItemTool({
                             ? "rgba(255,255,255,0.04)"
                             : "rgba(34,211,238,0.1)",
                           border: "2px solid #22d3ee",
-                          color: "#fff",
+                          color: t.textPrimary,
                           fontSize: 15,
                           fontWeight: 800,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
                           cursor: updating ? "not-allowed" : "pointer",
@@ -1981,7 +1982,7 @@ export default function AddItemTool({
                             : "rgba(239,68,68,0.6)",
                           fontSize: 12,
                           fontWeight: 800,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           letterSpacing: "0.03em",
                           textTransform: "uppercase",
                           cursor: deleting ? "not-allowed" : "pointer",
@@ -2009,10 +2010,10 @@ export default function AddItemTool({
                           ? "rgba(255,255,255,0.04)"
                           : `${accent}18`,
                         border: `2px solid ${accent}`,
-                        color: "#fff",
+                        color: t.textPrimary,
                         fontSize: 15,
                         fontWeight: 800,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         letterSpacing: "0.03em",
                         textTransform: "uppercase",
                         cursor:
@@ -2058,8 +2059,8 @@ function Label({ children, style = {} }) {
         fontWeight: 700,
         textTransform: "uppercase",
         letterSpacing: "0.06em",
-        color: "#71717a",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: t.textMuted,
+        fontFamily: t.fontDisplay,
         marginBottom: 6,
         ...style,
       }}
@@ -2082,9 +2083,9 @@ function FieldRow({ label, children, style = {} }) {
       <span
         style={{
           fontSize: 10,
-          color: "#9a9a9f",
+          color: t.textMuted,
           fontWeight: 600,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase",
           letterSpacing: "0.04em",
           minWidth: 44,
@@ -2114,13 +2115,13 @@ function VerdictInput({ color, arrow, value, onChange }) {
         style={{
           width: 48,
           textAlign: "center",
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: t.bgElevated,
+          border: `1px solid ${t.bgHover}`,
           borderRadius: 8,
           padding: "6px 4px",
-          color: "#e4e4e7",
+          color: t.textSecondary,
           fontSize: 14,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 700,
           outline: "none",
         }}
@@ -2136,22 +2137,22 @@ function VerdictInput({ color, arrow, value, onChange }) {
 const smallBtn = {
   padding: "4px 12px",
   borderRadius: 6,
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  color: "#ddd",
+  background: t.bgInput,
+  border: `1px solid ${t.borderMedium}`,
+  color: t.textSecondary,
   fontSize: 11,
   fontWeight: 600,
-  fontFamily: "'Barlow Condensed', sans-serif",
+  fontFamily: t.fontDisplay,
   cursor: "pointer",
 };
 
 function inputStyle(accent) {
   return {
     width: "100%",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: t.bgElevated,
+    border: `1px solid ${t.bgHover}`,
     borderRadius: 10,
-    color: "#e4e4e7",
+    color: t.textSecondary,
     padding: "10px 12px",
     fontSize: 14,
     fontFamily: "inherit",
@@ -2171,11 +2172,11 @@ function selectStyle(accent, hasValue) {
       hasValue ? `${accent}40` : "rgba(255,255,255,0.08)"
     }`,
     borderRadius: 10,
-    color: hasValue ? accent : "rgba(255,255,255,0.5)",
+    color: hasValue ? accent : t.textMuted,
     padding: "10px 12px",
     fontSize: 13,
     fontWeight: 700,
-    fontFamily: "'Barlow Condensed', sans-serif",
+    fontFamily: t.fontDisplay,
     letterSpacing: "0.03em",
     cursor: "pointer",
     outline: "none",

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import { useAudioPlayer } from "../shared/AudioPlayerProvider";
@@ -19,9 +20,9 @@ import CommunityFilter from "../shared/CommunityFilter";
  */
 
 const HOSTS = [
-  { key: "griffin", name: "Griffin", short: "G", color: "#e94560" },
-  { key: "david", name: "David", short: "D", color: "#22d3ee" },
-  { key: "joe", name: "Joe", short: "J", color: "#facc15" },
+  { key: "griffin", name: "Griffin", short: "G", color: t.red },
+  { key: "david", name: "David", short: "D", color: t.cyan },
+  { key: "joe", name: "Joe", short: "J", color: t.gold },
 ];
 
 const BEN_COLOR = "#4ade80";
@@ -129,7 +130,7 @@ export default function CommunityAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: t.textSecondary, fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -138,11 +139,11 @@ export default function CommunityAwardsTab({
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
         <div style={{
-          fontSize: 22, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 22, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 The Blankies</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -154,8 +155,8 @@ export default function CommunityAwardsTab({
       {/* ─── Awards Hero: banner + dropdown + donuts ──────── */}
       <AwardsHeroBanner community={community}>
         <div style={{
-          fontSize: 28, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 28, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", lineHeight: 1.1,
           padding: "20px 16px 0",
@@ -163,14 +164,14 @@ export default function CommunityAwardsTab({
           The Blankies
         </div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.7)",
+          fontSize: 13, color: t.textMuted,
           textAlign: "center", marginTop: 4,
         }}>
           The Annual Blank Check Awards
         </div>
         <div style={{
-          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 11, fontWeight: 600, color: t.textMuted,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.08em", textTransform: "uppercase",
           textAlign: "center", marginTop: 10,
         }}>
@@ -214,14 +215,14 @@ export default function CommunityAwardsTab({
               style={{
                 width: "100%",
                 padding: "8px 36px 8px 34px",
-                background: "rgba(255,255,255,0.06)",
+                background: t.bgInput,
                 border: `1px solid ${accent}`,
                 borderRadius: 10,
-                color: "#fff",
+                color: t.textPrimary,
                 fontSize: 14,
                 outline: "none",
                 boxSizing: "border-box",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.01em",
               }}
             />
@@ -242,7 +243,7 @@ export default function CommunityAwardsTab({
                 position: "absolute", right: 8, top: "50%",
                 transform: "translateY(-50%)",
                 background: "rgba(255,255,255,0.1)", border: "none",
-                color: "#aaa", fontSize: 12, cursor: "pointer",
+                color: t.textMuted, fontSize: 12, cursor: "pointer",
                 borderRadius: 20, width: 22, height: 22,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 padding: 0, lineHeight: 1,
@@ -263,7 +264,7 @@ export default function CommunityAwardsTab({
                 flexShrink: 0,
                 width: 34, height: 34,
                 borderRadius: 10,
-                background: "rgba(255,255,255,0.06)",
+                background: t.bgInput,
                 border: "1px solid rgba(255,255,255,0.08)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer",
@@ -296,7 +297,7 @@ export default function CommunityAwardsTab({
                 <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${accent}40, transparent)` }} />
                 <div style={{
                   fontSize: 20, fontWeight: 800, color: accent,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.06em",
                 }}>
                   {yd.year}
@@ -333,7 +334,7 @@ export default function CommunityAwardsTab({
                   <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
                   <div style={{
                     fontSize: 16, fontWeight: 800, color: BEN_COLOR,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     textTransform: "uppercase", letterSpacing: "0.08em",
                   }}>🎲 Ben's Awards{selectedYear === "all" ? ` ${yd.year}` : ""}</div>
                   <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, transparent, rgba(74,222,128,0.2), transparent)" }} />
@@ -374,7 +375,7 @@ export default function CommunityAwardsTab({
       {allYearsData.every(yd => yd.standard.length === 0 && yd.ben.length === 0) && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+          fontSize: 13, color: t.textSecondary, fontStyle: "italic",
         }}>No picks added{selectedYear !== "all" ? ` for ${selectedYear}` : ""} yet</div>
       )}
     </div>
@@ -450,8 +451,8 @@ function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast,
     <div style={{ marginBottom: isLast ? 0 : 4, paddingBottom: isLast ? 0 : 4 }}>
       {/* Category header */}
       <div style={{
-        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.72)",
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 11, fontWeight: 700, color: t.textMuted,
+        fontFamily: t.fontMono,
         letterSpacing: "0.06em", textTransform: "uppercase",
         marginBottom: 10, paddingLeft: 16,
       }}>{name}</div>
@@ -478,7 +479,7 @@ function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast,
       </div>
 
       {/* Separator */}
-      <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 16px 16px" }} />
+      <div style={{ height: 1, background: t.bgElevated, margin: "0 16px 16px" }} />
     </div>
   );
 }
@@ -511,7 +512,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
           {card.hostWins.map(h => (
             <div key={h.key} style={{
               fontSize: 8, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.04em", textTransform: "uppercase",
               color: h.color, background: `${h.color}18`,
               border: `1px solid ${h.color}40`,
@@ -546,7 +547,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              fontSize: 9, fontWeight: 600, color: t.textMuted,
               lineHeight: 1.2, textAlign: "center",
             }}>{card.title}</div>
           </div>
@@ -572,7 +573,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
         {isSeen && (
           <div style={{
             position: "absolute", bottom: 4, right: 4,
-            background: "#4ade80", color: "#0a0a0a",
+            background: t.green, color: "#0a0a0a",
             width: 18, height: 18, borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 700,
@@ -583,7 +584,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
       {/* Title */}
       <div style={{
         fontSize: 10, fontWeight: isWinner ? 600 : 400,
-        color: isSeen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+        color: isSeen ? t.textSecondary : t.textMuted,
         lineHeight: 1.2, marginTop: 5,
         overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -592,7 +593,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
       {/* Subtitle for performance categories */}
       {isPerformance && card.subtitle && (
         <div style={{
-          fontSize: 8, color: "rgba(255,255,255,0.7)", marginTop: 1,
+          fontSize: 8, color: t.textMuted, marginTop: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           fontStyle: "italic",
         }}>{card.subtitle}</div>
@@ -635,7 +636,7 @@ function BenCategoryShelf({ category, isSeen, getItemId, onToggle, filter, searc
   const catName = category.category;
   const isNoThankYou = catName.toLowerCase().includes("no thank");
   const isHonorable = catName.toLowerCase().includes("honorable");
-  const tint = isNoThankYou ? "#e94560" : BEN_COLOR;
+  const tint = isNoThankYou ? t.red : BEN_COLOR;
   const q = (searchQuery || "").trim().toLowerCase();
   const isSearching = q.length >= 2;
   const categoryMatches = isSearching && catName.toLowerCase().includes(q);
@@ -657,7 +658,7 @@ function BenCategoryShelf({ category, isSeen, getItemId, onToggle, filter, searc
       <div style={{ padding: "0 16px", marginBottom: 8 }}>
         <div style={{
           fontSize: 12, fontWeight: 700, color: tint,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.04em", textTransform: "uppercase",
         }}>
           {isNoThankYou ? "👎 " : isHonorable ? "📝 " : "🏆 "}{catName}
@@ -756,7 +757,7 @@ function BenCard({ pick, posterUrl, isSeen, isNoThankYou, tint, onTap }) {
             background: "rgba(233,69,96,0.15)",
           }}>
             <span style={{
-              fontSize: 32, color: "#e94560", opacity: 0.6,
+              fontSize: 32, color: t.red, opacity: 0.6,
               fontWeight: 900, lineHeight: 1,
               textShadow: "0 2px 8px rgba(0,0,0,0.5)",
             }}>✕</span>
@@ -767,7 +768,7 @@ function BenCard({ pick, posterUrl, isSeen, isNoThankYou, tint, onTap }) {
         {isSeen && !isNoThankYou && (
           <div style={{
             position: "absolute", bottom: 4, right: 4,
-            background: "#4ade80", color: "#0a0a0a",
+            background: t.green, color: "#0a0a0a",
             width: 18, height: 18, borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 700,
@@ -778,7 +779,7 @@ function BenCard({ pick, posterUrl, isSeen, isNoThankYou, tint, onTap }) {
       {/* Title */}
       <div style={{
         fontSize: 10, fontWeight: 600,
-        color: isNoThankYou ? "rgba(233,69,96,0.7)" : (isSeen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)"),
+        color: isNoThankYou ? "rgba(233,69,96,0.7)" : (isSeen ? t.textSecondary : t.textMuted),
         lineHeight: 1.2, marginTop: 5,
         overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -863,20 +864,20 @@ function YearDropdown({ years, selectedYear, onChange, accent }) {
           border: `1px solid ${accent}40`,
           borderRadius: 10,
           padding: "8px 32px 8px 14px",
-          color: "#fff",
+          color: t.textPrimary,
           fontSize: 16,
           fontWeight: 700,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.04em",
           cursor: "pointer",
           outline: "none",
         }}
       >
-        <option value="all" style={{ background: "#1a1a2e", color: "#fff" }}>
+        <option value="all" style={{ background: t.bgCard, color: t.textPrimary }}>
           All Years
         </option>
         {years.map((year) => (
-          <option key={year} value={year} style={{ background: "#1a1a2e", color: "#fff" }}>
+          <option key={year} value={year} style={{ background: t.bgCard, color: t.textPrimary }}>
             {year}
           </option>
         ))}
@@ -910,10 +911,10 @@ const HOST_AVATARS = {
 };
 
 const DONUT_HOSTS = [
-  { key: "griffin", name: "Griffin", color: "#e94560" },
-  { key: "david",  name: "David",  color: "#22d3ee" },
-  { key: "ben",    name: "Ben",    color: "#4ade80" },
-  { key: "joe",    name: "Joe",    color: "#facc15" },
+  { key: "griffin", name: "Griffin", color: t.red },
+  { key: "david",  name: "David",  color: t.cyan },
+  { key: "ben",    name: "Ben",    color: t.green },
+  { key: "joe",    name: "Joe",    color: t.gold },
 ];
 
 function HostDonutGrid({ hostStats, selectedHost, onSelectHost }) {
@@ -1022,8 +1023,8 @@ function HostDonutGrid({ hostStats, selectedHost, onSelectHost }) {
             <div style={{
               fontSize: 18,
               fontWeight: 800,
-              color: isActive ? host.color : "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: isActive ? host.color : t.textPrimary,
+              fontFamily: t.fontDisplay,
               lineHeight: 1,
               transition: "color 0.2s",
             }}>
@@ -1034,8 +1035,8 @@ function HostDonutGrid({ hostStats, selectedHost, onSelectHost }) {
             <div style={{
               fontSize: 12,
               fontWeight: 700,
-              color: isActive ? host.color : "rgba(255,255,255,0.45)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: isActive ? host.color : t.textFaint,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               transition: "color 0.2s",
@@ -1091,10 +1092,10 @@ function BlankiesListenPill({ selectedYear, accent, playEpisode, currentEp, isPl
         background: playing ? `${accent}20` : `${accent}12`,
         border: `1px solid ${playing ? accent : `${accent}40`}`,
         borderRadius: 10,
-        color: playing ? accent : "#fff",
+        color: playing ? accent : t.textPrimary,
         fontSize: 14,
         fontWeight: 700,
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         letterSpacing: "0.04em",
         cursor: "pointer",
         outline: "none",

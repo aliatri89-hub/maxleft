@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo, useRef, useState, useEffect } from "react";
 import { HeroBanner } from "../primitives";
 import { useSlideReveal } from "../../../hooks/useSlideReveal";
@@ -89,7 +90,7 @@ export default function NowPlayingHero({
 
   useEffect(() => { prevCount.current = stats.completed; }, [stats.completed]);
 
-  const accent = isBooks ? "#d4a574" : isArcade ? "#00ffc8" : "#facc15";
+  const accent = isBooks ? t.sand : isArcade ? t.mint : "#facc15";
 
   const formatPages = (n) => {
     if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
@@ -114,8 +115,8 @@ export default function NowPlayingHero({
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         <div style={{
-          fontSize: 28, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 28, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -125,36 +126,36 @@ export default function NowPlayingHero({
         {isArcade ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: "#00ffc8", fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.completed}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.mint, fontFamily: t.fontDisplay }}>{stats.completed}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
             </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, background: t.bgHover }} />
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: "#a78bfa", fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.gamesBeat || 0}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Beat</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.purple, fontFamily: t.fontDisplay }}>{stats.gamesBeat || 0}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Beat</div>
             </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, background: t.bgHover }} />
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Titles</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Titles</div>
             </div>
           </div>
         ) : isBooks ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: accent, fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.completed}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Read</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: accent, fontFamily: t.fontDisplay }}>{stats.completed}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Read</div>
             </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, background: t.bgHover }} />
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Books</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Books</div>
             </div>
             {stats.pages > 0 && (<>
-              <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+              <div style={{ width: 1, background: t.bgHover }} />
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 30, fontWeight: 800, color: "rgba(255,255,255,0.78)", fontFamily: "'Barlow Condensed', sans-serif" }}>{formatPages(stats.pages)}</div>
-                <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Pages</div>
+                <div style={{ fontSize: 30, fontWeight: 800, color: t.textSecondary, fontFamily: t.fontDisplay }}>{formatPages(stats.pages)}</div>
+                <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Pages</div>
               </div>
             </>)}
           </div>
@@ -163,8 +164,8 @@ export default function NowPlayingHero({
             <div style={{ textAlign: "center" }}>
               <div style={{ overflow: "hidden", height: 36 }}>
                 <div style={{
-                  fontSize: 30, fontWeight: 800, color: "#facc15",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 30, fontWeight: 800, color: t.gold,
+                  fontFamily: t.fontDisplay,
                   transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
                   opacity: watchedRevealed ? 1 : 0,
                   transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
@@ -172,12 +173,12 @@ export default function NowPlayingHero({
                   {stats.completed}
                 </div>
               </div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
             </div>
-            <div style={{ width: 1, background: "rgba(255,255,255,0.08)" }} />
+            <div style={{ width: 1, background: t.bgHover }} />
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", fontFamily: "'Barlow Condensed', sans-serif" }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.72)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Films</div>
+              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
+              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Films</div>
             </div>
           </div>
         )}

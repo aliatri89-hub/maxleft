@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState } from "react";
 import { Poster, resolveImg, TMDB_BACKDROP, getSlugAbbrev, getCommunityAccent } from "./FeedPrimitives";
 
@@ -65,7 +66,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
             <Poster path={data.poster_path} tmdbId={data.tmdb_id} title={data.title} mediaType={data.media_type} width={72} height={108} radius={8} />
             <div style={{ flex: 1, paddingTop: 2, display: "flex", flexDirection: "column", minHeight: 104 }}>
               <div style={{
-                fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+                fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
                 letterSpacing: "0.04em", textTransform: "uppercase",
                 color: "var(--accent-green, #34d399)",
                 marginBottom: 8,
@@ -97,7 +98,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
                     {communities.slice(0, 3).map((c, i) => (
                       <div key={i} style={{
                         display: "inline-flex", alignItems: "center", gap: 4,
-                        background: "rgba(255,255,255,0.04)", borderRadius: 10,
+                        background: t.bgElevated, borderRadius: 10,
                         padding: "3px 8px 3px 3px",
                       }}>
                         {c.community_image && (
@@ -170,7 +171,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
             fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
             color: "rgba(52,211,153,0.4)", letterSpacing: "0.1em", textTransform: "uppercase",
             textAlign: "center", marginBottom: 10,
-            paddingBottom: 6, borderBottom: "1px solid rgba(255,255,255,0.06)",
+            paddingBottom: 6, borderBottom: `1px solid ${t.borderSubtle}`,
             position: "relative",
           }}>
             {data.title}
@@ -218,7 +219,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
           <div style={{
             position: "absolute", bottom: 6, right: 12,
             fontFamily: "var(--font-mono)", fontSize: 6,
-            color: "rgba(255,255,255,0.12)", letterSpacing: "0.06em", textTransform: "uppercase",
+            color: t.textFaint, letterSpacing: "0.06em", textTransform: "uppercase",
           }}>
             tap to flip back
           </div>

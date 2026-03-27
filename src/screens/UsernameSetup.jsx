@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 import { parseFile, importMovies } from "../utils/importUtils";
@@ -96,7 +97,7 @@ function SkipButton({ onClick, label = "I'll do this later" }) {
     <div
       onClick={onClick}
       style={{
-        fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
+        fontFamily: t.fontMono, fontSize: 12,
         color: dk.textMuted, textAlign: "center",
         marginTop: 12, cursor: "pointer", letterSpacing: "0.02em",
         padding: "8px 0",
@@ -121,7 +122,7 @@ function BackButton({ onClick }) {
         border: `2px solid ${dk.border}`,
         borderRadius: 12,
         color: dk.textDim,
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         fontWeight: 700, fontSize: 15,
         cursor: "pointer",
         letterSpacing: "0.02em",
@@ -162,11 +163,11 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
           <>
             <div style={{ fontSize: 20, marginBottom: 4, color: dk.terracotta }}>✓</div>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+              fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
               color: dk.terracotta, textTransform: "uppercase",
             }}>{file.name}</div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: t.fontMono, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>Tap to change file</div>
           </>
@@ -174,11 +175,11 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
           <>
             <div style={{ fontSize: 20, marginBottom: 4 }}>📄</div>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+              fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
               color: dk.text, textTransform: "uppercase",
             }}>{label}</div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: t.fontMono, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>.csv files only</div>
           </>
@@ -212,7 +213,7 @@ function TaskRow({ task }) {
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: 11, fontWeight: 700, flexShrink: 0,
         background: task.status === "done" ? statusColor.done : "transparent",
-        color: task.status === "done" ? "#fff" : statusColor[task.status],
+        color: task.status === "done" ? t.textPrimary : statusColor[task.status],
         transition: "all 0.3s ease",
       }}>
         {task.status === "running" ? (
@@ -226,7 +227,7 @@ function TaskRow({ task }) {
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 14,
+          fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 14,
           textTransform: "uppercase", letterSpacing: "0.02em",
           color: task.status === "pending" ? dk.textMuted : dk.text,
         }}>
@@ -245,7 +246,7 @@ function TaskRow({ task }) {
               }} />
             </div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+              fontFamily: t.fontMono, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>
               {task.progress} / {task.total}
@@ -255,7 +256,7 @@ function TaskRow({ task }) {
 
         {task.status === "done" && task.result && (
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            fontFamily: t.fontMono, fontSize: 10,
             color: dk.textDim, marginTop: 2,
           }}>
             {task.result}
@@ -264,7 +265,7 @@ function TaskRow({ task }) {
 
         {task.status === "error" && task.result && (
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            fontFamily: t.fontMono, fontSize: 10,
             color: dk.red, marginTop: 2,
           }}>
             {task.result}
@@ -611,10 +612,10 @@ function UsernameSetup({ name, session, onComplete }) {
 
                   {/* Name */}
                   <div style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontWeight: 700, fontSize: 10,
                     textTransform: "uppercase", letterSpacing: "0.02em",
-                    color: on ? "#fff" : dk.text,
+                    color: on ? t.textPrimary : dk.text,
                     lineHeight: 1.2,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -624,7 +625,7 @@ function UsernameSetup({ name, session, onComplete }) {
                   {/* Community badge */}
                   {hasLaunchedCommunity && (
                     <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 7,
+                      fontFamily: t.fontMono, fontSize: 7,
                       color: dk.terracotta, marginTop: 2,
                       letterSpacing: "0.04em", textTransform: "uppercase",
                     }}>Community</div>
@@ -637,7 +638,7 @@ function UsernameSetup({ name, session, onComplete }) {
                       width: 16, height: 16, borderRadius: "50%",
                       background: dk.terracotta,
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 9, color: "#fff", fontWeight: 700,
+                      fontSize: 9, color: t.textPrimary, fontWeight: 700,
                     }}>✓</div>
                   )}
                 </div>
@@ -647,7 +648,7 @@ function UsernameSetup({ name, session, onComplete }) {
         )}
 
         <div style={{
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+          fontFamily: t.fontMono, fontSize: 10,
           color: dk.textDim, textAlign: "center", marginBottom: 16, letterSpacing: "0.03em",
         }}>
           {selectedCount} selected · Manage anytime in settings
@@ -694,14 +695,14 @@ function UsernameSetup({ name, session, onComplete }) {
           borderRadius: 12,
         }}>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
             textTransform: "uppercase", color: dk.text, marginBottom: 4,
             display: "flex", alignItems: "center", gap: 8,
           }}>
             <span style={{ fontSize: 15 }}>📡</span> Live Sync
           </div>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
+            fontFamily: t.fontDisplay, fontSize: 12, color: dk.textDim,
             lineHeight: 1.5, marginBottom: 10,
           }}>
             Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
@@ -717,7 +718,7 @@ function UsernameSetup({ name, session, onComplete }) {
           />
           {letterboxdUsername && (
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              fontFamily: t.fontMono, fontSize: 10,
               color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
               wordBreak: "break-all",
             }}>
@@ -734,21 +735,21 @@ function UsernameSetup({ name, session, onComplete }) {
           borderRadius: 12,
         }}>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: 13,
+            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
             textTransform: "uppercase", color: dk.text, marginBottom: 4,
             display: "flex", alignItems: "center", gap: 8,
           }}>
             <span style={{ fontSize: 15 }}>📦</span> Import Full History
           </div>
           <div style={{
-            fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, color: dk.textDim,
+            fontFamily: t.fontDisplay, fontSize: 12, color: dk.textDim,
             lineHeight: 1.5, marginBottom: 10,
           }}>
             This brings in everything you've ever logged — ratings, dates, the works.
           </div>
 
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
+            fontFamily: t.fontMono, fontSize: 11,
             color: dk.text, lineHeight: 1.8, marginBottom: 12,
             padding: "10px 12px",
             background: "rgba(255,255,255,0.03)",
@@ -848,7 +849,7 @@ function UsernameSetup({ name, session, onComplete }) {
           <>
             {hasErrors && (
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                fontFamily: t.fontMono, fontSize: 10,
                 color: dk.textDim, textAlign: "center", marginBottom: 16,
               }}>
                 Some items couldn't be imported — you can retry from Settings anytime.
@@ -867,7 +868,7 @@ function UsernameSetup({ name, session, onComplete }) {
 
         {!allDone && (
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            fontFamily: t.fontMono, fontSize: 10,
             color: dk.textDim, textAlign: "center",
             letterSpacing: "0.02em",
           }}>

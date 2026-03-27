@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { getPosterUrl, fetchSinglePoster } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
@@ -133,7 +134,7 @@ export function ProgressBar({ current, total, color = "var(--accent-green, #34d3
   return (
     <div style={{
       width: 48, height, borderRadius: height,
-      background: "rgba(255,255,255,0.08)", overflow: "hidden",
+      background: t.bgHover, overflow: "hidden",
     }}>
       <div style={{
         height: "100%", borderRadius: height,
@@ -308,7 +309,7 @@ export function FeedPlayButton({ episodeUrl, episodeTitle, communityName, commun
           : "rgba(255,255,255,0.06)",
         border: isThisPlaying
           ? "1px solid rgba(245,197,24,0.3)"
-          : "1px solid rgba(255,255,255,0.1)",
+          : `1px solid ${t.borderMedium}`,
         display: "flex", alignItems: "center", justifyContent: "center",
         cursor: "pointer", flexShrink: 0,
         transition: "all 0.2s ease",

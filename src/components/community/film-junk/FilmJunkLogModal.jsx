@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import AdminItemEditor from "../shared/AdminItemEditor";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useState, useEffect, useRef } from "react";
@@ -218,11 +219,11 @@ fetchTMDBWatchProviders(item.tmdb_id)
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.08)",
+              background: t.bgHover,
               border: "none", borderRadius: "50%",
               width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#bbb", fontSize: 18, cursor: "pointer",
+              color: t.textSecondary, fontSize: 18, cursor: "pointer",
               transition: "background 0.2s",
             }}
           >✕</button>
@@ -250,11 +251,11 @@ fetchTMDBWatchProviders(item.tmdb_id)
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 20, fontWeight: 700, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 20, fontWeight: 700, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               lineHeight: 1.2, marginBottom: 4,
             }}>{item.title}</div>
-            <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>
+            <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>
               {item.creator}{item.year ? ` · ${item.year}` : ""}
             </div>
             {isCompleted && (
@@ -262,9 +263,9 @@ fetchTMDBWatchProviders(item.tmdb_id)
                 <div style={{
                   display: "inline-flex", alignItems: "center", gap: 4,
                   padding: "3px 10px",
-                  background: "rgba(74,222,128,0.1)",
+                  background: t.greenDim,
                   border: "1px solid rgba(74,222,128,0.3)",
-                  borderRadius: 20, fontSize: 11, color: "#4ade80", fontWeight: 600,
+                  borderRadius: 20, fontSize: 11, color: t.green, fontWeight: 600,
                 }}>
                   ✓ Logged
                 </div>
@@ -292,7 +293,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             <div
               onClick={() => setOverviewExpanded(!overviewExpanded)}
               style={{
-                fontSize: 12.5, color: "#aaa", lineHeight: 1.5,
+                fontSize: 12.5, color: t.textMuted, lineHeight: 1.5,
                 display: "-webkit-box",
                 WebkitLineClamp: overviewExpanded ? 999 : 3,
                 WebkitBoxOrient: "vertical",
@@ -305,7 +306,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             {overview.length > 150 && !overviewExpanded && (
               <div
                 onClick={() => setOverviewExpanded(true)}
-                style={{ fontSize: 11, color: "#aaa", marginTop: 4, cursor: "pointer" }}
+                style={{ fontSize: 11, color: t.textMuted, marginTop: 4, cursor: "pointer" }}
               >
                 more ›
               </div>
@@ -321,7 +322,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
         {/* Rating */}
         <div style={{ marginBottom: 14 }}>
           <div style={{
-            fontSize: 10, fontWeight: 600, color: "#bbb",
+            fontSize: 10, fontWeight: 600, color: t.textSecondary,
             textTransform: "uppercase", letterSpacing: "0.08em",
             marginBottom: 6,
           }}>Your Rating</div>
@@ -331,20 +332,20 @@ fetchTMDBWatchProviders(item.tmdb_id)
               const isHalf = !isFull && rating >= n - 0.5;
               return (
                 <div key={n} className="fj-star-btn"
-                  style={{ color: isFull ? "#facc15" : isHalf ? "#facc15" : "#444" }}>
+                  style={{ color: isFull ? t.gold : isHalf ? t.gold : t.textFaint }}>
                   <div className="fj-star-zone left" onClick={() => handleStarClick(n, true)} />
                   <div className="fj-star-zone right" onClick={() => handleStarClick(n, false)} />
                   {isFull ? "★" : isHalf ? (
                       <span style={{ position: "relative", display: "inline-block" }}>
-                        <span style={{ color: "#ddd" }}>★</span>
-                        <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: "#facc15" }}>★</span>
+                        <span style={{ color: t.textSecondary }}>★</span>
+                        <span style={{ position: "absolute", left: 0, top: 0, overflow: "hidden", width: "50%", color: t.gold }}>★</span>
                       </span>
                     ) : "☆"}
                 </div>
               );
             })}
             {rating > 0 && (
-              <span style={{ fontSize: 12, color: "#facc15", marginLeft: 8, fontWeight: 600 }}>
+              <span style={{ fontSize: 12, color: t.gold, marginLeft: 8, fontWeight: 600 }}>
                 {rating} / 5
               </span>
             )}
@@ -365,7 +366,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                     background: "linear-gradient(135deg, #4ade80, #22c55e)",
                     border: "none", borderRadius: 12,
                     color: "#0a0a0a", fontSize: 15, fontWeight: 700,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     letterSpacing: "0.02em",
                     cursor: saving ? "wait" : "pointer",
                     opacity: saving ? 0.6 : 1,
@@ -390,10 +391,10 @@ fetchTMDBWatchProviders(item.tmdb_id)
                   disabled={saving}
                   style={{
                     flex: 1, padding: "11px 0",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: t.bgInput,
+                    border: `1px solid ${t.borderMedium}`,
                     borderRadius: 12,
-                    color: "#ddd", fontSize: 12, fontWeight: 600,
+                    color: t.textSecondary, fontSize: 12, fontWeight: 600,
                     cursor: saving ? "wait" : "pointer",
                     transition: "background 0.2s",
                   }}
@@ -405,10 +406,10 @@ fetchTMDBWatchProviders(item.tmdb_id)
                   disabled={saving}
                   style={{
                     flex: 1, padding: "11px 0",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: t.bgElevated,
+                    border: `1px solid ${t.bgHover}`,
                     borderRadius: 12,
-                    color: "#ddd", fontSize: 12, fontWeight: 600,
+                    color: t.textSecondary, fontSize: 12, fontWeight: 600,
                     cursor: saving ? "wait" : "pointer",
                     transition: "background 0.2s",
                   }}
@@ -430,7 +431,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                   background: "linear-gradient(135deg, #10b981, #059669)",
                   border: "none", borderRadius: 12,
                   color: "#0a0a0a", fontSize: 15, fontWeight: 700,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.02em",
                   cursor: saving ? "wait" : "pointer",
                   opacity: saving ? 0.6 : 1,
@@ -449,7 +450,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                   background: confirmUnlog ? "rgba(233,69,96,0.2)" : "rgba(233,69,96,0.08)",
                   border: confirmUnlog ? "1px solid rgba(233,69,96,0.5)" : "1px solid rgba(233,69,96,0.2)",
                   borderRadius: 12,
-                  color: "#e94560", fontSize: 13, fontWeight: 600,
+                  color: t.red, fontSize: 13, fontWeight: 600,
                   cursor: saving ? "wait" : "pointer",
                   transition: "background 0.2s",
                 }}
@@ -464,7 +465,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             style={{
               width: "100%", padding: "10px 0",
               background: "none", border: "none",
-              color: "#aaa", fontSize: 13,
+              color: t.textMuted, fontSize: 13,
               cursor: "pointer",
             }}
           >
@@ -490,8 +491,8 @@ function WatchProviders({ providers }) {
   const chipStyle = {
     display: "flex", alignItems: "center", gap: 5,
     padding: "3px 8px 3px 3px",
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: t.bgInput,
+    border: `1px solid ${t.bgHover}`,
     borderRadius: 6, textDecoration: "none",
     transition: "background 0.15s",
   };
@@ -499,10 +500,10 @@ function WatchProviders({ providers }) {
   const ProviderRow = ({ items, label }) => (
     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
       <div style={{
-        fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+        fontSize: 9, fontWeight: 600, color: t.textMuted,
         textTransform: "uppercase", letterSpacing: "0.06em",
         width: 48, flexShrink: 0,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: t.fontMono,
       }}>{label}</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {items.slice(0, 3).map(p => (
@@ -516,7 +517,7 @@ function WatchProviders({ providers }) {
               style={{ width: 20, height: 20, borderRadius: 4 }}
             />
             <span style={{
-              fontSize: 10, color: "rgba(255,255,255,0.78)",
+              fontSize: 10, color: t.textSecondary,
               fontWeight: 500, whiteSpace: "nowrap",
             }}>{p.provider_name}</span>
           </a>
@@ -529,11 +530,11 @@ function WatchProviders({ providers }) {
     <div style={{
       marginBottom: 14, padding: "10px 12px",
       background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.06)",
+      border: `1px solid ${t.borderSubtle}`,
       borderRadius: 10,
     }}>
       <div style={{
-        fontSize: 10, fontWeight: 600, color: "#bbb",
+        fontSize: 10, fontWeight: 600, color: t.textSecondary,
         textTransform: "uppercase", letterSpacing: "0.08em",
         marginBottom: 8,
       }}>Where to Watch {country && country !== "US" ? `(${country})` : ""}</div>
@@ -542,11 +543,11 @@ function WatchProviders({ providers }) {
       {hasBuy && <ProviderRow items={buy} label="Buy" />}
       {link ? (
         <a href={link} target="_blank" rel="noopener noreferrer"
-          style={{ fontSize: 8, color: "rgba(255,255,255,0.78)", marginTop: 2, fontStyle: "italic", textDecoration: "none" }}>
+          style={{ fontSize: 8, color: t.textSecondary, marginTop: 2, fontStyle: "italic", textDecoration: "none" }}>
           via <span style={{ color: "rgba(255,215,0,0.4)" }}>JustWatch</span>
         </a>
       ) : (
-        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.72)", marginTop: 2, fontStyle: "italic" }}>
+        <div style={{ fontSize: 8, color: t.textMuted, marginTop: 2, fontStyle: "italic" }}>
           Data from JustWatch via TMDB
         </div>
       )}

@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
@@ -581,7 +582,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         }}>
           <div style={{
             width: 36, height: 4, borderRadius: 2,
-            background: "rgba(255,255,255,0.2)",
+            background: t.textFaint,
           }} />
         </div>
 
@@ -652,8 +653,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 textAlign: "center", zIndex: 3, pointerEvents: "none",
               }}>
                 <span style={{
-                  fontFamily: "'Permanent Marker', cursive",
-                  fontSize: 20, color: "#f0ebe1",
+                  fontFamily: t.fontSharpie,
+                  fontSize: 20, color: t.textPrimary,
                   textShadow: "0 2px 8px rgba(0,0,0,0.9)",
                 }}>
                   {data.title}
@@ -683,8 +684,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               />
             ) : (
               <div style={{
-                fontFamily: "'Permanent Marker', cursive",
-                fontSize: 22, color: "#f0ebe1",
+                fontFamily: t.fontSharpie,
+                fontSize: 22, color: t.textPrimary,
                 lineHeight: 1.2,
               }}>
                 {data.title}
@@ -692,7 +693,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             )}
             {data.year && (
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
                 fontSize: 11, color: "rgba(240,235,225,0.35)",
                 letterSpacing: "0.1em", marginTop: 4,
               }}>
@@ -743,7 +744,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 paddingBottom: 2,
               }}>
                 <div style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em", textTransform: "lowercase",
@@ -772,7 +773,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             {cast.length > 3 && (
               <div style={{ marginBottom: 6, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
@@ -790,7 +791,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 display: "flex", alignItems: "baseline", justifyContent: "center", gap: 6,
               }}>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em", textTransform: "lowercase",
@@ -854,7 +855,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   border: `1px solid ${isLogged ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
                   borderRadius: 20,
                   color: isLogged ? "#81c784" : "rgba(240,235,225,0.45)",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontSize: 11, fontWeight: 600,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
@@ -886,7 +887,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     border: `1px solid ${onWatchlist ? "rgba(76,175,80,0.2)" : "rgba(255,255,255,0.08)"}`,
                     borderRadius: 20,
                     color: onWatchlist ? "#81c784" : "rgba(240,235,225,0.45)",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontSize: 11, fontWeight: 600,
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
@@ -917,7 +918,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               paddingTop: 12, marginBottom: 14,
             }}>
               <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 fontWeight: 800, fontSize: 10,
                 color: "rgba(240,235,225,0.4)",
                 letterSpacing: "0.14em", textTransform: "uppercase",
@@ -973,13 +974,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
-                              fontFamily: "'Barlow Condensed', sans-serif",
+                              fontFamily: t.fontDisplay,
                               fontWeight: 700, fontSize: 13,
-                              color: isExpanded || isActive ? "#f0ebe1" : "rgba(240,235,225,0.7)",
+                              color: isExpanded || isActive ? t.cream : "rgba(240,235,225,0.7)",
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{ep.episode_title || ep.podcast_name}</div>
                             <div style={{
-                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontFamily: t.fontMono,
                               fontSize: 11, color: "rgba(240,235,225,0.35)",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
@@ -1108,7 +1109,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             return (
                               <div style={{
                                 padding: "4px 6px 10px 48px",
-                                fontFamily: "'IBM Plex Mono', monospace",
+                                fontFamily: t.fontMono,
                                 fontSize: 12, lineHeight: 1.55,
                                 color: "rgba(240,235,225,0.5)",
                                 whiteSpace: "pre-wrap",
@@ -1120,7 +1121,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           })() : isExpanded ? (
                             <div style={{
                               padding: "4px 6px 10px 48px",
-                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontFamily: t.fontMono,
                               fontSize: 11, fontStyle: "italic",
                               color: "rgba(240,235,225,0.25)",
                             }}>
@@ -1142,7 +1143,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             const hasAudio = visibleEps.length > 0 || epLoading;
             return !hasAudio && merged.overview ? (
               <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
                 fontSize: 12, lineHeight: 1.55,
                 color: "rgba(240,235,225,0.65)",
                 textAlign: "center",
@@ -1185,9 +1186,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       />
                     ) : (
                       <div style={{
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         fontWeight: 800, fontSize: 11,
-                        color: "#f0ebe1",
+                        color: t.textPrimary,
                         letterSpacing: "0.1em", textTransform: "uppercase",
                       }}>
                         {studio.name}
@@ -1209,13 +1210,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     {budgetStr && (
                       <div>
                         <div style={{
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           fontWeight: 800, fontSize: 8,
                           color: "rgba(240,235,225,0.35)",
                           letterSpacing: "0.12em", textTransform: "uppercase",
                         }}>Budget</div>
                         <div style={{
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           fontWeight: 700, fontSize: 13,
                           color: "rgba(240,235,225,0.7)",
                           letterSpacing: "0.02em",
@@ -1226,13 +1227,13 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     {grossStr && (
                       <div>
                         <div style={{
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           fontWeight: 800, fontSize: 8,
                           color: "rgba(240,235,225,0.35)",
                           letterSpacing: "0.12em", textTransform: "uppercase",
                         }}>WW Gross</div>
                         <div style={{
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           fontWeight: 700, fontSize: 13,
                           color: "rgba(240,235,225,0.7)",
                           letterSpacing: "0.02em",
@@ -1250,14 +1251,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   {stripes.map((s, i) => (
                     <div key={i} style={{
                       width: s.w * 1.5, height: "100%",
-                      background: s.dark ? "#f0ebe1" : "transparent",
+                      background: s.dark ? t.cream : "transparent",
                       flexShrink: 0,
                     }} />
                   ))}
                 </div>
                 <div style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 6, color: "#f0ebe1",
+                  fontFamily: t.fontMono,
+                  fontSize: 6, color: t.textPrimary,
                   letterSpacing: "0.12em",
                 }}>
                   {String(seed).padStart(12, "0").slice(0, 12)}
@@ -1271,9 +1272,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     border: "1.5px solid #f0ebe1",
                     borderRadius: 2,
                     padding: "2px 6px",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontWeight: 800, fontSize: 11,
-                    color: "#f0ebe1",
+                    color: t.textPrimary,
                     letterSpacing: "0.06em",
                     lineHeight: 1,
                   }}>
@@ -1286,7 +1287,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
           {/* Legal flair — VHS authenticity touch */}
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: t.fontMono,
             fontSize: 6, color: "rgba(240,235,225,0.15)",
             textAlign: "center", marginTop: 10,
             letterSpacing: "0.04em",

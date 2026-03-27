@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/AdminShell.jsx
 //
 // Desktop-only admin shell. Sidebar nav + content area.
@@ -188,8 +189,8 @@ const styles = {
   shell: {
     display: "flex",
     height: "100vh",
-    background: "#0f0d0b",
-    color: "#f0ebe1",
+    background: t.bgPrimary,
+    color: t.cream,
     fontFamily: "var(--font-body)",
     overflow: "hidden",
   },
@@ -213,8 +214,8 @@ const styles = {
   },
   logo: {
     fontSize: 22,
-    fontFamily: "'Permanent Marker', cursive",
-    color: "#f0ebe1",
+    fontFamily: t.fontSharpie,
+    color: t.cream,
     letterSpacing: "0.02em",
   },
   adminBadge: {
@@ -223,7 +224,7 @@ const styles = {
     fontFamily: "var(--font-display)",
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#C4734F",
+    color: t.terra,
     background: "rgba(196,115,79,0.12)",
     border: "1px solid rgba(196,115,79,0.25)",
     padding: "2px 8px",
@@ -256,7 +257,7 @@ const styles = {
   },
   navItemActive: {
     background: "rgba(196,115,79,0.1)",
-    color: "#f0ebe1",
+    color: t.cream,
     border: "none",
   },
   navItemDisabled: {
@@ -318,14 +319,14 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    background: "#0f0d0b",
+    background: t.bgPrimary,
   },
   loadingSpinner: {
     width: 28,
     height: 28,
     borderRadius: "50%",
     border: "2.5px solid rgba(240,235,225,0.15)",
-    borderTopColor: "#C4734F",
+    borderTopColor: t.terra,
     animation: "admin-spin 0.8s linear infinite",
   },
   gateWrap: {
@@ -334,13 +335,13 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     height: "100vh",
-    background: "#0f0d0b",
-    color: "#f0ebe1",
+    background: t.bgPrimary,
+    color: t.cream,
     gap: 12,
   },
   gateLogo: {
     fontSize: 32,
-    fontFamily: "'Permanent Marker', cursive",
+    fontFamily: t.fontSharpie,
     marginBottom: 8,
   },
   gateMessage: {
@@ -357,7 +358,7 @@ const styles = {
     borderRadius: 8,
     border: "1px solid rgba(196,115,79,0.3)",
     background: "rgba(196,115,79,0.1)",
-    color: "#C4734F",
+    color: t.terra,
     fontSize: 13,
     fontWeight: 700,
     fontFamily: "var(--font-display)",

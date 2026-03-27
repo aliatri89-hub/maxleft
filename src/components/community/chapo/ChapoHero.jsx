@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { ActivityRings, CyclePill, HeroBanner } from "../primitives";
 
@@ -28,7 +29,7 @@ export default function ChapoHero({ community, miniseries, progress }) {
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -42,8 +43,8 @@ export default function ChapoHero({ community, miniseries, progress }) {
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         <div style={{
           fontSize: 28,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>

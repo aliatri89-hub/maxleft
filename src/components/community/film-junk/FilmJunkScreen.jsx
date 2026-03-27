@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -224,7 +225,7 @@ export default function FilmJunkScreen({ community, miniseries, session, onBack,
 
   return (
     <div style={{
-      minHeight: "100vh", background: "#0f0d0b",
+      minHeight: "100vh", background: t.bgPrimary,
       overflowX: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: hasBottomNav ? 72 : "env(safe-area-inset-bottom, 0px)",
@@ -243,8 +244,8 @@ export default function FilmJunkScreen({ community, miniseries, session, onBack,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>

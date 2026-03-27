@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState } from "react";
 import { useEpisodeMatch } from "../../hooks/community/useEpisodeMatch";
 import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
@@ -112,7 +113,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
             <div>
               {isDropped ? (
                 <div style={{
-                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+                  fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
                   letterSpacing: "0.04em", textTransform: "uppercase",
                   color: accent,
                 }}>
@@ -120,7 +121,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 </div>
               ) : (
                 <div style={{
-                  fontFamily: "'Playfair Display', serif", fontWeight: 700,
+                  fontFamily: t.fontSerif, fontWeight: 700,
                   fontSize: 18, lineHeight: 1,
                   color: accent,
                 }}>
@@ -149,7 +150,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                   <circle cx="7" cy="7" r="5.5"
-                    stroke={seen ? "#34d399" : "rgba(255,255,255,0.15)"}
+                    stroke={seen ? "#34d399" : t.textFaint}
                     strokeWidth="1.5"
                   />
                   {seen ? (
@@ -168,7 +169,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 <span style={{
                   fontSize: 12, fontWeight: 600, textTransform: "uppercase",
                   letterSpacing: "0.05em",
-                  color: seen ? "rgba(52,211,153,0.7)" : "rgba(255,255,255,0.15)",
+                  color: seen ? "rgba(52,211,153,0.7)" : t.textFaint,
                   fontFamily: "var(--font-mono, monospace)",
                   transition: "color 0.3s ease",
                 }}>
@@ -226,7 +227,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
           }}>
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 4,
-              background: "rgba(255,255,255,0.04)", borderRadius: 10,
+              background: t.bgElevated, borderRadius: 10,
               padding: "3px 8px 3px 3px",
             }}>
               {data.community_image && (
@@ -293,7 +294,7 @@ function EpisodeCard({ data, onNavigateCommunity }) {
                 <span style={{
                   fontSize: 11, fontWeight: 700, letterSpacing: "0.06em",
                   textTransform: "uppercase",
-                  color: "#F96836",
+                  color: t.metacritic,
                   fontFamily: "var(--font-body, system-ui)",
                 }}>
                   Patreon

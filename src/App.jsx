@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
@@ -14,7 +15,7 @@ const AdminShell = lazy(() => import("./admin/AdminShell"));
 // then let CSS env(safe-area-inset-top) on .mantl-app handle the padding.
 if (Capacitor.isNativePlatform()) {
   StatusBar.setOverlaysWebView({ overlay: true });
-  StatusBar.setBackgroundColor({ color: "#0f0d0b" });
+  StatusBar.setBackgroundColor({ color: t.bgPrimary });
   StatusBar.setStyle({ style: Style.Dark });
 }
 
@@ -78,14 +79,14 @@ function CommunityLoadingSkeleton() {
   return (
     <div style={{
       position: "absolute", inset: 0, zIndex: 0,
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       display: "flex", flexDirection: "column",
       alignItems: "center",
       paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       <div style={{ width: "100%", display: "flex", alignItems: "center", padding: "16px 18px 12px", gap: 14 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.04)" }} />
-        <div style={{ width: 120, height: 14, borderRadius: 6, background: "rgba(255,255,255,0.06)", animation: "community-skeleton-pulse 1.2s ease-in-out infinite" }} />
+        <div style={{ width: 32, height: 32, borderRadius: 10, background: t.bgElevated }} />
+        <div style={{ width: 120, height: 14, borderRadius: 6, background: t.bgInput, animation: "community-skeleton-pulse 1.2s ease-in-out infinite" }} />
       </div>
       <div style={{ width: "calc(100% - 36px)", height: 180, borderRadius: 16, background: "rgba(255,255,255,0.03)", margin: "8px 18px 20px", animation: "community-skeleton-pulse 1.2s ease-in-out infinite", animationDelay: "0.15s" }} />
       {[0, 1, 2].map(i => (
@@ -111,7 +112,7 @@ export default function App() {
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
     return (
-      <Suspense fallback={<div style={{ background: "#0f0d0b", height: "100vh" }} />}>
+      <Suspense fallback={<div style={{ background: t.bgPrimary, height: "100vh" }} />}>
         <AdminShell />
       </Suspense>
     );
@@ -122,7 +123,7 @@ export default function App() {
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
     return (
-      <Suspense fallback={<div style={{ background: "#0f0d0b", height: "100vh" }} />}>
+      <Suspense fallback={<div style={{ background: t.bgPrimary, height: "100vh" }} />}>
         <GamesHubPublic />
       </Suspense>
     );
@@ -464,7 +465,7 @@ function AppMain() {
           const msg = typeof toast === "string" ? toast : "";
           const isError = /couldn't|failed|error|check/i.test(msg);
           const isInfo  = /up to date|syncing|connected|disconnected|welcome/i.test(msg);
-          const stripeColor = isError ? "#f87171" : isInfo ? "#EF9F27" : "#34d399";
+          const stripeColor = isError ? t.red : isInfo ? "#EF9F27" : "#34d399";
           const clean = msg.replace(/[\u{1F300}-\u{1FFFF}]/gu, "").replace(/[🎬🎮📚🔁🎧🌍✓]/g, "").trim();
           return (
             <div className={`toast${toastExiting ? " toast-exit" : ""}`}>
@@ -611,7 +612,7 @@ function AppMain() {
 
         {/* Reel Time Game */}
         {showReelTime && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <ErrorBoundary name="Reel Time">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
@@ -622,7 +623,7 @@ function AppMain() {
 
         {/* Cast Connections Game */}
         {showCastConnections && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
             <ErrorBoundary name="Cast Connections">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <CastConnections session={session} onBack={() => { removeNav("castConnections"); setShowCastConnections(false); }} onToast={showToast} />
@@ -659,7 +660,7 @@ function AppMain() {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0f0d0b", overflow: "hidden" }}>
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "hidden" }}>
             <CommunityLoadingSkeleton />
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}

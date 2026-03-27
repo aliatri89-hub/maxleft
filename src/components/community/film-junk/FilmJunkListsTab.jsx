@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useCallback } from "react";
 import { useCommunityLists } from "../../../hooks/useCommunityLists";
 import { ProgressRing, StatPill } from "../primitives";
@@ -25,9 +26,9 @@ import CommunityFilter from "../shared/CommunityFilter";
  */
 
 const HOSTS = [
-  { key: "sean", name: "Sean", color: "#9333EA" },
+  { key: "sean", name: "Sean", color: t.purple },
   { key: "jay", name: "Jay", color: "#78C044" },
-  { key: "frank", name: "Frank", color: "#FACC15" },
+  { key: "frank", name: "Frank", color: t.gold },
 ];
 
 const HOST_MAP = {};
@@ -129,7 +130,7 @@ export default function FilmJunkListsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#bbb", fontSize: 13 }}>Loading lists...</div>
+        <div style={{ color: t.textSecondary, fontSize: 13 }}>Loading lists...</div>
       </div>
     );
   }
@@ -139,7 +140,7 @@ export default function FilmJunkListsTab({
       <div style={{ padding: "0 0 100px" }}>
         <ListsHero community={community} seenStats={{ seen: 0, total: 0, pct: 0 }} accent={accent} />
         <div style={{ padding: "40px 16px", textAlign: "center" }}>
-          <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
+          <div style={{ fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
             {error ? "Failed to load lists" : "Lists coming soon"}
           </div>
         </div>
@@ -172,7 +173,7 @@ export default function FilmJunkListsTab({
                 display: "flex", alignItems: "center", gap: 7,
                 padding: "6px 14px", borderRadius: 20,
                 background: isActive ? `${host.color}18` : "rgba(255,255,255,0.04)",
-                border: isActive ? `1px solid ${host.color}55` : "1px solid rgba(255,255,255,0.08)",
+                border: isActive ? `1px solid ${host.color}55` : `1px solid ${t.bgHover}`,
                 cursor: "pointer", flexShrink: 0, transition: "all 0.2s",
                 WebkitTapHighlightColor: "transparent",
               }}
@@ -185,15 +186,15 @@ export default function FilmJunkListsTab({
               }} />
               <span style={{
                 fontSize: 12, fontWeight: 600,
-                color: isActive ? host.color : "#888",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                color: isActive ? host.color : t.textMuted,
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.02em",
               }}>{host.name}</span>
               {stat.total > 0 && (
                 <span style={{
                   fontSize: 12, fontWeight: 700,
-                  color: isActive ? host.color : "rgba(255,255,255,0.35)",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  color: isActive ? host.color : t.textFaint,
+                  fontFamily: t.fontDisplay,
                 }}>
                   {stat.pct}%
                 </span>
@@ -224,8 +225,8 @@ export default function FilmJunkListsTab({
             }}>
               <div style={{ flex: 1, height: 1, background: `${accent}30` }} />
               <div style={{
-                fontSize: 16, fontWeight: 800, color: "#fff",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 16, fontWeight: 800, color: t.textPrimary,
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.03em", textTransform: "uppercase",
                 whiteSpace: "nowrap",
               }}>{list.name}</div>
@@ -281,11 +282,11 @@ function HostShelf({ host, films, isSeen, getItemId, onToggle, accent }) {
         }} />
         <div style={{
           fontSize: 13, fontWeight: 700, color: host.color,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.02em", textTransform: "uppercase",
         }}>{host.name}'s List</div>
         <div style={{
-          fontSize: 11, color: "rgba(255,255,255,0.78)",
+          fontSize: 11, color: t.textSecondary,
           marginLeft: "auto",
         }}>
           {films.length} films
@@ -316,7 +317,7 @@ function HostShelf({ host, films, isSeen, getItemId, onToggle, accent }) {
       </div>
 
       {/* Separator */}
-      <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 16px" }} />
+      <div style={{ height: 1, background: t.bgElevated, margin: "0 16px" }} />
     </div>
   );
 }
@@ -346,7 +347,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
         width: "100%", aspectRatio: "2/3", borderRadius: 8,
         overflow: "hidden", position: "relative",
         background: "rgba(255,255,255,0.03)",
-        border: `2px solid ${seen ? "#4ade80" : "rgba(255,255,255,0.06)"}`,
+        border: `2px solid ${seen ? t.green : "rgba(255,255,255,0.06)"}`,
         boxShadow: seen ? "0 0 8px rgba(74,222,128,0.25)" : "none",
       }}>
         {posterUrl ? (
@@ -364,7 +365,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              fontSize: 9, fontWeight: 600, color: t.textMuted,
               lineHeight: 1.2, textAlign: "center",
             }}>{item.title}</div>
           </div>
@@ -374,11 +375,11 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
         <div style={{
           position: "absolute", top: 4, left: 4,
           background: isTop10 ? hostColor : "rgba(0,0,0,0.7)",
-          color: isTop10 ? "#fff" : "rgba(255,255,255,0.7)",
+          color: isTop10 ? t.textPrimary : t.textMuted,
           minWidth: 22, height: 22, borderRadius: 6,
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 11, fontWeight: 800,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           padding: "0 4px",
           boxShadow: isTop10 ? `0 0 8px ${hostColor}60` : "0 1px 3px rgba(0,0,0,0.4)",
         }}>
@@ -389,7 +390,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
         {seen && (
           <div style={{
             position: "absolute", bottom: 4, right: 4,
-            background: "#4ade80", color: "#0a0a0a",
+            background: t.green, color: "#0a0a0a",
             width: 18, height: 18, borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 700,
@@ -400,7 +401,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
       {/* Title */}
       <div style={{
         fontSize: 10, fontWeight: 600,
-        color: seen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+        color: seen ? t.textSecondary : t.textMuted,
         lineHeight: 1.2, marginTop: 5,
         overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -424,7 +425,7 @@ function ListsHero({ community, seenStats, accent }) {
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       {hasBanner ? (
@@ -453,13 +454,13 @@ function ListsHero({ community, seenStats, accent }) {
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         <div style={{
-          fontSize: 28, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 28, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>{heroTagline}</div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.7)",
+          fontSize: 13, color: t.textMuted,
           textAlign: "center", maxWidth: 300,
           margin: "0 auto 20px",
         }}>{heroDescription}</div>

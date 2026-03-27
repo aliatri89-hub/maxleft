@@ -125,7 +125,7 @@ const handleSearch = async () => {
       <button
         onClick={() => setOpen(true)}
         style={{
-          background: "rgba(255,255,255,0.06)",
+          background: t.bgInput,
           border: "none", borderRadius: "50%",
           width: 28, height: 28,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -315,11 +315,11 @@ const labelStyle = {
 };
 const inputStyle = {
   width: "100%", padding: "6px 8px",
-  background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
+  background: t.bgInput, border: "1px solid rgba(255,255,255,0.1)",
   borderRadius: 6, color: t.textSecondary, fontSize: 12, outline: "none", fontFamily: "inherit",
 };
 const smallBtnStyle = {
-  padding: "0 12px", background: "rgba(255,255,255,0.08)",
+  padding: "0 12px", background: t.bgHover,
   border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6,
   color: t.textSecondary, fontSize: 11, cursor: "pointer", flexShrink: 0,
 };

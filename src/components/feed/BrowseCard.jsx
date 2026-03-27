@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useRef, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useBrowseFeed";
@@ -28,13 +29,13 @@ function fmtSharpieDate(dateStr) {
 // ── Cream label brand stamps ──
 const VHS_BRANDS = [
   { color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
-  { color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
+  { color: t.bgCard, text: "Memorex", sub: "HS", weight: 800 },
   { color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
   { color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
   { color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
 ];
-const VHS_LOGO_BRAND = { color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
+const VHS_LOGO_BRAND = { color: t.creamDark, text: "VHS", sub: "", weight: 800, isVhs: true };
 
 function getVhsBrands(title) {
   const hash = (title || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
@@ -67,13 +68,13 @@ function BrandStamp({ brand, side = "right" }) {
       ) : (
         <>
           <div style={{
-            writingMode: "vertical-rl", fontFamily: "'Barlow Condensed', sans-serif",
+            writingMode: "vertical-rl", fontFamily: t.fontDisplay,
             fontWeight: brand.weight, fontSize: fs, letterSpacing: "0.05em",
             textTransform: "uppercase", color: brand.color, transform: "rotate(180deg)", lineHeight: 1,
           }}>{brand.text}</div>
           {brand.sub && (
             <div style={{
-              writingMode: "vertical-rl", fontFamily: "'IBM Plex Mono', monospace",
+              writingMode: "vertical-rl", fontFamily: t.fontMono,
               fontWeight: 500, fontSize: 5.5, letterSpacing: "0.08em",
               color: brand.color, opacity: 0.5, transform: "rotate(180deg)", lineHeight: 1,
             }}>{brand.sub}</div>
@@ -94,7 +95,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
     <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36, width: "100%" }}>
       {/* Fallback text — always rendered, fades out when logo is ready */}
       <div style={{
-        fontFamily: "'Playfair Display', serif", fontWeight: 700,
+        fontFamily: t.fontSerif, fontWeight: 700,
         fontSize: Math.max(16, Math.min(28, 320 / Math.max(data.title.length, 1))),
         lineHeight: 1.1, color: theme.textColor, textTransform: "uppercase",
         letterSpacing: "0.02em", textAlign: "center",
@@ -151,7 +152,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
 // CREAM — home video, sharpie on blank tape
 // ════════════════════════════════════
 const CREAM_THEME = {
-  textColor: "#2C2824",
+  textColor: t.creamDark,
   textShadow: "1px 1px 0px rgba(44,40,36,0.08), -0.5px 0.5px 2px rgba(44,40,36,0.06)",
   logoFilter: (isLight) => isLight ? "brightness(0)" : "none",
   logoOpacity: (isLight, ready) => ready ? (isLight ? 0.8 : 0.85) : 0,
@@ -180,7 +181,7 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
         {dateStr && (
           <div style={{
             position: "absolute", bottom: 5, left: 28,
-            fontFamily: "'Playfair Display', serif", fontWeight: 700,
+            fontFamily: t.fontSerif, fontWeight: 700,
             fontSize: 10, color: "rgba(44,40,36,0.7)",
             transform: `rotate(${-0.5 + ((data.tmdb_id || 0) % 3) * 0.4}deg)`,
             whiteSpace: "nowrap", pointerEvents: "none",
@@ -196,7 +197,7 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
 // ARTWORK — backdrop bleed (new releases)
 // ════════════════════════════════════
 const ARTWORK_THEME = {
-  textColor: "#fff",
+  textColor: t.textPrimary,
   textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.4)",
   logoFilter: () => "drop-shadow(0 2px 6px rgba(0,0,0,0.8))",
   logoOpacity: (_, ready) => ready ? 0.95 : 0,

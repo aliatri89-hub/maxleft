@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
@@ -33,7 +34,7 @@ const GENRE_META = {
 
 const ALL_KEY = "__all__";
 const UPCOMING_KEY = "__upcoming__";
-const MEDIA_COLORS = { film: "#e94560", book: "#f59e0b", game: "#3b82f6" };
+const MEDIA_COLORS = { film: t.red, book: "#f59e0b", game: "#3b82f6" };
 
 export default function NowPlayingGenreTab({
   community,
@@ -287,7 +288,7 @@ export default function NowPlayingGenreTab({
           <span style={{ fontSize: 14 }}>{icon}</span>
           <span style={{
             fontSize: 14, fontWeight: 700, color: "#ffffffcc",
-            fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: 0.3,
+            fontFamily: t.fontDisplay, letterSpacing: 0.3,
           }}>{title}</span>
         </div>
         <div className="hide-scrollbar" style={{
@@ -302,7 +303,7 @@ export default function NowPlayingGenreTab({
                   width: 120,
                   aspectRatio: "2/3",
                   borderRadius: 8,
-                  background: "rgba(255,255,255,0.04)",
+                  background: t.bgElevated,
                   animation: "skeletonPulse 1.5s ease-in-out infinite",
                   animationDelay: `${i * 0.1}s`,
                 }} />
@@ -373,23 +374,23 @@ export default function NowPlayingGenreTab({
             {s.director_emoji && <span style={{ fontSize: 20 }}>{s.director_emoji}</span>}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontSize: 15, fontWeight: 700, color: "#fff",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 15, fontWeight: 700, color: t.textPrimary,
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.02em",
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>
                 {s.title}
               </div>
               {((s.director_name && s.director_name !== ".") || s.episode_range) && (
-                <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
+                <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 1 }}>
                   {[s.director_name !== "." && s.director_name, s.episode_range].filter(Boolean).join(" · ")}
                 </div>
               )}
             </div>
             <div style={{
               fontSize: 13, fontWeight: 700,
-              color: allPct === 100 ? "#4ade80" : "#e94560",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: allPct === 100 ? t.green : t.red,
+              fontFamily: t.fontDisplay,
             }}>
               {allCompleted}/{allTotal}
             </div>
@@ -397,7 +398,7 @@ export default function NowPlayingGenreTab({
 
           {/* Progress bar */}
           <div style={{
-            height: 3, borderRadius: 2, background: "rgba(255,255,255,0.08)", overflow: "hidden",
+            height: 3, borderRadius: 2, background: t.bgHover, overflow: "hidden",
           }}>
             <div style={{
               height: "100%", borderRadius: 2,
@@ -440,8 +441,8 @@ export default function NowPlayingGenreTab({
               gap: 4,
               cursor: "pointer",
               borderRadius: 8,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: t.bgElevated,
+              border: `1px solid ${t.bgHover}`,
               transition: "background 0.2s",
             }}
           >
@@ -454,8 +455,8 @@ export default function NowPlayingGenreTab({
               <span style={{ fontSize: 20, color: accent, lineHeight: 1 }}>+</span>
             </div>
             <span style={{
-              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 10, fontWeight: 600, color: t.textSecondary,
+              fontFamily: t.fontDisplay,
             }}>
               +{remaining}
             </span>
@@ -471,7 +472,7 @@ export default function NowPlayingGenreTab({
   return (
     <div style={{ padding: "0 0 100px", overflow: "hidden" }}>
       <style>{`
-        .cs-search-npp::placeholder { color: rgba(255,255,255,0.78); }
+        .cs-search-npp::placeholder { color: var(--text-secondary); }
         .cs-search-npp:focus { border-color: ${accent}66; outline: none; }
         @keyframes genreTileFadeIn {
           from { opacity: 0; transform: scale(0.95); }
@@ -496,8 +497,8 @@ export default function NowPlayingGenreTab({
               style={{
                 width: 30, height: 30,
                 borderRadius: "50%",
-                border: "1px solid rgba(255,255,255,0.1)",
-                background: "rgba(255,255,255,0.04)",
+                border: `1px solid ${t.borderMedium}`,
+                background: t.bgElevated,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: "pointer", flexShrink: 0,
                 WebkitTapHighlightColor: "transparent",
@@ -521,7 +522,7 @@ export default function NowPlayingGenreTab({
             padding: "8px 3px 0",
           }}>
             {genreKeys.map((key, i) => {
-              const meta = GENRE_META[key] || { label: key, icon: "📌", tint: "#1a1a2e" };
+              const meta = GENRE_META[key] || { label: key, icon: "📌", tint: t.bgCard };
               const gs = genreStats[key];
               return (
                 <GenreGridTile
@@ -574,7 +575,7 @@ export default function NowPlayingGenreTab({
                 background: "none", border: "none", color: accent,
                 fontSize: 13, fontWeight: 700, cursor: "pointer",
                 padding: "4px 6px 4px 0",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 letterSpacing: "0.02em",
                 flexShrink: 0,
                 WebkitTapHighlightColor: "transparent",
@@ -591,8 +592,8 @@ export default function NowPlayingGenreTab({
               }}>
                 <span style={{ fontSize: 14 }}>{GENRE_META[activeGenre]?.icon || "📌"}</span>
                 <span style={{
-                  fontSize: 13, fontWeight: 800, color: "#fff",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 13, fontWeight: 800, color: t.textPrimary,
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.02em", textTransform: "uppercase",
                 }}>
                   {GENRE_META[activeGenre]?.label || activeGenre}
@@ -607,7 +608,7 @@ export default function NowPlayingGenreTab({
                 <span style={{ fontSize: 14 }}>📅</span>
                 <span style={{
                   fontSize: 13, fontWeight: 800, color: "rgba(250,204,21,0.8)",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.02em", textTransform: "uppercase",
                 }}>
                   Coming Soon ({upcomingSchedule.length})
@@ -623,7 +624,7 @@ export default function NowPlayingGenreTab({
                 style={{
                   padding: "5px 10px",
                   fontSize: 10, fontWeight: 600,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
                   borderRadius: 20,
@@ -631,7 +632,7 @@ export default function NowPlayingGenreTab({
                     ? `1.5px solid ${accent}`
                     : "1px solid rgba(255,255,255,0.1)",
                   background: filter === f ? `${accent}18` : "rgba(255,255,255,0.04)",
-                  color: filter === f ? accent : "rgba(255,255,255,0.4)",
+                  color: filter === f ? accent : t.textFaint,
                   cursor: "pointer",
                   flexShrink: 0,
                   WebkitTapHighlightColor: "transparent",
@@ -663,7 +664,7 @@ export default function NowPlayingGenreTab({
               }}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                stroke={searchOpen ? accent : "rgba(255,255,255,0.4)"}
+                stroke={searchOpen ? accent : t.textFaint}
                 strokeWidth="2" strokeLinecap="round"
               >
                 <circle cx="11" cy="11" r="8" />
@@ -696,9 +697,9 @@ export default function NowPlayingGenreTab({
                   width: "100%",
                   padding: "8px 14px 8px 32px",
                   background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  border: `1px solid ${t.bgHover}`,
                   borderRadius: 10,
-                  color: "#e0e0e0",
+                  color: t.textSecondary,
                   fontSize: 13,
                   fontFamily: "inherit",
                   WebkitAppearance: "none",
@@ -706,7 +707,7 @@ export default function NowPlayingGenreTab({
               />
               <div style={{
                 position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
-                fontSize: 13, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
+                fontSize: 13, color: t.textSecondary, pointerEvents: "none",
               }}>🔍</div>
               {searchQuery && (
                 <button
@@ -715,7 +716,7 @@ export default function NowPlayingGenreTab({
                     position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
                     background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
                     width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                    color: "#bbb", fontSize: 11, cursor: "pointer",
+                    color: t.textSecondary, fontSize: 11, cursor: "pointer",
                   }}
                 >✕</button>
               )}
@@ -734,22 +735,22 @@ export default function NowPlayingGenreTab({
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                   <span style={{
                     fontSize: 12, fontWeight: 700,
-                    color: gDone ? "#4ade80" : accent,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    color: gDone ? t.green : accent,
+                    fontFamily: t.fontDisplay,
                   }}>
                     {gs.completed}/{gs.total} series
                   </span>
                   <span style={{
                     fontSize: 11, fontWeight: 600,
-                    color: "rgba(255,255,255,0.7)",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    color: t.textMuted,
+                    fontFamily: t.fontDisplay,
                   }}>
                     {gPct}%
                   </span>
                 </div>
                 <div style={{
                   height: 3, borderRadius: 2,
-                  background: "rgba(255,255,255,0.08)",
+                  background: t.bgHover,
                   overflow: "hidden",
                 }}>
                   <div style={{
@@ -771,8 +772,8 @@ export default function NowPlayingGenreTab({
             upcomingSchedule.length === 0 ? (
               <div style={{
                 textAlign: "center", padding: "40px 0",
-                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-                color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+                fontFamily: t.fontDisplay, fontSize: 13,
+                color: t.textSecondary, fontStyle: "italic",
               }}>No upcoming items</div>
             ) : (
               <div style={{
@@ -791,15 +792,15 @@ export default function NowPlayingGenreTab({
                     />
                     <div style={{
                       fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontFamily: t.fontDisplay,
                       letterSpacing: "0.04em", textTransform: "uppercase",
                       marginTop: 4,
                     }}>
                       {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                     </div>
                     <div style={{
-                      fontSize: 9, color: "#aaa", marginTop: 1,
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: 9, color: t.textMuted, marginTop: 1,
+                      fontFamily: t.fontDisplay,
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                     }}>
                       {item._shelfTitle}
@@ -813,8 +814,8 @@ export default function NowPlayingGenreTab({
             upcomingSchedule.length === 0 ? (
               <div style={{
                 textAlign: "center", padding: "40px 0",
-                fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-                color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+                fontFamily: t.fontDisplay, fontSize: 13,
+                color: t.textSecondary, fontStyle: "italic",
               }}>No upcoming items</div>
             ) : (
               <div style={{ padding: "16px 0", overflow: "hidden" }}>
@@ -834,15 +835,15 @@ export default function NowPlayingGenreTab({
                         />
                         <div style={{
                           fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.7)",
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           letterSpacing: "0.04em", textTransform: "uppercase",
                           marginTop: 4,
                         }}>
                           {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
                         </div>
                         <div style={{
-                          fontSize: 9, color: "#aaa", marginTop: 1,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontSize: 9, color: t.textMuted, marginTop: 1,
+                          fontFamily: t.fontDisplay,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>
                           {item._shelfTitle}
@@ -856,8 +857,8 @@ export default function NowPlayingGenreTab({
           ) : visibleSeries.length === 0 ? (
             <div style={{
               textAlign: "center", padding: "40px 0",
-              fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13,
-              color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+              fontFamily: t.fontDisplay, fontSize: 13,
+              color: t.textSecondary, fontStyle: "italic",
             }}>
               {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}
             </div>
@@ -905,8 +906,8 @@ function GenrePill({ label, icon, isActive, accent, isComplete, count, onClick }
       <span style={{ fontSize: 12, flexShrink: 0 }}>{icon}</span>
       <span style={{
         fontSize: 10, fontWeight: 700,
-        color: isActive ? accent : isComplete ? "#4ade80" : "rgba(255,255,255,0.5)",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: isActive ? accent : isComplete ? t.green : t.textMuted,
+        fontFamily: t.fontDisplay,
         letterSpacing: "0.02em",
         textTransform: "uppercase",
         overflow: "hidden",
@@ -919,7 +920,7 @@ function GenrePill({ label, icon, isActive, accent, isComplete, count, onClick }
       {count != null && (
         <span style={{
           fontSize: 9, fontWeight: 600,
-          color: isActive ? accent : "rgba(255,255,255,0.25)",
+          color: isActive ? accent : t.textFaint,
           flexShrink: 0,
         }}>
           {count}
@@ -954,15 +955,15 @@ function MediaStatRow({ color, label, completed, total, state, onClick }) {
     >
       <div style={{
         width: 10, height: 10, borderRadius: "50%",
-        background: isHidden ? "rgba(255,255,255,0.2)" : color,
+        background: isHidden ? t.textFaint : color,
         flexShrink: 0,
         boxShadow: isSolo ? `0 0 8px ${color}80` : `0 0 4px ${color}40`,
         transition: "all 0.2s",
       }} />
       <span style={{
         fontSize: 13, fontWeight: 600,
-        color: isHidden ? "rgba(255,255,255,0.3)" : isSolo ? "#fff" : "rgba(255,255,255,0.5)",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: isHidden ? t.textFaint : isSolo ? t.textPrimary : t.textMuted,
+        fontFamily: t.fontDisplay,
         letterSpacing: "0.02em",
         textDecoration: isHidden ? "line-through" : "none",
         transition: "all 0.2s",
@@ -971,8 +972,8 @@ function MediaStatRow({ color, label, completed, total, state, onClick }) {
       </span>
       <span style={{
         fontSize: 14, fontWeight: 800,
-        color: isHidden ? "rgba(255,255,255,0.2)" : "#fff",
-        fontFamily: "'Barlow Condensed', sans-serif",
+        color: isHidden ? t.textFaint : t.textPrimary,
+        fontFamily: t.fontDisplay,
         marginLeft: "auto",
         transition: "color 0.2s",
       }}>
@@ -1005,7 +1006,7 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
           const isComplete = pct >= 100;
           const isHidden = ring.state === "hide";
           const isDimmed = ring.state === "dimmed";
-          const color = isComplete ? "#4ade80" : ring.color;
+          const color = isComplete ? t.green : ring.color;
           const trackOpacity = isHidden ? 0.04 : isDimmed ? 0.06 : 0.12;
           const arcOpacity = isHidden ? 0.15 : isDimmed ? 0.25 : 1;
 
@@ -1043,12 +1044,12 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
         alignItems: "center", justifyContent: "center",
       }}>
         <div style={{
-          fontSize: 20, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif", lineHeight: 1,
+          fontSize: 20, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay, lineHeight: 1,
         }}>{centerPct}%</div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.72)",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 9, color: t.textMuted,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.05em", textTransform: "uppercase",
           marginTop: 2,
         }}>seen</div>
@@ -1157,8 +1158,8 @@ function GenreGridTile({ label, icon, tint, poster, logoPos = "bottom", accent, 
         pointerEvents: "none",
       }}>
         <div style={{
-          fontSize: 20, fontWeight: 900, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 20, fontWeight: 900, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           lineHeight: 1.1,
           letterSpacing: "0.06em",
           textTransform: "uppercase",

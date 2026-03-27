@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useEffect } from "react";
 import { tapLight } from "../utils/haptics";
 
@@ -45,7 +46,7 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
             <div style={{
               padding: "48px 20px",
               textAlign: "center",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               fontSize: 12,
               color: "var(--text-faint)",
               letterSpacing: "0.04em",
@@ -58,7 +59,7 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
                 {/* Day header */}
                 <div style={{
                   padding: "12px 20px 6px",
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: t.fontMono,
                   fontSize: 9,
                   fontWeight: 700,
                   textTransform: "uppercase",

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -80,7 +81,7 @@ export default function OriginalsScreen({
 
   return (
     <div style={{
-      height: "100dvh", background: "#0f0d0b",
+      height: "100dvh", background: t.bgPrimary,
       overflowX: "hidden", overflowY: "auto",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
@@ -99,8 +100,8 @@ export default function OriginalsScreen({
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>MANTL Originals</div>
@@ -120,7 +121,7 @@ export default function OriginalsScreen({
       <div style={{ paddingTop: 8 }}>
         {sortedShelves.length === 0 && (
           <div style={{
-            textAlign: "center", color: "rgba(255,255,255,0.7)",
+            textAlign: "center", color: t.textMuted,
             fontSize: 14, padding: "48px 20px", fontStyle: "italic",
           }}>
             No shelves yet
@@ -194,25 +195,25 @@ export default function OriginalsScreen({
                   <span style={{ fontSize: 11 }}>📝</span>
                   <span style={{
                     fontSize: 9, fontWeight: 800,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     color: accent,
                   }}>
                     Staff Pick
                   </span>
-                  <span style={{ color: "rgba(255,255,255,0.78)" }}>·</span>
+                  <span style={{ color: t.textSecondary }}>·</span>
                   <span style={{
                     fontSize: 9, fontWeight: 600,
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    color: "rgba(255,255,255,0.72)",
+                    fontFamily: t.fontMono,
+                    color: t.textMuted,
                   }}>
                     {blurbAuthor}
                   </span>
                 </div>
                 <div style={{
                   fontSize: 13, lineHeight: 1.65,
-                  color: "rgba(255,255,255,0.72)",
+                  color: t.textMuted,
                   fontFamily: "'Georgia', 'Times New Roman', serif",
                 }}>
                   {blurb}

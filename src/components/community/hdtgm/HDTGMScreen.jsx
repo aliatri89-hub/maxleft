@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -105,7 +106,7 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
 
   return (
     <div style={{
-      height: "100dvh", background: "#0f0d0b",
+      height: "100dvh", background: t.bgPrimary,
       overflowX: "hidden", overflowY: "auto",
       paddingTop: "env(safe-area-inset-top, 0px)",
       paddingBottom: "env(safe-area-inset-bottom, 0px)",
@@ -124,8 +125,8 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
@@ -150,7 +151,7 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
               background: viewMode === v.key ? `${accent}25` : "rgba(255,255,255,0.05)",
               border: `1.5px solid ${viewMode === v.key ? accent : "rgba(255,255,255,0.1)"}`,
               borderRadius: 20, padding: "5px 14px",
-              color: viewMode === v.key ? accent : "#888",
+              color: viewMode === v.key ? accent : t.textMuted,
               fontSize: 12, fontWeight: 600, cursor: "pointer",
               transition: "all 0.2s",
             }}

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "../../../supabase";
 import CommunityLoadingScreen from "../../CommunityLoadingScreen";
@@ -14,12 +15,12 @@ const C = {
   bgDeep: "#111111",
   bgCard: "#222222",
   bgCardHover: "#2a2a2a",
-  text: "#f0ece4",
+  text: t.cream,
   textMuted: "rgba(240,236,228,0.5)",
   textDim: "rgba(240,236,228,0.3)",
-  green: "#4ade80",
-  red: "#f87171",
-  yellow: "#facc15",
+  green: t.green,
+  red: t.red,
+  yellow: t.gold,
   border: "rgba(255,255,255,0.07)",
 };
 
@@ -110,7 +111,7 @@ const StarDisplay = ({ rating, size = 14, gap = 2, showValue = false }) => {
       {showValue && rating > 0 && (
         <span style={{
           fontSize: size * 0.85, fontWeight: 700, color: C.star,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
         }}>{Number(rating).toFixed(1)}</span>
       )}
     </div>
@@ -205,7 +206,7 @@ const EpisodeLink = ({ title, episodeUrl, compact }) => {
   const badgeStyle = {
     display: "inline-flex", alignItems: "center", gap: compact ? 4 : 5,
     padding: compact ? "4px 8px" : "5px 10px",
-    background: "rgba(255,255,255,0.04)",
+    background: t.bgElevated,
     border: `1px solid rgba(255,255,255,0.08)`,
     borderRadius: compact ? 4 : 6,
     textDecoration: "none",
@@ -229,7 +230,7 @@ const EpisodeLink = ({ title, episodeUrl, compact }) => {
           <span style={{ fontSize: compact ? 11 : 13 }}>▶</span>
           <span style={{
             fontSize: compact ? 10 : 11, fontWeight: 700, color: C.purple,
-            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+            fontFamily: t.fontHeadline, textTransform: "uppercase",
             letterSpacing: 1, whiteSpace: "nowrap",
           }}>Listen to Episode</span>
         </a>
@@ -242,7 +243,7 @@ const EpisodeLink = ({ title, episodeUrl, compact }) => {
         <svg width={compact ? 12 : 14} height={compact ? 12 : 14} viewBox="0 0 24 24" fill="#1DB954">
           <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
         </svg>
-        <span style={{ fontSize: compact ? 9 : 10, fontWeight: 600, color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>Spotify</span>
+        <span style={{ fontSize: compact ? 9 : 10, fontWeight: 600, color: t.textMuted, whiteSpace: "nowrap" }}>Spotify</span>
       </a>
 
       <a href={BC_APPLE} target="_blank" rel="noopener noreferrer" style={badgeStyle}
@@ -252,7 +253,7 @@ const EpisodeLink = ({ title, episodeUrl, compact }) => {
         <svg width={compact ? 12 : 14} height={compact ? 12 : 14} viewBox="0 0 24 24" fill="#A855F7">
           <path d="M5.34 0A5.328 5.328 0 000 5.34v13.32A5.328 5.328 0 005.34 24h13.32A5.328 5.328 0 0024 18.66V5.34A5.328 5.328 0 0018.66 0H5.34zm6.525 2.568c2.336 0 4.448.902 6.056 2.587 1.224 1.272 1.912 2.619 2.264 4.392.12.6-.12 1.2-.6 1.5-.48.3-1.14.18-1.5-.3-.18-.36-.24-.78-.36-1.14-.36-1.2-.96-2.16-1.92-2.94-1.32-1.08-2.82-1.5-4.5-1.26-2.28.36-3.84 1.62-4.8 3.66-.36.78-.54 1.62-.54 2.52 0 1.56.42 2.94 1.38 4.2.3.36.3.96 0 1.32-.36.36-.96.42-1.32.06-.42-.36-.78-.78-1.08-1.26-.9-1.38-1.32-2.94-1.38-4.62-.06-2.1.54-3.96 1.8-5.58 1.56-2.04 3.66-3.18 6.48-3.12zm.12 4.32c1.44.06 2.7.6 3.72 1.68.78.84 1.2 1.8 1.38 2.94.06.6-.24 1.08-.78 1.26-.54.12-1.08-.12-1.26-.72-.12-.36-.18-.72-.36-1.08-.6-1.2-1.62-1.74-2.94-1.74-1.62.06-2.76.84-3.3 2.4-.18.48-.24 1.02-.18 1.56.06.66.18 1.32.48 1.92.06.12.12.3.12.42.06.54-.18 1.02-.66 1.2-.54.18-1.08 0-1.32-.48-.42-.84-.66-1.74-.78-2.7-.18-1.56.18-2.94 1.02-4.2.96-1.38 2.34-2.22 4.02-2.46.3-.06.54-.06.84-.06zm-.12 4.44c1.26 0 2.22 1.02 2.22 2.22 0 .9-.54 1.62-1.32 2.01l.48 4.38c.06.54-.36 1.02-.9 1.08h-.96c-.54-.06-.96-.54-.9-1.08l.48-4.38c-.78-.42-1.32-1.14-1.32-2.01.02-1.2.98-2.22 2.22-2.22z"/>
         </svg>
-        <span style={{ fontSize: compact ? 9 : 10, fontWeight: 600, color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>Apple</span>
+        <span style={{ fontSize: compact ? 9 : 10, fontWeight: 600, color: t.textMuted, whiteSpace: "nowrap" }}>Apple</span>
       </a>
     </div>
   );
@@ -283,7 +284,7 @@ const PodcastFooterLinks = () => (
         style={{
           display: "inline-flex", alignItems: "center", gap: 6,
           padding: "6px 14px", borderRadius: 6,
-          background: "rgba(255,255,255,0.04)",
+          background: t.bgElevated,
           border: `1px solid ${C.border}`,
           textDecoration: "none",
           transition: "all 0.2s",
@@ -296,7 +297,7 @@ const PodcastFooterLinks = () => (
         {svg}
         <span style={{
           fontSize: 11, fontWeight: 600, color: C.textMuted,
-          fontFamily: "'Barlow Condensed', sans-serif", whiteSpace: "nowrap",
+          fontFamily: t.fontDisplay, whiteSpace: "nowrap",
         }}>{label}</span>
       </a>
     ))}
@@ -346,7 +347,7 @@ const LoginModal = ({ onClose }) => {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h3 style={{
             margin: 0, fontSize: 18, fontWeight: 700, color: C.purple,
-            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+            fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 1.5,
           }}>Sign In</h3>
           <button onClick={onClose} style={{
             background: "none", border: "none", color: C.textDim,
@@ -357,9 +358,9 @@ const LoginModal = ({ onClose }) => {
         {magicLinkSent ? (
           <>
             <div style={{ fontSize: 32, marginBottom: 8 }}>✉️</div>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 4 }}>Check your email</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: t.textPrimary, marginBottom: 4 }}>Check your email</p>
             <p style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.5, marginBottom: 12 }}>
-              Sign-in link sent to <strong style={{ color: "#ddd" }}>{email}</strong>
+              Sign-in link sent to <strong style={{ color: t.textSecondary }}>{email}</strong>
             </p>
             <button onClick={() => { setMagicLinkSent(false); setEmail(""); setShowEmail(false); }} style={{
               background: "none", border: "none", color: C.purple, fontSize: 12, cursor: "pointer",
@@ -369,7 +370,7 @@ const LoginModal = ({ onClose }) => {
           <>
             <p style={{
               fontSize: 13, color: C.textMuted, lineHeight: 1.6, marginBottom: 20,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
             }}>
               Sign in to track your progress across every director.
             </p>
@@ -379,9 +380,9 @@ const LoginModal = ({ onClose }) => {
               disabled={loading}
               style={{
                 width: "100%", padding: "12px 0", borderRadius: 8,
-                background: "#fff", border: "none",
+                background: t.textPrimary, border: "none",
                 color: "#333", fontSize: 14, fontWeight: 600,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 cursor: loading ? "wait" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
                 transition: "opacity 0.15s",
@@ -402,7 +403,7 @@ const LoginModal = ({ onClose }) => {
             }}>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
               <span style={{ fontSize: 10, color: C.textDim, letterSpacing: "0.1em", textTransform: "uppercase",
-                fontFamily: "'IBM Plex Mono', monospace" }}>or</span>
+                fontFamily: t.fontMono }}>or</span>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
             </div>
 
@@ -411,7 +412,7 @@ const LoginModal = ({ onClose }) => {
                 width: "100%", padding: "12px 0", borderRadius: 8,
                 background: "transparent", border: "1px solid rgba(255,255,255,0.15)",
                 color: C.textMuted, fontSize: 14, fontWeight: 600,
-                fontFamily: "'Barlow Condensed', sans-serif", cursor: "pointer",
+                fontFamily: t.fontDisplay, cursor: "pointer",
                 transition: "all 0.15s",
               }}>Continue with email</button>
             ) : (
@@ -425,9 +426,9 @@ const LoginModal = ({ onClose }) => {
                   onKeyDown={(e) => e.key === "Enter" && handleEmail()}
                   style={{
                     width: "100%", padding: "12px 14px", borderRadius: 8,
-                    border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.06)",
-                    color: "#fff", fontSize: 14, outline: "none", boxSizing: "border-box",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    border: "1px solid rgba(255,255,255,0.15)", background: t.bgInput,
+                    color: t.textPrimary, fontSize: 14, outline: "none", boxSizing: "border-box",
+                    fontFamily: t.fontDisplay,
                   }}
                 />
                 <button onClick={handleEmail} disabled={loading || !email.trim()} style={{
@@ -435,7 +436,7 @@ const LoginModal = ({ onClose }) => {
                   background: C.purple, border: "none", color: "#000",
                   fontSize: 14, fontWeight: 600, cursor: loading ? "wait" : "pointer",
                   opacity: loading || !email.trim() ? 0.5 : 1,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                 }}>{loading ? "Sending..." : "Send sign-in link"}</button>
                 <button onClick={() => { setShowEmail(false); setEmail(""); setError(null); }} style={{
                   background: "none", border: "none", color: C.textDim, fontSize: 11, cursor: "pointer",
@@ -447,7 +448,7 @@ const LoginModal = ({ onClose }) => {
               <div style={{
                 marginTop: 12, padding: "8px 12px", borderRadius: 6,
                 background: "rgba(248,113,113,0.1)", border: "1px solid rgba(248,113,113,0.3)",
-                fontSize: 12, color: C.red, fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 12, color: C.red, fontFamily: t.fontDisplay,
               }}>{error}</div>
             )}
           </>
@@ -455,7 +456,7 @@ const LoginModal = ({ onClose }) => {
 
         <div style={{
           marginTop: 16, fontSize: 10, color: C.textDim,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
         }}>powered by MANTL</div>
       </div>
     </div>
@@ -472,13 +473,13 @@ const Toast = ({ message, link, onDone }) => {
       animation: "slideUp 0.25s ease", boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
       display: "flex", alignItems: "center", gap: 12,
     }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: C.text, fontFamily: "'Barlow Condensed', sans-serif" }}>
+      <span style={{ fontSize: 13, fontWeight: 600, color: C.text, fontFamily: t.fontDisplay }}>
         {message}
       </span>
       {link && (
         <a href={link} target="_blank" rel="noopener noreferrer" style={{
           fontSize: 11, fontWeight: 700, color: C.purple, textDecoration: "none",
-          fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+          fontFamily: t.fontHeadline, textTransform: "uppercase",
           letterSpacing: 1, whiteSpace: "nowrap",
           borderLeft: `1px solid ${C.border}`, paddingLeft: 12,
         }}>My Tracker →</a>
@@ -542,7 +543,7 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
             <svg width="10" height="10" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={C.star} />
             </svg>
-            <span style={{ fontSize: 10, fontWeight: 700, color: C.star, fontFamily: "'IBM Plex Mono', monospace" }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: C.star, fontFamily: t.fontMono }}>
               {Number(avg).toFixed(1)}
             </span>
           </div>
@@ -572,13 +573,13 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
           width: "100%",
         }}>
           <div style={{
-            fontSize: hasPoster ? 13 : 15, fontWeight: 700, color: "#fff", lineHeight: 1.25,
-            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 0.5,
+            fontSize: hasPoster ? 13 : 15, fontWeight: 700, color: t.textPrimary, lineHeight: 1.25,
+            fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 0.5,
             textShadow: hasPoster ? "0 1px 4px rgba(0,0,0,0.8)" : "none",
           }}>{film.title}</div>
           <div style={{
-            fontSize: 11, color: "rgba(255,255,255,0.78)", marginTop: 2,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 11, color: t.textSecondary, marginTop: 2,
+            fontFamily: t.fontMono,
             textShadow: hasPoster ? "0 1px 3px rgba(0,0,0,0.8)" : "none",
           }}>{film.year}</div>
         </div>
@@ -592,7 +593,7 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
           }}>
             <span style={{
               fontSize: 8, fontWeight: 700, color: C.purple,
-              textTransform: "uppercase", letterSpacing: 2, fontFamily: "'IBM Plex Mono', monospace",
+              textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontMono,
             }}>Community Favorite</span>
           </div>
         )}
@@ -700,9 +701,9 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
           <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{
               margin: 0, fontSize: 22, fontWeight: 700, color: C.text,
-              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+              fontFamily: t.fontHeadline, textTransform: "uppercase",
             }}>{film.title}</h2>
-            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: "'IBM Plex Mono', monospace" }}>
+            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: t.fontMono }}>
               {film.year} · {film.miniseries_title || ""}
             </span>
           </div>
@@ -750,7 +751,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
           }}>
             <div style={{
               fontSize: 9, fontWeight: 700, color: C.purple, textTransform: "uppercase",
-              letterSpacing: 2, marginBottom: 12, fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: 2, marginBottom: 12, fontFamily: t.fontMono,
               display: "flex", alignItems: "center", gap: 6,
             }}>
               <span style={{ fontSize: 11 }}>⚙</span> Admin Controls
@@ -760,7 +761,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
             <div style={{ marginBottom: 14 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontMono,
               }}>Title / Poster (TMDB)</div>
               <input
                 type="text"
@@ -769,13 +770,13 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                 onChange={(e) => setTmdbQuery(e.target.value)}
                 style={{
                   width: "100%", padding: "7px 10px", borderRadius: 6,
-                  background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                  color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
+                  background: t.bgInput, border: `1px solid ${C.border}`,
+                  color: C.text, fontSize: 12, fontFamily: t.fontDisplay,
                   outline: "none", boxSizing: "border-box",
                 }}
               />
               {tmdbSearching && (
-                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: "'IBM Plex Mono', monospace" }}>
+                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: t.fontMono }}>
                   Searching...
                 </div>
               )}
@@ -807,10 +808,10 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{
                           fontSize: 12, fontWeight: 600, color: C.text,
-                          fontFamily: "'Barlow Condensed', sans-serif",
+                          fontFamily: t.fontDisplay,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>{r.title || r.original_title}</div>
-                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace" }}>
+                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: t.fontMono }}>
                           {r.release_date?.slice(0, 4) || "?"} · ID {r.id}
                         </div>
                       </div>
@@ -824,7 +825,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
             <div>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontMono,
               }}>Director Series</div>
               <div style={{ display: "flex", gap: 6 }}>
                 <select
@@ -832,8 +833,8 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                   onChange={(e) => setNewCategory(e.target.value)}
                   style={{
                     flex: 1, padding: "7px 10px", borderRadius: 6,
-                    background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                    color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
+                    background: t.bgInput, border: `1px solid ${C.border}`,
+                    color: C.text, fontSize: 12, fontFamily: t.fontDisplay,
                     cursor: "pointer", outline: "none",
                   }}
                 >
@@ -846,7 +847,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                   background: `${C.purple}18`, border: `1px solid ${C.purple}55`,
                   color: C.purple, fontSize: 10, fontWeight: 700,
                   cursor: adminSaving ? "wait" : "pointer",
-                  fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1,
+                  fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 1,
                   opacity: adminSaving || newCategory === (film.miniseries_title || "") ? 0.4 : 1,
                 }}>Move</button>
               </div>
@@ -856,7 +857,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
               <div style={{
                 marginTop: 10, fontSize: 11, fontWeight: 600,
                 color: adminToast.includes("Error") ? C.red : C.green,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
               }}>{adminToast}</div>
             )}
           </div>
@@ -872,14 +873,14 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
         }}>
           <div style={{
             fontSize: 10, color: C.textDim, textTransform: "uppercase",
-            letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Bebas Neue', sans-serif",
+            letterSpacing: 2.5, marginBottom: 10, fontFamily: t.fontHeadline,
             fontWeight: 700,
           }}>
             {isAuthed ? "Your Rating" : "Rate This Film"}
           </div>
           <StarRating value={userRating} onChange={(r) => onRate(film.item_id, r)} size={32} gap={6} />
           {!isAuthed && (
-            <div style={{ fontSize: 11, color: C.textDim, marginTop: 8, fontFamily: "'Barlow Condensed', sans-serif" }}>
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 8, fontFamily: t.fontDisplay }}>
               Sign in to rate
             </div>
           )}
@@ -894,7 +895,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
         }}>
           <div style={{
             fontSize: 10, color: C.textDim, textTransform: "uppercase",
-            letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Bebas Neue', sans-serif",
+            letterSpacing: 2.5, marginBottom: 10, fontFamily: t.fontHeadline,
             fontWeight: 700, display: "flex", alignItems: "center", gap: 6,
           }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -910,7 +911,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
         {SHOW_COMMUNITY_STATS && (<>
         <div style={{
           fontSize: 10, color: C.textDim, textTransform: "uppercase",
-          letterSpacing: 2.5, marginBottom: 10, fontFamily: "'Bebas Neue', sans-serif",
+          letterSpacing: 2.5, marginBottom: 10, fontFamily: t.fontHeadline,
           fontWeight: 700,
         }}>Community Rating</div>
         <div style={{ marginBottom: 18 }}>
@@ -918,10 +919,10 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
             <StarDisplay rating={avg} size={18} gap={3} />
             <span style={{
               fontSize: 22, fontWeight: 700, color: C.star,
-              fontFamily: "'Bebas Neue', sans-serif",
+              fontFamily: t.fontHeadline,
             }}>{avg > 0 ? Number(avg).toFixed(1) : "—"}</span>
             <span style={{
-              fontSize: 11, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 11, color: C.textDim, fontFamily: t.fontMono,
             }}>{total} {total === 1 ? "rating" : "ratings"}</span>
           </div>
           <RatingBar avg={avg} total={total} />
@@ -933,7 +934,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
           {isAuthed && (
             <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
               fontSize: 11, color: C.textDim, textDecoration: "none",
-              fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 0.5,
+              fontFamily: t.fontMono, letterSpacing: 0.5,
               transition: "color 0.15s",
             }}
               onMouseEnter={(e) => e.currentTarget.style.color = C.purple}
@@ -942,7 +943,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
           )}
           <a href={BC_WEBSITE} target="_blank" rel="noopener noreferrer" style={{
             fontSize: 11, color: C.textDim, textDecoration: "none",
-            fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 0.5,
+            fontFamily: t.fontMono, letterSpacing: 0.5,
             transition: "color 0.15s",
           }}
             onMouseEnter={(e) => e.currentTarget.style.color = C.purple}
@@ -1058,7 +1059,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill={C.star} />
                 </svg>
                 <span style={{
-                  fontSize: 10, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 10, fontWeight: 700, fontFamily: t.fontMono,
                   color: C.star,
                 }}>{Number(avg).toFixed(1)}</span>
               </div>
@@ -1071,12 +1072,12 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontSize: 14, fontWeight: 700, color: isUpcoming ? C.text : "rgba(240,236,228,0.75)",
-                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                fontFamily: t.fontHeadline, textTransform: "uppercase",
                 letterSpacing: 0.3, lineHeight: 1.3,
               }}>{ep.title}</div>
               <div style={{
                 fontSize: 11, color: C.textDim, marginTop: 3,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
               }}>
                 <span>{ep.dateDisplay}</span>
               </div>
@@ -1086,7 +1087,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                 <div style={{
                   background: `${C.purple}22`, borderRadius: 3, padding: "2px 8px",
                   fontSize: 9, fontWeight: 700, color: C.purple,
-                  fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
+                  fontFamily: t.fontMono, letterSpacing: 1,
                 }}>SOON</div>
               )}
               {isAdmin && !film && ep.guid && (
@@ -1096,7 +1097,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                   borderRadius: 4, padding: "2px 8px", cursor: "pointer",
                   fontSize: 9, fontWeight: 700,
                   color: adminOpen ? C.purple : C.textDim,
-                  fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
+                  fontFamily: t.fontMono, letterSpacing: 1,
                   transition: "all 0.15s",
                 }}>🔗 LINK</button>
               )}
@@ -1109,7 +1110,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
               <RatingBar avg={avg} total={total} />
               <div style={{
                 display: "flex", gap: 8, marginTop: 4, alignItems: "center",
-                fontSize: 10, fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10, fontFamily: t.fontMono,
               }}>
                 <StarDisplay rating={avg} size={10} gap={1} />
                 <span style={{ color: C.star }}>{Number(avg).toFixed(1)}</span>
@@ -1131,9 +1132,9 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                 <button
                   onClick={() => setExpanded(!expanded)}
                   style={{
-                    background: "rgba(255,255,255,0.04)", border: `1px solid ${C.border}`,
+                    background: t.bgElevated, border: `1px solid ${C.border}`,
                     borderRadius: 4, padding: "4px 8px", cursor: "pointer",
-                    fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 10, color: C.textDim, fontFamily: t.fontMono,
                     transition: "all 0.15s",
                   }}
                 >{expanded ? "Less" : "Info"}</button>
@@ -1151,7 +1152,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                     borderRadius: 4, padding: "4px 10px",
                     fontSize: 10, fontWeight: 700, textDecoration: "none",
                     color: isUpcoming ? C.purple : C.textMuted,
-                    fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                    fontFamily: t.fontHeadline, textTransform: "uppercase",
                     letterSpacing: 1, transition: "all 0.15s",
                   }}
                 >
@@ -1171,7 +1172,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
         }}>
           <div style={{
             fontSize: 9, fontWeight: 700, color: C.purple, textTransform: "uppercase",
-            letterSpacing: 2, marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace",
+            letterSpacing: 2, marginBottom: 8, fontFamily: t.fontMono,
           }}>Link to TMDB Film</div>
 
           <div style={{ position: "relative", marginBottom: 8 }}>
@@ -1182,13 +1183,13 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
               onChange={(e) => setTmdbQuery(e.target.value)}
               style={{
                 width: "100%", padding: "7px 10px", borderRadius: 6,
-                background: "rgba(255,255,255,0.06)", border: `1px solid ${C.border}`,
-                color: C.text, fontSize: 12, fontFamily: "'Barlow Condensed', sans-serif",
+                background: t.bgInput, border: `1px solid ${C.border}`,
+                color: C.text, fontSize: 12, fontFamily: t.fontDisplay,
                 outline: "none", boxSizing: "border-box",
               }}
             />
             {tmdbSearching && (
-              <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: "'IBM Plex Mono', monospace" }}>
+              <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: t.fontMono }}>
                 Searching...
               </div>
             )}
@@ -1226,11 +1227,11 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 600, color: C.text,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        fontFamily: t.fontDisplay,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{r.title || r.original_title}</div>
                       <div style={{
-                        fontSize: 10, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 10, color: C.textDim, fontFamily: t.fontMono,
                         display: "flex", gap: 8, alignItems: "center",
                       }}>
                         <span>{r.release_date?.slice(0, 4) || "?"}</span>
@@ -1250,7 +1251,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
           )}
 
           {tmdbQuery.length >= 2 && !tmdbSearching && tmdbResults.length === 0 && (
-            <div style={{ fontSize: 11, color: C.textDim, fontFamily: "'IBM Plex Mono', monospace" }}>
+            <div style={{ fontSize: 11, color: C.textDim, fontFamily: t.fontMono }}>
               No results
             </div>
           )}
@@ -1265,7 +1266,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
         }}>
           <p style={{
             fontSize: 12, color: C.textMuted, lineHeight: 1.6,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             margin: "10px 0 0",
           }}>
             {ep.description.replace(/<[^>]*>/g, "").slice(0, 300)}
@@ -1636,7 +1637,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
   const tabBtn = (key) => ({
     padding: "10px 20px", background: "none", border: "none", cursor: "pointer",
     fontSize: 13, fontWeight: 700, transition: "all 0.2s",
-    fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 1.5,
+    fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 1.5,
     color: tab === key ? C.purple : C.textDim,
     borderBottom: tab === key ? `2px solid ${C.purple}` : "2px solid transparent",
   });
@@ -1726,10 +1727,10 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
           >
             <span style={{
               fontSize: 18, fontWeight: 700, color: C.purple,
-              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2, textTransform: "uppercase",
+              fontFamily: t.fontHeadline, letterSpacing: 2, textTransform: "uppercase",
             }}>Blank Check</span>
             <span style={{
-              fontSize: 9, color: "#fff", fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 9, color: t.textPrimary, fontFamily: t.fontDisplay,
               fontWeight: 600, letterSpacing: 0.5, opacity: 0.7, whiteSpace: "nowrap",
             }}>with Griffin and David</span>
           </div>
@@ -1757,7 +1758,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
               <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
                 background: C.bgDeep, borderRadius: 4, padding: "5px 12px",
                 fontSize: 11, fontWeight: 700, color: C.purple, cursor: "pointer",
-                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                fontFamily: t.fontHeadline, textTransform: "uppercase",
                 letterSpacing: 1, textDecoration: "none",
                 display: "flex", alignItems: "center", gap: 5,
               }}>My Tracker →</a>
@@ -1783,14 +1784,14 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             <>
               <button onClick={() => setShowLogin(true)} style={{
                 background: "transparent", borderRadius: 4, padding: "5px 12px",
-                fontSize: 11, fontWeight: 700, color: "#fff", cursor: "pointer",
-                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                fontSize: 11, fontWeight: 700, color: t.textPrimary, cursor: "pointer",
+                fontFamily: t.fontHeadline, textTransform: "uppercase",
                 letterSpacing: 1, border: "none", opacity: 0.8,
               }}>Sign In</button>
               <button onClick={() => setShowLogin(true)} style={{
                 background: C.bgDeep, borderRadius: 4, padding: "5px 12px",
                 fontSize: 11, fontWeight: 700, color: C.purple, cursor: "pointer",
-                fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                fontFamily: t.fontHeadline, textTransform: "uppercase",
                 letterSpacing: 1, border: "none",
               }}>Join on MANTL</button>
             </>
@@ -1830,19 +1831,19 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.purple, animation: "pulse 2s ease infinite" }} />
             <span style={{
               fontSize: 10, color: C.purple, fontWeight: 700, letterSpacing: 2,
-              textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace",
+              textTransform: "uppercase", fontFamily: t.fontMono,
             }}>Live Community{SHOW_COMMUNITY_STATS ? ` · ${memberStats.active_this_week || 0} active this week` : ""}</span>
           </div>
 
           <h1 style={{
             fontSize: 42, fontWeight: 700, lineHeight: 1.05, marginBottom: 10,
-            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+            fontFamily: t.fontHeadline, textTransform: "uppercase",
             animation: "slideUp 0.4s ease 0.05s both",
           }}>Community<br /><span style={{ color: C.purple }}>Dashboard</span></h1>
 
           <p style={{
             fontSize: 15, color: C.textMuted, maxWidth: 460, lineHeight: 1.6,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             animation: "slideUp 0.4s ease 0.1s both",
           }}>Griffin Newman and David Sims walk through the filmographies of directors who were given a blank check to make whatever crazy, passion project they want. Sometimes… those checks clear. And sometimes, they bounce, baby! <a href={BC_WEBSITE} target="_blank" rel="noopener noreferrer" style={{ color: C.purple, textDecoration: "none", fontWeight: 600 }}>Listen →</a></p>
 
@@ -1855,10 +1856,10 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
               ...(SHOW_COMMUNITY_STATS ? [{ v: memberStats.total_logs || 0, l: "Total Ratings" }] : []),
             ].map((s) => (
               <div key={s.l} style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: "'Bebas Neue', sans-serif" }}>
+                <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: t.fontHeadline }}>
                   {s.v.toLocaleString()}
                 </span>
-                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: "'IBM Plex Mono', monospace" }}>{s.l}</span>
+                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontMono }}>{s.l}</span>
               </div>
             ))}
           </div>
@@ -1910,11 +1911,11 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                   <div className="ds-rating-icon" style={{ background: `${C.purple}18` }}>🎬</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div className="ds-rating-name" style={{ color: C.star }}>George Miller</div>
-                    <div style={{ height: 3, background: "rgba(255,255,255,0.06)", borderRadius: 2, marginTop: 3, overflow: "hidden" }}>
+                    <div style={{ height: 3, background: t.bgInput, borderRadius: 2, marginTop: 3, overflow: "hidden" }}>
                       <div style={{ height: "100%", width: "63.6%", borderRadius: 2, background: `linear-gradient(90deg, ${C.purple}, ${C.star})` }} />
                     </div>
                   </div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.32rem", fontWeight: 600, color: C.star, flexShrink: 0 }}>7/11</div>
+                  <div style={{ fontFamily: t.fontMono, fontSize: "0.32rem", fontWeight: 600, color: C.star, flexShrink: 0 }}>7/11</div>
                 </div>
 
                 <div className="ds-stats">
@@ -1950,11 +1951,11 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
           <div style={{ textAlign: "center" }}>
             <div style={{
               fontSize: 18, fontWeight: 700, color: C.text,
-              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+              fontFamily: t.fontHeadline, textTransform: "uppercase",
               letterSpacing: 1.5, marginBottom: 6,
             }}>Track Every Director. <span style={{ color: C.purple }}>Earn Badges.</span></div>
             <div style={{
-              fontSize: 13, color: C.textMuted, fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 13, color: C.textMuted, fontFamily: t.fontDisplay,
               lineHeight: 1.5, maxWidth: 420, margin: "0 auto 20px",
             }}>
               Follow your progress across {directors.length - 1} directors{badgeCount > 0 ? ` and collect ${badgeCount} badges` : ""} as you work through every filmography.
@@ -1962,8 +1963,8 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             <button onClick={() => setShowLogin(true)} style={{
               padding: "10px 28px", borderRadius: 4,
               background: C.purple, border: "none",
-              color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+              color: t.textPrimary, fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: t.fontHeadline, textTransform: "uppercase",
               letterSpacing: 2, transition: "opacity 0.15s",
             }}>Start Tracking on MANTL</button>
           </div>
@@ -2002,7 +2003,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                 style={{
                   width: "100%", padding: "9px 12px 9px 36px", borderRadius: 6,
                   background: "rgba(255,255,255,0.05)", border: `1px solid ${searchQuery ? C.purpleBorder : C.border}`,
-                  color: C.text, fontSize: 13, fontFamily: "'Barlow Condensed', sans-serif",
+                  color: C.text, fontSize: 13, fontFamily: t.fontDisplay,
                   outline: "none", boxSizing: "border-box", transition: "border-color 0.2s",
                 }}
               />
@@ -2026,9 +2027,9 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                   onChange={(e) => { setActiveDirector(e.target.value || null); setSearchQuery(""); }}
                   style={{
                     padding: "6px 32px 6px 10px", borderRadius: 5,
-                    background: "rgba(255,255,255,0.06)", border: `1px solid ${activeDirector ? C.purpleBorder : C.border}`,
+                    background: t.bgInput, border: `1px solid ${activeDirector ? C.purpleBorder : C.border}`,
                     color: activeDirector ? C.purple : C.textMuted,
-                    fontSize: 12, fontWeight: 600, fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: 12, fontWeight: 600, fontFamily: t.fontDisplay,
                     cursor: "pointer", outline: "none",
                     appearance: "none", WebkitAppearance: "none",
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238B5CF6' fill='none' stroke-width='1.5'/%3E%3C/svg%3E")`,
@@ -2049,7 +2050,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
+                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: t.fontMono, textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
               {[
                 { key: "az", label: sortBy === "za" ? "Z–A" : "A–Z", toggle: true },
                 ...(SHOW_COMMUNITY_STATS ? [
@@ -2067,7 +2068,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                   padding: "4px 10px", borderRadius: 4, border: "none",
                   background: isActive ? `${C.purple}15` : "transparent",
                   color: isActive ? C.purple : C.textDim,
-                  fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 11, cursor: "pointer", fontFamily: t.fontMono,
                   transition: "all 0.2s", fontWeight: isActive ? 700 : 400,
                 }}>{s.toggle && sortBy === "za" ? "Z–A" : s.label}</button>
                 );
@@ -2089,7 +2090,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                 </svg>
                 <span style={{
                   flex: 1, fontSize: 12, color: C.textMuted,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                 }}>
                   Listen to the full <strong style={{ color: C.purple }}>{activeDirector}</strong> miniseries
                 </span>
@@ -2101,7 +2102,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                     padding: "4px 10px", borderRadius: 4,
                     background: "rgba(29,185,84,0.12)", border: "1px solid rgba(29,185,84,0.25)",
                     textDecoration: "none", fontSize: 10, fontWeight: 700,
-                    color: "#1DB954", fontFamily: "'Bebas Neue', sans-serif",
+                    color: t.spotify, fontFamily: t.fontHeadline,
                     textTransform: "uppercase", letterSpacing: 1, flexShrink: 0,
                   }}
                 >
@@ -2114,13 +2115,13 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             )}
 
             {filtered.length === 0 && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
                 {searchQuery ? `No films matching "${searchQuery}"` : "No films found"}
               </div>
             )}
 
             {searchQuery && filtered.length > 0 && (
-              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: t.fontMono, marginBottom: 10 }}>
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{searchQuery}"
                 {activeDirector && activeDirector !== "All" ? ` in ${activeDirector}` : ""}
               </div>
@@ -2142,14 +2143,14 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                   padding: "10px 32px", borderRadius: 6,
                   background: `${C.purple}12`, border: `1px solid ${C.purpleBorder}`,
                   color: C.purple, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                  fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+                  fontFamily: t.fontHeadline, textTransform: "uppercase",
                   letterSpacing: 1.5, transition: "all 0.2s",
                 }}>
                   Show More · {filtered.length - visibleCount} remaining
                 </button>
                 <div style={{
                   fontSize: 10, color: C.textDim, marginTop: 8,
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: t.fontMono,
                 }}>
                   Showing {visibleCount} of {filtered.length}
                 </div>
@@ -2170,7 +2171,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
                 No upcoming episodes yet
               </div>
             )}
@@ -2181,12 +2182,12 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         {tab === "recent" && (
           <div style={{ paddingBottom: 48 }}>
             {rssLoading && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 12 }}>
                 Loading episodes...
               </div>
             )}
             {rssError && !rssLoading && recent.length === 0 && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 12 }}>
                 {rssError}
               </div>
             )}
@@ -2198,7 +2199,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : !rssLoading && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
                 No recent episodes
               </div>
             )}
@@ -2222,7 +2223,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
         >
           <span style={{
             fontSize: 16, fontWeight: 700, color: C.purple,
-            fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase",
+            fontFamily: t.fontHeadline, textTransform: "uppercase",
             letterSpacing: 2,
           }}>Blank Check</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.purple} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.6 }}>
@@ -2232,7 +2233,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
           </svg>
         </a>
 
-        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 6, fontFamily: "'Barlow Condensed', sans-serif" }}>
+        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 6, fontFamily: t.fontDisplay }}>
           Every director. Every film. The filmography deep dive.
         </p>
 
@@ -2242,7 +2243,7 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
           marginTop: 20, paddingTop: 16,
           borderTop: `1px solid ${C.border}`,
         }}>
-          <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: "'Barlow Condensed', sans-serif" }}>
+          <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, fontFamily: t.fontDisplay }}>
             {isAuthed
               ? "Track your progress across every director on MANTL."
               : "Explore every director the hosts have covered."
@@ -2252,20 +2253,20 @@ export default function BlankCheckDashboard({ session: sessionProp }) {
             <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
               display: "inline-block", padding: "10px 28px", borderRadius: 4,
               background: C.purple, border: "none", textDecoration: "none",
-              color: "#fff", fontSize: 13, fontWeight: 700,
-              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 2,
+              color: t.textPrimary, fontSize: 13, fontWeight: 700,
+              fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 2,
             }}>Open My Tracker →</a>
           ) : (
             <button onClick={() => setShowLogin(true)} style={{
               display: "inline-block", padding: "10px 28px", borderRadius: 4,
               background: C.purple, border: "none",
-              color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Bebas Neue', sans-serif", textTransform: "uppercase", letterSpacing: 2,
+              color: t.textPrimary, fontSize: 13, fontWeight: 700, cursor: "pointer",
+              fontFamily: t.fontHeadline, textTransform: "uppercase", letterSpacing: 2,
             }}>Join on MANTL</button>
           )}
           <div style={{
             marginTop: 14, fontSize: 10, color: C.textDim,
-            fontFamily: "'IBM Plex Mono', monospace", letterSpacing: 1,
+            fontFamily: t.fontMono, letterSpacing: 1,
           }}>
             <a href={BC_WEBSITE} target="_blank" rel="noopener noreferrer"
               style={{ color: C.textDim, textDecoration: "none", transition: "color 0.15s" }}

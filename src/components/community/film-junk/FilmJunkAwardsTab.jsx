@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import { ProgressRing, StatPill } from "../primitives";
@@ -85,7 +86,7 @@ export default function FilmJunkAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: t.textSecondary, fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -94,11 +95,11 @@ export default function FilmJunkAwardsTab({
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
         <div style={{
-          fontSize: 22, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 22, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 The Junkies</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -124,11 +125,11 @@ export default function FilmJunkAwardsTab({
         {years.map((year) => (
           <button key={year} onClick={() => setSelectedYear(year)} style={{
             padding: "7px 18px", borderRadius: 20,
-            border: selectedYear === year ? `1px solid ${accent}` : "1px solid rgba(255,255,255,0.08)",
+            border: selectedYear === year ? `1px solid ${accent}` : `1px solid ${t.bgHover}`,
             background: selectedYear === year ? `${accent}18` : "rgba(255,255,255,0.03)",
-            color: selectedYear === year ? accent : "rgba(255,255,255,0.45)",
+            color: selectedYear === year ? accent : t.textFaint,
             fontSize: 15, fontWeight: 700,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             cursor: "pointer", flexShrink: 0, transition: "all 0.2s",
           }}>{year}</button>
         ))}
@@ -158,7 +159,7 @@ export default function FilmJunkAwardsTab({
       {yearData.standard.length === 0 && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+          fontSize: 13, color: t.textSecondary, fontStyle: "italic",
         }}>No picks added for {selectedYear} yet</div>
       )}
     </div>
@@ -210,8 +211,8 @@ function JunkiesCategorySection({ category, isSeen, getItemId, onToggle, isLast,
     <div style={{ marginBottom: isLast ? 0 : 4, paddingBottom: isLast ? 0 : 4 }}>
       {/* Category header */}
       <div style={{
-        fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.72)",
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 11, fontWeight: 700, color: t.textMuted,
+        fontFamily: t.fontMono,
         letterSpacing: "0.06em", textTransform: "uppercase",
         marginBottom: 10, paddingLeft: 16,
       }}>{name}</div>
@@ -238,7 +239,7 @@ function JunkiesCategorySection({ category, isSeen, getItemId, onToggle, isLast,
       </div>
 
       {/* Separator */}
-      <div style={{ height: 1, background: "rgba(255,255,255,0.04)", margin: "0 16px 16px" }} />
+      <div style={{ height: 1, background: t.bgElevated, margin: "0 16px 16px" }} />
     </div>
   );
 }
@@ -268,7 +269,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
         }}>
           <div style={{
             fontSize: 8, fontWeight: 700,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.04em", textTransform: "uppercase",
             color: accent, background: `${accent}18`,
             border: `1px solid ${accent}40`,
@@ -301,7 +302,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              fontSize: 9, fontWeight: 600, color: t.textMuted,
               lineHeight: 1.2, textAlign: "center",
             }}>{card.title}</div>
           </div>
@@ -320,7 +321,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
         {isSeen && (
           <div style={{
             position: "absolute", bottom: 4, right: 4,
-            background: "#4ade80", color: "#0a0a0a",
+            background: t.green, color: "#0a0a0a",
             width: 18, height: 18, borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 700,
@@ -331,7 +332,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
       {/* Title */}
       <div style={{
         fontSize: 10, fontWeight: card.isWinner ? 600 : 400,
-        color: isSeen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+        color: isSeen ? t.textSecondary : t.textMuted,
         lineHeight: 1.2, marginTop: 5,
         overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -340,7 +341,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
       {/* Subtitle (e.g. actor name for performance categories) */}
       {card.subtitle && (
         <div style={{
-          fontSize: 8, color: "rgba(255,255,255,0.7)", marginTop: 1,
+          fontSize: 8, color: t.textMuted, marginTop: 1,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           fontStyle: "italic",
         }}>{card.subtitle}</div>
@@ -364,7 +365,7 @@ function JunkiesHero({ community, seenStats, accent, yearsCount }) {
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       {hasBanner ? (
@@ -392,13 +393,13 @@ function JunkiesHero({ community, seenStats, accent, yearsCount }) {
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         <div style={{
-          fontSize: 28, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 28, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>{heroTagline}</div>
         <div style={{
-          fontSize: 13, color: "rgba(255,255,255,0.7)",
+          fontSize: 13, color: t.textMuted,
           textAlign: "center", maxWidth: 300,
           margin: "0 auto 20px",
         }}>{heroDescription}</div>

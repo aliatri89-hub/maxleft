@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import CommunityFilter from "../shared/CommunityFilter";
@@ -135,7 +136,7 @@ export default function FilmspottingAwardsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#bbb", fontSize: 13 }}>Loading awards data...</div>
+        <div style={{ color: t.textSecondary, fontSize: 13 }}>Loading awards data...</div>
       </div>
     );
   }
@@ -144,11 +145,11 @@ export default function FilmspottingAwardsTab({
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
         <div style={{
-          fontSize: 22, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 22, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase", marginBottom: 8,
         }}>🏆 {community?.name || "Awards"}</div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
           {error ? "Failed to load awards" : "Awards data coming soon"}
         </div>
       </div>
@@ -166,9 +167,9 @@ export default function FilmspottingAwardsTab({
             padding: "6px 28px 6px 12px", borderRadius: 20,
             background: selectedYear ? `${accent}20` : "rgba(255,255,255,0.04)",
             border: `1.5px solid ${selectedYear ? accent : "rgba(255,255,255,0.08)"}`,
-            color: selectedYear ? accent : "rgba(255,255,255,0.5)",
+            color: selectedYear ? accent : t.textMuted,
             fontSize: 13, fontWeight: 700, cursor: "pointer",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             appearance: "none", WebkitAppearance: "none",
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='${selectedYear ? accent.replace("#", "%23") : "%23666"}'/%3E%3C/svg%3E")`,
             backgroundRepeat: "no-repeat",
@@ -177,9 +178,9 @@ export default function FilmspottingAwardsTab({
             transition: "all 0.2s",
           }}
         >
-          <option value="" style={{ background: "#1a1a2e", color: "#ddd" }}>All Years</option>
+          <option value="" style={{ background: t.bgCard, color: t.textSecondary }}>All Years</option>
           {years.map(y => (
-            <option key={y} value={y} style={{ background: "#1a1a2e", color: "#ddd" }}>{y}</option>
+            <option key={y} value={y} style={{ background: t.bgCard, color: t.textSecondary }}>{y}</option>
           ))}
         </select>
       </div>
@@ -203,7 +204,7 @@ export default function FilmspottingAwardsTab({
                 display: "flex", alignItems: "center", gap: 7,
                 padding: "6px 14px", borderRadius: 20,
                 background: isActive ? `${host.color}18` : "rgba(255,255,255,0.04)",
-                border: isActive ? `1px solid ${host.color}55` : "1px solid rgba(255,255,255,0.08)",
+                border: isActive ? `1px solid ${host.color}55` : `1px solid ${t.bgHover}`,
                 cursor: "pointer", flexShrink: 0, transition: "all 0.2s",
               }}
             >
@@ -213,14 +214,14 @@ export default function FilmspottingAwardsTab({
                 boxShadow: isActive ? `0 0 6px ${host.color}80` : "none",
               }} />
               <span style={{
-                fontSize: 12, fontWeight: 600, color: isActive ? host.color : "rgba(255,255,255,0.5)",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 12, fontWeight: 600, color: isActive ? host.color : t.textMuted,
+                fontFamily: t.fontDisplay,
               }}>{host.name}</span>
               {stat.total > 0 && (
                 <span style={{
                   fontSize: 10, fontWeight: 700,
-                  color: stat.pct === 100 ? "#4ade80" : "rgba(255,255,255,0.3)",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  color: stat.pct === 100 ? t.green : t.textFaint,
+                  fontFamily: t.fontDisplay,
                 }}>{stat.pct}%</span>
               )}
             </button>
@@ -236,11 +237,11 @@ export default function FilmspottingAwardsTab({
               {/* Year heading */}
               <div style={{
                 textAlign: "center", padding: "24px 16px 12px",
-                borderTop: "1px solid rgba(255,255,255,0.06)",
+                borderTop: `1px solid ${t.borderSubtle}`,
               }}>
                 <div style={{
-                  fontSize: 22, fontWeight: 800, color: "rgba(255,255,255,0.85)",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 22, fontWeight: 800, color: t.textSecondary,
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.06em", textTransform: "uppercase",
                 }}>{year} Top 10 Lists</div>
               </div>
@@ -262,7 +263,7 @@ export default function FilmspottingAwardsTab({
       ) : (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          fontSize: 13, color: "rgba(255,255,255,0.78)", fontStyle: "italic",
+          fontSize: 13, color: t.textSecondary, fontStyle: "italic",
         }}>No picks {filter !== "all" ? "match this filter" : selectedYear ? `added for ${selectedYear} yet` : "added yet"}</div>
       )}
     </div>
@@ -288,12 +289,12 @@ function FSHostShelf({ host, picks, isSeen, getItemId, onToggle }) {
         }} />
         <div style={{
           fontSize: 14, fontWeight: 700, color: host.color,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.02em", textTransform: "uppercase",
         }}>{host.name}</div>
         <div style={{
-          fontSize: 11, color: "rgba(255,255,255,0.7)",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 11, color: t.textMuted,
+          fontFamily: t.fontDisplay,
           marginLeft: "auto",
         }}>{picks.length} picks</div>
       </div>
@@ -363,7 +364,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
             display: "flex", alignItems: "center", justifyContent: "center", padding: 6,
           }}>
             <div style={{
-              fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.7)",
+              fontSize: 9, fontWeight: 600, color: t.textMuted,
               lineHeight: 1.2, textAlign: "center",
             }}>{pick.title}</div>
           </div>
@@ -374,9 +375,9 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
           <div style={{
             position: "absolute", top: 4, left: 4,
             background: isNumber1 ? hostColor : "rgba(0,0,0,0.7)",
-            color: isNumber1 ? "#fff" : "rgba(255,255,255,0.8)",
+            color: isNumber1 ? t.textPrimary : t.textSecondary,
             fontSize: 11, fontWeight: 800, padding: "2px 6px",
-            borderRadius: 4, fontFamily: "'Barlow Condensed', sans-serif",
+            borderRadius: 4, fontFamily: t.fontDisplay,
             boxShadow: isNumber1 ? `0 2px 6px ${hostColor}50` : "none",
           }}>#{pick.rank}</div>
         )}
@@ -385,7 +386,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
         {seen && (
           <div style={{
             position: "absolute", bottom: 4, right: 4,
-            background: "#4ade80", color: "#0a0a0a",
+            background: t.green, color: "#0a0a0a",
             width: 18, height: 18, borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 10, fontWeight: 700,
@@ -396,7 +397,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
       {/* Title */}
       <div style={{
         fontSize: 10, fontWeight: isNumber1 ? 600 : 400,
-        color: seen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+        color: seen ? t.textSecondary : t.textMuted,
         lineHeight: 1.2, marginTop: 5,
         overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",

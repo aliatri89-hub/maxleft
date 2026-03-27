@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useFeed } from "../hooks/community/useFeed";
 import { useBrowseFeed } from "../hooks/community/useBrowseFeed";
@@ -363,7 +364,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
+              fontFamily: t.fontHeadline, letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
@@ -475,7 +476,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
+              fontFamily: t.fontHeadline, letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",
@@ -556,7 +557,7 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
               margin: "0 auto 14px",
             }} />
             <div style={{
-              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 1,
+              fontFamily: t.fontHeadline, letterSpacing: 1,
               fontSize: 12,
               color: "var(--text-faint, #5a6480)",
               letterSpacing: "0.04em",

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useCommunityDrafts } from "../../../hooks/useCommunityDrafts";
 import { ProgressRing, StatPill } from "../primitives";
@@ -129,7 +130,7 @@ export default function CommunityDraftsTab({
   if (loading) {
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
-        <div style={{ color: "#bbb", fontSize: 13 }}>Loading drafts...</div>
+        <div style={{ color: t.textSecondary, fontSize: 13 }}>Loading drafts...</div>
       </div>
     );
   }
@@ -138,13 +139,13 @@ export default function CommunityDraftsTab({
     return (
       <div style={{ padding: "40px 16px", textAlign: "center" }}>
         <div style={{
-          fontSize: 22, fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 22, fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase", marginBottom: 8,
         }}>
           📋 Drafts
         </div>
-        <div style={{ fontSize: 13, color: "rgba(255,255,255,0.72)", fontStyle: "italic" }}>
+        <div style={{ fontSize: 13, color: t.textMuted, fontStyle: "italic" }}>
           {error ? "Failed to load drafts" : "Draft data coming soon"}
         </div>
       </div>
@@ -171,7 +172,7 @@ export default function CommunityDraftsTab({
             display: "flex",
             gap: 0,
             overflowX: "auto",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            borderBottom: `1px solid ${t.borderSubtle}`,
             scrollbarWidth: "none",
             WebkitOverflowScrolling: "touch",
           }}
@@ -189,10 +190,10 @@ export default function CommunityDraftsTab({
                     ? `2px solid ${accent}`
                     : "2px solid transparent",
                 color:
-                  activeDraftType === type ? accent : "rgba(255,255,255,0.3)",
+                  activeDraftType === type ? accent : t.textFaint,
                 fontSize: 11,
                 fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase",
                 letterSpacing: "0.06em",
                 cursor: "pointer",
@@ -232,12 +233,12 @@ export default function CommunityDraftsTab({
                 borderRadius: 20,
                 border: isActive
                   ? `1px solid ${accent}`
-                  : "1px solid rgba(255,255,255,0.08)",
+                  : `1px solid ${t.bgHover}`,
                 background: isActive ? `${accent}18` : "rgba(255,255,255,0.03)",
-                color: isActive ? accent : "rgba(255,255,255,0.45)",
+                color: isActive ? accent : t.textFaint,
                 fontSize: 15,
                 fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 cursor: "pointer",
                 flexShrink: 0,
                 transition: "all 0.2s",
@@ -280,7 +281,7 @@ export default function CommunityDraftsTab({
             textAlign: "center",
             padding: "40px 16px",
             fontSize: 13,
-            color: "rgba(255,255,255,0.78)",
+            color: t.textSecondary,
             fontStyle: "italic",
           }}
         >
@@ -303,7 +304,7 @@ export default function CommunityDraftsTab({
               background: "rgba(30, 215, 96, 0.08)",
               border: "1px solid rgba(30, 215, 96, 0.2)",
               borderRadius: 20,
-              color: "#1ed760",
+              color: t.spotify,
               fontSize: 12,
               fontWeight: 600,
               textDecoration: "none",
@@ -332,7 +333,7 @@ function DraftsHero({ community, seenStats, accent, draftTitle }) {
       style={{
         position: "relative",
         overflow: "hidden",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: `1px solid ${t.borderSubtle}`,
       }}
     >
       {/* Background */}
@@ -375,8 +376,8 @@ function DraftsHero({ community, seenStats, accent, draftTitle }) {
           style={{
             fontSize: 28,
             fontWeight: 800,
-            color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.03em",
             textTransform: "uppercase",
             textAlign: "center",
@@ -389,7 +390,7 @@ function DraftsHero({ community, seenStats, accent, draftTitle }) {
         <div
           style={{
             fontSize: 13,
-            color: "rgba(255,255,255,0.7)",
+            color: t.textMuted,
             textAlign: "center",
             maxWidth: 300,
             margin: "0 auto 20px",
@@ -434,17 +435,17 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
         background: "rgba(255,255,255,0.03)",
         borderRadius: 14,
         padding: "14px 16px",
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: `1px solid ${t.borderSubtle}`,
       }}
     >
       <div
         style={{
           fontSize: 11,
           fontWeight: 700,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          color: "rgba(255,255,255,0.72)",
+          color: t.textMuted,
           marginBottom: 12,
         }}
       >
@@ -467,8 +468,8 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
                 width: 20,
                 fontSize: 13,
                 fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
-                color: idx === 0 ? accent : "rgba(255,255,255,0.25)",
+                fontFamily: t.fontDisplay,
+                color: idx === 0 ? accent : t.textFaint,
                 textAlign: "center",
               }}
             >
@@ -481,7 +482,7 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
                 width: 64,
                 fontSize: 14,
                 fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 color: host.color,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -496,7 +497,7 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
               style={{
                 flex: 1,
                 height: 6,
-                background: "rgba(255,255,255,0.06)",
+                background: t.bgInput,
                 borderRadius: 3,
                 overflow: "hidden",
               }}
@@ -518,8 +519,8 @@ function DraftScoreboard({ scoreboard, draftTitle, accent }) {
               style={{
                 fontSize: 13,
                 fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
-                color: "#fff",
+                fontFamily: t.fontDisplay,
+                color: t.textPrimary,
                 width: 36,
                 textAlign: "right",
               }}
@@ -589,8 +590,8 @@ function DraftCategoryShelf({
         style={{
           fontSize: 11,
           fontWeight: 700,
-          color: "rgba(255,255,255,0.72)",
-          fontFamily: "'IBM Plex Mono', monospace",
+          color: t.textMuted,
+          fontFamily: t.fontMono,
           letterSpacing: "0.06em",
           textTransform: "uppercase",
           marginBottom: 10,
@@ -634,7 +635,7 @@ function DraftCategoryShelf({
       <div
         style={{
           height: 1,
-          background: "rgba(255,255,255,0.04)",
+          background: t.bgElevated,
           margin: "0 16px 0",
         }}
       />
@@ -681,7 +682,7 @@ function DraftCard({ card, isSeen, onTap }) {
             style={{
               fontSize: 8,
               fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
               color: h.color,
@@ -745,7 +746,7 @@ function DraftCard({ card, isSeen, onTap }) {
               style={{
                 fontSize: 9,
                 fontWeight: 600,
-                color: "rgba(255,255,255,0.7)",
+                color: t.textMuted,
                 lineHeight: 1.2,
               }}
             >
@@ -754,7 +755,7 @@ function DraftCard({ card, isSeen, onTap }) {
             <div
               style={{
                 fontSize: 8,
-                color: "rgba(255,255,255,0.78)",
+                color: t.textSecondary,
                 marginTop: 2,
               }}
             >
@@ -770,7 +771,7 @@ function DraftCard({ card, isSeen, onTap }) {
               position: "absolute",
               bottom: 4,
               right: 4,
-              background: "#4ade80",
+              background: t.green,
               color: "#0a0a0a",
               width: 18,
               height: 18,
@@ -792,7 +793,7 @@ function DraftCard({ card, isSeen, onTap }) {
         style={{
           fontSize: 10,
           fontWeight: 600,
-          color: isSeen ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.6)",
+          color: isSeen ? t.textSecondary : t.textMuted,
           lineHeight: 1.2,
           marginTop: 5,
           overflow: "hidden",
@@ -809,7 +810,7 @@ function DraftCard({ card, isSeen, onTap }) {
       <div
         style={{
           fontSize: 9,
-          color: "rgba(255,255,255,0.78)",
+          color: t.textSecondary,
           marginTop: 2,
         }}
       >

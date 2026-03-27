@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * ProgressRing — Shared SVG progress ring used across community tabs.
  *
@@ -17,7 +18,7 @@ export default function ProgressRing({ pct, accent, size = 110 }) {
   const circumference = 2 * Math.PI * r;
   const offset = circumference - (Math.min(pct, 100) / 100) * circumference;
   const isComplete = pct >= 100;
-  const color = isComplete ? "#4ade80" : accent;
+  const color = isComplete ? t.green : accent;
 
   return (
     <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
@@ -47,12 +48,12 @@ export default function ProgressRing({ pct, accent, size = 110 }) {
         <div style={{
           fontSize: size >= 100 ? 26 : 20,
           fontWeight: 800,
-          color: isComplete ? "#4ade80" : "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: isComplete ? t.green : t.textPrimary,
+          fontFamily: t.fontDisplay,
           lineHeight: 1,
         }}>{Math.round(pct)}%</div>
         <div style={{
-          fontSize: 9, color: "rgba(255,255,255,0.78)",
+          fontSize: 9, color: t.textSecondary,
           marginTop: 2, letterSpacing: "0.04em",
         }}>{isComplete ? "complete!" : "seen"}</div>
       </div>

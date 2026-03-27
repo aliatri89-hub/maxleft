@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import ItemCard from "../primitives/ItemCard";
 
 /**
@@ -73,7 +74,7 @@ export default function GetPlayedItemCard({
         }}>
           <span style={{ fontSize: 8 }}>▶</span>
           <span style={{
-            fontSize: 8, fontWeight: 800, color: "#fff",
+            fontSize: 8, fontWeight: 800, color: t.textPrimary,
             textTransform: "uppercase", letterSpacing: "0.08em",
           }}>Playing</span>
         </div>
@@ -92,7 +93,7 @@ export default function GetPlayedItemCard({
         }}>
           <span style={{ fontSize: 8 }}>📋</span>
           <span style={{
-            fontSize: 8, fontWeight: 800, color: "#1a1a2e",
+            fontSize: 8, fontWeight: 800, color: t.bgCard,
             textTransform: "uppercase", letterSpacing: "0.08em",
           }}>Backlog</span>
         </div>

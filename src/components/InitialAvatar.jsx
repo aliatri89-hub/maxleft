@@ -1,3 +1,4 @@
+import { t } from "../theme";
 /**
  * InitialAvatar — colored circle with username initial.
  * Deterministic color based on username hash so it's consistent across sessions.
@@ -40,10 +41,10 @@ export default function InitialAvatar({ username, size = 32, style = {} }) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontFamily: "'Barlow Condensed', sans-serif",
+      fontFamily: t.fontDisplay,
       fontWeight: 800,
       fontSize: size * 0.48,
-      color: "#fff",
+      color: t.textPrimary,
       textTransform: "uppercase",
       letterSpacing: "0.02em",
       lineHeight: 1,

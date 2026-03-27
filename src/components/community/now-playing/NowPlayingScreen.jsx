@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
@@ -208,7 +209,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   return (
     <div style={{
       width: "100%", height: "100dvh", display: "flex", flexDirection: "column",
-      background: "#0f0d0b", overflowX: "hidden",
+      background: t.bgPrimary, overflowX: "hidden",
       paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&display=swap');`}</style>
@@ -238,8 +239,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
@@ -275,7 +276,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 fontSize: 11,
                 fontWeight: 700,
                 color: earnedCount > 0 ? "#ffffffcc" : "#ffffff40",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
               }}>
                 {earnedCount}/{badges.length}
               </span>
@@ -313,18 +314,18 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                   style={{
                     padding: "5px 10px",
                     fontSize: 10, fontWeight: 600,
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
                     borderRadius: 20,
                     border: filter === f
-                      ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#d4a574"}`
+                      ? `1.5px solid ${tabKey === "arcade" ? t.mint : t.sand}`
                       : "1px solid rgba(255,255,255,0.1)",
                     background: filter === f
                       ? `${tabKey === "arcade" ? "rgba(0,255,200,0.12)" : "rgba(212,165,116,0.12)"}`
                       : "rgba(255,255,255,0.04)",
                     color: filter === f
-                      ? (tabKey === "arcade" ? "#00ffc8" : "#d4a574")
+                      ? (tabKey === "arcade" ? t.mint : t.sand)
                       : "rgba(255,255,255,0.4)",
                     cursor: "pointer",
                     flexShrink: 0,
@@ -342,7 +343,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 }}
                 style={{
                   width: 30, height: 30, borderRadius: "50%",
-                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? "#00ffc8" : "#d4a574"}` : "1px solid rgba(255,255,255,0.1)",
+                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? t.mint : t.sand}` : "1px solid rgba(255,255,255,0.1)",
                   background: searchQuery ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer", marginLeft: "auto", flexShrink: 0,
@@ -350,7 +351,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
                 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke={searchQuery ? (tabKey === "arcade" ? "#00ffc8" : "#d4a574") : "rgba(255,255,255,0.4)"}
+                  stroke={searchQuery ? (tabKey === "arcade" ? t.mint : t.sand) : "rgba(255,255,255,0.4)"}
                   strokeWidth="2" strokeLinecap="round"
                 >
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />

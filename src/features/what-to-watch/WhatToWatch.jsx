@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 // src/features/what-to-watch/WhatToWatch.jsx
 //
 // Full-screen overlay: "What to Watch" — swipe-to-narrow film picker.
@@ -83,7 +84,7 @@ export default function WhatToWatch({ session, onBack, onToast, pushNav, removeN
     <div style={{
       position: "fixed", inset: 0, zIndex: 9000, background: DARK,
       display: "flex", flexDirection: "column", overflow: "hidden",
-      fontFamily: "'Barlow Condensed', -apple-system, sans-serif",
+      fontFamily: t.fontDisplay,
     }}>
       <Header onClose={handleClose} round={round} phase={phase} remaining={remaining} />
 
@@ -142,7 +143,7 @@ function Header({ onClose, round, phase, remaining }) {
       }}>✕</button>
       <div style={{ textAlign: "center" }}>
         <div style={{
-          fontFamily: "'Bebas Neue', sans-serif",
+          fontFamily: t.fontHeadline,
           fontSize: 16, color: AMBER, letterSpacing: 1,
         }}>WHAT TO WATCH</div>
         {phase === "swiping" && (
@@ -286,7 +287,7 @@ function SwipeCard({ film, onSwipeRight, onSwipeLeft, onSelect, onPeek, remainin
         <button onClick={() => { haptic(); onSelect(film); }} style={{
           background: "none", border: `1px solid ${AMBER}`, color: AMBER, borderRadius: 20,
           padding: "8px 20px", fontSize: 13, cursor: "pointer",
-          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, letterSpacing: 0.5,
+          fontFamily: t.fontDisplay, fontWeight: 700, letterSpacing: 0.5,
         }}>This one →</button>
       </div>
 
@@ -338,7 +339,7 @@ function CoverageSheet({ film, episodes, loading, onClose, onSelect, onPlay, onQ
           <button onClick={onSelect} style={{
             background: AMBER, color: DARK, border: "none", borderRadius: 16,
             padding: "8px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer",
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, flexShrink: 0,
+            fontFamily: t.fontDisplay, fontWeight: 700, flexShrink: 0,
           }}>Pick this</button>
         </div>
 
@@ -367,7 +368,7 @@ function ReviewGrid({ films, round, onNextRound, onSelect, onPeek }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ padding: "16px 20px 8px", textAlign: "center" }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: 18, color: AMBER }}>
+        <div style={{ fontFamily: t.fontSerif, fontWeight: 700, fontSize: 18, color: AMBER }}>
           {films.length === 2 ? "Final two!" : `${films.length} contenders`}
         </div>
         <div style={{ fontSize: 13, color: CREAM, opacity: 0.4, marginTop: 4 }}>
@@ -397,7 +398,7 @@ function ReviewGrid({ films, round, onNextRound, onSelect, onPeek }) {
           <button onClick={() => { haptic(); onNextRound(); }} style={{
             background: AMBER, color: DARK, border: "none", borderRadius: 24,
             padding: "12px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer",
-            fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, letterSpacing: 0.5,
+            fontFamily: t.fontDisplay, fontWeight: 700, letterSpacing: 0.5,
           }}>Keep narrowing →</button>
         </div>
       )}
@@ -475,7 +476,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
     <div style={{ flex: 1, overflow: "auto", padding: "0 0 120px" }}>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 24px 16px" }}>
         {posterUrl && <img src={posterUrl} loading="lazy" alt={film.title} style={{ width: 180, borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }} />}
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: GREEN, marginTop: 16, letterSpacing: 2 }}>TONIGHT'S PICK</div>
+        <div style={{ fontFamily: t.fontHeadline, fontSize: 16, color: GREEN, marginTop: 16, letterSpacing: 2 }}>TONIGHT'S PICK</div>
         <div style={{ color: CREAM, fontSize: 22, fontWeight: 700, marginTop: 4, textAlign: "center" }}>{film.title}</div>
         <div style={{ color: CREAM, opacity: 0.5, fontSize: 13, marginTop: 4 }}>{film.year}{film.genre ? ` · ${film.genre}` : ""}</div>
         {film.overview && (
@@ -492,7 +493,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
       </div>
 
       <div style={{ padding: "0 16px" }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, color: AMBER, marginBottom: 12, paddingLeft: 4, letterSpacing: 2 }}>PODCAST COVERAGE</div>
+        <div style={{ fontFamily: t.fontHeadline, fontSize: 16, color: AMBER, marginBottom: 12, paddingLeft: 4, letterSpacing: 2 }}>PODCAST COVERAGE</div>
         {epLoading && <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>Loading episodes…</div>}
         {!epLoading && episodes && episodes.length === 0 && (
           <div style={{ color: CREAM, opacity: 0.4, fontSize: 13, textAlign: "center", padding: 20 }}>No episodes found</div>
@@ -635,7 +636,7 @@ function SetupScreen({ userId, onStart }) {
 
         {/* Podcasts */}
         <div style={{
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: 2,
+          fontFamily: t.fontHeadline, fontSize: 16, letterSpacing: 2,
           color: AMBER, marginBottom: 12, letterSpacing: 0.5,
         }}>PICK YOUR PODCASTS</div>
 
@@ -683,7 +684,7 @@ function SetupScreen({ userId, onStart }) {
 
         {/* Pool size */}
         <div style={{
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 16, letterSpacing: 2,
+          fontFamily: t.fontHeadline, fontSize: 16, letterSpacing: 2,
           color: AMBER, marginBottom: 12, letterSpacing: 0.5,
         }}>HOW MANY TO SWIPE?</div>
 
@@ -691,7 +692,7 @@ function SetupScreen({ userId, onStart }) {
           {POOL_SIZES.map(size => (
             <button key={size} onClick={() => { haptic(); setPoolSize(size); }} style={{
               flex: 1, padding: "14px 0", borderRadius: 10, fontSize: 20, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
+              fontFamily: t.fontDisplay, fontWeight: 700,
               background: poolSize === size ? "rgba(212,175,55,0.15)" : "rgba(240,235,225,0.04)",
               border: `1.5px solid ${poolSize === size ? AMBER : "rgba(240,235,225,0.1)"}`,
               color: poolSize === size ? AMBER : CREAM,
@@ -713,7 +714,7 @@ function SetupScreen({ userId, onStart }) {
           color: canGo ? DARK : CREAM,
           border: "none", borderRadius: 24, padding: "14px 40px",
           fontSize: 17, fontWeight: 700, cursor: canGo ? "pointer" : "default",
-          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, letterSpacing: 1,
+          fontFamily: t.fontDisplay, fontWeight: 700, letterSpacing: 1,
           opacity: canGo ? 1 : 0.4,
         }}>LET'S GO</button>
       </div>

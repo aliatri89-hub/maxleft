@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../../../supabase";
@@ -47,8 +48,8 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
         style={{
           margin: "0 16px 12px",
           padding: "14px 16px",
-          background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.08)",
+          background: t.bgElevated,
+          border: `1px solid ${t.bgHover}`,
           borderRadius: 12,
           cursor: "pointer",
           transition: "border-color 0.2s",
@@ -66,15 +67,15 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 13, fontWeight: 700, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 13, fontWeight: 700, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.02em",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
               {post.title}
             </div>
             <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.78)",
+              fontSize: 11, color: t.textSecondary,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               marginTop: 2,
             }}>
@@ -84,7 +85,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 
           <div style={{
             fontSize: 10, color: accent, fontWeight: 600,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: t.fontMono,
             textTransform: "uppercase",
             flexShrink: 0,
           }}>
@@ -130,7 +131,7 @@ function ReaderOverlay({ post, accent, onClose }) {
           key={i}
           style={{
             fontSize: 17, lineHeight: 1.75,
-            color: "rgba(255,255,255,0.78)",
+            color: t.textSecondary,
             margin: "0 0 20px",
             fontFamily: "'Georgia', 'Times New Roman', serif",
           }}
@@ -147,7 +148,7 @@ function ReaderOverlay({ post, accent, onClose }) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       display: "flex", flexDirection: "column",
     }}>
       {/* ── Sticky header ── */}
@@ -157,7 +158,7 @@ function ReaderOverlay({ post, accent, onClose }) {
         paddingTop: "calc(12px + env(safe-area-inset-top, 0px))",
         background: "rgba(15,13,11,0.97)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        borderBottom: `1px solid ${t.borderSubtle}`,
         display: "flex", alignItems: "center", gap: 8,
       }}>
         <button
@@ -172,8 +173,8 @@ function ReaderOverlay({ post, accent, onClose }) {
         </button>
         <div style={{
           flex: 1, textAlign: "center",
-          fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.72)",
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 11, fontWeight: 600, color: t.textMuted,
+          fontFamily: t.fontMono,
           textTransform: "uppercase", letterSpacing: "0.06em",
         }}>
           MANTL Originals
@@ -190,8 +191,8 @@ function ReaderOverlay({ post, accent, onClose }) {
         {/* Title block */}
         <div style={{ padding: "32px 24px 0" }}>
           <div style={{
-            fontSize: 28, fontWeight: 800, color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 28, fontWeight: 800, color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             letterSpacing: "0.01em",
             lineHeight: 1.15,
             marginBottom: 12,
@@ -206,17 +207,17 @@ function ReaderOverlay({ post, accent, onClose }) {
             <div style={{
               fontSize: 11, fontWeight: 600,
               color: accent,
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               letterSpacing: "0.03em",
             }}>
               by Ali
             </div>
             {publishDate && (
               <>
-                <span style={{ color: "rgba(255,255,255,0.78)" }}>·</span>
+                <span style={{ color: t.textSecondary }}>·</span>
                 <div style={{
-                  fontSize: 11, color: "rgba(255,255,255,0.72)",
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 11, color: t.textMuted,
+                  fontFamily: t.fontMono,
                 }}>
                   {publishDate}
                 </div>
@@ -240,12 +241,12 @@ function ReaderOverlay({ post, accent, onClose }) {
         {/* Footer */}
         <div style={{
           padding: "32px 24px 0",
-          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderTop: `1px solid ${t.borderSubtle}`,
           marginTop: 12,
         }}>
           <div style={{
-            fontSize: 11, color: "rgba(255,255,255,0.78)",
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 11, color: t.textSecondary,
+            fontFamily: t.fontMono,
             textAlign: "center",
             letterSpacing: "0.05em",
             textTransform: "uppercase",

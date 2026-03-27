@@ -1,3 +1,4 @@
+import { t } from "../theme";
 import { useEffect, useState } from "react";
 
 /**
@@ -101,7 +102,7 @@ export default function LetterboxdSyncToast({ synced = 0, rewatches = 0, duratio
                 </svg>
               </div>
               <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700,
+                fontFamily: t.fontDisplay, fontWeight: 700,
                 fontSize: 22, color: "#1a100a", lineHeight: 1.1,
                 marginBottom: 2, whiteSpace: "nowrap",
                 overflow: "hidden", textOverflow: "ellipsis",

@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 // ════════════════════════════════════════════════
 // BADGE NUDGE CARD — mysterious locked treasure
 // ════════════════════════════════════════════════
@@ -88,7 +89,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
 
           <div style={{ flex: 1 }}>
             <div style={{
-              fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+              fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
               letterSpacing: "0.04em", textTransform: "uppercase",
               color: pct >= 75 ? accentColor : "var(--text-faint, #5a6480)",
               marginBottom: 8,
@@ -120,7 +121,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
       <div style={{ padding: "0 18px 14px" }}>
         <div style={{
           width: "100%", height: 6, borderRadius: 3,
-          background: "rgba(255,255,255,0.06)", overflow: "hidden",
+          background: t.bgInput, overflow: "hidden",
           position: "relative",
         }}>
           <div style={{
@@ -137,7 +138,7 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
         }}>
           <div style={{
             display: "inline-flex", alignItems: "center", gap: 4,
-            background: "rgba(255,255,255,0.04)", borderRadius: 10,
+            background: t.bgElevated, borderRadius: 10,
             padding: "3px 8px 3px 3px",
           }}>
             {data.community_image && (

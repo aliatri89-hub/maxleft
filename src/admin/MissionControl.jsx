@@ -1,3 +1,4 @@
+import { t } from "../theme";
 // src/admin/MissionControl.jsx
 //
 // Phase 1 admin dashboard: is everything running?
@@ -255,7 +256,7 @@ function GameCard({ name, hasToday, accent }) {
       <div style={styles.cardHeader}>
         <div style={{
           ...styles.statusDot,
-          background: hasToday ? "#4ade80" : "#f87171",
+          background: hasToday ? t.green : t.red,
           boxShadow: hasToday ? "0 0 8px rgba(74,222,128,0.4)" : "0 0 8px rgba(248,113,113,0.4)",
         }} />
         <div style={{ ...styles.cardTitle, color: accent }}>{name}</div>
@@ -331,7 +332,7 @@ const styles = {
     fontFamily: "var(--font-display)",
     textTransform: "uppercase",
     letterSpacing: "0.04em",
-    color: "#f0ebe1",
+    color: t.cream,
     margin: 0,
   },
   subtitle: {
@@ -345,7 +346,7 @@ const styles = {
     borderRadius: 8,
     border: "1px solid rgba(196,115,79,0.25)",
     background: "rgba(196,115,79,0.08)",
-    color: "#C4734F",
+    color: t.terra,
     fontSize: 12,
     fontWeight: 700,
     fontFamily: "var(--font-display)",
@@ -403,7 +404,7 @@ const styles = {
     fontSize: 22,
     fontWeight: 700,
     fontFamily: "var(--font-mono)",
-    color: "#f0ebe1",
+    color: t.cream,
   },
   bigLabel: {
     fontSize: 11,
@@ -425,7 +426,7 @@ const styles = {
     fontSize: 24,
     fontWeight: 700,
     fontFamily: "var(--font-mono)",
-    color: "#f0ebe1",
+    color: t.cream,
     padding: "6px 14px 4px",
   },
   statDetail: {
@@ -457,7 +458,7 @@ const styles = {
     height: 28,
     borderRadius: "50%",
     border: "2.5px solid rgba(240,235,225,0.1)",
-    borderTopColor: "#C4734F",
+    borderTopColor: t.terra,
     animation: "admin-spin 0.8s linear infinite",
   },
   loadingText: {

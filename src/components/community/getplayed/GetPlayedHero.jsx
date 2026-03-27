@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useMemo } from "react";
 import { HeroBanner } from "../primitives";
 
@@ -53,16 +54,16 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
   };
 
   const STATUS_COLORS = {
-    beat: "#4ade80",
+    beat: t.green,
     playing: "#00d4ff",
-    backlog: "#facc15",
+    backlog: t.gold,
     total: "#e91e8c",
   };
 
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -76,8 +77,8 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
         {/* Title + tagline */}
         <div style={{
           fontSize: heroTagline ? 28 : 22,
-          fontWeight: 800, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 800, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
@@ -100,7 +101,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
         {isPlayAlong && playingNow.length > 0 && (
           <div style={{ marginTop: 18 }}>
             <div style={{
-              fontSize: 11, fontWeight: 700, color: "#facc15",
+              fontSize: 11, fontWeight: 700, color: t.gold,
               textTransform: "uppercase", letterSpacing: "0.1em",
               marginBottom: 10, textAlign: "center",
             }}>
@@ -120,7 +121,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
                   }}>
                     <div style={{
                       width: 100, height: 56, borderRadius: 8, overflow: "hidden",
-                      background: "rgba(255,255,255,0.06)",
+                      background: t.bgInput,
                       border: "2px solid rgba(250,204,21,0.3)",
                       boxShadow: "0 0 12px rgba(250,204,21,0.1)",
                     }}>
@@ -136,7 +137,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
                       )}
                     </div>
                     <div style={{
-                      fontSize: 10, fontWeight: 600, color: "#fff",
+                      fontSize: 10, fontWeight: 600, color: t.textPrimary,
                       textAlign: "center", lineHeight: 1.2,
                       overflow: "hidden", textOverflow: "ellipsis",
                       display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -172,7 +173,7 @@ function StatBar({ label, count, total, pct, color, showTotal }) {
       </div>
       <div style={{
         flex: 1, height: 8, borderRadius: 4,
-        background: "rgba(255,255,255,0.06)",
+        background: t.bgInput,
         overflow: "hidden",
       }}>
         <div style={{

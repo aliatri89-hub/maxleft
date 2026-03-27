@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect, useCallback, useMemo, Fragment } from "react";
 import { supabase } from "../../supabase";
 
@@ -265,7 +266,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             border: `1px solid ${syncing ? "rgba(255,255,255,0.06)" : "rgba(196,115,79,0.25)"}`,
             color: syncing ? "rgba(240,235,225,0.4)" : "#c4734f",
             fontSize: 10, fontWeight: 800,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase", letterSpacing: "0.06em",
             cursor: syncing ? "not-allowed" : "pointer",
             display: "flex", alignItems: "center", gap: 6,
@@ -289,7 +290,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           margin: "8px 16px 0",
           padding: "10px 14px",
           background: "rgba(255,255,255,0.02)",
-          border: "1px solid rgba(255,255,255,0.06)",
+          border: `1px solid ${t.borderSubtle}`,
           borderRadius: 10,
           display: "flex", alignItems: "center", gap: 12,
         }}>
@@ -303,7 +304,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               fontSize: 11, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.06em",
               color: "rgba(240,235,225,0.5)",
             }}>
@@ -311,7 +312,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             </div>
             <div style={{
               fontSize: 12, color: "rgba(240,235,225,0.8)",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               marginTop: 2,
             }}>
               {summary.total_new_episodes || 0} new eps → {summary.total_matches || 0} matches
@@ -338,11 +339,11 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             onClick={selected.size === totalCount ? deselectAll : selectAll}
             style={{
               padding: "5px 10px", borderRadius: 6,
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
+              background: t.bgElevated,
+              border: `1px solid ${t.bgHover}`,
               color: "rgba(240,235,225,0.6)",
               fontSize: 10, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.06em",
               cursor: "pointer",
             }}
@@ -352,7 +353,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
 
           <div style={{
             flex: 1, fontSize: 11,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: t.fontMono,
             color: "rgba(240,235,225,0.4)",
           }}>
             {selectedCount}/{totalCount} selected
@@ -366,9 +367,9 @@ export default function IngestReviewTool({ userId, onToast, session }) {
               padding: "6px 14px", borderRadius: 8,
               background: selectedCount > 0 ? "rgba(248,113,113,0.08)" : "rgba(255,255,255,0.02)",
               border: `1px solid ${selectedCount > 0 ? "rgba(248,113,113,0.3)" : "rgba(255,255,255,0.06)"}`,
-              color: selectedCount > 0 ? "#f87171" : "rgba(240,235,225,0.3)",
+              color: selectedCount > 0 ? t.red : "rgba(240,235,225,0.3)",
               fontSize: 11, fontWeight: 800,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.04em",
               cursor: selectedCount > 0 ? "pointer" : "not-allowed",
               opacity: rejecting ? 0.5 : 1,
@@ -387,7 +388,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
               border: `1px solid ${selectedCount > 0 ? "rgba(52,211,153,0.3)" : "rgba(255,255,255,0.06)"}`,
               color: selectedCount > 0 ? "#34d399" : "rgba(240,235,225,0.3)",
               fontSize: 11, fontWeight: 800,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.04em",
               cursor: selectedCount > 0 ? "pointer" : "not-allowed",
               opacity: approving ? 0.5 : 1,
@@ -421,14 +422,14 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           }}>✓</div>
           <div style={{
             fontSize: 14, fontWeight: 700,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase", letterSpacing: "0.08em",
             marginBottom: 6,
           }}>
             All clear
           </div>
           <div style={{
-            fontSize: 12, fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 12, fontFamily: t.fontMono,
             lineHeight: 1.5,
           }}>
             No matches waiting for review.
@@ -466,7 +467,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontSize: 9, fontWeight: 700,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase", letterSpacing: "0.08em",
                 color: "rgba(240,235,225,0.35)",
                 marginBottom: 2,
@@ -481,7 +482,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
               <div style={{
                 fontSize: 12, fontWeight: 600,
                 color: "rgba(240,235,225,0.75)",
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: t.fontMono,
                 overflow: "hidden", textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}>
@@ -537,7 +538,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                 ) : (
                   <div style={{
                     width: 34, height: 51, borderRadius: 4, flexShrink: 0,
-                    background: "rgba(255,255,255,0.04)",
+                    background: t.bgElevated,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 14, color: "rgba(240,235,225,0.2)",
                   }}>🎬</div>
@@ -556,7 +557,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                   <div style={{
                     fontSize: 11,
                     color: "rgba(240,235,225,0.4)",
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                     marginTop: 1,
                   }}>
                     {match.film_year || "—"}
@@ -580,7 +581,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                   background: `${color}15`,
                   border: `1px solid ${color}30`,
                   fontSize: 9, fontWeight: 800,
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   textTransform: "uppercase", letterSpacing: "0.06em",
                   color: color,
                   flexShrink: 0,
@@ -634,11 +635,11 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                       placeholder="Search TMDB…"
                       autoFocus
                       style={{
-                        flex: 1, background: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        borderRadius: 8, color: "#e4e4e7", padding: "6px 10px",
+                        flex: 1, background: t.bgElevated,
+                        border: `1px solid ${t.bgHover}`,
+                        borderRadius: 8, color: t.textSecondary, padding: "6px 10px",
                         fontSize: 12, outline: "none",
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontFamily: t.fontMono,
                       }}
                     />
                     <button
@@ -648,8 +649,8 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                         padding: "6px 10px", borderRadius: 8,
                         background: "rgba(196,115,79,0.12)",
                         border: "1px solid rgba(196,115,79,0.25)",
-                        color: "#c4734f", fontSize: 11, fontWeight: 700,
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        color: t.terra, fontSize: 11, fontWeight: 700,
+                        fontFamily: t.fontDisplay,
                         textTransform: "uppercase",
                         cursor: "pointer",
                       }}
@@ -670,10 +671,10 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                         )}
                         style={{
                           display: "flex", alignItems: "center", gap: 6,
-                          background: "rgba(255,255,255,0.04)",
-                          border: "1px solid rgba(255,255,255,0.08)",
+                          background: t.bgElevated,
+                          border: `1px solid ${t.bgHover}`,
                           borderRadius: 8, padding: "4px 8px",
-                          cursor: "pointer", color: "#e4e4e7", flexShrink: 0,
+                          cursor: "pointer", color: t.textSecondary, flexShrink: 0,
                         }}
                       >
                         {alt.poster_path && (
@@ -683,7 +684,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                             style={{ width: 24, height: 36, borderRadius: 3, objectFit: "cover" }}
                           />
                         )}
-                        <div style={{ fontSize: 11, whiteSpace: "nowrap", fontFamily: "'IBM Plex Mono', monospace" }}>
+                        <div style={{ fontSize: 11, whiteSpace: "nowrap", fontFamily: t.fontMono }}>
                           {alt.title || alt.name} ({(alt.release_date || "").split("-")[0]})
                         </div>
                       </button>
@@ -705,10 +706,10 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             style={{
               padding: "8px 20px", borderRadius: 8,
               background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.06)",
+              border: `1px solid ${t.borderSubtle}`,
               color: "rgba(240,235,225,0.4)",
               fontSize: 10, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase", letterSpacing: "0.06em",
               cursor: "pointer",
             }}

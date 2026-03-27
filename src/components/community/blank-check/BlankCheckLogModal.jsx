@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import CommunityLogModal from "../shared/CommunityLogModal";
 import { useState } from "react";
 
@@ -42,7 +43,7 @@ export default function BlankCheckLogModal({
             padding: "3px 10px",
             background: "rgba(250,204,21,0.1)",
             border: "1px solid rgba(250,204,21,0.3)",
-            borderRadius: 20, fontSize: 11, color: "#facc15", fontWeight: 600,
+            borderRadius: 20, fontSize: 11, color: t.gold, fontWeight: 600,
           }}>
             Commentary
           </div>
@@ -101,7 +102,7 @@ export default function BlankCheckLogModal({
                   position: "absolute",
                   top: 2, left: listenedWithCommentary ? 20 : 2,
                   width: 18, height: 18, borderRadius: "50%",
-                  background: listenedWithCommentary ? "#fff" : "rgba(255,255,255,0.5)",
+                  background: listenedWithCommentary ? t.textPrimary : t.textMuted,
                   transition: "left 0.2s, background 0.2s",
                   boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
                 }} />
@@ -111,14 +112,14 @@ export default function BlankCheckLogModal({
               <div style={{ flex: 1 }}>
                 <div style={{
                   fontSize: 13, fontWeight: 600,
-                  color: listenedWithCommentary ? "#facc15" : "#999",
+                  color: listenedWithCommentary ? t.gold : t.textMuted,
                   transition: "color 0.2s",
                 }}>
                   Listened to commentary
                 </div>
                 <div style={{
                   fontSize: 10,
-                  color: listenedWithCommentary ? "rgba(250,204,21,0.5)" : "rgba(255,255,255,0.25)",
+                  color: listenedWithCommentary ? "rgba(250,204,21,0.5)" : t.textFaint,
                   marginTop: 1, transition: "color 0.2s",
                 }}>
                   Listened to the Patreon commentary episode

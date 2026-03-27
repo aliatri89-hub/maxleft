@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 /**
  * BrowseLoadingSplash — VHS-branded loading splash for browse tabs.
  * Shows a cinematic title ("Now In Theaters" / "Now Streaming") with
@@ -8,7 +9,7 @@
  */
 
 const MODES = {
-  releases:  { label: "New Releases",     accent: "#C4734F" },
+  releases:  { label: "New Releases",     accent: t.terra },
   streaming: { label: "Now Streaming",    accent: "#60a5fa" },
 };
 
@@ -42,7 +43,7 @@ export default function BrowseLoadingSplash({ mode = "releases" }) {
 
       {/* Tab label */}
       <div style={{
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         fontWeight: 800,
         fontSize: 13,
         letterSpacing: "0.2em",
@@ -67,10 +68,10 @@ export default function BrowseLoadingSplash({ mode = "releases" }) {
         animation: `${uid}-up 0.5s ease 0.15s forwards`,
       }}>
         <span style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 900, fontSize: 38,
           lineHeight: 0.85, letterSpacing: "0.02em",
-          color: "#f5f0eb",
+          color: t.cream,
         }}>M</span>
 
         {/* VHS play button */}
@@ -99,10 +100,10 @@ export default function BrowseLoadingSplash({ mode = "releases" }) {
         </div>
 
         <span style={{
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 900, fontSize: 38,
           lineHeight: 0.85, letterSpacing: "0.02em",
-          color: "#f5f0eb",
+          color: t.cream,
         }}>NTL</span>
       </div>
 
@@ -120,7 +121,7 @@ export default function BrowseLoadingSplash({ mode = "releases" }) {
 
       {/* Loading tagline */}
       <div style={{
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         fontStyle: "italic",
         fontSize: 13,
         color: "#8a7e72",

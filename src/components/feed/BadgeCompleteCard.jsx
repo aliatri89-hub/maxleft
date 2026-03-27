@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { getTimeAgo } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
@@ -80,7 +81,7 @@ function BadgeCompleteCard({ data, onCelebrate }) {
         <div style={{ flex: 1 }}>
           {/* Label */}
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
             letterSpacing: "0.04em", textTransform: "uppercase",
             color: accent, marginBottom: 8,
           }}>

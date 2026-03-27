@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 // src/features/games-hub/GamesHub.jsx
 //
 // Full-screen Games hub page. Rendered by App.jsx when showGamesHub === true.
@@ -107,7 +108,7 @@ const GAMES = [
     id: "reelTime",
     name: "Reel Time",
     tagline: "Order the releases",
-    color: "#7cb8e8",
+    color: t.cyan,
     bgAccent: "rgba(124, 184, 232, 0.06)",
     daily: true,
   },
@@ -219,7 +220,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     if (status === "completed") {
       return (
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          fontFamily: t.fontSerif, fontSize: 11, fontWeight: 700, padding: "3px 8px",
           borderRadius: 6, background: "rgba(76,175,80,0.15)", color: "#4caf50",
         }}>
           ✓ Done
@@ -229,7 +230,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     if (status === "available") {
       return (
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          fontFamily: t.fontSerif, fontSize: 11, fontWeight: 700, padding: "3px 8px",
           borderRadius: 6, background: `${color}20`, color,
         }}>
           Play
@@ -239,7 +240,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
     // For non-daily games
     return (
       <span style={{
-        fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+        fontFamily: t.fontSerif, fontSize: 11, fontWeight: 700, padding: "3px 8px",
         borderRadius: 6, background: `${color}15`, color,
       }}>
         Open
@@ -249,8 +250,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
   return (
     <div style={{
-      minHeight: isTab ? "auto" : "100vh", background: "#0f0d0b", color: "#f5f0e8",
-      fontFamily: "'IBM Plex Mono', monospace", padding: isTab ? "0 16px 100px" : "0 16px 40px",
+      minHeight: isTab ? "auto" : "100vh", background: t.bgPrimary, color: t.cream,
+      fontFamily: t.fontMono, padding: isTab ? "0 16px 100px" : "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
       paddingTop: isTab ? 0 : "env(safe-area-inset-top, 0px)",
     }}>
@@ -277,18 +278,18 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       }}>
         {!isTab && (
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
-            letterSpacing: 4, textTransform: "uppercase", color: "#b5a994", marginBottom: 4,
+            fontFamily: t.fontMono, fontSize: 11,
+            letterSpacing: 4, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
           }}>
             M▶NTL
           </div>
         )}
         <h1 style={{
-          fontFamily: "'Bebas Neue', sans-serif", fontSize: 40, letterSpacing: 2, color: "#f5f0e8", lineHeight: 1.1,
+          fontFamily: t.fontHeadline, fontSize: 40, letterSpacing: 2, color: t.cream, lineHeight: 1.1,
         }}>
           Games
         </h1>
-        <div style={{ fontSize: 13, color: "#b5a994", marginTop: 6 }}>{getTodayFormatted()}</div>
+        <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6 }}>{getTodayFormatted()}</div>
       </div>
 
       {/* Badges — top of hub */}
@@ -319,17 +320,17 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         </div>
         <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
           <div style={{
-            fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
-            color: "#f5f0e8", lineHeight: 1.2,
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
+            color: t.cream, lineHeight: 1.2,
           }}>
             Badges
           </div>
-          <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2, lineHeight: 1.35 }}>
+          <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2, lineHeight: 1.35 }}>
             A scavenger hunt through the libraries of your favorite podcasts.
           </div>
         </div>
         <span style={{
-          fontFamily: "'Playfair Display', serif", fontSize: 11, fontWeight: 700, padding: "3px 8px",
+          fontFamily: t.fontSerif, fontSize: 11, fontWeight: 700, padding: "3px 8px",
           borderRadius: 6, background: "rgba(212, 168, 83, 0.15)", color: "#d4a853",
         }}>
           View
@@ -344,7 +345,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       {/* Our Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: "#6b6256", margin: "20px 0 10px 4px",
+        color: t.creamMuted, margin: "20px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.3s",
       }}>
         Our Games
@@ -379,8 +380,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
                 {game.isNew && (
                   <span style={{
                     position: "absolute", top: -6, right: -10,
-                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 7, letterSpacing: 1,
-                    color: "#0f0d0b", background: "#a8d870",
+                    fontFamily: t.fontMono, fontSize: 7, letterSpacing: 1,
+                    color: t.bgPrimary, background: "#a8d870",
                     padding: "2px 4px", borderRadius: 3, transform: "rotate(8deg)",
                   }}>
                     NEW
@@ -390,12 +391,12 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
               <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
                 <div style={{
-                  fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
-                  color: "#f5f0e8", lineHeight: 1.2,
+                  fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
+                  color: t.cream, lineHeight: 1.2,
                 }}>
                   {game.name}
                 </div>
-                <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2 }}>{game.tagline}</div>
+                <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2 }}>{game.tagline}</div>
               </div>
 
               <StatusPill gameId={game.id} color={game.color} />
@@ -414,7 +415,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       {/* Other Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: "#6b6256", margin: "24px 0 10px 4px",
+        color: t.creamMuted, margin: "24px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.4s",
       }}>
         Other Games
@@ -452,12 +453,12 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
             </div>
             <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
               <div style={{
-                fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700,
-                color: "#f5f0e8", lineHeight: 1.2,
+                fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
+                color: t.cream, lineHeight: 1.2,
               }}>
                 {game.name}
               </div>
-              <div style={{ fontSize: 11, color: "#b5a994", marginTop: 2 }}>{game.tagline}</div>
+              <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2 }}>{game.tagline}</div>
             </div>
             <ExternalLinkIcon />
           </button>

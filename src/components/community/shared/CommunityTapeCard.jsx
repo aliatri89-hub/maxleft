@@ -10,7 +10,7 @@ const NOISE_SVG = "url(\"data:image/svg+xml,%3Csvg width='4' height='4' xmlns='h
 // VHS brand marks — deterministic per community
 const VHS_BRANDS = [
   { color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
-  { color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
+  { color: t.bgCard, text: "Memorex", sub: "HS", weight: 800 },
   { color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
   { color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
@@ -132,7 +132,7 @@ export default function CommunityTapeCard({
         {/* Cream label */}
         <div style={{
           flex: 1,
-          background: "#f0ebe1",
+          background: t.cream,
           padding: isSubscribed ? "8px 14px" : "10px 14px",
           display: "flex",
           flexDirection: "column",
@@ -196,7 +196,7 @@ export default function CommunityTapeCard({
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontFamily: "'Permanent Marker', cursive",
+                    fontFamily: t.fontSharpie,
                     color: t.creamDark,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
@@ -214,7 +214,7 @@ export default function CommunityTapeCard({
                   {/* Minimal stat */}
                   {stats?.totalSeries > 0 && (
                     <div style={{
-                      fontFamily: "'Permanent Marker', cursive",
+                      fontFamily: t.fontSharpie,
                       fontSize: 10,
                       color: "rgba(44,40,36,0.4)",
                       marginTop: 2,
@@ -285,7 +285,7 @@ export default function CommunityTapeCard({
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontFamily: "'Permanent Marker', cursive",
+                    fontFamily: t.fontSharpie,
                     color: t.creamDark,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
@@ -301,7 +301,7 @@ export default function CommunityTapeCard({
                     ))}
                   </div>
                   <div style={{
-                    fontFamily: "'Permanent Marker', cursive",
+                    fontFamily: t.fontSharpie,
                     fontSize: 9,
                     color: "rgba(44,40,36,0.35)",
                     marginTop: 2,

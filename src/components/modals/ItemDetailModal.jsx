@@ -1,3 +1,4 @@
+import { t } from "../../theme";
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
 import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteMediaLog } from "../../utils/mediaWrite";
@@ -48,14 +49,14 @@ export default function ItemDetailModal({
       fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
       fontSize: 10, fontWeight: 600, letterSpacing: "0.08em",
       textTransform: "uppercase", marginBottom: 8,
-      color: "rgba(255,255,255,0.7)",
+      color: t.textMuted,
     }}>{text}</div>
   );
 
   const statusMsg = () => saveStatus && (
     <div style={{
       marginTop: 10, fontSize: 12, textAlign: "center",
-      color: saveStatus === "saved" ? "#4ade80" : saveStatus === "error" ? "#e94560" : "#888",
+      color: saveStatus === "saved" ? t.green : saveStatus === "error" ? t.red : t.textMuted,
     }}>
       {saveStatus === "saving" && "Saving..."}
       {saveStatus === "saved" && "✓ Done!"}
@@ -181,7 +182,7 @@ export default function ItemDetailModal({
     if (!rating) return null;
     const full = Math.floor(rating);
     const hasHalf = rating % 1 >= 0.5;
-    return <span style={{ color: "#facc15", letterSpacing: 1 }}>{"★".repeat(full)}{hasHalf ? "⯨" : ""}</span>;
+    return <span style={{ color: t.gold, letterSpacing: 1 }}>{"★".repeat(full)}{hasHalf ? "⯨" : ""}</span>;
   };
 
   return (
@@ -210,20 +211,20 @@ export default function ItemDetailModal({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontFamily: "var(--font-display, 'Barlow Condensed', sans-serif)",
-            fontSize: 22, fontWeight: 800, color: "#fff",
+            fontSize: 22, fontWeight: 800, color: t.textPrimary,
             textTransform: "uppercase", lineHeight: 1.1, marginBottom: 4,
           }}>{localItem.title}</div>
 
-          {localItem.year && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.year}</div>}
-          {localItem.author && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.author}</div>}
-          {localItem.director && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.director}</div>}
-          {localItem.platform && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.platform}</div>}
-          {shelfType === "games" && localItem.genre && <div style={{ fontSize: 12, color: "#ddd", marginBottom: 2 }}>{localItem.genre}</div>}
+          {localItem.year && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.year}</div>}
+          {localItem.author && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.author}</div>}
+          {localItem.director && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.director}</div>}
+          {localItem.platform && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.platform}</div>}
+          {shelfType === "games" && localItem.genre && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.genre}</div>}
 
           {localItem.rating && (
             <div style={{ marginTop: 8 }}>
               {renderStars(localItem.rating)}
-              <span style={{ fontSize: 11, color: "#bbb", marginLeft: 6 }}>({localItem.rating})</span>
+              <span style={{ fontSize: 11, color: t.textSecondary, marginLeft: 6 }}>({localItem.rating})</span>
             </div>
           )}
 
@@ -244,8 +245,8 @@ export default function ItemDetailModal({
             <div style={badgeStyle("#4ade80")}>✓ Beat</div>
           )}
 
-          {localItem.watchedAt && <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>Watched {formatDate(localItem.watchedAt)}</div>}
-          {localItem.finishedAt && <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>Finished {formatDate(localItem.finishedAt)}</div>}
+          {localItem.watchedAt && <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>Watched {formatDate(localItem.watchedAt)}</div>}
+          {localItem.finishedAt && <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>Finished {formatDate(localItem.finishedAt)}</div>}
         </div>
       </div>
 
@@ -299,13 +300,13 @@ export default function ItemDetailModal({
                 <StatCard value={`${hours}h`} sub="PLAYED" />
               )}
               {achTotal > 0 && (
-                <div style={{ flex: 1, minWidth: 100, padding: "14px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 10, textAlign: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono, monospace)" }}>
-                    {achEarned}<span style={{ fontSize: 14, color: "#aaa" }}>/{achTotal}</span>
+                <div style={{ flex: 1, minWidth: 100, padding: "14px 16px", background: t.bgElevated, border: `1px solid ${t.borderSubtle}`, borderRadius: 10, textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: t.textPrimary, fontFamily: "var(--font-mono, monospace)" }}>
+                    {achEarned}<span style={{ fontSize: 14, color: t.textMuted }}>/{achTotal}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>ACHIEVEMENTS</div>
-                  <div style={{ height: 4, background: "rgba(255,255,255,0.06)", borderRadius: 2, marginTop: 8, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${achPct}%`, background: achPct === 100 ? "#4ade80" : "#a78bfa", borderRadius: 2, transition: "width 0.3s" }} />
+                  <div style={{ fontSize: 10, color: t.textMuted, marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>ACHIEVEMENTS</div>
+                  <div style={{ height: 4, background: t.bgInput, borderRadius: 2, marginTop: 8, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${achPct}%`, background: achPct === 100 ? t.green : "#a78bfa", borderRadius: 2, transition: "width 0.3s" }} />
                   </div>
                 </div>
               )}
@@ -322,8 +323,8 @@ export default function ItemDetailModal({
           <div style={{ display: "flex", gap: 8 }}>
             {[
               { key: "playing", label: "🎮 Playing", bg: "linear-gradient(135deg, #a78bfa, #7c5cc4)", color: "white" },
-              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: "#bbb" },
-              { key: "beat", label: "✓ Beat", bg: "#4ade80", color: "#0a0a0a" },
+              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: t.textSecondary },
+              { key: "beat", label: "✓ Beat", bg: t.green, color: "#0a0a0a" },
             ].map(opt => {
               const isActive = (localItem.status || "backlog") === opt.key;
               return (
@@ -332,9 +333,9 @@ export default function ItemDetailModal({
                     flex: 1, padding: "10px 8px", fontSize: 11, border: "none", borderRadius: 8,
                     cursor: "pointer", fontFamily: "var(--font-mono, monospace)", fontWeight: isActive ? 700 : 400,
                     background: isActive ? opt.bg : "rgba(255,255,255,0.04)",
-                    color: isActive ? opt.color : "rgba(255,255,255,0.3)",
+                    color: isActive ? opt.color : t.textFaint,
                     boxShadow: isActive ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
-                    border: isActive ? "none" : "1px solid rgba(255,255,255,0.06)",
+                    border: isActive ? "none" : `1px solid ${t.borderSubtle}`,
                     transition: "all 0.2s",
                   }}>
                   {opt.label}
@@ -380,11 +381,11 @@ export default function ItemDetailModal({
           border: "1px solid rgba(233,69,96,0.15)",
           borderRadius: 12,
         }}>
-          <div style={{ fontSize: 13, color: "#ddd", lineHeight: 1.5, marginBottom: 12 }}>
-            Remove <strong style={{ color: "#fff" }}>{localItem.title}</strong> from your shelf? This will also delete any journal entries and ratings.
+          <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5, marginBottom: 12 }}>
+            Remove <strong style={{ color: t.textPrimary }}>{localItem.title}</strong> from your shelf? This will also delete any journal entries and ratings.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button style={{ ...primaryBtn, background: "#e94560" }}
+            <button style={{ ...primaryBtn, background: t.red }}
               onClick={removeItem} disabled={deleting}>
               {deleting ? "Deleting..." : "Yes, Remove"}
             </button>
@@ -409,12 +410,12 @@ function StatCard({ value, sub }) {
   return (
     <div style={{
       flex: 1, minWidth: 100, padding: "14px 16px",
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.06)",
+      background: t.bgElevated,
+      border: `1px solid ${t.borderSubtle}`,
       borderRadius: 10, textAlign: "center",
     }}>
-      <div style={{ fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "var(--font-mono, monospace)" }}>{value}</div>
-      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.7)", marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>{sub}</div>
+      <div style={{ fontSize: 22, fontWeight: 700, color: t.textPrimary, fontFamily: "var(--font-mono, monospace)" }}>{value}</div>
+      <div style={{ fontSize: 10, color: t.textMuted, marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>{sub}</div>
     </div>
   );
 }
@@ -442,9 +443,9 @@ const primaryBtn = {
 
 const secondaryBtn = {
   flex: 1, width: "100%", padding: "11px 0",
-  background: "rgba(255,255,255,0.06)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 12, color: "#ddd",
+  background: t.bgInput,
+  border: `1px solid ${t.borderMedium}`,
+  borderRadius: 12, color: t.textSecondary,
   fontSize: 13, fontWeight: 600,
   cursor: "pointer", transition: "background 0.15s",
   textAlign: "center",
@@ -452,9 +453,9 @@ const secondaryBtn = {
 
 const dangerBtn = {
   flex: 1, width: "100%", padding: "11px 0",
-  background: "rgba(233,69,96,0.08)",
+  background: t.redDim,
   border: "1px solid rgba(233,69,96,0.2)",
-  borderRadius: 12, color: "#e94560",
+  borderRadius: 12, color: t.red,
   fontSize: 13, fontWeight: 600,
   cursor: "pointer", transition: "background 0.15s",
   textAlign: "center",
@@ -463,5 +464,5 @@ const dangerBtn = {
 const ghostBtn = {
   width: "100%", padding: "10px 0", marginTop: 8,
   background: "none", border: "none",
-  color: "#aaa", fontSize: 13, cursor: "pointer",
+  color: t.textMuted, fontSize: 13, cursor: "pointer",
 };

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useCallback } from "react";
 import { useCommunityDrafts } from "../../../hooks/useCommunityDrafts";
 import CommunityFilter from "../shared/CommunityFilter";
@@ -108,8 +109,8 @@ export default function BigPictureFilmographyTab({
           style={{
             width: "100%", padding: "10px 14px",
             background: "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 10, color: "#e0e0e0", fontSize: 14,
+            border: `1px solid ${t.bgHover}`,
+            borderRadius: 10, color: t.textSecondary, fontSize: 14,
             fontFamily: "inherit", WebkitAppearance: "none", outline: "none",
           }}
         />
@@ -119,7 +120,7 @@ export default function BigPictureFilmographyTab({
       {visibleSeries.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "40px 20px",
-          color: "rgba(255,255,255,0.7)", fontSize: 14,
+          color: t.textMuted, fontSize: 14,
         }}>
           {filter !== "all" ? "No films match this filter" : "No films found"}
         </div>
@@ -160,15 +161,15 @@ function DecadeShelf({ series, progress, draftMeta, hostsConfig, accent, onToggl
         padding: "0 16px", marginBottom: 8,
       }}>
         <div style={{
-          fontSize: 15, fontWeight: 800, color: allSeen ? "#4ade80" : "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 15, fontWeight: 800, color: allSeen ? t.green : t.textPrimary,
+          fontFamily: t.fontDisplay,
         }}>
           {series.title}
         </div>
         <div style={{
           fontSize: 12, fontWeight: 600,
-          color: allSeen ? "#4ade80" : accent,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: allSeen ? t.green : accent,
+          fontFamily: t.fontDisplay,
           marginLeft: "auto",
         }}>
           {seen}/{total}
@@ -224,7 +225,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
         background: isSeen
           ? "linear-gradient(135deg, #1a3a2a, #0f2a1a)"
           : "linear-gradient(135deg, #1a1a2e, #16213e)",
-        border: `2px solid ${isSeen ? "#4ade80" : "transparent"}`,
+        border: `2px solid ${isSeen ? t.green : "transparent"}`,
         transition: "border-color 0.2s",
       }}>
         {posterUrl ? (
@@ -246,7 +247,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
             display: "flex", alignItems: "center", justifyContent: "center",
             padding: 6,
           }}>
-            <div style={{ fontSize: 10, color: "#bbb", textAlign: "center", lineHeight: 1.2 }}>
+            <div style={{ fontSize: 10, color: t.textSecondary, textAlign: "center", lineHeight: 1.2 }}>
               {item.title}
             </div>
           </div>
@@ -256,7 +257,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
         {meta && meta.draftCount > 1 && (
           <div style={{
             position: "absolute", top: 4, right: 4,
-            background: `${accent}cc`, color: "#fff",
+            background: `${accent}cc`, color: t.textPrimary,
             fontSize: 9, fontWeight: 700, padding: "2px 5px",
             borderRadius: 4, lineHeight: 1,
           }}>
@@ -289,7 +290,7 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
             paddingBottom: 6,
           }}>
             <div style={{
-              background: "#4ade80", color: "#0a0a0a",
+              background: t.green, color: "#0a0a0a",
               width: 22, height: 22, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 12, fontWeight: 700,
@@ -302,14 +303,14 @@ function BPPosterCard({ item, isSeen, meta, hostsConfig, accent, onTap, coverCac
       {/* Title */}
       <div style={{
         marginTop: 5, fontSize: 10, fontWeight: 600,
-        color: isSeen ? "#4ade80" : "rgba(255,255,255,0.7)",
+        color: isSeen ? t.green : t.textMuted,
         lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis",
         display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
       }}>
         {item.title}
       </div>
       {item.year && (
-        <div style={{ fontSize: 9, color: "#aaa", marginTop: 2 }}>{item.year}</div>
+        <div style={{ fontSize: 9, color: t.textMuted, marginTop: 2 }}>{item.year}</div>
       )}
     </div>
   );

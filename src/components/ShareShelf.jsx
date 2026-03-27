@@ -1,10 +1,11 @@
+import { t } from "../theme";
 import { useState, useRef, useCallback } from "react";
 import html2canvas from "html2canvas";
 
 // ── Brand data (mirrors FeedScreen) ──
 const VHS_BRANDS = [
   { color: "#0d5a2d", text: "FUJI", sub: "HQ", weight: 900 },
-  { color: "#1a1a2e", text: "Memorex", sub: "HS", weight: 800 },
+  { color: t.bgCard, text: "Memorex", sub: "HS", weight: 800 },
   { color: "#b8860b", text: "TDK", sub: "SA", weight: 900 },
   { color: "#c41e1e", text: "Kodak", sub: "T-120", weight: 800 },
   { color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
@@ -59,8 +60,8 @@ function ShareBrandStamp({ brand, side }) {
       }}>
         <div style={{
           writingMode: "vertical-rl", transform: "rotate(180deg)",
-          fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 800,
-          fontSize: 9, letterSpacing: "0.05em", color: "#2C2824", opacity: 0.6,
+          fontFamily: t.fontDisplay, fontWeight: 800,
+          fontSize: 9, letterSpacing: "0.05em", color: t.creamDark, opacity: 0.6,
         }}>
           VHS
         </div>
@@ -74,7 +75,7 @@ function ShareBrandStamp({ brand, side }) {
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1,
     }}>
       <div style={{
-        writingMode: "vertical-rl", fontFamily: "'Barlow Condensed', sans-serif",
+        writingMode: "vertical-rl", fontFamily: t.fontDisplay,
         fontWeight: brand.weight, fontSize: brandFontSize, letterSpacing: "0.05em",
         textTransform: "uppercase", color: brand.color, transform: "rotate(180deg)", lineHeight: 1,
       }}>
@@ -82,7 +83,7 @@ function ShareBrandStamp({ brand, side }) {
       </div>
       {brand.sub && (
         <div style={{
-          writingMode: "vertical-rl", fontFamily: "'IBM Plex Mono', monospace",
+          writingMode: "vertical-rl", fontFamily: t.fontMono,
           fontWeight: 600, fontSize: 5, letterSpacing: "0.06em",
           color: brand.color, opacity: 0.6, transform: "rotate(180deg)",
         }}>
@@ -116,7 +117,7 @@ function ShareTape({ item }) {
         {/* Cream label */}
         <div style={{
           flex: 1,
-          background: "#f0ebe1",
+          background: t.cream,
           padding: "8px 12px",
           display: "flex",
           flexDirection: "column",
@@ -154,10 +155,10 @@ function ShareTape({ item }) {
             />
           ) : (
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: t.fontSharpie,
               fontSize,
               lineHeight: 1.1,
-              color: "#2C2824",
+              color: t.creamDark,
               textTransform: "uppercase",
               letterSpacing: "0.02em",
               position: "relative",
@@ -175,7 +176,7 @@ function ShareTape({ item }) {
           {/* Year */}
           {item.year && (
             <div style={{
-              fontFamily: "'Permanent Marker', cursive",
+              fontFamily: t.fontSharpie,
               fontSize: 9, color: "rgba(44,40,36,0.5)",
               marginTop: 2, position: "relative", textAlign: "center",
             }}>
@@ -299,7 +300,7 @@ export default function ShareShelf({ items = [], username, onClose, onToast }) {
       <div style={{
         position: "absolute", top: 16, right: 16,
         width: 36, height: 36, borderRadius: "50%",
-        background: "rgba(255,255,255,0.08)",
+        background: t.bgHover,
         display: "flex", alignItems: "center", justifyContent: "center",
         cursor: "pointer",
       }} onClick={onClose}>
@@ -317,7 +318,7 @@ export default function ShareShelf({ items = [], username, onClose, onToast }) {
         style={{
           width: 360,
           maxWidth: "100%",
-          background: "#0f0d0b",
+          background: t.bgPrimary,
           borderRadius: 10,
           overflow: "hidden",
           boxShadow: "0 16px 48px rgba(0,0,0,0.5)",
@@ -341,7 +342,7 @@ export default function ShareShelf({ items = [], username, onClose, onToast }) {
               width: 18, height: 18, background: "#e8dcc8", borderRadius: 3,
               margin: "0 2px",
             }}>
-              <span style={{ fontSize: 10, color: "#0f0d0b", marginLeft: 2 }}>▶</span>
+              <span style={{ fontSize: 10, color: t.bgPrimary, marginLeft: 2 }}>▶</span>
             </span>
             NTL
           </div>
@@ -398,7 +399,7 @@ export default function ShareShelf({ items = [], username, onClose, onToast }) {
           </span>
           {username && (
             <span style={{
-              fontFamily: "'Permanent Marker', cursive", fontSize: 9,
+              fontFamily: t.fontSharpie, fontSize: 9,
               color: "#3a342a",
             }}>
               @{username}
@@ -421,7 +422,7 @@ export default function ShareShelf({ items = [], username, onClose, onToast }) {
         style={{
           marginTop: 16,
           padding: "12px 32px",
-          background: capturing ? "#3a342a" : "#f0ebe1",
+          background: capturing ? "#3a342a" : t.cream,
           color: capturing ? "#8a7d68" : "#1a1612",
           border: "none",
           borderRadius: 8,
