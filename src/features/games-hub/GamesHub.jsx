@@ -325,7 +325,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           }}>
             Badges
           </div>
-          <div style={{ fontSize: 11, color: t.creamMuted, marginTop: 2, lineHeight: 1.35 }}>
+          <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2, lineHeight: 1.35 }}>
             A scavenger hunt through the libraries of your favorite podcasts.
           </div>
         </div>
