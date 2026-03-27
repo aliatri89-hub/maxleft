@@ -111,19 +111,45 @@ function StaffPicksTitle({ tilt, isSubscribed }) {
   const size = isSubscribed ? 22 : 20;
   return (
     <div style={{ transform: `rotate(${tilt * 0.5}deg)` }}>
+      {/* Matches header-brand: Barlow Condensed 900, tight spacing */}
       <div style={{
-        fontFamily: "'Bebas Neue', sans-serif",
+        fontFamily: "'Barlow Condensed', sans-serif",
+        fontWeight: 900,
         fontSize: size,
         color: "#2c2824",
         letterSpacing: "0.06em",
+        textTransform: "uppercase",
         lineHeight: 1,
+        display: "inline-flex",
+        alignItems: "center",
       }}>
-        M▶NTL
+        M
+        <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: size * 0.7,
+          height: size * 0.8,
+          margin: "0 -1px",
+          position: "relative",
+          flexShrink: 0,
+        }}>
+          <span style={{
+            position: "absolute", inset: 0,
+            background: "#2c2824",
+            borderRadius: 2,
+          }} />
+          <svg style={{ position: "relative", zIndex: 1 }}
+            width={size * 0.38} height={size * 0.38} viewBox="0 0 24 24" fill="none">
+            <polygon points="6,4 20,12 6,20" fill="#f5f0eb" />
+          </svg>
+        </span>
+        NTL
       </div>
       <div style={{
         fontFamily: "'Permanent Marker', cursive",
         fontSize: Math.max(10, size * 0.55),
-        color: "rgba(44,40,36,0.75)",
+        color: "rgba(44,40,36,0.65)",
         letterSpacing: "0.02em",
         lineHeight: 1.2,
         marginTop: 2,
