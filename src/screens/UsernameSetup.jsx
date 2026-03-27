@@ -97,7 +97,7 @@ function SkipButton({ onClick, label = "I'll do this later" }) {
     <div
       onClick={onClick}
       style={{
-        fontFamily: t.fontMono, fontSize: 12,
+        fontFamily: t.fontBody, fontSize: 12,
         color: dk.textMuted, textAlign: "center",
         marginTop: 12, cursor: "pointer", letterSpacing: "0.02em",
         padding: "8px 0",
@@ -167,7 +167,7 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
               color: dk.terracotta, textTransform: "uppercase",
             }}>{file.name}</div>
             <div style={{
-              fontFamily: t.fontMono, fontSize: 9,
+              fontFamily: t.fontBody, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>Tap to change file</div>
           </>
@@ -179,7 +179,7 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
               color: dk.text, textTransform: "uppercase",
             }}>{label}</div>
             <div style={{
-              fontFamily: t.fontMono, fontSize: 9,
+              fontFamily: t.fontBody, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>.csv files only</div>
           </>
@@ -246,7 +246,7 @@ function TaskRow({ task }) {
               }} />
             </div>
             <div style={{
-              fontFamily: t.fontMono, fontSize: 9,
+              fontFamily: t.fontBody, fontSize: 9,
               color: dk.textMuted, marginTop: 3,
             }}>
               {task.progress} / {task.total}
@@ -256,7 +256,7 @@ function TaskRow({ task }) {
 
         {task.status === "done" && task.result && (
           <div style={{
-            fontFamily: t.fontMono, fontSize: 10,
+            fontFamily: t.fontBody, fontSize: 10,
             color: dk.textDim, marginTop: 2,
           }}>
             {task.result}
@@ -265,7 +265,7 @@ function TaskRow({ task }) {
 
         {task.status === "error" && task.result && (
           <div style={{
-            fontFamily: t.fontMono, fontSize: 10,
+            fontFamily: t.fontBody, fontSize: 10,
             color: dk.red, marginTop: 2,
           }}>
             {task.result}
@@ -625,7 +625,7 @@ function UsernameSetup({ name, session, onComplete }) {
                   {/* Community badge */}
                   {hasLaunchedCommunity && (
                     <div style={{
-                      fontFamily: t.fontMono, fontSize: 7,
+                      fontFamily: t.fontBody, fontSize: 7,
                       color: dk.terracotta, marginTop: 2,
                       letterSpacing: "0.04em", textTransform: "uppercase",
                     }}>Community</div>
@@ -648,7 +648,7 @@ function UsernameSetup({ name, session, onComplete }) {
         )}
 
         <div style={{
-          fontFamily: t.fontMono, fontSize: 10,
+          fontFamily: t.fontBody, fontSize: 10,
           color: dk.textDim, textAlign: "center", marginBottom: 16, letterSpacing: "0.03em",
         }}>
           {selectedCount} selected · Manage anytime in settings
@@ -718,7 +718,7 @@ function UsernameSetup({ name, session, onComplete }) {
           />
           {letterboxdUsername && (
             <div style={{
-              fontFamily: t.fontMono, fontSize: 10,
+              fontFamily: t.fontBody, fontSize: 10,
               color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
               wordBreak: "break-all",
             }}>
@@ -749,7 +749,7 @@ function UsernameSetup({ name, session, onComplete }) {
           </div>
 
           <div style={{
-            fontFamily: t.fontMono, fontSize: 11,
+            fontFamily: t.fontBody, fontSize: 11,
             color: dk.text, lineHeight: 1.8, marginBottom: 12,
             padding: "10px 12px",
             background: "rgba(255,255,255,0.03)",
@@ -849,7 +849,7 @@ function UsernameSetup({ name, session, onComplete }) {
           <>
             {hasErrors && (
               <div style={{
-                fontFamily: t.fontMono, fontSize: 10,
+                fontFamily: t.fontBody, fontSize: 10,
                 color: dk.textDim, textAlign: "center", marginBottom: 16,
               }}>
                 Some items couldn't be imported — you can retry from Settings anytime.
@@ -868,7 +868,7 @@ function UsernameSetup({ name, session, onComplete }) {
 
         {!allDone && (
           <div style={{
-            fontFamily: t.fontMono, fontSize: 10,
+            fontFamily: t.fontBody, fontSize: 10,
             color: dk.textDim, textAlign: "center",
             letterSpacing: "0.02em",
           }}>

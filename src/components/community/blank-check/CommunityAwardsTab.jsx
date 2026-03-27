@@ -452,7 +452,7 @@ function CategorySection({ category, hosts, isSeen, getItemId, onToggle, isLast,
       {/* Category header */}
       <div style={{
         fontSize: 11, fontWeight: 700, color: t.textMuted,
-        fontFamily: t.fontMono,
+        fontFamily: t.fontBody,
         letterSpacing: "0.06em", textTransform: "uppercase",
         marginBottom: 10, paddingLeft: 16,
       }}>{name}</div>

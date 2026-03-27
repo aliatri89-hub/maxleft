@@ -1408,7 +1408,7 @@ function LandingScreen({ onSignIn }) {
             autoFocus
             maxLength={8}
             style={{ textAlign: 'center', letterSpacing: '0.25em', fontSize: '1.3rem',
-              fontFamily: t.fontMono, fontWeight: 600 }}
+              fontFamily: t.fontBody, fontWeight: 600 }}
             onKeyDown={(e) => e.key === 'Enter' && otpCode.length === 8 && handleVerifyOtp()}
           />
           <button
@@ -1638,7 +1638,7 @@ function LandingScreen({ onSignIn }) {
                           <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
                           <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
                         </svg>
-                        <span style={{ fontSize: 9, fontFamily: t.fontMono, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                        <span style={{ fontSize: 9, fontFamily: t.fontBody, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                           tap to flip
                         </span>
                       </div>
@@ -1648,7 +1648,7 @@ function LandingScreen({ onSignIn }) {
                     <div className="flip-card-back" onClick={(e) => e.stopPropagation()}>
                       <div style={{
                         fontSize: 10, fontWeight: 600, color: t.textSecondary,
-                        fontFamily: t.fontMono, textTransform: "uppercase",
+                        fontFamily: t.fontBody, textTransform: "uppercase",
                         letterSpacing: "0.08em", marginBottom: 6,
                         display: "flex", alignItems: "center", justifyContent: "space-between",
                       }}>

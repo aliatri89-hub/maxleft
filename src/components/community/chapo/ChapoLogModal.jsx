@@ -544,7 +544,7 @@ function WatchProviders({ providers }) {
         fontSize: 9, fontWeight: 600, color: t.textMuted,
         textTransform: "uppercase", letterSpacing: "0.06em",
         width: 48, flexShrink: 0,
-        fontFamily: t.fontMono,
+        fontFamily: t.fontBody,
       }}>{label}</div>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
         {items.slice(0, 3).map(p => (

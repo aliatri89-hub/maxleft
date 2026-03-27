@@ -703,7 +703,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             )}
             {data.year && (
               <div style={{
-                fontFamily: t.fontMono,
+                fontFamily: t.fontBody,
                 fontSize: 11, color: "rgba(240,235,225,0.35)",
                 letterSpacing: "0.1em", marginTop: 4,
               }}>
@@ -990,7 +990,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{ep.episode_title || ep.podcast_name}</div>
                             <div style={{
-                              fontFamily: t.fontMono,
+                              fontFamily: t.fontBody,
                               fontSize: 11, color: "rgba(240,235,225,0.35)",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
@@ -1282,7 +1282,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                   ))}
                 </div>
                 <div style={{
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                   fontSize: 6, color: t.cream,
                   letterSpacing: "0.12em",
                 }}>
@@ -1312,7 +1312,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
 
           {/* Legal flair — VHS authenticity touch */}
           <div style={{
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 6, color: "rgba(240,235,225,0.15)",
             textAlign: "center", marginTop: 10,
             letterSpacing: "0.04em",

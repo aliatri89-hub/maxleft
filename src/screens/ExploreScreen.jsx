@@ -223,7 +223,7 @@ export default function ExploreScreen({
         </div>
         <div style={{
           fontSize: 11, color: "var(--text-faint)", marginTop: 4,
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
           letterSpacing: "0.04em", textTransform: "uppercase",
         }}>
           Track films, earn badges, complete series
@@ -261,7 +261,7 @@ export default function ExploreScreen({
             {unfollowedCommunities.length > 0 && (
               <>
                 <div style={{
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                   fontWeight: 500, fontSize: 9,
                   color: "var(--text-faint)",
                   textTransform: "uppercase",
@@ -307,7 +307,7 @@ export default function ExploreScreen({
               </div>
               <div style={{
                 fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
-                fontFamily: t.fontMono,
+                fontFamily: t.fontBody,
               }}>
                 New podcast communities are added regularly.
               </div>

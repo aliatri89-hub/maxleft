@@ -163,7 +163,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     display: "inline-flex", alignItems: "center", gap: 3,
     padding: "2px 7px 2px 5px", borderRadius: 12,
     fontSize: 9, fontWeight: 600,
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
     textTransform: "uppercase", letterSpacing: "0.06em",
     flexShrink: 0, whiteSpace: "nowrap",
   };
@@ -234,7 +234,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               </span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 {film_year && (
-                  <span style={{ fontFamily: t.fontMono, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>
+                  <span style={{ fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>
                     {film_year}
                   </span>
                 )}
@@ -242,7 +242,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
                 )}
                 {fmtDate(episode_air_date) && (
-                  <span style={{ fontFamily: t.fontMono, fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                  <span style={{ fontFamily: t.fontBody, fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em" }}>
                     {fmtDate(episode_air_date)}
                   </span>
                 )}
@@ -295,7 +295,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   </div>
                   {duration_seconds > 0 && (
                     <span style={{
-                      fontFamily: t.fontMono, fontSize: 9, color: t.textFaint,
+                      fontFamily: t.fontBody, fontSize: 9, color: t.textFaint,
                       letterSpacing: "0.03em", textTransform: "uppercase",
                     }}>
                       {formatDuration(duration_seconds)}
@@ -319,7 +319,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   </svg>
                   <span style={{
                     fontSize: 11, fontWeight: 700, letterSpacing: "0.05em",
-                    textTransform: "uppercase", color: "#F96836", fontFamily: t.fontMono,
+                    textTransform: "uppercase", color: "#F96836", fontFamily: t.fontBody,
                   }}>Patreon</span>
                 </a>
               )}

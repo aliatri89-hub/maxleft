@@ -65,7 +65,7 @@ function LoadingState() {
         borderTopColor: "#e8d3a2", borderRadius: "50%",
         animation: "cc-spin 0.8s linear infinite",
       }} />
-      <div style={{ marginTop: 16, fontSize: 13, color: t.creamMuted, fontFamily: t.fontMono }}>
+      <div style={{ marginTop: 16, fontSize: 13, color: t.creamMuted, fontFamily: t.fontBody }}>
         Loading puzzle...
       </div>
     </div>
@@ -151,7 +151,7 @@ function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
           color: t.textSecondary,
           marginTop: 8,
           letterSpacing: 0.3,
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
           textShadow: "0 1px 3px rgba(0,0,0,0.5)",
         }}>
           {movie.actors.map((a) => a.name).join("  •  ")}
@@ -249,7 +249,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         <BackButton onBack={onBack} />
         <div style={{ textAlign: "center", padding: "80px 24px" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🎞️</div>
-          <div style={{ fontSize: 15, color: t.creamMuted, fontFamily: t.fontMono }}>
+          <div style={{ fontSize: 15, color: t.creamMuted, fontFamily: t.fontBody }}>
             {error || "No puzzle available today"}
           </div>
         </div>
@@ -291,7 +291,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         <div style={{
-          fontFamily: t.fontMono, fontSize: 11,
+          fontFamily: t.fontBody, fontSize: 11,
           letterSpacing: 4, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
         }}>
           M▶NTL
@@ -302,7 +302,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         }}>
           Cast Connections
         </h1>
-        <div style={{ fontSize: 12, color: t.creamMuted, marginTop: 6, fontFamily: t.fontMono }}>
+        <div style={{ fontSize: 12, color: t.creamMuted, marginTop: 6, fontFamily: t.fontBody }}>
           {puzzleNumber ? `#${puzzleNumber} · ` : ""}
           {"★".repeat(puzzle.difficulty === "hard" ? 5 : puzzle.difficulty === "medium" ? 4 : 3)}
         </div>
@@ -327,7 +327,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
           }}>
             {won ? "Perfect Take!" : "That's a Wrap"}
           </div>
-          <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6, fontFamily: t.fontMono }}>
+          <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6, fontFamily: t.fontBody }}>
             {won
               ? `Solved with ${mistakes === 0 ? "no" : mistakes} mistake${mistakes !== 1 ? "s" : ""}`
               : "Better luck tomorrow"}
@@ -472,7 +472,7 @@ function BackButton({ onBack }) {
 
 const S = {
   container: {
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
     background: t.bgPrimary,
     minHeight: "100vh",
     display: "flex",
@@ -526,7 +526,7 @@ const S = {
     color: t.creamMuted,
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
   },
   dots: {
     display: "flex",
@@ -545,7 +545,7 @@ const S = {
     marginBottom: 24,
   },
   btnSecondary: {
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
     fontSize: 12,
     padding: "10px 18px",
     borderRadius: 24,
@@ -559,7 +559,7 @@ const S = {
     outline: "none",
   },
   btnPrimary: {
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
     fontSize: 12,
     padding: "10px 22px",
     borderRadius: 24,

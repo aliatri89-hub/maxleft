@@ -176,7 +176,7 @@ export default function NowPlayingArcadeTab({
         {visibleSeries.length === 0 ? (
           <div style={{
             textAlign: "center", padding: "40px 0",
-            fontFamily: t.fontMono, fontSize: 13,
+            fontFamily: t.fontBody, fontSize: 13,
             color: "rgba(0,255,200,0.2)", fontStyle: "normal",
           }}>
             {searchQuery ? "No matching games" : "No games here yet"}
@@ -422,7 +422,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
         padding: "2px 5px",
         color: accent,
         fontWeight: 600,
-        fontFamily: t.fontMono,
+        fontFamily: t.fontBody,
         letterSpacing: "0.03em",
       }}>
        

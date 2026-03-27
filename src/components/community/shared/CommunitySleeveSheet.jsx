@@ -369,7 +369,7 @@ export default function CommunitySleeveSheet({
         {/* ── Description ── */}
         {community.description && (
           <div style={{
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 11,
             lineHeight: 1.65,
             color: "rgba(240,235,225,0.55)",
@@ -515,7 +515,7 @@ export default function CommunitySleeveSheet({
               ))}
             </div>
             <div style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 9,
               color: "rgba(240,235,225,0.3)",
               textAlign: "center",
@@ -527,7 +527,7 @@ export default function CommunitySleeveSheet({
 
         {/* Fine print */}
         <div style={{
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
           fontSize: 6,
           color: "rgba(240,235,225,0.15)",
           textAlign: "center",

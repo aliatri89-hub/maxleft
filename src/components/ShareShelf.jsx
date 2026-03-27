@@ -83,7 +83,7 @@ function ShareBrandStamp({ brand, side }) {
       </div>
       {brand.sub && (
         <div style={{
-          writingMode: "vertical-rl", fontFamily: t.fontMono,
+          writingMode: "vertical-rl", fontFamily: t.fontBody,
           fontWeight: 600, fontSize: 5, letterSpacing: "0.06em",
           color: brand.color, opacity: 0.6, transform: "rotate(180deg)",
         }}>

@@ -146,7 +146,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             }}>{data.title}</div>
             {data.year && (
               <div style={{
-                fontFamily: t.fontMono,
+                fontFamily: t.fontBody,
                 fontSize: 10, color: "var(--text-muted)",
                 marginTop: 2,
               }}>{data.year}</div>
@@ -204,7 +204,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
           <div
             onClick={handleConfirm}
             style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 11, color: "var(--text-muted)",
               cursor: "pointer", marginTop: -8,
               letterSpacing: "0.04em",

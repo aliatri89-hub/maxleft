@@ -18,7 +18,7 @@ function getMonthDay(dateStr) {
 const S = {
   page: {
     minHeight: "100vh", background: t.bgPrimary, color: t.cream,
-    fontFamily: t.fontMono,
+    fontFamily: t.fontBody,
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "0 16px 40px", overflow: "auto", WebkitOverflowScrolling: "touch",
     paddingTop: "env(safe-area-inset-top, 0px)",
@@ -33,7 +33,7 @@ const S = {
     position: "relative",
   },
   title: {
-    fontFamily: t.fontMono, fontSize: 11,
+    fontFamily: t.fontBody, fontSize: 11,
     letterSpacing: 3, textTransform: "uppercase", color: t.creamMuted, marginBottom: 4,
   },
   year: {
@@ -130,7 +130,7 @@ const S = {
   timelineLabel: {
     display: "flex", flexDirection: "column", alignItems: "center",
     fontSize: 10, textTransform: "uppercase", letterSpacing: 2,
-    color: "rgba(124,184,232,0.4)", fontFamily: t.fontMono,
+    color: "rgba(124,184,232,0.4)", fontFamily: t.fontBody,
     padding: "6px 0", marginLeft: 30,
   },
   flash: (correct) => ({
@@ -162,13 +162,13 @@ const S = {
   nextTimer: { fontSize: 12, color: t.creamMuted, marginTop: 10 },
   loading: {
     minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-    background: t.bgPrimary, color: t.creamMuted, fontFamily: t.fontMono,
+    background: t.bgPrimary, color: t.creamMuted, fontFamily: t.fontBody,
     fontSize: 15,
   },
   errorWrap: {
     minHeight: "100vh", display: "flex", flexDirection: "column",
     alignItems: "center", justifyContent: "center", background: t.bgPrimary,
-    color: t.creamMuted, fontFamily: t.fontMono, fontSize: 15,
+    color: t.creamMuted, fontFamily: t.fontBody, fontSize: 15,
     padding: 32, textAlign: "center",
   },
   placementDots: {

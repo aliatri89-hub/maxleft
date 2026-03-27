@@ -74,7 +74,7 @@ function BrandStamp({ brand, side = "right" }) {
           }}>{brand.text}</div>
           {brand.sub && (
             <div style={{
-              writingMode: "vertical-rl", fontFamily: t.fontMono,
+              writingMode: "vertical-rl", fontFamily: t.fontBody,
               fontWeight: 500, fontSize: 5.5, letterSpacing: "0.08em",
               color: brand.color, opacity: 0.5, transform: "rotate(180deg)", lineHeight: 1,
             }}>{brand.sub}</div>

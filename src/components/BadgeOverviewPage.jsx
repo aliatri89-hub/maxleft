@@ -301,7 +301,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
             <div style={{
               fontSize: 10, color: t.textFaint,
               textTransform: "uppercase", letterSpacing: 2.5,
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               marginTop: 4,
             }}>
               Badges Earned
@@ -324,7 +324,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
           <div style={{
             textAlign: "center", padding: "80px 20px",
             color: t.textFaint, fontSize: 13,
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
           }}>
             Loading badges…
           </div>
@@ -368,7 +368,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     {comm.title}
                   </div>
                   <div style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 10, color: t.textFaint,
                     letterSpacing: 1,
                   }}>
@@ -384,7 +384,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     padding: "4px 10px",
                     color: accent,
                     fontSize: 10,
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontWeight: 600,
                     letterSpacing: 1,
                     cursor: "pointer",
@@ -507,7 +507,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
             </div>
             <div style={{
               fontSize: 11, color: t.textFaint,
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               marginTop: 8,
             }}>
               Subscribe to a podcast community to get started.
@@ -656,7 +656,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         <div style={{
           fontSize: 8,
           color: t.textFaint,
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
           marginTop: 2,
           textAlign: "center",
           maxWidth: size + 8,

@@ -476,7 +476,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           {browseLoading ? (
             <div style={{
               padding: "32px 16px", textAlign: "center",
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textMuted,
             }}>Loading…</div>
           ) : browseResults.length > 0 ? (
@@ -530,7 +530,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               {!browseHasMore && browseResults.length >= BROWSE_PAGE && (
                 <div style={{
                   padding: "8px 16px 20px", textAlign: "center",
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                   fontSize: 9, color: t.textFaint,
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>
@@ -541,7 +541,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           ) : (
             <div style={{
               padding: "32px 16px", textAlign: "center",
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
             }}>No coverage found for this filter</div>
           )}
@@ -560,7 +560,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               textTransform: "uppercase", letterSpacing: "0.08em",
             }}>Recently covered</div>
             <div style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
               marginTop: 2,
             }}>New podcast episodes this month</div>
@@ -570,7 +570,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           {recentLoading ? (
             <div style={{
               padding: "20px 16px",
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
             }}>Loading…</div>
           ) : recentlyCovered.length > 0 ? (
@@ -644,7 +644,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                           ))}
                         </div>
                         <span style={{
-                          fontFamily: t.fontMono,
+                          fontFamily: t.fontBody,
                           fontSize: 9, color: TC,
                           whiteSpace: "nowrap",
                         }}>{film.year || ""}</span>
@@ -657,7 +657,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
           ) : (
             <div style={{
               padding: "20px 16px",
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
             }}>No recent coverage found</div>
           )}
@@ -675,7 +675,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               marginBottom: 4,
             }}>Or search any film</div>
             <div style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
             }}>Find coverage across {recentlyCovered.length > 0
               ? `${recentlyCovered[0]?.podcasts?.length || "all"} podcasts and counting`
@@ -696,7 +696,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
             marginBottom: 6,
           }}>No results for "{query}"</div>
           <div style={{
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 10, color: t.textSecondary,
           }}>Try a different title or spelling</div>
         </div>
@@ -736,7 +736,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
         }}>
           <div style={{ flex: 1, height: 1, background: "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)" }} />
           <span style={{
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 9, color: t.textMuted,
             textTransform: "uppercase", letterSpacing: "0.1em", whiteSpace: "nowrap",
           }}>no coverage yet</span>
@@ -848,7 +848,7 @@ function ResultCard({
             background: t.bgElevated,
             border: `1px solid ${t.borderSubtle}`,
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 9, color: t.textSecondary,
           }}>NO<br />IMG</div>
         )}
@@ -875,7 +875,7 @@ function ResultCard({
             whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>{result.title}</div>
           <div style={{
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             fontSize: 11, color: t.textMuted, marginTop: 2,
           }}>{result.year || "—"}</div>
 
@@ -906,7 +906,7 @@ function ResultCard({
                   ))}
                   {result.podcasts.length > 5 && (
                     <span style={{
-                      fontFamily: t.fontMono,
+                      fontFamily: t.fontBody,
                       fontSize: 9, color: t.textMuted,
                       marginLeft: 4,
                     }}>+{result.podcasts.length - 5}</span>
@@ -966,7 +966,7 @@ function ResultCard({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, fontWeight: 600,
                     color: "rgba(52,211,153,0.6)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -987,7 +987,7 @@ function ResultCard({
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   <span style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, fontWeight: 600,
                     color: t.textSecondary,
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -997,13 +997,13 @@ function ResultCard({
             </div>
           )}
           {loadingEpisodes && (
-            <div style={{ padding: "12px 0", fontFamily: t.fontMono, fontSize: 10, color: t.textMuted }}>
+            <div style={{ padding: "12px 0", fontFamily: t.fontBody, fontSize: 10, color: t.textMuted }}>
               Loading episodes…
             </div>
           )}
 
           {!loadingEpisodes && episodes.length === 0 && (
-            <div style={{ padding: "12px 0", fontFamily: t.fontMono, fontSize: 10, color: t.textSecondary }}>
+            <div style={{ padding: "12px 0", fontFamily: t.fontBody, fontSize: 10, color: t.textSecondary }}>
               No playable episodes found
             </div>
           )}
@@ -1050,7 +1050,7 @@ function ResultCard({
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                   }}>{ep.episode_title || "Episode"}</div>
                   <div style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, color: t.textMuted,
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>
@@ -1120,7 +1120,7 @@ function ResultCard({
                   </>
                 ) : (
                   <span style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 8, color: t.textSecondary, textTransform: "uppercase",
                   }}>soon</span>
                 )}
@@ -1151,7 +1151,7 @@ function ResultCard({
                 })() : isEpExpanded ? (
                   <div style={{
                     padding: "4px 8px 10px 50px",
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, fontStyle: "italic",
                     color: t.textMuted,
                   }}>
@@ -1185,7 +1185,7 @@ function ResultCard({
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                   <span style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, fontWeight: 600,
                     color: "rgba(52,211,153,0.6)",
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -1206,7 +1206,7 @@ function ResultCard({
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   <span style={{
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     fontSize: 9, fontWeight: 600,
                     color: t.textSecondary,
                     textTransform: "uppercase", letterSpacing: "0.06em",
@@ -1222,7 +1222,7 @@ function ResultCard({
             borderRadius: 10,
           }}>
             <div style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
               textTransform: "uppercase", letterSpacing: "0.06em",
               marginBottom: 10,
@@ -1287,7 +1287,7 @@ function ResultCard({
             )}
 
             <div style={{
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontSize: 9, color: t.textSecondary,
               marginTop: 8, lineHeight: 1.4,
             }}>

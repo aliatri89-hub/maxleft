@@ -114,7 +114,7 @@ export default function CrossCommunityChips({
         textTransform: "uppercase",
         letterSpacing: "0.08em",
         marginBottom: 8,
-        fontFamily: t.fontMono,
+        fontFamily: t.fontBody,
       }}>
         Also in
       </div>

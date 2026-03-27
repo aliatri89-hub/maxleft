@@ -202,15 +202,15 @@ export default function ShelfModals({
                     {/* Single-add date picker for Been (via long-press) */}
                     {isPending && passportTab === "been" && (
                       <div style={{ padding: "12px 16px", background: "rgba(196,115,79,0.04)", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                        <div style={{ fontFamily: t.fontMono, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                        <div style={{ fontFamily: t.fontBody, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
                           Last visited (optional)
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <select value={pendingVisitMonth} onChange={e => setPendingVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                          <select value={pendingVisitMonth} onChange={e => setPendingVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                             <option value="">Month</option>
                             {VISIT_MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                           </select>
-                          <select value={pendingVisitYear} onChange={e => setPendingVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                          <select value={pendingVisitYear} onChange={e => setPendingVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                             <option value="">Year</option>
                             {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
                           </select>
@@ -244,15 +244,15 @@ export default function ShelfModals({
                     )}
                     {isPending && passportTab === "bucket_list" && (
                       <div style={{ padding: "12px 16px", background: "rgba(139,158,126,0.06)", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                        <div style={{ fontFamily: t.fontMono, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                        <div style={{ fontFamily: t.fontBody, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
                           ✈ Planned trip? (optional)
                         </div>
                         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <select value={pendingTripMonth} onChange={e => setPendingTripMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                          <select value={pendingTripMonth} onChange={e => setPendingTripMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                             <option value="">Month</option>
                             {VISIT_MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                           </select>
-                          <select value={pendingTripYear} onChange={e => setPendingTripYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                          <select value={pendingTripYear} onChange={e => setPendingTripYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                             <option value="">Year</option>
                             {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i).map(y => <option key={y} value={y}>{y}</option>)}
                           </select>
@@ -357,7 +357,7 @@ export default function ShelfModals({
               </div>
             )}
             <div style={{ padding: "16px 20px 24px" }}>
-              <div style={{ fontFamily: t.fontMono, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+              <div style={{ fontFamily: t.fontBody, fontSize: 10, color: "var(--text-faint)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
                 {viewingCountry.status === "been" ? "Visited" : "Bucket List"}
                 {viewingCountry.status === "been" && (viewingCountry.visitMonth || viewingCountry.visitYear) ? ` · ${formatVisitDate(viewingCountry.visitMonth, viewingCountry.visitYear)}` : ""}
                 {viewingCountry.status === "bucket_list" && (viewingCountry.tripMonth || viewingCountry.tripYear) ? ` · ✈ ${formatVisitDate(viewingCountry.tripMonth, viewingCountry.tripYear)}` : ""}
@@ -386,11 +386,11 @@ export default function ShelfModals({
               )}
               {editingCountryDate && viewingCountry.status === "been" && (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-                  <select value={editVisitMonth} onChange={e => setEditVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                  <select value={editVisitMonth} onChange={e => setEditVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                     <option value="">Month</option>
                     {VISIT_MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                   </select>
-                  <select value={editVisitYear} onChange={e => setEditVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                  <select value={editVisitYear} onChange={e => setEditVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                     <option value="">Year</option>
                     {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -408,11 +408,11 @@ export default function ShelfModals({
               )}
               {editingCountryDate && viewingCountry.status === "bucket_list" && (
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-                  <select value={editVisitMonth} onChange={e => setEditVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                  <select value={editVisitMonth} onChange={e => setEditVisitMonth(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                     <option value="">Month</option>
                     {VISIT_MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                   </select>
-                  <select value={editVisitYear} onChange={e => setEditVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontMono, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
+                  <select value={editVisitYear} onChange={e => setEditVisitYear(e.target.value)} style={{ flex: 1, padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.1)", fontFamily: t.fontBody, fontSize: 12, background: "white", color: "var(--charcoal)" }}>
                     <option value="">Year</option>
                     {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() + i).map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -587,7 +587,7 @@ export default function ShelfModals({
                     )}
                   </div>
                   {profile.username && (
-                    <div style={{ marginTop: 12, fontFamily: t.fontMono, fontSize: 10, color: "var(--text-faint)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    <div style={{ marginTop: 12, fontFamily: t.fontBody, fontSize: 10, color: "var(--text-faint)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                       @{profile.username}'s passport
                     </div>
                   )}

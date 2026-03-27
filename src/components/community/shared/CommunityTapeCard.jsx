@@ -69,7 +69,7 @@ function BrandStamp({ brand, side = "right" }) {
           {brand.sub && (
             <div style={{
               writingMode: "vertical-rl",
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               fontWeight: 600,
               fontSize: 5,
               letterSpacing: "0.06em",

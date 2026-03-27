@@ -191,7 +191,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                       </div>
                       <div style={{
                         fontSize: 10, color: t.textMuted,
-                        fontFamily: t.fontMono,
+                        fontFamily: t.fontBody,
                       }}>
                         {topGenre.completed}
                       </div>
@@ -229,7 +229,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
                           fontSize: 9, fontWeight: 600,
                           color: g.completed > 0 ? t.textFaint : t.textFaint,
                           textAlign: "right",
-                          fontFamily: t.fontMono,
+                          fontFamily: t.fontBody,
                         }}>
                           {g.completed}
                         </div>

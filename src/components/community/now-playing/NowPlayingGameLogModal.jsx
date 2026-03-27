@@ -639,7 +639,7 @@ export default function NowPlayingGameLogModal({
                       : achPct >= 50
                       ? "#F5C518"
                       : "#66C0F4",
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                 }}
               >
                 {steamStats.earned}/{steamStats.total} ({achPct}%)

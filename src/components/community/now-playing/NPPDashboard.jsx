@@ -404,7 +404,7 @@ const LoginModal = ({ onClose }) => {
             placeholder="00000000"
             onKeyDown={(e) => e.key === "Enter" && otpCode.length === 8 && handleVerifyOtp()}
             style={{ ...inputStyle, textAlign: "center", letterSpacing: "0.25em", fontSize: 20,
-              fontFamily: t.fontMono, fontWeight: 600 }}
+              fontFamily: t.fontBody, fontWeight: 600 }}
           />
           <button onClick={handleVerifyOtp} disabled={loading || otpCode.length < 8} style={{
             width: "100%", padding: "12px 0", borderRadius: 8,
@@ -541,7 +541,7 @@ const LoginModal = ({ onClose }) => {
             <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0" }}>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
               <span style={{ fontSize: 10, color: C.textDim, letterSpacing: "0.1em", textTransform: "uppercase",
-                fontFamily: t.fontMono }}>or</span>
+                fontFamily: t.fontBody }}>or</span>
               <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.1)" }} />
             </div>
           </>
@@ -559,7 +559,7 @@ const LoginModal = ({ onClose }) => {
 
         <div style={{
           marginTop: 16, fontSize: 10, color: C.textDim,
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
         }}>powered by MANTL</div>
       </div>
     </div>
@@ -730,7 +730,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
           }}>{film.title}</div>
           <div style={{
             fontSize: 11, color: t.textSecondary, marginTop: 2,
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             textShadow: hasPoster ? "0 1px 3px rgba(0,0,0,0.8)" : "none",
           }}>{film.year}</div>
         </div>
@@ -744,7 +744,7 @@ const FilmCard = ({ film, onClick, index, userVote, onVote, isAuthed, hasEpisode
           }}>
             <span style={{
               fontSize: 8, fontWeight: 700, color: C.brown,
-              textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontMono,
+              textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontBody,
             }}>Cult Favorite</span>
           </div>
         )}
@@ -914,7 +914,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
               margin: 0, fontSize: 22, fontWeight: 700, color: C.text,
               fontFamily: t.fontHeadline, textTransform: "uppercase",
             }}>{film.title}</h2>
-            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: t.fontMono }}>
+            <span style={{ fontSize: 13, color: C.textMuted, fontFamily: t.fontBody }}>
               {film.year} · {film.miniseries_title || ""}
             </span>
           </div>
@@ -947,7 +947,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           }}>
             <div style={{
               fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase",
-              letterSpacing: 2, marginBottom: 12, fontFamily: t.fontMono,
+              letterSpacing: 2, marginBottom: 12, fontFamily: t.fontBody,
               display: "flex", alignItems: "center", gap: 6,
             }}>
               <span style={{ fontSize: 11 }}>⚙</span> Admin Controls
@@ -957,14 +957,14 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div style={{ marginBottom: 14 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontMono,
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontBody,
               }}>Host Verdicts</div>
               <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
                 {/* Up */}
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hUp, setHUp, C.green, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.green, display: "block", fontFamily: t.fontMono }}>▲</span>
+                    <span style={{ fontSize: 9, color: C.green, display: "block", fontFamily: t.fontBody }}>▲</span>
                     <span style={{ fontSize: 16, fontWeight: 700, color: C.green, fontFamily: t.fontHeadline }}>{hUp}</span>
                   </div>
                   {counterBtn(hUp, setHUp, C.green, 1)}
@@ -973,7 +973,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hDown, setHDown, C.red, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.red, display: "block", fontFamily: t.fontMono }}>▼</span>
+                    <span style={{ fontSize: 9, color: C.red, display: "block", fontFamily: t.fontBody }}>▼</span>
                     <span style={{ fontSize: 16, fontWeight: 700, color: C.red, fontFamily: t.fontHeadline }}>{hDown}</span>
                   </div>
                   {counterBtn(hDown, setHDown, C.red, 1)}
@@ -982,7 +982,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   {counterBtn(hBrown, setHBrown, C.brown, -1)}
                   <div style={{ textAlign: "center", minWidth: 32 }}>
-                    <span style={{ fontSize: 9, color: C.brown, display: "block", fontFamily: t.fontMono }}>◆</span>
+                    <span style={{ fontSize: 9, color: C.brown, display: "block", fontFamily: t.fontBody }}>◆</span>
                     <span style={{ fontSize: 16, fontWeight: 700, color: C.brown, fontFamily: t.fontHeadline }}>{hBrown}</span>
                   </div>
                   {counterBtn(hBrown, setHBrown, C.brown, 1)}
@@ -1001,7 +1001,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div style={{ marginBottom: 14 }}>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontMono,
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontBody,
               }}>Title / Poster (TMDB)</div>
               <input
                 type="text"
@@ -1016,7 +1016,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 }}
               />
               {tmdbSearching && (
-                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: t.fontMono }}>
+                <div style={{ fontSize: 10, color: C.textDim, marginTop: 4, fontFamily: t.fontBody }}>
                   Searching...
                 </div>
               )}
@@ -1051,7 +1051,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                           fontFamily: t.fontDisplay,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>{r.title || r.original_title}</div>
-                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: t.fontMono }}>
+                        <div style={{ fontSize: 10, color: C.textDim, fontFamily: t.fontBody }}>
                           {r.release_date?.slice(0, 4) || "?"} · ID {r.id}
                         </div>
                       </div>
@@ -1065,7 +1065,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             <div>
               <div style={{
                 fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase",
-                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontMono,
+                letterSpacing: 1.5, marginBottom: 8, fontFamily: t.fontBody,
               }}>Category</div>
               <div style={{ display: "flex", gap: 6 }}>
                 <select
@@ -1100,7 +1100,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
                 marginTop: 10, padding: "6px 12px", borderRadius: 6,
                 background: `${C.gold}15`, border: `1px solid ${C.gold}33`,
                 fontSize: 11, fontWeight: 600, color: C.gold,
-                fontFamily: t.fontMono, textAlign: "center",
+                fontFamily: t.fontBody, textAlign: "center",
               }}>{adminToast}</div>
             )}
           </div>
@@ -1113,7 +1113,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             fontSize: 52, fontWeight: 800, color: C.gold,
             fontFamily: t.fontHeadline, lineHeight: 1,
           }}>{avg > 0 ? Number(avg).toFixed(1) : "—"}</div>
-          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4, fontFamily: t.fontMono }}>
+          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4, fontFamily: t.fontBody }}>
             {total > 0 ? `avg from ${total.toLocaleString()} logs` : "No logs yet"}
           </div>
         </div>
@@ -1213,13 +1213,13 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <span style={{ color: s.color, fontSize: 13 }}>{s.icon}</span>
-                <span style={{ color: s.color, fontSize: 20, fontWeight: 700, fontFamily: t.fontMono }}>
+                <span style={{ color: s.color, fontSize: 20, fontWeight: 700, fontFamily: t.fontBody }}>
                   {s.count}
                 </span>
               </div>
               <div style={{
                 fontSize: 9, color: C.textDim, marginTop: 2,
-                textTransform: "uppercase", letterSpacing: 1.2, fontFamily: t.fontMono,
+                textTransform: "uppercase", letterSpacing: 1.2, fontFamily: t.fontBody,
               }}>{s.label}</div>
             </div>
           ))}
@@ -1231,7 +1231,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           {isAuthed && (
             <a href={MANTL_APP_URL} target="_blank" rel="noopener noreferrer" style={{
               fontSize: 11, color: C.textDim, textDecoration: "none",
-              fontFamily: t.fontMono, letterSpacing: 0.5,
+              fontFamily: t.fontBody, letterSpacing: 0.5,
               transition: "color 0.15s",
             }}
               onMouseEnter={(e) => e.currentTarget.style.color = C.gold}
@@ -1240,7 +1240,7 @@ const FilmModal = ({ film, onClose, userVote, onVote, isAuthed, isAdmin, onUpdat
           )}
           <a href={NPP_WEBSITE} target="_blank" rel="noopener noreferrer" style={{
             fontSize: 11, color: C.textDim, textDecoration: "none",
-            fontFamily: t.fontMono, letterSpacing: 0.5,
+            fontFamily: t.fontBody, letterSpacing: 0.5,
             transition: "color 0.15s",
           }}
             onMouseEnter={(e) => e.currentTarget.style.color = C.gold}
@@ -1365,7 +1365,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                 backdropFilter: "blur(4px)",
               }}>
                 <span style={{
-                  fontSize: 10, fontWeight: 700, fontFamily: t.fontMono,
+                  fontSize: 10, fontWeight: 700, fontFamily: t.fontBody,
                   color: g > r ? C.green : C.red,
                 }}>{Number(avg).toFixed(1)}</span>
               </div>
@@ -1385,7 +1385,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
               }}>{ep.title}</div>
               <div style={{
                 fontSize: 11, color: C.textDim, marginTop: 3,
-                fontFamily: t.fontMono,
+                fontFamily: t.fontBody,
                 display: "flex", alignItems: "center", gap: 8,
               }}>
                 <span>{ep.dateDisplay}</span>
@@ -1399,7 +1399,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                 <div style={{
                   background: `${C.gold}22`, borderRadius: 3, padding: "2px 8px",
                   fontSize: 9, fontWeight: 700, color: C.gold,
-                  fontFamily: t.fontMono, letterSpacing: 1,
+                  fontFamily: t.fontBody, letterSpacing: 1,
                 }}>SOON</div>
               )}
               {/* Admin link button — only when no matched film */}
@@ -1410,7 +1410,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                   borderRadius: 4, padding: "2px 8px", cursor: "pointer",
                   fontSize: 9, fontWeight: 700,
                   color: adminOpen ? C.gold : C.textDim,
-                  fontFamily: t.fontMono, letterSpacing: 1,
+                  fontFamily: t.fontBody, letterSpacing: 1,
                   transition: "all 0.15s",
                 }}>🔗 LINK</button>
               )}
@@ -1423,7 +1423,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
               <ArrowBar green={g} red={r} brown={br} yellow={film.yellow_count || 0} total={total} />
               <div style={{
                 display: "flex", gap: 10, marginTop: 4,
-                fontSize: 10, fontFamily: t.fontMono,
+                fontSize: 10, fontFamily: t.fontBody,
               }}>
                 <span style={{ color: C.green }}>▲{g}</span>
                 <span style={{ color: C.red }}>▼{r}</span>
@@ -1451,7 +1451,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                   style={{
                     background: t.bgElevated, border: `1px solid ${C.border}`,
                     borderRadius: 4, padding: "4px 8px", cursor: "pointer",
-                    fontSize: 10, color: C.textDim, fontFamily: t.fontMono,
+                    fontSize: 10, color: C.textDim, fontFamily: t.fontBody,
                     transition: "all 0.15s",
                   }}
                 >{expanded ? "Less" : "Info"}</button>
@@ -1490,7 +1490,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
         }}>
           <div style={{
             fontSize: 9, fontWeight: 700, color: C.gold, textTransform: "uppercase",
-            letterSpacing: 2, marginBottom: 8, fontFamily: t.fontMono,
+            letterSpacing: 2, marginBottom: 8, fontFamily: t.fontBody,
           }}>Link to TMDB Film</div>
 
           {/* TMDB Search */}
@@ -1517,7 +1517,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
 
           {/* GUID info */}
           <div style={{
-            fontSize: 9, color: C.textDim, fontFamily: t.fontMono,
+            fontSize: 9, color: C.textDim, fontFamily: t.fontBody,
             marginBottom: 8, wordBreak: "break-all",
           }}>guid: {ep.guid || "none"}</div>
 
@@ -1555,7 +1555,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{r.title || r.original_title}</div>
                       <div style={{
-                        fontSize: 10, color: C.textDim, fontFamily: t.fontMono,
+                        fontSize: 10, color: C.textDim, fontFamily: t.fontBody,
                         display: "flex", gap: 8, alignItems: "center",
                       }}>
                         <span>{r.release_date?.slice(0, 4) || "?"}</span>
@@ -1575,7 +1575,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userVote, onVote, isAuthed, isAdmi
           )}
 
           {tmdbQuery.length >= 2 && !tmdbSearching && tmdbResults.length === 0 && (
-            <div style={{ fontSize: 11, color: C.textDim, fontFamily: t.fontMono }}>
+            <div style={{ fontSize: 11, color: C.textDim, fontFamily: t.fontBody }}>
               No results
             </div>
           )}
@@ -2092,7 +2092,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               fontFamily: t.fontHeadline, letterSpacing: 2, textTransform: "uppercase",
             }}>Now Playing</span>
             <span style={{
-              fontSize: 9, color: C.textMuted, fontFamily: t.fontMono,
+              fontSize: 9, color: C.textMuted, fontFamily: t.fontBody,
               letterSpacing: 3, textTransform: "uppercase",
             }}>Podcast</span>
           </div>
@@ -2193,7 +2193,7 @@ export default function NPPDashboard({ session: sessionProp }) {
             <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.gold, animation: "pulse 2s ease infinite" }} />
             <span style={{
               fontSize: 10, color: C.gold, fontWeight: 700, letterSpacing: 2,
-              textTransform: "uppercase", fontFamily: t.fontMono,
+              textTransform: "uppercase", fontFamily: t.fontBody,
             }}>Live Community{SHOW_COMMUNITY_STATS ? ` · ${memberStats.active_this_week || 0} active this week` : ""}</span>
           </div>
 
@@ -2221,7 +2221,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 <span style={{ fontSize: 30, fontWeight: 700, color: C.text, fontFamily: t.fontHeadline }}>
                   {s.v.toLocaleString()}
                 </span>
-                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontMono }}>{s.l}</span>
+                <span style={{ fontSize: 10, color: C.textDim, textTransform: "uppercase", letterSpacing: 2, fontFamily: t.fontBody }}>{s.l}</span>
               </div>
             ))}
           </div>
@@ -2231,7 +2231,7 @@ export default function NPPDashboard({ session: sessionProp }) {
             {VOTE_TYPES.map((a) => (
               <div key={a.key} style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: C.textDim }}>
                 <span style={{ color: a.color, fontSize: 11 }}>{a.icon}</span>
-                <span style={{ fontFamily: t.fontMono, fontSize: 10 }}>{a.label}</span>
+                <span style={{ fontFamily: t.fontBody, fontSize: 10 }}>{a.label}</span>
               </div>
             ))}
           </div>
@@ -2380,7 +2380,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                   }}>
                     <span style={{ fontSize: 14, lineHeight: 1 }}>{b.icon}</span>
                     {b.label}&ensp;<span style={{
-                      fontSize: 10, opacity: 0.6, fontFamily: t.fontMono,
+                      fontSize: 10, opacity: 0.6, fontFamily: t.fontBody,
                       fontWeight: 400,
                     }}>{b.count}</span>
                   </button>
@@ -2396,7 +2396,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               {activeBucket && franchisesInBucket.length > 1 && (
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{
-                    fontSize: 10, color: C.textDim, fontFamily: t.fontMono,
+                    fontSize: 10, color: C.textDim, fontFamily: t.fontBody,
                     textTransform: "uppercase", letterSpacing: 1,
                   }}>Franchise</span>
                   <select
@@ -2427,7 +2427,7 @@ export default function NPPDashboard({ session: sessionProp }) {
               )}
 
               <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: activeBucket && franchisesInBucket.length > 1 ? 0 : 0 }}>
-                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: t.fontMono, textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
+                <span style={{ fontSize: 10, color: C.textDim, marginRight: 4, fontFamily: t.fontBody, textTransform: "uppercase", letterSpacing: 1 }}>Sort</span>
                 {[
                   { key: "az", label: sortBy === "za" ? "Z–A" : "A–Z", toggle: true },
                   ...(SHOW_COMMUNITY_STATS ? [
@@ -2446,7 +2446,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                     padding: "4px 10px", borderRadius: 4, border: "none",
                     background: isActive ? `${C.gold}15` : "transparent",
                     color: isActive ? C.gold : C.textDim,
-                    fontSize: 11, cursor: "pointer", fontFamily: t.fontMono,
+                    fontSize: 11, cursor: "pointer", fontFamily: t.fontBody,
                     transition: "all 0.2s", fontWeight: isActive ? 700 : 400,
                   }}>{s.toggle && sortBy === "za" ? "Z–A" : s.label}</button>
                   );
@@ -2510,13 +2510,13 @@ export default function NPPDashboard({ session: sessionProp }) {
             )}
 
             {filtered.length === 0 && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontBody, fontSize: 13 }}>
                 {searchQuery ? `No films matching "${searchQuery}"` : "No films found"}
               </div>
             )}
 
             {searchQuery && filtered.length > 0 && (
-              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: t.fontMono, marginBottom: 10 }}>
+              <div style={{ fontSize: 11, color: C.textMuted, fontFamily: t.fontBody, marginBottom: 10 }}>
                 {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{searchQuery}"
                 {activeBucket ? ` in ${(BUCKET_LABELS[activeBucket] || {}).label || activeBucket}` : ""}
               </div>
@@ -2545,7 +2545,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 </button>
                 <div style={{
                   fontSize: 10, color: C.textDim, marginTop: 8,
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                 }}>
                   Showing {visibleCount} of {filtered.length}
                 </div>
@@ -2565,7 +2565,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontBody, fontSize: 13 }}>
                 No upcoming episodes yet
               </div>
             )}
@@ -2576,12 +2576,12 @@ export default function NPPDashboard({ session: sessionProp }) {
         {tab === "recent" && (
           <div style={{ paddingBottom: 48 }}>
             {rssLoading && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontBody, fontSize: 12 }}>
                 Loading episodes...
               </div>
             )}
             {rssError && !rssLoading && recent.length === 0 && (
-              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 12 }}>
+              <div style={{ textAlign: "center", padding: "20px 0", color: C.textDim, fontFamily: t.fontBody, fontSize: 12 }}>
                 {rssError}
               </div>
             )}
@@ -2593,7 +2593,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                 isAdmin={isAdmin} films={films} onLinkEpisode={handleLinkEpisode}
               />
             )) : !rssLoading && (
-              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontMono, fontSize: 13 }}>
+              <div style={{ textAlign: "center", padding: "40px 0", color: C.textDim, fontFamily: t.fontBody, fontSize: 13 }}>
                 No recent episodes
               </div>
             )}
@@ -2661,7 +2661,7 @@ export default function NPPDashboard({ session: sessionProp }) {
           )}
           <div style={{
             marginTop: 14, fontSize: 10, color: C.textDim,
-            fontFamily: t.fontMono, letterSpacing: 1,
+            fontFamily: t.fontBody, letterSpacing: 1,
           }}>
             <a href={NPP_WEBSITE} target="_blank" rel="noopener noreferrer"
               style={{ color: C.textDim, textDecoration: "none", transition: "color 0.15s" }}

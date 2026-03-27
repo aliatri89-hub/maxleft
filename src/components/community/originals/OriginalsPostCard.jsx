@@ -85,7 +85,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 
           <div style={{
             fontSize: 10, color: accent, fontWeight: 600,
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             textTransform: "uppercase",
             flexShrink: 0,
           }}>
@@ -174,7 +174,7 @@ function ReaderOverlay({ post, accent, onClose }) {
         <div style={{
           flex: 1, textAlign: "center",
           fontSize: 11, fontWeight: 600, color: t.textMuted,
-          fontFamily: t.fontMono,
+          fontFamily: t.fontBody,
           textTransform: "uppercase", letterSpacing: "0.06em",
         }}>
           MANTL Originals
@@ -207,7 +207,7 @@ function ReaderOverlay({ post, accent, onClose }) {
             <div style={{
               fontSize: 11, fontWeight: 600,
               color: accent,
-              fontFamily: t.fontMono,
+              fontFamily: t.fontBody,
               letterSpacing: "0.03em",
             }}>
               by Ali
@@ -217,7 +217,7 @@ function ReaderOverlay({ post, accent, onClose }) {
                 <span style={{ color: t.textSecondary }}>·</span>
                 <div style={{
                   fontSize: 11, color: t.textMuted,
-                  fontFamily: t.fontMono,
+                  fontFamily: t.fontBody,
                 }}>
                   {publishDate}
                 </div>
@@ -246,7 +246,7 @@ function ReaderOverlay({ post, accent, onClose }) {
         }}>
           <div style={{
             fontSize: 11, color: t.textSecondary,
-            fontFamily: t.fontMono,
+            fontFamily: t.fontBody,
             textAlign: "center",
             letterSpacing: "0.05em",
             textTransform: "uppercase",

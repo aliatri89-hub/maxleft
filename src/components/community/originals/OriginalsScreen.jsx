@@ -205,7 +205,7 @@ export default function OriginalsScreen({
                   <span style={{ color: t.textSecondary }}>·</span>
                   <span style={{
                     fontSize: 9, fontWeight: 600,
-                    fontFamily: t.fontMono,
+                    fontFamily: t.fontBody,
                     color: t.textMuted,
                   }}>
                     {blurbAuthor}
