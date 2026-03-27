@@ -673,10 +673,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 display: "flex", justifyContent: "center",
                 zIndex: 3, pointerEvents: "none",
               }}>
-                <FadeImg
+                <img
                   src={data.logo_url}
                   alt={data.title}
-                  placeholderColor="transparent"
                   style={{
                     height: 40,
                     maxWidth: "70%",
@@ -710,17 +709,15 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             textAlign: "center",
           }}>
             {data.logo_url ? (
-              <FadeImg
+              <img
                 src={data.logo_url}
                 alt={data.title}
-                placeholderColor="transparent"
                 style={{
                   height: 44,
                   maxWidth: "75%",
                   objectFit: "contain",
                   filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6))",
                   opacity: 0.95,
-                  margin: "0 auto",
                 }}
               />
             ) : (
@@ -1449,10 +1446,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                   }}>
                     {studio.logo_url ? (
-                      <FadeImg
+                      <img
                         src={studio.logo_url}
                         alt={studio.name}
-                        placeholderColor="transparent"
+                        loading="lazy"
                         style={{
                           height: 18, width: "auto", maxWidth: 72,
                           objectFit: "contain",
