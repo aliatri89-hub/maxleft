@@ -213,14 +213,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               }}>
                 {film_title}
               </span>
-              {duration_seconds > 0 && (
-                <span style={{
-                  fontFamily: t.fontMono, fontSize: 10, color: t.textFaint,
-                  letterSpacing: "0.03em", flexShrink: 0, textTransform: "uppercase",
-                }}>
-                  {formatDuration(duration_seconds)}
-                </span>
-              )}
             </div>
             {/* Badge + buttons in one row */}
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -262,26 +254,36 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 </div>
               )}
               {!isPaywall && (
-                <div onClick={handlePlay} style={{
-                  width: 38, height: 38, borderRadius: "50%",
-                  background: isActiveAndPlaying ? "rgba(201,124,93,0.2)" : "#c97c5d",
-                  border: isActiveAndPlaying ? "1.5px solid rgba(201,124,93,0.5)" : "1.5px solid #c97c5d",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", transition: "all 0.15s",
-                }}>
-                  {isCurrent && buffering ? (
-                    <div style={{
-                      width: 14, height: 14, borderRadius: "50%",
-                      border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "#fff",
-                      animation: "pcSpin 0.6s linear infinite",
-                    }} />
-                  ) : (
-                    <svg width="15" height="15" viewBox="0 0 24 24"
-                      fill={isActiveAndPlaying ? "#c97c5d" : "var(--bg-card, #0f0d0b)"}>
-                      {isActiveAndPlaying
-                        ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                        : <path d="M8 5v14l11-7z" />}
-                    </svg>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                  <div onClick={handlePlay} style={{
+                    width: 38, height: 38, borderRadius: "50%",
+                    background: isActiveAndPlaying ? "rgba(201,124,93,0.2)" : "#c97c5d",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(201,124,93,0.5)" : "1.5px solid #c97c5d",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", transition: "all 0.15s",
+                  }}>
+                    {isCurrent && buffering ? (
+                      <div style={{
+                        width: 14, height: 14, borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "#fff",
+                        animation: "pcSpin 0.6s linear infinite",
+                      }} />
+                    ) : (
+                      <svg width="15" height="15" viewBox="0 0 24 24"
+                        fill={isActiveAndPlaying ? "#c97c5d" : "var(--bg-card, #0f0d0b)"}>
+                        {isActiveAndPlaying
+                          ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                          : <path d="M8 5v14l11-7z" />}
+                      </svg>
+                    )}
+                  </div>
+                  {duration_seconds > 0 && (
+                    <span style={{
+                      fontFamily: t.fontMono, fontSize: 9, color: t.textFaint,
+                      letterSpacing: "0.03em", textTransform: "uppercase",
+                    }}>
+                      {formatDuration(duration_seconds)}
+                    </span>
                   )}
                 </div>
               )}
@@ -331,10 +333,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                     {fullDesc}
                   </div>
                 ) : (
-                  <div style={{ marginTop: 6, display: "flex", alignItems: "center" }}>
+                  <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
                     <div style={{
-                      width: 32, height: 3, borderRadius: 2,
-                      background: "rgba(255,255,255,0.1)",
+                      width: 48, height: 4, borderRadius: 2,
+                      background: "rgba(255,255,255,0.12)",
                     }} />
                   </div>
                 )
