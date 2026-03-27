@@ -312,8 +312,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
-                  background: inQueue ? "rgba(255,255,255,0.12)" : t.bgElevated,
-                  border: inQueue ? "1px solid rgba(255,255,255,0.3)" : `1px solid ${t.borderMedium}`,
+                  background: inQueue ? "#4a4540" : "#2e2b27",
+                  border: inQueue ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.12)",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer",
                   transition: "all 0.2s",
@@ -333,8 +334,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div onClick={handlePlay} style={{
                     width: 38, height: 38, borderRadius: 8,
-                    background: isActiveAndPlaying ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)",
-                    border: isActiveAndPlaying ? "1.5px solid rgba(255,255,255,0.25)" : "1.5px solid rgba(255,255,255,0.15)",
+                    background: isActiveAndPlaying ? "#3a3530" : "#2e2b27",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(255,255,255,0.2)" : "1.5px solid rgba(255,255,255,0.1)",
+                    boxShadow: "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", transition: "all 0.15s",
                   }}>
