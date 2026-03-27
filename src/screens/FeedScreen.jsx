@@ -15,7 +15,6 @@ import {
   EmptyFeed,
   FeedCard,
 } from "../components/feed";
-import BrowseLoadingSplash from "../components/feed/BrowseLoadingSplash";
 
 // ════════════════════════════════════════════════
 // FEED SCREEN — Movies | Podcast | Activity
@@ -203,17 +202,33 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
   if (showSkeleton) {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
-        <div style={{ padding: "0 16px" }}>
-          {[0, 1, 2].map(i => (
-            <div key={i} style={{
-              margin: "6px 0", height: i === 1 ? 120 : 180, borderRadius: 16,
-              background: "var(--bg-card, #1a1714)",
-              opacity: 0.6 - i * 0.15,
-              animation: "skeleton-pulse 1.5s ease infinite",
-              animationDelay: `${i * 0.2}s`,
+        {/* Match LogCard: 16:9 aspect ratio, margin 6px 16px, borderRadius 10, dark bg */}
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} style={{
+            margin: "6px 16px",
+            borderRadius: 10,
+            aspectRatio: "16 / 9",
+            background: "var(--bg-card, #1a1714)",
+            position: "relative",
+            overflow: "hidden",
+            opacity: 0,
+            animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
+          }}>
+            {/* Pulse shimmer */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
+              backgroundSize: "200% 100%",
+              animation: `badgeShimmer 2s ease ${i * 0.2}s infinite`,
             }} />
-          ))}
-        </div>
+            {/* Bottom strip placeholder — mimics date sticker area */}
+            <div style={{
+              position: "absolute", bottom: 10, left: 12,
+              width: 60, height: 18, borderRadius: 3,
+              background: "rgba(240,235,225,0.06)",
+            }} />
+          </div>
+        ))}
       </div>
     );
   }
@@ -319,7 +334,51 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
       {/* ── New Releases pane ── */}
       <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
         {releases.loading && releases.items.length === 0 && (
-          <BrowseLoadingSplash mode="releases" />
+          <div style={{ padding: "4px 0" }}>
+            {[0, 1, 2, 3, 4].map(i => (
+              <div key={i} style={{
+                margin: "6px 16px",
+                borderRadius: 10,
+                minHeight: 80,
+                background: "var(--bg-card, #1a1714)",
+                border: "1px solid rgba(255,255,255,0.04)",
+                position: "relative",
+                overflow: "hidden",
+                opacity: 0,
+                animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
+              }}>
+                {/* Inner tape structure — mimics BrowseCard with tape edges */}
+                <div style={{
+                  display: "flex", minHeight: 80, borderRadius: 9, overflow: "hidden",
+                }}>
+                  <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
+                  <div style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.015)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    position: "relative",
+                  }}>
+                    {/* Shimmer */}
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
+                      backgroundSize: "200% 100%",
+                      animation: "badgeShimmer 2s ease infinite",
+                      animationDelay: `${i * 0.2}s`,
+                    }} />
+                    {/* Title placeholder */}
+                    <div style={{
+                      width: `${50 + (i * 7) % 30}%`, height: 16, borderRadius: 4,
+                      background: "rgba(255,255,255,0.05)",
+                      animation: "skeleton-pulse 1.5s ease infinite",
+                      animationDelay: `${i * 0.15}s`,
+                    }} />
+                  </div>
+                  <div style={{ width: 5, flexShrink: 0, background: "#1a1612" }} />
+                </div>
+              </div>
+            ))}
+          </div>
         )}
         {releases.items.length === 0 && !releases.loading && (
           <div style={{
@@ -340,8 +399,10 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
             No releases covered by {selectedPodcast === "__favorites__" ? "your favorites" : "this podcast"}
           </div>
         )}
-        {filteredReleases.slice(0, BROWSE_CAP).map((item) => (
-          <BrowseCard key={`rel-${item.tmdb_id}`} data={item} variant="releases" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
+        {filteredReleases.slice(0, BROWSE_CAP).map((item, i) => (
+          <FeedCard key={`rel-${item.tmdb_id}`} index={i} dismissable={false}>
+            <BrowseCard data={item} variant="releases" pushNav={pushNav} removeNav={removeNav} onNavigateCommunity={onNavigateCommunity} />
+          </FeedCard>
         ))}
         {releases.hasMore && releases.items.length < BROWSE_CAP && <div ref={releasesSentinelRef} style={{ height: 1 }} />}
         {releases.loading && releases.items.length > 0 && (
@@ -414,12 +475,43 @@ export default function FeedScreen({ session, profile, onToast, isActive, onNavi
           <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "8px 0" }}>
             {[0, 1, 2, 3].map(i => (
               <div key={i} style={{
-                height: 100, borderRadius: 14,
+                borderRadius: 14,
                 background: "var(--bg-card, #1a1714)",
-                opacity: 0.5 - i * 0.1,
-                animation: "skeleton-pulse 1.5s ease infinite",
-                animationDelay: `${i * 0.15}s`,
-              }} />
+                border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+                padding: "12px 14px",
+                display: "flex", gap: 12, alignItems: "flex-start",
+                opacity: 0,
+                animation: `feedCardIn 0.35s ease ${i * 0.08}s both`,
+              }}>
+                {/* Podcast artwork placeholder */}
+                <div style={{
+                  width: 60, height: 60, borderRadius: 10, flexShrink: 0,
+                  background: "rgba(255,255,255,0.04)",
+                  animation: "skeleton-pulse 1.5s ease infinite",
+                  animationDelay: `${i * 0.15}s`,
+                }} />
+                {/* Text lines placeholder */}
+                <div style={{ flex: 1, paddingTop: 4 }}>
+                  <div style={{
+                    width: "70%", height: 14, borderRadius: 4,
+                    background: "rgba(255,255,255,0.06)",
+                    animation: "skeleton-pulse 1.5s ease infinite",
+                    animationDelay: `${i * 0.15}s`,
+                  }} />
+                  <div style={{
+                    width: "45%", height: 11, borderRadius: 3, marginTop: 8,
+                    background: "rgba(255,255,255,0.04)",
+                    animation: "skeleton-pulse 1.5s ease infinite",
+                    animationDelay: `${i * 0.15 + 0.1}s`,
+                  }} />
+                  <div style={{
+                    width: "85%", height: 10, borderRadius: 3, marginTop: 10,
+                    background: "rgba(255,255,255,0.03)",
+                    animation: "skeleton-pulse 1.5s ease infinite",
+                    animationDelay: `${i * 0.15 + 0.2}s`,
+                  }} />
+                </div>
+              </div>
             ))}
           </div>
         )}

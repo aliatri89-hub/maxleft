@@ -2,7 +2,7 @@ import { t } from "../../theme";
 import { useState, useEffect, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { renderWithTimecodes } from "../community/shared/AudioPlayerProvider";
-import { isPatreonUrl } from "./FeedPrimitives";
+import { isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
@@ -217,10 +217,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       {/* B&W backdrop wash — full card height */}
       {bdUrl && (
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-          <img
+          <FadeImg
             src={bdUrl}
             alt=""
-            loading="lazy"
+            placeholderColor="transparent"
             style={{
               position: "absolute",
               inset: 0,
@@ -266,8 +266,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           boxShadow: "0 3px 8px rgba(0,0,0,0.5)",
         }}>
           {podcast_artwork ? (
-            <img loading="lazy" src={podcast_artwork} alt={podcast_name}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <FadeImg src={podcast_artwork} alt={podcast_name}
+              placeholderColor="#2a2520"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <div style={{
               width: "100%", height: "100%",
