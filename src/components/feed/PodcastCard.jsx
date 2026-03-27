@@ -203,13 +203,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         {/* Right column */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
 
-          {/* Row 1: Title + duration (left) | badge + play buttons (right) */}
+          {/* Single row: left (title + dur + year) | right (badge + buttons) */}
           <div style={{
             display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-            gap: 8, marginBottom: 2,
+            gap: 8,
           }}>
-            {/* Title + duration */}
-            <div style={{ minWidth: 0, flex: 1 }}>
+            {/* Left: title, duration, year stacked */}
+            <div style={{ minWidth: 0, flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
                 <span style={{
                   fontFamily: t.fontDisplay,
@@ -229,9 +229,33 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   </span>
                 )}
               </div>
+              {/* Year · Date */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {film_year && (
+                  <span style={{
+                    fontFamily: t.fontMono,
+                    fontSize: 11, color: "var(--text-secondary)",
+                    letterSpacing: "0.02em",
+                  }}>
+                    {film_year}
+                  </span>
+                )}
+                {film_year && fmtDate(episode_air_date) && (
+                  <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
+                )}
+                {fmtDate(episode_air_date) && (
+                  <span style={{
+                    fontFamily: t.fontMono,
+                    fontSize: 10, color: t.textFaint,
+                    textTransform: "uppercase", letterSpacing: "0.04em",
+                  }}>
+                    {fmtDate(episode_air_date)}
+                  </span>
+                )}
+              </div>
             </div>
 
-            {/* Right stack: badge on top, play buttons below */}
+            {/* Right: badge on top, play buttons below */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
               {/* Watched / Log badge */}
               {isWatched ? (
@@ -261,7 +285,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 </div>
               ) : null}
 
-              {/* Play buttons row */}
+              {/* Play buttons */}
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {!isPaywall && addToQueue && !isCurrent && (
                   <div onClick={handleQueue} title="Up Next" style={{
@@ -325,38 +349,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             </div>
           </div>
 
-          {/* Row 2: Year · Date */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-            {film_year && (
-              <span style={{
-                fontFamily: t.fontMono,
-                fontSize: 11, color: "var(--text-secondary)",
-                letterSpacing: "0.02em",
-              }}>
-                {film_year}
-              </span>
-            )}
-            {film_year && fmtDate(episode_air_date) && (
-              <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
-            )}
-            {fmtDate(episode_air_date) && (
-              <span style={{
-                fontFamily: t.fontMono,
-                fontSize: 10, color: t.textFaint,
-                textTransform: "uppercase", letterSpacing: "0.04em",
-              }}>
-                {fmtDate(episode_air_date)}
-              </span>
-            )}
-          </div>
-
-          {/* Row 3: About pill / expanded description — bottom of card */}
+          {/* About pill / expanded description — below the two-column row */}
           {hasDesc && (
             expanded ? (
               <div style={{
                 fontFamily: t.fontMono,
                 fontSize: 12, color: "var(--text-secondary)",
-                lineHeight: 1.5, marginTop: 2,
+                lineHeight: 1.5, marginTop: 8,
               }}>
                 {fullDesc}
               </div>
@@ -366,7 +365,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 padding: "3px 9px", borderRadius: 20,
                 border: "1px solid rgba(255,255,255,0.08)",
                 background: "rgba(255,255,255,0.03)",
-                marginTop: 2, alignSelf: "flex-start",
+                marginTop: 8, alignSelf: "flex-start",
               }}>
                 <span style={{
                   fontFamily: t.fontMono, fontSize: 10, color: t.textFaint,
