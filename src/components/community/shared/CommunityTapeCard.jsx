@@ -129,11 +129,14 @@ function StaffPicksTitle({ tilt, isSubscribed }) {
           alignItems: "center",
           justifyContent: "center",
           width: size * 0.7,
-          height: size * 0.8,
-          marginLeft: -size * 0.06,
+          height: size * 0.82,
+          marginLeft: -size * 0.14,
           marginRight: -1,
+          verticalAlign: "middle",
+          alignSelf: "center",
           position: "relative",
           flexShrink: 0,
+          marginTop: size * 0.02,
         }}>
           <span style={{
             position: "absolute", inset: 0,
