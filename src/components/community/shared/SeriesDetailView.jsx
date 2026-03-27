@@ -137,7 +137,7 @@ export default function SeriesDetailView({
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                objectPosition: "top center",
+                objectPosition: series.thumbnail_position || "top center",
                 opacity: 0.7,
                 display: "block",
               }}

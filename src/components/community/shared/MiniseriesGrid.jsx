@@ -134,7 +134,7 @@ function GridTile({ series, accent, onTap }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: "top center",
+            objectPosition: series.thumbnail_position || "top center",
             display: "block",
             opacity: imgLoaded ? 1 : 0,
             transition: "opacity 0.3s",
