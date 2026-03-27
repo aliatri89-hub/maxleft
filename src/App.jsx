@@ -184,7 +184,7 @@ function AppMain() {
 
   // ── Extracted hooks ──
   const { toast, toastExiting, toastDuration, showToast } = useToast();
-  const { pushNav, removeNav, dismissOverlays } = useBackNav(activeTab, setActiveTab);
+  const { pushNav, removeNav, dismissOverlays, popNav } = useBackNav(activeTab, setActiveTab);
   const {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
     syncSliderPosition,
@@ -672,6 +672,7 @@ function AppMain() {
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
                 onBack={() => { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
+                popNav={popNav}
                 onShelvesChanged={refreshShelves}
                 communitySubscriptions={communitySubscriptions}
                 onOpenCommunity={(slug, tmdbId) => { setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
@@ -733,13 +734,7 @@ function AppMain() {
         {/* Floating back button — shown on iOS/Android when nav bar is hidden */}
         {screen === "app" && (activeCommunitySlug || showWhatToWatch || showTripleFeature || showReelTime || showCastConnections) && (
           <div
-            onClick={() => {
-              if (activeCommunitySlug) { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }
-              else if (showTripleFeature) { removeNav("tripleFeature"); setShowTripleFeature(false); }
-              else if (showReelTime) { removeNav("reelTime"); setShowReelTime(false); }
-              else if (showCastConnections) { removeNav("castConnections"); setShowCastConnections(false); }
-              else if (showWhatToWatch) { removeNav("whatToWatch"); setShowWhatToWatch(false); }
-            }}
+            onClick={() => { popNav(); }}
             style={{
               position: "fixed",
               top: "calc(env(safe-area-inset-top, 0px) + 12px)",

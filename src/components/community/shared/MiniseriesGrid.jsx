@@ -72,15 +72,22 @@ export default function MiniseriesGrid({
       {!searchQuery.trim() && filter === "all" && dynamicShelves}
 
       {/* Grid */}
+      <style>{`
+        @keyframes gridTileIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: 4,
         padding: "6px 4px 0",
       }}>
-        {filtered.map((s) => (
+        {filtered.map((s, i) => (
           <GridTile
             key={s.id}
+            index={i}
             series={s}
             accent={accent}
             userId={userId}
@@ -110,11 +117,12 @@ export default function MiniseriesGrid({
    GridTile — Single series tile in the grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GridTile({ series, accent, onTap, userId }) {
+function GridTile({ series, accent, onTap, userId, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [localPosition, setLocalPosition] = useState(series.thumbnail_position || "top center");
   const isDone = series._pct === 100 && series._total > 0;
   const hasProgress = series._completed > 0;
+  const staggerDelay = `${Math.min(index, 10) * 0.04}s`;
 
   return (
     <div
@@ -125,6 +133,7 @@ function GridTile({ series, accent, onTap, userId }) {
         cursor: "pointer",
         overflow: "hidden",
         WebkitTapHighlightColor: "transparent",
+        animation: `gridTileIn 0.35s ease ${staggerDelay} both`,
       }}
     >
       {/* Admin positioner */}
