@@ -1,4 +1,5 @@
 import { t } from "../../../theme";
+import { FadeImg } from "../../feed/FeedPrimitives";
 // ════════════════════════════════════════════════
 // COMMUNITY TAPE CARD — VHS label for Explore screen
 // ════════════════════════════════════════════════
@@ -143,10 +144,10 @@ export default function CommunityTapeCard({
         }}>
           {/* Ghost backdrop — podcast artwork */}
           {artworkUrl && (
-            <img
+            <FadeImg
               src={artworkUrl}
               alt=""
-              loading="lazy"
+              placeholderColor="transparent"
               style={{
                 position: "absolute", inset: -4,
                 width: "calc(100% + 8px)", height: "calc(100% + 8px)",
@@ -181,9 +182,10 @@ export default function CommunityTapeCard({
                 padding: "0 18px",
               }}>
                 {artworkUrl && (
-                  <img
+                  <FadeImg
                     src={artworkUrl}
                     alt=""
+                    placeholderColor="rgba(44,40,36,0.08)"
                     style={{
                       width: 58, height: 58,
                       borderRadius: 8,
@@ -270,9 +272,10 @@ export default function CommunityTapeCard({
                 padding: "0 18px",
               }}>
                 {artworkUrl && (
-                  <img
+                  <FadeImg
                     src={artworkUrl}
                     alt=""
+                    placeholderColor="rgba(44,40,36,0.08)"
                     style={{
                       width: 48, height: 48,
                       borderRadius: 8,

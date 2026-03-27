@@ -4,7 +4,7 @@ import CrossCommunityChips from "./CrossCommunityChips";
 import WatchProviders from "./WatchProviders";
 import ListenOnBadges from "./ListenOnBadges";
 import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
-import { isPatreonUrl } from "../../feed/FeedPrimitives";
+import { isPatreonUrl, FadeImg } from "../../feed/FeedPrimitives";
 import { useState, useEffect, useMemo } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
@@ -355,7 +355,8 @@ export default function CommunityLogModal({
             position: "relative",
           }}>
             {resolvedCoverUrl ? (
-              <img loading="lazy" src={resolvedCoverUrl} alt={item.title}
+              <FadeImg src={resolvedCoverUrl} alt={item.title}
+                placeholderColor="#1a1a2e"
                 style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
               <div style={{

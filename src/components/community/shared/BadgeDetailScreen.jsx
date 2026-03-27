@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase";
+import { FadeImg } from "../../feed/FeedPrimitives";
 import BadgeCelebration from "./BadgeCelebration";
 
 /**
@@ -212,9 +213,10 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             onMouseLeave={isComplete ? (e => e.currentTarget.style.transform = "scale(1)") : undefined}
           >
             {badge.image_url ? (
-              <img
+              <FadeImg
                 src={badge.image_url}
                 alt={badge.name}
+                placeholderColor={`${accent}15`}
                 style={{
                   width: "100%", height: "100%", objectFit: "cover",
                   filter: isComplete
