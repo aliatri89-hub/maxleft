@@ -230,7 +230,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               </div>
             </div>
             {/* Queue + play buttons only */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
