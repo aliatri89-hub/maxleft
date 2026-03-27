@@ -252,8 +252,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       prevTmdbId.current = data.tmdb_id;
     }
 
-    // Skip if we already have credits for THIS card
-    if (data.credits) return;
+    // Skip if we already have credits with actual cast data for THIS card
+    if (data.credits?.cast?.length > 0) return;
 
     let cancelled = false;
     (async () => {
@@ -265,7 +265,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         .maybeSingle();
 
       if (cancelled) return;
-      if (d && d.credits) { setDetail(d); return; }
+      if (d && d.credits?.cast?.length > 0) { setDetail(d); return; }
 
       // Fallback: fetch from TMDB API (browse cards — film not in media table, or credits not cached)
       const partialDetail = d || null;
