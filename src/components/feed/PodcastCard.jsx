@@ -205,7 +205,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
           {/* Row 1: Title + duration (left) | badge + buttons (right, same row) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap", minWidth: 0 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
               <span style={{
                 fontFamily: t.fontDisplay,
                 fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
@@ -213,6 +213,21 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               }}>
                 {film_title}
               </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {film_year && (
+                  <span style={{ fontFamily: t.fontMono, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>
+                    {film_year}
+                  </span>
+                )}
+                {film_year && fmtDate(episode_air_date) && (
+                  <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
+                )}
+                {fmtDate(episode_air_date) && (
+                  <span style={{ fontFamily: t.fontMono, fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                    {fmtDate(episode_air_date)}
+                  </span>
+                )}
+              </div>
             </div>
             {/* Badge + buttons in one row */}
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -310,39 +325,20 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             </div>
           </div>
 
-          {/* Row 2: Year · Date */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {film_year && (
-              <span style={{ fontFamily: t.fontMono, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>
-                {film_year}
-              </span>
-            )}
-            {film_year && fmtDate(episode_air_date) && (
-              <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
-            )}
-            {fmtDate(episode_air_date) && (
-              <span style={{ fontFamily: t.fontMono, fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                {fmtDate(episode_air_date)}
-              </span>
-            )}
-          </div>
-
-              {hasDesc && (
-                expanded ? (
-                  <div style={{ fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 2 }}>
-                    {fullDesc}
-                  </div>
-                ) : (
-                  <div style={{ marginTop: 8, display: "flex", justifyContent: "center" }}>
-                    <div style={{
-                      width: 48, height: 4, borderRadius: 2,
-                      background: "rgba(255,255,255,0.12)",
-                    }} />
-                  </div>
-                )
-              )}
         </div>
       </div>
+
+      {/* Handle bar — full card width so it truly centers */}
+      {hasDesc && !expanded && (
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 8 }}>
+          <div style={{ width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />
+        </div>
+      )}
+      {hasDesc && expanded && (
+        <div style={{ fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5, marginTop: 8 }}>
+          {fullDesc}
+        </div>
+      )}
 
       <style>{`
         @keyframes pcSpin {
