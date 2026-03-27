@@ -359,7 +359,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   </div>
                   {duration_seconds > 0 && (
                     <span style={{
-                      fontFamily: t.fontBody, fontSize: 9, color: t.textFaint,
+                      fontFamily: t.fontBody, fontSize: 9, color: "rgba(255,255,255,0.85)",
+                      fontWeight: 700,
                       letterSpacing: "0.03em", textTransform: "uppercase",
                     }}>
                       {formatDuration(duration_seconds)}
