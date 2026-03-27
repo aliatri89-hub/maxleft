@@ -52,7 +52,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         // 2. Get all active badges across communities
         const { data: badgeRows } = await supabase
           .from("badges")
-          .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter, progress_tagline, sort_order, is_active")
+          .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter, progress_tagline, sort_order, is_active, audio_url, tagline, description")
           .in("community_id", communityIds)
           .eq("is_active", true)
           .order("sort_order");
