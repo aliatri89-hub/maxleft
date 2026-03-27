@@ -76,7 +76,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue } = useAudioPlayer();
 
   const isWatched = watched || justLogged;
 
@@ -111,6 +111,12 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const handleQueue = (e) => {
     e.stopPropagation();
     if (!addToQueue || isPaywall || isCurrent) return;
+    if (inQueue) {
+      const idx = queue.findIndex(q => q.enclosureUrl === resolveAudioUrl(item));
+      if (idx !== -1) removeFromQueue(idx);
+      setInQueue(false);
+      return;
+    }
     const playerEp = toPlayerEpisode({
       episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
@@ -238,7 +244,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   background: inQueue ? "rgba(255,255,255,0.12)" : t.bgElevated,
                   border: inQueue ? "1px solid rgba(255,255,255,0.3)" : `1px solid ${t.borderMedium}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: inQueue ? "default" : "pointer",
+                  cursor: "pointer",
                   transition: "all 0.2s",
                 }}>
                   {inQueue ? (
