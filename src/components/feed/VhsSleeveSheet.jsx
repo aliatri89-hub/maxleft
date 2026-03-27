@@ -147,7 +147,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
-  const { seekTo, currentEp: playerCurrentEp } = useAudioPlayer();
+  const { seekTo, currentEp: playerCurrentEp, queue, removeFromQueue, showNudge } = useAudioPlayer();
+  const [queuedUrls, setQueuedUrls] = useState(new Set());
 
   const handleTimecodeSeek = (ep, sec) => {
     const epUrl = resolveAudioUrl(ep);
@@ -1052,27 +1053,42 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               )}
                             </div>
                           )}
-                          {/* Queue: add to up next (skip for Patreon eps) */}
+                          {/* Queue: toggle add/remove from up next */}
                           {onQueueEpisode && !isActive && !isPatreonUrl(epUrl) && (
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onQueueEpisode(ep);
+                                const inQueue = queuedUrls.has(epUrl);
+                                if (inQueue) {
+                                  const idx = queue.findIndex(q => q.enclosureUrl === epUrl);
+                                  if (idx !== -1) removeFromQueue(idx);
+                                  setQueuedUrls(prev => { const n = new Set(prev); n.delete(epUrl); return n; });
+                                  showNudge("Removed from Up Next", true);
+                                } else {
+                                  onQueueEpisode(ep);
+                                  setQueuedUrls(prev => new Set([...prev, epUrl]));
+                                }
                               }}
-                              title="Add to Up Next"
+                              title={queuedUrls.has(epUrl) ? "Remove from Up Next" : "Add to Up Next"}
                               style={{
                                 width: 28, height: 28, borderRadius: "50%",
-                                background: "rgba(240,235,225,0.03)",
-                                border: "1px solid rgba(240,235,225,0.06)",
+                                background: queuedUrls.has(epUrl) ? "rgba(240,235,225,0.08)" : "rgba(240,235,225,0.03)",
+                                border: queuedUrls.has(epUrl) ? "1px solid rgba(240,235,225,0.2)" : "1px solid rgba(240,235,225,0.06)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 flexShrink: 0, cursor: "pointer",
                                 transition: "all 0.15s",
                               }}
                             >
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                              </svg>
+                              {queuedUrls.has(epUrl) ? (
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                              ) : (
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <line x1="12" y1="5" x2="12" y2="19" />
+                                  <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                              )}
                             </div>
                           )}
                           {/* Admin: unlink episode from film */}
