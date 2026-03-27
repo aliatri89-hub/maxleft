@@ -247,11 +247,21 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div onClick={handlePlay} style={{
                     width: 38, height: 38, borderRadius: "50%",
-                    background: isActiveAndPlaying ? "rgba(201,124,93,0.2)" : "#c97c5d",
-                    border: isActiveAndPlaying ? "1.5px solid rgba(201,124,93,0.5)" : "1.5px solid #c97c5d",
+                    background: isActiveAndPlaying ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(93,201,140,0.5)" : "1.5px solid rgba(255,255,255,0.15)",
+                    boxShadow: isActiveAndPlaying ? "0 0 0 2px rgba(93,201,140,0.2)" : "none",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", transition: "all 0.15s",
+                    position: "relative", overflow: "hidden",
                   }}>
+                    {/* Green underline accent */}
+                    {!isActiveAndPlaying && (
+                      <div style={{
+                        position: "absolute", bottom: 5, left: "50%", transform: "translateX(-50%)",
+                        width: 14, height: 2, borderRadius: 1,
+                        background: "#4ade80",
+                      }} />
+                    )}
                     {isCurrent && buffering ? (
                       <div style={{
                         width: 14, height: 14, borderRadius: "50%",
@@ -259,8 +269,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                         animation: "pcSpin 0.6s linear infinite",
                       }} />
                     ) : (
-                      <svg width="15" height="15" viewBox="0 0 24 24"
-                        fill={isActiveAndPlaying ? "#c97c5d" : "var(--bg-card, #0f0d0b)"}>
+                      <svg width="14" height="14" viewBox="0 0 24 24"
+                        fill={isActiveAndPlaying ? "#4ade80" : "#ffffff"}
+                        style={{ marginBottom: isActiveAndPlaying ? 0 : 2 }}>
                         {isActiveAndPlaying
                           ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
                           : <path d="M8 5v14l11-7z" />}
