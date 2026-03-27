@@ -12,7 +12,7 @@ import { tapLight } from "../utils/haptics";
  * MANTL logo in header returns to feed.
  */
 
-const TABS = ["feed", "communities", "games", "search", "shelf"];
+const TABS = ["feed", "communities", "games", "search", "mantl"];
 const FEED_MODES = ["releases", "podcast", "activity"];
 
 export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode) {

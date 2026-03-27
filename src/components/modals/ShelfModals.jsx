@@ -13,7 +13,7 @@ import ItemDetailModal from "./ItemDetailModal";
 /**
  * ShelfModals — Renders all shelf-related modals/overlays.
  *
- * Receives "trigger" props (what's open + closers) from ShelfHome.
+ * Receives "trigger" props (what's open + closers) from MyMantlScreen.
  * Manages all internal modal state (forms, editing, confirming, etc).
  */
 export default function ShelfModals({

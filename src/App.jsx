@@ -32,9 +32,9 @@ import FeedScreen from "./screens/FeedScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 
 // Screens (lazy — loaded on demand)
-const ShelfHome = lazy(() => import("./screens/ShelfHome"));
+const MyMantlScreen = lazy(() => import("./screens/MyMantlScreen"));
 const ProfileScreen = lazy(() => import("./screens/ProfileScreen"));
-const ExploreScreen = lazy(() => import("./screens/ExploreScreen"));
+const CommunitiesScreen = lazy(() => import("./screens/CommunitiesScreen"));
 const SearchScreen = lazy(() => import("./screens/SearchScreen"));
 
 // Community dashboards (lazy — public routes)
@@ -526,7 +526,7 @@ function AppMain() {
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
                     onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); }}
-                    onNavigateMantl={() => { tapLight(); if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("shelf"); }}
+                    onNavigateMantl={() => { tapLight(); if (activeTab !== "mantl") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("mantl"); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     favoritePodcasts={favoritePodcasts}
@@ -537,7 +537,7 @@ function AppMain() {
                 </div>
                 <div className="tab-pane" key="communities-tab">
                   {visitedTabs.has("communities") && <ErrorBoundary name="Communities"><Suspense fallback={<CommunityLoadingSkeleton />}>
-                    <ExploreScreen session={session}
+                    <CommunitiesScreen session={session}
                     onOpenCommunity={(slug) => { setScrollToTmdbId(null); setActiveCommunitySlug(slug); }}
                     isActive={activeTab === "communities"} communitySubscriptions={communitySubscriptions}
                     onSubscribe={handleSubscribeCommunity} onUnsubscribe={unsubscribeCommunity} subscriptionsLoaded={subscriptionsLoaded}
@@ -580,14 +580,14 @@ function AppMain() {
                   </Suspense></ErrorBoundary>}
                 </div>
                 <div className="tab-pane" key="shelf-tab">
-                  {visitedTabs.has("shelf") && <ErrorBoundary name="My MANTL"><Suspense fallback={<CommunityLoadingSkeleton />}>
-                    <ShelfHome profile={profile}
+                  {visitedTabs.has("mantl") && <ErrorBoundary name="My MANTL"><Suspense fallback={<CommunityLoadingSkeleton />}>
+                    <MyMantlScreen profile={profile}
                     onShelfIt={openShelfIt} session={session} pushNav={pushNav} removeNav={removeNav}
                     onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
                     goodreadsSyncing={sync.goodreadsSyncing} steamSyncing={sync.steamSyncing}
-                    isActive={activeTab === "shelf"} />
+                    isActive={activeTab === "mantl"} />
                   </Suspense></ErrorBoundary>}
                 </div>
               </div>
@@ -782,12 +782,12 @@ function AppMain() {
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
               <div className="nav-label">Search</div>
             </button>
-            <button className={`nav-item${activeTab === "shelf" ? " active" : ""}`}
-              onTouchStart={() => { if (activeTab !== "shelf") setPreloadTab("shelf"); }}
+            <button className={`nav-item${activeTab === "mantl" ? " active" : ""}`}
+              onTouchStart={() => { if (activeTab !== "mantl") setPreloadTab("mantl"); }}
               onClick={() => {
                 tapLight(); dismissOverlays();
-                if (activeTab !== "shelf") pushNav("tab", () => { setActiveTab("feed"); });
-                setActiveTab("shelf"); setPreloadTab(null);
+                if (activeTab !== "mantl") pushNav("tab", () => { setActiveTab("feed"); });
+                setActiveTab("mantl"); setPreloadTab(null);
               }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V3H6v6z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><line x1="12" y1="15" x2="12" y2="18"/><path d="M8 21h8"/><path d="M8 21l1-3h6l1 3"/></svg></div>
               <div className="nav-label">Mantl</div>

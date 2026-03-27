@@ -17,7 +17,7 @@ const PODCAST_ART = {
 // EXPLORE SCREEN — VHS tape shelf with sleeve discovery
 // ════════════════════════════════════════════════
 
-export default function ExploreScreen({
+export default function CommunitiesScreen({
   session,
   onOpenCommunity,
   isActive,
