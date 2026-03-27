@@ -76,7 +76,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge } = useAudioPlayer();
 
   const isWatched = watched || justLogged;
 
@@ -115,6 +115,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const idx = queue.findIndex(q => q.enclosureUrl === resolveAudioUrl(item));
       if (idx !== -1) removeFromQueue(idx);
       setInQueue(false);
+      showNudge("Removed from Up Next");
       return;
     }
     const playerEp = toPlayerEpisode({
@@ -131,7 +132,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const { error } = await supabase.from("wishlist").delete()
         .eq("user_id", userId).eq("title", film_title)
         .in("item_type", ["movie", "show"]);
-      if (!error) setAddedToWatchlist(false);
+      if (!error) { setAddedToWatchlist(false); showNudge("Removed from Watchlist"); }
       return;
     }
     const { error } = await supabase.from("wishlist").insert({
@@ -141,7 +142,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       cover_url: poster_path ? `https://image.tmdb.org/t/p/w185${poster_path}` : null,
       year: film_year || null,
     });
-    if (!error) setAddedToWatchlist(true);
+    if (!error) { setAddedToWatchlist(true); showNudge("Added to Watchlist"); }
   };
 
   if (dismissed) return null;

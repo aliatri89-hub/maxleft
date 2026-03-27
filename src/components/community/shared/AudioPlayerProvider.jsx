@@ -1306,7 +1306,7 @@ function QueueToast({ toast }) {
           textTransform: "uppercase",
           letterSpacing: "0.03em",
         }}>
-          {toast.duplicate ? "Already in queue" : "Added to Up Next"}
+          {toast.duplicate ? "Already in queue" : toast.custom ? toast.title : "Added to Up Next"}
         </span>
       </div>
     </div>
@@ -1672,7 +1672,11 @@ export default function AudioPlayerProvider({ children, session }) {
     });
   }, []);
 
-  const addToQueue = useCallback((ep) => {
+  const showNudge = useCallback((msg) => {
+    clearTimeout(queueToastRef.current);
+    setQueueToast({ title: msg, custom: true });
+    queueToastRef.current = setTimeout(() => setQueueToast(null), 2200);
+  }, []);
     if (!ep?.enclosureUrl) return;
     const isDuplicate = queueRef.current.some(q => q.enclosureUrl === ep.enclosureUrl);
     if (!isDuplicate) {
@@ -1819,13 +1823,13 @@ export default function AudioPlayerProvider({ children, session }) {
     bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
-    addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue,
+    addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue, showNudge,
   }), [
     currentEp, isPlaying, speed, buffering, error, recents, queue,
     bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimerAction, clearSleepTimer,
-    addToQueue, playNextInQueue, removeFromQueue, clearQueue,
+    addToQueue, playNextInQueue, removeFromQueue, clearQueue, showNudge,
   ]);
 
   // ── Render ───────────────────────────────────────────────
