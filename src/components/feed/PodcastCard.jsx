@@ -160,10 +160,25 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         background: t.bgCard,
         cursor: "pointer",
         padding: "12px 14px",
+        position: "relative",
       }}
     >
+      {/* ── Admin X — top left ── */}
+      {isAdmin && (
+        <div onClick={handleUnlink} title="Unlink" style={{
+          position: "absolute", top: 8, left: 8,
+          width: 18, height: 18,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", zIndex: 2,
+        }}>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </div>
+      )}
+
       {/* ── Art + right column ── */}
-      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
         {/* Podcast artwork */}
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
@@ -187,16 +202,15 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
         {/* Right column */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-          {/* Row 1: Title + Duration ←→ Status badges (top right) */}
+
+          {/* Row 1: Title + duration (left) | badge + play buttons (right) */}
           <div style={{
             display: "flex", alignItems: "flex-start", justifyContent: "space-between",
             gap: 8, marginBottom: 2,
           }}>
             {/* Title + duration */}
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{
-                display: "flex", alignItems: "baseline", gap: 6,
-              }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
                 <span style={{
                   fontFamily: t.fontDisplay,
                   fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
@@ -217,8 +231,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               </div>
             </div>
 
-            {/* Status badges — top right */}
-            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            {/* Right stack: badge on top, play buttons below */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+              {/* Watched / Log badge */}
               {isWatched ? (
                 <div style={{
                   ...badgeBase,
@@ -232,56 +247,86 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   Watched
                 </div>
               ) : userId ? (
-                <>
-                  <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{
-                    ...badgeBase,
-                    background: "rgba(255,255,255,0.03)",
-                    border: `1px solid ${t.bgHover}`,
-                    color: t.textFaint,
-                    cursor: "pointer",
+                <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{
+                  ...badgeBase,
+                  background: "rgba(255,255,255,0.03)",
+                  border: `1px solid ${t.bgHover}`,
+                  color: t.textFaint,
+                  cursor: "pointer",
+                }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Log
+                </div>
+              ) : null}
+
+              {/* Play buttons row */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {!isPaywall && addToQueue && !isCurrent && (
+                  <div onClick={handleQueue} title="Up Next" style={{
+                    width: 34, height: 34, borderRadius: "50%",
+                    background: t.bgElevated, border: `1px solid ${t.borderMedium}`,
+                    display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+                    transition: "all 0.15s",
                   }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
                       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
-                    Log
                   </div>
-                  {addedToWatchlist ? (
-                    <div onClick={handleWatchlist} style={{
-                      ...badgeBase,
-                      background: "rgba(201,124,93,0.06)",
-                      border: "1px solid rgba(201,124,93,0.15)",
-                      color: "rgba(201,124,93,0.5)",
-                      cursor: "pointer",
-                    }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
+                )}
+                {!isPaywall && (
+                  <div onClick={handlePlay} style={{
+                    width: 38, height: 38, borderRadius: "50%",
+                    background: isActiveAndPlaying ? "rgba(201,124,93,0.2)" : "#c97c5d",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(201,124,93,0.5)" : "1.5px solid #c97c5d",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", transition: "all 0.15s",
+                  }}>
+                    {isCurrent && buffering ? (
+                      <div style={{
+                        width: 14, height: 14, borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "#fff",
+                        animation: "pcSpin 0.6s linear infinite",
+                      }} />
+                    ) : (
+                      <svg width="15" height="15" viewBox="0 0 24 24"
+                        fill={isActiveAndPlaying ? "#c97c5d" : "var(--bg-card, #0f0d0b)"}>
+                        {isActiveAndPlaying
+                          ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
+                          : <path d="M8 5v14l11-7z" />}
                       </svg>
-                      Added
-                    </div>
-                  ) : (
-                    <div onClick={handleWatchlist} style={{
-                      ...badgeBase,
-                      background: "rgba(255,255,255,0.03)",
-                      border: `1px solid ${t.bgHover}`,
-                      color: t.textFaint,
-                      cursor: "pointer",
-                    }}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
-                        <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                      Watchlist
-                    </div>
-                  )}
-                </>
-              ) : null}
+                    )}
+                  </div>
+                )}
+                {isPaywall && (
+                  <a href={epUrl} target="_blank" rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: "rgba(249,104,58,0.12)",
+                      border: "1px solid rgba(249,104,58,0.25)",
+                      borderRadius: 20, padding: "6px 14px 6px 10px",
+                      cursor: "pointer", textDecoration: "none",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                      <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
+                    </svg>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, letterSpacing: "0.05em",
+                      textTransform: "uppercase", color: "#F96836",
+                      fontFamily: t.fontMono,
+                    }}>Patreon</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Row 2: Year · Date */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 6,
-            marginBottom: 6,
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
             {film_year && (
               <span style={{
                 fontFamily: t.fontMono,
@@ -305,7 +350,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             )}
           </div>
 
-          {/* Row 3: Tap pill → full description */}
+          {/* Row 3: About pill / expanded description — bottom of card */}
           {hasDesc && (
             expanded ? (
               <div style={{
@@ -333,97 +378,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               </div>
             )
           )}
-
-          {/* Row 4: Bottom — admin trash (left) + queue/play (right) */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            marginTop: 8,
-          }}>
-            {/* Left: admin unlink only */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {isAdmin && (
-                <div onClick={handleUnlink} title="Unlink" style={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)",
-                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-                }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(239,68,68,0.6)" strokeWidth="2" strokeLinecap="round">
-                    <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            {/* Right: queue + play buttons (larger) */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              {/* Queue button */}
-              {!isPaywall && addToQueue && !isCurrent && (
-                <div onClick={handleQueue} title="Up Next" style={{
-                  width: 34, height: 34, borderRadius: "50%",
-                  background: t.bgElevated, border: `1px solid ${t.borderMedium}`,
-                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  transition: "all 0.15s",
-                }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </div>
-              )}
-              {/* Play button — primary action, larger + accent fill */}
-              {!isPaywall && (
-                <div onClick={handlePlay} style={{
-                  width: 38, height: 38, borderRadius: "50%",
-                  background: isActiveAndPlaying ? "rgba(201,124,93,0.2)" : "#c97c5d",
-                  border: isActiveAndPlaying ? "1.5px solid rgba(201,124,93,0.5)" : "1.5px solid #c97c5d",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", transition: "all 0.15s",
-                }}>
-                  {isCurrent && buffering ? (
-                    <div style={{
-                      width: 14, height: 14, borderRadius: "50%",
-                      border: "2px solid rgba(255,255,255,0.2)", borderTopColor: "#fff",
-                      animation: "pcSpin 0.6s linear infinite",
-                    }} />
-                  ) : (
-                    <svg width="15" height="15" viewBox="0 0 24 24"
-                      fill={isActiveAndPlaying ? "#c97c5d" : "var(--bg-card, #0f0d0b)"}>
-                      {isActiveAndPlaying
-                        ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
-                        : <path d="M8 5v14l11-7z" />}
-                    </svg>
-                  )}
-                </div>
-              )}
-              {/* Patreon link-out */}
-              {isPaywall && (
-                <a
-                  href={epUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 6,
-                    background: "rgba(249,104,58,0.12)",
-                    border: "1px solid rgba(249,104,58,0.25)",
-                    borderRadius: 20, padding: "6px 14px 6px 10px",
-                    cursor: "pointer", textDecoration: "none",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                    <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
-                  </svg>
-                  <span style={{
-                    fontSize: 11, fontWeight: 700, letterSpacing: "0.05em",
-                    textTransform: "uppercase", color: "#F96836",
-                    fontFamily: t.fontMono,
-                  }}>
-                    Patreon
-                  </span>
-                </a>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
