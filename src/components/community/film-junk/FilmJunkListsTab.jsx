@@ -3,7 +3,6 @@ import { useState, useMemo, useCallback } from "react";
 import { useCommunityLists } from "../../../hooks/useCommunityLists";
 import { ProgressRing, StatPill } from "../primitives";
 import CommunityFilter from "../shared/CommunityFilter";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * FilmJunkListsTab — Per-host poster shelves grouped under list headers.
@@ -352,7 +351,7 @@ function ListPosterCard({ item, rank, seen, accent, hostColor, onTap }) {
         boxShadow: seen ? "0 0 8px rgba(74,222,128,0.25)" : "none",
       }}>
         {posterUrl ? (
-          <FadeImg src={posterUrl} alt={item.title} loading="lazy"
+          <img src={posterUrl} alt={item.title} loading="lazy"
             onLoad={() => setImgLoaded(true)}
             style={{
               width: "100%", height: "100%", objectFit: "cover",
@@ -431,7 +430,7 @@ function ListsHero({ community, seenStats, accent }) {
     }}>
       {hasBanner ? (
         <>
-          <FadeImg loading="lazy" src={bannerUrl} alt=""
+          <img loading="lazy" src={bannerUrl} alt=""
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%",

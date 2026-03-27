@@ -3,7 +3,6 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import { ProgressRing, StatPill } from "../primitives";
 import CommunityFilter from "../shared/CommunityFilter";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * FilmJunkAwardsTab — The Junkies
@@ -289,7 +288,7 @@ function JunkiesCard({ card, isSeen, accent, onTap }) {
         border: `1.5px solid ${isSeen ? "rgba(74,222,128,0.35)" : card.isWinner ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)"}`,
       }}>
         {posterUrl ? (
-          <FadeImg src={posterUrl} alt={card.title} loading="lazy"
+          <img src={posterUrl} alt={card.title} loading="lazy"
             onLoad={() => setImgLoaded(true)}
             style={{
               width: "100%", height: "100%", objectFit: "cover",
@@ -371,7 +370,7 @@ function JunkiesHero({ community, seenStats, accent, yearsCount }) {
     }}>
       {hasBanner ? (
         <>
-          <FadeImg loading="lazy" src={bannerUrl} alt=""
+          <img loading="lazy" src={bannerUrl} alt=""
             style={{
               position: "absolute", inset: 0,
               width: "100%", height: "100%",

@@ -1,6 +1,5 @@
 import { t } from "../../../theme";
 import { useState, useEffect, useRef } from "react";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * BadgeCelebration — Full-screen badge unlock celebration.
@@ -209,7 +208,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
           position: "relative",
         }}>
           {badge.image_url ? (
-            <FadeImg loading="lazy" src={badge.image_url} alt={badge.name}
+            <img loading="lazy" src={badge.image_url} alt={badge.name}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (

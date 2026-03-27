@@ -12,7 +12,6 @@ import CommunityBottomNav from "../shared/CommunityBottomNav";
 import AddItemTool from "../dashboard/AddItemTool";
 import AdminFab from "../dashboard/AdminFab";
 import RSSSyncTool from "../dashboard/RSSSyncTool";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 const DEFAULT_TABS = [
   { key: "lists", label: "Lists", icon: "📋" },
@@ -316,7 +315,7 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
                             position: "relative", overflow: "hidden",
                           }}>
                             {resolvedCover ? (
-                              <FadeImg loading="lazy" src={resolvedCover} alt={item.title}
+                              <img loading="lazy" src={resolvedCover} alt={item.title}
                                 style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             ) : (
                               <div style={{

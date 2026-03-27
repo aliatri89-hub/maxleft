@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
 import { toLogTimestamp } from "../../../utils/helpers";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * ChapoLogModal — How Did This Get Made? community log modal.
@@ -224,7 +223,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             position: "relative",
           }}>
             {coverUrl ? (
-              <FadeImg src={coverUrl} loading="lazy" alt={item.title}
+              <img src={coverUrl} loading="lazy" alt={item.title}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }} />
             ) : (
               <div style={{
@@ -284,7 +283,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
                     cursor: "pointer",
                   }}
                 >
-                  <FadeImg loading="lazy" src="https://c5.patreon.com/external/favicon/favicon-32x32.png" alt="" style={{ width: 12, height: 12, borderRadius: 2 }} />
+                  <img loading="lazy" src="https://c5.patreon.com/external/favicon/favicon-32x32.png" alt="" style={{ width: 12, height: 12, borderRadius: 2 }} />
                   Patreon
                 </a>
               )}
@@ -553,7 +552,7 @@ function WatchProviders({ providers }) {
             style={chipStyle}
             onClick={e => { if (!link) e.preventDefault(); }}
           >
-            <FadeImg
+            <img
               src={`https://image.tmdb.org/t/p/w45${p.logo_path}`}
               alt={p.provider_name}
               style={{ width: 20, height: 20, borderRadius: 4 }}

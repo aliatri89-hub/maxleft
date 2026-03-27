@@ -1,7 +1,6 @@
 import { t } from "../../../theme";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 // ════════════════════════════════════════════════
 // COMMUNITY SLEEVE SHEET — VHS box-back for podcast discovery
@@ -186,7 +185,7 @@ export default function CommunitySleeveSheet({
             overflow: "hidden",
             marginBottom: -24,
           }}>
-            <FadeImg
+            <img
               src={sleeveHero}
               alt=""
               loading="lazy"
@@ -233,7 +232,7 @@ export default function CommunitySleeveSheet({
           zIndex: 2,
         }}>
           {artworkUrl && (
-            <FadeImg
+            <img
               src={artworkUrl}
               alt=""
               style={{

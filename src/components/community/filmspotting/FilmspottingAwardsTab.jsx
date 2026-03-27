@@ -2,7 +2,6 @@ import { t } from "../../../theme";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useCommunityAwards } from "../../../hooks/useCommunityAwards";
 import CommunityFilter from "../shared/CommunityFilter";
-import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * FilmspottingAwardsTab — Year-end Top 10 Lists.
@@ -351,7 +350,7 @@ function FSRankedCard({ pick, hostColor, seen, onTap }) {
         border: `1.5px solid ${seen ? "rgba(74,222,128,0.35)" : isNumber1 ? `${hostColor}40` : "rgba(255,255,255,0.04)"}`,
       }}>
         {posterUrl ? (
-          <FadeImg src={posterUrl} alt={pick.title} loading="lazy"
+          <img src={posterUrl} alt={pick.title} loading="lazy"
             onLoad={() => setImgLoaded(true)}
             style={{
               width: "100%", height: "100%", objectFit: "cover",

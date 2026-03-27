@@ -5,7 +5,6 @@ import { supabase } from "../supabase";
 import { useShelves } from "../contexts/ShelvesProvider";
 import BadgeShelf from "../components/shelf/BadgeShelf";
 import ShelfModals from "../components/modals/ShelfModals";
-import { FadeImg } from "../components/feed/FeedPrimitives";
 
 const accent = "#EF9F27";
 
@@ -324,7 +323,7 @@ function ShelfHome({ profile, onShelfIt, session, pushNav, removeNav, onRefresh,
                               flexShrink: 0, background: t.bgElevated,
                               boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
                             }}>
-                              <FadeImg src={movie.cover} alt="" style={{
+                              <img src={movie.cover} alt="" style={{
                                 width: "100%", height: "100%", objectFit: "cover", display: "block",
                               }} loading="lazy" />
                             </div>

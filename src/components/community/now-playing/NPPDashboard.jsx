@@ -2283,7 +2283,7 @@ export default function NPPDashboard({ session: sessionProp }) {
                   <div className="pitch-badge-back" style={{ border: `1px solid ${badge.color}44` }}>
                     <div className="backdrop" style={{ backgroundImage: `url(${badge.backdrop})` }} />
                     <div className="overlay" />
-                    <FadeImg src={badge.art} alt={badge.name} style={{ border: `2px solid ${badge.color}66` }} />
+                    <img src={badge.art} loading="lazy" alt={badge.name} style={{ border: `2px solid ${badge.color}66` }} />
                     <div className="badge-name" style={{ color: badge.color }}>{badge.name}</div>
                     <div className="badge-sub" style={{ color: `${badge.color}99` }}>{badge.sub}</div>
                   </div>
