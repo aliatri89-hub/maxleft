@@ -227,7 +227,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               objectFit: "cover",
               objectPosition: "center top",
               filter: "grayscale(1) contrast(1.1)",
-              opacity: 0.28,
+              opacity: 0.21,
             }}
           />
           {/* Soft vignette — protects text without cutting the image */}
@@ -237,7 +237,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           }} />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(26,23,20,0.3) 0%, transparent 40%, rgba(26,23,20,0.5) 100%)",
+            background: "linear-gradient(180deg, rgba(26,23,20,0.2) 0%, transparent 35%, rgba(26,23,20,0.75) 85%, rgba(26,23,20,0.92) 100%)",
           }} />
         </div>
       )}
