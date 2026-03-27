@@ -61,17 +61,22 @@ function extractDominantColor(src, onColor) {
 // Phase 2: dominant color extracted client-side after first load, cached in localStorage
 export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30,22,14,0.9)", className, onLoad, onError, loading = "lazy", ...rest }) {
   const [bgColor, setBgColor] = useState(() => getCachedColor(src) || placeholderColor);
+  // Start loaded=true if color is already cached (image likely browser-cached too)
+  const [loaded, setLoaded] = useState(() => !!getCachedColor(src));
 
   useEffect(() => {
     const cached = getCachedColor(src);
     if (cached) {
       setBgColor(cached);
+      setLoaded(true);
     } else {
       setBgColor(placeholderColor); // reset for new src while extraction runs
+      setLoaded(false);
     }
   }, [src, placeholderColor]);
 
   const handleLoad = (e) => {
+    setLoaded(true);
     onLoad?.(e);
     // Only extract if we don't already have a color for this src
     if (src && !getCachedColor(src)) {
@@ -107,6 +112,8 @@ export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30
           height: "100%",
           objectFit,
           ...(objectPosition ? { objectPosition } : {}),
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.35s ease",
         }}
         {...rest}
       />
