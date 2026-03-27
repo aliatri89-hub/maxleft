@@ -27,6 +27,20 @@ const MAX_SYNC_PER_USER = 50;
 const TMDB_BATCH_SIZE = 4;
 const TMDB_BATCH_DELAY_MS = 300;
 
+// ── HTML entity decoder ─────────────────────────────────────
+// The regex-based XML parser doesn't decode HTML entities like DOMParser does.
+// Letterboxd RSS titles can contain &amp; (e.g. "Love &amp; Other Drugs").
+// Without decoding, the title won't match existing user_films_v records (which
+// were stored with the decoded "&"), causing duplicate logs + feed_activity rows.
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+}
+
 // ── XML helpers (regex-based, same pattern as ingest-rss) ───
 function extractTag(content: string, tag: string): string {
   const regex = new RegExp(
@@ -109,7 +123,7 @@ function parseLetterboxdRSS(xml: string): RSSFilm[] {
       extractTag(content, "filmTitle");
     if (!filmTitle) continue;
 
-    const title = filmTitle.trim();
+    const title = decodeHtmlEntities(filmTitle.trim());
     if (!title) continue;
 
     const yearStr =
