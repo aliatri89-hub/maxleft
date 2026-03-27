@@ -305,21 +305,33 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             )}
           </div>
 
-          {/* Row 3: Description — single text node, toggle clamp */}
+          {/* Row 3: Tap pill → full description */}
           {hasDesc && (
-            <div style={{
-              fontFamily: t.fontMono,
-              fontSize: 12, color: "var(--text-secondary)",
-              lineHeight: 1.5,
-              overflow: "hidden",
-              ...(!expanded ? {
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              } : {}),
-            }}>
-              {fullDesc}
-            </div>
+            expanded ? (
+              <div style={{
+                fontFamily: t.fontMono,
+                fontSize: 12, color: "var(--text-secondary)",
+                lineHeight: 1.5, marginTop: 2,
+              }}>
+                {fullDesc}
+              </div>
+            ) : (
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "3px 9px", borderRadius: 20,
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.03)",
+                marginTop: 2, alignSelf: "flex-start",
+              }}>
+                <span style={{
+                  fontFamily: t.fontMono, fontSize: 10, color: t.textFaint,
+                  letterSpacing: "0.05em", textTransform: "uppercase",
+                }}>About this episode</span>
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            )
           )}
 
           {/* Row 4: Bottom — admin trash (left) + queue/play (right) */}
