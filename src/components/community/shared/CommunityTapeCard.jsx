@@ -91,15 +91,15 @@ function PlayButtonArt({ size = 58 }) {
     <div style={{
       width: size, height: size,
       borderRadius: 8,
-      background: "#0f0d0b",
+      background: "linear-gradient(145deg, #2e2b27, #1c1a17)",
       flexShrink: 0,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      border: "1.5px solid rgba(44,40,36,0.18)",
-      boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.5), 0 1px 0 rgba(255,255,255,0.06) inset, 0 -2px 0 rgba(0,0,0,0.3) inset",
     }}>
-      <svg width={size * 0.45} height={size * 0.45} viewBox="0 0 24 24" fill="none">
+      <svg width={size * 0.55} height={size * 0.55} viewBox="0 0 24 24" fill="none">
         <polygon points="6,4 20,12 6,20" fill="#ffffff" />
       </svg>
     </div>
