@@ -85,7 +85,6 @@ export function FadeImg({ src, alt = "", style = {}, onError, duration = 300, ..
       ref={imgRef}
       src={src}
       alt={alt}
-      crossOrigin="anonymous"
       onLoad={handleLoad}
       onError={handleError}
       style={{
