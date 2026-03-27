@@ -116,7 +116,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
 
   const completedCount = items.filter(i => progressMap[i.id]).length;
   const totalCount = items.length;
-  const isComplete = completedCount === totalCount && totalCount > 0;
+  const isComplete = !!earnedAt || (completedCount === totalCount && totalCount > 0);
 
   // Format date nicely
   const formatDate = (isoStr) => {
