@@ -85,10 +85,32 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
+// ── Square play button for MANTL Originals ──
+function PlayButtonArt({ size = 58 }) {
+  return (
+    <div style={{
+      width: size, height: size,
+      borderRadius: 8,
+      background: "#0f0d0b",
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      border: "1.5px solid rgba(44,40,36,0.18)",
+      boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+    }}>
+      <svg width={size * 0.45} height={size * 0.45} viewBox="0 0 24 24" fill="none">
+        <polygon points="6,4 20,12 6,20" fill="#34d399" />
+      </svg>
+    </div>
+  );
+}
+
 export default function CommunityTapeCard({
   community,
   isSubscribed,
   artworkUrl,
+  showPlayButton,
   accent,
   stats,
   onTap,
@@ -181,7 +203,9 @@ export default function CommunityTapeCard({
                 width: "100%",
                 padding: "0 18px",
               }}>
-                {artworkUrl && (
+                {showPlayButton ? (
+                  <PlayButtonArt size={58} />
+                ) : artworkUrl && (
                   <FadeImg
                     src={artworkUrl}
                     alt=""
@@ -271,7 +295,9 @@ export default function CommunityTapeCard({
                 width: "100%",
                 padding: "0 18px",
               }}>
-                {artworkUrl && (
+                {showPlayButton ? (
+                  <PlayButtonArt size={48} />
+                ) : artworkUrl && (
                   <FadeImg
                     src={artworkUrl}
                     alt=""
