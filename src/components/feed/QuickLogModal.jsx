@@ -98,7 +98,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
   const thumbUrl = data.poster_path?.startsWith("http")
     ? data.poster_path
     : data.poster_path
-      ? `https://image.tmdb.org/t/p/w154${data.poster_path}`
+      ? `https://image.tmdb.org/t/p/w342${data.poster_path}`
       : data.cover_url || null;
 
   return createPortal(

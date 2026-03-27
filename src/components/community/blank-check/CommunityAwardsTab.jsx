@@ -495,7 +495,7 @@ function AwardCard({ card, isSeen, onTap, isPerformance }) {
   const posterUrl = card.posterPath
     ? card.posterPath.startsWith("http")
       ? card.posterPath
-      : `https://image.tmdb.org/t/p/w185${card.posterPath}`
+      : `https://image.tmdb.org/t/p/w342${card.posterPath}`
     : null;
 
   return (
@@ -676,7 +676,7 @@ function BenCategoryShelf({ category, isSeen, getItemId, onToggle, filter, searc
           const posterUrl = pick.posterPath
             ? pick.posterPath.startsWith("http")
               ? pick.posterPath
-              : `https://image.tmdb.org/t/p/w185${pick.posterPath}`
+              : `https://image.tmdb.org/t/p/w342${pick.posterPath}`
             : null;
 
           return (

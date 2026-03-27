@@ -653,7 +653,7 @@ function DraftCard({ card, isSeen, onTap }) {
   const posterUrl = card.posterPath
     ? card.posterPath.startsWith("http")
       ? card.posterPath
-      : `https://image.tmdb.org/t/p/w185${card.posterPath}`
+      : `https://image.tmdb.org/t/p/w342${card.posterPath}`
     : null;
 
   return (
