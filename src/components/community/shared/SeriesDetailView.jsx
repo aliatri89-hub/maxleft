@@ -123,36 +123,39 @@ export default function SeriesDetailView({
 
       {/* ── Series art hero ────────────────────────────────────── */}
       {series.thumbnail_url && (
-        <div style={{
-          position: "relative",
-          aspectRatio: "16/9",
-          overflow: "hidden",
-        }}>
-          <img
-            src={series.thumbnail_url}
-            alt={series.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              opacity: 0.35,
-            }}
-          />
+        <>
+          {/* Image — top third crop */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(transparent 20%, #0f0d0b 100%)",
-          }} />
-          <div style={{
-            position: "absolute",
-            bottom: 14, left: 16, right: 16,
+            position: "relative",
+            height: 160,
+            overflow: "hidden",
           }}>
+            <img
+              src={series.thumbnail_url}
+              alt={series.title}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "top center",
+                opacity: 0.7,
+                display: "block",
+              }}
+            />
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(transparent 40%, #0f0d0b 100%)",
+            }} />
+          </div>
+
+          {/* Title / meta below the image */}
+          <div style={{ padding: "12px 16px 4px" }}>
             <div style={{
               fontSize: 20, fontWeight: 800, color: t.textPrimary,
               fontFamily: t.fontDisplay,
               textTransform: "uppercase",
               letterSpacing: "0.03em",
               lineHeight: 1.1,
-              textShadow: "0 2px 8px rgba(0,0,0,0.5)",
             }}>
               {series.title}
             </div>
@@ -193,7 +196,7 @@ export default function SeriesDetailView({
               }} />
             </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* ── No series art fallback ─────────────────────────────── */}
