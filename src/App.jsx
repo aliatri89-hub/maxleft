@@ -192,6 +192,8 @@ function AppMain() {
   } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
 
   const sync = useIntegrationSync({ session, showToast, setProfile });
+  const syncRef = useRef(sync);
+  useEffect(() => { syncRef.current = sync; });
 
   const {
     subscriptions: communitySubscriptions, isSubscribed,
@@ -408,7 +410,7 @@ function AppMain() {
         await loadShelves(user.id);
         sync.runInitialSync(p, user.id, {
           onLetterboxdSync: async (username, uid) => {
-            const result = await sync.syncLetterboxd(username, uid);
+            const result = await syncRef.current.syncLetterboxd(username, uid);
             if (result) setLetterboxdToast({ synced: result.synced, rewatches: result.rewatchCount });
           },
         });
