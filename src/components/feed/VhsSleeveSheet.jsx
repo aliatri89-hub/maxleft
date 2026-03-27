@@ -408,8 +408,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
     // Already fetched for this movie — keep showing those
     if (fetchedForRef.current === data.tmdb_id && fetchedStills.length > 0) return;
 
-    // Different movie — fetch new ones but DON'T clear yet; keep old stills visible
-    // until new ones arrive so there's no blank gap
+    // Different movie than last fetch — clear stale stills
+    if (fetchedForRef.current !== data.tmdb_id) {
+      setFetchedStills([]);
+    }
 
     let cancelled = false;
 
@@ -417,10 +419,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       try {
         const type = (data.media_type === "show") ? "tv" : "movie";
         const rawHero = data.backdrop_path || "";
-        // Normalize: extract just the filename regardless of whether it's a full URL or a raw path
-        // Full URL: "https://image.tmdb.org/t/p/w780/abc.jpg" → "/abc.jpg"
-        // Raw path: "/abc.jpg" → "/abc.jpg"
-        const heroMatch = rawHero.match(/\/[^/]+\.jpg/i);
+        const heroMatch = rawHero.match(/\/[^/]+$/);
         const heroBdPath = heroMatch ? heroMatch[0] : rawHero;
 
         // Fetch from TMDB
@@ -481,12 +480,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         if (!cancelled && picks.length > 0) {
           const paths = picks.map(p => p.file_path);
           const stills = paths.map(p => `${TMDB_IMG_BASE}/w780${p}`);
-          // Final safety: remove any still that matches the hero URL exactly
-          const heroFull = backdropUrl || "";
-          const safeStills = stills.filter(s => s !== heroFull);
-          if (!safeStills.length) return;
           fetchedForRef.current = data.tmdb_id;
-          setFetchedStills(safeStills);
+          setFetchedStills(stills);
 
           // Write back to media so next open (by anyone) is instant
           supabase.rpc("hydrate_media", {
@@ -497,7 +492,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
       } catch {}
     })();
     return () => { cancelled = true; };
-  }, [open, data?.tmdb_id, cachedStills, backdropUrl]);
+  }, [open, data?.tmdb_id, cachedStills]);
 
   // Prevent background scroll while sheet is open
   useLayoutEffect(() => {
@@ -625,7 +620,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           <div style={{ position: "relative", width: "100%", marginBottom: 0 }}>
             {/* Hero backdrop — z1 (back) */}
             <div style={{ position: "relative", width: "100%", overflow: "hidden", zIndex: 1 }}>
-              <FadeImg key={heroUrl} src={heroUrl} alt="" style={{
+              <FadeImg src={heroUrl} alt="" style={{
                 width: "100%", height: 200,
                 objectFit: "cover", objectPosition: "center top",
                 display: "block",
@@ -650,10 +645,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 display: "flex", justifyContent: "center",
                 zIndex: 3, pointerEvents: "none",
               }}>
-                <FadeImg
+                <img
                   src={data.logo_url}
                   alt={data.title}
-                  duration={200}
                   style={{
                     height: 40,
                     maxWidth: "70%",
@@ -687,10 +681,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             textAlign: "center",
           }}>
             {data.logo_url ? (
-              <FadeImg
+              <img
                 src={data.logo_url}
                 alt={data.title}
-                duration={200}
                 style={{
                   height: 44,
                   maxWidth: "75%",
@@ -737,15 +730,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 border: "2px solid rgba(240,235,225,0.18)",
                 boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
               }}>
-                <FadeImg
-                  key={stillUrl}
+                <img
                   src={stillUrl}
                   alt=""
-                  duration={400}
                   style={{
                     width: "100%", height: "100%",
                     objectFit: "cover", display: "block",
                   }}
+                  loading="lazy"
                 />
                 <div style={{
                   position: "absolute", inset: 0, pointerEvents: "none", opacity: 0.1,
