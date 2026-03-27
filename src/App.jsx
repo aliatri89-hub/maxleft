@@ -184,7 +184,7 @@ function AppMain() {
 
   // ── Extracted hooks ──
   const { toast, toastExiting, toastDuration, showToast } = useToast();
-  const { pushNav, removeNav, dismissOverlays } = useBackNav(activeTab, setActiveTab);
+  const { pushNav, removeNav, dismissOverlays, popNav } = useBackNav(activeTab, setActiveTab);
   const {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
     syncSliderPosition,
@@ -672,6 +672,7 @@ function AppMain() {
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
                 onBack={() => { removeNav("community"); setScrollToTmdbId(null); setActiveCommunitySlug(null); }}
+                popNav={popNav}
                 onShelvesChanged={refreshShelves}
                 communitySubscriptions={communitySubscriptions}
                 onOpenCommunity={(slug, tmdbId) => { setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}

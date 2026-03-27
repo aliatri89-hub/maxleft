@@ -17,7 +17,7 @@ import RSSSyncTool from "../dashboard/RSSSyncTool";
  * 2 episodes per row, each showing 2-3 posters as a compact card.
  * Season tabs at the bottom. Episode descriptions in log modal.
  */
-export default function ChapoScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
+export default function ChapoScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav, popNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#D32F2F";
   const tabs = community?.theme_config?.tabs || [];
@@ -159,7 +159,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
         display: "flex", alignItems: "center", gap: 8,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
-        <button onClick={onBack} style={{
+        <button onClick={popNav} style={{
           background: "none", border: "none", color: accent,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>

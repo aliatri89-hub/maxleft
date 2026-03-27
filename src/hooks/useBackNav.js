@@ -51,6 +51,15 @@ export function useBackNav(activeTab, setActiveTab) {
     }
   }, [activeTab, setActiveTab]);
 
+  // Same as the gesture/hardware back — pops top of stack and calls it.
+  // Community back buttons should use this instead of calling onBack directly.
+  const popNav = useCallback(() => {
+    if (backActions.current.length > 0) {
+      const action = backActions.current.pop();
+      action.fn();
+    }
+  }, []);
+
   const dismissOverlays = useCallback(() => {
     const remaining = [];
     backActions.current.forEach(a => {
@@ -63,5 +72,5 @@ export function useBackNav(activeTab, setActiveTab) {
     backActions.current = remaining;
   }, []);
 
-  return { pushNav, removeNav, dismissOverlays };
+  return { pushNav, removeNav, dismissOverlays, popNav };
 }

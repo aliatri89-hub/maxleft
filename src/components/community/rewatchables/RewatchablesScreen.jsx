@@ -21,7 +21,7 @@ import useHostFilter from "../../../hooks/useHostFilter";
  * Genre shelves, decades view, rewatch tracking with dates.
  * Rewatch data is community-specific — does NOT write to the main shelf.
  */
-export default function RewatchablesScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav }) {
+export default function RewatchablesScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, pushNav, removeNav, popNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#1DB954";
   // Scroll to shelf when deep-linked from another community
@@ -185,7 +185,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
         display: "flex", alignItems: "center", gap: 8,
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>
-        <button onClick={onBack} style={{
+        <button onClick={popNav} style={{
           background: "none", border: "none", color: accent,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0", fontWeight: 600,
         }}>← Back</button>

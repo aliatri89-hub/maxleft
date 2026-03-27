@@ -42,7 +42,7 @@ const OriginalsScreen = lazy(() => import("../components/community/originals/Ori
  *   onToast          — (msg) => void
  *   onShelvesChanged — () => void
  */
-export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
+export default function CommunityRouter({ slug, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav, popNav }) {
   const { community, miniseries, loading, error } = useCommunityPage(slug);
 
   // Register community-level back with native back button system
@@ -83,7 +83,7 @@ export default function CommunityRouter({ slug, session, onBack, onToast, onShel
   }
 
   const communityType = community.theme_config?.community_type;
-  const sharedProps = { community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav };
+  const sharedProps = { community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav, popNav };
 
   let Screen;
   switch (communityType) {

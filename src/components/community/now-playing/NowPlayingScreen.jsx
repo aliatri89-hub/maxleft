@@ -36,7 +36,7 @@ import { useRecentEpisodes } from "../../../hooks/community/useRecentEpisodes";
  * Props passed from CommunityRouter:
  *   community, miniseries, session, onBack, onToast, onShelvesChanged
  */
-export default function NowPlayingScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav }) {
+export default function NowPlayingScreen({ community, miniseries, session, onBack, onToast, onShelvesChanged, communitySubscriptions, onOpenCommunity, scrollToTmdbId, letterboxdSyncSignal, pushNav, removeNav, popNav }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
 
@@ -232,7 +232,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
           if (genreResetRef.current) {
             genreResetRef.current();
           } else {
-            onBack();
+            popNav();
           }
         }} style={{
           background: "none", border: "none", color: accent,
