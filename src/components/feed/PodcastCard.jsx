@@ -319,12 +319,12 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       </div>
 
       {/* Bottom row: spacer | centered bar | badges right */}
-      {!expanded && (
+      {(!expanded || !hasDesc) && (
         <div style={{ display: "flex", alignItems: "center", marginTop: 8 }}>
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
-          {/* Handle bar */}
-          {hasDesc && (
+          {/* Handle bar — only when desc exists and collapsed */}
+          {hasDesc && !expanded && (
             <div style={{ width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)", flexShrink: 0 }} />
           )}
           {/* Badges — right */}
