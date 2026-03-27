@@ -304,19 +304,123 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
               />
             )}
 
-            {/* Patreon tab */}
+            {/* Patreon tab — Grid view (same pattern as filmography) */}
             {tabKey === "patreon" && (
-              <BlankCheckPatreonTab
-                community={community}
-                progress={progress}
-                onToggle={handleItemTap}
-                onToggleCommentary={handleToggleCommentary}
-                miniseries={miniseries}
-                coverCacheVersion={coverCache}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                mediaFilter={mediaFilter}
-              />
+              <>
+                {/* Search + Filter row */}
+                <div style={{
+                  padding: "10px 16px 0",
+                  display: "flex", alignItems: "center", gap: 8,
+                }}>
+                  {searchOpen ? (
+                    <div style={{ flex: 1, position: "relative" }}>
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search commentaries…"
+                        style={{
+                          width: "100%",
+                          padding: "8px 36px 8px 34px",
+                          background: t.bgInput,
+                          border: `1px solid ${accent}`,
+                          borderRadius: 10,
+                          color: t.textPrimary,
+                          fontSize: 14,
+                          outline: "none",
+                          boxSizing: "border-box",
+                          fontFamily: t.fontDisplay,
+                          letterSpacing: "0.01em",
+                        }}
+                      />
+                      <span style={{
+                        position: "absolute", left: 10, top: "50%",
+                        transform: "translateY(-50%)",
+                        pointerEvents: "none",
+                        display: "flex", alignItems: "center",
+                      }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </span>
+                      <button
+                        onClick={() => { setSearchQuery(""); setSearchOpen(false); }}
+                        style={{
+                          position: "absolute", right: 8, top: "50%",
+                          transform: "translateY(-50%)",
+                          background: "rgba(255,255,255,0.1)", border: "none",
+                          color: t.textMuted, fontSize: 12, cursor: "pointer",
+                          borderRadius: 20, width: 22, height: 22,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          padding: 0, lineHeight: 1,
+                        }}
+                      >✕</button>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ display: "flex", gap: 5, flex: 1 }}>
+                        {[
+                          { key: "all", label: "All" },
+                          { key: "inprogress", label: "In Progress" },
+                          { key: "done", label: "Done" },
+                          { key: "notstarted", label: "Not Started" },
+                        ].map(f => (
+                          <button
+                            key={f.key}
+                            onClick={() => setFilter(f.key)}
+                            style={{
+                              padding: "5px 10px",
+                              background: filter === f.key ? `${accent}22` : "rgba(255,255,255,0.05)",
+                              border: filter === f.key ? `1px solid ${accent}` : "1px solid rgba(255,255,255,0.08)",
+                              borderRadius: 20,
+                              color: filter === f.key ? accent : t.textMuted,
+                              fontSize: 11, fontWeight: 600, cursor: "pointer",
+                              fontFamily: t.fontDisplay,
+                              letterSpacing: "0.03em",
+                              textTransform: "uppercase",
+                              transition: "all 0.2s",
+                              WebkitTapHighlightColor: "transparent",
+                            }}
+                          >{f.label}</button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSearchOpen(true);
+                          setTimeout(() => searchInputRef.current?.focus(), 50);
+                        }}
+                        style={{
+                          flexShrink: 0,
+                          width: 34, height: 34,
+                          borderRadius: 10,
+                          background: t.bgInput,
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          cursor: "pointer",
+                          WebkitTapHighlightColor: "transparent",
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8" />
+                          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                {/* Patreon Miniseries Grid */}
+                <MiniseriesGrid
+                  miniseries={miniseries.filter(s => s.tab_key === "patreon")}
+                  progress={progress}
+                  onSelectSeries={setSelectedSeries}
+                  accent={accent}
+                  searchQuery={searchQuery}
+                  filter={filter}
+                />
+              </>
             )}
 
             {/* Awards tab */}
