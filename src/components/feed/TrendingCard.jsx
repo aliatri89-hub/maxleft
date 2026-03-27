@@ -1,6 +1,6 @@
 import { t } from "../../theme";
 import { useState } from "react";
-import { Poster, resolveImg, TMDB_BACKDROP, getSlugAbbrev, getCommunityAccent, FadeImg} from "./FeedPrimitives";
+import { Poster, resolveImg, TMDB_BACKDROP, getSlugAbbrev, getCommunityAccent } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
 // TRENDING CARD — dynamic, energetic, cinematic
@@ -195,7 +195,7 @@ function TrendingCard({ data, onNavigateCommunity }) {
                   title={c.community_name}
                 >
                   {c.community_image ? (
-                    <FadeImg src={c.community_image} alt={c.community_name} style={{
+                    <img src={c.community_image} loading="lazy" alt={c.community_name} style={{
                       width: 40, height: 40, borderRadius: 10, objectFit: "cover",
                       border: `2px solid ${cAccent}44`,
                     }} />

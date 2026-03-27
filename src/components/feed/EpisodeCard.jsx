@@ -1,7 +1,7 @@
 import { t } from "../../theme";
 import { useState } from "react";
 import { useEpisodeMatch } from "../../hooks/community/useEpisodeMatch";
-import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl, FadeImg} from "./FeedPrimitives";
+import { Stars, Poster, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
 import QuickLogModal from "./QuickLogModal";
 
 // ════════════════════════════════════════════════

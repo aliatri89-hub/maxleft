@@ -1,5 +1,5 @@
 import { t } from "../../theme";
-import { getTimeAgo, FadeImg} from "./FeedPrimitives";
+import { getTimeAgo } from "./FeedPrimitives";
 
 // ════════════════════════════════════════════════
 // BADGE COMPLETE CARD — celebration moment on the feed
