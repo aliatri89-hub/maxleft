@@ -212,7 +212,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         position: "relative",
       }}
     >
-      {/* B&W backdrop wash — top-anchored, fades toward bottom */}
+      {/* B&W backdrop wash — full card height */}
       {bdUrl && (
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
           <img
@@ -221,22 +221,23 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             loading="lazy"
             style={{
               position: "absolute",
-              top: 0, left: 0,
+              inset: 0,
               width: "100%",
-              height: "150%",
+              height: "100%",
               objectFit: "cover",
               objectPosition: "center top",
-              filter: "grayscale(1) contrast(1.05)",
-              opacity: 0.13,
+              filter: "grayscale(1) contrast(1.1)",
+              opacity: 0.28,
             }}
           />
+          {/* Soft vignette — protects text without cutting the image */}
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, transparent 20%, var(--bg-card, #1a1714) 75%)",
+            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 8%, transparent 50%, var(--bg-card, #1a1714) 92%)",
           }} />
           <div style={{
             position: "absolute", inset: 0,
-            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 8%, transparent 50%)",
+            background: "linear-gradient(180deg, rgba(26,23,20,0.3) 0%, transparent 40%, rgba(26,23,20,0.5) 100%)",
           }} />
         </div>
       )}
