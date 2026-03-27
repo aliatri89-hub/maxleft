@@ -229,60 +229,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 )}
               </div>
             </div>
-            {/* Badge + buttons in one row */}
+            {/* Queue + play buttons only */}
             <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-              {isWatched ? (
-                <div style={{
-                  ...badgeBase,
-                  background: "rgba(52,211,153,0.10)",
-                  border: "1px solid rgba(52,211,153,0.25)",
-                  color: "rgba(52,211,153,0.7)",
-                }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Watched
-                </div>
-              ) : userId ? (
-                <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{
-                  ...badgeBase,
-                  background: "rgba(255,255,255,0.03)",
-                  border: `1px solid ${t.bgHover}`,
-                  color: t.textFaint, cursor: "pointer",
-                }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  Log
-                </div>
-              ) : null}
-              {userId && !isWatched && (
-                addedToWatchlist ? (
-                  <div onClick={handleWatchlist} style={{
-                    ...badgeBase,
-                    background: "rgba(201,124,93,0.06)",
-                    border: "1px solid rgba(201,124,93,0.15)",
-                    color: "rgba(201,124,93,0.5)", cursor: "pointer",
-                  }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    Added
-                  </div>
-                ) : (
-                  <div onClick={handleWatchlist} style={{
-                    ...badgeBase,
-                    background: "rgba(255,255,255,0.03)",
-                    border: `1px solid ${t.bgHover}`,
-                    color: t.textFaint, cursor: "pointer",
-                  }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round">
-                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    Watchlist
-                  </div>
-                )
-              )}
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
@@ -355,10 +303,36 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       </div>
 
-      {/* Handle bar — full card width so it truly centers */}
+      {/* Bottom row: handle bar (left) + badges (right) */}
       {hasDesc && !expanded && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
           <div style={{ width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {isWatched ? (
+              <div style={{ ...badgeBase, background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)", color: "rgba(52,211,153,0.7)" }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                Watched
+              </div>
+            ) : userId ? (
+              <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{ ...badgeBase, background: "rgba(255,255,255,0.03)", border: `1px solid ${t.bgHover}`, color: t.textFaint, cursor: "pointer" }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                Log
+              </div>
+            ) : null}
+            {userId && !isWatched && (
+              addedToWatchlist ? (
+                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(201,124,93,0.06)", border: "1px solid rgba(201,124,93,0.15)", color: "rgba(201,124,93,0.5)", cursor: "pointer" }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(201,124,93,0.6)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  Added
+                </div>
+              ) : (
+                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(255,255,255,0.03)", border: `1px solid ${t.bgHover}`, color: t.textFaint, cursor: "pointer" }}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={t.textFaint} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  Watchlist
+                </div>
+              )
+            )}
+          </div>
         </div>
       )}
       {hasDesc && expanded && (
