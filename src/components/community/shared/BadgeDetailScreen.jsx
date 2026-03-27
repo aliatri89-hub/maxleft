@@ -47,19 +47,35 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
 
   // ── Load items + user progress ────────────────────────────
   useEffect(() => {
-    if (!badge.miniseries_id || !userId) return;
+    const isItemSet = badge.badge_type === "item_set_completion";
+    if ((!badge.miniseries_id && !isItemSet) || !userId) return;
     let cancelled = false;
 
     (async () => {
       setLoading(true);
 
-      // Fetch items in this miniseries (filtered by media_type if badge specifies)
-      let itemQuery = supabase
-        .from("community_items")
-        .select("id, title, year, sort_order, tmdb_id, media_type")
-        .eq("miniseries_id", badge.miniseries_id);
-      if (badge.media_type_filter) itemQuery = itemQuery.eq("media_type", badge.media_type_filter);
-      const { data: itemRows } = await itemQuery.order("sort_order");
+      let itemRows = [];
+
+      if (isItemSet) {
+        // item_set_completion: fetch items via badge_items join
+        const { data: badgeItemRows } = await supabase
+          .from("badge_items")
+          .select("community_items(id, title, year, sort_order, tmdb_id, media_type)")
+          .eq("badge_id", badge.id);
+        itemRows = (badgeItemRows || [])
+          .map(r => r.community_items)
+          .filter(Boolean)
+          .sort((a, b) => (a.year ?? 0) - (b.year ?? 0));
+      } else {
+        // miniseries_completion: fetch items by miniseries_id
+        let itemQuery = supabase
+          .from("community_items")
+          .select("id, title, year, sort_order, tmdb_id, media_type")
+          .eq("miniseries_id", badge.miniseries_id);
+        if (badge.media_type_filter) itemQuery = itemQuery.eq("media_type", badge.media_type_filter);
+        const { data: rows } = await itemQuery.order("sort_order");
+        itemRows = rows || [];
+      }
 
       if (cancelled) return;
 
@@ -112,7 +128,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
     })();
 
     return () => { cancelled = true; };
-  }, [badge.miniseries_id, userId]);
+  }, [badge.miniseries_id, badge.badge_type, badge.id, userId]);
 
   const completedCount = items.filter(i => progressMap[i.id]).length;
   const totalCount = items.length;
