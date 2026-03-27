@@ -337,11 +337,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div onClick={handlePlay} style={{
                     width: 38, height: 38, borderRadius: 8,
-                    background: isActiveAndPlaying ? "#3a3530" : "#2e2b27",
-                    border: isActiveAndPlaying ? "1.5px solid rgba(255,255,255,0.2)" : "1.5px solid rgba(255,255,255,0.1)",
-                    boxShadow: "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
+                    background: isActiveAndPlaying ? "rgba(239,159,39,0.15)" : "#2e2b27",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(239,159,39,0.5)" : "1.5px solid rgba(255,255,255,0.1)",
+                    boxShadow: isActiveAndPlaying ? "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(239,159,39,0.1)" : "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", transition: "all 0.15s",
+                    cursor: "pointer", transition: "all 0.3s",
                   }}>
                     {isCurrent && buffering ? (
                       <div style={{
