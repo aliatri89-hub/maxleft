@@ -304,8 +304,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                 </div>
               </Expandable>
 
-              {/* Goodreads */}
-              <div className="profile-group-sub-row" onClick={() => setGoodreadsOpen(!goodreadsOpen)}>
+              {/* Goodreads — hidden, backend/edge functions preserved for future multimedia use */}
+              {/* <div className="profile-group-sub-row" onClick={() => setGoodreadsOpen(!goodreadsOpen)}>
                 <span className="profile-group-row-text" style={{ fontSize: 14 }}>Goodreads</span>
                 <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   {profile.goodreads_user_id && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.5 }} />}
@@ -355,10 +355,10 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                     </>
                   )}
                 </div>
-              </Expandable>
+              </Expandable> */}
 
-              {/* Steam */}
-              <div className="profile-group-sub-row" onClick={() => setSteamOpen(!steamOpen)}>
+              {/* Steam — hidden, backend/edge functions preserved for future multimedia use */}
+              {/* <div className="profile-group-sub-row" onClick={() => setSteamOpen(!steamOpen)}>
                 <span className="profile-group-row-text" style={{ fontSize: 14 }}>Steam</span>
                 <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   {profile.steam_id && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.5 }} />}
@@ -402,7 +402,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                     </>
                   )}
                 </div>
-              </Expandable>
+              </Expandable> */}
             </div>
           </Expandable>
 
