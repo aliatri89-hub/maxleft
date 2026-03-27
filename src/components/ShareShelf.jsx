@@ -1,6 +1,7 @@
 import { t } from "../theme";
 import { useState, useRef, useCallback } from "react";
 import html2canvas from "html2canvas";
+import { FadeImg } from "./feed/FeedPrimitives";
 
 // ── Brand data (mirrors FeedScreen) ──
 const VHS_BRANDS = [
@@ -138,7 +139,7 @@ function ShareTape({ item }) {
 
           {/* Logo or text title */}
           {item.logo_url ? (
-            <img
+            <FadeImg
               src={item.logo_url}
               alt={item.title}
               crossOrigin="anonymous"

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import AdminItemEditor from "../shared/AdminItemEditor";
 import CrossCommunityChips from "../shared/CrossCommunityChips";
 import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
+import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * FilmspottingLogModal — Filmspotting community log modal.
@@ -61,7 +62,7 @@ export default function FilmspottingLogModal({
         <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
           <div style={{ position: "relative", width: 60, height: 90, flexShrink: 0 }}>
             {coverUrl && (
-              <img loading="lazy" src={coverUrl} alt="" style={{
+              <FadeImg loading="lazy" src={coverUrl} alt="" style={{
                 width: 60, height: 90, borderRadius: 6, objectFit: "cover", display: "block",
               }} />
             )}

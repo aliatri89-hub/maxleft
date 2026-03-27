@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useMemo } from "react";
 import { HeroBanner } from "../primitives";
+import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * GetPlayedHero — Hero section for the Get Played community page.
@@ -126,7 +127,7 @@ export default function GetPlayedHero({ community, miniseries, progress, activeT
                       boxShadow: "0 0 12px rgba(250,204,21,0.1)",
                     }}>
                       {game.cover_url ? (
-                        <img loading="lazy" src={game.cover_url} alt={game.title}
+                        <FadeImg loading="lazy" src={game.cover_url} alt={game.title}
                           style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
                         <div style={{

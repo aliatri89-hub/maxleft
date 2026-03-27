@@ -5,6 +5,7 @@ import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteMe
 import { formatDate } from "../../utils/helpers";
 import BottomSheet from "../shared/BottomSheet";
 import StarRating from "../shared/StarRating";
+import { FadeImg } from "../feed/FeedPrimitives";
 
 /**
  * ItemDetailModal — Dark bottom-sheet for viewing/editing any shelf item.
@@ -197,7 +198,7 @@ export default function ItemDetailModal({
           boxShadow: "0 2px 6px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.2)",
         }}>
           {localItem.cover ? (
-            <img src={localItem.cover} loading="lazy" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            <FadeImg src={localItem.cover} loading="lazy" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           ) : (
             <div style={{
               width: "100%", height: "100%",

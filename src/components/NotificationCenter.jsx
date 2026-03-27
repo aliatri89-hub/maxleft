@@ -1,6 +1,7 @@
 import { t } from "../theme";
 import { useEffect } from "react";
 import { tapLight } from "../utils/haptics";
+import { FadeImg } from "./feed/FeedPrimitives";
 
 /**
  * NotificationCenter — right slide panel showing notification inbox.
@@ -83,7 +84,7 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
                     {/* Avatar / artwork */}
                     <div className="notif-item-avatar">
                       {notif.image_url ? (
-                        <img loading="lazy" src={notif.image_url} alt="" />
+                        <FadeImg loading="lazy" src={notif.image_url} alt="" />
                       ) : (
                         notifIcon(notif.notif_type)
                       )}

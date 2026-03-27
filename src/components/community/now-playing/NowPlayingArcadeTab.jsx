@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useMemo, useEffect } from "react";
 import NowPlayingItemCard from "./NowPlayingItemCard";
+import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * NowPlayingArcadeTab — Video game franchise shelves for Now Playing Arcade.
@@ -374,7 +375,7 @@ function GameLandscapeCard({ item, isCompleted, status, onToggle, accent }) {
     >
       {/* Background image */}
       {bgImage ? (
-        <img
+        <FadeImg
           src={bgImage}
           alt={item.title}
           loading="lazy"

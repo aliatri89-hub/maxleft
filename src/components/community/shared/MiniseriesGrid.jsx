@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
+import { FadeImg } from "../../feed/FeedPrimitives";
 
 /**
  * MiniseriesGrid — 3-column visual grid of miniseries tiles.
@@ -125,7 +126,7 @@ function GridTile({ series, accent, onTap }) {
     >
       {/* Series artwork */}
       {series.thumbnail_url ? (
-        <img
+        <FadeImg
           src={series.thumbnail_url}
           alt={series.title}
           loading="lazy"

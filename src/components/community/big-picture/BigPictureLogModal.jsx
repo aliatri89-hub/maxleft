@@ -5,6 +5,7 @@ import { useEpisodeMatch } from "../../../hooks/community/useEpisodeMatch";
 
 import { fetchTMDBRaw, fetchTMDBWatchProviders } from "../../../utils/api";
 import { toLogTimestamp } from "../../../utils/helpers";
+import { FadeImg } from "../../feed/FeedPrimitives";
 const PATREON_URL = "https://www.patreon.com/thebigpicture";
 
 /**
@@ -229,7 +230,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
             position: "relative",
           }}>
             {coverUrl ? (
-              <img loading="lazy" src={coverUrl} alt={item.title}
+              <FadeImg loading="lazy" src={coverUrl} alt={item.title}
                 style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8, display: "block" }} />
             ) : (
               <div style={{
@@ -534,7 +535,7 @@ function WatchProviders({ providers }) {
             style={chipStyle}
             onClick={e => { if (!link) e.preventDefault(); }}
           >
-            <img
+            <FadeImg
               src={`https://image.tmdb.org/t/p/w45${p.logo_path}`}
               alt={p.provider_name}
               style={{ width: 20, height: 20, borderRadius: 4 }}

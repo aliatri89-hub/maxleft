@@ -24,6 +24,7 @@ import { toPlayerEpisode, resolveAudioUrl } from "../utils/episodeUrl";
 import { toPosterPath } from "../utils/mediaWrite";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
 import QuickLogModal from "../components/feed/QuickLogModal";
+import { FadeImg } from "../components/feed/FeedPrimitives";
 
 const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
@@ -592,7 +593,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                 >
                   {/* Poster */}
                   {film.poster_path ? (
-                    <img
+                    <FadeImg
                       src={`${TMDB_IMG}/w185${film.poster_path}`}
                       alt={film.title}
                       loading="lazy"
@@ -629,7 +630,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
                         <div style={{ display: "flex" }}>
                           {film.podcasts.slice(0, 4).map((p, i) => (
-                            <img
+                            <FadeImg
                               key={p.slug}
                               src={p.artwork}
                               alt={p.name}
@@ -837,7 +838,7 @@ function ResultCard({
         {/* Poster + watched badge */}
         <div style={{ position: "relative", flexShrink: 0 }}>
         {result.poster ? (
-          <img src={result.poster} alt={result.title} loading="lazy"
+          <FadeImg src={result.poster} alt={result.title} loading="lazy"
             style={{
               width: 52, height: 78, borderRadius: 6, objectFit: "cover",
               border: `1px solid ${t.borderSubtle}`,
@@ -885,7 +886,7 @@ function ResultCard({
                 <>
                   {result.podcasts.slice(0, 5).map((pod, i) => (
                     pod.artwork ? (
-                      <img key={pod.slug || i} src={pod.artwork} loading="lazy" alt={pod.name}
+                      <FadeImg key={pod.slug || i} src={pod.artwork} loading="lazy" alt={pod.name}
                         title={pod.name}
                         style={{
                           width: 22, height: 22, borderRadius: 5, objectFit: "cover",
@@ -1029,7 +1030,7 @@ function ResultCard({
                     background: isEpExpanded ? "rgba(199,91,63,0.08)" : isCurrent ? "rgba(199,91,63,0.05)" : "transparent",
                   }}>
                 {ep.podcast_artwork_url ? (
-                  <img src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name}
+                  <FadeImg src={ep.podcast_artwork_url} loading="lazy" alt={ep.podcast_name}
                     style={{
                       width: 32, height: 32, borderRadius: 8, objectFit: "cover",
                       border: isEpExpanded || isCurrent ? `1.5px solid ${TC}` : `1px solid ${t.borderSubtle}`,

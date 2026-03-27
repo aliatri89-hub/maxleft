@@ -28,6 +28,7 @@ const SUPABASE_URL = "https://api.mymantl.app";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const ADMIN_IDS = ["19410e64-d610-4fab-9c26-d24fafc94696"];
 import { searchTMDBRaw } from "../../../utils/api";
+import { FadeImg } from "../../feed/FeedPrimitives";
 const MANTL_APP_URL = "https://www.mymantl.app/#/community/blankcheck";
 
 // ── Blank Check Podcast Links ────────────────────────────────────────
@@ -517,7 +518,7 @@ const FilmCard = ({ film, onClick, index, userRating, onRate, isAuthed, hasEpiso
         padding: 0, textAlign: "center", overflow: "hidden", borderRadius: 6,
       }}>
         {hasPoster && (
-          <img
+          <FadeImg
             src={`${TMDB_IMG}/w300${film.poster_path}`}
             alt={film.title}
             loading="lazy"
@@ -734,7 +735,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
             position: "relative", aspectRatio: "2/3", maxHeight: 280,
             display: "flex", justifyContent: "center",
           }}>
-            <img
+            <FadeImg
               src={`${TMDB_IMG}/w342${film.poster_path}`}
               alt={film.title}
               style={{ height: "100%", objectFit: "cover", borderRadius: 8 }}
@@ -795,7 +796,7 @@ const FilmModal = ({ film, onClose, userRating, onRate, isAuthed, isAdmin, onUpd
                       onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                     >
                       {r.poster_path ? (
-                        <img loading="lazy" src={`${TMDB_IMG}/w92${r.poster_path}`} alt="" style={{
+                        <FadeImg loading="lazy" src={`${TMDB_IMG}/w92${r.poster_path}`} alt="" style={{
                           width: 28, height: 42, borderRadius: 3, objectFit: "cover", flexShrink: 0,
                         }} />
                       ) : (
@@ -1042,7 +1043,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
             width: 72, minHeight: 100, flexShrink: 0,
             background: C.bgDeep, position: "relative", overflow: "hidden",
           }}>
-            <img
+            <FadeImg
               src={`${TMDB_IMG}/w154${film.poster_path}`}
               alt={film.title}
               loading="lazy"
@@ -1212,7 +1213,7 @@ const EpisodeCard = ({ ep, isUpcoming, index, userRating, onRate, isAuthed, isAd
                     opacity: linking ? 0.5 : 1,
                   }}>
                     {r.poster_path ? (
-                      <img
+                      <FadeImg
                         src={`${TMDB_IMG}/w92${r.poster_path}`}
                         alt={r.title}
                         style={{ width: 36, height: 54, borderRadius: 3, objectFit: "cover", flexShrink: 0 }}
