@@ -248,7 +248,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   <div onClick={handlePlay} style={{
                     width: 38, height: 38, borderRadius: 8,
                     background: isActiveAndPlaying ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.08)",
-                    border: isActiveAndPlaying ? "1.5px solid rgba(255,255,255,0.25)" : "1.5px solid rgba(255,255,255,0.15)",
+                    border: isActiveAndPlaying ? "1.5px solid rgba(255,255,255,0.25)" : "1.5px solid #4ade80",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     cursor: "pointer", transition: "all 0.15s",
                   }}>
