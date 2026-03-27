@@ -2,11 +2,12 @@ import { t } from "../../theme";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl } from "./FeedPrimitives";
-import { resolveAudioUrl } from "../../utils/episodeUrl";
+import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
 import QuickLogModal from "./QuickLogModal";
+import { useAudioPlayer, renderWithTimecodes } from "../community/shared/AudioPlayerProvider";
 
 const TMDB_IMG_BASE = "https://image.tmdb.org/t/p";
 
@@ -146,6 +147,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
+  const { seekTo, currentEp: playerCurrentEp } = useAudioPlayer();
+
+  const handleTimecodeSeek = (ep, sec) => {
+    const epUrl = resolveAudioUrl(ep);
+    const isCurrent = playerCurrentEp?.enclosureUrl === epUrl;
+    if (isCurrent) { seekTo(sec); return; }
+    if (onPlayEpisode) onPlayEpisode({ ...ep, startAt: sec });
+  };
 
   // Lazy-load heavy detail fields — try media table first, fall back to TMDB API
   const [detail, setDetail] = useState(null);
@@ -1114,8 +1123,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                 color: "rgba(240,235,225,0.5)",
                                 whiteSpace: "pre-wrap",
                               }}>
-                                <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{hook}</span>
-                                {rest && <>{" "}{rest}</>}
+                                <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{renderWithTimecodes(hook, (sec) => handleTimecodeSeek(ep, sec))}</span>
+                                {rest && <>{" "}{renderWithTimecodes(rest, (sec) => handleTimecodeSeek(ep, sec))}</>}
                               </div>
                             );
                           })() : isExpanded ? (
