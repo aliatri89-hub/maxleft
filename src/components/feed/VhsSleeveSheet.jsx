@@ -1109,8 +1109,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             return (
                               <div style={{
                                 padding: "4px 6px 10px 48px",
-                                fontFamily: t.fontMono,
-                                fontSize: 12, lineHeight: 1.55,
+                                fontFamily: t.fontSerif,
+                                fontSize: 13, lineHeight: 1.55,
                                 color: "rgba(240,235,225,0.5)",
                                 whiteSpace: "pre-wrap",
                               }}>
@@ -1121,8 +1121,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           })() : isExpanded ? (
                             <div style={{
                               padding: "4px 6px 10px 48px",
-                              fontFamily: t.fontMono,
-                              fontSize: 11, fontStyle: "italic",
+                              fontFamily: t.fontSerif,
+                              fontSize: 12, fontStyle: "italic",
                               color: "rgba(240,235,225,0.25)",
                             }}>
                               No description available
