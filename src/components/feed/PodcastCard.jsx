@@ -369,7 +369,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
       {hasDesc && expanded && (
         <div style={{
-          fontFamily: t.fontMono, fontSize: 12, color: "var(--text-secondary)",
+          fontFamily: t.fontSerif, fontSize: 13, color: "var(--text-secondary)",
           lineHeight: 1.5, marginTop: 8,
           animation: "pcFadeSlide 0.2s ease forwards",
         }}>
