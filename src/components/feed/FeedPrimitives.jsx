@@ -15,17 +15,80 @@ export function resolveImg(path, base) {
   return `${base}${path}`;
 }
 
+// ── Dominant color cache (localStorage) ──
+const COLOR_PREFIX = "mantl:imgcolor:";
+function getCachedColor(src) {
+  if (!src) return null;
+  try { return localStorage.getItem(COLOR_PREFIX + src); } catch { return null; }
+}
+function setCachedColor(src, color) {
+  if (!src || !color) return;
+  try { localStorage.setItem(COLOR_PREFIX + src, color); } catch {}
+}
+
+// Extract dominant (non-black, non-white) color from an image URL.
+// Uses a hidden off-screen image with crossOrigin — never touches the real <img>.
+function extractDominantColor(src, onColor) {
+  if (!src) return;
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 8; canvas.height = 8;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, 8, 8);
+      const data = ctx.getImageData(0, 0, 8, 8).data;
+      let r = 0, g = 0, b = 0, count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        if (brightness < 20 || brightness > 235) continue; // skip near-black / near-white
+        r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+      }
+      if (count > 0) {
+        const f = 0.35; // darken for use as placeholder bg
+        onColor(`rgb(${Math.round(r / count * f)},${Math.round(g / count * f)},${Math.round(b / count * f)})`);
+      }
+    } catch { /* tainted canvas or CORS failure — silent */ }
+  };
+  img.onerror = () => {};
+  // Small delay so it doesn't race the real image for bandwidth
+  setTimeout(() => { img.src = src + (src.includes("?") ? "&" : "?") + "_c=1"; }, 800);
+}
+
 // ── FadeImg — wrapper approach, safe on mobile/Capacitor ──
-// The wrapper shows a placeholder color while the img loads.
-// Image is always visible (opacity:1) — no onLoad visibility gate.
+// Phase 1: wrapper div always shows placeholder color, image always opacity:1
+// Phase 2: dominant color extracted client-side after first load, cached in localStorage
 export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30,22,14,0.9)", className, onLoad, onError, loading = "lazy", ...rest }) {
+  const [bgColor, setBgColor] = useState(() => getCachedColor(src) || placeholderColor);
+
+  useEffect(() => {
+    const cached = getCachedColor(src);
+    if (cached) {
+      setBgColor(cached);
+    } else {
+      setBgColor(placeholderColor); // reset for new src while extraction runs
+    }
+  }, [src, placeholderColor]);
+
+  const handleLoad = (e) => {
+    onLoad?.(e);
+    // Only extract if we don't already have a color for this src
+    if (src && !getCachedColor(src)) {
+      extractDominantColor(src, (color) => {
+        setCachedColor(src, color);
+        setBgColor(color);
+      });
+    }
+  };
+
   const { objectFit = "cover", objectPosition, flexShrink, borderRadius, boxShadow, ...wrapperStyle } = style;
   return (
     <div
       className={className}
       style={{
         ...wrapperStyle,
-        backgroundColor: placeholderColor,
+        backgroundColor: bgColor,
         overflow: "hidden",
         flexShrink: flexShrink ?? 0,
         ...(borderRadius !== undefined && { borderRadius }),
@@ -36,7 +99,7 @@ export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30
         src={src}
         alt={alt}
         loading={loading}
-        onLoad={onLoad}
+        onLoad={handleLoad}
         onError={onError}
         style={{
           display: "block",
