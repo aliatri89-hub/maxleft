@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo } from "react";
 import BadgeDetailScreen from "./BadgeDetailScreen";
 
@@ -49,7 +50,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "#0f0d0b",
+      background: t.bgPrimary,
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
     }}>
@@ -86,13 +87,13 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
         <button onClick={onClose} style={{
           background: "none", border: "none", color: accent,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0",
-          fontWeight: 600, fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600, fontFamily: t.fontDisplay,
         }}>
           ← Back
         </button>
         <div style={{
-          fontSize: 14, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 14, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           flex: 1, textAlign: "center",
           letterSpacing: "0.03em", textTransform: "uppercase",
         }}>
@@ -113,7 +114,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
           <div style={{
             fontSize: 11, color: "#ffffff30",
             textTransform: "uppercase", letterSpacing: 2.5,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
           }}>
             {earned.length} of {badges.length} earned
           </div>
@@ -126,7 +127,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
               fontSize: 10, color: "#ffffff25",
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
             }}>
               Earned
             </div>
@@ -157,7 +158,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
               fontSize: 10, color: "#ffffff25",
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
             }}>
               In Progress
             </div>
@@ -188,7 +189,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
               fontSize: 10, color: "#ffffff25",
               textTransform: "uppercase", letterSpacing: 2,
               marginBottom: 16, paddingLeft: 4,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
             }}>
               Available
             </div>
@@ -330,7 +331,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
             background: "#22c55e",
             border: "2px solid #0f0d0b",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 12, color: "#fff", fontWeight: 700,
+            fontSize: 12, color: t.textPrimary, fontWeight: 700,
           }}>
             ✓
           </div>
@@ -346,7 +347,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
             padding: "2px 6px",
             fontSize: 10, fontWeight: 700,
             color: `${accent}cc`,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
           }}>
             {current}/{total}
           </div>
@@ -362,7 +363,7 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         textAlign: "center",
         lineHeight: 1.25,
         maxWidth: size + 8,
-        fontFamily: "'Barlow Condensed', sans-serif",
+        fontFamily: t.fontDisplay,
         letterSpacing: "0.02em",
       }}>
         {badge.name}

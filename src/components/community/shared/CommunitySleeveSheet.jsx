@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -259,7 +260,7 @@ export default function CommunitySleeveSheet({
         {topHosts.length > 0 && (
           <div style={{ padding: "0 20px" }}>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 400, fontSize: 10,
               color: "rgba(240,235,225,0.4)",
               letterSpacing: "0.1em",
@@ -288,7 +289,7 @@ export default function CommunitySleeveSheet({
                 justifyContent: "center", gap: 5, marginBottom: 4,
               }}>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
@@ -308,7 +309,7 @@ export default function CommunitySleeveSheet({
                 justifyContent: "center", gap: 6,
               }}>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
@@ -328,7 +329,7 @@ export default function CommunitySleeveSheet({
                 justifyContent: "center", gap: 6,
               }}>
                 <span style={{
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 400, fontSize: 10,
                   color: "rgba(240,235,225,0.4)",
                   letterSpacing: "0.1em",
@@ -357,7 +358,7 @@ export default function CommunitySleeveSheet({
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
           </svg>
           <span style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontWeight: 600, fontSize: 11,
             color: "rgba(240,235,225,0.5)",
             letterSpacing: "0.12em",
@@ -368,7 +369,7 @@ export default function CommunitySleeveSheet({
         {/* ── Description ── */}
         {community.description && (
           <div style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: t.fontMono,
             fontSize: 11,
             lineHeight: 1.65,
             color: "rgba(240,235,225,0.55)",
@@ -385,7 +386,7 @@ export default function CommunitySleeveSheet({
           justifyContent: "center",
           gap: 20,
           padding: "16px 20px 0",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontSize: 14, fontWeight: 600,
           color: "rgba(240,235,225,0.4)",
         }}>
@@ -418,12 +419,12 @@ export default function CommunitySleeveSheet({
                     borderRadius: 8,
                     border: "none",
                     cursor: "pointer",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontWeight: 700, fontSize: 14,
                     letterSpacing: "0.08em",
                     textTransform: "uppercase",
                     background: accent || "#e94560",
-                    color: "#fff",
+                    color: t.textPrimary,
                     WebkitTapHighlightColor: "transparent",
                   }}
                 >Enter Community</button>
@@ -434,7 +435,7 @@ export default function CommunitySleeveSheet({
                     borderRadius: 8,
                     border: `1.5px solid rgba(240,235,225,0.15)`,
                     cursor: "pointer",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontWeight: 600, fontSize: 11,
                     letterSpacing: "0.06em",
                     textTransform: "uppercase",
@@ -453,12 +454,12 @@ export default function CommunitySleeveSheet({
                   borderRadius: 8,
                   border: "none",
                   cursor: "pointer",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontFamily: t.fontDisplay,
                   fontWeight: 700, fontSize: 14,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                   background: accent || "#e94560",
-                  color: "#fff",
+                  color: t.textPrimary,
                   WebkitTapHighlightColor: "transparent",
                 }}
               >+ Follow Community</button>
@@ -481,7 +482,7 @@ export default function CommunitySleeveSheet({
           }}>
             {network && (
               <span style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 fontWeight: 700, fontSize: 12,
                 color: "rgba(240,235,225,0.3)",
                 textTransform: "uppercase",
@@ -496,7 +497,7 @@ export default function CommunitySleeveSheet({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 800, fontSize: 11,
               color: "rgba(240,235,225,0.4)",
             }}>{abbrev}</div>
@@ -514,7 +515,7 @@ export default function CommunitySleeveSheet({
               ))}
             </div>
             <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               fontSize: 9,
               color: "rgba(240,235,225,0.3)",
               textAlign: "center",
@@ -526,7 +527,7 @@ export default function CommunitySleeveSheet({
 
         {/* Fine print */}
         <div style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
           fontSize: 6,
           color: "rgba(240,235,225,0.15)",
           textAlign: "center",

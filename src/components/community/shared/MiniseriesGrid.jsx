@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
 
@@ -88,8 +89,8 @@ export default function MiniseriesGrid({
       {filtered.length === 0 && (
         <div style={{
           textAlign: "center", padding: "40px 16px",
-          color: "rgba(255,255,255,0.78)", fontSize: 14,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: t.textSecondary, fontSize: 14,
+          fontFamily: t.fontDisplay,
           fontStyle: "italic",
         }}>
           {searchQuery.trim().length >= 2
@@ -151,8 +152,8 @@ function GridTile({ series, accent, onTap }) {
             <span style={{ fontSize: 28, marginBottom: 4 }}>{series.director_emoji}</span>
           )}
           <div style={{
-            fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 11, fontWeight: 700, color: t.textSecondary,
+            fontFamily: t.fontDisplay,
             textAlign: "center", lineHeight: 1.2,
           }}>
             {series.title}
@@ -196,8 +197,8 @@ function GridTile({ series, accent, onTap }) {
         )}
         <span style={{
           fontSize: 10, fontWeight: 700,
-          color: isDone ? "#fff" : (hasProgress ? accent : "rgba(255,255,255,0.5)"),
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: isDone ? t.textPrimary : (hasProgress ? accent : t.textMuted),
+          fontFamily: t.fontDisplay,
           letterSpacing: "0.03em",
         }}>
           {series._completed}/{series._total}
@@ -231,8 +232,8 @@ function GridTile({ series, accent, onTap }) {
 
         {/* Series title (podcast name) */}
         <div style={{
-          fontSize: 9, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 9, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           lineHeight: 1.15,
           letterSpacing: "0.01em",
           textShadow: "0 1px 4px rgba(0,0,0,0.9)",
@@ -249,8 +250,8 @@ function GridTile({ series, accent, onTap }) {
         {series.director_name && series.director_name !== "." && (
           <div style={{
             fontSize: 8, fontWeight: 600,
-            color: "rgba(255,255,255,0.7)",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textSecondary,
+            fontFamily: t.fontDisplay,
             textAlign: "center",
             textShadow: "0 1px 3px rgba(0,0,0,0.8)",
             marginTop: 1,

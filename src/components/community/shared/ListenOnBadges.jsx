@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 /**
  * ListenOnBadges — Podcast platform deep links (Spotify, Apple, Podbean, Patreon, etc.)
  *
@@ -83,7 +84,7 @@ export default function ListenOnBadges({ title, communityName, platforms = [], i
   const labelStyle = {
     fontSize: compact ? 10 : 11,
     fontWeight: 600,
-    color: "rgba(255,255,255,0.78)",
+    color: t.textSecondary,
     whiteSpace: "nowrap",
   };
 
@@ -98,7 +99,7 @@ export default function ListenOnBadges({ title, communityName, platforms = [], i
     <div style={{ marginTop: compact ? 8 : 0, marginBottom: compact ? 0 : 14 }}>
       {!compact && (
         <div style={{
-          fontSize: 10, fontWeight: 600, color: "#bbb",
+          fontSize: 10, fontWeight: 600, color: t.textSecondary,
           textTransform: "uppercase", letterSpacing: "0.08em",
           marginBottom: 8,
         }}>Listen On</div>

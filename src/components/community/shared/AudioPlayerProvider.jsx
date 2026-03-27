@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { createContext, useContext, useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { getAudioBridge } from "../../../utils/nativeAudioBridge";
@@ -99,7 +100,7 @@ function renderWithTimecodes(text, onSeek) {
         onClick={(e) => { e.stopPropagation(); onSeek(sec); }}
         style={{
           color: ACCENT,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: t.fontMono,
           fontWeight: 600,
           cursor: "pointer",
           textDecoration: "underline",
@@ -313,7 +314,7 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
           <div style={{ display: "flex", gap: 2, alignItems: "flex-end", height: 14 }}>
             {[0, 1, 2].map(j => (
               <div key={j} style={{
-                width: 3, borderRadius: 1, background: "#0a0a0a",
+                width: 3, borderRadius: 1, background: t.bgPrimary,
                 animation: `audioEqBar 0.5s ease ${j * 0.12}s infinite alternate`,
               }} />
             ))}
@@ -360,8 +361,8 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
           flex: 1, minWidth: 0, cursor: "pointer", padding: "4px 0",
         }}>
           <div style={{
-            fontSize: 12, fontWeight: 700, color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 12, fontWeight: 700, color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase", letterSpacing: "0.02em",
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             lineHeight: 1.2,
@@ -369,18 +370,18 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
             {episode.title}
           </div>
           <div style={{
-            fontSize: 9, color: "rgba(255,255,255,0.7)",
-            fontFamily: "'IBM Plex Mono', monospace", marginTop: 1,
+            fontSize: 9, color: t.textSecondary,
+            fontFamily: t.fontMono, marginTop: 1,
             display: "flex", alignItems: "center", gap: 4,
           }}>
             {error ? (
-              <span style={{ color: "#ff4444" }}>Tap to retry</span>
+              <span style={{ color: t.red }}>Tap to retry</span>
             ) : (<>
               {episode.community && <span style={{ color: `${ACCENT}77` }}>{episode.community}</span>}
-              {episode.community && <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>}
+              {episode.community && <span style={{ color: t.textFaint }}>·</span>}
               <span>{remainingMin ? `${remainingMin}m left` : fmt(progress)}</span>
               {queueCount > 0 && (<>
-                <span style={{ color: "rgba(255,255,255,0.1)" }}>·</span>
+                <span style={{ color: t.textFaint }}>·</span>
                 <span style={{ color: `${ACCENT}77` }}>{queueCount} queued</span>
               </>)}
             </>)}
@@ -390,7 +391,7 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
         {/* Collapse to badge */}
         <button onClick={(e) => { e.stopPropagation(); onCollapse(); }} style={{
           background: "none", border: "none", cursor: "pointer",
-          color: "rgba(255,255,255,0.72)", padding: 6, display: "flex", flexShrink: 0,
+          color: t.textSecondary, padding: 6, display: "flex", flexShrink: 0,
         }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="6 9 12 15 18 9" />
@@ -549,7 +550,7 @@ function FullScreenPlayer({
               background: "rgba(255,255,255,0.06)", border: "none",
               borderRadius: "50%", width: 32, height: 32,
               display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(255,255,255,0.7)", cursor: "pointer",
+              color: t.textSecondary, cursor: "pointer",
               fontSize: 14,
             }}
           >
@@ -590,7 +591,7 @@ function FullScreenPlayer({
                 }}>
                   <div style={{
                     display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
-                    color: "#fff", opacity: 0.9,
+                    color: t.textPrimary, opacity: 0.9,
                   }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       {skipFlash === "back" ? (<>
@@ -601,7 +602,7 @@ function FullScreenPlayer({
                         <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
                       </>)}
                     </svg>
-                    <span style={{ fontSize: 10, fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>15s</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, fontFamily: t.fontMono }}>15s</span>
                   </div>
                 </div>
               )}
@@ -610,8 +611,8 @@ function FullScreenPlayer({
           {/* Title */}
           <div style={{
             fontSize: 20, fontWeight: 800,
-            color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase",
             letterSpacing: "0.03em",
             lineHeight: 1.2,
@@ -622,8 +623,8 @@ function FullScreenPlayer({
           </div>
           <div style={{
             fontSize: 11,
-            color: "rgba(255,255,255,0.72)",
-            fontFamily: "'IBM Plex Mono', monospace",
+            color: t.textSecondary,
+            fontFamily: t.fontMono,
             textTransform: "uppercase",
             letterSpacing: "0.08em",
           }}>
@@ -650,7 +651,7 @@ function FullScreenPlayer({
             >
               <div style={{
                 fontSize: 12, lineHeight: 1.5,
-                color: "rgba(255,255,255,0.7)",
+                color: t.textSecondary,
                 fontFamily: "var(--font-body, system-ui)",
                 overflow: "hidden",
                 maxHeight: descExpanded ? "none" : 42,
@@ -667,7 +668,7 @@ function FullScreenPlayer({
                   marginTop: 6,
                   fontSize: 10, fontWeight: 600,
                   color: `${ACCENT}88`,
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: t.fontMono,
                   textTransform: "uppercase",
                   letterSpacing: "0.06em",
                   gap: 4,
@@ -696,14 +697,14 @@ function FullScreenPlayer({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="#ff4444" flexShrink="0">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
             </svg>
-            <div style={{ flex: 1, fontSize: 11, color: "rgba(255,255,255,0.78)", fontFamily: "'IBM Plex Mono', monospace" }}>
+            <div style={{ flex: 1, fontSize: 11, color: t.textSecondary, fontFamily: t.fontMono }}>
               {error}
             </div>
             <button onClick={onRetry} style={{
               background: "rgba(255,68,68,0.2)", border: "1px solid rgba(255,68,68,0.3)",
               borderRadius: 6, padding: "4px 10px", cursor: "pointer",
-              color: "#ff6666", fontSize: 11, fontWeight: 700,
-              fontFamily: "'Barlow Condensed', sans-serif", textTransform: "uppercase",
+              color: t.red, fontSize: 11, fontWeight: 700,
+              fontFamily: t.fontDisplay, textTransform: "uppercase",
             }}>
               Retry
             </button>
@@ -767,8 +768,8 @@ function FullScreenPlayer({
           <div style={{
             display: "flex", justifyContent: "space-between",
             fontSize: 11,
-            color: "rgba(255,255,255,0.72)",
-            fontFamily: "'IBM Plex Mono', monospace",
+            color: t.textSecondary,
+            fontFamily: t.fontMono,
             marginTop: -2,
           }}>
             <span>{fmt(displayProgress)}</span>
@@ -788,10 +789,10 @@ function FullScreenPlayer({
               background: speed !== 1 ? `${ACCENT}18` : "rgba(255,255,255,0.04)",
               border: `1px solid ${speed !== 1 ? `${ACCENT}33` : "rgba(255,255,255,0.06)"}`,
               borderRadius: 8, padding: "6px 12px",
-              color: speed !== 1 ? ACCENT : "rgba(255,255,255,0.4)",
+              color: speed !== 1 ? ACCENT : t.textFaint,
               fontSize: 13, fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               minWidth: 48,
               transition: "all 0.2s",
             }}
@@ -805,7 +806,7 @@ function FullScreenPlayer({
             aria-label="Back 15 seconds"
             style={{
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.7)", padding: 8,
+              color: t.textSecondary, padding: 8,
               display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
               transition: "color 0.15s",
             }}
@@ -860,7 +861,7 @@ function FullScreenPlayer({
             aria-label="Forward 15 seconds"
             style={{
               background: "none", border: "none", cursor: "pointer",
-              color: "rgba(255,255,255,0.7)", padding: 8,
+              color: t.textSecondary, padding: 8,
               display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
               transition: "color 0.15s",
             }}
@@ -880,10 +881,10 @@ function FullScreenPlayer({
               background: sleepTimer ? `${ACCENT}18` : "rgba(255,255,255,0.04)",
               border: `1px solid ${sleepTimer ? `${ACCENT}33` : "rgba(255,255,255,0.06)"}`,
               borderRadius: 8, padding: "6px 10px",
-              color: sleepTimer ? ACCENT : "rgba(255,255,255,0.4)",
+              color: sleepTimer ? ACCENT : t.textFaint,
               fontSize: 11, fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               minWidth: 48,
               transition: "all 0.2s",
               display: "flex", alignItems: "center", gap: 4,
@@ -911,7 +912,7 @@ function FullScreenPlayer({
                   borderRadius: 8, padding: "6px 14px",
                   color: ACCENT, fontSize: 12, fontWeight: 600,
                   cursor: "pointer",
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: t.fontMono,
                   transition: "all 0.15s",
                 }}
               >
@@ -930,10 +931,10 @@ function FullScreenPlayer({
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.06)",
               borderRadius: 8, padding: "6px 12px",
-              color: "rgba(255,255,255,0.7)",
+              color: t.textSecondary,
               fontSize: 11, fontWeight: 700,
               cursor: "pointer",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase",
               letterSpacing: "0.05em",
               transition: "all 0.2s",
@@ -961,8 +962,8 @@ function FullScreenPlayer({
             </div>
             <div style={{
               fontSize: 16, fontWeight: 700,
-              color: "rgba(255,255,255,0.8)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              color: t.textSecondary,
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase",
               letterSpacing: "0.04em",
             }}>
@@ -970,8 +971,8 @@ function FullScreenPlayer({
             </div>
             <div style={{
               fontSize: 11,
-              color: "rgba(255,255,255,0.7)",
-              fontFamily: "'IBM Plex Mono', monospace",
+              color: t.textSecondary,
+              fontFamily: t.fontMono,
               marginTop: 4,
             }}>
               {recents.length > 0 ? "Resume a recent episode below" : "Log something in a community to find episodes"}
@@ -995,7 +996,7 @@ function FullScreenPlayer({
                 padding: "14px 20px 8px",
                 fontSize: 11, fontWeight: 700,
                 color: ACCENT,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
                 display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1014,8 +1015,8 @@ function FullScreenPlayer({
                 </div>
                 <button onClick={onClearQueue} style={{
                   background: "none", border: "none", cursor: "pointer",
-                  color: "rgba(255,255,255,0.78)", fontSize: 10, fontWeight: 600,
-                  fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase",
+                  color: t.textSecondary, fontSize: 10, fontWeight: 600,
+                  fontFamily: t.fontMono, textTransform: "uppercase",
                   padding: "2px 4px",
                 }}>
                   Clear
@@ -1038,7 +1039,7 @@ function FullScreenPlayer({
                     display: "flex", alignItems: "center", justifyContent: "center",
                     flexShrink: 0,
                     fontSize: 11, fontWeight: 700, color: ACCENT,
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: t.fontMono,
                   }}>
                     {i + 1}
                   </div>
@@ -1047,8 +1048,8 @@ function FullScreenPlayer({
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontSize: 12, fontWeight: 700,
-                      color: "rgba(255,255,255,0.8)",
-                      fontFamily: "'Barlow Condensed', sans-serif",
+                      color: t.textSecondary,
+                      fontFamily: t.fontDisplay,
                       textTransform: "uppercase",
                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       lineHeight: 1.3,
@@ -1058,7 +1059,7 @@ function FullScreenPlayer({
                     {q.community && (
                       <span style={{
                         fontSize: 9, color: `${ACCENT}88`,
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontFamily: t.fontMono,
                       }}>
                         {q.community}
                       </span>
@@ -1072,7 +1073,7 @@ function FullScreenPlayer({
                     style={{
                       background: "none", border: "none",
                       cursor: "pointer", padding: 4,
-                      color: "rgba(255,255,255,0.78)",
+                      color: t.textSecondary,
                       fontSize: 12, lineHeight: 1,
                       flexShrink: 0,
                     }}
@@ -1098,8 +1099,8 @@ function FullScreenPlayer({
                 }}>
                   <div style={{
                     fontSize: 12,
-                    color: "rgba(255,255,255,0.72)",
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    color: t.textSecondary,
+                    fontFamily: t.fontMono,
                     lineHeight: 1.6,
                   }}>
                     Play an episode from any community to start listening
@@ -1113,7 +1114,7 @@ function FullScreenPlayer({
                 padding: "14px 20px 8px",
                 fontSize: 11, fontWeight: 700,
                 color: ACCENT,
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontFamily: t.fontDisplay,
                 textTransform: "uppercase",
                 letterSpacing: "0.1em",
                 display: "flex", alignItems: "center", gap: 8,
@@ -1180,8 +1181,8 @@ function FullScreenPlayer({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 700,
-                        color: "rgba(255,255,255,0.8)",
-                        fontFamily: "'Barlow Condensed', sans-serif",
+                        color: t.textSecondary,
+                        fontFamily: t.fontDisplay,
                         textTransform: "uppercase",
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         lineHeight: 1.3,
@@ -1197,13 +1198,13 @@ function FullScreenPlayer({
                           <span style={{
                             fontSize: 9,
                             color: `${ACCENT}88`,
-                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontFamily: t.fontMono,
                             whiteSpace: "nowrap",
                           }}>
                             {r.community}
                           </span>
                         )}
-                        {r.community && <span style={{ color: "rgba(255,255,255,0.1)", fontSize: 9 }}>·</span>}
+                        {r.community && <span style={{ color: t.textFaint, fontSize: 9 }}>·</span>}
                         {/* Progress bar */}
                         <div style={{
                           flex: 1, height: 3, borderRadius: 2,
@@ -1218,8 +1219,8 @@ function FullScreenPlayer({
                         </div>
                         <span style={{
                           fontSize: 9,
-                          color: "rgba(255,255,255,0.78)",
-                          fontFamily: "'IBM Plex Mono', monospace",
+                          color: t.textSecondary,
+                          fontFamily: t.fontMono,
                           whiteSpace: "nowrap",
                         }}>
                           {fmt(r.time)} / {fmt(r.duration)} · {timeAgo}
@@ -1234,7 +1235,7 @@ function FullScreenPlayer({
                       style={{
                         background: "none", border: "none",
                         cursor: "pointer", padding: 4,
-                        color: "rgba(255,255,255,0.78)",
+                        color: t.textSecondary,
                         fontSize: 12, lineHeight: 1,
                         flexShrink: 0,
                       }}
@@ -1300,8 +1301,8 @@ function QueueToast({ toast }) {
         )}
         <span style={{
           fontSize: 12, fontWeight: 600,
-          color: toast.duplicate ? "rgba(255,255,255,0.5)" : "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: toast.duplicate ? t.textMuted : t.textPrimary,
+          fontFamily: t.fontDisplay,
           textTransform: "uppercase",
           letterSpacing: "0.03em",
         }}>

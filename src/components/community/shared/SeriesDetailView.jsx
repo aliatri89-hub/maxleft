@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
 
@@ -61,7 +62,7 @@ export default function SeriesDetailView({
       style={{
         position: "absolute",
         inset: 0,
-        background: "#0f0d0b",
+        background: t.bgPrimary,
         zIndex: 20,
         overflowY: "auto",
         overflowX: "hidden",
@@ -103,8 +104,8 @@ export default function SeriesDetailView({
         }}>← Series</button>
         <div style={{
           flex: 1, textAlign: "center",
-          fontSize: 13, fontWeight: 700, color: "#fff",
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 13, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
           {series.director_name && series.director_name !== "."
@@ -113,8 +114,8 @@ export default function SeriesDetailView({
         </div>
         <div style={{
           fontSize: 13, fontWeight: 700,
-          color: isDone ? "#4ade80" : accent,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          color: isDone ? t.green : accent,
+          fontFamily: t.fontDisplay,
         }}>
           {completedCount}/{items.length}
         </div>
@@ -146,8 +147,8 @@ export default function SeriesDetailView({
             bottom: 14, left: 16, right: 16,
           }}>
             <div style={{
-              fontSize: 20, fontWeight: 800, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 20, fontWeight: 800, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               textTransform: "uppercase",
               letterSpacing: "0.03em",
               lineHeight: 1.1,
@@ -157,8 +158,8 @@ export default function SeriesDetailView({
             </div>
             {series.director_name && series.director_name !== "." && (
               <div style={{
-                fontSize: 12, color: "rgba(255,255,255,0.7)",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 12, color: t.textSecondary,
+                fontFamily: t.fontDisplay,
                 marginTop: 3,
               }}>
                 The Films of {series.director_name}
@@ -166,8 +167,8 @@ export default function SeriesDetailView({
             )}
             {series.episode_range && (
               <div style={{
-                fontSize: 11, color: "rgba(255,255,255,0.72)",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 11, color: t.textSecondary,
+                fontFamily: t.fontDisplay,
                 marginTop: 2,
               }}>
                 {series.episode_range}
@@ -199,8 +200,8 @@ export default function SeriesDetailView({
       {!series.thumbnail_url && (
         <div style={{ padding: "20px 16px 12px" }}>
           <div style={{
-            fontSize: 22, fontWeight: 800, color: "#fff",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 22, fontWeight: 800, color: t.textPrimary,
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase",
             letterSpacing: "0.03em",
           }}>
@@ -208,8 +209,8 @@ export default function SeriesDetailView({
           </div>
           {series.director_name && series.director_name !== "." && (
             <div style={{
-              fontSize: 13, color: "rgba(255,255,255,0.7)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 13, color: t.textSecondary,
+              fontFamily: t.fontDisplay,
               marginTop: 3,
             }}>
               The Films of {series.director_name}
@@ -271,7 +272,7 @@ export default function SeriesDetailView({
           <div style={{
             fontSize: 13, fontWeight: 700,
             color: "rgba(250,204,21,0.7)",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             textTransform: "uppercase",
             letterSpacing: "0.06em",
             marginBottom: 10,

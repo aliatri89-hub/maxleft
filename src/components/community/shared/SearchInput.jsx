@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useRef, useId } from "react";
 
 /**
@@ -21,8 +22,8 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
   return (
     <div style={{ padding: "12px 16px 0" }}>
       <style>{`
-        .cs-search-${uid}::placeholder { color: rgba(255,255,255,0.78); }
-        .cs-search-${uid}:focus { border-color: ${accent ? `${accent}66` : "rgba(255,255,255,0.3)"}; outline: none; }
+        .cs-search-${uid}::placeholder { color: var(--text-secondary); }
+        .cs-search-${uid}:focus { border-color: ${accent ? `${accent}66` : "var(--text-faint)"}; outline: none; }
       `}</style>
       <div style={{ position: "relative" }}>
         <input
@@ -38,7 +39,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
             background: "rgba(255,255,255,0.05)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 10,
-            color: "#e0e0e0",
+            color: t.textSecondary,
             fontSize: 14,
             fontFamily: "inherit",
             WebkitAppearance: "none",
@@ -46,7 +47,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
         />
         <div style={{
           position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)",
-          fontSize: 14, color: "rgba(255,255,255,0.78)", pointerEvents: "none",
+          fontSize: 14, color: t.textSecondary, pointerEvents: "none",
         }}>🔍</div>
         {value && (
           <button
@@ -55,7 +56,7 @@ export default function SearchInput({ value, onChange, placeholder = "Search..."
               position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
               background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
               width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#bbb", fontSize: 12, cursor: "pointer",
+              color: t.textSecondary, fontSize: 12, cursor: "pointer",
             }}
           >✕</button>
         )}

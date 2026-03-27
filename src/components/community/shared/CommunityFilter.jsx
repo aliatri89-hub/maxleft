@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 export default function CommunityFilter({ value = "all", onChange, accent = "#e94560", upcomingCount = 0 }) {
   const options = [
     { key: "all", label: "All" },
@@ -22,12 +23,12 @@ export default function CommunityFilter({ value = "all", onChange, accent = "#e9
               border: active ? "1px solid " + accent : "1px solid rgba(255,255,255,0.08)",
               borderRadius: 20,
               padding: "5px 14px",
-              color: active ? accent : "#888",
+              color: active ? accent : t.textMuted,
               fontSize: 12,
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.2s",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.03em",
               textTransform: "uppercase",
             }}

@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useRef } from "react";
 
 /**
@@ -260,7 +261,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             Badge Unlocked
           </div>
           <div style={{
-            fontSize: 32, fontWeight: 700, color: "#fff",
+            fontSize: 32, fontWeight: 700, color: t.textPrimary,
             fontFamily: "'Playfair Display', serif",
             textShadow: `0 0 60px ${accent}25`,
             lineHeight: 1.15,
@@ -290,7 +291,7 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
                     fontSize: 11, color: "#ffffff40",
                     marginTop: 10, letterSpacing: 1.2,
                     textTransform: "uppercase",
-                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontFamily: t.fontDisplay,
                     fontStyle: "normal",
                   }}>
                     {parts[1]}

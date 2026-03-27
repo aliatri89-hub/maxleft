@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useRef } from "react";
 
 /**
@@ -145,10 +146,10 @@ export default function ComedyPointsToast({ points, visible, onDone }) {
           {/* Points text */}
           <div style={{ position: "relative" }}>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 800,
               fontSize: 26,
-              color: "#f5c542",
+              color: t.gold,
               lineHeight: 1,
               letterSpacing: "-0.02em",
               animation: phase === "holding" ? "cp-number-pop 0.35s ease-out 0.2s both" : "none",
@@ -157,7 +158,7 @@ export default function ComedyPointsToast({ points, visible, onDone }) {
               +{pointsStr}
             </div>
             <div style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: "0.14em",

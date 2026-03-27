@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import React, { useRef, useEffect } from "react";
 
 /**
@@ -34,7 +35,7 @@ export default function HostChipBar({
     borderRadius: 20,
     border: `1.5px solid ${active ? accent : "rgba(255,255,255,0.1)"}`,
     background: active ? `${accent}25` : "rgba(255,255,255,0.05)",
-    color: active ? accent : "#888",
+    color: active ? accent : t.textMuted,
     fontSize: 12,
     fontWeight: 600,
     cursor: "pointer",
@@ -50,7 +51,7 @@ export default function HostChipBar({
     fontSize: 10,
     fontWeight: 500,
     opacity: 0.55,
-    color: active ? accent : "#666",
+    color: active ? accent : t.textFaint,
   });
 
   return (

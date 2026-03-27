@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "../../../supabase";
 import { searchTMDBRaw, apiProxy } from "../../../utils/api";
@@ -650,7 +651,7 @@ export default function AdminItemEditor({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#aaa",
+          color: t.textMuted,
           fontSize: 14,
           cursor: "pointer",
           flexShrink: 0,
@@ -827,7 +828,7 @@ export default function AdminItemEditor({
                   textAlign: "center",
                   background: tmdbFetching ? "rgba(255,255,255,0.04)" : "rgba(250,204,21,0.08)",
                   borderColor: "rgba(250,204,21,0.2)",
-                  color: "#facc15",
+                  color: t.gold,
                 }}
               >
                 {tmdbFetching ? "Fetching…" : "Fetch Poster + Backdrop from TMDB"}
@@ -847,13 +848,13 @@ export default function AdminItemEditor({
                     value={backdropPath}
                     onChange={(e) => setBackdropPath(e.target.value)}
                     placeholder="/abcdef123.jpg (TMDB path or full URL)"
-                    style={{ ...S.input, fontSize: 10, color: "#ddd" }}
+                    style={{ ...S.input, fontSize: 10, color: t.textSecondary }}
                   />
                 </div>
                 {backdropPath && (
                   <button
                     onClick={() => setBackdropPath("")}
-                    style={{ ...S.smallBtn, color: "#e94560", borderColor: "rgba(233,69,96,0.2)", padding: "6px 10px" }}
+                    style={{ ...S.smallBtn, color: t.red, borderColor: "rgba(233,69,96,0.2)", padding: "6px 10px" }}
                   >Clear</button>
                 )}
               </div>
@@ -985,7 +986,7 @@ export default function AdminItemEditor({
                     {coverImage && (
                       <button
                         onClick={() => setCoverImage("")}
-                        style={{ ...S.smallBtn, color: "#e94560", borderColor: "rgba(233,69,96,0.2)" }}
+                        style={{ ...S.smallBtn, color: t.red, borderColor: "rgba(233,69,96,0.2)" }}
                       >
                         Clear
                       </button>
@@ -1002,7 +1003,7 @@ export default function AdminItemEditor({
               <label style={S.label}>
                 Shelf{" "}
                 {currentShelf ? (
-                  <span style={{ color: "#aaa", fontWeight: 400 }}>
+                  <span style={{ color: t.textMuted, fontWeight: 400 }}>
                     (currently: {currentShelf.title})
                   </span>
                 ) : (
@@ -1056,7 +1057,7 @@ export default function AdminItemEditor({
                 display: "flex", justifyContent: "space-between", alignItems: "center",
                 marginBottom: 8,
               }}>
-                <label style={{ ...S.label, marginBottom: 0, color: "#facc15" }}>
+                <label style={{ ...S.label, marginBottom: 0, color: t.gold }}>
                   Quick Match
                 </label>
                 {quickMatchDone && (
@@ -1068,13 +1069,13 @@ export default function AdminItemEditor({
               </div>
 
               {quickMatchLoading && (
-                <div style={{ fontSize: 11, color: "#bbb", padding: "8px 0" }}>
+                <div style={{ fontSize: 11, color: t.textSecondary, padding: "8px 0" }}>
                   Loading latest episodes…
                 </div>
               )}
 
               {quickMatchDone && quickMatchEps.length === 0 && (
-                <div style={{ fontSize: 11, color: "#aaa", padding: "4px 0" }}>
+                <div style={{ fontSize: 11, color: t.textMuted, padding: "4px 0" }}>
                   No recent episodes found in feed.
                 </div>
               )}
@@ -1102,12 +1103,12 @@ export default function AdminItemEditor({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: isBest ? 700 : 500,
-                        color: isBest ? "#facc15" : "#ccc",
+                        color: isBest ? t.gold : t.textSecondary,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                       }}>{ep.title}</div>
-                      <div style={{ fontSize: 9, color: "#aaa" }}>
+                      <div style={{ fontSize: 9, color: t.textMuted }}>
                         {ep.pubDate ? new Date(ep.pubDate).toLocaleDateString() : ""}
-                        {ep.score > 0 && <span style={{ marginLeft: 6, color: ep.score >= 50 ? "#facc15" : "#555" }}>
+                        {ep.score > 0 && <span style={{ marginLeft: 6, color: ep.score >= 50 ? t.gold : t.textFaint }}>
                           {ep.score}% match
                         </span>}
                       </div>
@@ -1115,7 +1116,7 @@ export default function AdminItemEditor({
                     <div style={{
                       fontSize: 9, fontWeight: 700, textTransform: "uppercase",
                       letterSpacing: "0.06em", flexShrink: 0,
-                      color: isBest ? "#facc15" : "#888",
+                      color: isBest ? t.gold : t.textMuted,
                     }}>
                       {quickSaving ? "…" : "Link"}
                     </div>
@@ -1177,7 +1178,7 @@ export default function AdminItemEditor({
               value={rssGuid}
               onChange={(e) => setRssGuid(e.target.value)}
               placeholder="RSS episode GUID"
-              style={{ ...S.input, fontSize: 10, color: "#bbb" }}
+              style={{ ...S.input, fontSize: 10, color: t.textSecondary }}
             />
           </div>
 
@@ -1218,7 +1219,7 @@ export default function AdminItemEditor({
               <label style={{ ...S.label, marginBottom: 0 }}>
                 RSS Episode Browser{" "}
                 {rssLoaded && (
-                  <span style={{ color: "#22c55e", fontWeight: 400 }}>
+                  <span style={{ color: t.green, fontWeight: 400 }}>
                     ({rssEpisodes.length} episodes)
                   </span>
                 )}
@@ -1240,7 +1241,7 @@ export default function AdminItemEditor({
               <div
                 style={{
                   fontSize: 9,
-                  color: "#aaa",
+                  color: t.textMuted,
                   marginBottom: 6,
                   wordBreak: "break-all",
                 }}
@@ -1250,7 +1251,7 @@ export default function AdminItemEditor({
             )}
 
             {rssError && (
-              <div style={{ fontSize: 10, color: "#e94560", marginBottom: 8 }}>
+              <div style={{ fontSize: 10, color: t.red, marginBottom: 8 }}>
                 {rssError}
               </div>
             )}
@@ -1310,7 +1311,7 @@ export default function AdminItemEditor({
                         <span
                           style={{
                             fontSize: 10,
-                            color: "#facc15",
+                            color: t.gold,
                             flexShrink: 0,
                           }}
                         >
@@ -1324,7 +1325,7 @@ export default function AdminItemEditor({
                       style={{
                         padding: 12,
                         fontSize: 11,
-                        color: "#aaa",
+                        color: t.textMuted,
                         textAlign: "center",
                       }}
                     >
@@ -1348,7 +1349,7 @@ export default function AdminItemEditor({
               style={{
                 ...S.smallBtn,
                 marginTop: 8,
-                color: "#e94560",
+                color: t.red,
                 borderColor: "rgba(233,69,96,0.2)",
               }}
             >
@@ -1416,7 +1417,7 @@ export default function AdminItemEditor({
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: "#ddd",
+                color: t.textSecondary,
                 cursor: "pointer",
                 padding: "6px 0",
               }}
@@ -1428,7 +1429,7 @@ export default function AdminItemEditor({
                 style={{ accentColor: "#facc15" }}
               />
               Commentary Only
-              <span style={{ fontSize: 9, color: "#aaa" }}>
+              <span style={{ fontSize: 9, color: t.textMuted }}>
                 (Patreon tab — no green card frame)
               </span>
             </label>
@@ -1438,7 +1439,7 @@ export default function AdminItemEditor({
                 alignItems: "center",
                 gap: 8,
                 fontSize: 12,
-                color: "#ddd",
+                color: t.textSecondary,
                 cursor: "pointer",
                 padding: "6px 0",
               }}
@@ -1450,7 +1451,7 @@ export default function AdminItemEditor({
                 style={{ accentColor: "#facc15" }}
               />
               Coming Soon
-              <span style={{ fontSize: 9, color: "#aaa" }}>
+              <span style={{ fontSize: 9, color: t.textMuted }}>
                 (episode seeded but not yet aired)
               </span>
             </label>
@@ -1465,7 +1466,7 @@ export default function AdminItemEditor({
             }}
           >
             <label style={S.label}>Debug</label>
-            <div style={{ fontSize: 10, color: "#aaa", lineHeight: 1.6 }}>
+            <div style={{ fontSize: 10, color: t.textMuted, lineHeight: 1.6 }}>
               <div>
                 <strong>ID:</strong>{" "}
                 <span style={{ fontFamily: "monospace", userSelect: "all" }}>
@@ -1486,13 +1487,13 @@ export default function AdminItemEditor({
               </div>
               {item.extra_data && (
                 <details style={{ marginTop: 4 }}>
-                  <summary style={{ cursor: "pointer", color: "#777" }}>
+                  <summary style={{ cursor: "pointer", color: t.textMuted }}>
                     extra_data
                   </summary>
                   <pre
                     style={{
                       fontSize: 9,
-                      color: "#aaa",
+                      color: t.textMuted,
                       whiteSpace: "pre-wrap",
                       marginTop: 4,
                     }}
@@ -1523,14 +1524,14 @@ export default function AdminItemEditor({
             <div
               style={{
                 fontSize: 11,
-                color: "#e94560",
+                color: t.red,
                 fontWeight: 600,
                 marginBottom: 6,
               }}
             >
               Delete Item
             </div>
-            <div style={{ fontSize: 10, color: "#ddd", marginBottom: 10 }}>
+            <div style={{ fontSize: 10, color: t.textSecondary, marginBottom: 10 }}>
               This will permanently remove "{title}" from this community, including
               all user progress and badge items linked to it.
             </div>
@@ -1542,7 +1543,7 @@ export default function AdminItemEditor({
                 background: "rgba(233,69,96,0.15)",
                 border: "1px solid rgba(233,69,96,0.3)",
                 borderRadius: 8,
-                color: "#e94560",
+                color: t.red,
                 fontSize: 12,
                 fontWeight: 700,
                 cursor: "pointer",
@@ -1570,7 +1571,7 @@ export default function AdminItemEditor({
                 ? "1px solid #22c55e"
                 : "1px solid rgba(250,204,21,0.3)",
               borderRadius: 8,
-              color: saved ? "#000" : "#facc15",
+              color: saved ? t.bgPrimary : t.gold,
               fontSize: 13,
               fontWeight: 700,
               cursor: "pointer",
@@ -1610,23 +1611,23 @@ const S = {
   badge: {
     fontSize: 9,
     fontWeight: 700,
-    color: "#facc15",
+    color: t.gold,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
   },
   itemId: {
     fontSize: 9,
-    color: "#aaa",
+    color: t.textMuted,
     fontFamily: "monospace",
   },
   timestamp: {
     fontSize: 9,
-    color: "#ddd",
+    color: t.textSecondary,
   },
   closeBtn: {
     background: "none",
     border: "none",
-    color: "#aaa",
+    color: t.textMuted,
     fontSize: 14,
     cursor: "pointer",
     padding: "2px 6px",
@@ -1643,7 +1644,7 @@ const S = {
     background: "none",
     border: "none",
     borderBottom: "2px solid transparent",
-    color: "#aaa",
+    color: t.textMuted,
     fontSize: 10,
     fontWeight: 600,
     textTransform: "uppercase",
@@ -1652,7 +1653,7 @@ const S = {
     transition: "all 0.15s",
   },
   tabActive: {
-    color: "#facc15",
+    color: t.gold,
     borderBottomColor: "#facc15",
   },
   tabContent: {
@@ -1662,7 +1663,7 @@ const S = {
     display: "block",
     fontSize: 9,
     fontWeight: 600,
-    color: "#bbb",
+    color: t.textSecondary,
     textTransform: "uppercase",
     letterSpacing: "0.06em",
     marginBottom: 3,
@@ -1673,7 +1674,7 @@ const S = {
     background: "rgba(255,255,255,0.06)",
     border: "1px solid rgba(255,255,255,0.1)",
     borderRadius: 6,
-    color: "#e0e0e0",
+    color: t.textSecondary,
     fontSize: 12,
     outline: "none",
     fontFamily: "inherit",
@@ -1684,7 +1685,7 @@ const S = {
     background: "rgba(255,255,255,0.08)",
     border: "1px solid rgba(255,255,255,0.12)",
     borderRadius: 6,
-    color: "#ddd",
+    color: t.textSecondary,
     fontSize: 11,
     cursor: "pointer",
     flexShrink: 0,
@@ -1721,14 +1722,14 @@ const S = {
   searchTitle: {
     fontSize: 11,
     fontWeight: 600,
-    color: "#fff",
+    color: t.textPrimary,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
   searchMeta: {
     fontSize: 9,
-    color: "#bbb",
+    color: t.textSecondary,
   },
   posterRow: {
     display: "flex",
@@ -1744,7 +1745,7 @@ const S = {
   },
   posterLabel: {
     fontSize: 8,
-    color: "#bbb",
+    color: t.textSecondary,
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     marginBottom: 4,
@@ -1757,7 +1758,7 @@ const S = {
   },
   posterArrow: {
     fontSize: 16,
-    color: "#facc15",
+    color: t.gold,
   },
   coverThumb: {
     width: 36,
@@ -1770,7 +1771,7 @@ const S = {
     display: "block",
     marginTop: 4,
     fontSize: 9,
-    color: "rgba(255,255,255,0.78)",
+    color: t.textSecondary,
     textDecoration: "none",
   },
   rssList: {
@@ -1793,7 +1794,7 @@ const S = {
     borderRadius: "50%",
     background: "rgba(255,255,255,0.08)",
     border: "1px solid rgba(255,255,255,0.1)",
-    color: "#facc15",
+    color: t.gold,
     fontSize: 10,
     cursor: "pointer",
     display: "flex",
@@ -1803,13 +1804,13 @@ const S = {
   },
   rssTitle: {
     fontSize: 11,
-    color: "#ddd",
+    color: t.textSecondary,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
   },
   rssMeta: {
     fontSize: 9,
-    color: "#aaa",
+    color: t.textMuted,
   },
 };

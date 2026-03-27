@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 // ════════════════════════════════════════════════
 // COMMUNITY TAPE CARD — VHS label for Explore screen
 // ════════════════════════════════════════════════
@@ -15,7 +16,7 @@ const VHS_BRANDS = [
   { color: "#14398a", text: "Maxell", sub: "HGX", weight: 800 },
   { color: "#9b1b1b", text: "BASF", sub: "E-180", weight: 900 },
 ];
-const VHS_LOGO_BRAND = { color: "#2C2824", text: "VHS", sub: "", weight: 800, isVhs: true };
+const VHS_LOGO_BRAND = { color: t.creamDark, text: "VHS", sub: "", weight: 800, isVhs: true };
 
 function getVhsBrands(slug) {
   const hash = (slug || "").split("").reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
@@ -46,7 +47,7 @@ function BrandStamp({ brand, side = "right" }) {
         <div style={{
           transform: "rotate(-90deg)",
           opacity: 0.6,
-          fontFamily: "'Barlow Condensed', sans-serif",
+          fontFamily: t.fontDisplay,
           fontWeight: 900,
           fontSize: 9,
           letterSpacing: 2,
@@ -56,7 +57,7 @@ function BrandStamp({ brand, side = "right" }) {
         <>
           <div style={{
             writingMode: "vertical-rl",
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
             fontWeight: brand.weight,
             fontSize,
             letterSpacing: "0.05em",
@@ -68,7 +69,7 @@ function BrandStamp({ brand, side = "right" }) {
           {brand.sub && (
             <div style={{
               writingMode: "vertical-rl",
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: t.fontMono,
               fontWeight: 600,
               fontSize: 5,
               letterSpacing: "0.06em",
@@ -196,7 +197,7 @@ export default function CommunityTapeCard({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontFamily: "'Permanent Marker', cursive",
-                    color: "#2C2824",
+                    color: t.creamDark,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
                     lineHeight: 1.15,
@@ -285,7 +286,7 @@ export default function CommunityTapeCard({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontFamily: "'Permanent Marker', cursive",
-                    color: "#2C2824",
+                    color: t.creamDark,
                     textTransform: "uppercase",
                     letterSpacing: "0.02em",
                     lineHeight: 1.15,

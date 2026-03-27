@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useRef } from "react";
 
 /**
@@ -138,7 +139,7 @@ export default function BadgeProgressToast({ badge, current, total, isComplete, 
             background: "rgba(0,0,0,0.3)",
           }}>
             <span style={{
-              fontSize: 20, color: "#22c55e",
+              fontSize: 20, color: t.green,
               animation: isShowing ? "badgeToastCheck 0.5s 0.3s ease-out both" : "none",
               textShadow: "0 0 12px #22c55e60",
             }}>✓</span>
@@ -149,12 +150,12 @@ export default function BadgeProgressToast({ badge, current, total, isComplete, 
         <div style={{ flex: 1 }}>
           <div style={{
             fontSize: 10, letterSpacing: 2.5, textTransform: "uppercase",
-            color: "#22c55e", fontWeight: 700, marginBottom: 4,
+            color: t.green, fontWeight: 700, marginBottom: 4,
           }}>
             Badge Unlocked
           </div>
           <div style={{
-            fontSize: 16, color: "#fff", fontWeight: 700, marginBottom: 8,
+            fontSize: 16, color: t.textPrimary, fontWeight: 700, marginBottom: 8,
             lineHeight: 1.2,
           }}>
             {badge.name}
@@ -260,7 +261,7 @@ export default function BadgeProgressToast({ badge, current, total, isComplete, 
       {/* Progress info */}
       <div style={{ flex: 1 }}>
         <div style={{
-          fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 3,
+          fontSize: 12, color: t.textPrimary, fontWeight: 600, marginBottom: 3,
           display: "flex", alignItems: "center", gap: 7,
         }}>
           <span>{current}/{total}</span>

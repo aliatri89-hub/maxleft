@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect } from "react";
 import { supabase } from "../../../supabase";
 
@@ -109,11 +110,11 @@ export default function CrossCommunityChips({
       <div style={{
         fontSize: 10,
         fontWeight: 600,
-        color: "rgba(255,255,255,0.7)",
+        color: t.textSecondary,
         textTransform: "uppercase",
         letterSpacing: "0.08em",
         marginBottom: 8,
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: t.fontMono,
       }}>
         Also in
       </div>
@@ -169,7 +170,7 @@ export default function CrossCommunityChips({
               fontSize: 12,
               fontWeight: 700,
               color: community.accent,
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.03em",
               textTransform: "uppercase",
               whiteSpace: "nowrap",

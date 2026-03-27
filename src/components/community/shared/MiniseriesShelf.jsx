@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useMemo, useEffect } from "react";
 import ItemCard from "../primitives/ItemCard";
 import { isComingSoon } from "../../../utils/comingSoon";
@@ -73,15 +74,15 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
           {series.director_emoji && <span style={{ fontSize: 20 }}>{series.director_emoji}</span>}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 15, fontWeight: 700, color: "#fff",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 15, fontWeight: 700, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
               letterSpacing: "0.02em",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>
               {series.title}
             </div>
             {((series.director_name && series.director_name !== ".") || series.episode_range) && (
-              <div style={{ fontSize: 12, color: "#bbb", marginTop: 1 }}>
+              <div style={{ fontSize: 12, color: t.textSecondary, marginTop: 1 }}>
                 {[series.director_name !== "." && series.director_name, series.episode_range].filter(Boolean).join(" · ")}
               </div>
             )}
@@ -100,16 +101,16 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
                   <path d="M3.5 6l1.8 1.8 3.2-3.6" stroke="#4ade80" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
                 <span style={{
-                  fontSize: 11, fontWeight: 700, color: "#4ade80",
-                  fontFamily: "'Barlow Condensed', sans-serif",
+                  fontSize: 11, fontWeight: 700, color: t.green,
+                  fontFamily: t.fontDisplay,
                   letterSpacing: "0.04em",
                 }}>DONE</span>
               </div>
             ) : (
               <div style={{
                 fontSize: 13, fontWeight: 700,
-                color: "#e94560",
-                fontFamily: "'Barlow Condensed', sans-serif",
+                color: t.red,
+                fontFamily: t.fontDisplay,
               }}>
                 {allCompleted}/{allItems.length}
               </div>
@@ -147,7 +148,7 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
                 background: activeType === type ? "rgba(233,69,96,0.2)" : "rgba(255,255,255,0.05)",
                 border: activeType === type ? "1px solid #e94560" : "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 20, padding: "4px 12px",
-                color: activeType === type ? "#e94560" : "#888",
+                color: activeType === type ? t.red : t.textMuted,
                 fontSize: 12, fontWeight: 600, cursor: "pointer",
                 transition: "all 0.2s",
               }}
@@ -217,8 +218,8 @@ export default function MiniseriesShelf({ series, progress, onToggle, onToggleCo
               <span style={{ fontSize: 20, color: accent, lineHeight: 1 }}>+</span>
             </div>
             <span style={{
-              fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.78)",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontSize: 10, fontWeight: 600, color: t.textSecondary,
+              fontFamily: t.fontDisplay,
             }}>
               +{remaining}
             </span>

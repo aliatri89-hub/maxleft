@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../../../supabase";
 import BadgeCelebration from "./BadgeCelebration";
@@ -178,7 +179,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
         <button onClick={onClose} style={{
           background: "none", border: "none", color: accent,
           fontSize: 15, cursor: "pointer", padding: "4px 8px 4px 0",
-          fontWeight: 600, fontFamily: "'Barlow Condensed', sans-serif",
+          fontWeight: 600, fontFamily: t.fontDisplay,
         }}>
           ← Back
         </button>
@@ -255,7 +256,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             marginTop: 20, textAlign: "center",
           }}>
             <div style={{
-              fontSize: 28, fontWeight: 700, color: "#fff",
+              fontSize: 28, fontWeight: 700, color: t.textPrimary,
               fontFamily: "'Playfair Display', serif",
               lineHeight: 1.15,
             }}>
@@ -291,7 +292,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                 <div style={{ fontSize: 10, color: "#ffffff30", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
                   Earned
                 </div>
-                <div style={{ fontSize: 13, color: "#22c55e", fontWeight: 600 }}>
+                <div style={{ fontSize: 13, color: t.green, fontWeight: 600 }}>
                   {earnedDateStr}
                 </div>
               </div>
@@ -300,7 +301,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
               <div style={{ fontSize: 10, color: "#ffffff30", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 3 }}>
                 Films
               </div>
-              <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>
+              <div style={{ fontSize: 13, color: t.textPrimary, fontWeight: 600 }}>
                 {completedCount}/{totalCount}
               </div>
             </div>
@@ -332,7 +333,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
             fontSize: 10, color: "#ffffff30",
             textTransform: "uppercase", letterSpacing: 2,
             marginBottom: 14, paddingLeft: 2,
-            fontFamily: "'Barlow Condensed', sans-serif",
+            fontFamily: t.fontDisplay,
           }}>
             The Journey
           </div>
@@ -413,7 +414,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
                     {/* Star rating */}
                     {stars && (
                       <div style={{
-                        fontSize: 12, color: "#f59e0b",
+                        fontSize: 12, color: t.gold,
                         fontWeight: 600, flexShrink: 0,
                         display: "flex", alignItems: "center", gap: 2,
                       }}>
@@ -461,7 +462,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.2s",
-              fontFamily: "'Barlow Condensed', sans-serif",
+              fontFamily: t.fontDisplay,
               letterSpacing: 0.5,
             }}
           >

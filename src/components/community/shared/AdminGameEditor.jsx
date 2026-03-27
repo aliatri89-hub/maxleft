@@ -1,3 +1,4 @@
+import { t } from "../../../theme";
 import { useState } from "react";
 import { supabase } from "../../../supabase";
 
@@ -128,7 +129,7 @@ const handleSearch = async () => {
           border: "none", borderRadius: "50%",
           width: 28, height: 28,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: "#aaa", fontSize: 14, cursor: "pointer",
+          color: t.textMuted, fontSize: 14, cursor: "pointer",
           flexShrink: 0,
         }}
         title="Admin: Edit game"
@@ -154,7 +155,7 @@ const handleSearch = async () => {
           textTransform: "uppercase", letterSpacing: "0.08em",
         }}>Game Editor</div>
         <button onClick={() => setOpen(false)} style={{
-          background: "none", border: "none", color: "#aaa",
+          background: "none", border: "none", color: t.textMuted,
           fontSize: 12, cursor: "pointer",
         }}>close</button>
       </div>
@@ -203,10 +204,10 @@ const handleSearch = async () => {
                       display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>🎮</div>
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: t.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {r.name}
                     </div>
-                    <div style={{ fontSize: 9, color: "#bbb" }}>
+                    <div style={{ fontSize: 9, color: t.textSecondary }}>
                       {yr}{platforms ? ` · ${platforms}` : ""} · rawg:{r.id}
                     </div>
                   </div>
@@ -251,7 +252,7 @@ const handleSearch = async () => {
       {rawgId && (
         <div style={{ marginBottom: 8 }}>
           <label style={labelStyle}>RAWG</label>
-          <div style={{ fontSize: 10, color: "#bbb" }}>
+          <div style={{ fontSize: 10, color: t.textSecondary }}>
             ID: {rawgId} · Slug: {rawgSlug}
           </div>
         </div>
@@ -294,13 +295,13 @@ const handleSearch = async () => {
           padding: "8px 14px",
           background: "rgba(233,69,96,0.08)",
           border: "1px solid rgba(233,69,96,0.2)",
-          borderRadius: 8, color: "#e94560", fontSize: 11, fontWeight: 600, cursor: "pointer",
+          borderRadius: 8, color: t.red, fontSize: 11, fontWeight: 600, cursor: "pointer",
         }}>Delete</button>
       </div>
 
       {rawgId && (
         <a href={`https://rawg.io/games/${rawgSlug || rawgId}`} target="_blank" rel="noopener noreferrer"
-          style={{ display: "block", marginTop: 8, fontSize: 9, color: "rgba(255,255,255,0.78)", textDecoration: "none" }}>
+          style={{ display: "block", marginTop: 8, fontSize: 9, color: t.textSecondary, textDecoration: "none" }}>
           View on RAWG → rawg.io/games/{rawgSlug || rawgId}
         </a>
       )}
@@ -309,16 +310,16 @@ const handleSearch = async () => {
 }
 
 const labelStyle = {
-  display: "block", fontSize: 9, fontWeight: 600, color: "#bbb",
+  display: "block", fontSize: 9, fontWeight: 600, color: t.textSecondary,
   textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3,
 };
 const inputStyle = {
   width: "100%", padding: "6px 8px",
   background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 6, color: "#e0e0e0", fontSize: 12, outline: "none", fontFamily: "inherit",
+  borderRadius: 6, color: t.textSecondary, fontSize: 12, outline: "none", fontFamily: "inherit",
 };
 const smallBtnStyle = {
   padding: "0 12px", background: "rgba(255,255,255,0.08)",
   border: "1px solid rgba(255,255,255,0.12)", borderRadius: 6,
-  color: "#ddd", fontSize: 11, cursor: "pointer", flexShrink: 0,
+  color: t.textSecondary, fontSize: 11, cursor: "pointer", flexShrink: 0,
 };
