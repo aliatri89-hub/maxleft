@@ -5,7 +5,6 @@ import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
-import { useToast } from "../../hooks/useToast";
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — redesigned layout
@@ -79,7 +78,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [inQueue, setInQueue] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue } = useAudioPlayer();
 
-  const { toast, toastExiting, showToast } = useToast();
   const isWatched = watched || justLogged;
 
   const epUrl = resolveAudioUrl(item);
@@ -117,31 +115,33 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       const idx = queue.findIndex(q => q.enclosureUrl === resolveAudioUrl(item));
       if (idx !== -1) removeFromQueue(idx);
       setInQueue(false);
-      showToast("Removed from Up Next");
       return;
     }
     const playerEp = toPlayerEpisode({
       episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
-    if (playerEp) { addToQueue(playerEp); setInQueue(true); showToast("Added to Up Next"); }
+    if (playerEp) { addToQueue(playerEp); setInQueue(true); }
   };
 
   const handleWatchlist = async (e) => {
     e.stopPropagation();
     if (!userId) return;
     if (addedToWatchlist) {
+      // Remove from watchlist
       const { error } = await supabase.from("wishlist").delete()
         .eq("user_id", userId).eq("title", film_title)
         .in("item_type", ["movie", "show"]);
-      if (!error) { setAddedToWatchlist(false); showToast("Removed from Watchlist"); }
+      if (!error) setAddedToWatchlist(false);
       return;
     }
     const { error } = await supabase.from("wishlist").insert({
-      user_id: userId, item_type: "movie", title: film_title,
+      user_id: userId,
+      item_type: "movie",
+      title: film_title,
       cover_url: poster_path ? `https://image.tmdb.org/t/p/w185${poster_path}` : null,
       year: film_year || null,
     });
-    if (!error) { setAddedToWatchlist(true); showToast("Added to Watchlist"); }
+    if (!error) setAddedToWatchlist(true);
   };
 
   if (dismissed) return null;
@@ -374,27 +374,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           from { opacity: 0; transform: translateY(-4px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pcToastIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
       `}</style>
-
-      {/* Inline toast */}
-      {toast && (
-        <div style={{
-          position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
-          background: "rgba(30,28,26,0.95)", border: "1px solid rgba(255,255,255,0.1)",
-          borderRadius: 20, padding: "5px 14px",
-          fontFamily: t.fontMono, fontSize: 11, color: "rgba(255,255,255,0.8)",
-          letterSpacing: "0.04em", textTransform: "uppercase",
-          whiteSpace: "nowrap", pointerEvents: "none", zIndex: 10,
-          animation: "pcToastIn 0.15s ease forwards",
-          opacity: toastExiting ? 0 : 1, transition: toastExiting ? "opacity 0.3s" : "none",
-        }}>
-          {toast}
-        </div>
-      )}
     </div>
 
     <QuickLogModal
