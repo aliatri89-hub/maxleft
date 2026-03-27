@@ -70,19 +70,21 @@ export default function AdminImagePositioner({ seriesId, imageUrl, position, use
     <>
       {/* Trigger button — small ✦ in corner */}
       <button
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+        onClick={(e) => { e.stopPropagation(); e.preventDefault(); setOpen(true); }}
         style={{
           position: "absolute",
           top: 6, left: 6,
-          width: 26, height: 26,
+          width: 28, height: 28,
           borderRadius: "50%",
-          background: "rgba(0,0,0,0.7)",
-          border: `1px solid ${accent}`,
-          color: accent,
-          fontSize: 13,
+          background: accent,
+          border: "none",
+          color: "#fff",
+          fontSize: 14,
+          fontWeight: 900,
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer",
-          zIndex: 5,
+          zIndex: 10,
+          boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
           WebkitTapHighlightColor: "transparent",
         }}
       >✦</button>
