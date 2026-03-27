@@ -136,15 +136,6 @@ function GridTile({ series, accent, onTap, userId, index = 0 }) {
         animation: `gridTileIn 0.35s ease ${staggerDelay} both`,
       }}
     >
-      {/* Admin positioner */}
-      <AdminImagePositioner
-        seriesId={series.id}
-        imageUrl={series.thumbnail_url}
-        position={localPosition}
-        userId={userId}
-        accent={accent}
-        onSaved={(newPos) => setLocalPosition(newPos)}
-      />
       {/* Series artwork */}
       {series.thumbnail_url ? (
         <img
