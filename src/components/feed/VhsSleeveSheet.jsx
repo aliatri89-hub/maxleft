@@ -1106,7 +1106,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                         </div>
                         {/* Inline accordion description */}
                         <div style={{
-                          maxHeight: isExpanded ? 300 : 0,
+                          maxHeight: isExpanded ? "none" : 0,
                           overflow: "hidden",
                           transition: "max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                         }}>
