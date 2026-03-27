@@ -144,7 +144,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               width: "100%", height: "100%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 900, fontSize: 10, color: "rgba(255,255,255,0.7)",
+              fontWeight: 900, fontSize: 10, color: "var(--text-secondary)",
               textTransform: "uppercase", textAlign: "center", lineHeight: 1.1,
             }}>
               {podcast_name}
@@ -161,7 +161,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           }}>
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontWeight: 600, fontSize: 16, color: "#f0ebe1",
+              fontWeight: 600, fontSize: 16, color: "var(--text-primary)",
               lineHeight: 1.2, whiteSpace: "nowrap",
               overflow: "hidden", textOverflow: "ellipsis",
               flex: 1, minWidth: 0,
@@ -170,7 +170,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               {film_year && (
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 12, color: "rgba(255,255,255,0.7)",
+                  fontSize: 12, color: "var(--text-secondary)",
                   marginLeft: 6, fontWeight: 400,
                 }}>
                   {film_year}
@@ -184,7 +184,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             }}>
               <span style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 11, color: "rgba(255,255,255,0.72)",
+                fontSize: 11, color: "var(--text-secondary)",
                 textTransform: "uppercase", letterSpacing: "0.04em",
               }}>
                 {fmtDate(episode_air_date)}
@@ -194,7 +194,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   <span style={{ width: 2, height: 2, borderRadius: "50%", background: "rgba(255,255,255,0.15)" }} />
                   <span style={{
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 11, color: "rgba(255,255,255,0.78)",
+                    fontSize: 11, color: "var(--text-secondary)",
                     textTransform: "uppercase", letterSpacing: "0.04em",
                   }}>
                     {formatDuration(duration_seconds)}
@@ -221,7 +221,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
                   display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
                 }}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="2.5" strokeLinecap="round">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 </div>
@@ -256,7 +256,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {desc && (
             <div style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 12, color: "rgba(255,255,255,0.65)",
+              fontSize: 12, color: "var(--text-secondary)",
               lineHeight: 1.4,
               overflow: "hidden",
               display: "-webkit-box",
@@ -277,7 +277,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         <span style={{
           fontFamily: "'Barlow Condensed', sans-serif",
           fontSize: 13, fontWeight: 600,
-          color: "rgba(255,255,255,0.72)",
+          color: "var(--text-secondary)",
           textTransform: "uppercase", letterSpacing: "0.04em",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>
@@ -298,7 +298,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 10, fontWeight: 600,
-              color: "rgba(255,255,255,0.7)",
+              color: "var(--text-secondary)",
               textTransform: "uppercase", letterSpacing: "0.06em",
             }}>Watched</span>
           </div>
@@ -312,13 +312,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               border: "1px solid rgba(255,255,255,0.08)",
               cursor: "pointer",
             }}>
-              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
               </svg>
               <span style={{
                 fontFamily: "'IBM Plex Mono', monospace",
                 fontSize: 10, fontWeight: 600,
-                color: "rgba(255,255,255,0.78)",
+                color: "var(--text-secondary)",
                 textTransform: "uppercase", letterSpacing: "0.06em",
               }}>Log</span>
             </div>
@@ -348,13 +348,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 border: "1px solid rgba(255,255,255,0.08)",
                 cursor: "pointer",
               }}>
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" strokeLinecap="round">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 <span style={{
                   fontFamily: "'IBM Plex Mono', monospace",
                   fontSize: 10, fontWeight: 600,
-                  color: "rgba(255,255,255,0.78)",
+                  color: "var(--text-secondary)",
                   textTransform: "uppercase", letterSpacing: "0.06em",
                 }}>Watchlist</span>
               </div>
@@ -372,7 +372,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           }} />
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: 12, lineHeight: 1.55, color: "rgba(255,255,255,0.78)",
+            fontSize: 12, lineHeight: 1.55, color: "var(--text-secondary)",
           }}>
             {fullDesc}
           </div>

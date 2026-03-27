@@ -138,7 +138,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             <div style={{
               fontFamily: "'Barlow Condensed', sans-serif",
               fontWeight: 700, fontSize: 16,
-              color: "#f0ebe1",
+              color: "var(--text-primary)",
               lineHeight: 1.2,
               overflow: "hidden", textOverflow: "ellipsis",
               display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
@@ -146,7 +146,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             {data.year && (
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 10, color: "rgba(240,235,225,0.45)",
+                fontSize: 10, color: "var(--text-muted)",
                 marginTop: 2,
               }}>{data.year}</div>
             )}
@@ -204,7 +204,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             onClick={handleConfirm}
             style={{
               fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 11, color: "rgba(240,235,225,0.3)",
+              fontSize: 11, color: "var(--text-muted)",
               cursor: "pointer", marginTop: -8,
               letterSpacing: "0.04em",
             }}
