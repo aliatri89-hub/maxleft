@@ -9,7 +9,7 @@ import { t } from "../../theme";
  */
 
 const MODES = {
-  releases:  { label: "New Releases",     accent: t.terra },
+  releases:  { label: "Movies",            accent: t.terra },
   streaming: { label: "Now Streaming",    accent: "#60a5fa" },
 };
 

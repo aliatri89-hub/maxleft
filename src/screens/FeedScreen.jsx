@@ -18,13 +18,13 @@ import {
 import BrowseLoadingSplash from "../components/feed/BrowseLoadingSplash";
 
 // ════════════════════════════════════════════════
-// FEED SCREEN — New Releases | Podcast | Activity
+// FEED SCREEN — Movies | Podcast | Activity
 // ════════════════════════════════════════════════
 
 const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 const BASE_TABS = [
-  { key: "releases",  label: "New Releases" },
+  { key: "releases",  label: "Movies" },
   { key: "podcast",   label: "Podcasts" },
   { key: "activity",  label: "Activity" },
 ];
