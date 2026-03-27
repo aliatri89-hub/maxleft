@@ -303,10 +303,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       </div>
 
-      {/* Bottom row: handle bar (left) + badges (right) */}
+      {/* Bottom row: handle bar (centered) + badges (right) */}
       {hasDesc && !expanded && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
-          <div style={{ width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)" }} />
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "flex-end", marginTop: 8, minHeight: 16 }}>
+          <div style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            width: 48, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.12)",
+          }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             {isWatched ? (
               <div style={{ ...badgeBase, background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)", color: "rgba(52,211,153,0.7)" }}>
