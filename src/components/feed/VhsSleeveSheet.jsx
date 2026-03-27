@@ -368,11 +368,14 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
   const cast = merged?.cast_names || [];
   const studios = merged?.studio_names || [];
   // Stable stills: compute synchronously from cached still_paths to avoid flicker
+  // Also deduplicate against backdropUrl — old DB rows may have hero stored as a still
   const cachedStills = useMemo(() => {
     const paths = data?.still_paths || detail?.still_paths;
     if (!paths?.length) return null;
-    return paths.map(p => p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`);
-  }, [data?.still_paths, detail?.still_paths]);
+    const urls = paths.map(p => p.startsWith("http") ? p : `${TMDB_IMG_BASE}/w780${p}`);
+    const safe = backdropUrl ? urls.filter(u => u !== backdropUrl) : urls;
+    return safe.length ? safe : null;
+  }, [data?.still_paths, detail?.still_paths, backdropUrl]);
 
   const [fetchedStills, setFetchedStills] = useState([]);
   const fetchedForRef = useRef(null); // track which tmdb_id we fetched for
