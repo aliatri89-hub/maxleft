@@ -625,7 +625,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
           <div style={{ position: "relative", width: "100%", marginBottom: 0 }}>
             {/* Hero backdrop — z1 (back) */}
             <div style={{ position: "relative", width: "100%", overflow: "hidden", zIndex: 1 }}>
-              <FadeImg key={heroUrl} src={heroUrl} alt="" style={{
+              <FadeImg src={heroUrl} alt="" style={{
                 width: "100%", height: 200,
                 objectFit: "cover", objectPosition: "center top",
                 display: "block",
@@ -736,7 +736,6 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 boxShadow: "inset 0 0 8px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.5)",
               }}>
                 <FadeImg
-                  key={stillUrl}
                   src={stillUrl}
                   alt=""
                   style={{
