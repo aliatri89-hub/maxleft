@@ -1,7 +1,7 @@
 {
-  "name": "MANTL — Another reason to press play",
-  "short_name": "Mantl",
-  "description": "Discover what to watch, read, and play from the podcasts you love. Track your progress, earn badges, and explore podcast communities.",
+  "name": "MANTL — The podcast platform for movie lovers",
+  "short_name": "MANTL",
+  "description": "Browse movies by the podcasts that cover them. Track what you've watched, earn badges, and go deep with your favorite film podcast communities.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -10,140 +10,36 @@
   "theme_color": "#0f0d0b",
   "scope": "/",
   "id": "/",
-  "categories": ["lifestyle", "social", "entertainment"],
+  "categories": ["entertainment", "music"],
   "lang": "en",
   "dir": "ltr",
   "iarc_rating_id": "",
   "icons": [
-    {
-      "src": "/icons/icon-48.png",
-      "sizes": "48x48",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-256.png",
-      "sizes": "256x256",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/mobile-home.jpg",
-      "sizes": "960x1851",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Your Mantlpiece — books, films, fitness, travel all in one place"
-    },
-    {
-      "src": "/screenshots/activity.jpg",
-      "sizes": "960x1994",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Track your latest training activity with Strava"
-    },
-    {
-      "src": "/screenshots/passport-bookshelf.jpg",
-      "sizes": "960x1984",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Passport and bookshelf — track where you've been and what you've read"
-    },
-    {
-      "src": "/screenshots/feed.jpg",
-      "sizes": "960x1857",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "See what your friends are reading, watching, and doing"
-    },
-    {
-      "src": "/screenshots/passport.jpg",
-      "sizes": "960x1842",
-      "type": "image/jpeg",
-      "form_factor": "narrow",
-      "label": "Track every country you've visited"
-    },
-    {
-      "src": "/screenshots/recap.png",
-      "sizes": "1125x2613",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Monthly recap — your books, films, fitness, and travels at a glance"
-    }
+    { "src": "/icons/icon-48.png", "sizes": "48x48", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-256.png", "sizes": "256x256", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
     {
-      "name": "Shelf It",
-      "short_name": "Shelf It",
-      "url": "/?action=shelf",
-      "icons": [{ "src": "/icons/shortcut-shelf.png", "sizes": "96x96" }]
+      "name": "Daily Games",
+      "short_name": "Games",
+      "url": "/?tab=games",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Friends",
-      "short_name": "Friends",
-      "url": "/?tab=friends",
-      "icons": [{ "src": "/icons/shortcut-friends.png", "sizes": "96x96" }]
+      "name": "My Library",
+      "short_name": "Library",
+      "url": "/?tab=shelf",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
     }
   ],
   "related_applications": [],
