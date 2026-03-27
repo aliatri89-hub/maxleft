@@ -84,7 +84,7 @@ function parseTimecodeSeconds(match) {
   return parts[0] * 60 + parts[1];
 }
 
-function renderWithTimecodes(text, onSeek) {
+export function renderWithTimecodes(text, onSeek) {
   if (!text || !onSeek) return text;
   const parts = [];
   let last = 0;
@@ -1585,9 +1585,9 @@ export default function AudioPlayerProvider({ children, session }) {
         rate: saved.speed || speed,
       }).then(() => bridge.play());
     } else {
-      setProgress(0);
+      setProgress(ep.startAt || 0);
       setDuration(0);
-      bridge.load(ep.enclosureUrl, meta, { rate: speed })
+      bridge.load(ep.enclosureUrl, meta, { seekTo: ep.startAt || 0, rate: speed })
         .then(() => bridge.play());
     }
   }, [currentEp, isPlaying, speed, updateRecents, cleanupPendingSeek, bridge]);
@@ -1829,13 +1829,13 @@ export default function AudioPlayerProvider({ children, session }) {
     bubbleMode, activated, play: playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry,
     openFullScreen, fullScreen, resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimer: setSleepTimerAction, clearSleepTimer,
-    addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue, showNudge,
+    addToQueue, playNext: playNextInQueue, removeFromQueue, clearQueue, showNudge, seekTo,
   }), [
     currentEp, isPlaying, speed, buffering, error, recents, queue,
     bubbleMode, activated, playEpisode, togglePlay, skip, stop, dismiss, cycleSpeed, retry, openFullScreen, fullScreen,
     resumeRecent, clearRecent, minimize, restore,
     sleepTimer, setSleepTimerAction, clearSleepTimer,
-    addToQueue, playNextInQueue, removeFromQueue, clearQueue, showNudge,
+    addToQueue, playNextInQueue, removeFromQueue, clearQueue, showNudge, seekTo,
   ]);
 
   // ── Render ───────────────────────────────────────────────

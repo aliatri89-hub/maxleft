@@ -1,6 +1,7 @@
 import { t } from "../../theme";
 import { useState, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
+import { renderWithTimecodes } from "../community/shared/AudioPlayerProvider";
 import { isPatreonUrl } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
@@ -76,8 +77,18 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
-  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge } = useAudioPlayer();
+  const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
 
+  const handleTimecodeSeek = (sec) => {
+    if (isCurrent) {
+      seekTo(sec);
+    } else {
+      const playerEp = toPlayerEpisode({
+        episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
+      }, { artwork: podcast_artwork, community: podcast_name });
+      if (playerEp) playEpisode({ ...playerEp, startAt: sec });
+    }
+  };
   const isWatched = watched || justLogged;
 
   const epUrl = resolveAudioUrl(item);
@@ -362,7 +373,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           lineHeight: 1.5, marginTop: 8,
           animation: "pcFadeSlide 0.2s ease forwards",
         }}>
-          {fullDesc}
+          {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
         </div>
       )}
 
