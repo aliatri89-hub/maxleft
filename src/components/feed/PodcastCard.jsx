@@ -199,7 +199,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               }}>
                 <span style={{
                   fontFamily: t.fontDisplay,
-                  fontWeight: 600, fontSize: 16, color: "var(--text-primary)",
+                  fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
                   lineHeight: 1.2,
                 }}>
                   {film_title}
@@ -207,7 +207,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 {duration_seconds > 0 && (
                   <span style={{
                     fontFamily: t.fontMono,
-                    fontSize: 11, color: t.textFaint,
+                    fontSize: 10, color: t.textFaint,
                     letterSpacing: "0.03em", flexShrink: 0,
                     textTransform: "uppercase",
                   }}>
@@ -285,7 +285,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             {film_year && (
               <span style={{
                 fontFamily: t.fontMono,
-                fontSize: 12, color: "var(--text-secondary)",
+                fontSize: 11, color: "var(--text-secondary)",
                 letterSpacing: "0.02em",
               }}>
                 {film_year}
@@ -297,7 +297,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             {fmtDate(episode_air_date) && (
               <span style={{
                 fontFamily: t.fontMono,
-                fontSize: 11, color: t.textFaint,
+                fontSize: 10, color: t.textFaint,
                 textTransform: "uppercase", letterSpacing: "0.04em",
               }}>
                 {fmtDate(episode_air_date)}
