@@ -75,6 +75,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [addedToWatchlist, setAddedToWatchlist] = useState(false);
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
+  const [inQueue, setInQueue] = useState(false);
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
 
   const isWatched = watched || justLogged;
@@ -113,7 +114,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     const playerEp = toPlayerEpisode({
       episode_id, episode_title, episode_description, audio_url, audio_status, podcast_name, duration_seconds,
     }, { artwork: podcast_artwork, community: podcast_name });
-    if (playerEp) addToQueue(playerEp);
+    if (playerEp) { addToQueue(playerEp); setInQueue(true); }
   };
 
   const handleWatchlist = async (e) => {
@@ -234,13 +235,21 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
-                  background: t.bgElevated, border: `1px solid ${t.borderMedium}`,
+                  background: inQueue ? "rgba(255,255,255,0.12)" : t.bgElevated,
+                  border: inQueue ? "1px solid rgba(255,255,255,0.3)" : `1px solid ${t.borderMedium}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", transition: "all 0.15s",
+                  cursor: inQueue ? "default" : "pointer",
+                  transition: "all 0.2s",
                 }}>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  {inQueue ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  )}
                 </div>
               )}
               {!isPaywall && (
