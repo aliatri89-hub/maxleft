@@ -655,7 +655,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                 display: "flex", justifyContent: "center",
                 zIndex: 3, pointerEvents: "none",
               }}>
-                <FadeImg
+                <img
                   src={data.logo_url}
                   alt={data.title}
                   style={{
@@ -691,7 +691,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             textAlign: "center",
           }}>
             {data.logo_url ? (
-              <FadeImg
+              <img
                 src={data.logo_url}
                 alt={data.title}
                 style={{
