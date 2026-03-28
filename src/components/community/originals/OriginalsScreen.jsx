@@ -207,7 +207,7 @@ export default function OriginalsScreen({
                 }}>
                   {authorData?.avatar_url ? (
                     <img src={authorData.avatar_url} alt="" style={{
-                      width: 22, height: 22, borderRadius: "50%", objectFit: "cover",
+                      width: 32, height: 32, borderRadius: "50%", objectFit: "cover",
                       border: "1.5px solid rgba(233,69,96,0.3)",
                     }} />
                   ) : (

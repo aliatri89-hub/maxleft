@@ -216,7 +216,7 @@ function ReaderOverlay({ post, accent, onClose }) {
           }}>
             {authorData?.avatar_url && (
               <img src={authorData.avatar_url} alt="" style={{
-                width: 24, height: 24, borderRadius: "50%", objectFit: "cover",
+                width: 36, height: 36, borderRadius: "50%", objectFit: "cover",
                 border: `1.5px solid ${accent}40`,
               }} />
             )}
