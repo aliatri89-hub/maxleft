@@ -420,12 +420,26 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
       {hasDesc && expanded && (
         <div style={{
-          fontFamily: t.fontSerif, fontSize: 13, color: "var(--text-secondary)",
-          lineHeight: 1.5, marginTop: 8,
+          marginTop: 8,
           animation: "pcFadeSlide 0.2s ease forwards",
           position: "relative", zIndex: 1,
         }}>
-          {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
+          {episode_title && (
+            <div style={{
+              fontFamily: t.fontBody, fontSize: 11, fontWeight: 600,
+              color: "rgba(255,255,255,0.5)",
+              textTransform: "uppercase", letterSpacing: "0.05em",
+              marginBottom: 6,
+            }}>
+              {episode_title}
+            </div>
+          )}
+          <div style={{
+            fontFamily: t.fontSerif, fontSize: 13, color: "var(--text-secondary)",
+            lineHeight: 1.5,
+          }}>
+            {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
+          </div>
         </div>
       )}
 
