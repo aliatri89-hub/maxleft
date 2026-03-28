@@ -92,6 +92,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
+  const [logoDark, setLogoDark] = useState(false);
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -212,13 +213,36 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <img
             src={logo_url}
             alt={film_title}
-            onLoad={() => setLogoReady(true)}
+            crossOrigin="anonymous"
+            onLoad={(e) => {
+              setLogoReady(true);
+              try {
+                const img = e.currentTarget;
+                const canvas = document.createElement("canvas");
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                let totalBrightness = 0, count = 0;
+                for (let i = 0; i < data.length; i += 16) {
+                  const alpha = data[i + 3];
+                  if (alpha > 10) {
+                    totalBrightness += (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+                    count++;
+                  }
+                }
+                if (count > 0 && totalBrightness / count < 80) setLogoDark(true);
+              } catch (_) { /* CORS fallback */ }
+            }}
             style={{
               maxHeight: 58,
               maxWidth: "58%",
               width: "auto",
               height: "auto",
-              filter: "grayscale(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))",
+              filter: logoDark
+                ? "grayscale(1) brightness(8) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))"
+                : "grayscale(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))",
               opacity: logoReady ? 1 : 0,
               transition: "opacity 0.3s",
             }}
