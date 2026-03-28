@@ -415,7 +415,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 Watched
               </div>
             ) : userId ? (
-              <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
+              <div onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "var(--text-muted)", cursor: "pointer" }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 Log
               </div>
@@ -427,7 +427,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   Added
                 </div>
               ) : (
-                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
+                <div onClick={handleWatchlist} style={{ ...badgeBase, background: "#2e2b27", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "0 1px 3px rgba(0,0,0,0.4)", color: "var(--text-muted)", cursor: "pointer" }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                   Watchlist
                 </div>

@@ -386,7 +386,7 @@ export default function TripleFeaturePublic() {
               <div style={{ marginBottom: 6 }}>
                 <div style={{
                   fontFamily: t.fontSerif, fontSize: 40, fontWeight: 900, lineHeight: 1,
-                  color: rankScore === 10 ? "#d4af37" : rankScore >= 9 ? "#f0ece4" : "#8a8070",
+                  color: rankScore === 10 ? "#d4af37" : rankScore >= 9 ? "#f0ece4" : "var(--text-muted)",
                 }}>{rankScore}<span style={{ fontSize: 22, color: t.textMuted }}>/10</span></div>
                 <div style={{
                   fontSize: 11, fontWeight: 600, marginTop: 6, fontStyle: "italic",

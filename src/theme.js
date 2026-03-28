@@ -29,7 +29,7 @@ export const t = {
   textPrimary:    '#ffffff',
   textSecondary:  'rgba(255,255,255,0.92)',
   textMuted:      'rgba(255,255,255,0.65)',
-  textFaint:      'rgba(255,255,255,0.40)',
+  textFaint:      'rgba(255,255,255,0.60)',
 
   // ── Accent Colors ──
   red:            '#e94560',
