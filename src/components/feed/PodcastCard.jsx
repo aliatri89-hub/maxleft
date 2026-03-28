@@ -389,8 +389,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {hasDesc && !expanded && (
             <div style={{
               width: 36, height: 3, borderRadius: 2,
-              background: "#4ade80",
-              boxShadow: "0 0 8px rgba(74,222,128,0.7), 0 0 3px rgba(74,222,128,0.9)",
+              background: "rgba(255,255,255,0.25)",
+              boxShadow: "0 1px 4px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.15)",
               flexShrink: 0,
             }} />
           )}
