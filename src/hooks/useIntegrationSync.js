@@ -6,10 +6,10 @@ import { upsertMediaLog, toPosterPath, logGame } from "../utils/mediaWrite";
 import { useShelves } from "../contexts/ShelvesProvider";
 
 /**
- * useIntegrationSync — Letterboxd, Goodreads, and Steam sync logic.
+ * useIntegrationSync — Letterboxd and Steam sync logic.
  *
  * Extracted from App.jsx. Owns all sync state (syncing flags, last sync times,
- * lock refs, badge toast state). Gets loadShelves from ShelvesProvider context.
+ * lock refs). Gets loadShelves from ShelvesProvider context.
  */
 export function useIntegrationSync({ session, showToast, setProfile }) {
   const { loadShelves } = useShelves();
@@ -21,16 +21,10 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   const [letterboxdSyncSignal, setLetterboxdSyncSignal] = useState(null);
   const [autoLogCompleteSignal, setAutoLogCompleteSignal] = useState(null);
 
-  const [goodreadsSyncing, setGoodreadsSyncing] = useState(false);
-  const [goodreadsLastSync, setGoodreadsLastSync] = useState(null);
-
   const [steamSyncing, setSteamSyncing] = useState(false);
-
-  // Badge toasts removed — progress now goes to notification center as a digest
 
   // ── Lock refs (synchronous — prevents race conditions) ──
   const letterboxdLock = useRef(false);
-  const goodreadsLock = useRef(false);
   const steamLock = useRef(false);
   const hasSyncedThisSession = useRef(false);
 
@@ -508,141 +502,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   // GOODREADS
   // ════════════════════════════════════════════════
 
-  const syncGoodreads = async (grUserId, uid, manual = false) => {
-    if (!grUserId || !uid || goodreadsLock.current) return;
-    goodreadsLock.current = true;
-    setGoodreadsSyncing(true);
-
-    try {
-      const edgeUrl = `https://api.mymantl.app/functions/v1/goodreads-rss?user_id=${encodeURIComponent(grUserId)}&shelf=read&t=${Date.now()}`;
-      const res = await fetch(edgeUrl);
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        console.error("[Goodreads] Edge function error:", data.error || res.status);
-        showToast(data.error || "Couldn't reach Goodreads");
-        goodreadsLock.current = false;
-        setGoodreadsSyncing(false);
-        return;
-      }
-
-      const rssText = data.contents;
-      if (!rssText) {
-        showToast("No RSS content — check user ID");
-        goodreadsLock.current = false;
-        setGoodreadsSyncing(false);
-        return;
-      }
-
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(rssText, "text/xml");
-      const items = xml.querySelectorAll("item");
-
-
-      if (items.length === 0) {
-        showToast("No entries found — check your Goodreads user ID and that your profile is public");
-        goodreadsLock.current = false;
-        setGoodreadsSyncing(false);
-        return;
-      }
-
-      const { data: existingBooks } = await supabase.from("user_books_v")
-        .select("title, author").eq("user_id", uid);
-      const existingTitleSet = new Set((existingBooks || []).map(b => `${b.title}::${b.author}`));
-
-      const getTagText = (el, tagName) => {
-        const nodes = el.getElementsByTagName(tagName);
-        return nodes.length > 0 ? nodes[0].textContent?.trim() || null : null;
-      };
-
-      const workQueue = [];
-      const maxSync = 100;
-
-      for (const item of items) {
-        if (workQueue.length >= maxSync) break;
-        const title = getTagText(item, "title");
-        if (!title) continue;
-        const authorName = getTagText(item, "author_name")?.trim() || null;
-        const bookId = getTagText(item, "book_id");
-        const userRating = getTagText(item, "user_rating");
-        const rating = userRating ? parseInt(userRating) : null;
-        const numPages = getTagText(item, "num_pages");
-        const totalPages = numPages ? parseInt(numPages) : null;
-        const userReadAt = getTagText(item, "user_read_at");
-        const coverUrl = getTagText(item, "book_large_image_url") || getTagText(item, "book_medium_image_url") || getTagText(item, "book_image_url");
-        const isbn = getTagText(item, "isbn");
-
-        const dedupKey = `${title}::${authorName}`;
-        if (existingTitleSet.has(dedupKey)) continue;
-        existingTitleSet.add(dedupKey);
-        workQueue.push({ title, author: authorName, bookId, rating: rating || null, totalPages, userReadAt, coverUrl, isbn });
-      }
-
-
-      let synced = 0;
-      const BATCH_SIZE = 6;
-
-      const processBook = async ({ title, author, rating, userReadAt, coverUrl, isbn }) => {
-        let finishedAt = null;
-        if (userReadAt) {
-          try { finishedAt = new Date(userReadAt).toISOString(); } catch (e) {}
-        }
-        const cleanCover = coverUrl && !coverUrl.includes("nophoto") ? coverUrl : null;
-        const mediaId = await upsertMediaLog(uid, {
-          mediaType: "book",
-          isbn: isbn || null,
-          title, creator: author,
-          posterPath: cleanCover,
-          rating: rating || null,
-          watchedAt: finishedAt || new Date().toISOString(),
-          source: "goodreads",
-          status: "finished",
-        });
-        if (!mediaId) { console.error("[Goodreads] upsert_media_log failed for", title); return null; }
-        return title;
-      };
-
-      for (let i = 0; i < workQueue.length; i += BATCH_SIZE) {
-        const batch = workQueue.slice(i, i + BATCH_SIZE);
-        const results = await Promise.all(batch.map(processBook));
-        synced += results.filter(Boolean).length;
-      }
-
-      setGoodreadsLastSync(new Date());
-      if (synced > 0) {
-        showToast(`Synced ${synced} book${synced !== 1 ? "s" : ""} from Goodreads`);
-        await loadShelves(uid);
-      } else if (manual) {
-        showToast("Goodreads up to date ✓");
-      }
-    } catch (e) {
-      console.error("[Goodreads] Sync error:", e);
-      if (manual) showToast("Goodreads sync failed — check user ID");
-    } finally {
-      goodreadsLock.current = false;
-      setGoodreadsSyncing(false);
-    }
-  };
-
-  const connectGoodreads = async (grUserId) => {
-    if (!grUserId || !session) return;
-    const clean = grUserId.trim();
-    const { error } = await supabase.from("profiles").update({ goodreads_user_id: clean }).eq("id", session.user.id);
-    if (error) { showToast("Couldn't save user ID"); return; }
-    setProfile(prev => ({ ...prev, goodreads_user_id: clean }));
-    showToast("Goodreads connected! Syncing...");
-    syncGoodreads(clean, session.user.id, true);
-  };
-
-  const disconnectGoodreads = async () => {
-    if (!session) return;
-    const { error } = await supabase.from("profiles").update({ goodreads_user_id: null }).eq("id", session.user.id);
-    if (error) { showToast("Couldn't disconnect Goodreads"); return; }
-    setProfile(prev => ({ ...prev, goodreads_user_id: null }));
-    setGoodreadsLastSync(null);
-    showToast("Goodreads disconnected");
-  };
-
   // ════════════════════════════════════════════════
   // STEAM
   // ════════════════════════════════════════════════
@@ -814,7 +673,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
     if (!id) return;
     const letterboxdFn = onLetterboxdSync || syncLetterboxd;
     if (profile.letterboxd_username) letterboxdFn(profile.letterboxd_username, id);
-    if (profile.goodreads_user_id) syncGoodreads(profile.goodreads_user_id, id);
     if (profile.steam_id) syncSteam(profile.steam_id, id);
     hasSyncedThisSession.current = true;
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -823,13 +681,9 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
     // Letterboxd
     letterboxdSyncing, letterboxdLastSync, letterboxdSyncSignal, autoLogCompleteSignal,
     syncLetterboxd, connectLetterboxd, disconnectLetterboxd,
-    // Goodreads
-    goodreadsSyncing, goodreadsLastSync,
-    syncGoodreads, connectGoodreads, disconnectGoodreads,
     // Steam
     steamSyncing,
     syncSteam, connectSteam, disconnectSteam,
-    // Badge toasts removed — digest goes to notification center
     // Auto-sync
     runInitialSync,
   };

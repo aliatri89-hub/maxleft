@@ -82,7 +82,7 @@ function StatsRibbon({ userId }) {
   );
 }
 
-function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, goodreadsSyncing, steamSyncing, isActive }) {
+function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, steamSyncing, isActive }) {
   const { shelves, shelvesLoaded } = useShelves();
 
   // ── Trigger state (controls which modal/overlay is open) ──

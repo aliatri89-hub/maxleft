@@ -588,7 +588,7 @@ function AppMain() {
                     onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
-                    goodreadsSyncing={sync.goodreadsSyncing} steamSyncing={sync.steamSyncing}
+                    steamSyncing={sync.steamSyncing}
                     isActive={activeTab === "mantl"} />
                   </Suspense></ErrorBoundary>}
                 </div>
@@ -702,10 +702,6 @@ function AppMain() {
                   onLetterboxdDisconnect={sync.disconnectLetterboxd}
                   onLetterboxdSync={() => { if (session && profile.letterboxd_username) wrappedSyncLetterboxd(profile.letterboxd_username, session.user.id, true); }}
                   letterboxdSyncing={sync.letterboxdSyncing}
-                  onGoodreadsConnect={sync.connectGoodreads}
-                  onGoodreadsDisconnect={sync.disconnectGoodreads}
-                  onGoodreadsSync={() => { if (session && profile.goodreads_user_id) sync.syncGoodreads(profile.goodreads_user_id, session.user.id, true); }}
-                  goodreadsSyncing={sync.goodreadsSyncing}
                   onSteamConnect={sync.connectSteam}
                   onSteamDisconnect={sync.disconnectSteam}
                   onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}

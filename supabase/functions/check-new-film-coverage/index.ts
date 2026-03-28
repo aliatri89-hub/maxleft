@@ -40,6 +40,14 @@ serve(async (req) => {
       return jsonRes({ sent: 0, message: "No user_id or films provided" });
     }
 
+    // Safety cap: a legitimate incremental sync never sends >20 films at once.
+    // Larger batches almost certainly indicate a dedup failure upstream, not a
+    // genuine bulk log. Abort rather than flooding the notification inbox.
+    if (new_films.length > 20) {
+      console.warn(`[WatchedCoverage] Batch of ${new_films.length} films exceeds safety cap — aborting to prevent notification flood`);
+      return jsonRes({ sent: 0, message: "Batch too large — likely a dedup failure upstream" });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(supabaseUrl, serviceKey);

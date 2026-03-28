@@ -24,7 +24,7 @@ function Expandable({ open, children }) {
   );
 }
 
-function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onGoodreadsConnect, onGoodreadsDisconnect, onGoodreadsSync, goodreadsSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
+function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [watchlist, setWatchlist] = useState([]);
@@ -36,7 +36,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [letterboxdOpen, setLetterboxdOpen] = useState(false);
   const [lbUsernameInput, setLbUsernameInput] = useState(profile.letterboxd_username || "");
   const [goodreadsOpen, setGoodreadsOpen] = useState(false);
-  const [grUserIdInput, setGrUserIdInput] = useState(profile.goodreads_user_id || "");
+  const [grUserIdInput, setGrUserIdInput] = useState("");
   const [steamOpen, setSteamOpen] = useState(false);
   const [steamIdInput, setSteamIdInput] = useState(profile.steam_id || "");
   const [syncOpen, setSyncOpen] = useState(false);
@@ -240,8 +240,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           <div className="profile-group-row" onClick={() => setSyncOpen(!syncOpen)}>
             <span className="profile-group-row-text">Sync</span>
             <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {(letterboxdSyncing || goodreadsSyncing || steamSyncing) && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
-              {(profile.letterboxd_username || profile.goodreads_user_id || profile.steam_id) && (
+              {(letterboxdSyncing || steamSyncing) && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
+              {(profile.letterboxd_username || profile.steam_id) && (
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.6 }} />
               )}
               {syncOpen ? "▾" : "›"}

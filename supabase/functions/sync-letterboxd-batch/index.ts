@@ -191,7 +191,7 @@ serve(async (req) => {
     const userIds = users.map((u) => u.id);
     const { data: profiles } = await sb
       .from("profiles")
-      .select("id, letterboxd_etag, letterboxd_last_modified")
+      .select("id, letterboxd_etag, letterboxd_last_modified, letterboxd_last_synced_at")
       .in("id", userIds);
 
     const profileMap = new Map(
@@ -213,7 +213,8 @@ serve(async (req) => {
           uid,
           username,
           profile?.letterboxd_etag,
-          profile?.letterboxd_last_modified
+          profile?.letterboxd_last_modified,
+          profile?.letterboxd_last_synced_at ?? null
         );
 
         results.push({
@@ -310,7 +311,8 @@ async function syncUserLetterboxd(
   uid: string,
   username: string,
   storedEtag: string | null,
-  storedLastModified: string | null
+  storedLastModified: string | null,
+  lastSyncedAt: string | null
 ): Promise<{
   synced: number;
   rewatches: number;
@@ -361,10 +363,23 @@ async function syncUserLetterboxd(
   }
 
   // 2. Load existing films for this user
-  const { data: existingMovies } = await sb
+  const { data: existingMovies, error: existingErr } = await sb
     .from("user_films_v")
     .select("title, year, tmdb_id, watch_dates")
     .eq("user_id", uid);
+
+  // Safety guard: if the dedup query fails or returns empty for a user who has
+  // previously synced, abort rather than treating the full RSS as new films.
+  // This prevents mass re-logging on transient DB errors.
+  if (existingErr || (existingMovies?.length === 0 && lastSyncedAt !== null)) {
+    if (existingErr) {
+      console.error(`[LBBatch:${username}] Failed to load existing films:`, existingErr.message);
+    } else {
+      console.warn(`[LBBatch:${username}] Dedup returned 0 films but user has prior syncs — aborting to prevent re-log flood`);
+    }
+    await updateSyncMeta(sb, uid, newEtag, newLastModified);
+    return { synced: 0, rewatches: 0, community_logged: 0, synced_films: [] };
+  }
 
   const existingSet = new Set(
     (existingMovies || []).map((m: any) => `${m.title}::${m.year}`)
