@@ -35,8 +35,6 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [showImportCSV, setShowImportCSV] = useState(false);
   const [letterboxdOpen, setLetterboxdOpen] = useState(false);
   const [lbUsernameInput, setLbUsernameInput] = useState(profile.letterboxd_username || "");
-  const [goodreadsOpen, setGoodreadsOpen] = useState(false);
-  const [grUserIdInput, setGrUserIdInput] = useState("");
   const [steamOpen, setSteamOpen] = useState(false);
   const [steamIdInput, setSteamIdInput] = useState(profile.steam_id || "");
   const [syncOpen, setSyncOpen] = useState(false);

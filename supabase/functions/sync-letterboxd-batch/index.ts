@@ -377,7 +377,8 @@ async function syncUserLetterboxd(
     } else {
       console.warn(`[LBBatch:${username}] Dedup returned 0 films but user has prior syncs — aborting to prevent re-log flood`);
     }
-    await updateSyncMeta(sb, uid, newEtag, newLastModified);
+    // Do NOT save ETag here — next cron must re-fetch so new films aren’t skipped via 304.
+    await sb.from("profiles").update({ letterboxd_last_synced_at: new Date().toISOString() }).eq("id", uid);
     return { synced: 0, rewatches: 0, community_logged: 0, synced_films: [] };
   }
 
