@@ -59,10 +59,12 @@ function stripHtml(html) {
 function stripUrls(text) {
   if (!text) return "";
   return text
+    // Remove CDATA artifacts
+    .replace(/\]\]>/g, "")
     // Remove bare URLs
     .replace(/https?:\/\/\S+/g, "")
-    // Remove "Follow:" / "Support:" / "Links:" label lines and everything after
-    .replace(/\b(Follow|Links|Support|Subscribe|Connect|See omnystudio|Visit megaphone)[:\s].*/si, "")
+    // Remove boilerplate label lines and everything after
+    .replace(/\b(Follow|Links|Support|Subscribe|Connect|See omnystudio|Visit megaphone|See Privacy Policy|Privacy Policy|California Privacy|Learn more about your ad|Advertising Inquiries)[:\s].*/si, "")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
