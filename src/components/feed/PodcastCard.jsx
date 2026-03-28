@@ -72,7 +72,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
-    tmdb_id, film_title, film_year, poster_path, watched,
+    tmdb_id, film_title, film_year, poster_path, watched, logo_url,
   } = item;
 
   const [dismissed, setDismissed] = useState(false);
@@ -81,6 +81,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
+  const [logoReady, setLogoReady] = useState(false);
 
   // ── B&W backdrop fetch — index #7 (sorted by vote), different frame from movies feed ──
   const [bdUrl, setBdUrl] = useState(() =>
@@ -288,13 +289,39 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {/* Row 1: Title + duration (left) | badge + buttons (right, same row) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-              <span style={{
-                fontFamily: t.fontDisplay,
-                fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
-                lineHeight: 1.2,
-              }}>
-                {film_title}
-              </span>
+              {/* Logo or fallback title */}
+              <div style={{ position: "relative", minHeight: 28 }}>
+                {/* Fallback text — always rendered, fades out when logo ready */}
+                <span style={{
+                  fontFamily: t.fontDisplay,
+                  fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
+                  lineHeight: 1.2,
+                  display: "block",
+                  opacity: (logo_url && logoReady) ? 0 : 1,
+                  transition: "opacity 0.25s",
+                }}>
+                  {film_title}
+                </span>
+                {/* Logo image — fades in on load */}
+                {logo_url && (
+                  <img
+                    src={logo_url}
+                    alt={film_title}
+                    onLoad={() => setLogoReady(true)}
+                    style={{
+                      position: "absolute",
+                      top: 0, left: 0,
+                      maxWidth: "65%",
+                      maxHeight: 52,
+                      objectFit: "contain",
+                      objectPosition: "left center",
+                      filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.7))",
+                      opacity: logoReady ? 0.92 : 0,
+                      transition: "opacity 0.25s",
+                    }}
+                  />
+                )}
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 {film_year && (
                   <span style={{ fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>

@@ -1,5 +1,38 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
+import { fetchLogosForItems, getLogoUrl, isLogoChecked } from "../../utils/communityTmdb";
+
+function enrichLogos(items, mountedRef, setItems) {
+  let patched = false;
+  for (const item of items) {
+    if (item.logo_url) continue;
+    const url = getLogoUrl(item.tmdb_id);
+    if (url) { item.logo_url = url; patched = true; }
+  }
+
+  if (patched && mountedRef.current) {
+    setItems(prev => prev.map(item => {
+      if (item.logo_url) return item;
+      const url = getLogoUrl(item.tmdb_id);
+      return url ? { ...item, logo_url: url } : item;
+    }));
+  }
+
+  const logoItems = items
+    .filter(m => !m.logo_url && !isLogoChecked(m.tmdb_id))
+    .map(m => ({ tmdb_id: m.tmdb_id, media_type: "film" }));
+
+  if (logoItems.length > 0) {
+    fetchLogosForItems(logoItems, () => {
+      if (!mountedRef.current) return;
+      setItems(prev => prev.map(item => {
+        if (item.logo_url) return item;
+        const url = getLogoUrl(item.tmdb_id);
+        return url ? { ...item, logo_url: url } : item;
+      }));
+    }).catch(() => {});
+  }
+}
 
 /**
  * usePodcastFeed — powers the Podcast tab.
@@ -51,6 +84,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
         setItems(rows);
       }
       setHasMore(rows.length === PAGE_SIZE);
+      enrichLogos(rows, mountedRef, setItems);
     } catch (err) {
       console.error("[PodcastFeed] fetch error:", err);
     } finally {
