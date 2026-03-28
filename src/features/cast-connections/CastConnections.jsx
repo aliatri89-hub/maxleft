@@ -77,22 +77,22 @@ function LoadingState() {
 function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
   const hasBackdrop = !!movie.backdrop_path;
   return (
-    <div
-      className="cc-solved-group"
-      style={{
-        borderRadius: 12,
-        padding: 0,
-        textAlign: "center",
-        backgroundColor: color,
-        overflow: "hidden",
-        position: "relative",
-        opacity: dimmed ? 0.65 : 1,
-        animationDelay: `${delay}s`,
-        minHeight: 110,
-        display: "flex",
-        alignItems: "stretch",
-      }}
-    >
+    <div style={{ opacity: dimmed ? 0.65 : 1 }}>
+      <div
+        className="cc-solved-group"
+        style={{
+          borderRadius: 12,
+          padding: 0,
+          textAlign: "center",
+          backgroundColor: color,
+          overflow: "hidden",
+          position: "relative",
+          animationDelay: `${delay}s`,
+          minHeight: 110,
+          display: "flex",
+          alignItems: "stretch",
+        }}
+      >
       {hasBackdrop && (
         <div
           className="cc-backdrop-img"
@@ -157,6 +157,7 @@ function BackdropCard({ movie, color, delay, dimmed, logoUrl }) {
           {movie.actors.map((a) => a.name).join("  •  ")}
         </div>
       </div>
+    </div>
     </div>
   );
 }
@@ -621,7 +622,7 @@ const CSS = `
   }
 
   .cc-solved-group {
-    animation: cc-solve-reveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: cc-solve-reveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
   @keyframes cc-solve-reveal {
     0% { transform: scaleY(0) scaleX(0.95); opacity: 0; }
