@@ -420,7 +420,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
       {hasDesc && expanded && (
         <div style={{
-          marginTop: 8,
+          marginTop: 20,
           animation: "pcFadeSlide 0.2s ease forwards",
           position: "relative", zIndex: 1,
         }}>
