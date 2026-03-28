@@ -35,153 +35,26 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
     });
   }, []);
 
-  // ── Fetch all data ──
+  // ── Fetch all data via single RPC ──
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
     let cancelled = false;
 
     (async () => {
       try {
-        // 1. Get subscribed communities with details
-        const { data: subRows } = await supabase
-          .from("user_community_subscriptions")
-          .select("community_id, community_pages!inner(id, name, slug, logo_url, theme_config)")
-          .eq("user_id", userId);
+        const { data, error } = await supabase.rpc("get_badge_overview", { p_user_id: userId });
 
         if (cancelled) return;
-        const comms = (subRows || []).map(r => ({
-          id: r.community_pages.id,
-          title: r.community_pages.name,
-          slug: r.community_pages.slug,
-          accent_color: r.community_pages.theme_config?.accent || "#ff6a00",
-          image_url: r.community_pages.logo_url,
-        }));
-        setCommunities(comms);
+        if (error) throw error;
 
-        if (comms.length === 0) { setLoading(false); return; }
-
-        const communityIds = comms.map(c => c.id);
-
-        // 2. Fetch badges + earned in parallel (independent queries)
-        const [badgeRes, earnedRes] = await Promise.all([
-          supabase
-            .from("badges")
-            .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter, progress_tagline, sort_order, is_active, audio_url, tagline, description")
-            .in("community_id", communityIds)
-            .eq("is_active", true)
-            .order("sort_order"),
-          supabase
-            .from("user_badges")
-            .select("badge_id")
-            .eq("user_id", userId),
-        ]);
-
-        if (cancelled) return;
-        const badgeRows = badgeRes.data || [];
-        const earnedRows = earnedRes.data || [];
-
-        setAllBadges(badgeRows);
-        const earnedSet = new Set(earnedRows.map(r => r.badge_id));
-        setEarnedIds(earnedSet);
-
-        // 3. Compute progress for unearned badges
-        const unearnedBadges = badgeRows.filter(b => !earnedSet.has(b.id));
-        const progressEntries = {};
-
-        // Run miniseries + item-set progress in parallel
-        const miniseriesBadges = unearnedBadges.filter(b => b.badge_type === "miniseries_completion" && b.miniseries_id);
-        const itemSetBadges = unearnedBadges.filter(b => b.badge_type === "item_set_completion");
-
-        const progressTasks = [];
-
-        // ── Miniseries completion badges ──
-        if (miniseriesBadges.length > 0) {
-          progressTasks.push((async () => {
-            const miniseriesIds = [...new Set(miniseriesBadges.map(b => b.miniseries_id))];
-
-            const { data: itemRows } = await supabase
-              .from("community_items")
-              .select("id, miniseries_id, media_type, tmdb_id")
-              .in("miniseries_id", miniseriesIds);
-
-            if (cancelled) return;
-
-            const allTmdbIds = [...new Set((itemRows || []).map(i => i.tmdb_id).filter(Boolean))];
-            let completedRows = [];
-            if (allTmdbIds.length > 0) {
-              const { data: cRows } = await supabase
-                .from("community_user_progress")
-                .select("item_id, community_items!inner(tmdb_id, media_type)")
-                .eq("user_id", userId)
-                .eq("status", "completed")
-                .in("community_items.tmdb_id", allTmdbIds);
-              completedRows = cRows || [];
-            }
-
-            if (cancelled) return;
-            const completedTmdbSet = new Set(completedRows.map(c => c.community_items?.tmdb_id));
-
-            for (const badge of miniseriesBadges) {
-              const badgeItems = (itemRows || []).filter(i =>
-                i.miniseries_id === badge.miniseries_id
-                && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
-              );
-              const requiredTmdbIds = [...new Set(badgeItems.map(i => i.tmdb_id).filter(Boolean))];
-              const current = requiredTmdbIds.filter(id => completedTmdbSet.has(id)).length;
-              progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
-            }
-          })());
-        }
-
-        // ── Item set completion badges ──
-        if (itemSetBadges.length > 0) {
-          progressTasks.push((async () => {
-            const itemSetBadgeIds = itemSetBadges.map(b => b.id);
-
-            const { data: biRows } = await supabase
-              .from("badge_items")
-              .select("badge_id, community_items!inner(tmdb_id, media_type)")
-              .in("badge_id", itemSetBadgeIds);
-
-            if (cancelled) return;
-
-            const badgeItemsMap = {};
-            for (const row of (biRows || [])) {
-              if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
-              badgeItemsMap[row.badge_id].push(row.community_items?.tmdb_id);
-            }
-
-            const allItemSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat().filter(Boolean))];
-            let itemSetCompleted = [];
-            if (allItemSetTmdbIds.length > 0) {
-              const { data: cRows } = await supabase
-                .from("community_user_progress")
-                .select("item_id, community_items!inner(tmdb_id)")
-                .eq("user_id", userId)
-                .eq("status", "completed")
-                .in("community_items.tmdb_id", allItemSetTmdbIds);
-              itemSetCompleted = cRows || [];
-            }
-
-            if (cancelled) return;
-            const completedItemSetTmdbIds = new Set(itemSetCompleted.map(c => c.community_items?.tmdb_id));
-
-            for (const badge of itemSetBadges) {
-              const requiredTmdbIds = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
-              const current = requiredTmdbIds.filter(id => completedItemSetTmdbIds.has(id)).length;
-              progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
-            }
-          })());
-        }
-
-        await Promise.all(progressTasks);
-
-        if (!cancelled) {
-          setProgressMap(progressEntries);
-          setLoading(false);
-        }
+        const result = data || {};
+        setCommunities(result.communities || []);
+        setAllBadges(result.badges || []);
+        setEarnedIds(new Set(result.earned_ids || []));
+        setProgressMap(result.progress || {});
       } catch (err) {
         console.error("[BadgeOverview] Error:", err);
+      } finally {
         if (!cancelled) setLoading(false);
       }
     })();
