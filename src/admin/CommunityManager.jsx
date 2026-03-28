@@ -290,11 +290,15 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
 
   const handleSave = async () => {
     setSaving(true);
+    const newSort = sortOrder !== "" ? parseInt(sortOrder) : null;
+    const oldSort = item.sort_order;
+    const effectiveShelfId = shelfId || item.miniseries_id;
+
     const updates = {
       title: title.trim(),
       year: year ? parseInt(year) : null,
       tmdb_id: tmdbId ? parseInt(tmdbId) : null,
-      sort_order: sortOrder !== "" ? parseInt(sortOrder) : null,
+      sort_order: newSort,
       creator: creator.trim() || null,
     };
     if (shelfId && shelfId !== item.miniseries_id) {
@@ -314,8 +318,30 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
       updates.extra_data = Object.keys(newExtra).length > 0 ? newExtra : null;
     }
     const { error } = await supabase.from("community_items").update(updates).eq("id", item.id);
-    if (error) { showToast(`Error: ${error.message}`); }
-    else { showToast("Updated ✓"); onSaved(); }
+    if (error) { showToast(`Error: ${error.message}`); setSaving(false); return; }
+
+    // If sort_order changed, renormalize siblings within the same shelf
+    if (newSort !== null && newSort !== oldSort) {
+      const { data: allItems } = await supabase
+        .from("community_items")
+        .select("id, sort_order")
+        .eq("miniseries_id", effectiveShelfId)
+        .order("sort_order");
+
+      if (allItems && allItems.length > 1) {
+        const others = allItems.filter(i => i.id !== item.id);
+        const targetIdx = Math.max(0, Math.min(newSort - 1, others.length));
+        others.splice(targetIdx, 0, { id: item.id });
+
+        const reorders = others.map((it, i) => (
+          supabase.from("community_items").update({ sort_order: i + 1 }).eq("id", it.id)
+        ));
+        await Promise.all(reorders);
+      }
+    }
+
+    showToast("Updated ✓");
+    onSaved();
     setSaving(false);
   };
 
