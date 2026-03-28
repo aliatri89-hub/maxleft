@@ -7,7 +7,7 @@
 //   2. Change ACTOR_ID and ACTOR_NAME below
 
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
-const ACTOR_ID = 2888;
+const ACTOR_ID = 5292;
 const ACTOR_NAME = 'Denzel Washington';
 
 // community_id: b144bdc9-6e76-4807-8cfb-30f7d5f573fa
