@@ -22,7 +22,7 @@ import AddItemTool from "../dashboard/AddItemTool";
 export default function OriginalsScreen({
   community, miniseries, session, onBack, onToast,
   onShelvesChanged, communitySubscriptions, onOpenCommunity,
-  scrollToTmdbId, pushNav, removeNav,
+  scrollToTmdbId, pushNav, removeNav, popNav,
 }) {
   const userId = session?.user?.id;
   const accent = community?.theme_config?.accent || "#e94560";
