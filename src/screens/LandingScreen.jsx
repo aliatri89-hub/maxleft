@@ -456,7 +456,7 @@ const featureStyles = `
   }
   .badge-back-name {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.92rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-weight: 600;
@@ -467,7 +467,7 @@ const featureStyles = `
   .badge-back-flair {
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     opacity: 0.85;
     text-shadow: 0 1px 5px rgba(0,0,0,0.85), 0 0 10px rgba(0,0,0,0.5);
     filter: brightness(1.2);
@@ -771,13 +771,13 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    font-size: 0.95rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: var(--text-primary);
   }
   .community-stat {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 0.82rem;
+    font-size: 1rem;
     color: var(--text-muted);
     font-style: italic;
   }
