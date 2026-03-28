@@ -4,7 +4,7 @@ import { t } from "../../theme";
 // Full-screen overlay game. Rendered by App.jsx when showCastConnections === true.
 // Props: session, onBack, onToast
 //
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useCastConnections } from "./useCastConnections";
 import { getPuzzleNumber } from "./castConnectionsApi";
 import { fetchMovieLogo, getLogoUrl } from "../../utils/communityTmdb";
@@ -177,10 +177,26 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [logos, setLogos] = useState({});
+  const [wrongFlash, setWrongFlash] = useState(false);
+  const [wrongNames, setWrongNames] = useState([]);
+  const [dotPop, setDotPop] = useState(-1);
+  const prevMistakes = useRef(mistakes);
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
   }, []);
+
+  // Track mistake changes → trigger red flash on wrong tiles + dot pop
+  useEffect(() => {
+    if (mistakes > prevMistakes.current) {
+      setWrongNames([...selected]);
+      setWrongFlash(true);
+      setDotPop(maxMistakes - mistakes); // index of dot that just went dark
+      setTimeout(() => { setWrongFlash(false); setWrongNames([]); }, 600);
+      setTimeout(() => setDotPop(-1), 500);
+    }
+    prevMistakes.current = mistakes;
+  }, [mistakes]);
 
   // Fetch movie logos when puzzle loads
   useEffect(() => {
@@ -342,25 +358,30 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         </div>
       ) : (
         <>
-          {/* 3×3 actor grid — solved tiles stay highlighted */}
-          <div className={shaking ? "cc-shake" : ""} style={S.grid}>
-            {allActors.map((actor) => {
+          {/* 3×3 actor grid */}
+          <div style={S.grid}>
+            {allActors.map((actor, i) => {
               const isSolved = solvedActorNames.has(actor.name);
               const isSelected = selected.includes(actor.name);
+              const isWrong = wrongFlash && wrongNames.includes(actor.name);
               const movieIdx = solvedActorMovieIdx[actor.name];
               const solvedColor = isSolved ? (puzzle.colors[movieIdx] || "#4a7c59") : null;
 
               return (
                 <button
                   key={actor.name}
-                  className={`cc-tile${isSolved ? " cc-tile-solved" : ""}`}
+                  className={`cc-tile${isSolved ? " cc-tile-solved" : ""}${isSelected && !isWrong ? " cc-tile-selected" : ""}${isWrong ? " cc-tile-wrong" : ""}`}
                   onClick={() => toggleSelect(actor.name)}
                   style={{
                     ...S.tile,
+                    animationDelay: loaded ? "0s" : `${i * 0.04}s`,
                     ...(isSolved ? {
                       background: solvedColor,
                       borderColor: solvedColor,
                       pointerEvents: "none",
+                    } : isWrong ? {
+                      background: "rgba(180, 60, 50, 0.25)",
+                      borderColor: "#b43c32",
                     } : isSelected ? {
                       background: "#2e2518",
                       borderColor: "#e8d3a2",
@@ -372,7 +393,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                 >
                   <span style={{
                     ...S.actorName,
-                    color: isSolved ? t.textPrimary : "#e8d3a2",
+                    color: isSolved ? t.textPrimary : isWrong ? "#e07060" : "#e8d3a2",
                   }}>
                     {(() => {
                       const parts = actor.name.split(" ");
@@ -391,16 +412,22 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
           <div style={S.mistakesRow}>
             <span style={S.mistakesLabel}>Mistakes remaining:</span>
             <div style={S.dots}>
-              {Array.from({ length: maxMistakes }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    ...S.dot,
-                    backgroundColor: i < maxMistakes - mistakes ? "#e8d3a2" : "#2a2520",
-                    transition: "background-color 0.3s ease",
-                  }}
-                />
-              ))}
+              {Array.from({ length: maxMistakes }).map((_, i) => {
+                const isActive = i < maxMistakes - mistakes;
+                const isPopping = dotPop === i;
+                return (
+                  <div
+                    key={i}
+                    className={isPopping ? "cc-dot-pop" : ""}
+                    style={{
+                      ...S.dot,
+                      backgroundColor: isActive ? "#e8d3a2" : "#2a2520",
+                      transition: "background-color 0.4s ease, transform 0.3s ease",
+                      boxShadow: isActive ? "0 0 6px rgba(232,211,162,0.3)" : "none",
+                    }}
+                  />
+                );
+              })}
             </div>
           </div>
 
@@ -601,12 +628,12 @@ const CSS = `
   }
 
   .cc-solved-group {
-    animation: cc-solve-reveal 0.4s ease forwards;
+    animation: cc-solve-reveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   @keyframes cc-solve-reveal {
-    0% { transform: scaleY(0); opacity: 0; }
-    60% { transform: scaleY(1.03); }
-    100% { transform: scaleY(1); opacity: 1; }
+    0% { transform: scaleY(0) scaleX(0.95); opacity: 0; }
+    50% { transform: scaleY(1.04) scaleX(1.01); }
+    100% { transform: scaleY(1) scaleX(1); opacity: 1; }
   }
 
   .cc-backdrop-img {
@@ -619,11 +646,11 @@ const CSS = `
   }
 
   .cc-tile-solved {
-    animation: cc-tile-lock 0.35s ease;
+    animation: cc-tile-lock 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
   @keyframes cc-tile-lock {
     0% { transform: scale(1); }
-    40% { transform: scale(1.08); }
+    35% { transform: scale(1.1); }
     100% { transform: scale(1); }
   }
 
@@ -635,20 +662,45 @@ const CSS = `
     to { opacity: 1; transform: translateY(0); }
   }
 
-  .cc-shake {
-    animation: cc-shake-anim 0.5s ease;
+  /* Wrong guess — tiles flash red briefly */
+  .cc-tile-wrong {
+    animation: cc-wrong-flash 0.55s ease forwards;
   }
-  @keyframes cc-shake-anim {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
+  @keyframes cc-wrong-flash {
+    0% { transform: scale(1); }
+    15% { transform: scale(0.94); }
+    40% { transform: scale(1.02); border-color: #b43c32; }
+    100% { transform: scale(1); }
+  }
+
+  /* Selected tile subtle glow pulse */
+  .cc-tile-selected {
+    animation: cc-select-glow 1.6s ease-in-out infinite;
+  }
+  @keyframes cc-select-glow {
+    0%, 100% { box-shadow: 0 0 0px rgba(232,211,162,0); }
+    50% { box-shadow: 0 0 12px rgba(232,211,162,0.25); }
+  }
+
+  /* Dot pop when a mistake is made */
+  .cc-dot-pop {
+    animation: cc-dot-pop-anim 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cc-dot-pop-anim {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.5); opacity: 0.7; }
+    50% { transform: scale(0.6); }
+    100% { transform: scale(1); }
   }
 
   .cc-tile {
     transition: all 0.2s ease;
     -webkit-tap-highlight-color: transparent;
+    animation: cc-tile-enter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  @keyframes cc-tile-enter {
+    from { opacity: 0; transform: scale(0.85) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
   }
   .cc-tile:active {
     transform: scale(0.95);
