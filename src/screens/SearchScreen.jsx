@@ -51,14 +51,31 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   const pendingDeepLinkRef = useRef(null);
 
   useEffect(() => {
-    if (!initialTmdbId || !initialTitle) return;
-    // Store which tmdb_id to auto-expand after results land
+    if (!initialTmdbId) return;
     pendingDeepLinkRef.current = initialTmdbId;
-    // Pre-fill the query and kick off the search immediately (bypass debounce)
-    setQuery(initialTitle);
-    lastQueryRef.current = ""; // force runSearch to not dedup
-    runSearch(initialTitle);
     if (onDeepLinkConsumed) onDeepLinkConsumed();
+
+    const kickOff = async (title) => {
+      setQuery(title);
+      lastQueryRef.current = ""; // force runSearch to not dedup
+      runSearch(title);
+    };
+
+    if (initialTitle && initialTitle.trim().length >= 2) {
+      // Payload already has the title (new notifications)
+      kickOff(initialTitle.trim());
+    } else {
+      // Old notification payload missing film_title — look it up by tmdb_id
+      supabase
+        .from("media")
+        .select("title")
+        .eq("tmdb_id", initialTmdbId)
+        .eq("media_type", "film")
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.title) kickOff(data.title);
+        });
+    }
   }, [initialTmdbId, initialTitle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Once results load, if there's a pending deep link tmdb_id, auto-expand it
