@@ -1,4 +1,5 @@
 import { t } from "../../../theme";
+import { supabase } from "../../../supabase";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -31,6 +32,17 @@ export default function OriginalsScreen({
   const [coverCache, setCoverCache] = useState({});
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
+  const [authors, setAuthors] = useState({});
+
+  // ── Fetch authors (for avatar in blurb cards) ──
+  useEffect(() => {
+    supabase.from("originals_authors").select("name, avatar_url")
+      .then(({ data }) => {
+        const map = {};
+        (data || []).forEach(a => { map[a.name] = a; });
+        setAuthors(map);
+      });
+  }, []);
 
   // ── Android back gestures ──
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
@@ -176,6 +188,7 @@ export default function OriginalsScreen({
           renderEditorial={() => {
             const blurb = modalItem?.extra_data?.editorial_blurb;
             const blurbAuthor = modalItem?.extra_data?.blurb_author || "Ali";
+            const authorData = authors[blurbAuthor];
             if (!blurb) return null;
             return (
               <div style={{
@@ -189,10 +202,17 @@ export default function OriginalsScreen({
                 animation: "clmContentFadeIn 0.3s ease",
               }}>
                 <div style={{
-                  display: "flex", alignItems: "center", gap: 6,
+                  display: "flex", alignItems: "center", gap: 8,
                   marginBottom: 8,
                 }}>
-                  <span style={{ fontSize: 13 }}>📝</span>
+                  {authorData?.avatar_url ? (
+                    <img src={authorData.avatar_url} alt="" style={{
+                      width: 22, height: 22, borderRadius: "50%", objectFit: "cover",
+                      border: "1.5px solid rgba(233,69,96,0.3)",
+                    }} />
+                  ) : (
+                    <span style={{ fontSize: 13 }}>📝</span>
+                  )}
                   <span style={{
                     fontSize: 11, fontWeight: 800,
                     fontFamily: t.fontDisplay,

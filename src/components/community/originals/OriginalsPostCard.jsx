@@ -109,12 +109,22 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 // ════════════════════════════════════════════════
 
 function ReaderOverlay({ post, accent, onClose }) {
+  const [authorData, setAuthorData] = useState(null);
+
   // Lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = prev; };
   }, []);
+
+  // Fetch author avatar
+  useEffect(() => {
+    const authorName = post.author || "Ali";
+    supabase.from("originals_authors").select("name, avatar_url")
+      .eq("name", authorName).maybeSingle()
+      .then(({ data }) => setAuthorData(data));
+  }, [post.author]);
 
   // Simple markdown → HTML
   const renderMarkdown = (md) => {
@@ -204,13 +214,19 @@ function ReaderOverlay({ post, accent, onClose }) {
             display: "flex", alignItems: "center", gap: 8,
             marginBottom: 28,
           }}>
+            {authorData?.avatar_url && (
+              <img src={authorData.avatar_url} alt="" style={{
+                width: 24, height: 24, borderRadius: "50%", objectFit: "cover",
+                border: `1.5px solid ${accent}40`,
+              }} />
+            )}
             <div style={{
-              fontSize: 11, fontWeight: 600,
+              fontSize: 12, fontWeight: 600,
               color: accent,
               fontFamily: t.fontBody,
               letterSpacing: "0.03em",
             }}>
-              by Ali
+              by {post.author || "Ali"}
             </div>
             {publishDate && (
               <>

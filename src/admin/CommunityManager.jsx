@@ -93,6 +93,14 @@ export default function CommunityManager({ session }) {
             {tab.label}
           </button>
         ))}
+        {selectedCommunity?.slug === "staff-picks" && (
+          <button
+            onClick={() => setActiveTab("authors")}
+            style={{ ...S.tab, ...(activeTab === "authors" ? S.tabActive : {}) }}
+          >
+            Authors
+          </button>
+        )}
       </div>
 
       {selectedCommunity && activeTab === "items" && (
@@ -106,6 +114,9 @@ export default function CommunityManager({ session }) {
       )}
       {selectedCommunity && activeTab === "posts" && (
         <PostsPanel community={selectedCommunity} showToast={showToast} />
+      )}
+      {selectedCommunity && activeTab === "authors" && (
+        <AuthorsPanel showToast={showToast} />
       )}
     </div>
   );
@@ -285,8 +296,15 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
   const [blurb, setBlurb] = useState(item.extra_data?.editorial_blurb || "");
   const [blurbAuthor, setBlurbAuthor] = useState(item.extra_data?.blurb_author || "Ali");
   const [saving, setSaving] = useState(false);
+  const [authors, setAuthors] = useState([]);
 
   const isOriginals = communitySlug === "staff-picks";
+
+  useEffect(() => {
+    if (!isOriginals) return;
+    supabase.from("originals_authors").select("name").order("created_at")
+      .then(({ data }) => setAuthors(data || []));
+  }, [isOriginals]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -387,12 +405,13 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
               </div>
               <div style={{ width: 140 }}>
                 <label style={S.fieldLabel}>Blurb Author</label>
-                <input
+                <select
                   value={blurbAuthor}
                   onChange={e => setBlurbAuthor(e.target.value)}
-                  placeholder="Ali"
-                  style={S.formInput}
-                />
+                  style={S.formSelect}
+                >
+                  {authors.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+                </select>
               </div>
             </div>
           </td>
@@ -1323,6 +1342,12 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
   const [showPreview, setShowPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [authors, setAuthors] = useState([]);
+
+  useEffect(() => {
+    supabase.from("originals_authors").select("name").order("created_at")
+      .then(({ data }) => setAuthors(data || []));
+  }, []);
 
   // Auto-generate slug from title
   const autoSlug = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
@@ -1435,7 +1460,9 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
       <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
         <div style={{ width: 180 }}>
           <label style={S.fieldLabel}>Author</label>
-          <input value={author} onChange={e => setAuthor(e.target.value)} style={S.formInput} placeholder="Ali" />
+          <select value={author} onChange={e => setAuthor(e.target.value)} style={S.formSelect}>
+            {authors.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
+          </select>
         </div>
         <div style={{ width: 220 }}>
           <label style={S.fieldLabel}>Linked Shelf</label>
@@ -1531,6 +1558,169 @@ function PostEditor({ post, shelves, isNew, showToast, onSaved, onCancel }) {
             <div dangerouslySetInnerHTML={{ __html: renderPreview(body) }} />
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════
+// AUTHORS PANEL — manage Originals authors (name, avatar, bio)
+// ═══════════════════════════════════════════════════
+
+function AuthorsPanel({ showToast }) {
+  const [authors, setAuthors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
+
+  const fetchAuthors = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("originals_authors")
+      .select("*")
+      .order("created_at");
+    setAuthors(data || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchAuthors(); }, [fetchAuthors]);
+
+  if (loading) return <div style={S.emptyState}><div style={S.spinner} /></div>;
+
+  return (
+    <div>
+      <div style={S.toolbar}>
+        <div style={S.toolbarLeft}>
+          <span style={S.toolCount}>{authors.length} authors</span>
+        </div>
+        <div style={S.toolbarRight}>
+          <button onClick={() => setShowCreate(!showCreate)} style={S.addBtn}>
+            {showCreate ? "Cancel" : "+ New Author"}
+          </button>
+        </div>
+      </div>
+
+      {showCreate && (
+        <AuthorForm
+          author={{ name: "", avatar_url: "", bio: "" }}
+          isNew
+          showToast={showToast}
+          onSaved={() => { setShowCreate(false); fetchAuthors(); }}
+          onCancel={() => setShowCreate(false)}
+        />
+      )}
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {authors.map((a) => (
+          editingId === a.id ? (
+            <AuthorForm
+              key={a.id}
+              author={a}
+              showToast={showToast}
+              onSaved={() => { setEditingId(null); fetchAuthors(); }}
+              onCancel={() => setEditingId(null)}
+            />
+          ) : (
+            <div key={a.id} style={{
+              display: "flex", alignItems: "center", gap: 16,
+              padding: "14px 20px",
+              background: "rgba(255,255,255,0.015)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              borderRadius: 12,
+            }}>
+              {a.avatar_url ? (
+                <img src={a.avatar_url} alt="" style={{
+                  width: 44, height: 44, borderRadius: "50%", objectFit: "cover",
+                  border: "2px solid rgba(255,255,255,0.1)",
+                }} />
+              ) : (
+                <div style={{
+                  width: 44, height: 44, borderRadius: "50%",
+                  background: t.bgElevated, border: "2px solid rgba(255,255,255,0.1)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, color: "rgba(240,235,225,0.3)",
+                }}>👤</div>
+              )}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: t.cream, fontFamily: "var(--font-display)" }}>{a.name}</div>
+                {a.bio && <div style={{ fontSize: 11, color: "rgba(240,235,225,0.4)", marginTop: 2 }}>{a.bio}</div>}
+              </div>
+              <button onClick={() => setEditingId(a.id)} style={S.editBtn}>Edit</button>
+            </div>
+          )
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AuthorForm({ author, isNew, showToast, onSaved, onCancel }) {
+  const [name, setName] = useState(author.name || "");
+  const [avatarUrl, setAvatarUrl] = useState(author.avatar_url || "");
+  const [bio, setBio] = useState(author.bio || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!name.trim()) { showToast("Name is required"); return; }
+    setSaving(true);
+    const payload = {
+      name: name.trim(),
+      avatar_url: avatarUrl.trim() || null,
+      bio: bio.trim() || null,
+    };
+    let error;
+    if (isNew) {
+      ({ error } = await supabase.from("originals_authors").insert(payload));
+    } else {
+      ({ error } = await supabase.from("originals_authors").update(payload).eq("id", author.id));
+    }
+    if (error) showToast(`Error: ${error.message}`);
+    else { showToast(isNew ? "Author created ✓" : "Author updated ✓"); onSaved(); }
+    setSaving(false);
+  };
+
+  return (
+    <div style={S.addForm}>
+      <div style={S.addFormHeader}>{isNew ? "New Author" : "Edit Author"}</div>
+      <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        {/* Preview */}
+        <div style={{ flexShrink: 0, textAlign: "center" }}>
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" style={{
+              width: 56, height: 56, borderRadius: "50%", objectFit: "cover",
+              border: "2px solid rgba(255,255,255,0.1)",
+            }} />
+          ) : (
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%",
+              background: t.bgElevated, border: "2px solid rgba(255,255,255,0.1)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 22, color: "rgba(240,235,225,0.3)",
+            }}>👤</div>
+          )}
+        </div>
+        {/* Fields */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ flex: 1 }}>
+              <label style={S.fieldLabel}>Name</label>
+              <input value={name} onChange={e => setName(e.target.value)} style={S.formInput} placeholder="Ali" />
+            </div>
+            <div style={{ flex: 2 }}>
+              <label style={S.fieldLabel}>Avatar URL</label>
+              <input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} style={S.formInput} placeholder="https://..." />
+            </div>
+          </div>
+          <div>
+            <label style={S.fieldLabel}>Bio <span style={S.fieldHint}>optional</span></label>
+            <input value={bio} onChange={e => setBio(e.target.value)} style={S.formInput} placeholder="Founder of MANTL" />
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={handleSave} disabled={saving} style={S.saveBtn}>{saving ? "…" : isNew ? "Create" : "Save"}</button>
+            <button onClick={onCancel} style={S.cancelBtn}>Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   );
