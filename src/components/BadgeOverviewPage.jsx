@@ -1,5 +1,5 @@
 import { t } from "../theme";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { supabase } from "../supabase";
 import BadgeDetailScreen from "./community/shared/BadgeDetailScreen";
 
@@ -9,18 +9,31 @@ import BadgeDetailScreen from "./community/shared/BadgeDetailScreen";
  * Shows ALL badge progress across every subscribed community in one place.
  * Lives in the Games tab as a full-screen overlay.
  *
+ * Communities are collapsed by default — tap to expand and see badges.
+ * Scales to 10+ communities × 20 badges each without performance issues.
+ *
  * Props:
  *   userId               — current user ID
  *   onClose              — () => void
  *   onNavigateCommunity  — (slug) => void — tap in-progress badge → jump to community
  */
 export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity }) {
-  const [communities, setCommunities] = useState([]);    // [{ id, title, slug, accent_color, image_url }]
-  const [allBadges, setAllBadges] = useState([]);         // badges with community info
+  const [communities, setCommunities] = useState([]);
+  const [allBadges, setAllBadges] = useState([]);
   const [earnedIds, setEarnedIds] = useState(new Set());
-  const [progressMap, setProgressMap] = useState({});      // { [badgeId]: { current, total } }
+  const [progressMap, setProgressMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedBadge, setSelectedBadge] = useState(null);
+  const [expandedIds, setExpandedIds] = useState(new Set());
+
+  const toggleCommunity = useCallback((id) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   // ── Fetch all data ──
   useEffect(() => {
@@ -49,108 +62,119 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
 
         const communityIds = comms.map(c => c.id);
 
-        // 2. Get all active badges across communities
-        const { data: badgeRows } = await supabase
-          .from("badges")
-          .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter, progress_tagline, sort_order, is_active, audio_url, tagline, description")
-          .in("community_id", communityIds)
-          .eq("is_active", true)
-          .order("sort_order");
+        // 2. Fetch badges + earned in parallel (independent queries)
+        const [badgeRes, earnedRes] = await Promise.all([
+          supabase
+            .from("badges")
+            .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter, progress_tagline, sort_order, is_active, audio_url, tagline, description")
+            .in("community_id", communityIds)
+            .eq("is_active", true)
+            .order("sort_order"),
+          supabase
+            .from("user_badges")
+            .select("badge_id")
+            .eq("user_id", userId),
+        ]);
 
         if (cancelled) return;
-        setAllBadges(badgeRows || []);
+        const badgeRows = badgeRes.data || [];
+        const earnedRows = earnedRes.data || [];
 
-        // 3. Get earned badges
-        const { data: earnedRows } = await supabase
-          .from("user_badges")
-          .select("badge_id")
-          .eq("user_id", userId);
+        setAllBadges(badgeRows);
+        const earnedSet = new Set(earnedRows.map(r => r.badge_id));
+        setEarnedIds(earnedSet);
 
-        if (cancelled) return;
-        setEarnedIds(new Set((earnedRows || []).map(r => r.badge_id)));
-
-        // 4. Compute progress for all unearned badges
-        const earnedSet = new Set((earnedRows || []).map(r => r.badge_id));
-        const unearnedBadges = (badgeRows || []).filter(b => !earnedSet.has(b.id));
+        // 3. Compute progress for unearned badges
+        const unearnedBadges = badgeRows.filter(b => !earnedSet.has(b.id));
         const progressEntries = {};
 
-        // ── Miniseries completion badges ──
+        // Run miniseries + item-set progress in parallel
         const miniseriesBadges = unearnedBadges.filter(b => b.badge_type === "miniseries_completion" && b.miniseries_id);
+        const itemSetBadges = unearnedBadges.filter(b => b.badge_type === "item_set_completion");
+
+        const progressTasks = [];
+
+        // ── Miniseries completion badges ──
         if (miniseriesBadges.length > 0) {
-          const miniseriesIds = [...new Set(miniseriesBadges.map(b => b.miniseries_id))];
+          progressTasks.push((async () => {
+            const miniseriesIds = [...new Set(miniseriesBadges.map(b => b.miniseries_id))];
 
-          const { data: itemRows } = await supabase
-            .from("community_items")
-            .select("id, miniseries_id, media_type, tmdb_id")
-            .in("miniseries_id", miniseriesIds);
+            const { data: itemRows } = await supabase
+              .from("community_items")
+              .select("id, miniseries_id, media_type, tmdb_id")
+              .in("miniseries_id", miniseriesIds);
 
-          if (cancelled) return;
+            if (cancelled) return;
 
-          const allTmdbIds = [...new Set((itemRows || []).map(i => i.tmdb_id).filter(Boolean))];
-          let completedRows = [];
-          if (allTmdbIds.length > 0) {
-            const { data: cRows } = await supabase
-              .from("community_user_progress")
-              .select("item_id, community_items!inner(tmdb_id, media_type)")
-              .eq("user_id", userId)
-              .eq("status", "completed")
-              .in("community_items.tmdb_id", allTmdbIds);
-            completedRows = cRows || [];
-          }
+            const allTmdbIds = [...new Set((itemRows || []).map(i => i.tmdb_id).filter(Boolean))];
+            let completedRows = [];
+            if (allTmdbIds.length > 0) {
+              const { data: cRows } = await supabase
+                .from("community_user_progress")
+                .select("item_id, community_items!inner(tmdb_id, media_type)")
+                .eq("user_id", userId)
+                .eq("status", "completed")
+                .in("community_items.tmdb_id", allTmdbIds);
+              completedRows = cRows || [];
+            }
 
-          if (cancelled) return;
-          const completedTmdbSet = new Set(completedRows.map(c => c.community_items?.tmdb_id));
+            if (cancelled) return;
+            const completedTmdbSet = new Set(completedRows.map(c => c.community_items?.tmdb_id));
 
-          for (const badge of miniseriesBadges) {
-            const badgeItems = (itemRows || []).filter(i =>
-              i.miniseries_id === badge.miniseries_id
-              && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
-            );
-            const requiredTmdbIds = [...new Set(badgeItems.map(i => i.tmdb_id).filter(Boolean))];
-            const current = requiredTmdbIds.filter(id => completedTmdbSet.has(id)).length;
-            progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
-          }
+            for (const badge of miniseriesBadges) {
+              const badgeItems = (itemRows || []).filter(i =>
+                i.miniseries_id === badge.miniseries_id
+                && (!badge.media_type_filter || i.media_type === badge.media_type_filter)
+              );
+              const requiredTmdbIds = [...new Set(badgeItems.map(i => i.tmdb_id).filter(Boolean))];
+              const current = requiredTmdbIds.filter(id => completedTmdbSet.has(id)).length;
+              progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
+            }
+          })());
         }
 
         // ── Item set completion badges ──
-        const itemSetBadges = unearnedBadges.filter(b => b.badge_type === "item_set_completion");
         if (itemSetBadges.length > 0) {
-          const itemSetBadgeIds = itemSetBadges.map(b => b.id);
+          progressTasks.push((async () => {
+            const itemSetBadgeIds = itemSetBadges.map(b => b.id);
 
-          const { data: biRows } = await supabase
-            .from("badge_items")
-            .select("badge_id, community_items!inner(tmdb_id, media_type)")
-            .in("badge_id", itemSetBadgeIds);
+            const { data: biRows } = await supabase
+              .from("badge_items")
+              .select("badge_id, community_items!inner(tmdb_id, media_type)")
+              .in("badge_id", itemSetBadgeIds);
 
-          if (cancelled) return;
+            if (cancelled) return;
 
-          const badgeItemsMap = {};
-          for (const row of (biRows || [])) {
-            if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
-            badgeItemsMap[row.badge_id].push(row.community_items?.tmdb_id);
-          }
+            const badgeItemsMap = {};
+            for (const row of (biRows || [])) {
+              if (!badgeItemsMap[row.badge_id]) badgeItemsMap[row.badge_id] = [];
+              badgeItemsMap[row.badge_id].push(row.community_items?.tmdb_id);
+            }
 
-          const allItemSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat().filter(Boolean))];
-          let itemSetCompleted = [];
-          if (allItemSetTmdbIds.length > 0) {
-            const { data: cRows } = await supabase
-              .from("community_user_progress")
-              .select("item_id, community_items!inner(tmdb_id)")
-              .eq("user_id", userId)
-              .eq("status", "completed")
-              .in("community_items.tmdb_id", allItemSetTmdbIds);
-            itemSetCompleted = cRows || [];
-          }
+            const allItemSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat().filter(Boolean))];
+            let itemSetCompleted = [];
+            if (allItemSetTmdbIds.length > 0) {
+              const { data: cRows } = await supabase
+                .from("community_user_progress")
+                .select("item_id, community_items!inner(tmdb_id)")
+                .eq("user_id", userId)
+                .eq("status", "completed")
+                .in("community_items.tmdb_id", allItemSetTmdbIds);
+              itemSetCompleted = cRows || [];
+            }
 
-          if (cancelled) return;
-          const completedItemSetTmdbIds = new Set(itemSetCompleted.map(c => c.community_items?.tmdb_id));
+            if (cancelled) return;
+            const completedItemSetTmdbIds = new Set(itemSetCompleted.map(c => c.community_items?.tmdb_id));
 
-          for (const badge of itemSetBadges) {
-            const requiredTmdbIds = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
-            const current = requiredTmdbIds.filter(id => completedItemSetTmdbIds.has(id)).length;
-            progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
-          }
+            for (const badge of itemSetBadges) {
+              const requiredTmdbIds = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
+              const current = requiredTmdbIds.filter(id => completedItemSetTmdbIds.has(id)).length;
+              progressEntries[badge.id] = { current, total: requiredTmdbIds.length };
+            }
+          })());
         }
+
+        await Promise.all(progressTasks);
 
         if (!cancelled) {
           setProgressMap(progressEntries);
@@ -183,14 +207,12 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         return !p || p.current === 0;
       });
 
-      // Sort in-progress by % descending
       inProgress.sort((a, b) => {
         const pA = progressMap[a.id] ? progressMap[a.id].current / progressMap[a.id].total : 0;
         const pB = progressMap[b.id] ? progressMap[b.id].current / progressMap[b.id].total : 0;
         return pB - pA;
       });
 
-      // Community-level progress score for sorting
       const totalEarned = earned.length;
       const totalProgress = inProgress.reduce((sum, b) => {
         const p = progressMap[b.id];
@@ -203,11 +225,10 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         inProgress,
         available,
         badges,
-        score: totalEarned * 10 + totalProgress, // weight earned heavily
+        score: totalEarned * 10 + totalProgress,
       };
     });
 
-    // Sort: communities with most progress first
     groups.sort((a, b) => b.score - a.score);
     return groups.filter(g => g.badges.length > 0);
   }, [communities, allBadges, earnedIds, progressMap]);
@@ -235,10 +256,6 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
     }}>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Mono:wght@400;700&family=Bebas+Neue&display=swap"
-        rel="stylesheet"
-      />
       <style>{`
         @keyframes bo-fadeIn {
           from { opacity: 0; transform: translateY(10px); }
@@ -248,11 +265,21 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
           from { opacity: 0; transform: scale(0.85); }
           to { opacity: 1; transform: scale(1); }
         }
+        @keyframes bo-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
         .bo-card {
           transition: transform 0.15s ease;
         }
         .bo-card:active {
           transform: scale(0.93) !important;
+        }
+        .bo-comm-header {
+          transition: background 0.15s ease;
+        }
+        .bo-comm-header:active {
+          background: rgba(255,255,255,0.04) !important;
         }
       `}</style>
 
@@ -319,37 +346,52 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
           </div>
         )}
 
-        {/* ── Loading ── */}
+        {/* ── Skeleton Loading ── */}
         {loading && (
-          <div style={{
-            textAlign: "center", padding: "80px 20px",
-            color: t.textFaint, fontSize: 13,
-            fontFamily: t.fontBody,
-          }}>
-            Loading badges…
+          <div style={{ animation: "bo-fadeIn 0.3s ease-out" }}>
+            {/* Summary skeleton */}
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              <SkeletonBlock width={100} height={36} style={{ margin: "0 auto" }} />
+              <SkeletonBlock width={80} height={10} style={{ margin: "8px auto 0" }} />
+              <SkeletonBlock width={200} height={12} style={{ margin: "14px auto 0" }} />
+            </div>
+            {/* Community row skeletons */}
+            {[0, 1, 2].map(i => (
+              <SkeletonCommunityRow key={i} delay={i * 0.06} />
+            ))}
           </div>
         )}
 
-        {/* ── Community Groups ── */}
+        {/* ── Community Groups (collapsed by default) ── */}
         {!loading && communityGroups.map((group, gi) => {
           const { community: comm, earned, inProgress, available } = group;
           const accent = comm.accent_color || "#ff6a00";
           const commEarned = earned.length;
           const commTotal = group.badges.length;
+          const isExpanded = expandedIds.has(comm.id);
 
           return (
             <div key={comm.id} style={{
-              marginBottom: 40,
-              animation: `bo-fadeIn 0.35s ${gi * 0.08}s ease-out both`,
+              marginBottom: 12,
+              animation: `bo-fadeIn 0.35s ${gi * 0.06}s ease-out both`,
             }}>
-              {/* Community header */}
-              <div style={{
-                display: "flex", alignItems: "center", gap: 10,
-                marginBottom: 16, paddingLeft: 2,
-              }}>
+              {/* ── Community header (always visible, tap to expand) ── */}
+              <div
+                className="bo-comm-header"
+                onClick={() => toggleCommunity(comm.id)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 10,
+                  padding: "12px 12px",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  background: isExpanded ? "rgba(255,255,255,0.03)" : "transparent",
+                  border: `1px solid ${isExpanded ? `${accent}20` : "rgba(255,255,255,0.04)"}`,
+                }}
+              >
+                {/* Community logo */}
                 {comm.image_url && (
                   <div style={{
-                    width: 28, height: 28, borderRadius: 8,
+                    width: 32, height: 32, borderRadius: 8,
                     overflow: "hidden", flexShrink: 0,
                     border: `1.5px solid ${accent}40`,
                   }}>
@@ -358,12 +400,15 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     }} />
                   </div>
                 )}
-                <div style={{ flex: 1 }}>
+
+                {/* Title + counts */}
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontFamily: t.fontDisplay,
-                    fontSize: 16, fontWeight: 700, color: accent,
+                    fontSize: 15, fontWeight: 700, color: accent,
                     letterSpacing: "0.02em",
                     lineHeight: 1.2,
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>
                     {comm.title}
                   </div>
@@ -371,120 +416,164 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
                     fontFamily: t.fontBody,
                     fontSize: 10, color: t.textFaint,
                     letterSpacing: 1,
+                    marginTop: 2,
                   }}>
                     {commEarned}/{commTotal} earned
+                    {inProgress.length > 0 && (
+                      <span style={{ color: `${accent}80` }}>
+                        {" "}· {inProgress.length} in progress
+                      </span>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={() => onNavigateCommunity?.(comm.slug)}
-                  style={{
-                    background: `${accent}12`,
-                    border: `1px solid ${accent}25`,
-                    borderRadius: 8,
-                    padding: "4px 10px",
-                    color: accent,
-                    fontSize: 10,
-                    fontFamily: t.fontBody,
-                    fontWeight: 600,
-                    letterSpacing: 1,
-                    cursor: "pointer",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  View
-                </button>
+
+                {/* Mini progress bar */}
+                <div style={{
+                  width: 40, height: 3, borderRadius: 2,
+                  background: "#ffffff08", overflow: "hidden",
+                  flexShrink: 0,
+                }}>
+                  <div style={{
+                    width: `${commTotal > 0 ? (commEarned / commTotal) * 100 : 0}%`,
+                    height: "100%",
+                    background: accent,
+                    borderRadius: 2,
+                    transition: "width 0.4s ease",
+                  }} />
+                </div>
+
+                {/* Chevron */}
+                <div style={{
+                  color: t.textFaint, fontSize: 12,
+                  transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                  flexShrink: 0,
+                  lineHeight: 1,
+                }}>
+                  ▾
+                </div>
               </div>
 
-              {/* Earned row */}
-              {earned.length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{
-                    fontSize: 9, color: "#22c55e60",
-                    textTransform: "uppercase", letterSpacing: 2,
-                    marginBottom: 10, paddingLeft: 4,
-                    fontFamily: t.fontDisplay,
-                  }}>
-                    Earned
+              {/* ── Expanded badge grid ── */}
+              {isExpanded && (
+                <div style={{
+                  padding: "16px 8px 8px",
+                  animation: "bo-fadeIn 0.25s ease-out",
+                }}>
+                  {/* View community button */}
+                  <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.(comm.slug); }}
+                      style={{
+                        background: `${accent}12`,
+                        border: `1px solid ${accent}25`,
+                        borderRadius: 8,
+                        padding: "4px 10px",
+                        color: accent,
+                        fontSize: 10,
+                        fontFamily: t.fontBody,
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        cursor: "pointer",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      View Community
+                    </button>
                   </div>
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: 14,
-                  }}>
-                    {earned.map((badge, idx) => (
-                      <BadgeCard
-                        key={badge.id}
-                        badge={badge}
-                        isEarned
-                        progress={null}
-                        accent={badge.accent_color || accent}
-                        delay={(gi * 0.08) + (idx * 0.04)}
-                        onTap={() => setSelectedBadge(badge)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
 
-              {/* In Progress row */}
-              {inProgress.length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{
-                    fontSize: 9, color: t.textFaint,
-                    textTransform: "uppercase", letterSpacing: 2,
-                    marginBottom: 10, paddingLeft: 4,
-                    fontFamily: t.fontDisplay,
-                  }}>
-                    In Progress
-                  </div>
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: 14,
-                  }}>
-                    {inProgress.map((badge, idx) => (
-                      <BadgeCard
-                        key={badge.id}
-                        badge={badge}
-                        isEarned={false}
-                        progress={progressMap[badge.id]}
-                        accent={badge.accent_color || accent}
-                        delay={(gi * 0.08) + ((earned.length + idx) * 0.04)}
-                        onTap={() => onNavigateCommunity?.(comm.slug)}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+                  {/* Earned row */}
+                  {earned.length > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{
+                        fontSize: 9, color: "#22c55e60",
+                        textTransform: "uppercase", letterSpacing: 2,
+                        marginBottom: 10, paddingLeft: 4,
+                        fontFamily: t.fontDisplay,
+                      }}>
+                        Earned
+                      </div>
+                      <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gap: 14,
+                      }}>
+                        {earned.map((badge, idx) => (
+                          <BadgeCard
+                            key={badge.id}
+                            badge={badge}
+                            isEarned
+                            progress={null}
+                            accent={badge.accent_color || accent}
+                            delay={idx * 0.04}
+                            onTap={() => setSelectedBadge(badge)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-              {/* Available row */}
-              {available.length > 0 && (
-                <div>
-                  <div style={{
-                    fontSize: 9, color: "#ffffff15",
-                    textTransform: "uppercase", letterSpacing: 2,
-                    marginBottom: 10, paddingLeft: 4,
-                    fontFamily: t.fontDisplay,
-                  }}>
-                    Available
-                  </div>
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: 14,
-                  }}>
-                    {available.map((badge, idx) => (
-                      <BadgeCard
-                        key={badge.id}
-                        badge={badge}
-                        isEarned={false}
-                        progress={progressMap[badge.id]}
-                        accent={badge.accent_color || accent}
-                        delay={(gi * 0.08) + ((earned.length + inProgress.length + idx) * 0.04)}
-                        onTap={() => onNavigateCommunity?.(comm.slug)}
-                      />
-                    ))}
-                  </div>
+                  {/* In Progress row */}
+                  {inProgress.length > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{
+                        fontSize: 9, color: t.textFaint,
+                        textTransform: "uppercase", letterSpacing: 2,
+                        marginBottom: 10, paddingLeft: 4,
+                        fontFamily: t.fontDisplay,
+                      }}>
+                        In Progress
+                      </div>
+                      <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gap: 14,
+                      }}>
+                        {inProgress.map((badge, idx) => (
+                          <BadgeCard
+                            key={badge.id}
+                            badge={badge}
+                            isEarned={false}
+                            progress={progressMap[badge.id]}
+                            accent={badge.accent_color || accent}
+                            delay={(earned.length + idx) * 0.04}
+                            onTap={() => onNavigateCommunity?.(comm.slug)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Available row */}
+                  {available.length > 0 && (
+                    <div>
+                      <div style={{
+                        fontSize: 9, color: "#ffffff15",
+                        textTransform: "uppercase", letterSpacing: 2,
+                        marginBottom: 10, paddingLeft: 4,
+                        fontFamily: t.fontDisplay,
+                      }}>
+                        Available
+                      </div>
+                      <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gap: 14,
+                      }}>
+                        {available.map((badge, idx) => (
+                          <BadgeCard
+                            key={badge.id}
+                            badge={badge}
+                            isEarned={false}
+                            progress={progressMap[badge.id]}
+                            accent={badge.accent_color || accent}
+                            delay={(earned.length + inProgress.length + idx) * 0.04}
+                            onTap={() => onNavigateCommunity?.(comm.slug)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -520,17 +609,50 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
 }
 
 
-// ── BadgeCard (same pattern as BadgePage, compact for overview) ──
+// ── Skeleton components ──
 
-function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
+function SkeletonBlock({ width, height, style = {} }) {
+  return (
+    <div style={{
+      width, height, borderRadius: 6,
+      background: "linear-gradient(90deg, #ffffff06 25%, #ffffff10 50%, #ffffff06 75%)",
+      backgroundSize: "200% 100%",
+      animation: "bo-shimmer 1.8s ease-in-out infinite",
+      ...style,
+    }} />
+  );
+}
+
+function SkeletonCommunityRow({ delay = 0 }) {
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "12px 12px", marginBottom: 12,
+      borderRadius: 12,
+      border: "1px solid rgba(255,255,255,0.04)",
+      animation: `bo-fadeIn 0.3s ${delay}s ease-out both`,
+    }}>
+      <SkeletonBlock width={32} height={32} style={{ borderRadius: 8, flexShrink: 0 }} />
+      <div style={{ flex: 1 }}>
+        <SkeletonBlock width={120} height={14} />
+        <SkeletonBlock width={70} height={9} style={{ marginTop: 6 }} />
+      </div>
+      <SkeletonBlock width={40} height={3} style={{ borderRadius: 2, flexShrink: 0 }} />
+      <SkeletonBlock width={12} height={12} style={{ borderRadius: 3, flexShrink: 0 }} />
+    </div>
+  );
+}
+
+
+// ── BadgeCard (memoized — only re-renders when props actually change) ──
+
+const BadgeCard = memo(function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
   const current = progress?.current || 0;
   const total = progress?.total || 1;
   const pct = isEarned ? 1 : (total > 0 ? current / total : 0);
 
-  // Blur scales inversely with progress: 20px at 0%, 6px near completion
   const blurAmount = isEarned ? 0 : Math.round(20 - (pct * 14));
 
-  // SVG progress ring
   const size = 80;
   const strokeWidth = 2.5;
   const radius = (size - strokeWidth) / 2;
@@ -606,7 +728,6 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
           )}
         </div>
 
-        {/* Earned check */}
         {isEarned && (
           <div style={{
             position: "absolute", bottom: -1, right: -1,
@@ -620,7 +741,6 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
           </div>
         )}
 
-        {/* Fraction overlay */}
         {!isEarned && current > 0 && (
           <div style={{
             position: "absolute", bottom: -2, right: -2,
@@ -651,7 +771,6 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
         {badge.name}
       </div>
 
-      {/* Progress tagline for in-progress */}
       {!isEarned && badge.progress_tagline && current > 0 && (
         <div style={{
           fontSize: 8,
@@ -669,4 +788,4 @@ function BadgeCard({ badge, isEarned, progress, accent, delay, onTap }) {
       )}
     </div>
   );
-}
+});
