@@ -430,12 +430,12 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
               )}
             </div>
 
-            {/* ── Stats ────────────────────────────────────── */}
-            <StatsCard stats={stats} />
-
             <button onClick={shareResult} style={S.shareBtn}>
               {copied ? "Copied!" : "Share"}
             </button>
+
+            {/* ── Stats ────────────────────────────────────── */}
+            <StatsCard stats={stats} />
 
             <div style={{ textAlign: "center", fontSize: 12, color: t.textMuted, marginTop: 12 }}>
               New puzzle in <CountdownTimer getTimeUntilNext={getTimeUntilNext} />
