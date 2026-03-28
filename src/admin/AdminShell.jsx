@@ -22,6 +22,7 @@ const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
   { key: "feed",            label: "Feed & Ingest",   icon: "◈" },
   { key: "communities",     label: "Communities",      icon: "◆" },
+  { key: "originals",       label: "Staff Picks",      icon: "▶" },
   { key: "games",           label: "Games",            icon: "◇" },
   { key: "coverage",        label: "Coverage Links",   icon: "⊕" },
   { key: "analytics",       label: "Analytics",        icon: "◎" },
@@ -145,6 +146,9 @@ export default function AdminShell() {
           )}
           {activeSection === "communities" && (
             <CommunityManager session={session} />
+          )}
+          {activeSection === "originals" && (
+            <CommunityManager session={session} lockedSlug="staff-picks" />
           )}
           {activeSection === "games" && (
             <GamesManager session={session} />

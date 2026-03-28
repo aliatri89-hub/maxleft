@@ -36,7 +36,7 @@ const TABS = [
   { key: "posts", label: "Posts" },
 ];
 
-export default function CommunityManager({ session }) {
+export default function CommunityManager({ session, lockedSlug }) {
   const [communities, setCommunities] = useState([]);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [activeTab, setActiveTab] = useState("items");
@@ -55,10 +55,14 @@ export default function CommunityManager({ session }) {
         .select("id, slug, name, logo_url, sort_order")
         .order("sort_order");
       setCommunities(data || []);
-      if (data?.length > 0) setSelectedCommunity(data[0]);
+      if (lockedSlug) {
+        setSelectedCommunity((data || []).find(c => c.slug === lockedSlug) || data?.[0]);
+      } else if (data?.length > 0) {
+        setSelectedCommunity(data[0]);
+      }
       setLoading(false);
     })();
-  }, []);
+  }, [lockedSlug]);
 
   if (loading) {
     return <div style={S.emptyState}><div style={S.spinner} /></div>;
@@ -70,16 +74,18 @@ export default function CommunityManager({ session }) {
 
       {/* Header + Community picker */}
       <div style={S.header}>
-        <h1 style={S.title}>Communities</h1>
-        <select
-          value={selectedCommunity?.id || ""}
-          onChange={(e) => setSelectedCommunity(communities.find(c => c.id === e.target.value))}
-          style={S.communitySelect}
-        >
-          {communities.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        <h1 style={S.title}>{lockedSlug ? (selectedCommunity?.name || "Staff Picks") : "Communities"}</h1>
+        {!lockedSlug && (
+          <select
+            value={selectedCommunity?.id || ""}
+            onChange={(e) => setSelectedCommunity(communities.find(c => c.id === e.target.value))}
+            style={S.communitySelect}
+          >
+            {communities.map(c => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Tab bar */}
