@@ -382,12 +382,17 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
       {/* Bottom row: spacer | centered bar | badges right */}
       {(!expanded || !hasDesc) && (
-        <div style={{ display: "flex", alignItems: "center", marginTop: 8, position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", marginTop: 14, position: "relative", zIndex: 1 }}>
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
           {/* Handle / chevron — only when desc exists and collapsed */}
           {hasDesc && !expanded && (
-            <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(74,222,128,0.5)", flexShrink: 0 }} />
+            <div style={{
+              width: 36, height: 3, borderRadius: 2,
+              background: "#4ade80",
+              boxShadow: "0 0 8px rgba(74,222,128,0.7), 0 0 3px rgba(74,222,128,0.9)",
+              flexShrink: 0,
+            }} />
           )}
           {/* Badges — right */}
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 6 }}>
