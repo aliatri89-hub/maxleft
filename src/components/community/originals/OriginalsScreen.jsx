@@ -215,6 +215,7 @@ export default function OriginalsScreen({
                   fontSize: 13, lineHeight: 1.65,
                   color: t.textMuted,
                   fontFamily: "'Georgia', 'Times New Roman', serif",
+                  whiteSpace: "pre-line",
                 }}>
                   {blurb}
                 </div>
