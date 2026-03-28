@@ -244,6 +244,31 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           }} />
         </div>
       )}
+      {/* ── Centered logo overlay — above backdrop, below content ── */}
+      {logo_url && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}>
+          <img
+            src={logo_url}
+            alt={film_title}
+            onLoad={() => setLogoReady(true)}
+            style={{
+              maxHeight: 58,
+              maxWidth: "58%",
+              width: "auto",
+              height: "auto",
+              filter: "grayscale(1) drop-shadow(0 2px 8px rgba(0,0,0,0.9))",
+              opacity: logoReady ? 0.6 : 0,
+              transition: "opacity 0.3s",
+            }}
+          />
+        </div>
+      )}
+
       {/* ── Admin X — top left ── */}
       {isAdmin && (
         <div onClick={handleUnlink} title="Unlink" style={{
@@ -289,46 +314,17 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {/* Row 1: Title + duration (left) | badge + buttons (right, same row) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-              {/* Logo or fallback title — fixed-height container, logo clipped inside */}
-              <div style={{ position: "relative", height: 40, overflow: "hidden", display: "flex", alignItems: "center" }}>
-                {/* Fallback text — absolutely positioned, fades out when logo ready */}
-                <span style={{
-                  position: "absolute",
-                  fontFamily: t.fontDisplay,
-                  fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
-                  lineHeight: 1.2,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  maxWidth: "100%",
-                  opacity: (logo_url && logoReady) ? 0 : 1,
-                  transition: "opacity 0.25s",
-                  zIndex: 0,
-                }}>
-                  {film_title}
-                </span>
-                {/* Logo image — natural size, capped at 40px tall / 160px wide, no upscaling */}
-                {logo_url && (
-                  <img
-                    src={logo_url}
-                    alt={film_title}
-                    onLoad={() => setLogoReady(true)}
-                    style={{
-                      display: "block",
-                      maxHeight: 40,
-                      maxWidth: 160,
-                      width: "auto",
-                      height: "auto",
-                      filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.75))",
-                      opacity: logoReady ? 0.93 : 0,
-                      transition: "opacity 0.25s",
-                      position: "relative",
-                      zIndex: 1,
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-              </div>
+              {/* Title — always shown; logo overlay is separate, centered on card */}
+              <span style={{
+                fontFamily: t.fontDisplay,
+                fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
+                lineHeight: 1.2,
+                display: "block",
+                opacity: (logo_url && logoReady) ? 0 : 1,
+                transition: "opacity 0.3s",
+              }}>
+                {film_title}
+              </span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 {film_year && (
                   <span style={{ fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)", letterSpacing: "0.02em" }}>
