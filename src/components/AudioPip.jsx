@@ -14,8 +14,9 @@ export default function AudioPip() {
       onClick={() => { tapLight(); openFullScreen(); }}
       style={{
         width: 32,
-        height: 32,
+        height: 38,
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
@@ -40,11 +41,22 @@ export default function AudioPip() {
         <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5z" />
       </svg>
 
+      {/* Audio jack hole */}
+      <div style={{
+        width: 6,
+        height: 6,
+        borderRadius: "50%",
+        background: "#000",
+        border: "1.5px solid rgba(255,255,255,0.08)",
+        marginTop: 2,
+        flexShrink: 0,
+      }} />
+
       {/* Playing indicator — subtle pulse dot */}
       {isPlaying && (
         <div style={{
           position: "absolute",
-          top: 4,
+          top: 2,
           right: 4,
           width: 6,
           height: 6,

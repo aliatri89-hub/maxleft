@@ -1536,7 +1536,33 @@
     margin-top: 4px;
   }
 
-  /* Notification bell */
+  /* ── VCR Transport Deck ────────────────────────────── */
+  .vcr-transport {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 4px 10px;
+    background: rgba(20,18,16,0.8);
+  }
+  .vcr-btn {
+    background: rgba(26,23,20,0.9);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 5px;
+    cursor: pointer;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f5f0eb;
+    transition: background 0.1s, border-color 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .vcr-btn:active {
+    background: rgba(60,53,41,0.9);
+    border-color: rgba(255,255,255,0.18);
+  }
   .notif-bell {
     position: relative;
     width: 40px;

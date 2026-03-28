@@ -502,11 +502,29 @@ function AppMain() {
                     : <InitialAvatar username={profile.username} size={32} />}
                 </div>
               </div>
-              {/* Center: logo (absolutely centered) */}
-              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }}
-                style={{ cursor: "pointer", position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", zIndex: 1, pointerEvents: "auto" }}>
-                <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
-                <div className="header-tagline">press play</div>
+              {/* Center: VCR transport deck */}
+              <div className="vcr-transport" style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", zIndex: 1, pointerEvents: "auto" }}>
+                <button className="vcr-btn" onClick={() => {
+                  tapLight();
+                  const modes = ["releases", "podcast", "activity"];
+                  const i = modes.indexOf(feedMode);
+                  if (i > 0) { if (activeTab !== "feed") { removeNav("tab"); setActiveTab("feed"); } setFeedMode(modes[i - 1]); }
+                }}>
+                  <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M8 6L16 1V11L8 6Z" fill="currentColor"/><path d="M1 6L9 1V11L1 6Z" fill="currentColor"/></svg>
+                </button>
+                <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }}
+                  style={{ cursor: "pointer", textAlign: "center" }}>
+                  <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
+                  <div className="header-tagline">press play</div>
+                </div>
+                <button className="vcr-btn" onClick={() => {
+                  tapLight();
+                  const modes = ["releases", "podcast", "activity"];
+                  const i = modes.indexOf(feedMode);
+                  if (i < modes.length - 1) { if (activeTab !== "feed") { removeNav("tab"); setActiveTab("feed"); } setFeedMode(modes[i + 1]); }
+                }}>
+                  <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M10 6L2 1V11L10 6Z" fill="currentColor"/><path d="M17 6L9 1V11L17 6Z" fill="currentColor"/></svg>
+                </button>
               </div>
               {/* Right: audio pip + bell */}
               <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
