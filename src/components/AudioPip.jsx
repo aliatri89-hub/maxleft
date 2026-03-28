@@ -14,9 +14,8 @@ export default function AudioPip() {
       onClick={() => { tapLight(); openFullScreen(); }}
       style={{
         width: 32,
-        height: 38,
+        height: 32,
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
@@ -41,24 +40,24 @@ export default function AudioPip() {
         <path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3v5z" />
       </svg>
 
-      {/* Audio jack hole — lights up when playing */}
-      <div style={{
-        width: 6,
-        height: 6,
-        borderRadius: "50%",
-        background: isPlaying ? "#EF9F27" : "#000",
-        border: `1.5px solid ${isPlaying ? "rgba(239,159,39,0.3)" : "rgba(255,255,255,0.08)"}`,
-        marginTop: 2,
-        flexShrink: 0,
-        transition: "background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease",
-        boxShadow: isPlaying ? "0 0 4px rgba(239,159,39,0.5)" : "none",
-        animation: isPlaying ? "audioPipPulse 1.5s ease-in-out infinite" : "none",
-      }} />
+      {/* Playing indicator — subtle pulse dot */}
+      {isPlaying && (
+        <div style={{
+          position: "absolute",
+          top: 4,
+          right: 4,
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: "#EF9F27",
+          animation: "audioPipPulse 1.5s ease-in-out infinite",
+        }} />
+      )}
 
       <style>{`
         @keyframes audioPipPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.75); }
         }
       `}</style>
     </div>
