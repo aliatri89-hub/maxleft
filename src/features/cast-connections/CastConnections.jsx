@@ -229,12 +229,17 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     if (!puzzle) return "";
     const pNum = puzzleNumber || "?";
     const solveEmojis = ["🟩", "🟨", "🟪"];
-    // Build blocks: colored for solved (in solve order), red for unsolved
+    // Build grid: 3 blocks per row, one row per group
     const totalGroups = puzzle.movies.length;
-    const blocks = [];
-    solved.forEach((_, i) => blocks.push(solveEmojis[i] || "🟩"));
-    for (let i = solved.length; i < totalGroups; i++) blocks.push("🟥");
-    return `M▶NTL\nCast Connections #${pNum}\n${blocks.join("")}\nmymantl.app/play`;
+    const rows = [];
+    solved.forEach((_, i) => {
+      const emoji = solveEmojis[i] || "🟩";
+      rows.push(emoji.repeat(groupSize));
+    });
+    for (let i = solved.length; i < totalGroups; i++) {
+      rows.push("🟥".repeat(groupSize));
+    }
+    return `M▶NTL\nCast Connections #${pNum}\n${rows.join("\n")}\nmymantl.app/play`;
   }
 
   function handleShare() {

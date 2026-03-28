@@ -35,9 +35,6 @@ function calculateRank(movies, selectedIndices) {
   return idx + 1;
 }
 
-function scaleScore(gross) {
-  return Math.round(gross / 10) / 10;
-}
 
 // ── localStorage helpers ──────────────────────────────────
 
@@ -134,13 +131,11 @@ export function useTripleFeaturePublic() {
   const getShareText = useCallback(() => {
     if (!puzzle || !result) return "";
     const puzzleNum = getPuzzleNumber(puzzle.date);
-    const userScore = scaleScore(result.user_total);
-    const maxScore = scaleScore(puzzle.optimalTotal);
-    const pct = maxScore > 0 ? Math.round((userScore / maxScore) * 100) : 0;
-    const rankEmoji = pct === 100 ? "🏆" : pct >= 90 ? "🎯" : pct >= 75 ? "🎬" : "😬";
+    const rankScore = result.rank > 0 ? 11 - result.rank : 0;
+    const rankEmoji = rankScore === 10 ? "🏆" : rankScore >= 9 ? "🎯" : rankScore >= 7 ? "🎬" : "😬";
 
     let text = `M▶NTL\nTriple Feature #${puzzleNum}\n`;
-    text += `${rankEmoji} ${userScore}/${maxScore}\n`;
+    text += `${rankEmoji} ${rankScore}/10\n`;
     text += `mymantl.app/play`;
     return text;
   }, [puzzle, result]);
@@ -165,7 +160,6 @@ export function useTripleFeaturePublic() {
     submitPlay,
     getShareText,
     getTimeUntilNext,
-    scaleScore,
     // Not available in public version
     percentile: null,
     playerCount: 0,

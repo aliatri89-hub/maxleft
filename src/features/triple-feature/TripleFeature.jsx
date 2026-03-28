@@ -104,13 +104,12 @@ const PHASE = { PICKING: 0, REVEALING: 1, RESULT: 2 };
 
 // ── Flavor text ──────────────────────────────────────────────
 
-function getFlavorText(userScore, maxScore) {
-  if (userScore === maxScore) return "Perfect triple. You nailed it.";
-  const pct = maxScore > 0 ? (userScore / maxScore) * 100 : 0;
-  if (pct >= 95) return "So close to the top.";
-  if (pct >= 85) return "Solid instincts.";
-  if (pct >= 75) return "Not bad — left a little on the table.";
-  if (pct >= 60) return "Rough night at the box office.";
+function getFlavorText(rankScore) {
+  if (rankScore === 10) return "Perfect triple. You nailed it.";
+  if (rankScore >= 9) return "So close to the top.";
+  if (rankScore >= 7) return "Solid instincts.";
+  if (rankScore >= 5) return "Not bad — left a little on the table.";
+  if (rankScore >= 3) return "Rough night at the box office.";
   return "Oof. Better luck tomorrow.";
 }
 
@@ -154,7 +153,7 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
   const {
     puzzle, result, percentile, playerCount, stats,
     loading, error, hasPlayed,
-    submitPlay, getShareText, getTimeUntilNext, scaleScore,
+    submitPlay, getShareText, getTimeUntilNext,
   } = hookFn(userId);
 
   const [selected, setSelected] = useState(new Set());
@@ -208,8 +207,6 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
 
   // Computed result
   const userTotal = puzzle ? selectedArray.reduce((sum, i) => sum + puzzle.movies[i].gross, 0) : 0;
-  const userScore = scaleScore(result ? result.user_total : userTotal);
-  const maxScore = puzzle ? scaleScore(puzzle.optimalTotal) : 0;
 
   const userRank = (() => {
     if (result) return result.rank;
@@ -223,6 +220,8 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
     const s = new Set(selectedArray);
     return ranked.findIndex((c) => { const cs = new Set(c.indices); return [...s].every((i) => cs.has(i)); }) + 1;
   })();
+
+  const rankScore = userRank > 0 ? 11 - userRank : 0;
 
   const shareResult = () => {
     const text = getShareText();
@@ -402,23 +401,23 @@ export default function TripleFeature({ session, onBack, onToast, useHook }) {
         {/* ── Result phase ────────────────────────────────── */}
         {phase === PHASE.RESULT && (
           <div style={{ animation: "tf-slideUp 0.5s ease-out", position: "relative" }}>
-            <GoldConfetti active={userScore === maxScore} />
+            <GoldConfetti active={rankScore === 10} />
 
             <div style={S.resultCard}>
               <div style={{ marginBottom: 6 }}>
                 <div style={{
                   fontFamily: t.fontSerif, fontSize: 40, fontWeight: 900, lineHeight: 1,
-                  color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? "#f0ece4" : "#8a8070",
-                }}>{userScore}<span style={{ fontSize: 22, color: t.textMuted }}>/{maxScore}</span></div>
+                  color: rankScore === 10 ? "#d4af37" : rankScore >= 9 ? "#f0ece4" : "#8a8070",
+                }}>{rankScore}<span style={{ fontSize: 22, color: t.textMuted }}>/10</span></div>
                 <div style={{
                   fontSize: 11, fontWeight: 600, marginTop: 6, fontStyle: "italic",
-                  color: userScore === maxScore ? "#d4af37" : userScore >= maxScore * 0.9 ? t.green : userScore >= maxScore * 0.75 ? "#f59e0b" : t.red,
-                }}>{getFlavorText(userScore, maxScore)}</div>
+                  color: rankScore === 10 ? "#d4af37" : rankScore >= 9 ? t.green : rankScore >= 7 ? "#f59e0b" : t.red,
+                }}>{getFlavorText(rankScore)}</div>
               </div>
 
               <div style={{ fontSize: 12, color: t.creamMuted, marginBottom: 2, marginTop: 8 }}>Your box office</div>
               <div style={S.resultTotal}>{formatMoney(result ? result.user_total : userTotal)}</div>
-              {userScore < maxScore && (
+              {rankScore < 10 && (
                 <div style={{ fontSize: 12, color: t.creamMuted, marginTop: 2 }}>
                   Best was {formatMoney(puzzle.optimalTotal)}
                 </div>
