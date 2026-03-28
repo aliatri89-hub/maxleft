@@ -30,16 +30,17 @@ async function searchTMDB(query, type = "movie") {
 }
 
 const TABS = [
-  { key: "items", label: "Items" },
   { key: "shelves", label: "Shelves" },
-  { key: "badges", label: "Badges" },
   { key: "posts", label: "Posts" },
+  { key: "items", label: "Items" },
+  { key: "badges", label: "Badges" },
+  { key: "authors", label: "Authors", staffPicksOnly: true },
 ];
 
 export default function CommunityManager({ session, lockedSlug }) {
   const [communities, setCommunities] = useState([]);
   const [selectedCommunity, setSelectedCommunity] = useState(null);
-  const [activeTab, setActiveTab] = useState("items");
+  const [activeTab, setActiveTab] = useState("shelves");
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
@@ -90,7 +91,7 @@ export default function CommunityManager({ session, lockedSlug }) {
 
       {/* Tab bar */}
       <div style={S.tabBar}>
-        {TABS.map((tab) => (
+        {TABS.filter(tab => !tab.staffPicksOnly || selectedCommunity?.slug === "staff-picks").map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
@@ -99,14 +100,6 @@ export default function CommunityManager({ session, lockedSlug }) {
             {tab.label}
           </button>
         ))}
-        {selectedCommunity?.slug === "staff-picks" && (
-          <button
-            onClick={() => setActiveTab("authors")}
-            style={{ ...S.tab, ...(activeTab === "authors" ? S.tabActive : {}) }}
-          >
-            Authors
-          </button>
-        )}
       </div>
 
       {selectedCommunity && activeTab === "items" && (
