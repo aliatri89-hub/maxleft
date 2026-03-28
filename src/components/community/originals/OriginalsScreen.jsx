@@ -214,21 +214,21 @@ export default function OriginalsScreen({
                     <span style={{ fontSize: 13 }}>📝</span>
                   )}
                   <span style={{
-                    fontSize: 11, fontWeight: 800,
+                    fontSize: 13, fontWeight: 700,
+                    fontFamily: t.fontBody,
+                    color: t.textPrimary,
+                  }}>
+                    {blurbAuthor}
+                  </span>
+                  <span style={{ color: t.textSecondary }}>·</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 800,
                     fontFamily: t.fontDisplay,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
                     color: accent,
                   }}>
                     Staff Pick
-                  </span>
-                  <span style={{ color: t.textSecondary }}>·</span>
-                  <span style={{
-                    fontSize: 11, fontWeight: 600,
-                    fontFamily: t.fontBody,
-                    color: t.textSecondary,
-                  }}>
-                    {blurbAuthor}
                   </span>
                 </div>
                 <div style={{
