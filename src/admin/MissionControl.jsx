@@ -67,6 +67,7 @@ export default function MissionControl({ session }) {
       const { count: missingPosters } = await supabase
         .from("community_items")
         .select("*", { count: "exact", head: true })
+        .eq("media_type", "film")
         .is("poster_path", null)
         .not("tmdb_id", "is", null);
 
