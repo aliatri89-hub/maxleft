@@ -599,6 +599,7 @@ function ShelvesPanel({ community, showToast }) {
                 <EditShelfRow
                   key={shelf.id}
                   shelf={shelf}
+                  communityId={community.id}
                   showToast={showToast}
                   onSaved={() => { setEditingId(null); fetchShelves(); }}
                   onCancel={() => setEditingId(null)}
@@ -638,7 +639,7 @@ function ShelvesPanel({ community, showToast }) {
   );
 }
 
-function EditShelfRow({ shelf, showToast, onSaved, onCancel }) {
+function EditShelfRow({ shelf, communityId, showToast, onSaved, onCancel }) {
   const [title, setTitle] = useState(shelf.title || "");
   const [directorName, setDirectorName] = useState(shelf.director_name || "");
   const [directorEmoji, setDirectorEmoji] = useState(shelf.director_emoji || "");
@@ -649,16 +650,50 @@ function EditShelfRow({ shelf, showToast, onSaved, onCancel }) {
 
   const handleSave = async () => {
     setSaving(true);
+    const newSort = sortOrder !== "" ? parseInt(sortOrder) : null;
+    const oldSort = shelf.sort_order;
+
+    // Save the shelf itself
     const { error } = await supabase.from("community_miniseries").update({
       title: title.trim(),
       director_name: directorName.trim() || null,
       director_emoji: directorEmoji.trim() || null,
       tab_key: tabKey || null,
       status,
-      sort_order: sortOrder !== "" ? parseInt(sortOrder) : null,
+      sort_order: newSort,
     }).eq("id", shelf.id);
-    if (error) showToast(`Error: ${error.message}`);
-    else { showToast("Shelf updated ✓"); onSaved(); }
+
+    if (error) {
+      showToast(`Error: ${error.message}`);
+      setSaving(false);
+      return;
+    }
+
+    // If sort_order changed, renormalize all siblings to close gaps / resolve dupes
+    if (newSort !== null && newSort !== oldSort) {
+      const { data: allShelves } = await supabase
+        .from("community_miniseries")
+        .select("id, sort_order")
+        .eq("community_id", communityId)
+        .order("sort_order");
+
+      if (allShelves && allShelves.length > 1) {
+        // Remove the moved shelf, insert it at the right position
+        const others = allShelves.filter(s => s.id !== shelf.id);
+        // Clamp target index: newSort is 1-based position
+        const targetIdx = Math.max(0, Math.min(newSort - 1, others.length));
+        others.splice(targetIdx, 0, { id: shelf.id });
+
+        // Batch-update sequential sort_orders (1-based)
+        const updates = others.map((s, i) => (
+          supabase.from("community_miniseries").update({ sort_order: i + 1 }).eq("id", s.id)
+        ));
+        await Promise.all(updates);
+      }
+    }
+
+    showToast("Shelf updated ✓");
+    onSaved();
     setSaving(false);
   };
 
