@@ -311,32 +311,23 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         {/* Right column */}
         <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 3 }}>
 
-          {/* Row 1: Title + duration (left) | badge + buttons (right, same row) */}
+          {/* Row 1: date (left) | year + buttons (right) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-              {/* When logo present: show date prominently. When no logo: show film title + date below */}
               {logo_url ? (
-                <>
+                /* Logo present: small date in the left slot */
+                fmtDate(episode_air_date) && (
                   <span style={{
-                    fontFamily: t.fontDisplay,
-                    fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
-                    lineHeight: 1.2, display: "block",
+                    fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)",
+                    textTransform: "uppercase", letterSpacing: "0.04em",
                     opacity: logoReady ? 1 : 0,
                     transition: "opacity 0.3s",
                   }}>
                     {fmtDate(episode_air_date)}
                   </span>
-                  {/* Film title as small supporting label once logo is up */}
-                  <span style={{
-                    fontFamily: t.fontBody, fontSize: 10, color: t.textFaint,
-                    textTransform: "uppercase", letterSpacing: "0.05em",
-                    opacity: logoReady ? 1 : 0,
-                    transition: "opacity 0.3s",
-                  }}>
-                    {film_year}
-                  </span>
-                </>
+                )
               ) : (
+                /* No logo: film title + date below */
                 <>
                   <span style={{
                     fontFamily: t.fontDisplay,
@@ -353,8 +344,16 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 </>
               )}
             </div>
-            {/* Queue + play buttons only */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
+            {/* Year + queue + play buttons */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+              {logo_url && logoReady && film_year && (
+                <span style={{
+                  fontFamily: t.fontBody, fontSize: 10, color: t.textFaint,
+                  letterSpacing: "0.03em",
+                }}>
+                  {film_year}
+                </span>
+              )}
               {!isPaywall && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
