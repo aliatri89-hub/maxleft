@@ -6,10 +6,7 @@ import { isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
-import { apiProxy } from "../../utils/api";
 
-const TMDB_BD = "https://image.tmdb.org/t/p/w780";
-const _pcBdCache = new Map();
 
 // ════════════════════════════════════════════════
 // PODCAST CARD — redesigned layout
@@ -83,31 +80,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
 
-  // ── B&W backdrop fetch — index #7 (sorted by vote), different frame from movies feed ──
-  const [bdUrl, setBdUrl] = useState(() =>
-    tmdb_id && _pcBdCache.has(tmdb_id) ? _pcBdCache.get(tmdb_id) : null
-  );
-  useEffect(() => {
-    if (!tmdb_id) return;
-    if (_pcBdCache.has(tmdb_id)) { setBdUrl(_pcBdCache.get(tmdb_id)); return; }
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await apiProxy("tmdb_images", { tmdb_id: String(tmdb_id), type: "movie" });
-        if (cancelled) return;
-        const picks = (res?.backdrops || [])
-          .filter(b => b.file_path)
-          .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
-        const pick = picks[6] || picks[0] || null;
-        const url = pick ? `${TMDB_BD}${pick.file_path}` : null;
-        _pcBdCache.set(tmdb_id, url);
-        if (!cancelled) setBdUrl(url);
-      } catch {
-        _pcBdCache.set(tmdb_id, null);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [tmdb_id]);
+
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
 
   const handleTimecodeSeek = (sec) => {
@@ -207,7 +180,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         borderRadius: 14,
         overflow: "hidden",
         border: isActiveAndPlaying ? "1px solid rgba(239,159,39,0.35)" : `1px solid ${t.bgHover}`,
-        background: t.bgCard,
+        background: "#1c1917",
         cursor: "pointer",
         padding: "12px 14px",
         position: "relative",
@@ -215,35 +188,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         transition: "border-color 0.3s, box-shadow 0.3s",
       }}
     >
-      {/* B&W backdrop wash — full card height */}
-      {bdUrl && (
-        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-          <FadeImg
-            src={bdUrl}
-            alt=""
-            placeholderColor="transparent"
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              objectPosition: "center top",
-              filter: "grayscale(1) contrast(1.1)",
-              opacity: 0.21,
-            }}
-          />
-          {/* Soft vignette — protects text without cutting the image */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(90deg, var(--bg-card, #1a1714) 8%, transparent 50%, var(--bg-card, #1a1714) 92%)",
-          }} />
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "linear-gradient(180deg, rgba(26,23,20,0.2) 0%, transparent 35%, rgba(26,23,20,0.75) 85%, rgba(26,23,20,0.92) 100%)",
-          }} />
-        </div>
-      )}
       {/* ── Centered logo overlay — above backdrop, below content ── */}
       {logo_url && (
         <div style={{
@@ -345,11 +289,11 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               )}
             </div>
             {/* Year + queue + play buttons */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
               {logo_url && logoReady && film_year && (
                 <span style={{
-                  fontFamily: t.fontBody, fontSize: 10, color: t.textFaint,
-                  letterSpacing: "0.03em",
+                  fontFamily: t.fontBody, fontSize: 11, color: "rgba(255,255,255,0.45)",
+                  letterSpacing: "0.03em", paddingTop: 2,
                 }}>
                   {film_year}
                 </span>
