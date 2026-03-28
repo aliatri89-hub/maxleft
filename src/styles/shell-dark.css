@@ -131,6 +131,14 @@
   color: var(--accent-green) !important;
 }
 
+.nav-item.active::before {
+  background: var(--accent-green) !important;
+}
+
+.nav-item.active .nav-icon svg {
+  filter: drop-shadow(0 0 5px rgba(74,222,128,0.35)) !important;
+}
+
 .nav-label.nav-label {
   /* inherits color from .nav-item */
 }
