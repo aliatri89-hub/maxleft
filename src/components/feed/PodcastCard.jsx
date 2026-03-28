@@ -56,7 +56,16 @@ function stripHtml(html) {
     .trim();
 }
 
-function formatDuration(seconds) {
+function stripUrls(text) {
+  if (!text) return "";
+  return text
+    // Remove bare URLs
+    .replace(/https?:\/\/\S+/g, "")
+    // Remove "Follow:" / "Support:" / "Links:" label lines and everything after
+    .replace(/\b(Follow|Links|Support|Subscribe|Connect|See omnystudio|Visit megaphone)[:\s].*/si, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
   if (!seconds) return "";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -100,7 +109,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const isCurrent = currentEp?.guid === episode_id || currentEp?.episodeId === episode_id;
   const isActiveAndPlaying = isCurrent && isPlaying;
 
-  const fullDesc = stripHtml(episode_description);
+  const fullDesc = stripUrls(stripHtml(episode_description));
   const hasDesc = fullDesc && !isJunkDesc(fullDesc);
 
   const handlePlay = (e) => {
