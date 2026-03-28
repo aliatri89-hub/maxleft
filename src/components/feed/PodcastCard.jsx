@@ -387,7 +387,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <div style={{ flex: 1 }} />
           {/* Handle / chevron — only when desc exists and collapsed */}
           {hasDesc && !expanded && (
-            <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(255,255,255,0.18)", flexShrink: 0 }} />
+            <div style={{ width: 32, height: 3, borderRadius: 2, background: "rgba(74,222,128,0.5)", flexShrink: 0 }} />
           )}
           {/* Badges — right */}
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 6 }}>
