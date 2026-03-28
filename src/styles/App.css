@@ -3366,8 +3366,8 @@
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding: 10px 0 0;
-    padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
+    padding: 6px 0 0;
+    padding-bottom: max(env(safe-area-inset-bottom, 10px), 10px);
     z-index: 9999;
   }
   /* Extend background below viewport — kills iOS safe-area bleed on overscroll */
@@ -3398,7 +3398,7 @@
     position: relative;
   }
   .nav-item.active {
-    color: var(--nav-accent, var(--terracotta, #C4734F));
+    color: var(--accent-green, #4ade80);
   }
 
   .nav-icon {
@@ -3413,7 +3413,7 @@
   }
   .nav-item.active .nav-icon svg {
     transform: scale(1.06);
-    filter: drop-shadow(0 0 5px rgba(196,115,79,0.25));
+    filter: drop-shadow(0 0 5px rgba(74,222,128,0.3));
   }
 
   .nav-label {
@@ -3530,7 +3530,7 @@
     transform: translateX(-50%);
     width: 28px;
     height: 2px;
-    background: var(--nav-accent, var(--terracotta, #C4734F));
+    background: var(--accent-green, #4ade80);
     border-radius: 0 0 2px 2px;
   }
 
