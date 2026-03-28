@@ -217,7 +217,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   }, [puzzle]);
 
   useEffect(() => {
-    if (won && !result) {
+    if (won && !result && puzzle && solved.length > 0) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 2000);
     }
