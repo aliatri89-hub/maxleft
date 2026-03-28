@@ -207,7 +207,8 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
         }}>
           {badge.image_url ? (
             <FadeImg src={badge.image_url} alt={badge.name}
-              placeholderColor={`${accent}15`}
+              loading="eager"
+              placeholderColor={`${accent}40`}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ) : (
@@ -248,7 +249,8 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             }}>
               {badge.image_url ? (
                 <FadeImg src={badge.image_url} alt={badge.name}
-                  placeholderColor={`${accent}15`}
+                  loading="eager"
+                  placeholderColor={`${accent}40`}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               ) : (
