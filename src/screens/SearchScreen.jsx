@@ -29,7 +29,7 @@ const TC = "#C75B3F";
 const TMDB_IMG = "https://image.tmdb.org/t/p";
 const DEBOUNCE_MS = 300;
 
-export default function SearchScreen({ session, isActive, onToast, pushNav, removeNav }) {
+export default function SearchScreen({ session, isActive, onToast, pushNav, removeNav, initialTmdbId, initialTitle, onDeepLinkConsumed }) {
   const userId = session?.user?.id;
 
   // ── Search state ──
@@ -45,6 +45,33 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   const [expandedTmdbId, setExpandedTmdbId] = useState(null);
   const [episodes, setEpisodes] = useState([]);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+
+  // ── Deep link: auto-search + auto-expand when initialTmdbId is set ──
+  // pendingDeepLinkRef holds the tmdb_id to expand once results load.
+  const pendingDeepLinkRef = useRef(null);
+
+  useEffect(() => {
+    if (!initialTmdbId || !initialTitle) return;
+    // Store which tmdb_id to auto-expand after results land
+    pendingDeepLinkRef.current = initialTmdbId;
+    // Pre-fill the query and kick off the search immediately (bypass debounce)
+    setQuery(initialTitle);
+    lastQueryRef.current = ""; // force runSearch to not dedup
+    runSearch(initialTitle);
+    if (onDeepLinkConsumed) onDeepLinkConsumed();
+  }, [initialTmdbId, initialTitle]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Once results load, if there's a pending deep link tmdb_id, auto-expand it
+  useEffect(() => {
+    if (!pendingDeepLinkRef.current || results.length === 0) return;
+    const target = results.find(r => r.tmdbId === pendingDeepLinkRef.current);
+    if (!target) return;
+    pendingDeepLinkRef.current = null;
+    // Small delay so the result row is in the DOM before we expand
+    setTimeout(() => {
+      handleResultTap(target.tmdbId, target.podcastCount);
+    }, 150);
+  }, [results]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Notify state ──
   const [notifyingId, setNotifyingId] = useState(null);

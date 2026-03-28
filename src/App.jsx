@@ -160,6 +160,7 @@ function AppMain() {
   const [letterboxdToast, setLetterboxdToast] = useState(null);
   const [feedMode, setFeedMode] = useState("releases");
   const [pendingSleeveOpen, setPendingSleeveOpen] = useState(null); // tmdb_id from push notification tap
+  const [searchDeepLink, setSearchDeepLink] = useState(null); // { tmdbId, title } — from new_coverage notification tap
 
   // ── Profile + shelves ──
   const [profile, setProfile] = useState({
@@ -332,9 +333,11 @@ function AppMain() {
       setFeedMode("activity");
       setPendingSleeveOpen(parseInt(data.tmdb_id));
     } else if (data?.type === 'new_coverage' && data?.tmdb_id) {
-      setActiveTab("feed");
-      setFeedMode("activity");
-      setPendingSleeveOpen(parseInt(data.tmdb_id));
+      // Deep link to search screen — pre-searches the film and auto-expands
+      // so the user lands directly on the playable episode list.
+      // Works for all podcasts uniformly (communities and non-communities alike).
+      setSearchDeepLink({ tmdbId: parseInt(data.tmdb_id), title: data.film_title || "" });
+      setActiveTab("search");
     } else if (data?.type === 'new_coverage_digest') {
       setActiveTab("feed");
       setFeedMode("activity");
@@ -575,7 +578,7 @@ function AppMain() {
                 </div>
                 <div className="tab-pane" key="search-tab">
                   {visitedTabs.has("search") && <ErrorBoundary name="Search"><Suspense fallback={<CommunityLoadingSkeleton />}>
-                    <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+                    <SearchScreen session={session} isActive={activeTab === "search"} onToast={showToast} pushNav={pushNav} removeNav={removeNav} initialTmdbId={searchDeepLink?.tmdbId} initialTitle={searchDeepLink?.title} onDeepLinkConsumed={() => setSearchDeepLink(null)} />
                   </Suspense></ErrorBoundary>}
                 </div>
                 <div className="tab-pane" key="shelf-tab">
