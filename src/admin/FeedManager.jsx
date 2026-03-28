@@ -186,9 +186,10 @@ function IngestQueue({ session }) {
       if (error) throw error;
       const result = data || {};
       const parts = [`✓ ${result.approved || 0} approved`];
-      if (result.community_items_updated) parts.push(`${result.community_items_updated} community items`);
+      if (result.community_items_created) parts.push(`${result.community_items_created} seeded`);
+      if (result.community_items_updated) parts.push(`${result.community_items_updated} updated`);
       if (result.media_ids_linked) parts.push(`${result.media_ids_linked} media linked`);
-      if (result.notifications_generated) parts.push(`${result.notifications_generated} notifs`);
+      if (result.notifications_queued) parts.push(`${result.notifications_queued} notifs`);
       showToast(parts.join(" · "));
       setSelected(new Set());
       fetchQueue();
