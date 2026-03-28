@@ -175,16 +175,11 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   } = hookFn(userId);
 
   const [showConfetti, setShowConfetti] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [logos, setLogos] = useState({});
   const [wrongFlash, setWrongFlash] = useState(false);
   const [wrongNames, setWrongNames] = useState([]);
   const [dotPop, setDotPop] = useState(-1);
   const prevMistakes = useRef(mistakes);
-
-  useEffect(() => {
-    setTimeout(() => setLoaded(true), 100);
-  }, []);
 
   // Track mistake changes → trigger red flash on wrong tiles + dot pop
   useEffect(() => {
@@ -303,8 +298,6 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       {/* Header */}
       <div style={{
         textAlign: "center", padding: "24px 0 16px",
-        opacity: loaded ? 1 : 0, transform: `translateY(${loaded ? 0 : -8}px)`,
-        transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
       }}>
         <div style={{
           fontFamily: t.fontBody, fontSize: 11,
@@ -374,7 +367,6 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                   onClick={() => toggleSelect(actor.name)}
                   style={{
                     ...S.tile,
-                    animationDelay: loaded ? "0s" : `${i * 0.04}s`,
                     ...(isSolved ? {
                       background: solvedColor,
                       borderColor: solvedColor,
@@ -464,7 +456,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
               key={movie.tmdb_id}
               movie={movie}
               color={color}
-              delay={i * 0.12}
+              delay={i * 0.5}
               dimmed={dimmed}
               logoUrl={logos[movie.tmdb_id] || null}
             />
@@ -696,11 +688,6 @@ const CSS = `
   .cc-tile {
     transition: all 0.2s ease;
     -webkit-tap-highlight-color: transparent;
-    animation: cc-tile-enter 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  }
-  @keyframes cc-tile-enter {
-    from { opacity: 0; transform: scale(0.85) translateY(8px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
   }
   .cc-tile:active {
     transform: scale(0.95);
