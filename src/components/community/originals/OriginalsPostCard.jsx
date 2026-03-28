@@ -121,7 +121,7 @@ function ReaderOverlay({ post, accent, onClose }) {
   // Fetch author avatar
   useEffect(() => {
     const authorName = post.author || "Ali";
-    supabase.from("originals_authors").select("name, avatar_url")
+    supabase.from("originals_authors").select("name, avatar_url, bio")
       .eq("name", authorName).maybeSingle()
       .then(({ data }) => setAuthorData(data));
   }, [post.author]);
@@ -211,7 +211,7 @@ function ReaderOverlay({ post, accent, onClose }) {
           </div>
 
           <div style={{
-            display: "flex", alignItems: "center", gap: 8,
+            display: "flex", alignItems: "center", gap: 10,
             marginBottom: 28,
           }}>
             {authorData?.avatar_url && (
@@ -220,25 +220,38 @@ function ReaderOverlay({ post, accent, onClose }) {
                 border: `1.5px solid ${accent}40`,
               }} />
             )}
-            <div style={{
-              fontSize: 12, fontWeight: 600,
-              color: accent,
-              fontFamily: t.fontBody,
-              letterSpacing: "0.03em",
-            }}>
-              by {post.author || "Ali"}
-            </div>
-            {publishDate && (
-              <>
-                <span style={{ color: t.textSecondary }}>·</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{
+                  fontSize: 12, fontWeight: 600,
+                  color: accent,
+                  fontFamily: t.fontBody,
+                  letterSpacing: "0.03em",
+                }}>
+                  by {post.author || "Ali"}
+                </div>
+                {publishDate && (
+                  <>
+                    <span style={{ color: t.textSecondary }}>·</span>
+                    <div style={{
+                      fontSize: 11, color: t.textMuted,
+                      fontFamily: t.fontBody,
+                    }}>
+                      {publishDate}
+                    </div>
+                  </>
+                )}
+              </div>
+              {authorData?.bio && (
                 <div style={{
                   fontSize: 11, color: t.textMuted,
                   fontFamily: t.fontBody,
+                  lineHeight: 1.3,
                 }}>
-                  {publishDate}
+                  {authorData.bio}
                 </div>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Divider */}
