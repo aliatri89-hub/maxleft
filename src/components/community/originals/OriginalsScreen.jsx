@@ -192,9 +192,9 @@ export default function OriginalsScreen({
                   display: "flex", alignItems: "center", gap: 6,
                   marginBottom: 8,
                 }}>
-                  <span style={{ fontSize: 11 }}>📝</span>
+                  <span style={{ fontSize: 13 }}>📝</span>
                   <span style={{
-                    fontSize: 9, fontWeight: 800,
+                    fontSize: 11, fontWeight: 800,
                     fontFamily: t.fontDisplay,
                     textTransform: "uppercase",
                     letterSpacing: "0.08em",
@@ -204,9 +204,9 @@ export default function OriginalsScreen({
                   </span>
                   <span style={{ color: t.textSecondary }}>·</span>
                   <span style={{
-                    fontSize: 9, fontWeight: 600,
+                    fontSize: 11, fontWeight: 600,
                     fontFamily: t.fontBody,
-                    color: t.textMuted,
+                    color: t.textSecondary,
                   }}>
                     {blurbAuthor}
                   </span>
