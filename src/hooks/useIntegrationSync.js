@@ -237,10 +237,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
       const existingSet = new Set((existingMovies || []).map(m => `${m.title}::${m.year}`));
       const existingMap = new Map((existingMovies || []).map(m => [`${m.title}::${m.year}`, m]));
 
-      const { data: existingFeed } = await supabase.from("feed_activity")
-        .select("title, item_title").eq("user_id", uid).eq("activity_type", "movie");
-      const feedSet = new Set((existingFeed || []).flatMap(f => [f.title, f.item_title].filter(Boolean)));
-
       let synced = 0;
       const maxSync = 50;
       const BATCH_SIZE = 4;
@@ -682,8 +678,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
 
       const recentGames = recentData.games || [];
       const recentIds = new Set(recentGames.map(g => String(g.appid)));
-      const recentMap = {};
-      recentGames.forEach(g => { recentMap[String(g.appid)] = g; });
 
       const MIN_HOURS = 5;
       const allOwned = (ownedData.games || [])
@@ -702,10 +696,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
       const existingMap = {};
       (existingGames || []).forEach(g => { existingMap[String(g.steam_app_id)] = g.game_status; });
 
-      const { data: existingFeed } = await supabase.from("feed_activity")
-        .select("title, item_title").eq("user_id", uid).eq("activity_type", "game");
-      const feedSet = new Set((existingFeed || []).flatMap(f => [f.title, f.item_title].filter(Boolean)));
-
       let synced = 0;
       const maxSync = manual ? 50 : 10;
 
@@ -716,12 +706,8 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
         const title = game.name;
         const playtimeHours = Math.round((game.playtime_forever || 0) / 60 * 10) / 10;
         const isRecentlyPlayed = recentIds.has(appId);
-        const playtime2Weeks = isRecentlyPlayed
-          ? Math.round((recentMap[appId]?.playtime_2weeks || 0) / 60 * 10) / 10
-          : 0;
 
         const coverUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`;
-        const headerUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
 
         let achievementsEarned = null, achievementsTotal = null;
         try {
@@ -753,25 +739,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
         );
 
         existingMap[appId] = status;
-
-        if (isRecentlyPlayed && playtime2Weeks > 0) {
-          const feedKey = `steam_${appId}_active`;
-          if (!feedSet.has(feedKey) && !feedSet.has(title)) {
-            const feedRow = {
-              user_id: uid, activity_type: "game", action: "playing",
-              title: feedKey, item_title: title, item_cover: headerUrl,
-              metadata: {
-                source: "steam", steam_app_id: appId,
-                playtime_total: playtimeHours, playtime_2weeks: playtime2Weeks,
-                achievements_earned: achievementsEarned, achievements_total: achievementsTotal,
-              },
-            };
-            const { error: feedErr } = await supabase.from("feed_activity").insert(feedRow);
-            if (feedErr) console.error("[Steam] Feed insert error:", feedErr.message);
-            feedSet.add(feedKey);
-            feedSet.add(title);
-          }
-        }
 
         synced++;
         if (synced % 5 === 0) await new Promise(r => setTimeout(r, 300));

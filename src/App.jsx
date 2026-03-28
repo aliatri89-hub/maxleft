@@ -367,7 +367,6 @@ function AppMain() {
     if (!session) return;
     const userId = session.user.id;
     try {
-      await supabase.from("feed_activity").delete().eq("user_id", userId);
       await supabase.from("feed_reactions").delete().eq("user_id", userId);
       await supabase.from("feed_comments").delete().eq("user_id", userId);
       await supabase.from("community_user_progress").delete().eq("user_id", userId);

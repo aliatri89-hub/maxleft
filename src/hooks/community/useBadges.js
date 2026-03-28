@@ -338,8 +338,10 @@ export function useBadges(communityId, userId) {
         supabase.from("user_notifications").upsert({
           user_id: userId,
           notif_type: "badge_progress",
-          title: "Badge progress",
-          body: `${current}/${total} for "${badge.name}"`,
+          title: badge.name,
+          body: badge.progress_tagline
+            ? `${current}/${total}: "${badge.progress_tagline}"`
+            : `${current}/${total} complete`,
           image_url: badge.image_url || null,
           payload: { type: "badge_progress", badge_id: badge.id, community_id: badge.community_id, current, total },
           ref_key: `badge_progress:${badge.id}`,

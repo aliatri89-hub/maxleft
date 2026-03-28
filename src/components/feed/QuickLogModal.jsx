@@ -54,31 +54,6 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
         completed_at: new Date().toISOString().slice(0, 10),
       });
 
-      // Write to feed_activity (dedup with Letterboxd sync)
-      try {
-        const { data: existingFeed } = await supabase.from("feed_activity")
-          .select("id").eq("user_id", userIdRef.current).eq("activity_type", "movie")
-          .eq("item_title", data.title).limit(1);
-
-        if (!existingFeed || existingFeed.length === 0) {
-          await supabase.from("feed_activity").insert({
-            user_id: userIdRef.current,
-            activity_type: "movie",
-            action: "shelved",
-            title: data.title,
-            item_title: data.title,
-            item_cover: coverUrl,
-            item_author: data.director || data.creator || null,
-            item_year: data.year ? parseInt(data.year) : null,
-            rating: rating ? Math.round(rating) : null,
-          });
-        } else if (rating) {
-          await supabase.from("feed_activity")
-            .update({ rating: Math.round(rating) })
-            .eq("id", existingFeed[0].id);
-        }
-      } catch (e) { console.warn("[QuickLog] Feed activity error:", e); }
-
       // Auto-remove from watchlist
       try {
         await supabase.from("wishlist").delete()

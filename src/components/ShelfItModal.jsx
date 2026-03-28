@@ -204,38 +204,6 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
 
       const status = selected.type === "book" ? bookStatus : selected.type === "tv" ? showStatus : selected.type === "game" ? gameStatus : null;
 
-      // Log to feed_activity for friends feed
-      const actionMap = {
-        movie: "shelved",
-        tv: status === "watching" ? "started watching" : "finished",
-        book: status === "reading" ? "started reading" : "finished",
-        game: status === "playing" ? "started playing" : "finished",
-      };
-      try {
-        // Check for existing feed entry (dedup with Letterboxd sync)
-        const feedType = selected.type === "tv" ? "show" : selected.type;
-        const { data: existingFeedEntry } = await supabase.from("feed_activity")
-          .select("id").eq("user_id", session.user.id).eq("activity_type", feedType)
-          .eq("item_title", selected.title).limit(1);
-
-        if (!existingFeedEntry || existingFeedEntry.length === 0) {
-          const { error: feedErr } = await supabase.from("feed_activity").insert({
-            user_id: session.user.id,
-            activity_type: selected.type === "tv" ? "show" : selected.type,
-            action: actionMap[selected.type] || "shelved",
-            title: selected.title,
-            item_title: selected.title,
-            item_cover: selected.type === "book" ? (selected.cover || null) : (selected.poster || selected.cover || null),
-            item_author: selected.author || details?.director || null,
-            item_year: selected.year ? parseInt(selected.year) : null,
-            rating: rating ? Math.round(rating) : null,
-          });
-          if (feedErr) console.error("Feed activity insert failed:", feedErr.message, feedErr.code);
-        } else if (rating) {
-          await supabase.from("feed_activity").update({ rating: Math.round(rating) }).eq("id", existingFeedEntry[0].id);
-        }
-      } catch (e) { console.error("Feed activity error:", e); }
-
       // Auto-remove from wishlist if it was on there
       try {
         const wlType = selected.type === "tv" ? "show" : selected.type;

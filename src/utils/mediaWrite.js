@@ -9,8 +9,6 @@ import { supabase } from "../supabase";
  * which atomically handles:
  *   1. Upsert into `media` (canonical record)
  *   2. Upsert into `user_media_logs` (user's personal log)
- *   3. Insert/update `feed_activity`
- *   4. Remove from `wishlist`
  *
  * Returns the media.id (uuid) on success, null on error.
  */
