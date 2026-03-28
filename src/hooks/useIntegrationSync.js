@@ -38,7 +38,7 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   // AUTO-LOG + BADGE CHECK (shared by Letterboxd sync)
   // ════════════════════════════════════════════════
 
-  const autoLogAndCheckBadges = async (syncedFilms, uid) => {
+  const autoLogAndCheckBadges = async (syncedFilms, uid, isFirstImport = false) => {
     try {
       if (!syncedFilms.length) return;
       const tmdbIds = syncedFilms.map(f => f.tmdbId);
@@ -134,8 +134,14 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
 
       if (!badgeProgress.length) return;
 
-      // ── Badge digest notification (single notification, not a toast flood) ──
-      // Tap opens BadgeOverviewPage — no community_slug needed in payload
+      // ── Badge digest notification — FIRST IMPORT ONLY ──
+      // Only fires when this is the user's first Letterboxd sync (letterboxd_last_synced_at
+      // was null before this run). Subsequent syncs skip this entirely so users who import
+      // 1000 films and later add more don't keep seeing the onboarding digest.
+      // ignoreDuplicates: true is an extra safety net — the row should never exist for a
+      // genuine first import, but guards against edge cases (e.g. re-connecting Letterboxd).
+      if (!isFirstImport) return;
+
       const count = badgeProgress.length;
       const topPct = Math.round((badgeProgress[0].current / badgeProgress[0].total) * 100);
       const title = "Your library has a head start!";
@@ -152,7 +158,7 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
         payload: { type: "badge_digest", badge_count: count, top_pct: topPct },
         ref_key: "badge_digest:sync",
         created_at: new Date().toISOString(),
-      }, { onConflict: "user_id,ref_key" }).then(({ error }) => {
+      }, { onConflict: "user_id,ref_key", ignoreDuplicates: true }).then(({ error }) => {
         if (error) console.error("[AutoLog] Badge digest notification error:", error.message);
       });
     } catch (e) {
@@ -177,6 +183,21 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
     }
     letterboxdLock.current = true;
     setLetterboxdSyncing(true);
+
+    // Detect first import BEFORE anything changes — if last_synced_at is null,
+    // this is the user's very first Letterboxd sync (the onboarding import).
+    // We capture this now so the badge digest only fires in that scenario.
+    let isFirstImport = false;
+    try {
+      const { data: syncMeta } = await supabase
+        .from("profiles")
+        .select("letterboxd_last_synced_at")
+        .eq("id", uid)
+        .single();
+      isFirstImport = !syncMeta?.letterboxd_last_synced_at;
+    } catch (_) {
+      // If we can't check, default to false — safer to skip the digest than spam it
+    }
 
     try {
       const edgeUrl = `https://api.mymantl.app/functions/v1/letterboxd-rss?username=${encodeURIComponent(username)}&t=${Date.now()}`;
@@ -444,7 +465,7 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
             .catch(err => console.warn("[Letterboxd] Coverage check failed:", err));
 
           setTimeout(async () => {
-            await autoLogAndCheckBadges(syncedFilms, uid);
+            await autoLogAndCheckBadges(syncedFilms, uid, isFirstImport);
             setAutoLogCompleteSignal(Date.now());
           }, 2800);
         } else {
