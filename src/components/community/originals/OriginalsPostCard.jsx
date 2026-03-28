@@ -209,7 +209,7 @@ function ReaderOverlay({ post, accent, onClose }) {
         {post.cover_image_url ? (
           <div style={{
             position: "relative",
-            minHeight: 260,
+            minHeight: 360,
             display: "flex", flexDirection: "column", justifyContent: "flex-end",
             overflow: "hidden",
           }}>
@@ -223,7 +223,7 @@ function ReaderOverlay({ post, accent, onClose }) {
             {/* Dark gradient overlay */}
             <div style={{
               position: "absolute", inset: 0,
-              background: `linear-gradient(to bottom, rgba(15,13,11,0.15) 0%, rgba(15,13,11,0.75) 60%, ${t.bgPrimary} 100%)`,
+              background: `linear-gradient(to bottom, rgba(15,13,11,0.05) 0%, rgba(15,13,11,0.5) 65%, ${t.bgPrimary} 100%)`,
             }} />
             {/* Content over backdrop */}
             <div style={{ position: "relative", padding: "32px 24px 20px" }}>
