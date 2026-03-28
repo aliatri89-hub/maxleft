@@ -55,15 +55,22 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
           transition: "border-color 0.2s",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{
-            width: 28, height: 28, borderRadius: 6,
-            background: `${accent}20`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 14 }}>📝</span>
-          </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {post.cover_image_url ? (
+            <img src={post.cover_image_url} alt="" style={{
+              width: 44, height: 44, borderRadius: 8, objectFit: "cover",
+              flexShrink: 0,
+            }} />
+          ) : (
+            <div style={{
+              width: 28, height: 28, borderRadius: 6,
+              background: `${accent}20`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <span style={{ fontSize: 14 }}>📝</span>
+            </div>
+          )}
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
@@ -198,72 +205,153 @@ function ReaderOverlay({ post, accent, onClose }) {
         WebkitOverflowScrolling: "touch",
         paddingBottom: "calc(40px + env(safe-area-inset-bottom, 0px))",
       }}>
-        {/* Title block */}
-        <div style={{ padding: "32px 24px 0" }}>
+        {/* Title block — backdrop hero if cover image, plain if not */}
+        {post.cover_image_url ? (
           <div style={{
-            fontSize: 28, fontWeight: 800, color: t.textPrimary,
-            fontFamily: t.fontDisplay,
-            letterSpacing: "0.01em",
-            lineHeight: 1.15,
-            marginBottom: 12,
+            position: "relative",
+            minHeight: 260,
+            display: "flex", flexDirection: "column", justifyContent: "flex-end",
+            overflow: "hidden",
           }}>
-            {post.title}
-          </div>
-
-          <div style={{
-            display: "flex", alignItems: "center", gap: 10,
-            marginBottom: 28,
-          }}>
-            {authorData?.avatar_url && (
-              <img src={authorData.avatar_url} alt="" style={{
-                width: 55, height: 55, borderRadius: "50%", objectFit: "cover",
-                border: `1.5px solid ${accent}40`,
-              }} />
-            )}
-            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{
-                  fontSize: 12, fontWeight: 600,
-                  color: accent,
-                  fontFamily: t.fontBody,
-                  letterSpacing: "0.03em",
-                }}>
-                  by {post.author || "Ali"}
-                </div>
-                {publishDate && (
-                  <>
-                    <span style={{ color: t.textSecondary }}>·</span>
-                    <div style={{
-                      fontSize: 11, color: t.textMuted,
-                      fontFamily: t.fontBody,
-                    }}>
-                      {publishDate}
-                    </div>
-                  </>
-                )}
+            {/* Background image */}
+            <div style={{
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${post.cover_image_url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }} />
+            {/* Dark gradient overlay */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background: `linear-gradient(to bottom, rgba(15,13,11,0.15) 0%, rgba(15,13,11,0.75) 60%, ${t.bgPrimary} 100%)`,
+            }} />
+            {/* Content over backdrop */}
+            <div style={{ position: "relative", padding: "32px 24px 20px" }}>
+              <div style={{
+                fontSize: 28, fontWeight: 800, color: "#fff",
+                fontFamily: t.fontDisplay,
+                letterSpacing: "0.01em",
+                lineHeight: 1.15,
+                marginBottom: 12,
+                textShadow: "0 2px 8px rgba(0,0,0,0.5)",
+              }}>
+                {post.title}
               </div>
-              {authorData?.bio && (
-                <div style={{
-                  fontSize: 11, color: t.textMuted,
-                  fontFamily: t.fontBody,
-                  lineHeight: 1.3,
-                }}>
-                  {authorData.bio}
+
+              <div style={{
+                display: "flex", alignItems: "center", gap: 10,
+              }}>
+                {authorData?.avatar_url && (
+                  <img src={authorData.avatar_url} alt="" style={{
+                    width: 55, height: 55, borderRadius: "50%", objectFit: "cover",
+                    border: "2px solid rgba(255,255,255,0.3)",
+                  }} />
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{
+                      fontSize: 12, fontWeight: 600,
+                      color: "#fff",
+                      fontFamily: t.fontBody,
+                      letterSpacing: "0.03em",
+                      textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                    }}>
+                      by {post.author || "Ali"}
+                    </div>
+                    {publishDate && (
+                      <>
+                        <span style={{ color: "rgba(255,255,255,0.5)" }}>·</span>
+                        <div style={{
+                          fontSize: 11, color: "rgba(255,255,255,0.7)",
+                          fontFamily: t.fontBody,
+                          textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                        }}>
+                          {publishDate}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  {authorData?.bio && (
+                    <div style={{
+                      fontSize: 11, color: "rgba(255,255,255,0.6)",
+                      fontFamily: t.fontBody,
+                      lineHeight: 1.3,
+                      textShadow: "0 1px 4px rgba(0,0,0,0.5)",
+                    }}>
+                      {authorData.bio}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
+        ) : (
+          <div style={{ padding: "32px 24px 0" }}>
+            <div style={{
+              fontSize: 28, fontWeight: 800, color: t.textPrimary,
+              fontFamily: t.fontDisplay,
+              letterSpacing: "0.01em",
+              lineHeight: 1.15,
+              marginBottom: 12,
+            }}>
+              {post.title}
+            </div>
 
-          {/* Divider */}
-          <div style={{
-            height: 1,
-            background: `linear-gradient(90deg, ${accent}40, transparent)`,
-            marginBottom: 28,
-          }} />
-        </div>
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10,
+              marginBottom: 28,
+            }}>
+              {authorData?.avatar_url && (
+                <img src={authorData.avatar_url} alt="" style={{
+                  width: 55, height: 55, borderRadius: "50%", objectFit: "cover",
+                  border: `1.5px solid ${accent}40`,
+                }} />
+              )}
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{
+                    fontSize: 12, fontWeight: 600,
+                    color: accent,
+                    fontFamily: t.fontBody,
+                    letterSpacing: "0.03em",
+                  }}>
+                    by {post.author || "Ali"}
+                  </div>
+                  {publishDate && (
+                    <>
+                      <span style={{ color: t.textSecondary }}>·</span>
+                      <div style={{
+                        fontSize: 11, color: t.textMuted,
+                        fontFamily: t.fontBody,
+                      }}>
+                        {publishDate}
+                      </div>
+                    </>
+                  )}
+                </div>
+                {authorData?.bio && (
+                  <div style={{
+                    fontSize: 11, color: t.textMuted,
+                    fontFamily: t.fontBody,
+                    lineHeight: 1.3,
+                  }}>
+                    {authorData.bio}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{
+              height: 1,
+              background: `linear-gradient(90deg, ${accent}40, transparent)`,
+              marginBottom: 28,
+            }} />
+          </div>
+        )}
 
         {/* Body */}
-        <div style={{ padding: "0 24px" }}>
+        <div style={{ padding: `${post.cover_image_url ? 24 : 0}px 24px 0` }}>
           {renderMarkdown(post.body)}
         </div>
 
