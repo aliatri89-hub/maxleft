@@ -188,10 +188,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         transition: "border-color 0.3s, box-shadow 0.3s",
       }}
     >
-      {/* ── Centered logo overlay — above backdrop, below content ── */}
+      {/* ── Centered logo overlay — top of card only, never over expanded description ── */}
       {logo_url && (
         <div style={{
-          position: "absolute", inset: 0,
+          position: "absolute", top: 0, left: 0, right: 0, height: 84,
           display: "flex", alignItems: "center", justifyContent: "center",
           pointerEvents: "none",
           zIndex: 0,
