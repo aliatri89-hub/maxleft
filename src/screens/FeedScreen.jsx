@@ -34,7 +34,7 @@ export default function FeedScreen({
 
   // ── Shared filter state (passed down to all three panes) ──
   const [sortOrder, setSortOrder] = useState(null);
-  const [selectedPodcast, setSelectedPodcast] = useState("__favorites__");
+  const [selectedPodcast, setSelectedPodcast] = useState(null);
   const [favoriteSlugs, setFavoriteSlugs] = useState(null);
 
   // ── Pull-to-refresh (wraps the whole scroll container) ──
