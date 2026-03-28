@@ -105,9 +105,9 @@ function BadgeCard({ data, onNavigateCommunity, onViewBadgeDetail }) {
             </div>
             {data.progress_tagline && (
               <div style={{
-                fontFamily: "var(--font-body)", fontSize: 11,
-                color: "var(--text-muted, #8892a8)", fontStyle: "italic",
-                marginTop: 4, lineHeight: 1.3,
+                fontFamily: "var(--font-body)", fontSize: 12,
+                color: "var(--text-secondary, #b0bcd4)", fontStyle: "italic",
+                marginTop: 4, lineHeight: 1.4,
               }}>
                 {data.progress_tagline}
               </div>

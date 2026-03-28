@@ -646,15 +646,15 @@ const BadgeCard = memo(function BadgeCard({ badge, isEarned, progress, accent, d
 
       {!isEarned && badge.progress_tagline && current > 0 && (
         <div style={{
-          fontSize: 8,
-          color: t.textFaint,
+          fontSize: 10,
+          color: t.textSecondary,
           fontFamily: t.fontBody,
-          marginTop: 2,
+          fontStyle: "italic",
+          marginTop: 3,
           textAlign: "center",
-          maxWidth: size + 8,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          maxWidth: size + 16,
+          lineHeight: 1.3,
+          whiteSpace: "normal",
         }}>
           {badge.progress_tagline}
         </div>
