@@ -426,10 +426,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         }}>
           {episode_title && (
             <div style={{
-              fontFamily: t.fontBody, fontSize: 11, fontWeight: 600,
-              color: "rgba(255,255,255,0.5)",
-              textTransform: "uppercase", letterSpacing: "0.05em",
-              marginBottom: 6,
+              fontFamily: t.fontBody, fontSize: 13, fontWeight: 700,
+              color: "rgba(255,255,255,0.85)",
+              letterSpacing: "0.02em",
+              marginBottom: 8,
             }}>
               {episode_title}
             </div>
