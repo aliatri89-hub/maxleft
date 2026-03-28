@@ -346,7 +346,7 @@ const featureStyles = `
   .mantl-feature-desc {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     line-height: 1.65;
     margin-bottom: 12px;
   }
@@ -419,7 +419,7 @@ const featureStyles = `
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    color: var(--text-secondary);
+    color: var(--text-primary);
   }
   .badge-back {
     transform: rotateY(180deg);
@@ -502,7 +502,7 @@ const featureStyles = `
     font-size: 0.55rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-primary);
     margin-bottom: 2px;
   }
   .tf-target-val {
@@ -582,7 +582,7 @@ const featureStyles = `
     animation: fadeUp 0.4s ease;
   }
   .tf-card-rank.rank-dim {
-    color: var(--text-faint);
+    color: var(--text-primary);
     background: rgba(10,10,15,0.6);
   }
   .tf-card-gross {
@@ -605,7 +605,7 @@ const featureStyles = `
     color: var(--green);
   }
   .tf-card-gross-val.dim-val {
-    color: var(--text-faint);
+    color: var(--text-primary);
   }
   .tf-card-optimal-tag {
     font-family: 'IBM Plex Mono', monospace;
@@ -624,7 +624,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.55rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -633,7 +633,7 @@ const featureStyles = `
   .tf-prompt {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.65rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     margin-bottom: 8px;
     letter-spacing: 0.04em;
   }
@@ -663,7 +663,7 @@ const featureStyles = `
   .tf-result-sub {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.55rem;
-    color: var(--text-faint);
+    color: var(--text-primary);
     margin-top: 2px;
     letter-spacing: 0.04em;
   }
@@ -683,7 +683,7 @@ const featureStyles = `
   .tf-new-puzzle {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.55rem;
-    color: var(--text-faint);
+    color: var(--text-primary);
     margin-top: 10px;
     letter-spacing: 0.06em;
   }
@@ -695,7 +695,7 @@ const featureStyles = `
     border: none;
     font-family: 'IBM Plex Mono', monospace;
     font-size: 0.6rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     cursor: pointer;
     letter-spacing: 0.04em;
     text-decoration: underline;
@@ -703,7 +703,7 @@ const featureStyles = `
     transition: color 0.2s ease;
   }
   .tf-try-again:hover {
-    color: var(--text-secondary);
+    color: var(--text-primary);
   }
 
 
@@ -778,7 +778,7 @@ const featureStyles = `
   .community-stat {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 1rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-style: italic;
   }
   .community-donut {
@@ -860,7 +860,7 @@ const featureStyles = `
   .sync-stat {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: 0.68rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-style: italic;
   }
   .sync-badge {
@@ -923,12 +923,12 @@ const featureStyles = `
   .flip-card-back-name {
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700; font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .flip-card-back-ep {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; color: var(--text-muted);
+    font-size: 9px; color: var(--text-primary);
     text-transform: uppercase; letter-spacing: 0.04em;
   }
   .flip-card-play-btn {
@@ -945,7 +945,7 @@ const featureStyles = `
   .flip-nudge {
     text-align: center;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px; color: var(--text-secondary);
+    font-size: 10px; color: var(--text-primary);
     letter-spacing: 0.06em; text-transform: uppercase;
     padding: 8px 0 0;
     animation: flipNudgePulse 2.5s ease infinite;
@@ -968,7 +968,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     margin-top: 14px;
   }
 
@@ -977,7 +977,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.72rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
     text-align: center;
     margin-top: 10px;
   }
@@ -1059,7 +1059,7 @@ const featureStyles = `
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--text-muted);
+    color: var(--text-primary);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -1083,7 +1083,7 @@ const featureStyles = `
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
     font-size: 0.82rem;
-    color: var(--text-muted);
+    color: var(--text-primary);
     line-height: 1.65;
     margin-bottom: 16px;
   }
