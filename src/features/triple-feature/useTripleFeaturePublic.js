@@ -139,7 +139,7 @@ export function useTripleFeaturePublic() {
     const pct = maxScore > 0 ? Math.round((userScore / maxScore) * 100) : 0;
     const rankEmoji = pct === 100 ? "🏆" : pct >= 90 ? "🎯" : pct >= 75 ? "🎬" : "😬";
 
-    let text = `🎬 Triple Feature #${puzzleNum}\n`;
+    let text = `M▶NTL\nTriple Feature #${puzzleNum}\n`;
     text += `${rankEmoji} ${userScore}/${maxScore}\n`;
     text += `mymantl.app/play`;
     return text;

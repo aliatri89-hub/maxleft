@@ -157,7 +157,7 @@ export function useTripleFeature(userId) {
     const pct = maxScore > 0 ? Math.round((userScore / maxScore) * 100) : 0;
     const rankEmoji = pct === 100 ? "🏆" : pct >= 90 ? "🎯" : pct >= 75 ? "🎬" : "😬";
 
-    let text = `🎬 Triple Feature #${puzzleNum}\n`;
+    let text = `M▶NTL\nTriple Feature #${puzzleNum}\n`;
     text += `${rankEmoji} ${userScore}/${maxScore}\n`;
     if (stats?.current_streak > 1) text += `🔥 ${stats.current_streak} day streak\n`;
     if (percentile !== null && playerCount > 1) text += `Top ${Math.round(100 - percentile + 1)}% of players\n`;

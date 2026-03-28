@@ -228,8 +228,13 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   function getShareText() {
     if (!puzzle) return "";
     const pNum = puzzleNumber || "?";
-    const mistakeDots = "❌".repeat(mistakes);
-    return `Cast Connections #${pNum}\n${won ? "Solved" : "Failed"} ${mistakeDots ? `(${mistakeDots})` : "— no mistakes!"}\n\nmymantl.app`;
+    const solveEmojis = ["🟩", "🟨", "🟪"];
+    // Build blocks: colored for solved (in solve order), red for unsolved
+    const totalGroups = puzzle.movies.length;
+    const blocks = [];
+    solved.forEach((_, i) => blocks.push(solveEmojis[i] || "🟩"));
+    for (let i = solved.length; i < totalGroups; i++) blocks.push("🟥");
+    return `M▶NTL\nCast Connections #${pNum}\n${blocks.join("")}\nmymantl.app/play`;
   }
 
   function handleShare() {
