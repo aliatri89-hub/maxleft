@@ -515,7 +515,6 @@ function AppMain() {
                 <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }}
                   style={{ cursor: "pointer", textAlign: "center" }}>
                   <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
-                  <div className="header-tagline">press play</div>
                 </div>
                 <button className="vcr-btn" onClick={() => {
                   tapLight();
@@ -525,6 +524,7 @@ function AppMain() {
                 }}>
                   <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><path d="M10 6L2 1V11L10 6Z" fill="currentColor"/><path d="M17 6L9 1V11L17 6Z" fill="currentColor"/></svg>
                 </button>
+                <div className="vcr-legend">press play</div>
               </div>
               {/* Right: audio pip + bell */}
               <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
