@@ -725,6 +725,10 @@ async function updateCommunityRewatch(
 function toLogTimestamp(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return new Date().toISOString();
+  // If watched date is today (UTC), use current time so the film shows as
+  // "just now" rather than hours ago for non-UTC users logging late at night.
+  const todayUTC = new Date().toISOString().slice(0, 10);
+  if (dateStr.slice(0, 10) === todayUTC) return new Date().toISOString();
   d.setUTCHours(12, 0, 0, 0);
   return d.toISOString();
 }
