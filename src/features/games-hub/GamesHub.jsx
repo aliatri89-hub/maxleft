@@ -284,6 +284,15 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6 }}>{getTodayFormatted()}</div>
       </div>
 
+      {/* ── Anytime section ── */}
+      <div style={{
+        fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
+        color: t.creamMuted, margin: "0 0 10px 4px",
+        opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.2s",
+      }}>
+        Anytime
+      </div>
+
       {/* Badges — top of hub */}
       <button
         onClick={() => onLaunchGame("badges")}
