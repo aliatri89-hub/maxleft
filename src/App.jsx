@@ -626,7 +626,6 @@ function AppMain() {
                     onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
-                    steamSyncing={sync.steamSyncing}
                     isActive={activeTab === "mantl"} />
                   </Suspense></ErrorBoundary>}
                 </div>
@@ -740,10 +739,6 @@ function AppMain() {
                   onLetterboxdDisconnect={sync.disconnectLetterboxd}
                   onLetterboxdSync={() => { if (session && profile.letterboxd_username) wrappedSyncLetterboxd(profile.letterboxd_username, session.user.id, true); }}
                   letterboxdSyncing={sync.letterboxdSyncing}
-                  onSteamConnect={sync.connectSteam}
-                  onSteamDisconnect={sync.disconnectSteam}
-                  onSteamSync={() => { if (session && profile.steam_id) sync.syncSteam(profile.steam_id, session.user.id, true); }}
-                  steamSyncing={sync.steamSyncing}
                   onImportComplete={refreshShelves}
                   communitySubscriptions={communitySubscriptions}
                   onSubscribe={handleSubscribeCommunity}

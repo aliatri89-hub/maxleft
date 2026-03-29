@@ -15,57 +15,10 @@ export default function NowPlayingHero({
 }) {
   const tabHero = community?.theme_config?.tab_heroes?.[activeTab];
   const heroTagline = tabHero?.tagline ?? community?.tagline;
+  const heroBanner = tabHero?.banner_url ?? community?.banner_url;
 
-  const isBooks = activeTab === "books";
-  const isArcade = activeTab === "arcade";
-
-  const heroBanner = isBooks
-    ? "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BookAndNachosBanner.jpg"
-    : (tabHero?.banner_url ?? community?.banner_url);
-
-  // ── Compute stats based on active tab ──
+  // ── Compute stats ──
   const stats = useMemo(() => {
-    if (isBooks) {
-      let total = 0, completed = 0, pages = 0;
-      const seen = new Set();
-      miniseries.forEach((s) => {
-        if (s.tab_key !== "books") return;
-        (s.items || []).forEach((i) => {
-          const key = `${i.title}::${i.year || ""}`;
-          if (seen.has(key)) return;
-          seen.add(key);
-          total++;
-          const pageCount = i.extra_data?.page_count || 0;
-          if (progress[i.id]?.status === "completed" || progress[i.id]?.listened_with_commentary !== undefined) {
-            completed++;
-            pages += pageCount;
-          }
-        });
-      });
-      return { completed, total, pages };
-    }
-
-    if (isArcade) {
-      let filmWatched = 0, gamesBeat = 0;
-      const seenFilms = new Set(), seenGames = new Set();
-      miniseries.forEach((s) => {
-        (s.items || []).forEach((i) => {
-          if (i.media_type === "game") {
-            const gk = `game::${i.title}::${i.year || ""}`;
-            if (seenGames.has(gk)) return;
-            seenGames.add(gk);
-            if (progress[i.id]?.status === "completed") gamesBeat++;
-          } else {
-            const fk = `film::${i.title}::${i.year || ""}`;
-            if (seenFilms.has(fk)) return;
-            seenFilms.add(fk);
-            if (progress[i.id]) filmWatched++;
-          }
-        });
-      });
-      return { completed: filmWatched, total: seenFilms.size + seenGames.size, gamesBeat };
-    }
-
     let completed = 0, total = 0;
     miniseries.forEach((s) => {
       const items = (s.items || []).filter((i) => i.media_type === "film" || !i.media_type);
@@ -73,7 +26,7 @@ export default function NowPlayingHero({
       completed += items.filter((i) => progress[i.id]).length;
     });
     return { completed, total };
-  }, [miniseries, progress, isBooks, isArcade]);
+  }, [miniseries, progress]);
 
   const watchedRevealed = useSlideReveal(stats.completed);
   const prevCount = useRef(stats.completed);
@@ -90,12 +43,7 @@ export default function NowPlayingHero({
 
   useEffect(() => { prevCount.current = stats.completed; }, [stats.completed]);
 
-  const accent = isBooks ? t.sand : isArcade ? t.mint : "#facc15";
-
-  const formatPages = (n) => {
-    if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
-    return String(n);
-  };
+  const accent = "#facc15";
 
   return (
     <div style={{
@@ -104,13 +52,11 @@ export default function NowPlayingHero({
       overflow: "hidden",
     }}>
       <HeroBanner
-        bannerUrl={isArcade
-          ? "https://gfjobhkofftvmluocxyw.supabase.co/storage/v1/object/public/banners/BannerNowPlayingArcade.jpg"
-          : heroBanner}
-        contain={isBooks ? false : (isArcade ? false : tabHero?.banner_contain)}
-        position={isBooks ? "center center" : (isArcade ? "center center" : tabHero?.banner_position)}
-        opacity={isBooks ? 0.2 : (isArcade ? 0.3 : tabHero?.banner_opacity)}
-        gradientStrength={isBooks ? 0.9 : (isArcade ? 0.85 : tabHero?.gradient_strength)}
+        bannerUrl={heroBanner}
+        contain={tabHero?.banner_contain}
+        position={tabHero?.banner_position}
+        opacity={tabHero?.banner_opacity}
+        gradientStrength={tabHero?.gradient_strength}
       />
 
       <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
@@ -120,68 +66,30 @@ export default function NowPlayingHero({
           letterSpacing: "0.03em", textTransform: "uppercase",
           textAlign: "center", marginBottom: 4, lineHeight: 1.1,
         }}>
-          {isArcade ? "Now Playing Arcade" : isBooks ? "Books & Nachos" : (heroTagline || community?.name || "Now Playing")}
+          {heroTagline || community?.name || "Now Playing"}
         </div>
 
-        {isArcade ? (
-          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.mint, fontFamily: t.fontDisplay }}>{stats.completed}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
-            </div>
-            <div style={{ width: 1, background: t.bgHover }} />
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.purple, fontFamily: t.fontDisplay }}>{stats.gamesBeat || 0}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Beat</div>
-            </div>
-            <div style={{ width: 1, background: t.bgHover }} />
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Titles</div>
-            </div>
-          </div>
-        ) : isBooks ? (
-          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: accent, fontFamily: t.fontDisplay }}>{stats.completed}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Read</div>
-            </div>
-            <div style={{ width: 1, background: t.bgHover }} />
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Books</div>
-            </div>
-            {stats.pages > 0 && (<>
-              <div style={{ width: 1, background: t.bgHover }} />
-              <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 30, fontWeight: 800, color: t.textSecondary, fontFamily: t.fontDisplay }}>{formatPages(stats.pages)}</div>
-                <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Pages</div>
+        <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
+          <div style={{ textAlign: "center" }}>
+            <div style={{ overflow: "hidden", height: 36 }}>
+              <div style={{
+                fontSize: 30, fontWeight: 800, color: t.gold,
+                fontFamily: t.fontDisplay,
+                transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
+                opacity: watchedRevealed ? 1 : 0,
+                transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
+              }}>
+                {stats.completed}
               </div>
-            </>)}
-          </div>
-        ) : (
-          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ overflow: "hidden", height: 36 }}>
-                <div style={{
-                  fontSize: 30, fontWeight: 800, color: t.gold,
-                  fontFamily: t.fontDisplay,
-                  transform: watchedRevealed ? "translateY(0)" : "translateY(100%)",
-                  opacity: watchedRevealed ? 1 : 0,
-                  transition: "transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease",
-                }}>
-                  {stats.completed}
-                </div>
-              </div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
             </div>
-            <div style={{ width: 1, background: t.bgHover }} />
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
-              <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Films</div>
-            </div>
+            <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Watched</div>
           </div>
-        )}
+          <div style={{ width: 1, background: t.bgHover }} />
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 30, fontWeight: 800, color: t.textPrimary, fontFamily: t.fontDisplay }}>{stats.total}</div>
+            <div style={{ fontSize: 9, color: t.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>Films</div>
+          </div>
+        </div>
       </div>
     </div>
   );

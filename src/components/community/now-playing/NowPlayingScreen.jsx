@@ -8,11 +8,7 @@ import { fetchCoversForItems, getCoverUrl, getCoverCacheSnapshot } from "../../.
 import { isComingSoon } from "../../../utils/comingSoon";
 import NowPlayingHero from "./NowPlayingHero";
 import NowPlayingGenreTab from "./NowPlayingGenreTab";
-import NowPlayingArcadeTab from "./NowPlayingArcadeTab";
-import NowPlayingBooksTab from "./NowPlayingBooksTab";
 import NowPlayingLogModal from "./NowPlayingLogModal";
-import NowPlayingGameLogModal from "./NowPlayingGameLogModal";
-import { useNowPlayingGameBridge } from "../../../hooks/community/useNowPlayingGameBridge";
 import { useAudioPlayer } from "../shared/AudioPlayerProvider";
 import CommunityBottomNav from "../shared/CommunityBottomNav";
 import CommunityTabSlider from "../shared/CommunityTabSlider";
@@ -29,8 +25,8 @@ import { useRecentEpisodes } from "../../../hooks/community/useRecentEpisodes";
 /**
  * NowPlayingScreen — Self-contained screen for the Now Playing Podcast community.
  *
- * Tabs: filmography (genre view) + arcade (video game movies & games) + books (Books & Nachos)
- * Hero: NowPlayingHero (films + books + games, no commentary tracking)
+ * Tabs: filmography (genre-bucketed view)
+ * Hero: NowPlayingHero (film stats)
  * Rating style: host verdict arrows (up/down on item cards via extra_data)
  *
  * Props passed from CommunityRouter:
@@ -60,7 +56,6 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   const [activeTab, setActiveTab] = useState(tabs[0]?.key || "filmography");
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
-  const [mediaFilter, setMediaFilter] = useState(null);
   const [coverCache, setCoverCache] = useState(() => getCoverCacheSnapshot());
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
@@ -77,8 +72,6 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
-
-  useEffect(() => { setMediaFilter(null); }, [activeTab]);
 
   const hasBottomNav = tabs.length >= 1;
 
@@ -105,17 +98,6 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   const { progress, setProgress } = useCommunityProgress(community?.id, userId, allItems);
   const { logItem, unlogItem, addToWatchlist } = useCommunityActions(userId, setProgress);
 
-  // ── Game bridge (dual-write to games table + Steam sync) ───
-  const gameItems = useMemo(() => allItems.filter(i => i.media_type === "game"), [allItems]);
-
-  const {
-    gameProgress, logGameItem, unlogGameItem, addToBacklog,
-    userOwnsGame, getSteamStats, steamLoading,
-  } = useNowPlayingGameBridge(community?.id, userId, gameItems);
-
-  // Merged progress: films/books from standard hook, games from bridge
-  const mergedProgress = useMemo(() => ({ ...progress, ...gameProgress }), [progress, gameProgress]);
-
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress, "film");
   const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes([], allItems, 10, "nowplaying", community?.theme_config?.episode_source);
@@ -140,7 +122,6 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     const coverUrl = item ? getCoverUrl(item) : null;
     await logItem(itemId, item, coverUrl, { rating, completed_at, listened_with_commentary, brown_arrow, isUpdate });
 
-    const typeLabel = item?.media_type === "film" ? "film" : item?.media_type === "book" ? "book" : "game";
     if (onToast) onToast(isUpdate ? `Updated!` : `Logged!`);
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
 
@@ -163,46 +144,12 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
-    const label = item.media_type === "film" ? "watch list" : item.media_type === "book" ? "reading list" : "play list";
-    if (onToast) onToast(`Added to ${label}!`);
+    if (onToast) onToast("Added to watch list!");
   }, [addToWatchlist, onToast]);
 
-  // ── Game-specific handlers (dual-write via bridge) ────────
-  const handleGameLog = useCallback(async (itemId, opts) => {
-    const item = allItems.find(i => i.id === itemId);
-    const coverUrl = item ? getCoverUrl(item) : null;
-    await logGameItem(itemId, item, coverUrl, opts);
-
-    if (onToast) onToast(opts.isUpdate ? "Updated!" : "Logged!");
-    if (!opts.isUpdate && onShelvesChanged) onShelvesChanged();
-
-    // Badge check on fresh game logs
-    if (!opts.isUpdate && item) {
-      const earnedBadge = await checkForBadge(itemId);
-      if (earnedBadge) {
-        showCompletionToast(earnedBadge);
-      }
-      // Progress notifications handled by notification center (no toasts)
-    }
-  }, [allItems, logGameItem, onToast, onShelvesChanged, checkForBadge, showCompletionToast]);
-
-  const handleGameUnlog = useCallback(async (itemId) => {
-    await revokeBadgeIfNeeded(itemId);
-    await unlogGameItem(itemId);
-    if (onToast) onToast("Removed from log");
-  }, [unlogGameItem, onToast, revokeBadgeIfNeeded]);
-
-  const handleGameWatchlist = useCallback(async (item, coverUrl) => {
-    await addToBacklog(item, coverUrl);
-    if (onToast) onToast("Added to play list!");
-  }, [addToBacklog, onToast]);
 
   // ── Compute hero miniseries per tab ─────────────────────
   const getHeroMiniseries = useCallback((tabKey) => {
-    if (tabKey === "arcade") return miniseries.filter(s =>
-      s.tab_key === "arcade" || (s.genre_bucket === "video_games" && (!s.tab_key || s.tab_key === "filmography"))
-    );
-    if (tabKey === "books") return miniseries.filter(s => s.tab_key === "books");
     return miniseries.filter(s => !s.tab_key || s.tab_key === "filmography");
   }, [miniseries]);
 
@@ -297,118 +244,30 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
             <NowPlayingHero
               community={community}
               miniseries={getHeroMiniseries(tabKey)}
-              progress={mergedProgress}
+              progress={progress}
               activeTab={tabKey}
             />
-            {/* ── Filter bar — only for arcade & books (GenreTab has its own with genre dropdown) ── */}
-            {(tabKey === "arcade" || tabKey === "books") && (
-            <div style={{
-              padding: "8px 16px 10px",
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              {["all", "seen", "unseen", ...(upcomingCount > 0 ? ["upcoming"] : [])].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  style={{
-                    padding: "5px 10px",
-                    fontSize: 10, fontWeight: 600,
-                    fontFamily: t.fontDisplay,
-                    letterSpacing: "0.04em",
-                    textTransform: "uppercase",
-                    borderRadius: 20,
-                    border: filter === f
-                      ? `1.5px solid ${tabKey === "arcade" ? t.mint : t.sand}`
-                      : "1px solid rgba(255,255,255,0.1)",
-                    background: filter === f
-                      ? `${tabKey === "arcade" ? "rgba(0,255,200,0.12)" : "rgba(212,165,116,0.12)"}`
-                      : "rgba(255,255,255,0.04)",
-                    color: filter === f
-                      ? (tabKey === "arcade" ? t.mint : t.sand)
-                      : "rgba(255,255,255,0.4)",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                    WebkitTapHighlightColor: "transparent",
-                  }}
-                >
-                  {f}{f === "upcoming" ? ` (${upcomingCount})` : ""}
-                </button>
-              ))}
-              <button
-                onClick={() => setSearchQuery(searchQuery ? "" : "")}
-                onClickCapture={() => {
-                  const el = document.querySelector(".npp-search-input");
-                  if (el) { el.focus(); } else { setSearchQuery(searchQuery ? "" : " "); }
-                }}
-                style={{
-                  width: 30, height: 30, borderRadius: "50%",
-                  border: searchQuery ? `1.5px solid ${tabKey === "arcade" ? t.mint : t.sand}` : "1px solid rgba(255,255,255,0.1)",
-                  background: searchQuery ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.04)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", marginLeft: "auto", flexShrink: 0,
-                  WebkitTapHighlightColor: "transparent",
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                  stroke={searchQuery ? (tabKey === "arcade" ? t.mint : t.sand) : "rgba(255,255,255,0.4)"}
-                  strokeWidth="2" strokeLinecap="round"
-                >
-                  <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </button>
-            </div>
-            )}
-            {tabKey === "arcade" && (
-              <NowPlayingArcadeTab
-                community={community}
-                session={session}
-                progress={mergedProgress}
-                miniseries={miniseries}
-                onToggle={handleItemTap}
-                coverCacheVersion={coverCache}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                filter={filter}
-                onFilterChange={setFilter}
-              />
-            )}
-            {tabKey === "books" && (
-              <NowPlayingBooksTab
-                community={community}
-                session={session}
-                progress={mergedProgress}
-                miniseries={miniseries}
-                onToggle={handleItemTap}
-                coverCacheVersion={coverCache}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                filter={filter}
-                onFilterChange={setFilter}
-              />
-            )}
-            {tabKey !== "arcade" && tabKey !== "books" && (
-              <NowPlayingGenreTab
-                community={community}
-                filter={filter}
-                onFilterChange={setFilter}
-                session={session}
-                progress={mergedProgress}
-                miniseries={miniseries}
-                onToggle={handleItemTap}
-                onToggleCommentary={null}
-                coverCacheVersion={coverCache}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                recentItems={recentItems}
-                recentEpisodeItems={recentEpisodeItems}
-                progressLoading={recentLoading}
-                episodesLoading={episodesLoading}
-                upcomingCount={upcomingCount}
-                pushNav={pushNav}
-                removeNav={removeNav}
-                genreResetRef={genreResetRef}
-              />
-            )}
+            <NowPlayingGenreTab
+              community={community}
+              filter={filter}
+              onFilterChange={setFilter}
+              session={session}
+              progress={progress}
+              miniseries={miniseries}
+              onToggle={handleItemTap}
+              onToggleCommentary={null}
+              coverCacheVersion={coverCache}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              recentItems={recentItems}
+              recentEpisodeItems={recentEpisodeItems}
+              progressLoading={recentLoading}
+              episodesLoading={episodesLoading}
+              upcomingCount={upcomingCount}
+              pushNav={pushNav}
+              removeNav={removeNav}
+              genreResetRef={genreResetRef}
+            />
           </>
         )}
       </CommunityTabSlider>
@@ -425,41 +284,14 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
         accent={accent}
       />
 
-      {/* Game log modal (media_type === "game") */}
-      {modalItem && modalItem.media_type === "game" && (
-        <NowPlayingGameLogModal
-          item={modalItem}
-          coverUrl={getCoverUrl(modalItem)}
-          isCompleted={!!mergedProgress[modalItem.id]}
-          progressData={mergedProgress[modalItem.id] || null}
-          steamStats={getSteamStats(modalItem.id)}
-          userOwnsGame={userOwnsGame(modalItem.id)}
-          onLog={handleGameLog}
-          onUnlog={handleGameUnlog}
-          onWatchlist={handleGameWatchlist}
-          userId={userId}
-          miniseries={miniseries}
-          onClose={() => setModalItem(null)}
-          communityId={community.id}
-          communitySubscriptions={communitySubscriptions}
-          onToast={onToast}
-          onShelvesChanged={onShelvesChanged}
-          onNavigateCommunity={(slug, tmdbId) => {
-            setModalItem(null);
-            onBack();
-            onOpenCommunity?.(slug, tmdbId);
-          }}
-        />
-      )}
-
-      {/* Film / book / show log modal */}
-      {modalItem && modalItem.media_type !== "game" && (
+      {/* Film log modal */}
+      {modalItem && (
         <NowPlayingLogModal
           item={modalItem}
           coverUrl={getCoverUrl(modalItem)}
           coverCacheVersion={coverCache}
-          isCompleted={!!mergedProgress[modalItem.id]}
-          progressData={mergedProgress[modalItem.id] || null}
+          isCompleted={!!progress[modalItem.id]}
+          progressData={progress[modalItem.id] || null}
           onLog={handleLog}
           onUnlog={handleUnlog}
           onWatchlist={handleWatchlist}

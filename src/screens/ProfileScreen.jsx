@@ -24,7 +24,7 @@ function Expandable({ open, children }) {
   );
 }
 
-function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onSteamConnect, onSteamDisconnect, onSteamSync, steamSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
+function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, onUpdateAvatar, onUpdateProfile, onToast, initialView, pushNav, removeNav, onLetterboxdConnect, onLetterboxdDisconnect, onLetterboxdSync, letterboxdSyncing, onImportComplete, communitySubscriptions, onSubscribe, onUnsubscribe, favoritePodcasts, onToggleFavoritePodcast }) {
   const [uploading, setUploading] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [watchlist, setWatchlist] = useState([]);
@@ -35,8 +35,6 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [showImportCSV, setShowImportCSV] = useState(false);
   const [letterboxdOpen, setLetterboxdOpen] = useState(false);
   const [lbUsernameInput, setLbUsernameInput] = useState(profile.letterboxd_username || "");
-  const [steamOpen, setSteamOpen] = useState(false);
-  const [steamIdInput, setSteamIdInput] = useState(profile.steam_id || "");
   const [syncOpen, setSyncOpen] = useState(false);
   const [podcastsOpen, setPodcastsOpen] = useState(false);
   const [allPodcasts, setAllPodcasts] = useState([]);
@@ -238,8 +236,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           <div className="profile-group-row" onClick={() => setSyncOpen(!syncOpen)}>
             <span className="profile-group-row-text">Sync</span>
             <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              {(letterboxdSyncing || steamSyncing) && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
-              {(profile.letterboxd_username || profile.steam_id) && (
+              {letterboxdSyncing && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
+              {profile.letterboxd_username && (
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.6 }} />
               )}
               {syncOpen ? "▾" : "›"}
@@ -302,105 +300,6 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                 </div>
               </Expandable>
 
-              {/* Goodreads — hidden, backend/edge functions preserved for future multimedia use */}
-              {/* <div className="profile-group-sub-row" onClick={() => setGoodreadsOpen(!goodreadsOpen)}>
-                <span className="profile-group-row-text" style={{ fontSize: 14 }}>Goodreads</span>
-                <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {profile.goodreads_user_id && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.5 }} />}
-                  {goodreadsOpen ? "▾" : "›"}
-                </span>
-              </div>
-              <Expandable open={goodreadsOpen}>
-                <div className="profile-sync-panel">
-                  {profile.goodreads_user_id ? (
-                    <>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
-                          User ID: <strong>{profile.goodreads_user_id}</strong>
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
-                        Your read shelf syncs automatically when you open the app.
-                      </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button className="profile-sync-btn" onClick={onGoodreadsSync} disabled={goodreadsSyncing}>
-                          {goodreadsSyncing ? "Syncing..." : "Sync Now"}
-                        </button>
-                        <button className="profile-disconnect-btn" onClick={onGoodreadsDisconnect}>Disconnect</button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
-                        Auto-sync your Goodreads read shelf. Books, ratings, and read dates flow into your shelf and feed.
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 4 }}>
-                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>User ID:</span>
-                        <input value={grUserIdInput} onChange={e => setGrUserIdInput(e.target.value)}
-                          placeholder="e.g. 127753855"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px 10px 6px", background: "transparent", color: "var(--text-primary)" }} />
-                      </div>
-                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 10, lineHeight: 1.5 }}>
-                        Find your ID in your Goodreads profile URL: goodreads.com/user/show/<strong>127753855</strong>
-                      </div>
-                      <button className="profile-connect-btn" disabled={!grUserIdInput.trim() || goodreadsSyncing}
-                        onClick={() => onGoodreadsConnect(grUserIdInput.trim())}>
-                        {goodreadsSyncing ? "Connecting..." : "Connect & Sync"}
-                      </button>
-                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
-                        Your Goodreads profile must be public
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Expandable> */}
-
-              {/* Steam — hidden, backend/edge functions preserved for future multimedia use */}
-              {/* <div className="profile-group-sub-row" onClick={() => setSteamOpen(!steamOpen)}>
-                <span className="profile-group-row-text" style={{ fontSize: 14 }}>Steam</span>
-                <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {profile.steam_id && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.5 }} />}
-                  {steamOpen ? "▾" : "›"}
-                </span>
-              </div>
-              <Expandable open={steamOpen}>
-                <div className="profile-sync-panel">
-                  {profile.steam_id ? (
-                    <>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
-                          Steam ID: <strong>{profile.steam_id}</strong>
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
-                        Recently played games sync automatically.
-                      </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button className="profile-sync-btn" onClick={onSteamSync} disabled={steamSyncing}>
-                          {steamSyncing ? "Syncing..." : "Sync Now"}
-                        </button>
-                        <button className="profile-disconnect-btn" onClick={onSteamDisconnect}>Disconnect</button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
-                        Sync your recently played Steam games. Playtime and achievements flow into your shelf and feed.
-                      </div>
-                      <input value={steamIdInput} onChange={e => setSteamIdInput(e.target.value)}
-                        placeholder="Steam ID or custom URL name"
-                        style={{ width: "100%", border: "1px solid var(--border-medium)", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px", background: "var(--bg-input)", borderRadius: 10, color: "var(--text-primary)", marginBottom: 10, boxSizing: "border-box" }} />
-                      <button className="profile-connect-btn" disabled={!steamIdInput.trim() || steamSyncing}
-                        onClick={() => onSteamConnect(steamIdInput.trim())}>
-                        {steamSyncing ? "Connecting..." : "Connect & Sync"}
-                      </button>
-                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
-                        Your Steam profile must be public · Find your ID at steamid.io
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Expandable> */}
             </div>
           </Expandable>
 

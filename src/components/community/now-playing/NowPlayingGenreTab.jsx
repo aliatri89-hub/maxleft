@@ -26,15 +26,13 @@ const GENRE_META = {
   stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/likvx867SB7dz6hZHpDFEeSxE1c.jpg", logoPos: "bottom" },
   action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg", logoPos: "top" },
   sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/utz4z2SKNywqbob1XeZwCr8pWav.jpg", logoPos: "bottom" },
-  video_games:      { label: "Video Games",    icon: "🎮", order: 5, tint: "#1a2f1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/qy5FtVeAlwNE0kW6lgzvfR3KRVi.jpg", logoPos: "top" },
-  directors:        { label: "Directors",      icon: "🎬", order: 6, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg", logoPos: "bottom" },
-  comedy:           { label: "Comedy",         icon: "😂", order: 7, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg", logoPos: "bottom" },
-  animation_family: { label: "Animation",      icon: "🎨", order: 8, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg", logoPos: "bottom" },
+  directors:        { label: "Directors",      icon: "🎬", order: 5, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg", logoPos: "bottom" },
+  comedy:           { label: "Comedy",         icon: "😂", order: 6, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg", logoPos: "bottom" },
+  animation_family: { label: "Animation",      icon: "🎨", order: 7, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg", logoPos: "bottom" },
 };
 
 const ALL_KEY = "__all__";
 const UPCOMING_KEY = "__upcoming__";
-const MEDIA_COLORS = { film: t.red, book: "#f59e0b", game: "#3b82f6" };
 
 export default function NowPlayingGenreTab({
   community,
@@ -102,37 +100,6 @@ export default function NowPlayingGenreTab({
     });
   }, []);
 
-  // Media filter: null = all, "solo:film" = only films, "hide:film" = no films, etc.
-  const [mediaFilter, setMediaFilter] = useState(null);
-
-  const cycleMedia = useCallback((type) => {
-    setMediaFilter((prev) => {
-      if (!prev) return `solo:${type}`;
-      if (prev === `solo:${type}`) return `hide:${type}`;
-      if (prev === `hide:${type}`) return null;
-      return `solo:${type}`; // different type was active, switch
-    });
-  }, []);
-
-  const isMediaVisible = useCallback((mediaType) => {
-    if (!mediaFilter) return true;
-    const [mode, type] = mediaFilter.split(":");
-    if (mode === "solo") return (mediaType || "film") === type;
-    if (mode === "hide") return (mediaType || "film") !== type;
-    return true;
-  }, [mediaFilter]);
-
-  const mediaState = useCallback((type) => {
-    if (!mediaFilter) return "all";
-    if (mediaFilter === `solo:${type}`) return "solo";
-    if (mediaFilter === `hide:${type}`) return "hide";
-    // Another type is active
-    const [mode, activeType] = mediaFilter.split(":");
-    if (mode === "solo" && activeType !== type) return "dimmed";
-    if (mode === "hide" && activeType !== type) return "all";
-    return "all";
-  }, [mediaFilter]);
-
   // Only filmography-tab series
   const filmSeries = useMemo(
     () => miniseries.filter((s) => !s.tab_key || s.tab_key === "filmography"),
@@ -168,9 +135,6 @@ export default function NowPlayingGenreTab({
     return pool
       .map((s) => {
         let items = s.items || [];
-
-        // Media type filter
-        items = items.filter((i) => isMediaVisible(i.media_type));
 
         // Seen/unseen/upcoming filter (apply here so empty series are pruned)
         if (filter === "seen") {
@@ -209,7 +173,7 @@ export default function NowPlayingGenreTab({
         return { ...s, items };
       })
       .filter(Boolean);
-  }, [activeGenre, filmSeries, genreGroups, searchQuery, isMediaVisible, filter, progress]);
+  }, [activeGenre, filmSeries, genreGroups, searchQuery, filter, progress]);
 
   // Stats
   // Stats broken down by media type (Blank Check donut style)
@@ -217,24 +181,21 @@ export default function NowPlayingGenreTab({
     const pool = activeGenre === ALL_KEY ? filmSeries : (genreGroups[activeGenre] || []);
     const allItems = pool.flatMap((s) => s.items || []);
 
-    // Dedup per media type
-    const byType = { film: { total: 0, completed: 0 }, book: { total: 0, completed: 0 }, game: { total: 0, completed: 0 } };
-    const seen = { film: new Set(), book: new Set(), game: new Set() };
+    // Dedup films
+    let total = 0, completed = 0;
+    const seen = new Set();
 
     allItems.forEach((i) => {
-      const type = i.media_type || "film";
       const key = `${i.title}::${i.year || ""}`;
-      if (!seen[type]) return;
-      if (seen[type].has(key)) return;
-      seen[type].add(key);
-      byType[type].total++;
-      if (progress[i.id]) byType[type].completed++;
+      if (seen.has(key)) return;
+      seen.add(key);
+      total++;
+      if (progress[i.id]) completed++;
     });
 
-    // Overall percentage — film-only (primary tracking metric)
-    const overallPct = byType.film.total > 0 ? Math.round((byType.film.completed / byType.film.total) * 100) : 0;
+    const overallPct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    return { byType, overallPct };
+    return { total, completed, overallPct };
   }, [activeGenre, filmSeries, genreGroups, progress]);
 
   // Genre stats — track miniseries completion (not individual movies)
@@ -860,7 +821,7 @@ export default function NowPlayingGenreTab({
               fontFamily: t.fontDisplay, fontSize: 13,
               color: t.textSecondary, fontStyle: "italic",
             }}>
-              {searchQuery ? "No matching results" : mediaFilter ? "No items match this filter" : "No series in this genre yet"}
+              {searchQuery ? "No matching results" : "No series in this genre yet"}
             </div>
           ) : (
             <div style={{ paddingTop: 12 }}>
