@@ -314,6 +314,7 @@ function AppMain() {
     const isOAuthCallback = hash && (hash.includes("access_token") || hash.includes("refresh_token"));
     if (isOAuthCallback) {
       callbackTimeout = setTimeout(() => {
+        setSigningIn(false);
         setAuthLoading(false);
         setScreen("landing");
       }, 5000);
@@ -325,6 +326,7 @@ function AppMain() {
       setSession(s);
       if (s && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         clearNativeAuthPending(); // auth succeeded, clear the flag
+        setScreen("loading"); // immediately show loading — don't stay on landing while user data loads
         if (loadingUserId === s.user.id) return;
         loadingUserId = s.user.id;
         loadUserData(s.user).finally(() => { loadingUserId = null; });
@@ -336,18 +338,21 @@ function AppMain() {
         // the app resumes with no session before the deep link arrives —
         // don't flash the landing page during this gap
         if (isNativeAuthPending()) {
+          setScreen("loading"); // show loading instead of landing during browser→deep link gap
           // Safety: if the deep link never arrives (user dismissed browser),
           // fall back to landing after a few seconds
           if (nativeAuthTimeout) clearTimeout(nativeAuthTimeout);
           nativeAuthTimeout = setTimeout(() => {
             if (isNativeAuthPending()) {
               clearNativeAuthPending();
+              setSigningIn(false);
               setAuthLoading(false);
               setScreen("landing");
             }
           }, 5000);
           return;
         }
+        setSigningIn(false);
         setAuthLoading(false);
         setScreen("landing");
       }
@@ -383,7 +388,11 @@ function AppMain() {
     return setupPushListeners(showToast, handlePushNav);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const signIn = () => signInWithGoogle(showToast);
+  const [signingIn, setSigningIn] = useState(false);
+  const signIn = () => {
+    setSigningIn(true);
+    signInWithGoogle(showToast);
+  };
 
   const signOut = async () => {
     await removeDeviceToken(); // stop push to this device
@@ -428,7 +437,7 @@ function AppMain() {
       if (prof) {
         if (!prof.username) {
           setProfile({ name: prof.name || "", username: "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "" });
-          setAuthLoading(false); setScreen("setup"); return;
+          setAuthLoading(false); setSigningIn(false); setScreen("setup"); return;
         }
         const p = {
           name: prof.name || "", username: prof.username || "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "",
@@ -450,11 +459,11 @@ function AppMain() {
       if (path && path !== "" && path !== "index.html" && !path.includes("/")) {
         window.history.replaceState(null, "", "/");
       }
-      setAuthLoading(false); setScreen("app");
+      setAuthLoading(false); setSigningIn(false); setScreen("app");
       initPushNotifications(showToast); // register for native push (no-op on web)
     } catch (err) {
       console.error("Load user error:", err);
-      setAuthLoading(false); setScreen("landing");
+      setAuthLoading(false); setSigningIn(false); setScreen("landing");
     }
   };
 
@@ -518,7 +527,7 @@ function AppMain() {
         <style>{`@keyframes toast-countdown { from { width: 100%; } to { width: 0%; } }`}</style>
 
         {screen === "loading" && <div className="loading-screen" />}
-        {screen === "landing" && <LandingScreen onSignIn={signIn} />}
+        {screen === "landing" && <LandingScreen onSignIn={signIn} signingIn={signingIn} />}
         {screen === "setup" && <UsernameSetup name={profile.name} session={session} onComplete={handleUsernameComplete} />}
 
         {screen === "app" && (

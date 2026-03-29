@@ -1166,7 +1166,7 @@ const DEMO_PLAY_MOVIES = [
   },
 ];
 
-function LandingScreen({ onSignIn }) {
+function LandingScreen({ onSignIn, signingIn }) {
   const featuresRef = useRef(null);
   const [visibleBlocks, setVisibleBlocks] = useState(new Set());
 
@@ -1558,6 +1558,30 @@ function LandingScreen({ onSignIn }) {
           </div>
         </div>
         <div className="landing-bottom">
+          {signingIn ? (
+            <div style={{
+              display: "flex", flexDirection: "column",
+              alignItems: "center", gap: 14, padding: "8px 0",
+            }}>
+              <div style={{
+                width: 28, height: 28,
+                border: "2.5px solid rgba(255,255,255,0.15)",
+                borderTopColor: "#C4734F",
+                borderRadius: "50%",
+                animation: "authSpin 0.8s linear infinite",
+              }} />
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 14, fontWeight: 600,
+                color: "rgba(255,255,255,0.5)",
+                letterSpacing: "0.04em",
+              }}>
+                Signing in…
+              </div>
+              <style>{`@keyframes authSpin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          ) : (
+          <>
           <button className="btn-primary" onClick={onSignIn}>
             Sign in with Google
           </button>
@@ -1577,6 +1601,8 @@ function LandingScreen({ onSignIn }) {
             <span>See how it works</span>
             <span className="landing-learn-more-arrow">↓</span>
           </div>
+          </>
+          )}
         </div>
       </div>
 
