@@ -24,9 +24,9 @@ const GENRE_META = {
   comic_books:      { label: "Comic Books",    icon: "🦸", order: 0, tint: "#1e3a5f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/8ZFcbZjIdFngvmjAeXbjZeLp6ck.jpg", logoPos: "top" },
   horror:           { label: "Horror",         icon: "🔪", order: 1, tint: "#3b1a1a", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/d62YzdOrC4LfObyb2q1qGVxUvID.jpg", logoPos: "bottom" },
   stephen_king:     { label: "Stephen King",   icon: "📖", order: 2, tint: "#2d1f3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/likvx867SB7dz6hZHpDFEeSxE1c.jpg", logoPos: "bottom" },
-  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg", logoPos: "top" },
+  action_spy:       { label: "Action / Spy",   icon: "💥", order: 3, tint: "#3d2a0f", poster: "https://image.tmdb.org/t/p/original/mMJtkhQcWpRLpbKgtkMYV5fCS6R.jpg", logoPos: "top", posterPos: "center 30%" },
   sci_fi:           { label: "Sci-Fi",         icon: "🚀", order: 4, tint: "#0f2d3d", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/utz4z2SKNywqbob1XeZwCr8pWav.jpg", logoPos: "bottom" },
-  directors:        { label: "Directors",      icon: "🎬", order: 5, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg", logoPos: "bottom" },
+  directors:        { label: "Directors",      icon: "🎬", order: 5, tint: "#2d2420", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/zWyVLIqgxipPfBDPQG9mgXIbyn1.jpg", logoPos: "bottom", posterPos: "center 70%" },
   comedy:           { label: "Comedy",         icon: "😂", order: 6, tint: "#3d3a0f", poster: "https://media.themoviedb.org/t/p/w440_and_h660_face/xAHd8cm4Wy0LTffkoJjhOqOwatF.jpg", logoPos: "bottom" },
   animation_family: { label: "Animation",      icon: "🎨", order: 7, tint: "#1a2d3d", poster: "https://image.tmdb.org/t/p/original/69LkeJCGrYVRRBZLljXdxy9AP8p.jpg", logoPos: "bottom" },
 };
@@ -492,6 +492,7 @@ export default function NowPlayingGenreTab({
                   icon={meta.icon}
                   tint={meta.tint || "#1a1a2e"}
                   poster={meta.poster}
+                  posterPos={meta.posterPos}
                   logoPos={meta.logoPos || "bottom"}
                   accent={accent}
                   delay={i * 0.03}
@@ -1024,7 +1025,7 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
    GenreGridTile — Visual tile for a genre in the 3×3 grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GenreGridTile({ label, icon, tint, poster, logoPos = "bottom", accent, delay = 0, onTap }) {
+function GenreGridTile({ label, icon, tint, poster, posterPos, logoPos = "bottom", accent, delay = 0, onTap }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const isTop = logoPos === "top";
 
@@ -1052,6 +1053,7 @@ function GenreGridTile({ label, icon, tint, poster, logoPos = "bottom", accent, 
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            objectPosition: posterPos || "center center",
             display: "block",
             opacity: imgLoaded ? 1 : 0,
             transition: "opacity 0.3s",
