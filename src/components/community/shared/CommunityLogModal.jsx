@@ -218,6 +218,7 @@ export default function CommunityLogModal({
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         display: "flex", alignItems: "stretch", justifyContent: "center",
         animation: "clmFadeIn 0.2s ease",
+        paddingTop: "var(--sat)",
       }}
     >
       <style>{`

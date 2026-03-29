@@ -146,6 +146,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
         background: "rgba(0,0,0,0.85)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         display: "flex", alignItems: "stretch", justifyContent: "center",
+        paddingTop: "var(--sat)",
         animation: "fjLogFadeIn 0.2s ease",
       }}
     >

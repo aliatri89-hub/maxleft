@@ -53,6 +53,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
       background: t.bgPrimary,
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
+      paddingTop: "var(--sat)",
     }}>
       <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700;800&display=swap"
@@ -77,7 +78,7 @@ export default function BadgePage({ badges, earnedBadgeIds, badgeProgress, userI
 
       {/* Header */}
       <div style={{
-        position: "sticky", top: 0, zIndex: 10,
+        position: "sticky", top: "var(--sat)", zIndex: 10,
         background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
