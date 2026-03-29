@@ -16,7 +16,7 @@ const RENDER_PATH = "/storage/v1/render/image/public/";
 export function thumbnailUrl(url, width = 500, quality = 75) {
   if (!url || !url.includes(SUPABASE_STORAGE_MARKER)) return url;
   return url.replace(SUPABASE_STORAGE_MARKER, RENDER_PATH) +
-    `?width=${width}&quality=${quality}`;
+    `?width=${width}&quality=${quality}&resize=contain`;
 }
 
 // Preset sizes
