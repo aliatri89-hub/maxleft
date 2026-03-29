@@ -292,6 +292,11 @@ try {
     const parsed = JSON.parse(stored);
     if (parsed._v === LOGO_CACHE_VERSION) {
       delete parsed._v;
+      // Evict soft misses (network failures) on every app init so they retry immediately
+      // rather than waiting for the 1hr TTL. True TMDB misses (no soft flag) are kept.
+      for (const k of Object.keys(parsed)) {
+        if (parsed[k]?.soft) delete parsed[k];
+      }
       logoCache = parsed;
     }
   }
