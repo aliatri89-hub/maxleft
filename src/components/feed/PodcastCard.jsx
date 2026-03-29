@@ -276,9 +276,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             const next = !logoHiddenLocal;
             setLogoHiddenLocal(next);
             await supabase
-              .from('feed_episodes')
+              .from('podcast_episode_films')
               .update({ logo_hidden: next })
-              .eq('id', episode_id);
+              .eq('episode_id', episode_id)
+              .eq('tmdb_id', tmdb_id);
           }}
           title={logoHiddenLocal ? "Show logo" : "Hide logo"}
           style={{
