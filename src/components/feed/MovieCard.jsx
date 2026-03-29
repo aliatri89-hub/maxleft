@@ -328,7 +328,7 @@ function FilmStripLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLight
 // MAIN COMPONENT
 // ════════════════════════════════════
 export default memo(function BrowseCard({ data, variant, pushNav, removeNav, onNavigateCommunity }) {
-  const [isLightLogo, setIsLightLogo] = useState(true);
+  const [isLightLogo, setIsLightLogo] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
   const [episodes, setEpisodes] = useState(null);
   const [epLoading, setEpLoading] = useState(false);
