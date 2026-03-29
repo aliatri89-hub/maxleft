@@ -30,6 +30,7 @@ export default function ActivityPane({
   removeNav,
   pendingSleeveOpen,
   setPendingSleeveOpen,
+  onToast,
 }) {
   const {
     activityItems,
@@ -166,6 +167,8 @@ export default function ActivityPane({
                 removeNav={removeNav}
                 pendingSleeveOpen={pendingSleeveOpen}
                 setPendingSleeveOpen={setPendingSleeveOpen}
+                onToast={onToast}
+                onLogDeleted={refresh}
               />
             </FeedCard>
           );

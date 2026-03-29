@@ -517,7 +517,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
 // ════════════════════════════════════════════════
 // LOG CARD — main component
 // ════════════════════════════════════════════════
-function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false, pushNav, removeNav, pendingSleeveOpen, setPendingSleeveOpen }) {
+function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false, pushNav, removeNav, pendingSleeveOpen, setPendingSleeveOpen, onToast, onLogDeleted }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [episodes, setEpisodes] = useState(null);
@@ -690,6 +690,11 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       isPlaying={isPlaying}
       buffering={buffering}
       onTogglePlay={togglePlay}
+      onToast={onToast}
+      onLogDeleted={() => {
+        closeSleeve();
+        if (onLogDeleted) onLogDeleted();
+      }}
     />
     </>
   );

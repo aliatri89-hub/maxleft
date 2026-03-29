@@ -144,7 +144,7 @@ function makeBarcode(seed) {
   return stripes;
 }
 
-export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, buffering, onTogglePlay }) {
+export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunity, artworkHero, showProviders, episodes, epLoading, onPlayEpisode, onQueueEpisode, currentEp, isPlaying, buffering, onTogglePlay, onToast, onLogDeleted }) {
   const sheetRef = useRef(null);
   const startY = useRef(0);
   const currentY = useRef(0);
@@ -1578,7 +1578,11 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         onClose={() => setShowLogModal(false)}
         onLogged={onLogged}
         isLogged={isLogged}
-        onDeleted={() => setIsLogged(false)}
+        onDeleted={() => {
+          setIsLogged(false);
+          if (onToast) onToast("Removed from log");
+          if (onLogDeleted) onLogDeleted();
+        }}
       />
     </>,
     document.body

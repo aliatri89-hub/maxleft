@@ -205,6 +205,7 @@ export default function FeedScreen({
             removeNav={removeNav}
             pendingSleeveOpen={pendingSleeveOpen}
             setPendingSleeveOpen={setPendingSleeveOpen}
+            onToast={onToast}
           />
         </div>
       </div>
