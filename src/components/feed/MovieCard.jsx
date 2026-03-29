@@ -199,7 +199,9 @@ function CreamLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo
 const ARTWORK_THEME = {
   textColor: t.textPrimary,
   textShadow: "0 2px 10px rgba(0,0,0,0.8), 0 0 30px rgba(0,0,0,0.4)",
-  logoFilter: () => "drop-shadow(0 2px 6px rgba(0,0,0,0.8))",
+  logoFilter: (isLight) => isLight
+    ? "drop-shadow(0 2px 6px rgba(0,0,0,0.8))"
+    : "invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.8))",
   logoOpacity: (_, ready) => ready ? 0.95 : 0,
   skeletonBg: "rgba(255,255,255,0.06)",
 };
@@ -243,7 +245,9 @@ function ArtworkLabel({ data, logoReady, setLogoReady, isLightLogo, setIsLightLo
 const FILMSTRIP_THEME = {
   textColor: "rgba(240,215,170,0.85)",
   textShadow: "1px 1px 4px rgba(0,0,0,0.5)",
-  logoFilter: () => "sepia(0.15) brightness(1.1) drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
+  logoFilter: (isLight) => isLight
+    ? "sepia(0.15) brightness(1.1) drop-shadow(0 1px 3px rgba(0,0,0,0.6))"
+    : "invert(1) sepia(0.15) brightness(1.1) drop-shadow(0 1px 3px rgba(0,0,0,0.6))",
   logoOpacity: (_, ready) => ready ? 0.9 : 0,
   skeletonBg: "rgba(240,215,170,0.06)",
 };
