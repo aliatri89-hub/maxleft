@@ -4,11 +4,12 @@ import { isComingSoon } from "../../../utils/comingSoon";
 import AdminImagePositioner from "./AdminImagePositioner";
 
 /**
- * MiniseriesGrid — 3-column visual grid of miniseries tiles.
+ * MiniseriesGrid — 2-column visual grid of miniseries tiles.
  *
- * Replaces the flat shelf stack for communities with series-level artwork.
- * Each tile shows: thumbnail art, director name, progress count + bar.
- * Tap → onSelectSeries(series) to drill into the detail view.
+ * Progressive image loading: tiles render immediately with shimmer
+ * placeholders, images only begin loading when a tile enters the
+ * viewport (via IntersectionObserver), then each fades in smoothly.
+ * Inspired by Letterboxd's clean, efficient grid loading.
  *
  * Props:
  *   miniseries       — array of series objects (already filtered to the active tab)
@@ -72,22 +73,15 @@ export default function MiniseriesGrid({
       {!searchQuery.trim() && filter === "all" && dynamicShelves}
 
       {/* Grid */}
-      <style>{`
-        @keyframes gridTileIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: 4,
         padding: "6px 4px 0",
       }}>
-        {filtered.map((s, i) => (
+        {filtered.map((s) => (
           <GridTile
             key={s.id}
-            index={i}
             series={s}
             accent={accent}
             userId={userId}
@@ -114,18 +108,40 @@ export default function MiniseriesGrid({
 
 
 /* ═══════════════════════════════════════════════════════════════
-   GridTile — Single series tile in the grid
+   GridTile — Single series tile with viewport-based image loading
    ═══════════════════════════════════════════════════════════════ */
 
-function GridTile({ series, accent, onTap, userId, index = 0 }) {
+function GridTile({ series, accent, onTap, userId }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
   const [localPosition, setLocalPosition] = useState(series.thumbnail_position || "top center");
+  const tileRef = useRef(null);
   const isDone = series._pct === 100 && series._total > 0;
   const hasProgress = series._completed > 0;
-  const staggerDelay = `${Math.min(index, 10) * 0.04}s`;
+
+  // ── IntersectionObserver: only start loading image when near viewport ──
+  useEffect(() => {
+    const el = tileRef.current;
+    if (!el || !series.thumbnail_url) return;
+
+    // rootMargin: start loading 200px before tile enters viewport
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "200px 0px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [series.thumbnail_url]);
 
   return (
     <div
+      ref={tileRef}
       onClick={onTap}
       style={{
         position: "relative",
@@ -133,26 +149,38 @@ function GridTile({ series, accent, onTap, userId, index = 0 }) {
         cursor: "pointer",
         overflow: "hidden",
         WebkitTapHighlightColor: "transparent",
-        animation: `gridTileIn 0.35s ease ${staggerDelay} both`,
       }}
     >
-      {/* Series artwork */}
+      {/* Shimmer placeholder — visible until image loads */}
+      {series.thumbnail_url && !imgLoaded && (
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(135deg, #1a1817 0%, #252220 50%, #1a1817 100%)",
+          backgroundSize: "200% 100%",
+          animation: "gridShimmer 1.5s ease-in-out infinite",
+        }} />
+      )}
+
+      {/* Series artwork — only mounts when near viewport */}
       {series.thumbnail_url ? (
-        <img
-          src={series.thumbnail_url}
-          alt={series.title}
-          loading="lazy"
-          onLoad={() => setImgLoaded(true)}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: localPosition,
-            display: "block",
-            opacity: imgLoaded ? 1 : 0,
-            transition: "opacity 0.3s",
-          }}
-        />
+        shouldLoad && (
+          <img
+            src={series.thumbnail_url}
+            alt={series.title}
+            onLoad={() => setImgLoaded(true)}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: localPosition,
+              display: "block",
+              opacity: imgLoaded ? 1 : 0,
+              transition: "opacity 0.35s ease",
+            }}
+          />
+        )
       ) : (
         /* Fallback: dark tile with emoji + title */
         <div style={{
@@ -173,14 +201,6 @@ function GridTile({ series, accent, onTap, userId, index = 0 }) {
             {series.title}
           </div>
         </div>
-      )}
-
-      {/* Shimmer placeholder while image loads */}
-      {series.thumbnail_url && !imgLoaded && (
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "rgba(255,255,255,0.03)",
-        }} />
       )}
 
       {/* Bottom gradient overlay */}
@@ -277,6 +297,14 @@ function GridTile({ series, accent, onTap, userId, index = 0 }) {
           </div>
         )}
       </div>
+
+      {/* Shared shimmer animation */}
+      <style>{`
+        @keyframes gridShimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   );
 }
