@@ -92,7 +92,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
-  const [isLightLogo, setIsLightLogo] = useState(null); // null=unknown, true=light, false=dark
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -213,48 +212,14 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <img
             src={logo_url}
             alt={film_title}
-            onLoad={() => {
-              setLogoReady(true);
-              // Detect light vs dark via blob fetch (avoids canvas CORS taint)
-              fetch(logo_url)
-                .then(r => r.blob())
-                .then(blob => {
-                  const blobUrl = URL.createObjectURL(blob);
-                  const img = new Image();
-                  img.onload = () => {
-                    try {
-                      const c = document.createElement("canvas");
-                      c.width = 40; c.height = 40;
-                      const ctx = c.getContext("2d");
-                      ctx.drawImage(img, 0, 0, 40, 40);
-                      const px = ctx.getImageData(0, 0, 40, 40).data;
-                      let light = 0, visible = 0;
-                      for (let i = 0; i < px.length; i += 4) {
-                        if (px[i + 3] < 50) continue;
-                        visible++;
-                        // threshold 100: anything darker than mid-grey is "dark"
-                        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 100) light++;
-                      }
-                      setIsLightLogo(visible > 0 && light / visible > 0.5);
-                    } catch {
-                      setIsLightLogo(false); // on canvas error → invert (safe default)
-                    }
-                    URL.revokeObjectURL(blobUrl);
-                  };
-                  img.onerror = () => { setIsLightLogo(false); URL.revokeObjectURL(blobUrl); };
-                  img.src = blobUrl;
-                })
-                .catch(() => setIsLightLogo(false));
-            }}
+            onLoad={() => setLogoReady(true)}
             style={{
               maxHeight: 58,
               maxWidth: "58%",
               width: "auto",
               height: "auto",
-              filter: isLightLogo === true
-                ? "grayscale(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))"
-                : "grayscale(1) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))",
-              opacity: (logoReady && isLightLogo !== null) ? 1 : 0,
+              filter: "brightness(0) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
+              opacity: logoReady ? 1 : 0,
               transition: "opacity 0.3s",
             }}
           />
