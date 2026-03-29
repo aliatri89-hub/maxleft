@@ -223,7 +223,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               maxWidth: "58%",
               width: "auto",
               height: "auto",
-              filter: "brightness(0) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
+              filter: "brightness(0) invert(1) brightness(0.82) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
               opacity: logoReady ? 1 : 0,
               transition: "opacity 0.3s",
             }}
