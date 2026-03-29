@@ -229,6 +229,29 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       )}
 
+      {/* ── Centered fallback title — sharpie style, same position as logo ── */}
+      {!(logo_url && /\.png/i.test(logo_url)) && film_title && (
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 110,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+          zIndex: 0,
+          padding: "0 80px 0 80px",
+        }}>
+          <span style={{
+            fontFamily: t.fontSharpie,
+            fontWeight: 700,
+            fontSize: film_title.length > 20 ? 18 : 22,
+            color: "var(--text-primary)",
+            textAlign: "center",
+            lineHeight: 1.15,
+            textShadow: "0 2px 10px rgba(0,0,0,0.8)",
+          }}>
+            {film_title}
+          </span>
+        </div>
+      )}
+
       {/* ── Admin X — top left ── */}
       {isAdmin && (
         <div onClick={handleUnlink} title="Unlink" style={{
@@ -274,34 +297,16 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {/* Row 1: date (left) | year + buttons (right) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-              {logo_url && /\.png/i.test(logo_url) ? (
-                /* Logo present: small date in the left slot */
-                fmtDate(episode_air_date) && (
-                  <span style={{
-                    fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)",
-                    textTransform: "uppercase", letterSpacing: "0.04em",
-                    opacity: logoReady ? 1 : 0,
-                    transition: "opacity 0.3s",
-                  }}>
-                    {fmtDate(episode_air_date)}
-                  </span>
-                )
-              ) : (
-                /* No logo: film title + date below */
-                <>
-                  <span style={{
-                    fontFamily: t.fontDisplay,
-                    fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
-                    lineHeight: 1.2, display: "block",
-                  }}>
-                    {film_title}
-                  </span>
-                  {fmtDate(episode_air_date) && (
-                    <span style={{ fontFamily: t.fontBody, fontSize: 10, color: t.textFaint, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                      {fmtDate(episode_air_date)}
-                    </span>
-                  )}
-                </>
+              {/* Date in left slot — always small, title is in centered overlay */}
+              {fmtDate(episode_air_date) && (
+                <span style={{
+                  fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)",
+                  textTransform: "uppercase", letterSpacing: "0.04em",
+                  opacity: (logo_url && /\.png/i.test(logo_url)) ? (logoReady ? 1 : 0) : 1,
+                  transition: "opacity 0.3s",
+                }}>
+                  {fmtDate(episode_air_date)}
+                </span>
               )}
             </div>
             {/* Year + queue + play buttons */}
