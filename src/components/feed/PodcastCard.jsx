@@ -92,6 +92,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
+  const [logoTransparent, setLogoTransparent] = useState(null); // null=unknown, true=ok, false=baked-bg
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -202,7 +203,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       }}
     >
       {/* ── Centered logo overlay — top of card only, never over expanded description ── */}
-      {logo_url && /\.png/i.test(logo_url) && (
+      {logo_url && /\.png/i.test(logo_url) && logoTransparent !== false && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -212,14 +213,47 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <img
             src={logo_url}
             alt={film_title}
-            onLoad={() => setLogoReady(true)}
+            onLoad={() => {
+              setLogoReady(true);
+              // Check corners for transparency via blob fetch (avoids canvas CORS taint)
+              fetch(logo_url)
+                .then(r => r.blob())
+                .then(blob => {
+                  const blobUrl = URL.createObjectURL(blob);
+                  const img = new Image();
+                  img.onload = () => {
+                    try {
+                      const c = document.createElement("canvas");
+                      c.width = img.naturalWidth; c.height = img.naturalHeight;
+                      const ctx = c.getContext("2d");
+                      ctx.drawImage(img, 0, 0);
+                      const w = c.width, h = c.height;
+                      // Sample 4 corners — if all opaque, logo has baked-in background
+                      const corners = [
+                        ctx.getImageData(0, 0, 1, 1).data,
+                        ctx.getImageData(w - 1, 0, 1, 1).data,
+                        ctx.getImageData(0, h - 1, 1, 1).data,
+                        ctx.getImageData(w - 1, h - 1, 1, 1).data,
+                      ];
+                      const allOpaque = corners.every(px => px[3] > 20);
+                      setLogoTransparent(!allOpaque);
+                    } catch {
+                      setLogoTransparent(true); // assume ok on error
+                    }
+                    URL.revokeObjectURL(blobUrl);
+                  };
+                  img.onerror = () => { setLogoTransparent(true); URL.revokeObjectURL(blobUrl); };
+                  img.src = blobUrl;
+                })
+                .catch(() => setLogoTransparent(true));
+            }}
             style={{
               maxHeight: 58,
               maxWidth: "58%",
               width: "auto",
               height: "auto",
               filter: "brightness(0) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
-              opacity: logoReady ? 1 : 0,
+              opacity: (logoReady && logoTransparent) ? 1 : 0,
               transition: "opacity 0.3s",
             }}
           />
