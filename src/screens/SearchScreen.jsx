@@ -835,6 +835,16 @@ const SEARCH_PROMO_MARKERS = [
   /\bWeekly Plugs\b/i,
   /\bProducers?:/i,
   /\bWatch this episode on/i,
+  /\bWe're making video versions\b/i,
+];
+
+// If we cut at a promo block, look for a show-notes section that may follow it
+const SHOWNOTES_RESUME_MARKERS = [
+  /\bShow\s*[Nn]otes?\b/i,
+  /\bShownotes?\b/i,
+  /\bWhat we'?ve been watching\b/i,
+  /\(~?\s*\d{2}:\d{2}/,   // timestamps like (~00:28:01)
+  /\[\s*\d{2}:\d{2}/,     // timestamps like [00:28]
 ];
 
 function searchStripHtml(str) {
@@ -846,12 +856,31 @@ function searchStripHtml(str) {
     .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ")
     .replace(/\n{3,}/g, "\n\n").trim();
+
+  // Find the earliest promo cut point
   let cutIdx = text.length;
   for (const marker of SEARCH_PROMO_MARKERS) {
     const match = text.match(marker);
     if (match && match.index < cutIdx) cutIdx = match.index;
   }
-  if (cutIdx < text.length) text = text.slice(0, cutIdx).replace(/[\s\n:—–-]+$/, "").trim();
+
+  if (cutIdx < text.length) {
+    const intro = text.slice(0, cutIdx).replace(/[\s\n:—–-]+$/, "").trim();
+    // Check if show notes resume after the promo block
+    const tail = text.slice(cutIdx);
+    let resumeOffset = Infinity;
+    for (const marker of SHOWNOTES_RESUME_MARKERS) {
+      const m = tail.match(marker);
+      if (m && m.index < resumeOffset) resumeOffset = m.index;
+    }
+    if (resumeOffset < Infinity) {
+      const notes = tail.slice(resumeOffset).trim();
+      text = intro ? `${intro}\n\n${notes}` : notes;
+    } else {
+      text = intro;
+    }
+  }
+
   return text;
 }
 
