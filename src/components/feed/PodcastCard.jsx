@@ -213,7 +213,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           <img
             src={logo_url}
             alt={film_title}
-            onLoad={(e) => {
+            onLoad={() => {
               setLogoReady(true);
               // Detect light vs dark via blob fetch (avoids canvas CORS taint)
               fetch(logo_url)
@@ -232,12 +232,16 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                       for (let i = 0; i < px.length; i += 4) {
                         if (px[i + 3] < 50) continue;
                         visible++;
-                        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 180) light++;
+                        // threshold 100: anything darker than mid-grey is "dark"
+                        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 100) light++;
                       }
                       setIsLightLogo(visible > 0 && light / visible > 0.5);
-                    } catch {}
+                    } catch {
+                      setIsLightLogo(false); // on canvas error → invert (safe default)
+                    }
                     URL.revokeObjectURL(blobUrl);
                   };
+                  img.onerror = () => { setIsLightLogo(false); URL.revokeObjectURL(blobUrl); };
                   img.src = blobUrl;
                 })
                 .catch(() => setIsLightLogo(false));
@@ -250,8 +254,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               filter: isLightLogo === true
                 ? "grayscale(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))"
                 : "grayscale(1) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,1)) drop-shadow(0 0 20px rgba(0,0,0,0.8))",
-              opacity: logoReady ? 1 : 0,
-              transition: "opacity 0.3s, filter 0.2s",
+              opacity: (logoReady && isLightLogo !== null) ? 1 : 0,
+              transition: "opacity 0.3s",
             }}
           />
         </div>
