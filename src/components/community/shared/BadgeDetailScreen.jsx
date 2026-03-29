@@ -154,7 +154,6 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
       background: "#0a0600",
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
-      paddingTop: "var(--sat)",
     }}>
       <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700&display=swap"
@@ -187,10 +186,11 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
 
       {/* Header bar */}
       <div style={{
-        position: "sticky", top: "var(--sat)", zIndex: 10,
+        position: "sticky", top: 0, zIndex: 10,
         background: "rgba(10,6,0,0.92)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
+        paddingTop: "calc(var(--sat) + 12px)",
         display: "flex", alignItems: "center",
         borderBottom: `1px solid ${accent}10`,
       }}>
