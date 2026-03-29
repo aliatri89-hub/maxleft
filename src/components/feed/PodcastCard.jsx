@@ -83,7 +83,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
     tmdb_id, film_title, film_year, poster_path, watched, logo_url,
-    logo_hidden,
+    logo_display,
   } = item;
 
   const [dismissed, setDismissed] = useState(false);
@@ -93,8 +93,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
-  const [logoHiddenLocal, setLogoHiddenLocal] = useState(logo_hidden);
-  const showLogo = logo_url && /\.png/i.test(logo_url) && !logoHiddenLocal;
+  const [logoMode, setLogoMode] = useState(logo_display || "white");
+  const hasLogoFile = logo_url && /\.png/i.test(logo_url);
+  const showLogo = hasLogoFile && logoMode !== "hidden";
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -223,7 +224,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               maxWidth: "58%",
               width: "auto",
               height: "auto",
-              filter: "brightness(0) invert(1) brightness(0.82) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
+              filter: logoMode === "greyscale"
+                ? "grayscale(1) drop-shadow(0 2px 10px rgba(0,0,0,0.8))"
+                : "brightness(0) invert(1) brightness(0.82) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
               opacity: logoReady ? 1 : 0,
               transition: "opacity 0.3s",
             }}
@@ -268,20 +271,21 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         </div>
       )}
 
-      {/* ── Admin eye — bottom left: hide/show logo ── */}
-      {isAdmin && logo_url && /\.png/i.test(logo_url) && (
+      {/* ── Admin logo mode — bottom left: cycle white → greyscale → hidden ── */}
+      {isAdmin && hasLogoFile && (
         <div
           onClick={async (e) => {
             e.stopPropagation();
-            const next = !logoHiddenLocal;
-            setLogoHiddenLocal(next);
+            const cycle = { white: "greyscale", greyscale: "hidden", hidden: "white" };
+            const next = cycle[logoMode] || "white";
+            setLogoMode(next);
             await supabase
               .from('podcast_episode_films')
-              .update({ logo_hidden: next })
+              .update({ logo_display: next })
               .eq('episode_id', episode_id)
               .eq('tmdb_id', tmdb_id);
           }}
-          title={logoHiddenLocal ? "Show logo" : "Hide logo"}
+          title={{ white: "White logo (tap for greyscale)", greyscale: "Greyscale logo (tap to hide)", hidden: "Hidden (tap for white)" }[logoMode]}
           style={{
             position: "absolute", bottom: 8, left: 8,
             width: 18, height: 18,
@@ -290,9 +294,13 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           }}
         >
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-            stroke={logoHiddenLocal ? "rgba(255,200,0,0.5)" : "rgba(255,255,255,0.2)"}
+            stroke={
+              logoMode === "hidden" ? "rgba(255,200,0,0.5)"
+              : logoMode === "greyscale" ? "rgba(150,150,150,0.6)"
+              : "rgba(255,255,255,0.2)"
+            }
             strokeWidth="2.5" strokeLinecap="round">
-            {logoHiddenLocal
+            {logoMode === "hidden"
               ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></>
               : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>
             }
