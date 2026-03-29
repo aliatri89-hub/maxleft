@@ -83,6 +83,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
     tmdb_id, film_title, film_year, poster_path, watched, logo_url,
+    logo_hidden,
   } = item;
 
   const [dismissed, setDismissed] = useState(false);
@@ -92,6 +93,8 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
+  const [logoHiddenLocal, setLogoHiddenLocal] = useState(logo_hidden);
+  const showLogo = logo_url && /\.png/i.test(logo_url) && !logoHiddenLocal;
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -204,8 +207,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
 
       {/* ── Centered logo overlay — top of card only, never over expanded description ── */}
-      {/* TODO: admin toggle to hide bad logos (logo_hidden flag on episode) */}
-      {logo_url && /\.png/i.test(logo_url) && (
+      {showLogo && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -230,7 +232,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
 
       {/* ── Centered fallback title — sharpie style, same position as logo ── */}
-      {!(logo_url && /\.png/i.test(logo_url)) && film_title && (
+      {!showLogo && film_title && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -262,6 +264,37 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2.5" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </div>
+      )}
+
+      {/* ── Admin eye — bottom left: hide/show logo ── */}
+      {isAdmin && logo_url && /\.png/i.test(logo_url) && (
+        <div
+          onClick={async (e) => {
+            e.stopPropagation();
+            const next = !logoHiddenLocal;
+            setLogoHiddenLocal(next);
+            await supabase
+              .from('feed_episodes')
+              .update({ logo_hidden: next })
+              .eq('id', episode_id);
+          }}
+          title={logoHiddenLocal ? "Show logo" : "Hide logo"}
+          style={{
+            position: "absolute", bottom: 8, left: 8,
+            width: 18, height: 18,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", zIndex: 2,
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke={logoHiddenLocal ? "rgba(255,200,0,0.5)" : "rgba(255,255,255,0.2)"}
+            strokeWidth="2.5" strokeLinecap="round">
+            {logoHiddenLocal
+              ? <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></>
+              : <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>
+            }
           </svg>
         </div>
       )}
@@ -302,7 +335,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                 <span style={{
                   fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)",
                   textTransform: "uppercase", letterSpacing: "0.04em",
-                  opacity: (logo_url && /\.png/i.test(logo_url)) ? (logoReady ? 1 : 0) : 1,
+                  opacity: showLogo ? (logoReady ? 1 : 0) : 1,
                   transition: "opacity 0.3s",
                 }}>
                   {fmtDate(episode_air_date)}
@@ -311,7 +344,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             </div>
             {/* Year + queue + play buttons */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
-              {logo_url && /\.png/i.test(logo_url) && logoReady && film_year && (
+              {film_year && (
                 <span style={{
                   fontFamily: t.fontBody, fontSize: 11, color: "rgba(255,255,255,0.45)",
                   letterSpacing: "0.03em", paddingTop: 2,
