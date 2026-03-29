@@ -158,7 +158,7 @@ function AppMain() {
   const [showShelfIt, setShowShelfIt] = useState(false);
   const [shelfItCategory, setShelfItCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
-  const [feedMode, setFeedMode] = useState("releases");
+  const [feedMode, setFeedMode] = useState("podcast");
   const [pendingSleeveOpen, setPendingSleeveOpen] = useState(null); // tmdb_id from push notification tap
   const [searchDeepLink, setSearchDeepLink] = useState(null); // { tmdbId, title } — from new_coverage notification tap
 
@@ -505,7 +505,7 @@ function AppMain() {
                 </div>
               </div>
               {/* Center: logo (absolutely centered) */}
-              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("releases"); }}
+              <div onClick={() => { dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("podcast"); }}
                 style={{ cursor: "pointer", position: "absolute", left: "50%", transform: "translateX(-50%)", textAlign: "center", zIndex: 1, pointerEvents: "auto" }}>
                 <div className="header-brand">M<span className="header-play-btn"><span className="header-play-bg" /><span className="header-play-tri" /></span>NTL<span className="header-brand-line" /></div>
                 <div className="header-tagline">press play</div>
