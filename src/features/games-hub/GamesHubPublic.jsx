@@ -330,7 +330,7 @@ export default function GamesHubPublic() {
       minHeight: "100vh", background: t.bgPrimary, color: t.cream,
       fontFamily: t.fontBody, padding: "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
-      paddingTop: "env(safe-area-inset-top, 0px)",
+      paddingTop: "var(--sat)",
     }}>
       <style>{CSS}</style>
 

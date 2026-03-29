@@ -253,7 +253,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
       minHeight: isTab ? "auto" : "100vh", background: t.bgPrimary, color: t.cream,
       fontFamily: t.fontBody, padding: isTab ? "0 16px 100px" : "0 16px 40px",
       maxWidth: 480, margin: "0 auto", position: "relative",
-      paddingTop: isTab ? 0 : "env(safe-area-inset-top, 0px)",
+      paddingTop: isTab ? 0 : "var(--sat)",
     }}>
       <style>{CSS}</style>
 

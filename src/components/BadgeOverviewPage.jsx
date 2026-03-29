@@ -128,6 +128,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
       background: t.bgPrimary,
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
+      paddingTop: "var(--sat)",
     }}>
       <style>{`
         @keyframes bo-fadeIn {
@@ -162,7 +163,6 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
         background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",
-        paddingTop: "max(12px, env(safe-area-inset-top, 12px))",
         display: "flex", alignItems: "center",
         borderBottom: "1px solid rgba(255,255,255,0.04)",
       }}>

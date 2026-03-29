@@ -167,12 +167,12 @@ function ReaderOverlay({ post, accent, onClose }) {
       position: "fixed", inset: 0, zIndex: 9999,
       background: t.bgPrimary,
       display: "flex", flexDirection: "column",
+      paddingTop: "var(--sat)",
     }}>
       {/* ── Sticky header ── */}
       <div style={{
         flexShrink: 0,
         padding: "12px 16px",
-        paddingTop: "calc(12px + env(safe-area-inset-top, 0px))",
         background: "rgba(15,13,11,0.97)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         borderBottom: `1px solid ${t.borderSubtle}`,
@@ -203,7 +203,7 @@ function ReaderOverlay({ post, accent, onClose }) {
       <div style={{
         flex: 1, overflowY: "auto", overflowX: "hidden",
         WebkitOverflowScrolling: "touch",
-        paddingBottom: "calc(40px + env(safe-area-inset-bottom, 0px))",
+        paddingBottom: "calc(40px + var(--sab))",
       }}>
         {/* Title block — backdrop hero if cover image, plain if not */}
         {post.cover_image_url ? (

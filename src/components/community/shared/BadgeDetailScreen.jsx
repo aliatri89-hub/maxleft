@@ -154,6 +154,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
       background: "#0a0600",
       overflowY: "auto", overflowX: "hidden",
       WebkitOverflowScrolling: "touch",
+      paddingTop: "var(--sat)",
     }}>
       <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow+Condensed:wght@600;700&display=swap"

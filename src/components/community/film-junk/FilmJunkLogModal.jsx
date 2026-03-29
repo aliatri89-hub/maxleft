@@ -201,7 +201,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
           width: "100%", maxWidth: 420,
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: 0,
-          padding: "0 20px calc(20px + env(safe-area-inset-bottom, 0px))",
+          padding: "0 20px calc(20px + var(--sab))",
           animation: "fjLogSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",

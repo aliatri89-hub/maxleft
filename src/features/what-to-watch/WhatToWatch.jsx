@@ -85,7 +85,7 @@ export default function WhatToWatch({ session, onBack, onToast, pushNav, removeN
     <div style={{
       position: "fixed", inset: 0, zIndex: 9000, background: DARK,
       display: "flex", flexDirection: "column", overflow: "hidden",
-      fontFamily: t.fontDisplay,
+      fontFamily: t.fontDisplay, paddingTop: "var(--sat)",
     }}>
       <Header onClose={handleClose} round={round} phase={phase} remaining={remaining} />
 
@@ -134,7 +134,7 @@ export default function WhatToWatch({ session, onBack, onToast, pushNav, removeN
 function Header({ onClose, round, phase, remaining }) {
   return (
     <div style={{
-      padding: "env(safe-area-inset-top, 12px) 16px 10px",
+      padding: "12px 16px 10px",
       display: "flex", alignItems: "center", justifyContent: "space-between",
       borderBottom: "1px solid rgba(240,235,225,0.08)",
     }}>
@@ -345,7 +345,7 @@ function CoverageSheet({ film, episodes, loading, onClose, onSelect, onPlay, onQ
         </div>
 
         {/* Episodes */}
-        <div style={{ flex: 1, overflow: "auto", padding: "4px 0 calc(env(safe-area-inset-bottom, 8px) + 8px)" }}>
+        <div style={{ flex: 1, overflow: "auto", padding: "4px 0 calc(var(--sab) + 8px)" }}>
           {loading && <div style={{ padding: 24, textAlign: "center", color: CREAM, opacity: 0.4, fontSize: 13 }}>Loading coverage…</div>}
           {!loading && episodes && episodes.length === 0 && (
             <div style={{ padding: 24, textAlign: "center", color: CREAM, opacity: 0.4, fontSize: 13 }}>No episodes found</div>
@@ -392,7 +392,7 @@ function ReviewGrid({ films, round, onNextRound, onSelect, onPeek }) {
 
       {films.length > 2 && (
         <div style={{
-          padding: "12px 24px calc(env(safe-area-inset-bottom, 12px) + 12px)",
+          padding: "12px 24px calc(var(--sab) + 12px)",
           borderTop: "1px solid rgba(240,235,225,0.08)",
           display: "flex", justifyContent: "center", background: DARK, flexShrink: 0,
         }}>
@@ -508,7 +508,7 @@ function SelectedScreen({ film, episodes, epLoading, userId, onPlayEpisode, onQu
 
       <div style={{
         position: "fixed", bottom: 0, left: 0, right: 0,
-        padding: "12px 24px calc(env(safe-area-inset-bottom, 16px) + 12px)",
+        padding: "12px 24px calc(var(--sab) + 12px)",
         background: `linear-gradient(transparent, ${DARK} 30%)`,
         display: "flex", justifyContent: "center", gap: 12,
       }}>
@@ -706,7 +706,7 @@ function SetupScreen({ userId, onStart }) {
 
       {/* Go button */}
       <div style={{
-        padding: "12px 24px calc(env(safe-area-inset-bottom, 16px) + 12px)",
+        padding: "12px 24px calc(var(--sab) + 12px)",
         borderTop: "1px solid rgba(240,235,225,0.08)",
         display: "flex", justifyContent: "center", background: DARK,
       }}>

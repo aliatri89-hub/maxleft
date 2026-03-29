@@ -256,7 +256,7 @@ function PlayerBubble({ episode, isPlaying, buffering, error, progress, duration
       }}
       style={{
         position: "fixed",
-        bottom: "calc(62px + env(safe-area-inset-bottom, 0px))",
+        bottom: "calc(62px + var(--sab))",
         right: isBadge ? 16 : 12,
         left: "auto",
         zIndex: 9999,
@@ -537,7 +537,7 @@ function FullScreenPlayer({
           maxHeight: "80dvh",
           display: "flex", flexDirection: "column",
           animation: closing ? "audioSheetSlideOut 0.28s ease forwards" : "audioSheetSlideIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1)",
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingBottom: "var(--sab)",
         }}
       >
         {/* Handle + close */}
@@ -1272,7 +1272,7 @@ function QueueToast({ toast }) {
   return (
     <div style={{
       position: "fixed",
-      bottom: "calc(114px + env(safe-area-inset-bottom, 0px))",
+      bottom: "calc(114px + var(--sab))",
       left: "50%", transform: "translateX(-50%)",
       zIndex: 10000,
       animation: exiting
