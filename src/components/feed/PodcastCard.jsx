@@ -4,6 +4,7 @@ import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { renderWithTimecodes } from "../community/shared/AudioPlayerProvider";
 import { isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { toPlayerEpisode, resolveAudioUrl } from "../../utils/episodeUrl";
+import decodeEntities from "../../utils/decodeEntities";
 import { supabase } from "../../supabase";
 import QuickLogModal from "./QuickLogModal";
 
@@ -499,7 +500,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
               letterSpacing: "0.02em",
               marginBottom: 8,
             }}>
-              {episode_title}
+              {decodeEntities(episode_title)}
             </div>
           )}
           <div style={{

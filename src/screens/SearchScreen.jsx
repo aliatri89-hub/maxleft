@@ -21,6 +21,7 @@ import { searchTMDB } from "../utils/api";
 import { trackEvent } from "../hooks/useAnalytics";
 import { useAudioPlayer } from "../components/community/shared/AudioPlayerProvider";
 import { toPlayerEpisode, resolveAudioUrl } from "../utils/episodeUrl";
+import decodeEntities from "../utils/decodeEntities";
 import { toPosterPath } from "../utils/mediaWrite";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
 import QuickLogModal from "../components/feed/QuickLogModal";
@@ -1092,7 +1093,7 @@ function ResultCard({
                     fontWeight: 700, fontSize: 13,
                     color: isEpExpanded || isCurrent ? TC : t.textMuted,
                     whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                  }}>{ep.episode_title || "Episode"}</div>
+                  }}>{decodeEntities(ep.episode_title) || "Episode"}</div>
                   <div style={{
                     fontFamily: t.fontBody,
                     fontSize: 9, color: t.textMuted,

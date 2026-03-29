@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Stars, resolveImg, TMDB_BACKDROP, isPatreonUrl, FadeImg } from "./FeedPrimitives";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
+import decodeEntities from "../../utils/decodeEntities";
 import { apiProxy, fetchTMDBWatchProviders } from "../../utils/api";
 import { supabase } from "../../supabase";
 import WatchProviders from "../community/shared/WatchProviders";
@@ -1108,7 +1109,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               fontWeight: 700, fontSize: 13,
                               color: isExpanded || isActive ? t.cream : "rgba(240,235,225,0.7)",
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-                            }}>{ep.episode_title || ep.podcast_name}</div>
+                            }}>{decodeEntities(ep.episode_title || ep.podcast_name)}</div>
                             <div style={{
                               fontFamily: t.fontBody,
                               fontSize: 11, color: "rgba(240,235,225,0.35)",
@@ -1330,7 +1331,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           color: isExpanded ? t.cream : "rgba(240,235,225,0.7)",
                           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                         }}>
-                          {link.episode_title || link.podcast_name}
+                          {decodeEntities(link.episode_title || link.podcast_name)}
                         </div>
                         <div style={{
                           fontFamily: t.fontBody, fontSize: 11,

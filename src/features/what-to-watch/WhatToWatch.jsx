@@ -11,6 +11,7 @@ import { useAudioPlayer } from "../../components/community/shared/AudioPlayerPro
 import { useBackGesture } from "../../hooks/useBackGesture";
 import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 import { resolveAudioUrl, toPlayerEpisode } from "../../utils/episodeUrl";
+import decodeEntities from "../../utils/decodeEntities";
 import { supabase } from "../../supabase";
 
 const TMDB_IMG = "https://image.tmdb.org/t/p";
@@ -536,7 +537,7 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ color: CREAM, fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-          {ep.episode_title || ep.podcast_name}
+          {decodeEntities(ep.episode_title || ep.podcast_name)}
         </div>
         <div style={{ color: CREAM, opacity: 0.4, fontSize: 11, marginTop: 2 }}>
           {ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}

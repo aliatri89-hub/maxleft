@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
+import decodeEntities from "../../utils/decodeEntities";
 
 /**
  * useCommunityPage — Fetches community page + miniseries + items.
@@ -123,7 +124,7 @@ export function useCommunityPage(slug) {
               extra_data: {
                 ...item.extra_data,
                 episode_description: item.extra_data?.episode_description || ep.description     || null,
-                episode_title:       item.extra_data?.episode_title       || ep.title           || null,
+                episode_title:       decodeEntities(item.extra_data?.episode_title || ep.title || null),
                 episode_air_date:    item.extra_data?.episode_air_date    || ep.air_date        || null,
                 episode_duration:    item.extra_data?.episode_duration    || ep.duration_seconds || null,
               },

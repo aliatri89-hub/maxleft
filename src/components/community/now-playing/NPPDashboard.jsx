@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { supabase } from "../../../supabase";
+import decodeEntities from "../../../utils/decodeEntities";
 import CommunityLoadingScreen from "../../CommunityLoadingScreen";
 
 // ── NPP Brand Colors ───────────────────────────────────────────────────
@@ -1797,7 +1798,7 @@ export default function NPPDashboard({ session: sessionProp }) {
         // Match to DB film by rss_guid
         const matchedFilm = ep.guid ? guidToFilm[ep.guid] : null;
         return {
-          title: ep.title,
+          title: decodeEntities(ep.title),
           date: d,
           dateDisplay: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }),
           link: ep.link || ep.url || null,

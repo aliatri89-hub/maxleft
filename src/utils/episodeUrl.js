@@ -18,6 +18,8 @@
  *   if (ep) playEpisode(ep);
  */
 
+import decodeEntities from "./decodeEntities";
+
 /**
  * Resolve the canonical audio URL from any episode-shaped object.
  * Priority: audio_url (DB canonical) → episode_url → extra_data.episode_url → enclosureUrl (player/RSS)
@@ -62,10 +64,12 @@ export function toPlayerEpisode(ep, overrides = {}) {
       ep.episode_id ||
       null,
     title:
-      overrides.title ||
-      ep.episode_title ||
-      ep.title ||
-      "Episode",
+      decodeEntities(
+        overrides.title ||
+        ep.episode_title ||
+        ep.title ||
+        "Episode"
+      ),
     enclosureUrl: url,
     community:
       overrides.community ||
