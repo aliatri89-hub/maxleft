@@ -18,11 +18,17 @@ export default function PodcastPane({
   favoriteSlugs,
   sortOrder,
   onNavigateSearch,
+  refreshSignal,
 }) {
   // Server handles slug filtering + sort; client only filters favorites group
   const podcastSlugForHook = selectedPodcast && selectedPodcast !== "__favorites__" ? selectedPodcast : null;
   const podcast = usePodcastFeed(isVisible, userId, podcastSlugForHook, sortOrder);
   const sentinelRef = useRef(null);
+
+  // ── Pull-to-refresh ──
+  useEffect(() => {
+    if (refreshSignal && isVisible) podcast.refresh();
+  }, [refreshSignal]);
 
   // ── Client-side filter for favorites group ──
   const filteredPodcast = useMemo(() => {

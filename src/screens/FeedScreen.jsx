@@ -41,10 +41,10 @@ export default function FeedScreen({
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [showShareShelf, setShowShareShelf] = useState(false);
+  const [refreshSignal, setRefreshSignal] = useState(0);
   const touchStartY = useRef(0);
   const isPulling = useRef(false);
   const scrollContainerRef = useRef(null);
-  const activityRefreshRef = useRef(null); // ActivityPane registers its refresh here
   const PULL_THRESHOLD = 70;
 
   const handleTouchStart = useCallback((e) => {
@@ -73,8 +73,10 @@ export default function FeedScreen({
     if (pullDistance >= PULL_THRESHOLD) {
       setRefreshing(true);
       setPullDistance(PULL_THRESHOLD);
-      // ActivityPane exposes its refresh via callback ref
-      if (activityRefreshRef.current) await activityRefreshRef.current();
+      // Broadcast refresh signal to whichever pane is active
+      setRefreshSignal(s => s + 1);
+      // Minimum spinner time so it doesn't flash
+      await new Promise(r => setTimeout(r, 600));
       setRefreshing(false);
     }
     setPullDistance(0);
@@ -172,6 +174,7 @@ export default function FeedScreen({
             onNavigateCommunity={onNavigateCommunity}
             pushNav={pushNav}
             removeNav={removeNav}
+            refreshSignal={refreshSignal}
           />
         </div>
 
@@ -184,6 +187,7 @@ export default function FeedScreen({
             favoriteSlugs={favoriteSlugs}
             sortOrder={sortOrder}
             onNavigateSearch={onNavigateSearch}
+            refreshSignal={refreshSignal}
           />
         </div>
 
@@ -206,6 +210,7 @@ export default function FeedScreen({
             pendingSleeveOpen={pendingSleeveOpen}
             setPendingSleeveOpen={setPendingSleeveOpen}
             onToast={onToast}
+            refreshSignal={refreshSignal}
           />
         </div>
       </div>

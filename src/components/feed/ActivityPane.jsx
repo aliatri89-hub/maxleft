@@ -31,6 +31,7 @@ export default function ActivityPane({
   pendingSleeveOpen,
   setPendingSleeveOpen,
   onToast,
+  refreshSignal,
 }) {
   const {
     activityItems,
@@ -47,6 +48,11 @@ export default function ActivityPane({
 
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
+
+  // ── Pull-to-refresh ──
+  useEffect(() => {
+    if (refreshSignal && isVisible) refresh();
+  }, [refreshSignal]);
 
   // ── Refresh triggers ──
   useEffect(() => {

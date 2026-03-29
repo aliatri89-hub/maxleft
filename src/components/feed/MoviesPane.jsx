@@ -19,9 +19,15 @@ export default function MoviesPane({
   onNavigateCommunity,
   pushNav,
   removeNav,
+  refreshSignal,
 }) {
   const movies = useMoviesFeed("releases", isVisible);
   const sentinelRef = useRef(null);
+
+  // ── Pull-to-refresh ──
+  useEffect(() => {
+    if (refreshSignal && isVisible) movies.refresh();
+  }, [refreshSignal]);
 
   // ── Client-side filter + sort ──
   const filteredMovies = useMemo(() => {
