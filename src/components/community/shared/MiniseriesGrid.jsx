@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
+import { gridThumb } from "../../../utils/thumbnailUrl";
 
 /**
  * MiniseriesGrid — 2-column visual grid of miniseries tiles.
@@ -164,7 +165,7 @@ function GridTile({ series, accent, onTap, userId }) {
       {series.thumbnail_url ? (
         shouldLoad && (
           <img
-            src={series.thumbnail_url}
+            src={gridThumb(series.thumbnail_url)}
             alt={series.title}
             onLoad={() => setImgLoaded(true)}
             style={{

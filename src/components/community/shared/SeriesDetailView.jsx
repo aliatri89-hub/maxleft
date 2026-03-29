@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
+import { headerThumb } from "../../../utils/thumbnailUrl";
 import AdminImagePositioner from "./AdminImagePositioner";
 
 /**
@@ -141,7 +142,7 @@ export default function SeriesDetailView({
             overflow: "hidden",
           }}>
             <img
-              src={series.thumbnail_url}
+              src={headerThumb(series.thumbnail_url)}
               alt={series.title}
               style={{
                 width: "100%",
