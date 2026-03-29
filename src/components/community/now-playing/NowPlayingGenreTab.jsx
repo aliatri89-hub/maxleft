@@ -1033,7 +1033,7 @@ function GenreGridTile({ label, icon, tint, poster, logoPos = "bottom", accent, 
       onClick={onTap}
       style={{
         position: "relative",
-        aspectRatio: "2/3",
+        aspectRatio: "1",
         cursor: "pointer",
         overflow: "hidden",
         WebkitTapHighlightColor: "transparent",
