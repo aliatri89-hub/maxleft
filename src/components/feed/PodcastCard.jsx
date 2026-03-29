@@ -91,8 +91,6 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const [showLogModal, setShowLogModal] = useState(false);
   const [justLogged, setJustLogged] = useState(false);
   const [inQueue, setInQueue] = useState(false);
-  const [logoReady, setLogoReady] = useState(false);
-  const [logoTransparent, setLogoTransparent] = useState(null); // null=unknown, true=ok, false=baked-bg
 
 
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue, removeFromQueue, queue, showNudge, seekTo } = useAudioPlayer();
@@ -202,63 +200,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
         transition: "border-color 0.3s, box-shadow 0.3s",
       }}
     >
-      {/* ── Centered logo overlay — top of card only, never over expanded description ── */}
-      {logo_url && /\.png/i.test(logo_url) && logoTransparent !== false && (
-        <div style={{
-          position: "absolute", top: 0, left: 0, right: 0, height: 110,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          pointerEvents: "none",
-          zIndex: 0,
-        }}>
-          <img
-            src={logo_url}
-            alt={film_title}
-            onLoad={() => {
-              setLogoReady(true);
-              // Check corners for transparency via blob fetch (avoids canvas CORS taint)
-              fetch(logo_url)
-                .then(r => r.blob())
-                .then(blob => {
-                  const blobUrl = URL.createObjectURL(blob);
-                  const img = new Image();
-                  img.onload = () => {
-                    try {
-                      const c = document.createElement("canvas");
-                      c.width = img.naturalWidth; c.height = img.naturalHeight;
-                      const ctx = c.getContext("2d");
-                      ctx.drawImage(img, 0, 0);
-                      const w = c.width, h = c.height;
-                      // Sample 4 corners — if all opaque, logo has baked-in background
-                      const corners = [
-                        ctx.getImageData(0, 0, 1, 1).data,
-                        ctx.getImageData(w - 1, 0, 1, 1).data,
-                        ctx.getImageData(0, h - 1, 1, 1).data,
-                        ctx.getImageData(w - 1, h - 1, 1, 1).data,
-                      ];
-                      const allOpaque = corners.every(px => px[3] > 20);
-                      setLogoTransparent(!allOpaque);
-                    } catch {
-                      setLogoTransparent(true); // assume ok on error
-                    }
-                    URL.revokeObjectURL(blobUrl);
-                  };
-                  img.onerror = () => { setLogoTransparent(true); URL.revokeObjectURL(blobUrl); };
-                  img.src = blobUrl;
-                })
-                .catch(() => setLogoTransparent(true));
-            }}
-            style={{
-              maxHeight: 58,
-              maxWidth: "58%",
-              width: "auto",
-              height: "auto",
-              filter: "brightness(0) invert(1) drop-shadow(0 2px 10px rgba(0,0,0,0.8))",
-              opacity: (logoReady && logoTransparent) ? 1 : 0,
-              transition: "opacity 0.3s",
-            }}
-          />
-        </div>
-      )}
+
 
       {/* ── Admin X — top left ── */}
       {isAdmin && (
@@ -305,21 +247,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {/* Row 1: date (left) | year + buttons (right) */}
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
-              {logo_url ? (
-                /* Logo present: small date in the left slot */
-                fmtDate(episode_air_date) && (
-                  <span style={{
-                    fontFamily: t.fontBody, fontSize: 11, color: "var(--text-secondary)",
-                    textTransform: "uppercase", letterSpacing: "0.04em",
-                    opacity: logoReady ? 1 : 0,
-                    transition: "opacity 0.3s",
-                  }}>
-                    {fmtDate(episode_air_date)}
-                  </span>
-                )
-              ) : (
-                /* No logo: film title + date below */
-                <>
+              <>
                   <span style={{
                     fontFamily: t.fontDisplay,
                     fontWeight: 700, fontSize: 18, color: "var(--text-primary)",
@@ -333,11 +261,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                     </span>
                   )}
                 </>
-              )}
             </div>
             {/* Year + queue + play buttons */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: 6, flexShrink: 0 }}>
-              {logo_url && logoReady && film_year && (
+              {film_year && (
                 <span style={{
                   fontFamily: t.fontBody, fontSize: 11, color: "rgba(255,255,255,0.45)",
                   letterSpacing: "0.03em", paddingTop: 2,
