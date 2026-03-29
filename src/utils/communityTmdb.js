@@ -281,7 +281,8 @@ export const fetchCoversForItems = async (items, onUpdate) => {
 // ═══════════════════════════════════════════════════════════
 
 const LOGO_CACHE_KEY = "mantl_logo_cache";
-const LOGO_CACHE_VERSION = 2;
+const LOGO_CACHE_VERSION = 3;
+const NULL_LOGO_TTL_MS = 3 * 24 * 60 * 60 * 1000; // Re-check "no logo" entries after 3 days
 
 let logoCache = {};
 try {
@@ -312,8 +313,10 @@ export const getLogoUrl = (tmdbId) => {
   if (!tmdbId) return null;
   const key = `logo:${tmdbId}`;
   const val = logoCache[key];
-  // null means "no logo available" (already checked), undefined means "never checked"
-  return val || null;
+  if (!val) return null;
+  // String = URL, object with miss = no logo (check TTL)
+  if (typeof val === "string") return val;
+  return null;
 };
 
 // ─── Extra backdrops cache (piggybacks on logo fetch) ────────
@@ -340,17 +343,31 @@ const _cacheStills = (tmdbId, backdrops) => {
   if (stills.length) stillsCache[`stills:${tmdbId}`] = stills;
 };
 
-// Returns true if we've already checked this tmdb_id (even if no logo found)
+// Returns true if we've already checked this tmdb_id (and the check is still fresh)
 export const isLogoChecked = (tmdbId) => {
   if (!tmdbId) return true;
-  return `logo:${tmdbId}` in logoCache;
+  const key = `logo:${tmdbId}`;
+  const val = logoCache[key];
+  if (val === undefined) return false;
+  // String URL = definitely checked
+  if (typeof val === "string") return true;
+  // Object with miss = check if TTL expired
+  if (val && val.miss && val.ts) {
+    if (Date.now() - val.ts > NULL_LOGO_TTL_MS) {
+      delete logoCache[key]; // Expired, allow re-check
+      return false;
+    }
+    return true;
+  }
+  // Legacy null entries from old cache version — treat as unchecked
+  return false;
 };
 
 // Fetch a single logo — returns full URL or null
 export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
   if (!tmdbId) return null;
   const key = `logo:${tmdbId}`;
-  if (key in logoCache) return logoCache[key];
+  if (isLogoChecked(tmdbId)) return getLogoUrl(tmdbId);
 
   try {
     const type = mediaType === "show" ? "tv" : "movie";
@@ -360,11 +377,12 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
       append: "images",
     });
 
+    const cacheMiss = () => { logoCache[key] = { miss: true, ts: Date.now() }; saveLogoCache(); };
+
     if (!data || data.error || !data.images?.logos) {
       // Still cache backdrops even if no logos
       if (data?.images?.backdrops) _cacheStills(tmdbId, data.images.backdrops);
-      logoCache[key] = null; // Mark as checked, no logo
-      saveLogoCache();
+      cacheMiss();
       return null;
     }
 
@@ -382,8 +400,7 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
 
     const best = english[0] || noLang[0];
     if (!best?.file_path) {
-      logoCache[key] = null;
-      saveLogoCache();
+      cacheMiss();
       return null;
     }
 
@@ -392,7 +409,7 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
     saveLogoCache();
     return url;
   } catch {
-    logoCache[key] = null;
+    logoCache[key] = { miss: true, ts: Date.now() };
     saveLogoCache();
     return null;
   }
