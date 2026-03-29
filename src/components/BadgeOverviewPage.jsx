@@ -159,7 +159,7 @@ export default function BadgeOverviewPage({ userId, onClose, onNavigateCommunity
 
       {/* ── Sticky Header ── */}
       <div style={{
-        position: "sticky", top: 0, zIndex: 10,
+        position: "sticky", top: "var(--sat)", zIndex: 10,
         background: "rgba(15,13,11,0.95)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",

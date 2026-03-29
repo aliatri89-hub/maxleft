@@ -187,7 +187,7 @@ export default function BadgeDetailScreen({ badge: badgeProp, userId, earnedAt, 
 
       {/* Header bar */}
       <div style={{
-        position: "sticky", top: 0, zIndex: 10,
+        position: "sticky", top: "var(--sat)", zIndex: 10,
         background: "rgba(10,6,0,0.92)",
         backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
         padding: "12px 16px",

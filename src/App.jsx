@@ -13,10 +13,39 @@ const AdminShell = lazy(() => import("./admin/AdminShell"));
 // Android 15+ (API 35+) enforces edge-to-edge — overlay: false is ignored.
 // Use overlay: true so the WebView correctly reports safe-area insets,
 // then let CSS var(--sat) / var(--sab) handle spacing everywhere.
+//
+// IMPORTANT: env() inside CSS custom properties (:root { --sat: env(...) })
+// may silently resolve to 0px on some Android WebView versions. We probe
+// the actual value with a real element and set --sat/--sab as pixel values
+// from JS so every var(--sat) reference is guaranteed correct.
 if (Capacitor.isNativePlatform()) {
   StatusBar.setOverlaysWebView({ overlay: true });
   StatusBar.setBackgroundColor({ color: t.bgPrimary });
   StatusBar.setStyle({ style: Style.Dark });
+
+  // Probe actual safe-area inset values and set as pixel CSS variables
+  const probeSafeArea = () => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;";
+
+    // Top inset
+    probe.style.height = "env(safe-area-inset-top, 0px)";
+    document.body.appendChild(probe);
+    const top = probe.getBoundingClientRect().height;
+    probe.remove();
+
+    // Bottom inset
+    probe.style.height = "env(safe-area-inset-bottom, 0px)";
+    document.body.appendChild(probe);
+    const bottom = probe.getBoundingClientRect().height;
+    probe.remove();
+
+    if (top > 0) document.documentElement.style.setProperty("--sat", `${top}px`);
+    if (bottom > 0) document.documentElement.style.setProperty("--sab", `${bottom}px`);
+  };
+
+  // Wait for layout to settle after overlay mode is applied
+  requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
 }
 
 // Utils
