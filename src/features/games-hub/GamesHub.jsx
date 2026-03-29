@@ -112,14 +112,6 @@ const GAMES = [
     bgAccent: "rgba(124, 184, 232, 0.06)",
     daily: true,
   },
-  {
-    id: "pickAFlick",
-    name: "Pick a Flick",
-    tagline: "Swipe to find what to watch",
-    color: "#a8d870",
-    bgAccent: "rgba(168, 216, 112, 0.06)",
-    daily: false,
-  },
 ];
 
 // ── External games ──
@@ -342,13 +334,54 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         }} />
       </button>
 
-      {/* Our Games */}
+      {/* Pick a Flick — anytime game, same tier as Badges */}
+      <button
+        onClick={() => onLaunchGame("pickAFlick")}
+        onPointerDown={() => setPressedId("pickAFlick")}
+        onPointerUp={() => setPressedId(null)}
+        onPointerLeave={() => setPressedId(null)}
+        style={{
+          display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+          background: "rgba(168, 216, 112, 0.06)",
+          border: "1px solid rgba(245,240,232,0.06)",
+          borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
+          position: "relative", overflow: "hidden",
+          fontFamily: "inherit", color: "inherit", outline: "none",
+          WebkitTapHighlightColor: "transparent",
+          transform: pressedId === "pickAFlick" ? "scale(0.98)" : "scale(1)",
+          transition: "transform 0.15s ease",
+          marginTop: 8,
+          animation: "gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 150ms backwards",
+        }}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <PickAFlickIcon color="#a8d870" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
+          <div style={{
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
+            color: t.cream, lineHeight: 1.2,
+          }}>
+            Pick a Flick
+          </div>
+          <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2, lineHeight: 1.35 }}>
+            Swipe to find what to watch
+          </div>
+        </div>
+        <div style={{
+          position: "absolute", right: 14, top: "50%",
+          width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
+          transform: "translateY(-50%) rotate(-45deg)",
+        }} />
+      </button>
+
+      {/* Daily Games */}
       <div style={{
         fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
         color: t.creamMuted, margin: "20px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.3s",
       }}>
-        Our Games
+        Daily Games
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {GAMES.map((game, i) => {
