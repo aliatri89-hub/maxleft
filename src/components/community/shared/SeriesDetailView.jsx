@@ -30,6 +30,7 @@ export default function SeriesDetailView({
   accent = "#e94560",
   userId,
   onPositionSaved,
+  communitySlug,
 }) {
   const [closing, setClosing] = useState(false);
   const [localPosition, setLocalPosition] = useState(series?.thumbnail_position || "top center");
@@ -161,6 +162,7 @@ export default function SeriesDetailView({
               position={localPosition}
               userId={userId}
               accent={accent}
+              communitySlug={communitySlug}
               onSaved={(newPos) => {
                 setLocalPosition(newPos);
                 onPositionSaved?.(series.id, newPos);

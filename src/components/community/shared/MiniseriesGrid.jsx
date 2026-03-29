@@ -1,7 +1,6 @@
 import { t } from "../../../theme";
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { isComingSoon } from "../../../utils/comingSoon";
-import AdminImagePositioner from "./AdminImagePositioner";
 
 /**
  * MiniseriesGrid — 2-column visual grid of miniseries tiles.

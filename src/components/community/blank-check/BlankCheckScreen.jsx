@@ -4,6 +4,7 @@ import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
+import { bustCommunityCache } from "../../../hooks/community/useCommunityPage";
 import { isComingSoon } from "../../../utils/comingSoon";
 import BadgeCelebration from "../shared/BadgeCelebration";
 import BadgeProgressToast from "../shared/BadgeProgressToast";
@@ -77,6 +78,19 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
   const [selectedSeries, setSelectedSeries] = useState(null);
+
+  // ── Position overrides (admin image positioner saves) ──────
+  // Merges saved thumbnail_position changes into miniseries so the grid
+  // reflects new positions immediately without waiting for a re-fetch.
+  const [positionOverrides, setPositionOverrides] = useState({});
+  const effectiveMiniseries = useMemo(() => {
+    if (Object.keys(positionOverrides).length === 0) return miniseries;
+    return miniseries.map((s) =>
+      positionOverrides[s.id]
+        ? { ...s, thumbnail_position: positionOverrides[s.id] }
+        : s
+    );
+  }, [miniseries, positionOverrides]);
 
   // ── Badge system ──────────────────────────────────────────
   const {
@@ -413,7 +427,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
                 {/* Patreon Miniseries Grid */}
                 <MiniseriesGrid
-                  miniseries={miniseries.filter(s => s.tab_key === "patreon")}
+                  miniseries={effectiveMiniseries.filter(s => s.tab_key === "patreon")}
                   progress={progress}
                   onSelectSeries={setSelectedSeries}
                   accent={accent}
@@ -544,7 +558,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
                 {/* Miniseries Grid */}
                 <MiniseriesGrid
-                  miniseries={miniseries.filter(s => !s.tab_key || s.tab_key === "filmography")}
+                  miniseries={effectiveMiniseries.filter(s => !s.tab_key || s.tab_key === "filmography")}
                   progress={progress}
                   onSelectSeries={setSelectedSeries}
                   accent={accent}
@@ -583,11 +597,16 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           coverCacheVersion={coverCache}
           accent={accent}
           userId={userId}
+          communitySlug={community?.slug}
           onPositionSaved={(seriesId, newPos) => {
             setSelectedSeries(prev => prev?.id === seriesId
               ? { ...prev, thumbnail_position: newPos }
               : prev
             );
+            // Track override so the grid updates immediately
+            setPositionOverrides(prev => ({ ...prev, [seriesId]: newPos }));
+            // Bust community cache so re-entering loads the new position
+            if (community?.slug) bustCommunityCache(community.slug);
           }}
         />
       )}
