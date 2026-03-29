@@ -281,7 +281,7 @@ export const fetchCoversForItems = async (items, onUpdate) => {
 // ═══════════════════════════════════════════════════════════
 
 const LOGO_CACHE_KEY = "mantl_logo_cache";
-const LOGO_CACHE_VERSION = 3;
+const LOGO_CACHE_VERSION = 4;
 const NULL_LOGO_TTL_MS = 3 * 24 * 60 * 60 * 1000; // Re-check "no logo" entries after 3 days
 
 let logoCache = {};
@@ -371,26 +371,27 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
 
   try {
     const type = mediaType === "show" ? "tv" : "movie";
-    const data = await apiProxy("tmdb_details", {
+    // Use tmdb_images endpoint — it includes include_image_language=en,null
+    // which catches logos with iso_639_1: null that tmdb_details misses
+    const data = await apiProxy("tmdb_images", {
       tmdb_id: String(tmdbId),
       type,
-      append: "images",
     });
 
     const cacheMiss = () => { logoCache[key] = { miss: true, ts: Date.now() }; saveLogoCache(); };
 
-    if (!data || data.error || !data.images?.logos) {
-      // Still cache backdrops even if no logos
-      if (data?.images?.backdrops) _cacheStills(tmdbId, data.images.backdrops);
+    // tmdb_images returns { logos, backdrops, posters } at top level
+    if (!data || data.error || !data.logos) {
+      if (data?.backdrops) _cacheStills(tmdbId, data.backdrops);
       cacheMiss();
       return null;
     }
 
     // Cache extra backdrops for sleeve stills (piggyback — zero extra API calls)
-    if (data.images.backdrops) _cacheStills(tmdbId, data.images.backdrops);
+    if (data.backdrops) _cacheStills(tmdbId, data.backdrops);
 
     // Prefer English logo, then no-language, sorted by width (largest first)
-    const logos = data.images.logos;
+    const logos = data.logos;
     const english = logos
       .filter(l => l.iso_639_1 === "en")
       .sort((a, b) => (b.width || 0) - (a.width || 0) || (b.vote_average || 0) - (a.vote_average || 0));
