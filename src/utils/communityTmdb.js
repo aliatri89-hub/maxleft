@@ -282,7 +282,8 @@ export const fetchCoversForItems = async (items, onUpdate) => {
 
 const LOGO_CACHE_KEY = "mantl_logo_cache";
 const LOGO_CACHE_VERSION = 4;
-const NULL_LOGO_TTL_MS = 3 * 24 * 60 * 60 * 1000; // Re-check "no logo" entries after 3 days
+const NULL_LOGO_TTL_MS = 3 * 24 * 60 * 60 * 1000;       // Re-check "no logo" entries after 3 days
+const SOFT_LOGO_TTL_MS = 60 * 60 * 1000;                  // Re-check network failures after 1 hour
 
 let logoCache = {};
 try {
@@ -353,7 +354,8 @@ export const isLogoChecked = (tmdbId) => {
   if (typeof val === "string") return true;
   // Object with miss = check if TTL expired
   if (val && val.miss && val.ts) {
-    if (Date.now() - val.ts > NULL_LOGO_TTL_MS) {
+    const ttl = val.soft ? SOFT_LOGO_TTL_MS : NULL_LOGO_TTL_MS;
+    if (Date.now() - val.ts > ttl) {
       delete logoCache[key]; // Expired, allow re-check
       return false;
     }
@@ -378,10 +380,18 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
       type,
     });
 
+    // True TMDB miss (got a valid response but no logos) → cache for 3 days
     const cacheMiss = () => { logoCache[key] = { miss: true, ts: Date.now() }; saveLogoCache(); };
+    // Network/proxy failure → cache for only 1 hour so native retries after cold-start
+    const cacheNetworkFailure = () => { logoCache[key] = { miss: true, ts: Date.now(), soft: true }; saveLogoCache(); };
 
     // tmdb_images returns { logos, backdrops, posters } at top level
-    if (!data || data.error || !data.logos) {
+    if (!data || data.error) {
+      // null data = network failure (edge function unreachable on native cold-start)
+      cacheNetworkFailure();
+      return null;
+    }
+    if (!data.logos) {
       if (data?.backdrops) _cacheStills(tmdbId, data.backdrops);
       cacheMiss();
       return null;
@@ -410,7 +420,8 @@ export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
     saveLogoCache();
     return url;
   } catch {
-    logoCache[key] = { miss: true, ts: Date.now() };
+    // Network/exception failure → short TTL so native retries after cold-start
+    logoCache[key] = { miss: true, ts: Date.now(), soft: true };
     saveLogoCache();
     return null;
   }
