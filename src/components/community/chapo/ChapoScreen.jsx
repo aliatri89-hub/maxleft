@@ -102,10 +102,9 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
 
   return (
     <div style={{
-      height: "100dvh", background: t.bgPrimary,
+      height: "100%", background: t.bgPrimary,
       overflowX: "hidden", overflowY: "auto",
-      paddingTop: "env(safe-area-inset-top, 0px)",
-      paddingBottom: "calc(72px + env(safe-area-inset-bottom, 0px))",
+      paddingBottom: "calc(72px + var(--sab))",
     }}>
       <style>{`
         @keyframes chapoFadeIn {
@@ -354,7 +353,7 @@ export default function ChapoScreen({ community, miniseries, session, onBack, on
           backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
           borderTop: `1px solid ${t.borderSubtle}`,
           display: "flex", justifyContent: "center", gap: 0,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          paddingBottom: "var(--sab)",
         }}>
           {tabs.map(tab => {
             const isActive = tab.key === activeTab;

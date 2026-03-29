@@ -99,7 +99,7 @@ export default function ActivityPane({
   // ── Loading skeleton (full-screen, only on initial load) ──
   if (loading && activityItems.length === 0) {
     return (
-      <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))" }}>
+      <div style={{ minHeight: "100vh", background: "var(--bg-primary, #0f0d0b)", paddingBottom: "calc(120px + var(--sab))" }}>
         {[0, 1, 2, 3].map(i => (
           <div key={i} style={{
             margin: "6px 16px",

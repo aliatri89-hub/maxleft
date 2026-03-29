@@ -82,7 +82,7 @@ export default function BottomSheet({
           maxWidth,
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: "20px 20px 0 0",
-          padding: `16px 20px calc(20px + env(safe-area-inset-bottom, 0px))`,
+          padding: `16px 20px calc(20px + var(--sab))`,
           animation: "bsSlideUp 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)",
           maxHeight,
           overflowY: "auto",

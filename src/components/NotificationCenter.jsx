@@ -35,7 +35,7 @@ export default function NotificationCenter({ notifications, onClose, onNavigate,
       {/* Panel */}
       <div className="notif-panel">
         {/* Header */}
-        <div className="notif-panel-header" style={{ paddingTop: "max(env(safe-area-inset-top, 16px), 16px)" }}>
+        <div className="notif-panel-header" style={{ paddingTop: "max(var(--sat), 16px)" }}>
           <div className="notif-panel-title">Notifications</div>
           <div className="notif-panel-close" onClick={onClose}>✕</div>
         </div>

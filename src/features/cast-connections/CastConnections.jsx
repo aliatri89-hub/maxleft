@@ -477,7 +477,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       )}
 
       {/* Bottom spacer for safe area */}
-      <div style={{ height: "env(safe-area-inset-bottom, 20px)", minHeight: 20 }} />
+      <div style={{ height: "var(--sab)", minHeight: 20 }} />
     </div>
   );
 }
@@ -487,7 +487,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
 function BackButton({ onBack }) {
   return (
     <button onClick={onBack} style={{
-      position: "absolute", top: "calc(env(safe-area-inset-top, 0px) + 12px)", left: 12,
+      position: "absolute", top: 12, left: 12,
       width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center",
       cursor: "pointer", zIndex: 20, background: "none", border: "none", padding: 0,
       WebkitTapHighlightColor: "transparent",
@@ -510,7 +510,6 @@ const S = {
     flexDirection: "column",
     alignItems: "center",
     padding: "0 16px",
-    paddingTop: "env(safe-area-inset-top, 0px)",
     color: "#e8d3a2",
     position: "relative",
   },

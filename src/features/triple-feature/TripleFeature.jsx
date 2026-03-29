@@ -480,7 +480,6 @@ const S = {
     background: "#0a0a0f", color: t.cream,
     fontFamily: t.fontDisplay,
     position: "relative", overflow: "hidden",
-    paddingTop: "env(safe-area-inset-top, 0px)",
   },
   inner: { maxWidth: 440, margin: "0 auto", padding: "12px 16px 40px" },
   glowTL: {

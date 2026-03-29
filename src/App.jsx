@@ -12,11 +12,40 @@ const AdminShell = lazy(() => import("./admin/AdminShell"));
 // ─── NATIVE STATUS BAR CONFIG ─────────────────────────────────
 // Android 15+ (API 35+) enforces edge-to-edge — overlay: false is ignored.
 // Use overlay: true so the WebView correctly reports safe-area insets,
-// then let CSS env(safe-area-inset-top) on .mantl-app handle the padding.
+// then let CSS var(--sat) / var(--sab) handle spacing everywhere.
+//
+// IMPORTANT: env() inside CSS custom properties (:root { --sat: env(...) })
+// may silently resolve to 0px on some Android WebView versions. We probe
+// the actual value with a real element and set --sat/--sab as pixel values
+// from JS so every var(--sat) reference is guaranteed correct.
 if (Capacitor.isNativePlatform()) {
   StatusBar.setOverlaysWebView({ overlay: true });
   StatusBar.setBackgroundColor({ color: t.bgPrimary });
   StatusBar.setStyle({ style: Style.Dark });
+
+  // Probe actual safe-area inset values and set as pixel CSS variables
+  const probeSafeArea = () => {
+    const probe = document.createElement("div");
+    probe.style.cssText = "position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;";
+
+    // Top inset
+    probe.style.height = "env(safe-area-inset-top, 0px)";
+    document.body.appendChild(probe);
+    const top = probe.getBoundingClientRect().height;
+    probe.remove();
+
+    // Bottom inset
+    probe.style.height = "env(safe-area-inset-bottom, 0px)";
+    document.body.appendChild(probe);
+    const bottom = probe.getBoundingClientRect().height;
+    probe.remove();
+
+    if (top > 0) document.documentElement.style.setProperty("--sat", `${top}px`);
+    if (bottom > 0) document.documentElement.style.setProperty("--sab", `${bottom}px`);
+  };
+
+  // Wait for layout to settle after overlay mode is applied
+  requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
 }
 
 // Utils
@@ -82,7 +111,7 @@ function CommunityLoadingSkeleton() {
       background: t.bgPrimary,
       display: "flex", flexDirection: "column",
       alignItems: "center",
-      paddingTop: "env(safe-area-inset-top, 0px)",
+      paddingTop: "var(--sat)",
     }}>
       <div style={{ width: "100%", display: "flex", alignItems: "center", padding: "16px 18px 12px", gap: 14 }}>
         <div style={{ width: 32, height: 32, borderRadius: 10, background: t.bgElevated }} />
@@ -599,7 +628,7 @@ function AppMain() {
 
         {/* Community Dashboard (public) */}
         {communityDashboard && (
-          <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "#1a1a1a", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "#1a1a1a", overflow: "auto", WebkitOverflowScrolling: "touch", paddingTop: "var(--sat)" }}>
             <ErrorBoundary name="Dashboard">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 {communityDashboard === "blankcheck" ? <BlankCheckDashboard session={session} /> : <NPPDashboard session={session} />}
@@ -610,7 +639,7 @@ function AppMain() {
 
         {/* Triple Feature Game */}
         {showTripleFeature && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0a0a0f", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "#0a0a0f", overflow: "auto", WebkitOverflowScrolling: "touch", paddingTop: "var(--sat)" }}>
             <ErrorBoundary name="Triple Feature">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <TripleFeature session={session} onBack={() => { removeNav("tripleFeature"); setShowTripleFeature(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
@@ -621,7 +650,7 @@ function AppMain() {
 
         {/* Reel Time Game */}
         {showReelTime && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch", paddingTop: "var(--sat)" }}>
             <ErrorBoundary name="Reel Time">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <ReelTime session={session} onBack={() => { removeNav("reelTime"); setShowReelTime(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
@@ -632,7 +661,7 @@ function AppMain() {
 
         {/* Cast Connections Game */}
         {showCastConnections && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "auto", WebkitOverflowScrolling: "touch", paddingTop: "var(--sat)" }}>
             <ErrorBoundary name="Cast Connections">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <CastConnections session={session} onBack={() => { removeNav("castConnections"); setShowCastConnections(false); }} onToast={showToast} />
@@ -669,7 +698,7 @@ function AppMain() {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "hidden" }}>
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "hidden", paddingTop: "var(--sat)" }}>
             <CommunityLoadingSkeleton />
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
@@ -687,7 +716,7 @@ function AppMain() {
 
         {/* Profile overlay */}
         {showProfile && (
-          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)", overflow: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div className="overlay-slide-up" style={{ position: "fixed", inset: 0, zIndex: 200, background: "var(--bg-primary)", overflow: "auto", WebkitOverflowScrolling: "touch", paddingTop: "var(--sat)" }}>
             <ErrorBoundary name="Profile">
               <Suspense fallback={<CommunityLoadingSkeleton />}>
                 <ProfileScreen profile={profile} session={session}
@@ -735,7 +764,7 @@ function AppMain() {
             onClick={() => { popNav(); }}
             style={{
               position: "fixed",
-              top: "calc(env(safe-area-inset-top, 0px) + 12px)",
+              top: "calc(var(--sat) + 12px)",
               left: 16,
               zIndex: 9000,
               display: "flex", alignItems: "center", gap: 4,

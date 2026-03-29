@@ -232,9 +232,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
 
   return (
     <div style={{
-      height: "100dvh", display: "flex", flexDirection: "column",
+      height: "100%", display: "flex", flexDirection: "column",
       background: t.bgPrimary, overflowX: "hidden",
-      paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
       {/* Back nav */}
       <div style={{

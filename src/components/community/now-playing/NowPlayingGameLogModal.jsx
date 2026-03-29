@@ -226,7 +226,7 @@ export default function NowPlayingGameLogModal({
           maxHeight: "75dvh",
           background: `linear-gradient(180deg, ${t.bgCard} 0%, ${t.bgCardEnd} 100%)`,
           borderRadius: "16px 16px 0 0",
-          padding: "0 20px calc(20px + env(safe-area-inset-bottom, 0px))",
+          padding: "0 20px calc(20px + var(--sab))",
           animation: "nppGameSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",

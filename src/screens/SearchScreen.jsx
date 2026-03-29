@@ -454,7 +454,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     <div style={{
       minHeight: "100vh",
       background: t.bgPrimary,
-      paddingBottom: "calc(120px + env(safe-area-inset-bottom, 0px))",
+      paddingBottom: "calc(120px + var(--sab))",
     }}>
       {/* ── Sticky search + filter bar ── */}
       <div style={{

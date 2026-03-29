@@ -54,7 +54,7 @@ export default function FilmspottingLogModal({
         style={{
           width: "100%", maxWidth: 440, maxHeight: "85vh", overflowY: "auto",
           background: t.bgCard, borderRadius: "16px 16px 0 0",
-          padding: "20px 16px env(safe-area-inset-bottom, 16px)",
+          padding: "20px 16px max(var(--sab), 16px)",
         }}
       >
         {/* Header */}

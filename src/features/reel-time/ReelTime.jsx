@@ -21,7 +21,6 @@ const S = {
     fontFamily: t.fontBody,
     display: "flex", flexDirection: "column", alignItems: "center",
     padding: "0 16px 40px", overflow: "auto", WebkitOverflowScrolling: "touch",
-    paddingTop: "env(safe-area-inset-top, 0px)",
   },
   backBtn: {
     position: "absolute", top: 16, left: 16, width: 36, height: 36,

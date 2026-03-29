@@ -626,7 +626,7 @@ export default function CommunityLogModal({
         {/* Action buttons — fixed footer, never moves */}
         <div style={{
           display: "flex", flexDirection: "column", gap: 8,
-          padding: "12px 20px calc(12px + env(safe-area-inset-bottom, 0px))",
+          padding: "12px 20px calc(12px + var(--sab))",
           background: "#12121f",
           flexShrink: 0,
         }}>

@@ -153,7 +153,7 @@ export default function CommunitySleeveSheet({
           transform: open ? "translateY(0)" : "translateY(100%)",
           transition: open ? "transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)" : "transform 0.25s ease-in",
           willChange: "transform",
-          paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))",
+          paddingBottom: "calc(80px + var(--sab))",
           maxWidth: 420,
           marginLeft: "auto",
           marginRight: "auto",

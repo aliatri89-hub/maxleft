@@ -12,6 +12,10 @@
   }
 
   :root {
+    /* ── Safe-area inset aliases (set once, use everywhere) ── */
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+
     --cream:        #F0EBE1;
     --cream-dark:   #E8E2D6;
     --warm-white:   #FDFBF7;
@@ -62,8 +66,8 @@
     overflow-x: hidden;
     position: relative;
     -webkit-tap-highlight-color: transparent;
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: var(--sat);
+    padding-bottom: var(--sab);
   }
 
   .bb { font-family: 'Barlow Condensed', sans-serif; }
@@ -3366,7 +3370,7 @@
     align-items: center;
     justify-content: space-around;
     padding: 6px 0 0;
-    padding-bottom: max(env(safe-area-inset-bottom, 10px), 10px);
+    padding-bottom: max(var(--sab), 10px);
     z-index: 9999;
   }
   /* Extend background below viewport — kills iOS safe-area bleed on overscroll */
@@ -3623,7 +3627,7 @@
     background: #1a1714;
     border-radius: 20px 20px 0 0;
     padding: 24px 20px;
-    padding-bottom: max(env(safe-area-inset-bottom, 24px), 24px);
+    padding-bottom: max(var(--sab), 24px);
     min-height: 70vh;
     min-height: 70dvh;
     max-height: 92vh;
@@ -4015,7 +4019,7 @@
     background: #1a1714;
     border-radius: 20px 20px 0 0;
     padding: 24px 20px;
-    padding-bottom: max(env(safe-area-inset-bottom, 32px), 32px);
+    padding-bottom: max(var(--sab), 32px);
     min-height: 50vh;
     min-height: 50dvh;
     max-height: 90vh;

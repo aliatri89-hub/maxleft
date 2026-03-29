@@ -471,10 +471,9 @@ export default function GetPlayedScreen({ community, miniseries, session, onBack
 
   return (
     <div style={{
-      minHeight: "100vh", background: t.bgPrimary,
+      minHeight: "100%", background: t.bgPrimary,
       overflowX: "hidden",
-      paddingTop: "env(safe-area-inset-top, 0px)",
-      paddingBottom: hasBottomNav ? 72 : "env(safe-area-inset-bottom, 0px)",
+      paddingBottom: hasBottomNav ? 72 : "var(--sab)",
     }}>
       <div style={{
         position: "sticky", top: 0, zIndex: 10,
