@@ -229,8 +229,9 @@ export async function updateGameStatus(logId, displayStatus, extra = {}) {
 }
 
 /**
- * deleteMediaLog — Remove a user_media_logs row by ID.
- * Works for any media type. The media catalog row stays.
+ * deleteMediaLog — LEGACY: Remove a user_media_logs row by ID only.
+ * Does NOT cascade to feed_activity, community_user_progress, or badges.
+ * Use deleteFullMediaLog() instead for user-facing deletes.
  */
 export async function deleteMediaLog(logId) {
   const { error } = await supabase
@@ -240,6 +241,62 @@ export async function deleteMediaLog(logId) {
 
   if (error) {
     console.warn("[mediaWrite] deleteMediaLog error:", error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * deleteFullMediaLog — Cascading delete via server RPC.
+ * Removes: user_media_logs, feed_activity, community_user_progress,
+ * and revokes any badges that are no longer complete.
+ *
+ * @param {string} userId - user's UUID
+ * @param {string} logId  - user_media_logs.id (from shelf views)
+ */
+export async function deleteFullMediaLog(userId, logId) {
+  if (!userId || !logId) return false;
+
+  const { error } = await supabase.rpc("delete_media_log_by_log_id", {
+    p_user_id: userId,
+    p_log_id: logId,
+  });
+
+  if (error) {
+    console.warn("[mediaWrite] deleteFullMediaLog error:", error.message);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * deleteFullMediaLogByTmdb — Cascading delete by TMDB ID.
+ * For use from activity feed / QuickLogModal where we have tmdb_id but not log_id.
+ */
+export async function deleteFullMediaLogByTmdb(userId, tmdbId) {
+  if (!userId || !tmdbId) return false;
+
+  // Look up media_id from the media table
+  const { data: mediaRow, error: lookupErr } = await supabase
+    .from("media")
+    .select("id")
+    .eq("media_type", "film")
+    .eq("tmdb_id", tmdbId)
+    .limit(1)
+    .maybeSingle();
+
+  if (lookupErr || !mediaRow) {
+    console.warn("[mediaWrite] deleteFullMediaLogByTmdb: media not found", lookupErr?.message);
+    return false;
+  }
+
+  const { error } = await supabase.rpc("delete_media_log", {
+    p_user_id: userId,
+    p_media_id: mediaRow.id,
+  });
+
+  if (error) {
+    console.warn("[mediaWrite] deleteFullMediaLogByTmdb error:", error.message);
     return false;
   }
   return true;

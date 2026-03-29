@@ -2,21 +2,25 @@ import { t } from "../../theme";
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../../supabase";
-import { logFilm } from "../../utils/mediaWrite";
+import { logFilm, deleteFullMediaLogByTmdb } from "../../utils/mediaWrite";
 import StarRating from "../shared/StarRating";
 
 /**
  * QuickLogModal — lightweight rate + log overlay.
  *
  * Props:
- *   data     — { tmdb_id, title, year, poster_path, director, creator, cover_url }
- *   open     — boolean
- *   onClose  — () => void
- *   onLogged — () => void  (called after successful log)
+ *   data      — { tmdb_id, title, year, poster_path, director, creator, cover_url }
+ *   open      — boolean
+ *   onClose   — () => void
+ *   onLogged  — () => void  (called after successful log)
+ *   isLogged  — boolean (film already in user's log)
+ *   onDeleted — () => void  (called after successful delete)
  */
-export default function QuickLogModal({ data, open, onClose, onLogged }) {
+export default function QuickLogModal({ data, open, onClose, onLogged, isLogged, onDeleted }) {
   const [rating, setRating] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const userIdRef = useRef(null);
 
   // Grab session once
@@ -28,7 +32,7 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
 
   // Reset rating when modal opens with new data
   useEffect(() => {
-    if (open) setRating(0);
+    if (open) { setRating(0); setConfirmDelete(false); }
   }, [open, data?.tmdb_id]);
 
   const resolveCover = () => {
@@ -65,6 +69,19 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
       onClose();
     } catch (e) { console.warn("[QuickLog] Log error:", e); }
     setSaving(false);
+  };
+
+  const handleDelete = async () => {
+    if (!userIdRef.current || !data?.tmdb_id || deleting) return;
+    setDeleting(true);
+    try {
+      const ok = await deleteFullMediaLogByTmdb(userIdRef.current, data.tmdb_id);
+      if (ok) {
+        onDeleted?.();
+        onClose();
+      }
+    } catch (e) { console.warn("[QuickLog] Delete error:", e); }
+    setDeleting(false);
   };
 
   if (!open || !data) return null;
@@ -186,6 +203,75 @@ export default function QuickLogModal({ data, open, onClose, onLogged }) {
             }}
           >
             or log without rating
+          </div>
+        )}
+
+        {/* Remove from Log — only when already logged */}
+        {isLogged && !confirmDelete && (
+          <div
+            onClick={() => setConfirmDelete(true)}
+            style={{
+              fontFamily: t.fontBody,
+              fontSize: 11, color: "rgba(233,69,96,0.6)",
+              cursor: "pointer", marginTop: 4,
+              letterSpacing: "0.04em",
+              transition: "color 0.2s",
+            }}
+          >
+            remove from log
+          </div>
+        )}
+
+        {/* Confirm delete */}
+        {isLogged && confirmDelete && (
+          <div style={{
+            width: "100%", marginTop: 4,
+            padding: "12px 14px",
+            background: "rgba(233,69,96,0.06)",
+            border: "1px solid rgba(233,69,96,0.15)",
+            borderRadius: 10,
+          }}>
+            <div style={{
+              fontFamily: t.fontBody,
+              fontSize: 12, color: "var(--text-muted)",
+              lineHeight: 1.5, marginBottom: 10, textAlign: "center",
+            }}>
+              Remove from log? You'll lose any community and badge progress associated with this film.
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                style={{
+                  flex: 1, padding: "8px 0",
+                  borderRadius: 8, border: "none",
+                  background: deleting ? "rgba(233,69,96,0.2)" : "rgba(233,69,96,0.8)",
+                  color: deleting ? "rgba(255,255,255,0.4)" : "#fff",
+                  fontFamily: t.fontDisplay,
+                  fontWeight: 700, fontSize: 12,
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                  cursor: deleting ? "wait" : "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                {deleting ? "Removing..." : "Yes, Remove"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                style={{
+                  flex: 1, padding: "8px 0",
+                  borderRadius: 8, border: "1px solid rgba(240,235,225,0.1)",
+                  background: "transparent",
+                  color: "var(--text-muted)",
+                  fontFamily: t.fontDisplay,
+                  fontWeight: 600, fontSize: 12,
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>

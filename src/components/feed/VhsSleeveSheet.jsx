@@ -1577,6 +1577,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
         open={showLogModal}
         onClose={() => setShowLogModal(false)}
         onLogged={onLogged}
+        isLogged={isLogged}
+        onDeleted={() => setIsLogged(false)}
       />
     </>,
     document.body

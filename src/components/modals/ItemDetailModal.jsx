@@ -1,7 +1,7 @@
 import { t } from "../../theme";
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
-import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteMediaLog } from "../../utils/mediaWrite";
+import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteFullMediaLog } from "../../utils/mediaWrite";
 import { formatDate } from "../../utils/helpers";
 import BottomSheet from "../shared/BottomSheet";
 import StarRating from "../shared/StarRating";
@@ -85,7 +85,7 @@ export default function ItemDetailModal({
 
   const removeItem = async () => {
     setDeleting(true);
-    const ok = await deleteMediaLog(item.id);
+    const ok = await deleteFullMediaLog(userId, item.id);
     if (ok) {
       if (onRefresh) onRefresh();
       onClose();
@@ -382,7 +382,7 @@ export default function ItemDetailModal({
           borderRadius: 12,
         }}>
           <div style={{ fontSize: 13, color: t.textSecondary, lineHeight: 1.5, marginBottom: 12 }}>
-            Remove <strong style={{ color: t.textPrimary }}>{localItem.title}</strong> from your shelf? This will also delete any journal entries and ratings.
+            Remove <strong style={{ color: t.textPrimary }}>{localItem.title}</strong> from your log? You'll lose any community and badge progress associated with this item.
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button style={{ ...primaryBtn, background: t.red }}
