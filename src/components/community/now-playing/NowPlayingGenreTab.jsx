@@ -493,7 +493,6 @@ export default function NowPlayingGenreTab({
                   tint={meta.tint || "#1a1a2e"}
                   poster={meta.poster}
                   posterPos={meta.posterPos}
-                  logoPos={meta.logoPos || "bottom"}
                   accent={accent}
                   delay={i * 0.03}
                   onTap={() => setActiveGenre(key)}
@@ -506,7 +505,6 @@ export default function NowPlayingGenreTab({
                 label="Coming Soon"
                 icon="📅"
                 tint="#1a2a1a"
-                logoPos="bottom"
                 accent="rgba(250,204,21,0.8)"
                 delay={genreKeys.length * 0.03}
                 onTap={() => setActiveGenre(UPCOMING_KEY)}
@@ -1025,9 +1023,8 @@ function MultiRing({ size = 90, strokeWidth = 5, rings = [], centerPct = 0 }) {
    GenreGridTile — Visual tile for a genre in the 3×3 grid
    ═══════════════════════════════════════════════════════════════ */
 
-function GenreGridTile({ label, icon, tint, poster, posterPos, logoPos = "bottom", accent, delay = 0, onTap }) {
+function GenreGridTile({ label, icon, tint, poster, posterPos, accent, delay = 0, onTap }) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const isTop = logoPos === "top";
 
   return (
     <div
@@ -1084,24 +1081,6 @@ function GenreGridTile({ label, icon, tint, poster, posterPos, logoPos = "bottom
           background: "rgba(255,255,255,0.03)",
         }} />
       )}
-
-      {/* NPP filmstrip logo */}
-      <img
-        src="https://api.mymantl.app/storage/v1/object/public/banners/NPPLogo.png"
-        alt=""
-        style={{
-          position: "absolute",
-          left: "50%",
-          transform: "translateX(-50%)",
-          width: "80%",
-          objectFit: "contain",
-          opacity: 0.85,
-          pointerEvents: "none",
-          ...(isTop
-            ? { top: "8%" }
-            : { bottom: "8%" }),
-        }}
-      />
 
       {/* Center overlay for text readability */}
       <div style={{
