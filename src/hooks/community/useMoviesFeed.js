@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
-import { fetchLogosForItems, getLogoUrl, isLogoChecked } from "../../utils/communityTmdb";
+import { fetchLogosForItems, getLogoUrl, isLogoChecked, clearSoftLogoMisses } from "../../utils/communityTmdb";
 
 /**
  * useBrowseFeed — powers the New Releases and Streaming tabs.
@@ -136,6 +136,7 @@ export function useMoviesFeed(mode, active = false) {
   }, []);
 
   const refresh = useCallback(() => {
+    clearSoftLogoMisses();
     fetchFromCache();
   }, [fetchFromCache]);
 

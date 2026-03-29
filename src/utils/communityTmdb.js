@@ -370,6 +370,16 @@ export const isLogoChecked = (tmdbId) => {
   return false;
 };
 
+// Evict all soft misses from the live in-memory cache — called on pull-to-refresh
+// so network failures from this session are retried immediately without an app restart.
+export const clearSoftLogoMisses = () => {
+  let changed = false;
+  for (const k of Object.keys(logoCache)) {
+    if (logoCache[k]?.soft) { delete logoCache[k]; changed = true; }
+  }
+  if (changed) saveLogoCache();
+};
+
 // Fetch a single logo — returns full URL or null
 export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
   if (!tmdbId) return null;
