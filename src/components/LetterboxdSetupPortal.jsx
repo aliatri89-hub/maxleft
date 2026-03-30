@@ -305,7 +305,7 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
             </div>
             <label style={{ fontSize: 13, letterSpacing: "0.2em", color: dk.terracotta, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Letterboxd Username</label>
             <input
-              type="text" placeholder="e.g. aliatri"
+              type="text" placeholder="e.g. deniro"
               value={letterboxdUsername}
               onChange={e => setLetterboxdUsername(e.target.value.trim().toLowerCase())}
               style={{ width: "100%", background: dk.card, border: "1px solid " + dk.border, color: dk.text, fontSize: 17, padding: "14px 16px", borderRadius: 10, outline: "none", boxSizing: "border-box" }}
