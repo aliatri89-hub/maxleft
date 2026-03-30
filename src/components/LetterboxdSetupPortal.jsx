@@ -211,7 +211,7 @@ function RssPreview({ username, dk }) {
 }
 
 // ── Main portal ──────────────────────────────────────────
-export default function LetterboxdSetupPortal({ session, profile, onClose, onComplete }) {
+export default function LetterboxdSetupPortal({ session, profile, onClose, onComplete, onLetterboxdSync, letterboxdSyncing }) {
   const [phase, setPhase] = useState("setup"); // setup | processing
   const [letterboxdUsername, setLetterboxdUsername] = useState(profile?.letterboxd_username || "");
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -311,6 +311,31 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
               style={{ width: "100%", background: dk.card, border: "1px solid " + dk.border, color: dk.text, fontSize: 17, padding: "14px 16px", borderRadius: 10, outline: "none", boxSizing: "border-box" }}
             />
             <RssPreview username={letterboxdUsername} dk={dk} />
+            {profile?.letterboxd_username && letterboxdUsername === profile.letterboxd_username && onLetterboxdSync && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onLetterboxdSync(); }}
+                disabled={letterboxdSyncing}
+                style={{
+                  marginTop: 12, width: "100%", padding: "12px", borderRadius: 8,
+                  border: `1px solid ${dk.border}`,
+                  background: letterboxdSyncing ? "rgba(255,255,255,0.04)" : "rgba(201,120,73,0.15)",
+                  color: letterboxdSyncing ? dk.textMuted : dk.terracotta,
+                  fontSize: 13, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif",
+                  textTransform: "uppercase", letterSpacing: "0.05em",
+                  cursor: letterboxdSyncing ? "default" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                }}
+              >
+                {letterboxdSyncing ? (
+                  <>
+                    <div style={{ width: 12, height: 12, border: `2px solid ${dk.textMuted}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                    Syncing…
+                  </>
+                ) : (
+                  <>🔄 Sync Now</>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Import Full History */}

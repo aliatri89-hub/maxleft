@@ -632,6 +632,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           profile={profile}
           onClose={() => setLetterboxdOpen(false)}
           onComplete={onImportComplete}
+          onLetterboxdSync={onLetterboxdSync}
+          letterboxdSyncing={letterboxdSyncing}
         />
       )}
     </div>
