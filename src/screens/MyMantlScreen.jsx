@@ -137,7 +137,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <BadgeShelf session={session} />
+      <BadgeShelf session={session} isActive={isActive} />
 
       {/* ── Stats Ribbon ── */}
       <StatsRibbon userId={session?.user?.id} />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 
 /**
@@ -13,14 +13,16 @@ import { supabase } from "../supabase";
  *   closestBadge   — { id, name, image_url, accent_color, current, total } | null
  *   loading        — boolean
  */
-export function useGlobalBadges(userId) {
+export function useGlobalBadges(userId, active = false) {
   const [earnedBadges, setEarnedBadges] = useState([]);
   const [closestBadge, setClosestBadge] = useState(null);
   const [loading, setLoading] = useState(true);
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!userId) { setLoading(false); return; }
+    if (!userId || !active || fetchedRef.current) { setLoading(false); return; }
     let cancelled = false;
+    fetchedRef.current = true;
 
     (async () => {
       setLoading(true);
@@ -199,7 +201,7 @@ export function useGlobalBadges(userId) {
     })();
 
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, active]);
 
   return { earnedBadges, closestBadge, loading };
 }

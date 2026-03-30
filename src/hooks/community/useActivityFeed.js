@@ -369,9 +369,10 @@ function enrichMedia(visibleCards, thisGen, fetchGenRef, mountedRef, setRenderTi
 
 const PAGE_SIZE = 15;
 
-export function useActivityFeed(userId, favoritePodcastIds) {
+export function useActivityFeed(userId, favoritePodcastIds, active = false) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
+  const fetchedRef = useRef(false);
   const feedBucketRef = useRef([]);
   const fetchGenRef = useRef(0);
   const [activityVisible, setActivityVisible] = useState(PAGE_SIZE);
@@ -444,9 +445,12 @@ export function useActivityFeed(userId, favoritePodcastIds) {
 
   useEffect(() => {
     mountedRef.current = true;
-    fetchFeed();
+    if (active && !fetchedRef.current) {
+      fetchedRef.current = true;
+      fetchFeed();
+    }
     return () => { mountedRef.current = false; };
-  }, [fetchFeed]);
+  }, [active, fetchFeed]);
 
   return {
     activityItems,

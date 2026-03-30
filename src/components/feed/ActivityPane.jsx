@@ -39,7 +39,7 @@ export default function ActivityPane({
     loadMoreActivity,
     loading,
     refresh,
-  } = useActivityFeed(userId, favoritePodcasts);
+  } = useActivityFeed(userId, favoritePodcasts, isVisible);
 
   const sentinelRef = useRef(null);
   const wasActiveRef = useRef(isActive);

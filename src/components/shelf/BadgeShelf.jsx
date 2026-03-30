@@ -188,9 +188,9 @@ function EmptySlot({ delay = 0 }) {
   );
 }
 
-export default function BadgeShelf({ session }) {
+export default function BadgeShelf({ session, isActive }) {
   const userId = session?.user?.id;
-  const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId);
+  const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId, isActive);
   const [selectedBadge, setSelectedBadge] = useState(null);
 
   const recentThree = useMemo(() => earnedBadges.slice(0, 3), [earnedBadges]);
