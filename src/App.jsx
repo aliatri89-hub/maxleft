@@ -1,7 +1,9 @@
 import { t } from "./theme";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
+import { App as CapacitorApp } from "@capacitor/app";
 import { StatusBar, Style } from "@capacitor/status-bar";
+import { App as CapApp } from "@capacitor/app";
 import { supabase } from "./supabase";
 import "./styles/App.css";
 import { ShelvesProvider, useShelves } from "./contexts/ShelvesProvider";
@@ -45,6 +47,15 @@ if (Capacitor.isNativePlatform()) {
 
   // Wait for layout to settle after overlay mode is applied
   requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+
+  // Re-probe whenever the app returns to foreground (e.g. after OAuth system
+  // browser closes). Android needs ~150ms to re-apply window insets to the
+  // WebView after foregrounding, so a bare rAF fires too early and reads 0px.
+  CapApp.addListener("appStateChange", ({ isActive }) => {
+    if (isActive) {
+      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 150);
+    }
+  });
 }
 
 // Utils
