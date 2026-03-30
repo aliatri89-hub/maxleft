@@ -7,8 +7,6 @@
  */
 
 import { supabase } from "../supabase";
-import { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw } from "./api";
-import { upsertMediaLog, toPosterPath } from "./mediaWrite";
 
 // ═══════════════════════════════════════════════════════════
 //  CSV PARSING
@@ -172,316 +170,72 @@ export async function parseFile(file, userId) {
 
 // ═══════════════════════════════════════════════════════════
 //  IMPORT MOVIES (Letterboxd)
+
 // ═══════════════════════════════════════════════════════════
+//  IMPORT MOVIES (Letterboxd) — streams via Edge Function
+// ═══════════════════════════════════════════════════════════
+//
+// Sends pre-parsed items to the import-letterboxd-csv Edge Function,
+// which handles all TMDB lookups, DB writes, community backfill, and
+// badge checks entirely server-side. Fully backgroundable — the client
+// just reads the NDJSON stream for progress updates.
 
 export async function importMovies(items, userId, onProgress, { communityIds: providedCommunityIds } = {}) {
-  let count = 0, errs = 0;
-  const CONCURRENCY = 6;
-  const importedTmdbIds = []; // track successfully imported tmdb_ids
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error("Not authenticated");
 
-  const processItem = async (m, tmdbId) => {
-    try {
-      const results = await searchTMDBRaw(m.title, m.year || null);
-      const match = (results || [])[0];
-      if (!match) { errs++; return; }
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const fnUrl = `${supabaseUrl}/functions/v1/import-letterboxd-csv`;
 
-      const watchDates = (m.watchDates || [])
-        .filter(Boolean)
-        .map(d => {
-          try { return new Date(d).toISOString().slice(0, 10); }
-          catch { return null; }
-        })
-        .filter(Boolean)
-        .sort();
+  const response = await fetch(fnUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({
+      items,
+      communityIds: providedCommunityIds || [],
+    }),
+  });
 
-      if (watchDates.length === 0) {
-        watchDates.push(new Date().toISOString().slice(0, 10));
-      }
-
-      const watchedAt = m.watchedDate
-        ? new Date(m.watchedDate + "T12:00:00Z").toISOString()
-        : new Date().toISOString();
-
-      const mediaId = await upsertMediaLog(userId, {
-        mediaType: "film",
-        tmdbId: match.id,
-        title: m.title,
-        year: m.year || (match.release_date ? parseInt(match.release_date) : null),
-        creator: null,
-        posterPath: match.poster_path || null,
-        backdropPath: match.backdrop_path || null,
-        runtime: null,
-        genre: null,
-        rating: m.ratingHalf || m.rating || null,
-        watchedAt,
-        watchedDate: m.watchedDate || null,
-        source: "letterboxd",
-        watchCount: watchDates.length,
-        watchDates,
-      });
-
-      if (!mediaId) { errs++; return; }
-      count++;
-      importedTmdbIds.push({ tmdbId: match.id, rating: m.ratingHalf || m.rating || null, watchedAt });
-    } catch (e) { errs++; }
-  };
-
-  // Process in concurrent batches
-  for (let i = 0; i < items.length; i += CONCURRENCY) {
-    const batch = items.slice(i, i + CONCURRENCY);
-    await Promise.all(batch.map(m => processItem(m)));
-    await new Promise(r => setTimeout(r, 150)); // avoid TMDB rate limit
-    if (onProgress) onProgress(Math.min(i + CONCURRENCY, items.length), items.length);
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Import function error: ${err}`);
   }
 
-  // ── Backfill community_user_progress ──────────────────────
-  // Match imported tmdb_ids to community_items and write progress rows
-  try {
-    const allTmdbIds = importedTmdbIds.map(f => f.tmdbId);
+  // Read NDJSON stream for live progress updates
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let count = 0;
+  let errs = 0;
 
-    if (allTmdbIds.length > 0) {
-      const ratingMap = new Map(importedTmdbIds.map(f => [f.tmdbId, f]));
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
 
-      // Batch the community_items lookup to avoid URL length limits
-      const BATCH = 100;
-      const allMatchedItems = [];
-      for (let i = 0; i < allTmdbIds.length; i += BATCH) {
-        const chunk = allTmdbIds.slice(i, i + BATCH);
-        const { data, error } = await supabase
-          .from("community_items")
-          .select("id, tmdb_id")
-          .in("tmdb_id", chunk);
-        if (error) console.error("[importMovies] community_items query error:", error.message);
-        if (data) allMatchedItems.push(...data);
-      }
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop(); // keep incomplete last line
 
-
-      if (allMatchedItems.length > 0) {
-        // Batch the existing progress lookup too
-        const matchedItemIds = allMatchedItems.map(i => i.id);
-        const allExisting = [];
-        for (let i = 0; i < matchedItemIds.length; i += BATCH) {
-          const chunk = matchedItemIds.slice(i, i + BATCH);
-          const { data } = await supabase
-            .from("community_user_progress")
-            .select("item_id")
-            .eq("user_id", userId)
-            .in("item_id", chunk);
-          if (data) allExisting.push(...data);
-        }
-
-        const existingSet = new Set(allExisting.map(p => p.item_id));
-
-        const newRows = allMatchedItems
-          .filter(item => !existingSet.has(item.id))
-          .map(item => {
-            const filmData = ratingMap.get(item.tmdb_id);
-            return {
-              user_id: userId,
-              item_id: item.id,
-              status: "completed",
-              rating: filmData?.rating ? Math.round(filmData.rating) : null,
-              completed_at: filmData?.watchedAt || new Date().toISOString(),
-              listened_with_commentary: false,
-              brown_arrow: false,
-              updated_at: new Date().toISOString(),
-            };
-          });
-
-        if (newRows.length > 0) {
-          // Batch the upsert too
-          for (let i = 0; i < newRows.length; i += BATCH) {
-            const chunk = newRows.slice(i, i + BATCH);
-            const { error: upsertErr } = await supabase
-              .from("community_user_progress")
-              .upsert(chunk, { onConflict: "user_id,item_id" });
-            if (upsertErr) console.error("[importMovies] Backfill upsert error:", upsertErr.message);
-          }
-        } else {
-        }
-      }
-    }
-  } catch (e) {
-    console.error("[importMovies] Community progress backfill FAILED:", e.message, e);
-  }
-
-  // ── Award badges earned by the import ──────────────────────
-  // Normally badges are checked in useBadges when visiting a community.
-  // After a bulk import we need to check here so badges are awarded immediately.
-  try {
-
-    // 1. Get subscribed communities (use provided IDs during onboarding, since subscriptions aren't seeded yet)
-    let communityIds = providedCommunityIds || [];
-    if (communityIds.length === 0) {
-      const { data: subs } = await supabase
-        .from("user_community_subscriptions")
-        .select("community_id")
-        .eq("user_id", userId);
-      communityIds = (subs || []).map(s => s.community_id);
-    }
-
-    if (communityIds.length > 0) {
-      // 2. Get all active badges + already earned
-      const { data: allBadges } = await supabase
-        .from("badges")
-        .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter")
-        .in("community_id", communityIds)
-        .eq("is_active", true);
-
-      const { data: earnedRows } = await supabase
-        .from("user_badges")
-        .select("badge_id")
-        .eq("user_id", userId)
-        .in("badge_id", (allBadges || []).map(b => b.id));
-
-      const earnedSet = new Set((earnedRows || []).map(r => r.badge_id));
-      const unearnedBadges = (allBadges || []).filter(b => !earnedSet.has(b.id));
-
-      let awarded = 0;
-      const BATCH = 100;
-
-      // 3. Check miniseries_completion badges
-      const miniseriesBadges = unearnedBadges.filter(b => b.badge_type === "miniseries_completion" && b.miniseries_id);
-      if (miniseriesBadges.length > 0) {
-        const msIds = [...new Set(miniseriesBadges.map(b => b.miniseries_id))];
-        const allItems = [];
-        for (let i = 0; i < msIds.length; i += BATCH) {
-          const { data } = await supabase.from("community_items").select("id, tmdb_id, miniseries_id, media_type").in("miniseries_id", msIds.slice(i, i + BATCH));
-          if (data) allItems.push(...data);
-        }
-
-        const allTmdbIds = [...new Set(allItems.map(i => i.tmdb_id).filter(Boolean))];
-        const completedTmdbSet = new Set();
-        for (let i = 0; i < allTmdbIds.length; i += BATCH) {
-          const { data } = await supabase
-            .from("community_user_progress")
-            .select("community_items!inner(tmdb_id)")
-            .eq("user_id", userId).eq("status", "completed")
-            .in("community_items.tmdb_id", allTmdbIds.slice(i, i + BATCH));
-          (data || []).forEach(r => { if (r.community_items?.tmdb_id) completedTmdbSet.add(r.community_items.tmdb_id); });
-        }
-
-        for (const badge of miniseriesBadges) {
-          const items = allItems.filter(i => i.miniseries_id === badge.miniseries_id && (!badge.media_type_filter || i.media_type === badge.media_type_filter));
-          const required = [...new Set(items.map(i => i.tmdb_id).filter(Boolean))];
-          if (required.length > 0 && required.every(id => completedTmdbSet.has(id))) {
-            const { error } = await supabase.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
-            if (!error || error.message.includes("duplicate")) {
-              awarded++;
-              await supabase.from("user_notifications").upsert({
-                user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
-                body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
-                payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
-                ref_key: `badge_earned:${badge.id}`,
-              }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
-            }
-          }
-        }
-      }
-
-      // 4. Check item_set_completion badges
-      const itemSetBadges = unearnedBadges.filter(b => b.badge_type === "item_set_completion");
-      if (itemSetBadges.length > 0) {
-        const badgeIds = itemSetBadges.map(b => b.id);
-        const allBadgeItems = [];
-        for (let i = 0; i < badgeIds.length; i += BATCH) {
-          const { data } = await supabase.from("badge_items").select("badge_id, community_items!inner(tmdb_id)").in("badge_id", badgeIds.slice(i, i + BATCH));
-          if (data) allBadgeItems.push(...data);
-        }
-
-        const badgeItemsMap = {};
-        allBadgeItems.forEach(r => {
-          if (!badgeItemsMap[r.badge_id]) badgeItemsMap[r.badge_id] = [];
-          if (r.community_items?.tmdb_id) badgeItemsMap[r.badge_id].push(r.community_items.tmdb_id);
-        });
-
-        const allSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat())];
-        const completedSetTmdb = new Set();
-        for (let i = 0; i < allSetTmdbIds.length; i += BATCH) {
-          const { data } = await supabase
-            .from("community_user_progress")
-            .select("community_items!inner(tmdb_id)")
-            .eq("user_id", userId).eq("status", "completed")
-            .in("community_items.tmdb_id", allSetTmdbIds.slice(i, i + BATCH));
-          (data || []).forEach(r => { if (r.community_items?.tmdb_id) completedSetTmdb.add(r.community_items.tmdb_id); });
-        }
-
-        for (const badge of itemSetBadges) {
-          const required = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
-          if (required.length > 0 && required.every(id => completedSetTmdb.has(id))) {
-            const { error } = await supabase.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
-            if (!error || error.message.includes("duplicate")) {
-              awarded++;
-              await supabase.from("user_notifications").upsert({
-                user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
-                body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
-                payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
-                ref_key: `badge_earned:${badge.id}`,
-              }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
-            }
-          }
-        }
-      }
-
-
-      // ── Badge digest notification — "Your library has a head start!" ──
-      // Collect progress for unearned badges to show how close the user is.
-      // Only fires during the import (first time), not on re-imports.
+    for (const line of lines) {
+      if (!line.trim()) continue;
       try {
-        const progressEntries = [];
-
-        // Re-check unearned badges (excluding just-awarded ones) for partial progress
-        const { data: freshEarned } = await supabase
-          .from("user_badges").select("badge_id").eq("user_id", userId)
-          .in("badge_id", unearnedBadges.map(b => b.id));
-        const freshEarnedSet = new Set((freshEarned || []).map(r => r.badge_id));
-        const stillUnearned = unearnedBadges.filter(b => !freshEarnedSet.has(b.id));
-
-        for (const badge of stillUnearned) {
-          let required = [], current = 0;
-          if (badge.badge_type === "miniseries_completion" && badge.miniseries_id) {
-            const { data: items } = await supabase.from("community_items")
-              .select("tmdb_id").eq("miniseries_id", badge.miniseries_id);
-            required = [...new Set((items || []).map(i => i.tmdb_id).filter(Boolean))];
-            const { data: done } = required.length > 0
-              ? await supabase.from("community_user_progress")
-                  .select("community_items!inner(tmdb_id)")
-                  .eq("user_id", userId).eq("status", "completed")
-                  .in("community_items.tmdb_id", required)
-              : { data: [] };
-            current = new Set((done || []).map(r => r.community_items?.tmdb_id).filter(Boolean)).size;
-          }
-          if (current > 0 && current < required.length) {
-            progressEntries.push({ badge, current, total: required.length });
-          }
+        const msg = JSON.parse(line);
+        if (msg.type === "progress") {
+          count = msg.count;
+          errs = msg.errs;
+          if (onProgress) onProgress(msg.progress, msg.total);
+        } else if (msg.type === "done") {
+          count = msg.count;
+          errs = msg.errs;
         }
-
-        if (progressEntries.length > 0) {
-          progressEntries.sort((a, b) => (b.current / b.total) - (a.current / a.total));
-          const count = progressEntries.length + awarded; // include just-earned badges in the count
-          const topPct = Math.round((progressEntries[0].current / progressEntries[0].total) * 100);
-          const title = "Your library has a head start!";
-          const body = topPct >= 50
-            ? `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""} — you're over halfway to one. Tap to explore.`
-            : `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""}. Tap to see how close you are.`;
-
-          await supabase.from("user_notifications").upsert({
-            user_id: userId, notif_type: "badge_digest", title, body,
-            image_url: progressEntries[0]?.badge?.image_url || null,
-            payload: { type: "badge_digest", badge_count: count, top_pct: topPct },
-            ref_key: "badge_digest:sync",
-            created_at: new Date().toISOString(),
-          }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
-        }
-      } catch (e) {
-        console.warn("[importMovies] Badge digest failed:", e.message);
+      } catch {
+        // malformed line — ignore
       }
     }
-  } catch (e) {
-    console.error("[importMovies] Badge check failed:", e.message, e);
   }
 
   return { count, errs };
 }
-
-
