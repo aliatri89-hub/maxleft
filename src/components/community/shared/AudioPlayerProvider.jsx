@@ -427,6 +427,7 @@ function FullScreenPlayer({
   onRemoveFromQueue, onClearQueue,
 }) {
   const scrubberRef = useRef(null);
+  const sheetRef = useRef(null);
   const [scrubbing, setScrubbing] = useState(false);
   const [scrubValue, setScrubValue] = useState(0);
   const [closing, setClosing] = useState(false);
@@ -435,6 +436,7 @@ function FullScreenPlayer({
   const [skipFlash, setSkipFlash] = useState(null); // null | "back" | "fwd"
   const lastTapRef = useRef({ time: 0, x: 0 });
   const skipFlashTimer = useRef(null);
+  const dragRef = useRef({ startY: 0, currentY: 0, dragging: false });
 
   // Double-tap artwork to skip ±15s
   const handleArtworkTap = useCallback((e) => {
@@ -513,6 +515,72 @@ function FullScreenPlayer({
     setTimeout(onClose, 280);
   }, [onClose]);
 
+  // ── Swipe-down to dismiss ──
+  const handleSheetTouchStart = useCallback((e) => {
+    // Only start drag if the scrollable content is at top (or touch is on the handle area)
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const scrollable = sheet.querySelector("[data-scroll]");
+    const atTop = !scrollable || scrollable.scrollTop <= 0;
+    if (!atTop) return;
+    dragRef.current = { startY: e.touches[0].clientY, currentY: e.touches[0].clientY, dragging: false };
+  }, []);
+
+  const handleSheetTouchMove = useCallback((e) => {
+    const d = dragRef.current;
+    if (d.startY === 0) return;
+    const y = e.touches[0].clientY;
+    const delta = y - d.startY;
+    // Only drag downward
+    if (delta > 8) {
+      d.dragging = true;
+      d.currentY = y;
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = `translateY(${delta}px)`;
+        sheetRef.current.style.transition = "none";
+      }
+      e.preventDefault();
+    }
+  }, []);
+
+  const handleSheetTouchEnd = useCallback(() => {
+    const d = dragRef.current;
+    if (!d.dragging) { dragRef.current = { startY: 0, currentY: 0, dragging: false }; return; }
+    const delta = d.currentY - d.startY;
+    if (delta > 120) {
+      // Past threshold — dismiss
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = "translateY(100%)";
+        sheetRef.current.style.transition = "transform 0.25s ease";
+      }
+      setTimeout(onClose, 250);
+    } else {
+      // Snap back
+      if (sheetRef.current) {
+        sheetRef.current.style.transform = "translateY(0)";
+        sheetRef.current.style.transition = "transform 0.2s ease";
+      }
+    }
+    dragRef.current = { startY: 0, currentY: 0, dragging: false };
+  }, [onClose]);
+
+  // ── Attach swipe-down listeners as non-passive (needed for preventDefault) ──
+  useEffect(() => {
+    const el = sheetRef.current;
+    if (!el) return;
+    const onStart = (e) => handleSheetTouchStart(e);
+    const onMove = (e) => handleSheetTouchMove(e);
+    const onEnd = () => handleSheetTouchEnd();
+    el.addEventListener("touchstart", onStart, { passive: true });
+    el.addEventListener("touchmove", onMove, { passive: false });
+    el.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", onStart);
+      el.removeEventListener("touchmove", onMove);
+      el.removeEventListener("touchend", onEnd);
+    };
+  }, [handleSheetTouchStart, handleSheetTouchMove, handleSheetTouchEnd]);
+
   // Lock body scroll
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -530,6 +598,7 @@ function FullScreenPlayer({
       animation: closing ? "audioSheetOut 0.28s ease forwards" : "audioSheetBgIn 0.25s ease",
     }} onClick={handleClose}>
       <div
+        ref={sheetRef}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: "linear-gradient(180deg, #16162a 0%, #0d0d1a 100%)",
@@ -983,7 +1052,7 @@ function FullScreenPlayer({
         )}
 
         {/* ── Scrollable content: Recents ── */}
-        <div style={{
+        <div data-scroll style={{
           borderTop: "1px solid rgba(255,255,255,0.06)",
           flex: 1, minHeight: 0,
           overflowY: "auto",
