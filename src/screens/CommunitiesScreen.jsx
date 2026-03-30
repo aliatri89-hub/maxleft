@@ -4,6 +4,7 @@ import { supabase } from "../supabase";
 import { useBackGesture } from "../hooks/useBackGesture";
 import CommunityTapeCard from "../components/community/shared/CommunityTapeCard";
 import CommunitySleeveSheet from "../components/community/shared/CommunitySleeveSheet";
+import PodcastRequestSheet from "../components/community/shared/PodcastRequestSheet";
 
 // Podcast artwork by community slug
 // TODO: move to community_pages.image_url column when ready
@@ -32,6 +33,7 @@ export default function CommunitiesScreen({
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({}); // lightweight: series + badge counts
   const [sleeveOpen, setSleeveOpen] = useState(null); // community object or null
+  const [requestOpen, setRequestOpen] = useState(false); // podcast request sheet
   const isDev = new URLSearchParams(window.location.search).has("dev");
   const userId = session?.user?.id;
 
@@ -291,27 +293,45 @@ export default function CommunitiesScreen({
               </>
             )}
 
-            {/* Coming soon */}
-            <div style={{
-              background: "var(--bg-card)",
-              borderRadius: 16,
-              padding: "32px 24px",
-              textAlign: "center",
-              marginTop: 8,
-              border: "1px solid var(--border-subtle)",
-            }}>
+            {/* Request a podcast CTA */}
+            <div
+              onClick={() => setRequestOpen(true)}
+              style={{
+                background: "var(--bg-card)",
+                borderRadius: 16,
+                padding: "28px 24px",
+                textAlign: "center",
+                marginTop: 8,
+                border: "1px solid var(--border-subtle)",
+                cursor: "pointer",
+                transition: "border-color 0.15s",
+              }}
+            >
               <div style={{
-                fontFamily: t.fontSerif, fontWeight: 700,
-                fontSize: 18, color: "var(--text-primary)",
-                marginBottom: 8,
+                fontFamily: t.fontSharpie,
+                fontSize: 20, color: "var(--text-primary)",
+                marginBottom: 6,
               }}>
-                More communities coming soon
+                Don't see your favorite pod?
               </div>
               <div style={{
                 fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
-                fontFamily: t.fontBody,
+                fontFamily: t.fontBody, marginBottom: 14,
               }}>
-                New podcast communities are added regularly.
+                Request it and upvote others — popular requests get built first.
+              </div>
+              <div style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                padding: "10px 22px",
+                borderRadius: 10,
+                background: t.red,
+                color: "#fff",
+                fontSize: 13,
+                fontFamily: t.fontBody,
+                fontWeight: 600,
+                letterSpacing: "0.02em",
+              }}>
+                📼 Request a Podcast
               </div>
             </div>
           </>
@@ -336,6 +356,13 @@ export default function CommunitiesScreen({
           subscriptionsLoaded={subscriptionsLoaded}
         />
       )}
+
+      {/* Podcast request sheet */}
+      <PodcastRequestSheet
+        open={requestOpen}
+        onClose={() => setRequestOpen(false)}
+        userId={userId}
+      />
     </div>
   );
 }
