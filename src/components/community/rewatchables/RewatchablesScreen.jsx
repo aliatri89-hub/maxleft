@@ -203,8 +203,11 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
         allItems={allItems}
       />
 
-      {/* View mode + filter — single row, overlaps into hero */}
-      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center", position: "relative", zIndex: 2, marginTop: -66 }}>
+      {/* ─── Controls overlay — sits inside hero banner ── */}
+      <div style={{ position: "relative", zIndex: 2, marginTop: -76 }}>
+
+      {/* View mode + filter — single row */}
+      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center" }}>
         {[{ key: "az", label: "Genre" }, { key: "decades", label: "Decades" }].map(v => (
           <button
             key={v.key}
@@ -341,6 +344,8 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           Showing episodes with {selectedHostNames}
         </div>
       )}
+
+      </div>{/* end controls overlay */}
 
       <div style={{ paddingTop: 8 }}>
         {shelves.map((s) => {
