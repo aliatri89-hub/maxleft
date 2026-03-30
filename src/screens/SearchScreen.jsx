@@ -91,10 +91,6 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
     }, 150);
   }, [results]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Notify state ──
-  const [notifyingId, setNotifyingId] = useState(null);
-  const [notifiedIds, setNotifiedIds] = useState(new Set());
-
   // ── Filter / Sort / Browse ──
   const [selectedPodcast, setSelectedPodcast] = useState(null);
   const [sortOrder, setSortOrder] = useState(null); // null | "recent" | "oldest"
@@ -409,33 +405,7 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   }, [addToQueue]);
 
   // ═══════════════════════════════════════════
-  // NOTIFY ME (uncovered films)
-  // ═══════════════════════════════════════════
 
-  const handleNotify = useCallback(async (result) => {
-    if (!userId || notifyingId) return;
-    setNotifyingId(result.tmdbId);
-
-    try {
-      const { error } = await supabase.from("search_miss_log").upsert({
-        query: query.trim(),
-        tmdb_id: result.tmdbId,
-        user_id: userId,
-      }, {
-        onConflict: "user_id,tmdb_id",
-        ignoreDuplicates: true,
-      });
-
-      if (!error) {
-        setNotifiedIds((prev) => new Set([...prev, result.tmdbId]));
-        if (onToast) onToast(`We'll notify you when ${result.title} gets covered`);
-      }
-    } catch (err) {
-      console.error("[Search] Notify error:", err);
-    } finally {
-      setNotifyingId(null);
-    }
-  }, [userId, notifyingId, query, onToast]);
 
   // ── Split for rendering ──
   const coveredResults = useMemo(
@@ -798,9 +768,6 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
               result={r}
               isExpanded={expandedTmdbId === r.tmdbId}
               onTap={() => handleResultTap(r.tmdbId, 0)}
-              onNotify={() => handleNotify(r)}
-              notifying={notifyingId === r.tmdbId}
-              notified={notifiedIds.has(r.tmdbId)}
               watched={watchedTmdbIds.has(r.tmdbId)}
               userId={userId}
               onWatchedChange={(tmdbId) => setWatchedTmdbIds(prev => new Set([...prev, tmdbId]))}
@@ -886,7 +853,7 @@ function searchStripHtml(str) {
 
 function ResultCard({
   result, isExpanded, onTap, episodes, loadingEpisodes,
-  onPlayEpisode, onQueueEpisode, onNotify, notifying, notified, currentEp, isPlaying,
+  onPlayEpisode, onQueueEpisode, currentEp, isPlaying,
   isAdmin, hiddenEpIds, onUnlinkEpisode, watched, userId, onWatchedChange,
 }) {
   const hasCoverage = result.podcastCount > 0;
@@ -1299,75 +1266,8 @@ function ResultCard({
               fontFamily: t.fontBody,
               fontSize: 10, color: t.textSecondary,
               textTransform: "uppercase", letterSpacing: "0.06em",
-              marginBottom: 10,
             }}>
               No podcast coverage yet
-            </div>
-
-            {notified ? (
-              <div style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "8px 14px",
-                background: "rgba(199,91,63,0.06)",
-                border: "1px solid rgba(199,91,63,0.15)",
-                borderRadius: 8,
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TC} strokeWidth="2" strokeLinecap="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-                <span style={{
-                  fontFamily: t.fontDisplay,
-                  fontSize: 12, fontWeight: 600, color: TC,
-                  textTransform: "uppercase", letterSpacing: "0.04em",
-                }}>
-                  We'll let you know
-                </span>
-              </div>
-            ) : (
-              <button
-                onClick={(e) => { e.stopPropagation(); onNotify?.(); }}
-                disabled={notifying}
-                style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "8px 14px", width: "100%",
-                  background: notifying ? "rgba(199,91,63,0.08)" : "rgba(199,91,63,0.1)",
-                  border: `1px solid rgba(199,91,63,${notifying ? "0.15" : "0.25"})`,
-                  borderRadius: 8, cursor: notifying ? "wait" : "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                {notifying ? (
-                  <div style={{
-                    width: 14, height: 14, borderRadius: "50%",
-                    border: "2px solid rgba(199,91,63,0.2)",
-                    borderTopColor: TC,
-                    animation: "spin 0.6s linear infinite",
-                  }} />
-                ) : (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TC} strokeWidth="2" strokeLinecap="round">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                  </svg>
-                )}
-                <span style={{
-                  fontFamily: t.fontDisplay,
-                  fontSize: 12, fontWeight: 700, color: TC,
-                  textTransform: "uppercase", letterSpacing: "0.04em",
-                }}>
-                  {notifying ? "Subscribing…" : "Notify me when covered"}
-                </span>
-              </button>
-            )}
-
-            <div style={{
-              fontFamily: t.fontBody,
-              fontSize: 9, color: t.textSecondary,
-              marginTop: 8, lineHeight: 1.4,
-            }}>
-              {notified
-                ? "You'll get a notification when a podcast covers this film."
-                : "Get notified when a podcast in our network reviews this film."}
             </div>
           </div>
         </div>
