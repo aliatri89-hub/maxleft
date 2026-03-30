@@ -230,7 +230,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   function getShareText() {
     if (!puzzle) return "";
     const pNum = puzzleNumber || "?";
-    const solveEmojis = ["🟩", "🟨", "🟪"];
+    const solveEmojis = ["🟩", "🟨", "🟪", "🟦"];
     const totalGroups = puzzle.movies.length;
     const rows = [];
     solved.forEach((_, i) => {
