@@ -190,103 +190,9 @@ function FAQItem({ q, a, customKey }) {
   );
 }
 
-function ContactForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
-  const [sending, setSending] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!email.trim() || !message.trim()) return;
-    setSending(true);
-    try {
-      await fetch("https://formspree.io/f/hello@mymantl.app", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ name, email, message }),
-      });
-    } catch (_) {}
-    setSent(true);
-    setSending(false);
-  };
-
-  const inputStyle = {
-    width: "100%",
-    background: "rgba(255,255,255,0.05)",
-    border: `1px solid ${BORDER}`,
-    borderRadius: 8,
-    color: TEXT,
-    fontFamily: "'Barlow Condensed', sans-serif",
-    fontSize: 14,
-    padding: "10px 12px",
-    outline: "none",
-    boxSizing: "border-box",
-  };
-
-  if (sent) {
-    return (
-      <div
-        style={{
-          padding: "20px 0",
-          textAlign: "center",
-          fontFamily: "'Barlow Condensed', sans-serif",
-          color: MUTED,
-          fontSize: 14,
-        }}
-      >
-        Message sent — we'll get back to you soon.
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
-      <input
-        style={inputStyle}
-        placeholder="Name (optional)"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
-      <input
-        style={inputStyle}
-        placeholder="Email *"
-        type="email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <textarea
-        style={{ ...inputStyle, minHeight: 100, resize: "vertical" }}
-        placeholder="What's on your mind? *"
-        value={message}
-        onChange={e => setMessage(e.target.value)}
-      />
-      <button
-        onClick={handleSubmit}
-        disabled={sending || !email.trim() || !message.trim()}
-        style={{
-          background: AMBER,
-          color: BG,
-          border: "none",
-          borderRadius: 8,
-          padding: "11px 20px",
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontWeight: 700,
-          fontSize: 14,
-          cursor: sending || !email.trim() || !message.trim() ? "not-allowed" : "pointer",
-          opacity: sending || !email.trim() || !message.trim() ? 0.5 : 1,
-          letterSpacing: "0.04em",
-        }}
-      >
-        {sending ? "Sending..." : "Send Message"}
-      </button>
-    </div>
-  );
-}
 
 export default function FAQScreen() {
-  const [showForm, setShowForm] = useState(false);
-
   return (
     <div
       style={{
@@ -413,31 +319,25 @@ export default function FAQScreen() {
                 lineHeight: 1.6,
               }}
             >
-              We're a small team and read every message. Email us directly at{" "}
-              <a href="mailto:hello@mymantl.app" style={{ color: AMBER, textDecoration: "none" }}>
-                hello@mymantl.app
-              </a>{" "}
-              or use the form below.
+              We're a small team and read every message.
             </p>
-
-            <button
-              onClick={() => setShowForm(f => !f)}
+            <a
+              href="mailto:hello@mymantl.app"
               style={{
-                background: "transparent",
-                border: `1px solid ${BORDER}`,
+                display: "inline-block",
+                background: AMBER,
+                color: BG,
                 borderRadius: 8,
-                color: MUTED,
+                padding: "10px 18px",
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 13,
-                padding: "8px 14px",
-                cursor: "pointer",
-                marginBottom: showForm ? 16 : 0,
+                fontWeight: 700,
+                fontSize: 14,
+                textDecoration: "none",
+                letterSpacing: "0.04em",
               }}
             >
-              {showForm ? "Hide form" : "Send a message →"}
-            </button>
-
-            {showForm && <ContactForm />}
+              hello@mymantl.app
+            </a>
           </div>
         </div>
 
