@@ -238,7 +238,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
   // Match imported tmdb_ids to community_items and write progress rows
   try {
     const allTmdbIds = importedTmdbIds.map(f => f.tmdbId);
-    console.log(`[importMovies] Backfill: ${allTmdbIds.length} tmdb_ids to match against community_items`);
 
     if (allTmdbIds.length > 0) {
       const ratingMap = new Map(importedTmdbIds.map(f => [f.tmdbId, f]));
@@ -256,7 +255,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
         if (data) allMatchedItems.push(...data);
       }
 
-      console.log(`[importMovies] Backfill: ${allMatchedItems.length} community_items matched`);
 
       if (allMatchedItems.length > 0) {
         // Batch the existing progress lookup too
@@ -273,7 +271,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
         }
 
         const existingSet = new Set(allExisting.map(p => p.item_id));
-        console.log(`[importMovies] Backfill: ${existingSet.size} already have progress, ${allMatchedItems.length - existingSet.size} new`);
 
         const newRows = allMatchedItems
           .filter(item => !existingSet.has(item.id))
@@ -300,9 +297,7 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
               .upsert(chunk, { onConflict: "user_id,item_id" });
             if (upsertErr) console.error("[importMovies] Backfill upsert error:", upsertErr.message);
           }
-          console.log(`[importMovies] Backfill: wrote ${newRows.length} community_user_progress rows`);
         } else {
-          console.log("[importMovies] Backfill: no new rows to write (all already existed)");
         }
       }
     }
@@ -314,7 +309,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
   // Normally badges are checked in useBadges when visiting a community.
   // After a bulk import we need to check here so badges are awarded immediately.
   try {
-    console.log("[importMovies] Checking for earned badges...");
 
     // 1. Get subscribed communities (use provided IDs during onboarding, since subscriptions aren't seeded yet)
     let communityIds = providedCommunityIds || [];
@@ -325,7 +319,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
         .eq("user_id", userId);
       communityIds = (subs || []).map(s => s.community_id);
     }
-    if (communityIds.length === 0) { console.log("[importMovies] No community subscriptions, skipping badge check"); }
 
     if (communityIds.length > 0) {
       // 2. Get all active badges + already earned
@@ -343,7 +336,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
 
       const earnedSet = new Set((earnedRows || []).map(r => r.badge_id));
       const unearnedBadges = (allBadges || []).filter(b => !earnedSet.has(b.id));
-      console.log(`[importMovies] ${(allBadges || []).length} badges total, ${earnedSet.size} already earned, ${unearnedBadges.length} to check`);
 
       let awarded = 0;
       const BATCH = 100;
@@ -431,7 +423,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
         }
       }
 
-      console.log(`[importMovies] Badge check complete: ${awarded} badges awarded`);
 
       // ── Badge digest notification — "Your library has a head start!" ──
       // Collect progress for unearned badges to show how close the user is.
@@ -481,7 +472,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
             ref_key: "badge_digest:sync",
             created_at: new Date().toISOString(),
           }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
-          console.log(`[importMovies] Badge digest: ${count} badges with progress, top at ${topPct}%`);
         }
       } catch (e) {
         console.warn("[importMovies] Badge digest failed:", e.message);

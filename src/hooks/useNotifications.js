@@ -103,13 +103,8 @@ export default function useNotifications(session) {
         schema: "public",
         table: "user_notifications",
         filter: `user_id=eq.${userId}`,
-      }, (payload) => {
-        console.log("[Notifications] Realtime INSERT received:", payload?.new?.notif_type);
-        fetchNotifications();
-      })
-      .subscribe((status) => {
-        console.log("[Notifications] Realtime channel status:", status);
-      });
+      }, () => fetchNotifications())
+      .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [userId, fetchNotifications]);
 

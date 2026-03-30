@@ -54,7 +54,6 @@ export function useGlobalBadges(userId, active = false) {
           }));
 
         setEarnedBadges(earned);
-        console.log(`[GlobalBadges] Found ${earned.length} earned badges`);
 
         // ── 2. Find closest-to-earning badge ──
         // Get subscribed community IDs

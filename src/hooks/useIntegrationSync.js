@@ -432,7 +432,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
       }
 
       setLetterboxdLastSync(new Date());
-      console.log(`[Letterboxd] Sync done: synced=${synced}, rewatchCount=${rewatchCount}, syncedFilms=${syncedFilms.length}, isFirstImport=${isFirstImport}`);
       if (synced > 0 || rewatchCount > 0) {
         const parts = [];
         if (synced > 0) parts.push(`${synced} new film${synced !== 1 ? "s" : ""}`);
