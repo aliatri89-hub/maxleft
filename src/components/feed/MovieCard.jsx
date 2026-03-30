@@ -89,7 +89,8 @@ function BrandStamp({ brand, side = "right" }) {
 function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, theme }) {
   // Show fallback text as stable placeholder. When logo image loads, it fades in on top.
   // This eliminates the text → skeleton → logo flash on first load.
-  const hasLogo = !!data.logo_url;
+  const [logoFailed, setLogoFailed] = useState(false);
+  const hasLogo = !!data.logo_url && !logoFailed;
 
   return (
     <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36, width: "100%" }}>
@@ -110,6 +111,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
       {hasLogo && (
         <img
           src={data.logo_url} alt={data.title} crossOrigin="anonymous"
+          onError={() => setLogoFailed(true)}
           onLoad={(e) => {
             setLogoReady(true);
             const nw = e.target.naturalWidth;

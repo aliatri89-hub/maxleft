@@ -529,6 +529,11 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     }
     return null;
   });
+  // Distinguish "still fetching" from "fetched but no en-backdrop available"
+  const [backdropResolved, setBackdropResolved] = useState(() => {
+    if (!USE_TITLE_BACKDROPS || !data.tmdb_id) return true; // nothing to fetch
+    return _enBdCache.has(data.tmdb_id);
+  });
   const { play: playEpisode, togglePlay, currentEp, isPlaying, buffering, addToQueue } = useAudioPlayer();
   const timeAgo = getTimeAgo(data.logged_at || data.completed_at);
   const communities = data.communities || [];
@@ -544,6 +549,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
     if (!USE_TITLE_BACKDROPS || !data.tmdb_id) return;
     if (_enBdCache.has(data.tmdb_id)) {
       setEnBackdropUrl(_enBdCache.get(data.tmdb_id));
+      setBackdropResolved(true);
       return;
     }
     let cancelled = false;
@@ -562,9 +568,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
         const best = enOnes[0];
         const url = best ? `${TMDB_BD}${best.file_path}` : null;
         _enBdCache.set(data.tmdb_id, url);
-        if (!cancelled) setEnBackdropUrl(url);
+        if (!cancelled) { setEnBackdropUrl(url); setBackdropResolved(true); }
       } catch {
         _enBdCache.set(data.tmdb_id, null);
+        if (!cancelled) setBackdropResolved(true);
       }
     })();
     return () => { cancelled = true; };
@@ -623,28 +630,60 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   }, [isFirst]);
 
   const useBackdrop = USE_TITLE_BACKDROPS && enBackdropUrl;
+  const isLoading = USE_TITLE_BACKDROPS && !backdropResolved;
+
+  // While loading, style as if it will be a backdrop card (most common case).
+  // This prevents the cream→dark layout shift on 90%+ of cards.
+  const wrapAsBackdrop = useBackdrop || isLoading;
 
   return (
     <>
     <div
       style={{
-        margin: useBackdrop ? "6px 16px" : "4px 16px",
-        borderRadius: useBackdrop ? 10 : 6,
+        margin: wrapAsBackdrop ? "6px 16px" : "4px 16px",
+        borderRadius: wrapAsBackdrop ? 10 : 6,
         position: "relative",
         cursor: "pointer",
-        background: useBackdrop ? "#111" : "#302c28",
+        background: wrapAsBackdrop ? "#111" : "#302c28",
         padding: "1px 1px",
-        boxShadow: useBackdrop
+        boxShadow: wrapAsBackdrop
           ? "inset 0 0 0 1px rgba(255,255,255,0.07), 0 3px 12px rgba(0,0,0,0.5)"
           : "0 2px 8px rgba(0,0,0,0.4)",
-        backgroundImage: useBackdrop ? "none" : NOISE_SVG,
+        backgroundImage: wrapAsBackdrop ? "none" : NOISE_SVG,
       }}
     >
       <div style={{
-        borderRadius: useBackdrop ? 9 : 4,
+        borderRadius: wrapAsBackdrop ? 9 : 4,
         overflow: "hidden",
       }}>
-        {useBackdrop ? (
+        {isLoading ? (
+          /* Dark skeleton placeholder — matches backdrop card dimensions */
+          <div
+            onClick={openSleeve}
+            style={{
+              borderRadius: 8,
+              position: "relative",
+              overflow: "hidden",
+              aspectRatio: "16 / 9",
+              background: "var(--bg-card, #1a1714)",
+              cursor: "pointer",
+            }}
+          >
+            {/* Subtle shimmer */}
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
+              backgroundSize: "200% 100%",
+              animation: "badgeShimmer 2s ease infinite",
+            }} />
+            {/* Placeholder date sticker */}
+            <div style={{
+              position: "absolute", bottom: 10, left: 12,
+              width: 60, height: 18, borderRadius: 3,
+              background: "rgba(240,235,225,0.06)",
+            }} />
+          </div>
+        ) : useBackdrop ? (
           <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} hasPodcastCoverage={!!data.has_podcast_coverage} letterboxdUrl={data.letterboxd_url} onClick={openSleeve} />
         ) : (
           <CreamFront
