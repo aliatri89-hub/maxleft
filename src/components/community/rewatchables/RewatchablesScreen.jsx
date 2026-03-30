@@ -204,7 +204,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
       />
 
       {/* ─── Controls overlay — sits inside hero banner ── */}
-      <div style={{ position: "relative", zIndex: 2, marginTop: -76 }}>
+      <div style={{ position: "relative", zIndex: 2, marginTop: -90 }}>
 
       {/* View mode + filter — single row */}
       <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center" }}>
