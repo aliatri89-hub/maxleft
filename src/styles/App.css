@@ -12,9 +12,15 @@
   }
 
   :root {
-    /* ── Safe-area inset aliases (set once, use everywhere) ── */
-    --sat: env(safe-area-inset-top, 0px);
-    --sab: env(safe-area-inset-bottom, 0px);
+    /* ── Safe-area inset aliases ──
+       On native, JS sets --sat/--sab as inline styles with the real pixel value.
+       On web, these default to 0px.  We intentionally do NOT use env() here
+       because on Android WebView cold start, env(safe-area-inset-top) evaluates
+       to 0px before overlay mode is active, and that CSS-set 0px races against
+       the JS-set fallback causing a flash behind the status bar on first login.
+    */
+    --sat: 0px;
+    --sab: 0px;
 
     --cream:        #F0EBE1;
     --cream-dark:   #E8E2D6;

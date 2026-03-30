@@ -83,12 +83,21 @@ if (Capacitor.isNativePlatform()) {
     }));
   })();
 
-  // Re-probe whenever the app returns to foreground (e.g. after OAuth system
-  // browser closes). Android needs ~150ms to re-apply window insets to the
-  // WebView after foregrounding, so a bare rAF fires too early and reads 0px.
+  // Re-apply overlay + re-probe whenever the app returns to foreground
+  // (e.g. after OAuth system browser closes).  On Android 15+ the OS may
+  // need to re-communicate window insets to the WebView after foregrounding.
+  // Re-calling setOverlaysWebView ensures the native side is in the right
+  // state before we probe env(safe-area-inset-top).
   CapApp.addListener("appStateChange", ({ isActive }) => {
     if (isActive) {
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 500);
+      (async () => {
+        try {
+          await StatusBar.setOverlaysWebView({ overlay: true });
+          await StatusBar.setStyle({ style: Style.Dark });
+        } catch (_) { /* plugin may not be ready yet */ }
+        // Short delay lets the WebView recalculate insets after overlay re-apply
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 300);
+      })();
     }
   });
 }
@@ -385,11 +394,18 @@ function AppMain() {
         loadingUserId = s.user.id;
         loadUserData(s.user).finally(() => {
           loadingUserId = null; loadedUserId = s.user.id;
-          // Re-probe safe-area after first login — the authenticated shell
-          // (with notification bell etc.) is now mounted, and the WebView may
-          // have resolved overlay insets since the cold-start probe ran.
+          // Re-apply overlay + re-probe safe-area after first login —
+          // the authenticated shell (with notification bell etc.) is now
+          // mounted, and the WebView may not have had correct insets
+          // during the OAuth browser round-trip.
           if (Capacitor.isNativePlatform()) {
-            setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 300);
+            (async () => {
+              try {
+                await StatusBar.setOverlaysWebView({ overlay: true });
+                await StatusBar.setStyle({ style: Style.Dark });
+              } catch (_) {}
+              setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 200);
+            })();
           }
         });
       } else if (!s) {
@@ -522,10 +538,13 @@ function AppMain() {
       }
       setAuthLoading(false); setSigningIn(false); setScreen("app");
       initPushNotifications(showToast); // register for native push (no-op on web)
-      // Re-probe safe area insets — on fresh install the initial probe may have
+      // Re-apply overlay + probe — on fresh install the initial probe may have
       // fired before the OAuth browser round-trip, yielding --sat: 0px
       if (Capacitor.isNativePlatform()) {
-        requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+        (async () => {
+          try { await StatusBar.setOverlaysWebView({ overlay: true }); } catch (_) {}
+          requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+        })();
       }
     } catch (err) {
       console.error("Load user error:", err);
@@ -545,7 +564,10 @@ function AppMain() {
     await loadShelves(session.user.id);
     setScreen("app"); showToast(`Welcome to Mantl, @${username}`);
     if (Capacitor.isNativePlatform()) {
-      requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+      (async () => {
+        try { await StatusBar.setOverlaysWebView({ overlay: true }); } catch (_) {}
+        requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+      })();
     }
   };
 
