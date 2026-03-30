@@ -49,29 +49,11 @@ export default function ActivityPane({
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
 
-  // ── Progressive rendering — mount 3 cards initially, grow on scroll ──
+  // Progressive rendering state (effects below, after filteredActivity)
   const INITIAL_VISIBLE = 3;
   const BATCH_SIZE = 4;
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const growRef = useRef(null);
-
-  // Reset visible count when feed changes (filter, sort, refresh)
-  useEffect(() => { setVisibleCount(INITIAL_VISIBLE); }, [filteredActivity.length, selectedPodcast, sortOrder]);
-
-  const growMore = useCallback(() => {
-    setVisibleCount(v => Math.min(v + BATCH_SIZE, ACTIVITY_CAP));
-  }, []);
-
-  useEffect(() => {
-    const el = growRef.current;
-    if (!el || !isVisible) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) growMore(); },
-      { rootMargin: "300px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [visibleCount, isVisible, growMore]);
 
   // ── Pull-to-refresh ──
   useEffect(() => {
@@ -107,6 +89,24 @@ export default function ActivityPane({
     if (sortOrder === "oldest") items = [...items].reverse();
     return items;
   }, [activityItems, selectedPodcast, favoriteSlugs, sortOrder]);
+
+  // ── Progressive rendering — reset + grow on scroll ──
+  useEffect(() => { setVisibleCount(INITIAL_VISIBLE); }, [filteredActivity.length, selectedPodcast, sortOrder]);
+
+  const growMore = useCallback(() => {
+    setVisibleCount(v => Math.min(v + BATCH_SIZE, ACTIVITY_CAP));
+  }, []);
+
+  useEffect(() => {
+    const el = growRef.current;
+    if (!el || !isVisible) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) growMore(); },
+      { rootMargin: "300px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, isVisible, growMore]);
 
   // ── Infinite scroll ──
   useEffect(() => {
