@@ -93,6 +93,9 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
               fontFamily: t.fontBody,
               textTransform: "uppercase",
               letterSpacing: "0.08em",
+              border: `1px solid ${accent}`,
+              borderRadius: 20,
+              padding: "4px 10px",
             }}>Read</span>
           </div>
         </div>
