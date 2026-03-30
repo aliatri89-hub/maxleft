@@ -465,7 +465,7 @@ function UsernameSetup({ name, session, onComplete }) {
 
   if (phase === "username") {
     return (
-      <div className="setup-screen">
+      <div className="setup-screen" style={{ overflowY: "auto" }}>
         <style>{DARK_STYLES}</style>
         <StepDots total={allSteps.length} current={0} />
         <div className="setup-title">
@@ -488,7 +488,6 @@ function UsernameSetup({ name, session, onComplete }) {
             }}
             onKeyDown={(e) => e.key === "Enter" && handleUsernameSubmit()}
             maxLength={20}
-            autoFocus
           />
           {error && <div className="field-error">{error}</div>}
           {!error && <div className="field-hint">Letters, numbers, underscores only</div>}
