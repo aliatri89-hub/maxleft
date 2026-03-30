@@ -473,7 +473,7 @@ function AppMain() {
         prof = newProf;
       }
       if (prof) {
-        if (!prof.username) {
+        if (!prof.username || !prof.setup_complete) {
           setProfile({ name: prof.name || "", username: "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "" });
           setAuthLoading(false); setSigningIn(false); setScreen("setup"); return;
         }
@@ -512,7 +512,7 @@ function AppMain() {
 
   const handleUsernameComplete = async (username, enabledShelves, communityIds) => {
     if (!session) return;
-    const { error } = await supabase.from("profiles").update({ username, enabled_shelves: enabledShelves }).eq("id", session.user.id);
+    const { error } = await supabase.from("profiles").update({ username, enabled_shelves: enabledShelves, setup_complete: true }).eq("id", session.user.id);
     if (error) { console.error("Username save error:", error); return; }
     if (communityIds && communityIds.length > 0) await seedSubscriptions(communityIds);
     setProfile(prev => ({ ...prev, username, enabledShelves }));
