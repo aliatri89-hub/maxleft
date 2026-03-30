@@ -310,6 +310,130 @@ export async function importMovies(items, userId, onProgress) {
     console.error("[importMovies] Community progress backfill FAILED:", e.message, e);
   }
 
+  // ── Award badges earned by the import ──────────────────────
+  // Normally badges are checked in useBadges when visiting a community.
+  // After a bulk import we need to check here so badges are awarded immediately.
+  try {
+    console.log("[importMovies] Checking for earned badges...");
+
+    // 1. Get subscribed communities
+    const { data: subs } = await supabase
+      .from("user_community_subscriptions")
+      .select("community_id")
+      .eq("user_id", userId);
+    const communityIds = (subs || []).map(s => s.community_id);
+    if (communityIds.length === 0) { console.log("[importMovies] No community subscriptions, skipping badge check"); }
+
+    if (communityIds.length > 0) {
+      // 2. Get all active badges + already earned
+      const { data: allBadges } = await supabase
+        .from("badges")
+        .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter")
+        .in("community_id", communityIds)
+        .eq("is_active", true);
+
+      const { data: earnedRows } = await supabase
+        .from("user_badges")
+        .select("badge_id")
+        .eq("user_id", userId)
+        .in("badge_id", (allBadges || []).map(b => b.id));
+
+      const earnedSet = new Set((earnedRows || []).map(r => r.badge_id));
+      const unearnedBadges = (allBadges || []).filter(b => !earnedSet.has(b.id));
+      console.log(`[importMovies] ${(allBadges || []).length} badges total, ${earnedSet.size} already earned, ${unearnedBadges.length} to check`);
+
+      let awarded = 0;
+      const BATCH = 100;
+
+      // 3. Check miniseries_completion badges
+      const miniseriesBadges = unearnedBadges.filter(b => b.badge_type === "miniseries_completion" && b.miniseries_id);
+      if (miniseriesBadges.length > 0) {
+        const msIds = [...new Set(miniseriesBadges.map(b => b.miniseries_id))];
+        const allItems = [];
+        for (let i = 0; i < msIds.length; i += BATCH) {
+          const { data } = await supabase.from("community_items").select("id, tmdb_id, miniseries_id, media_type").in("miniseries_id", msIds.slice(i, i + BATCH));
+          if (data) allItems.push(...data);
+        }
+
+        const allTmdbIds = [...new Set(allItems.map(i => i.tmdb_id).filter(Boolean))];
+        const completedTmdbSet = new Set();
+        for (let i = 0; i < allTmdbIds.length; i += BATCH) {
+          const { data } = await supabase
+            .from("community_user_progress")
+            .select("community_items!inner(tmdb_id)")
+            .eq("user_id", userId).eq("status", "completed")
+            .in("community_items.tmdb_id", allTmdbIds.slice(i, i + BATCH));
+          (data || []).forEach(r => { if (r.community_items?.tmdb_id) completedTmdbSet.add(r.community_items.tmdb_id); });
+        }
+
+        for (const badge of miniseriesBadges) {
+          const items = allItems.filter(i => i.miniseries_id === badge.miniseries_id && (!badge.media_type_filter || i.media_type === badge.media_type_filter));
+          const required = [...new Set(items.map(i => i.tmdb_id).filter(Boolean))];
+          if (required.length > 0 && required.every(id => completedTmdbSet.has(id))) {
+            const { error } = await supabase.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
+            if (!error || error.message.includes("duplicate")) {
+              awarded++;
+              await supabase.from("user_notifications").upsert({
+                user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
+                body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
+                payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+                ref_key: `badge_earned:${badge.id}`,
+              }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+            }
+          }
+        }
+      }
+
+      // 4. Check item_set_completion badges
+      const itemSetBadges = unearnedBadges.filter(b => b.badge_type === "item_set_completion");
+      if (itemSetBadges.length > 0) {
+        const badgeIds = itemSetBadges.map(b => b.id);
+        const allBadgeItems = [];
+        for (let i = 0; i < badgeIds.length; i += BATCH) {
+          const { data } = await supabase.from("badge_items").select("badge_id, community_items!inner(tmdb_id)").in("badge_id", badgeIds.slice(i, i + BATCH));
+          if (data) allBadgeItems.push(...data);
+        }
+
+        const badgeItemsMap = {};
+        allBadgeItems.forEach(r => {
+          if (!badgeItemsMap[r.badge_id]) badgeItemsMap[r.badge_id] = [];
+          if (r.community_items?.tmdb_id) badgeItemsMap[r.badge_id].push(r.community_items.tmdb_id);
+        });
+
+        const allSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat())];
+        const completedSetTmdb = new Set();
+        for (let i = 0; i < allSetTmdbIds.length; i += BATCH) {
+          const { data } = await supabase
+            .from("community_user_progress")
+            .select("community_items!inner(tmdb_id)")
+            .eq("user_id", userId).eq("status", "completed")
+            .in("community_items.tmdb_id", allSetTmdbIds.slice(i, i + BATCH));
+          (data || []).forEach(r => { if (r.community_items?.tmdb_id) completedSetTmdb.add(r.community_items.tmdb_id); });
+        }
+
+        for (const badge of itemSetBadges) {
+          const required = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
+          if (required.length > 0 && required.every(id => completedSetTmdb.has(id))) {
+            const { error } = await supabase.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
+            if (!error || error.message.includes("duplicate")) {
+              awarded++;
+              await supabase.from("user_notifications").upsert({
+                user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
+                body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
+                payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+                ref_key: `badge_earned:${badge.id}`,
+              }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+            }
+          }
+        }
+      }
+
+      console.log(`[importMovies] Badge check complete: ${awarded} badges awarded`);
+    }
+  } catch (e) {
+    console.error("[importMovies] Badge check failed:", e.message, e);
+  }
+
   return { count, errs };
 }
 
