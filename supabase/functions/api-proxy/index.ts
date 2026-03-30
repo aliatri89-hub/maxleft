@@ -166,6 +166,9 @@ serve(async (req) => {
     let result: unknown;
 
     switch (action) {
+      case "ping":
+        result = { ok: true };
+        break;
       case "tmdb_search":
         result = await handleTmdbSearch(params);
         break;

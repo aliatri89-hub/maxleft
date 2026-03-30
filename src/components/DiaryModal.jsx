@@ -15,8 +15,14 @@ function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
   const [searchError, setSearchError] = useState(null);
   const [showStatus, setShowStatus] = useState("watching");
   const [addedToWishlist, setAddedToWishlist] = useState(false);
+  const [markedWatched, setMarkedWatched] = useState(false);
   const searchTimer = useRef(null);
   const categories = ["movie", "show"];
+
+  // Warm up the api-proxy edge function on mount so first search isn't slow
+  useEffect(() => {
+    supabase.functions.invoke("api-proxy", { body: { action: "ping" } }).catch(() => {});
+  }, []);
 
   const addToWishlistFromSearch = async () => {
     if (!session || !selected) return;
@@ -161,7 +167,7 @@ function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
       <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
         <div className="modal-sheet">
           <div className="modal-handle" />
-          <button className="shelf-detail-back" onClick={() => { setSelected(null); setRating(0); setDetails(null); setAddedToWishlist(false); }}>
+          <button className="shelf-detail-back" onClick={() => { setSelected(null); setRating(0); setDetails(null); setAddedToWishlist(false); setMarkedWatched(false); }}>
             ← Back to results
           </button>
           <div className="shelf-detail">
@@ -185,8 +191,8 @@ function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
 
             {selected.type === "movie" && (
               <div className="book-status-toggle">
-                <button className={`book-status-btn${!addedToWishlist ? " active" : ""}`} onClick={() => {}} style={{ cursor: "default" }}>Watched</button>
-                <button className={`book-status-btn${addedToWishlist ? " active" : ""}`} onClick={addToWishlistFromSearch} style={addedToWishlist ? { color: "var(--sage)" } : {}}>
+                <button className={`book-status-btn${markedWatched ? " active" : ""}`} onClick={() => setMarkedWatched(true)}>Watched</button>
+                <button className={`book-status-btn${addedToWishlist ? " active" : ""}`} onClick={() => { addToWishlistFromSearch(); setMarkedWatched(false); }} style={addedToWishlist ? { color: "var(--sage)" } : {}}>
                   {addedToWishlist ? "✓ Listed" : "🎬 Want to Watch"}
                 </button>
               </div>
