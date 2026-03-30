@@ -103,7 +103,7 @@ function FileUploadZone({ file, onFileSelect, fileInputRef }) {
           <>
             <div style={{ fontSize: 20, marginBottom: 4 }}>📦</div>
             <div style={{ fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>Tap to upload export</div>
-            <div style={{ fontSize: 12, color: dk.textMuted, marginTop: 3 }}>Upload the .zip export or diary.csv directly</div>
+            <div style={{ fontSize: 12, color: dk.textMuted, marginTop: 3 }}>Upload the .zip, or drop in diary.csv if already extracted</div>
           </>
         )}
       </div>
