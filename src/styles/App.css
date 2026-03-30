@@ -44,6 +44,7 @@
     min-height: 100vh;
     min-height: -webkit-fill-available;
     min-height: 100dvh;
+    overscroll-behavior-y: contain; /* block Chrome's native pull-to-refresh (our custom JS PTR still works) */
   }
 
   #root {
