@@ -174,7 +174,7 @@ export async function parseFile(file, userId) {
 //  IMPORT MOVIES (Letterboxd)
 // ═══════════════════════════════════════════════════════════
 
-export async function importMovies(items, userId, onProgress) {
+export async function importMovies(items, userId, onProgress, { communityIds: providedCommunityIds } = {}) {
   let count = 0, errs = 0;
   const CONCURRENCY = 6;
   const importedTmdbIds = []; // track successfully imported tmdb_ids
@@ -316,12 +316,15 @@ export async function importMovies(items, userId, onProgress) {
   try {
     console.log("[importMovies] Checking for earned badges...");
 
-    // 1. Get subscribed communities
-    const { data: subs } = await supabase
-      .from("user_community_subscriptions")
-      .select("community_id")
-      .eq("user_id", userId);
-    const communityIds = (subs || []).map(s => s.community_id);
+    // 1. Get subscribed communities (use provided IDs during onboarding, since subscriptions aren't seeded yet)
+    let communityIds = providedCommunityIds || [];
+    if (communityIds.length === 0) {
+      const { data: subs } = await supabase
+        .from("user_community_subscriptions")
+        .select("community_id")
+        .eq("user_id", userId);
+      communityIds = (subs || []).map(s => s.community_id);
+    }
     if (communityIds.length === 0) { console.log("[importMovies] No community subscriptions, skipping badge check"); }
 
     if (communityIds.length > 0) {

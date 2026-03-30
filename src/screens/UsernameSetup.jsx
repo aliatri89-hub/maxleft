@@ -508,7 +508,7 @@ function UsernameSetup({ name, session, onComplete }) {
 
             const result = await importMovies(items, userId, (progress, total) => {
               if (!cancelled) updateTask(task.id, { progress, total });
-            });
+            }, { communityIds: savedCommunityIds });
 
             updateTask(task.id, {
               status: "done",
