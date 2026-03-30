@@ -6,7 +6,7 @@ import { supabase } from '../supabase';
  * After 3 unique user reports, a DB trigger auto-flags the episode as 'dead'.
  *
  * @param {Object} playerEp — the currentEp from AudioPlayerProvider
- * @param {string} errorInfo — error type string from getAudioErrorInfo()
+ * @param {string} errorInfo — error type string
  */
 export async function reportDeadAudio(playerEp, errorInfo = '') {
   try {
