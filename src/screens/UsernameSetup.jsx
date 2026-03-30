@@ -286,7 +286,7 @@ function TaskRow({ task }) {
               fontFamily: t.fontBody, fontSize: 13,
               color: dk.textMuted, marginTop: 3,
             }}>
-              {task.progress} / {task.total}
+              {task.statusMessage || `${task.progress} / ${task.total}`}
             </div>
           </div>
         )}
@@ -508,7 +508,12 @@ function UsernameSetup({ name, session, onComplete }) {
 
             const result = await importMovies(items, userId, (progress, total) => {
               if (!cancelled) updateTask(task.id, { progress, total });
-            }, { communityIds: savedCommunityIds });
+            }, {
+              communityIds: savedCommunityIds,
+              onStatusMessage: (msg) => {
+                if (!cancelled) updateTask(task.id, { statusMessage: msg });
+              },
+            });
 
             updateTask(task.id, {
               status: "done",

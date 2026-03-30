@@ -180,7 +180,7 @@ export async function parseFile(file, userId) {
 // badge checks entirely server-side. Fully backgroundable — the client
 // just reads the NDJSON stream for progress updates.
 
-export async function importMovies(items, userId, onProgress, { communityIds: providedCommunityIds } = {}) {
+export async function importMovies(items, userId, onProgress, { communityIds: providedCommunityIds, onStatusMessage } = {}) {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) throw new Error("Not authenticated");
 
@@ -230,6 +230,8 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
             count = msg.count;
             errs = msg.errs;
             if (onProgress) onProgress(msg.progress, msg.total);
+          } else if (msg.type === "status") {
+            if (onStatusMessage) onStatusMessage(msg.message);
           } else if (msg.type === "done") {
             count = msg.count;
             errs = msg.errs;
