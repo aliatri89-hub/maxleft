@@ -228,45 +228,6 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
 // ═══════════════════════════════════════════════════════════
 //  TASK ROW — processing phase status line
 // ═══════════════════════════════════════════════════════════
-function SubTaskCard({ sub }) {
-  const color = sub.status === "done" ? dk.sage : sub.status === "running" ? dk.terracotta : dk.textMuted;
-  return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 10,
-      padding: "8px 12px",
-      background: sub.status === "done" ? "rgba(107,142,107,0.08)" : "rgba(255,255,255,0.03)",
-      border: `1px solid ${sub.status === "done" ? "rgba(107,142,107,0.25)" : dk.border}`,
-      borderRadius: 6,
-      transition: "all 0.3s ease",
-    }}>
-      <div style={{
-        width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
-        border: `2px solid ${color}`,
-        background: sub.status === "done" ? dk.sage : "transparent",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: 10, fontWeight: 700,
-        color: sub.status === "done" ? "#fff" : color,
-        transition: "all 0.3s ease",
-      }}>
-        {sub.status === "running" ? (
-          <div style={{
-            width: 8, height: 8, border: `2px solid ${dk.terracotta}`,
-            borderTopColor: "transparent", borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }} />
-        ) : sub.status === "done" ? "✓" : ""}
-      </div>
-      <div style={{
-        fontFamily: t.fontBody, fontSize: 13, fontWeight: sub.status === "done" ? 600 : 400,
-        color: sub.status === "pending" ? dk.textMuted : dk.text,
-        transition: "all 0.3s ease",
-      }}>
-        {sub.label}
-      </div>
-    </div>
-  );
-}
-
 function TaskRow({ task }) {
   const statusColor = {
     pending: dk.textMuted,
@@ -275,90 +236,78 @@ function TaskRow({ task }) {
     error: dk.red,
   };
 
-  const showSubTasks = task.subTasks && task.subTasks.some(s => s.status !== "pending");
-
   return (
     <div style={{
+      display: "flex", alignItems: "center", gap: 12,
       padding: "10px 0",
       opacity: task.status === "pending" ? 0.5 : 1,
       transition: "opacity 0.3s ease",
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{
-          width: 22, height: 22, borderRadius: "50%",
-          border: `2px solid ${statusColor[task.status]}`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: 11, fontWeight: 700, flexShrink: 0,
-          background: task.status === "done" ? statusColor.done : "transparent",
-          color: task.status === "done" ? "#fff" : statusColor[task.status],
-          transition: "all 0.3s ease",
-        }}>
-          {task.status === "running" ? (
-            <div style={{
-              width: 10, height: 10, border: `2px solid ${dk.terracotta}`,
-              borderTopColor: "transparent", borderRadius: "50%",
-              animation: "spin 0.8s linear infinite",
-            }} />
-          ) : task.status === "done" ? "✓" : task.status === "error" ? "✕" : "○"}
-        </div>
-
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{
+        width: 22, height: 22, borderRadius: "50%",
+        border: `2px solid ${statusColor[task.status]}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 11, fontWeight: 700, flexShrink: 0,
+        background: task.status === "done" ? statusColor.done : "transparent",
+        color: task.status === "done" ? "#fff" : statusColor[task.status],
+        transition: "all 0.3s ease",
+      }}>
+        {task.status === "running" ? (
           <div style={{
-            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 14,
-            textTransform: "uppercase", letterSpacing: "0.02em",
-            color: task.status === "pending" ? dk.textMuted : dk.text,
-          }}>
-            {task.label}
-          </div>
-
-          {task.status === "running" && task.total > 0 && (
-            <div style={{ marginTop: 6 }}>
-              <div style={{
-                width: "100%", background: dk.border, borderRadius: 3, height: 4, overflow: "hidden",
-              }}>
-                <div style={{
-                  height: "100%", background: dk.terracotta, borderRadius: 3,
-                  width: `${(task.progress / task.total) * 100}%`,
-                  transition: "width 0.3s ease",
-                }} />
-              </div>
-              <div style={{
-                fontFamily: t.fontBody, fontSize: 13,
-                color: dk.textMuted, marginTop: 3,
-              }}>
-                {task.progress} / {task.total}
-              </div>
-            </div>
-          )}
-
-          {task.status === "done" && task.result && (
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 13,
-              color: dk.textDim, marginTop: 2,
-            }}>
-              {task.result}
-            </div>
-          )}
-
-          {task.status === "error" && task.result && (
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 13,
-              color: dk.red, marginTop: 2,
-            }}>
-              {task.result}
-            </div>
-          )}
-        </div>
+            width: 10, height: 10, border: `2px solid ${dk.terracotta}`,
+            borderTopColor: "transparent", borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }} />
+        ) : task.status === "done" ? "✓" : task.status === "error" ? "✕" : "○"}
       </div>
 
-      {showSubTasks && (
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
-          marginTop: 10, marginLeft: 34,
-          display: "flex", flexDirection: "column", gap: 6,
+          fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 14,
+          textTransform: "uppercase", letterSpacing: "0.02em",
+          color: task.status === "pending" ? dk.textMuted : dk.text,
         }}>
-          {task.subTasks.map(sub => <SubTaskCard key={sub.id} sub={sub} />)}
+          {task.label}
         </div>
-      )}
+
+        {task.status === "running" && task.total > 0 && (
+          <div style={{ marginTop: 6 }}>
+            <div style={{
+              width: "100%", background: dk.border, borderRadius: 3, height: 4, overflow: "hidden",
+            }}>
+              <div style={{
+                height: "100%", background: dk.terracotta, borderRadius: 3,
+                width: `${(task.progress / task.total) * 100}%`,
+                transition: "width 0.3s ease",
+              }} />
+            </div>
+            <div style={{
+              fontFamily: t.fontBody, fontSize: 13,
+              color: dk.textMuted, marginTop: 3,
+            }}>
+              {task.progress} / {task.total}
+            </div>
+          </div>
+        )}
+
+        {task.status === "done" && task.result && (
+          <div style={{
+            fontFamily: t.fontBody, fontSize: 13,
+            color: dk.textDim, marginTop: 2,
+          }}>
+            {task.result}
+          </div>
+        )}
+
+        {task.status === "error" && task.result && (
+          <div style={{
+            fontFamily: t.fontBody, fontSize: 13,
+            color: dk.red, marginTop: 2,
+          }}>
+            {task.result}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -503,10 +452,18 @@ function UsernameSetup({ name, session, onComplete }) {
         label: "Importing film history",
         status: "pending",
         progress: 0, total: 0, result: null,
-        subTasks: [
-          { id: "community", label: "Logging community progress", status: "pending" },
-          { id: "badges",    label: "Checking badges",            status: "pending" },
-        ],
+      });
+      tasks.push({
+        id: "community-progress",
+        label: "Logging community progress",
+        status: "pending",
+        progress: 0, total: 0, result: null,
+      });
+      tasks.push({
+        id: "badge-check",
+        label: "Checking badges",
+        status: "pending",
+        progress: 0, total: 0, result: null,
       });
     }
 
@@ -567,15 +524,10 @@ function UsernameSetup({ name, session, onComplete }) {
               onStatusMessage: (msg) => {
                 if (!cancelled) {
                   if (msg.toLowerCase().includes("community")) {
-                    updateTask(task.id, { subTasks: [
-                      { id: "community", label: "Logging community progress", status: "running" },
-                      { id: "badges",    label: "Checking badges",            status: "pending" },
-                    ]});
+                    updateTask("community-progress", { status: "running" });
                   } else if (msg.toLowerCase().includes("badge")) {
-                    updateTask(task.id, { subTasks: [
-                      { id: "community", label: "Logging community progress", status: "done" },
-                      { id: "badges",    label: "Checking badges",            status: "running" },
-                    ]});
+                    updateTask("community-progress", { status: "done", result: "Done" });
+                    updateTask("badge-check", { status: "running" });
                   }
                 }
               },
@@ -584,11 +536,9 @@ function UsernameSetup({ name, session, onComplete }) {
             updateTask(task.id, {
               status: "done",
               result: `${result.count} film${result.count !== 1 ? "s" : ""} imported${result.errs > 0 ? `, ${result.errs} skipped` : ""}`,
-              subTasks: [
-                { id: "community", label: "Logging community progress", status: "done" },
-                { id: "badges",    label: "Checking badges",            status: "done" },
-              ],
             });
+            updateTask("community-progress", { status: "done", result: "Done" });
+            updateTask("badge-check", { status: "done", result: "Done" });
           }
         } catch (err) {
           console.error(`[Onboarding] Task ${task.id} failed:`, err);
