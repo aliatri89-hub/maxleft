@@ -92,12 +92,20 @@ export default function useNotifications(session) {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [fetchNotifications]);
 
-  // Lightweight poll — catches notifications written by background processes
-  // (badge digests after import, coverage alerts, etc.) without needing signals.
+  // Realtime — instant notification delivery via websocket.
+  // Fires fetchNotifications on any INSERT to user_notifications for this user.
   useEffect(() => {
     if (!userId) return;
-    const id = setInterval(fetchNotifications, 15_000);
-    return () => clearInterval(id);
+    const channel = supabase
+      .channel(`notifications:${userId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "user_notifications",
+        filter: `user_id=eq.${userId}`,
+      }, () => fetchNotifications())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [userId, fetchNotifications]);
 
   return { notifications, unreadCount, markAllSeen, refresh: fetchNotifications, loading };
