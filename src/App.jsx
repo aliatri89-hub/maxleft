@@ -40,6 +40,17 @@ export const probeSafeArea = () => {
 };
 
 if (Capacitor.isNativePlatform()) {
+  // ── IMMEDIATE FALLBACK ──────────────────────────────────────
+  // On first-ever install, the WebView can't report env(safe-area-inset-top)
+  // until overlay mode is fully applied by the native side.  That takes an
+  // unpredictable amount of time (sometimes >1s on cold start).  Set a
+  // minimum floor immediately so the shell never renders at 0px padding.
+  // Android status bar = 24dp minimum; phones with cutouts are ≥ 32dp.
+  // 48px is a safe conservative floor that works on virtually all devices.
+  // The real probe will overwrite this with the exact value once available.
+  const ANDROID_FALLBACK_SAT = "48px";
+  document.documentElement.style.setProperty("--sat", ANDROID_FALLBACK_SAT);
+
   // Await the native bridge calls — setOverlaysWebView is async and the
   // WebView won't report safe-area insets until overlay mode is actually
   // applied.  Without awaiting, probeSafeArea races the native side and
@@ -57,10 +68,15 @@ if (Capacitor.isNativePlatform()) {
       // This covers slow cold-start on older devices / Android 15 edge-to-edge.
       let retries = 0;
       const retry = () => {
-        if (retries++ >= 5) return;
+        if (retries++ >= 8) {
+          // Exhausted retries — keep the fallback (already set above).
+          // The appStateChange and auth-transition probes will still
+          // try to resolve the real value later.
+          return;
+        }
         const cur = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
-        if (!cur || cur === "0px" || cur === "env(safe-area-inset-top, 0px)") {
-          setTimeout(() => { probeSafeArea(); retry(); }, 200);
+        if (!cur || cur === "0px" || cur === ANDROID_FALLBACK_SAT || cur === "env(safe-area-inset-top, 0px)") {
+          setTimeout(() => { probeSafeArea(); retry(); }, 250);
         }
       };
       retry();
@@ -367,7 +383,15 @@ function AppMain() {
         if (loadingUserId === s.user.id || (event === "SIGNED_IN" && loadedUserId === s.user.id)) return;
         setScreen("loading"); // show loading while user data loads
         loadingUserId = s.user.id;
-        loadUserData(s.user).finally(() => { loadingUserId = null; loadedUserId = s.user.id; });
+        loadUserData(s.user).finally(() => {
+          loadingUserId = null; loadedUserId = s.user.id;
+          // Re-probe safe-area after first login — the authenticated shell
+          // (with notification bell etc.) is now mounted, and the WebView may
+          // have resolved overlay insets since the cold-start probe ran.
+          if (Capacitor.isNativePlatform()) {
+            setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 300);
+          }
+        });
       } else if (!s) {
         loadedUserId = null;
         // If URL has auth tokens, Supabase is still processing the OAuth callback —
