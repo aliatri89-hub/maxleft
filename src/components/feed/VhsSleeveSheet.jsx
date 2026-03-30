@@ -1112,7 +1112,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             }}>{decodeEntities(ep.episode_title || ep.podcast_name)}</div>
                             <div style={{
                               fontFamily: t.fontBody,
-                              fontSize: 11, color: "rgba(240,235,225,0.35)",
+                              fontSize: 12, color: "rgba(240,235,225,0.65)",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
@@ -1256,8 +1256,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               <div style={{
                                 padding: "4px 6px 10px 48px",
                                 fontFamily: t.fontSerif,
-                                fontSize: 13, lineHeight: 1.55,
-                                color: "rgba(240,235,225,0.5)",
+                                fontSize: 14, lineHeight: 1.55,
+                                color: "rgba(240,235,225,0.8)",
                                 whiteSpace: "pre-wrap",
                               }}>
                                 <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{renderWithTimecodes(hook, (sec) => handleTimecodeSeek(ep, sec))}</span>
@@ -1334,8 +1334,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           {decodeEntities(link.episode_title || link.podcast_name)}
                         </div>
                         <div style={{
-                          fontFamily: t.fontBody, fontSize: 11,
-                          color: "rgba(240,235,225,0.35)",
+                          fontFamily: t.fontBody, fontSize: 12,
+                          color: "rgba(240,235,225,0.65)",
                           textTransform: "uppercase", letterSpacing: "0.04em",
                         }}>
                           {link.podcast_name} · outside network
@@ -1388,8 +1388,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                         <div style={{
                           padding: "4px 6px 10px 48px",
                           fontFamily: t.fontSerif,
-                          fontSize: 13, lineHeight: 1.55,
-                          color: "rgba(240,235,225,0.5)",
+                          fontSize: 14, lineHeight: 1.55,
+                          color: "rgba(240,235,225,0.8)",
                           whiteSpace: "pre-wrap",
                         }}>
                           {link.episode_description}
@@ -1418,8 +1418,8 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
             return !hasAudio && merged.overview ? (
               <div style={{
                 fontFamily: t.fontSerif,
-                fontSize: 12, lineHeight: 1.55,
-                color: "rgba(240,235,225,0.65)",
+                fontSize: 14, lineHeight: 1.55,
+                color: "rgba(240,235,225,0.8)",
                 textAlign: "center",
                 marginBottom: 14,
               }}>
