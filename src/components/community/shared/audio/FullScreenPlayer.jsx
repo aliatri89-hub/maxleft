@@ -318,7 +318,7 @@ export default function FullScreenPlayer({
               }}
             >
               <div style={{
-                fontSize: 12, lineHeight: 1.5,
+                fontSize: 14, lineHeight: 1.55,
                 color: t.textSecondary,
                 fontFamily: "var(--font-body, system-ui)",
                 overflow: "hidden",
