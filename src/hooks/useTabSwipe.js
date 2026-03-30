@@ -39,10 +39,11 @@ export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMod
   const syncSliderPosition = useCallback(() => {
     if (!sliderRef.current) return;
     const idx = TABS.indexOf(activeTab);
-    if (!sliderRef.current.classList.contains("animating")) {
-      sliderRef.current.style.transform = `translateX(-${idx * 100}%)`;
-      sliderRef.current.style.setProperty("--active-index", idx);
-    }
+    // Always force-apply — clear any stale "animating" class that may have
+    // stuck if transitionend never fired (e.g. interrupted feed swipe).
+    sliderRef.current.classList.remove("animating");
+    sliderRef.current.style.transform = `translateX(-${idx * 100}%)`;
+    sliderRef.current.style.setProperty("--active-index", idx);
   }, [activeTab]);
 
   const onTouchStart = useCallback((e) => {
