@@ -494,6 +494,8 @@ function UsernameSetup({ name, session, onComplete }) {
 
       for (const task of processingTasks) {
         if (cancelled) break;
+        // community-progress and badge-check are driven by onStatusMessage, not the main loop
+        if (task.id === "community-progress" || task.id === "badge-check") continue;
         updateTask(task.id, { status: "running" });
 
         try {
