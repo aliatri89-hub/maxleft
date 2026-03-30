@@ -40,6 +40,8 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
 
   const preview = post.body.split(/\n\n/)[0] || "";
 
+  const cleanPreview = preview.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+ /g, "");
+
   return (
     <>
       {/* ── Compact card ── */}
@@ -47,46 +49,57 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
         onClick={() => setOpen(true)}
         style={{
           margin: "0 16px 12px",
-          padding: "14px 16px",
-          background: t.bgElevated,
-          border: `1px solid ${t.bgHover}`,
           borderRadius: 12,
+          overflow: "hidden",
           cursor: "pointer",
-          transition: "border-color 0.2s",
+          position: "relative",
+          minHeight: 80,
+          border: `1px solid ${t.bgHover}`,
+          background: t.bgElevated,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          {post.cover_image_url ? (
-            <img src={post.cover_image_url} alt="" style={{
-              width: 80, height: 56, borderRadius: 8, objectFit: "cover",
-              flexShrink: 0,
-            }} />
-          ) : (
+        {/* Backdrop image */}
+        {post.cover_image_url && (
+          <>
             <div style={{
-              width: 28, height: 28, borderRadius: 6,
-              background: `${accent}20`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-              flexShrink: 0,
-            }}>
-              <span style={{ fontSize: 14 }}>📝</span>
-            </div>
-          )}
+              position: "absolute", inset: 0,
+              backgroundImage: `url(${post.cover_image_url})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: 0.18,
+            }} />
+            <div style={{
+              position: "absolute", inset: 0,
+              background: "linear-gradient(90deg, rgba(15,13,11,0.85) 40%, rgba(15,13,11,0.4) 100%)",
+            }} />
+          </>
+        )}
 
+        {/* Content row */}
+        <div style={{
+          position: "relative",
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "14px 16px",
+        }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               fontSize: 13, fontWeight: 700, color: t.textPrimary,
               fontFamily: t.fontDisplay,
               letterSpacing: "0.02em",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              marginBottom: 5,
             }}>
               {post.title}
             </div>
             <div style={{
               fontSize: 11, color: t.textSecondary,
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              marginTop: 2,
+              lineHeight: 1.5,
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}>
-              {preview.replace(/\*\*/g, "").replace(/\*/g, "").slice(0, 80)}…
+              {cleanPreview.slice(0, 160)}
             </div>
           </div>
 
@@ -94,6 +107,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
             fontSize: 10, color: accent, fontWeight: 600,
             fontFamily: t.fontBody,
             textTransform: "uppercase",
+            letterSpacing: "0.06em",
             flexShrink: 0,
           }}>
             Read
