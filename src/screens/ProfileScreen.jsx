@@ -184,7 +184,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   };
 
   return (
-    <div className="profile-screen" style={{ paddingBottom: 40 }}>
+    <div className="profile-screen" style={{ paddingBottom: "calc(80px + var(--sab, 0px))" }}>
       <div className="profile-screen-header">
         <button className="profile-back" onClick={onBack}>← Back</button>
       </div>
