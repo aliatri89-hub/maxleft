@@ -91,6 +91,20 @@ export async function hasPlayedToday(userId) {
 }
 
 /**
+ * Fetch solve rate for a given puzzle date (% of players who solved it)
+ */
+export async function fetchSolveRate(puzzleDate) {
+  const { data, error } = await supabase
+    .from("cc_daily_results")
+    .select("solved")
+    .eq("puzzle_date", puzzleDate);
+
+  if (error || !data || data.length === 0) return null;
+  const solved = data.filter(r => r.solved).length;
+  return Math.round((solved / data.length) * 100);
+}
+
+/**
  * Puzzle number = days since launch
  */
 export function getPuzzleNumber(puzzleDate, launchDate = "2026-04-01") {

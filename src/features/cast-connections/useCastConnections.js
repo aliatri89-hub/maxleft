@@ -5,6 +5,7 @@ import {
   fetchTodaysResult,
   submitResult,
   getPuzzleNumber,
+  fetchSolveRate,
 } from "./castConnectionsApi";
 
 function shuffle(arr) {
@@ -31,6 +32,7 @@ export function useCastConnections(userId) {
   const [shaking, setShaking] = useState(false);
   const [revealAll, setRevealAll] = useState(false);
   const [hints, setHints] = useState([]); // array of tmdb_ids revealed as hints
+  const [solveRate, setSolveRate] = useState(null);
   const startTimeRef = useRef(null);
 
   const groupSize = puzzle?.movies[0]?.actors.length ?? 3;
@@ -138,6 +140,7 @@ export function useCastConnections(userId) {
           hintsUsed: hints.length,
         });
         if (res) setResult(res);
+        fetchSolveRate(puzzle.date).then(rate => setSolveRate(rate));
       }
     } else {
       // Wrong
@@ -222,6 +225,7 @@ export function useCastConnections(userId) {
     won,
     puzzleNumber,
     hints, useHint,
+    solveRate,
     // Actions
     toggleSelect,
     submitGuess,

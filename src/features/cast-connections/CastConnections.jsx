@@ -173,6 +173,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
     hints, useHint,
+    solveRate,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
   } = hookFn(userId);
 
@@ -241,7 +242,8 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     }
     const hintsStr = hints.length > 0 ? ` 💡${hints.length}` : "";
     const mistakesStr = mistakes > 0 ? ` ❌${mistakes}` : "";
-    return `M▶NTL\nCast Connections #${pNum}${hintsStr}${mistakesStr}\n${rows.join("\n")}\nmymantl.app/play`;
+    const rateStr = solveRate !== null ? `\n${solveRate}% of players solved this` : "";
+    return `M▶NTL\nCast Connections #${pNum}${hintsStr}${mistakesStr}\n${rows.join("\n")}${rateStr}\nmymantl.app/play`;
   }
 
   function handleShare() {
@@ -358,6 +360,11 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
               return `Solved with ${parts.join(" and ")}`;
             })() : "Better luck tomorrow"}
           </div>
+          {won && solveRate !== null && (
+            <div style={{ fontSize: 12, color: t.creamMuted, marginTop: 4, fontFamily: t.fontBody, opacity: 0.7 }}>
+              {solveRate}% of players solved today's puzzle
+            </div>
+          )}
           <button
             className="cc-btn-primary"
             onClick={handleShare}

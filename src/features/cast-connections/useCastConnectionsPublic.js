@@ -5,7 +5,7 @@
 // • Stores play state in localStorage (no DB writes)
 //
 import { useState, useEffect, useCallback, useRef } from "react";
-import { fetchTodaysPuzzle, getPuzzleNumber } from "./castConnectionsApi";
+import { fetchTodaysPuzzle, getPuzzleNumber, fetchSolveRate } from "./castConnectionsApi";
 
 const LS_KEY = "cc_result";
 
@@ -54,6 +54,7 @@ export function useCastConnectionsPublic() {
   const [shaking, setShaking] = useState(false);
   const [revealAll, setRevealAll] = useState(false);
   const [hints, setHints] = useState([]);
+  const [solveRate, setSolveRate] = useState(null);
   const startTimeRef = useRef(null);
 
   const groupSize = puzzle?.movies[0]?.actors.length ?? 3;
@@ -147,6 +148,7 @@ export function useCastConnectionsPublic() {
         };
         saveResult(resultData);
         setResult(resultData);
+        fetchSolveRate(puzzle.date).then(rate => setSolveRate(rate));
       }
     } else {
       const newMistakes = mistakes + 1;
@@ -213,6 +215,7 @@ export function useCastConnectionsPublic() {
     mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
     hints, useHint,
+    solveRate,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
   };
 }
