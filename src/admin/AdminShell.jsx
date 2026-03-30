@@ -26,7 +26,7 @@ const NAV_ITEMS = [
   { key: "originals",       label: "Staff Picks",      icon: "▶" },
   { key: "games",           label: "Games",            icon: "◇" },
   { key: "coverage",        label: "Coverage Links",   icon: "⊕" },
-  { key: "requests",        label: "Pod Requests",     icon: "📼" },
+  { key: "requests",        label: "Pod Requests",     icon: "◫" },
   { key: "analytics",       label: "Analytics",        icon: "◎" },
   { key: "config",          label: "Config & Flags",   icon: "◐" },
 ];

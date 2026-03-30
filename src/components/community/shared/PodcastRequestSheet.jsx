@@ -168,7 +168,12 @@ export default function PodcastRequestSheet({ open, onClose, userId }) {
           {submitted ? (
             /* ── Success state ── */
             <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>📼</div>
+              <div style={{
+                fontSize: 16, marginBottom: 12,
+                fontFamily: t.fontSharpie,
+                color: "var(--text-muted)",
+                letterSpacing: "0.04em",
+              }}>▶ ▶ ▶</div>
               <div style={{
                 fontFamily: t.fontSharpie,
                 fontSize: 18, color: "var(--text-primary)",

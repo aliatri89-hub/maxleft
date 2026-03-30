@@ -335,7 +335,7 @@ export default function CommunitiesScreen({
                 fontWeight: 600,
                 letterSpacing: "0.02em",
               }}>
-                📼 Request a Podcast
+                Request a Podcast
               </div>
             </div>
           </>
