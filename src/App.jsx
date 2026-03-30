@@ -371,6 +371,11 @@ function AppMain() {
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
     // Debug: log actual computed padding when screen changes
     if (screen === "app" && Capacitor.isNativePlatform()) {
+      // Reset page scroll — on first login the OAuth/setup flow can leave
+      // the page scrolled, pushing the header behind the status bar.
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
       requestAnimationFrame(() => {
         const app = document.querySelector(".mantl-app");
         const header = document.querySelector(".header");
