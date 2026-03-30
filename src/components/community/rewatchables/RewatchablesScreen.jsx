@@ -372,7 +372,6 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
               onToggle={handleItemTap}
               coverCacheVersion={coverCache}
               filter={filter}
-              hideTracker
             />
           );
         })}
