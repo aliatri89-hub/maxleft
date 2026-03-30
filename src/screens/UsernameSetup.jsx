@@ -314,6 +314,79 @@ function TaskRow({ task }) {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  RSS PREVIEW — shows last 3 films to confirm correct username
+// ═══════════════════════════════════════════════════════════
+function RssPreview({ username }) {
+  const [state, setState] = useState(null); // null | 'loading' | film[] | 'error' | 'notfound'
+
+  useEffect(() => {
+    if (!username || username.length < 2) { setState(null); return; }
+    setState("loading");
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://letterboxd.com/${username}/rss/`, { cache: "no-store" });
+        if (!res.ok) { setState("notfound"); return; }
+        const text = await res.text();
+        const xml = new DOMParser().parseFromString(text, "text/xml");
+        const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
+        if (items.length === 0) { setState("notfound"); return; }
+        const films = items.map(item => {
+          const ns = "https://a4.letterboxd.com/";
+          const title =
+            item.getElementsByTagNameNS("*", "filmTitle")[0]?.textContent ||
+            item.querySelector("title")?.textContent?.replace(/,.*$/, "") || "Unknown";
+          const desc = item.querySelector("description")?.textContent || "";
+          const imgMatch = desc.match(/src="([^"]+)"/);
+          return { title, poster: imgMatch?.[1] || null };
+        });
+        setState(films);
+      } catch {
+        setState(null); // CORS on web — hide silently, don't block
+      }
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [username]);
+
+  if (!state) return null;
+
+  if (state === "loading") return (
+    <div style={{ marginTop: 10, fontSize: 12, color: "rgba(255,255,255,0.4)", fontFamily: t.fontBody }}>
+      Checking…
+    </div>
+  );
+
+  if (state === "notfound") return (
+    <div style={{ marginTop: 10, fontSize: 13, color: "#c0392b", fontFamily: t.fontBody }}>
+      ✕ Username not found — double check your Letterboxd username
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", fontFamily: t.fontBody, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        ✓ Found — recent films
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {state.map((film, i) => (
+          <div key={i} style={{ flex: 1, textAlign: "center" }}>
+            {film.poster ? (
+              <img src={film.poster} alt={film.title} style={{ width: "100%", aspectRatio: "2/3", objectFit: "cover", borderRadius: 6, display: "block", marginBottom: 4 }} />
+            ) : (
+              <div style={{ width: "100%", aspectRatio: "2/3", background: "rgba(255,255,255,0.06)", borderRadius: 6, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ fontSize: 18 }}>🎬</span>
+              </div>
+            )}
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontFamily: t.fontBody, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {film.title}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 //  MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════
 function UsernameSetup({ name, session, onComplete }) {
@@ -752,20 +825,12 @@ function UsernameSetup({ name, session, onComplete }) {
           <input
             className="field-input"
             type="text"
-            placeholder="e.g. ali"
+            placeholder="e.g. aliatri"
             value={letterboxdUsername}
-            onChange={(e) => setLetterboxdUsername(e.target.value.trim().toLowerCase())}
+            onChange={(e) => { setLetterboxdUsername(e.target.value.trim().toLowerCase()); }}
             autoFocus
           />
-          {letterboxdUsername && (
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 12,
-              color: "rgba(255,255,255,0.5)", marginTop: 6,
-              wordBreak: "break-all",
-            }}>
-              RSS: {rssUrl}
-            </div>
-          )}
+          <RssPreview username={letterboxdUsername} />
         </div>
 
         {/* 2. CSV Export */}
