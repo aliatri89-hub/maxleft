@@ -1,5 +1,5 @@
 import { t } from "../theme";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 
@@ -10,16 +10,24 @@ import IngestReviewTool from "../components/feed/IngestReviewTool";
 
 /** Smooth expand/collapse wrapper using CSS grid trick */
 function Expandable({ open, children }) {
+  const [mounted, setMounted] = React.useState(open);
+
+  // Mount on first open, never unmount (avoids re-fetching data)
+  React.useEffect(() => {
+    if (open) setMounted(true);
+  }, [open]);
+
+  if (!mounted) return null;
+
   return (
     <div style={{
-      display: "grid",
-      gridTemplateRows: open ? "1fr" : "0fr",
+      overflow: "hidden",
+      maxHeight: open ? 2000 : 0,
       opacity: open ? 1 : 0,
-      transition: "grid-template-rows 0.3s cubic-bezier(0.2,0.9,0.3,1), opacity 0.25s ease",
+      transition: "max-height 0.32s cubic-bezier(0.2,0.9,0.3,1), opacity 0.2s ease",
+      willChange: "opacity",
     }}>
-      <div style={{ overflow: "hidden" }}>
-        {children}
-      </div>
+      {children}
     </div>
   );
 }
