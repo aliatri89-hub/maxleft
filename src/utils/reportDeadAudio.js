@@ -51,17 +51,3 @@ export async function reportDeadAudio(playerEp, errorInfo = '') {
     console.warn('[DeadAudio] Report error:', err);
   }
 }
-
-/**
- * Maps HTML5 MediaError codes to readable strings.
- */
-export function getAudioErrorInfo(mediaError) {
-  if (!mediaError) return 'unknown';
-  const codes = {
-    1: 'aborted',
-    2: 'network_error',   // Most likely for dead URLs / 403 / 404
-    3: 'decode_error',     // Paywall redirect returning HTML instead of MP3
-    4: 'not_supported',
-  };
-  return codes[mediaError.code] || `unknown_code_${mediaError.code}`;
-}

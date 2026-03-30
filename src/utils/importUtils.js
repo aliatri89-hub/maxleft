@@ -14,7 +14,7 @@ import { upsertMediaLog, toPosterPath } from "./mediaWrite";
 //  CSV PARSING
 // ═══════════════════════════════════════════════════════════
 
-export function parseCSV(text) {
+function parseCSV(text) {
   const result = [];
   let current = "";
   let fields = [];
@@ -42,7 +42,7 @@ export function parseCSV(text) {
 //  FORMAT DETECTION
 // ═══════════════════════════════════════════════════════════
 
-export function detectFormat(headers) {
+function detectFormat(headers) {
   const h = headers.map(c => c.toLowerCase().trim());
   if (h.includes("book id") || h.includes("exclusive shelf")) return "goodreads";
   if (h.includes("read status") || (h.includes("star rating") && h.includes("title"))) return "storygraph";
@@ -56,7 +56,7 @@ export const FORMAT_LABELS = { goodreads: "Goodreads", storygraph: "StoryGraph",
 //  ROW → ITEM PARSING (per format)
 // ═══════════════════════════════════════════════════════════
 
-export function parseRows(rows, headers, format) {
+function parseRows(rows, headers, format) {
   const headerMap = {};
   headers.forEach((h, i) => { headerMap[h.trim().toLowerCase()] = i; });
   const get = (row, key) => {
@@ -121,7 +121,7 @@ export function parseRows(rows, headers, format) {
 //  DEDUP AGAINST EXISTING DATA
 // ═══════════════════════════════════════════════════════════
 
-export async function deduplicateItems(items, format, userId) {
+async function deduplicateItems(items, format, userId) {
   // ── Books: unchanged — true dedup ──
   if (format !== "letterboxd") {
     const { data } = await supabase.from("user_books_v").select("title, author").eq("user_id", userId);

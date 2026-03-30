@@ -23,7 +23,7 @@ export function toPosterPath(url) {
   return match ? match[1] : url;
 }
 
-export function toBackdropPath(url) {
+function toBackdropPath(url) {
   if (!url) return null;
   if (url.startsWith("/")) return url;
   const match = url.match(/\/t\/p\/[^/]+(\/.*)/);
@@ -46,11 +46,11 @@ const GAME_STATUS_TO_DISPLAY = {
   backlog: "backlog",
 };
 
-export function gameStatusToInternal(displayStatus) {
+function gameStatusToInternal(displayStatus) {
   return GAME_STATUS_TO_INTERNAL[displayStatus] || displayStatus;
 }
 
-export function gameStatusToDisplay(internalStatus) {
+function gameStatusToDisplay(internalStatus) {
   return GAME_STATUS_TO_DISPLAY[internalStatus] || internalStatus;
 }
 
@@ -223,24 +223,6 @@ export async function updateGameStatus(logId, displayStatus, extra = {}) {
 
   if (error) {
     console.warn("[mediaWrite] updateGameStatus error:", error.message);
-    return false;
-  }
-  return true;
-}
-
-/**
- * deleteMediaLog — LEGACY: Remove a user_media_logs row by ID only.
- * Does NOT cascade to feed_activity, community_user_progress, or badges.
- * Use deleteFullMediaLog() instead for user-facing deletes.
- */
-export async function deleteMediaLog(logId) {
-  const { error } = await supabase
-    .from("user_media_logs")
-    .delete()
-    .eq("id", logId);
-
-  if (error) {
-    console.warn("[mediaWrite] deleteMediaLog error:", error.message);
     return false;
   }
   return true;

@@ -133,40 +133,7 @@ export const fetchTMDBWatchProviders = async (tmdbId, type = "movie") => {
   return data; // raw TMDB watch/providers response or null
 };
 
-// Now Playing — movies currently in theaters
-export const fetchTMDBNowPlaying = async (page = 1, region = "US") => {
-  const data = await apiProxy("tmdb_now_playing", {
-    page: String(page),
-    region,
-  });
-  return data; // { results, page, total_pages, total_results }
-};
-
-// Discover — streaming movies filtered by watch providers
-// Discover movies — flexible: streaming (with providers) or new releases (with dates)
-// Default providers: Netflix(8), Prime(9), Disney+(337), HBO Max(384),
-//   Hulu(15), Apple TV+(350), Paramount+(531), Peacock(386)
-export const fetchTMDBDiscover = async (page = 1, options = {}) => {
-  const params = {
-    page: String(page),
-    sort_by: options.sortBy || "popularity.desc",
-  };
-  // Provider filters (streaming tab)
-  if (options.providers) {
-    params.watch_region = options.region || "US";
-    params.with_watch_providers = options.providers;
-    params.with_watch_monetization_types = options.monetization || "flatrate";
-  }
-  // Date range filters (new releases tab)
-  if (options.releaseDateGte) params.release_date_gte = options.releaseDateGte;
-  if (options.releaseDateLte) params.release_date_lte = options.releaseDateLte;
-
-  const data = await apiProxy("tmdb_discover", params);
-  return data;
-};
-
 // Raw Google Books search (returns the full API response)
-// Used by ImportCSVModal, ChallengeScreen, GroupViewScreen
 export const searchGoogleBooksRaw = async (query, maxResults = 5) => {
   const data = await apiProxy("google_books", {
     query,
