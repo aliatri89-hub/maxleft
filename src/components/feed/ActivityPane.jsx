@@ -1,5 +1,5 @@
 import { t } from "../../theme";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useActivityFeed } from "../../hooks/community/useActivityFeed";
 import ActivityCard from "./ActivityCard";
 import EmptyFeed from "./EmptyFeed";
@@ -48,6 +48,30 @@ export default function ActivityPane({
 
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
+
+  // ── Progressive rendering — mount 3 cards initially, grow on scroll ──
+  const INITIAL_VISIBLE = 3;
+  const BATCH_SIZE = 4;
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const growRef = useRef(null);
+
+  // Reset visible count when feed changes (filter, sort, refresh)
+  useEffect(() => { setVisibleCount(INITIAL_VISIBLE); }, [filteredActivity.length, selectedPodcast, sortOrder]);
+
+  const growMore = useCallback(() => {
+    setVisibleCount(v => Math.min(v + BATCH_SIZE, ACTIVITY_CAP));
+  }, []);
+
+  useEffect(() => {
+    const el = growRef.current;
+    if (!el || !isVisible) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) growMore(); },
+      { rootMargin: "300px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleCount, isVisible, growMore]);
 
   // ── Pull-to-refresh ──
   useEffect(() => {
@@ -151,10 +175,12 @@ export default function ActivityPane({
         </div>
       )}
 
-      {/* Cards */}
+      {/* Cards — progressive rendering */}
       {(() => {
         const firstLogRef = { current: false };
-        return filteredActivity.slice(0, ACTIVITY_CAP).map((item, i) => {
+        const capped = filteredActivity.slice(0, ACTIVITY_CAP);
+        const rendered = capped.slice(0, visibleCount);
+        return rendered.map((item, i) => {
           if (!item?.data) return null;
           const isFirstLog = item.type === "log" && !firstLogRef.current;
           if (item.type === "log") firstLogRef.current = true;
@@ -180,6 +206,11 @@ export default function ActivityPane({
           );
         });
       })()}
+
+      {/* Progressive render sentinel — load more cards as user scrolls */}
+      {visibleCount < Math.min(filteredActivity.length, ACTIVITY_CAP) && (
+        <div ref={growRef} style={{ height: 1 }} />
+      )}
 
       {/* Infinite scroll sentinel */}
       {hasMoreActivity && activityItems.length < ACTIVITY_CAP && (
