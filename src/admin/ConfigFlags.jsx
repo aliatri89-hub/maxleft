@@ -22,7 +22,6 @@ const QUICK_REF = [
   { label: "Firebase Project", value: "mantl-6c5d1" },
   { label: "Repo", value: "github.com/aliatri89-hub/mantl" },
   { label: "LLC", value: "mymantl LLC (Wyoming)" },
-  { label: "RAWG API Key", value: "744f042dd2e547eba93ea70774d66a00" },
 ];
 
 export default function ConfigFlags({ session }) {

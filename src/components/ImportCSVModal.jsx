@@ -1,6 +1,6 @@
 import { t } from "../theme";
 import { useState, useRef } from "react";
-import { parseFile, importMovies, importBooks, FORMAT_LABELS } from "../utils/importUtils";
+import { parseFile, importMovies, FORMAT_LABELS } from "../utils/importUtils";
 
 const accent = "#EF9F27";
 
@@ -34,18 +34,14 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
     setErrors(0);
     const onProgress = (current, total) => { setProgress(current); setTotal(total); };
     let result;
-    if (format === "letterboxd") {
-      result = await importMovies(parsed, session.user.id, onProgress);
-    } else {
-      result = await importBooks(parsed, session.user.id, onProgress);
-    }
+    result = await importMovies(parsed, session.user.id, onProgress);
     setImported(result.count);
     setErrors(result.errs);
     setStep("done");
     if (result.count > 0 && onComplete) onComplete();
   };
 
-  const typeLabel = format === "letterboxd" ? "films" : "books";
+  const typeLabel = "films";
 
   return (
     <div className="overlay" onClick={() => step !== "importing" && onClose()}>
@@ -71,8 +67,6 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
-                  { key: "goodreads", label: "Goodreads", hint: "My Books → Import/Export → Export Library" },
-                  { key: "storygraph", label: "StoryGraph", hint: "Settings → Export StoryGraph Library" },
                   { key: "letterboxd", label: "Letterboxd", hint: "Settings → Import & Export → Export Your Data → diary.csv" },
                 ].map(opt => (
                   <div key={opt.key} onClick={() => fileRef.current?.click()} style={{
@@ -140,7 +134,6 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
                           {item.rating ? ` · ${"★".repeat(item.rating)}` : ""}
                         </div>
                       </div>
-                      {item.isReading && <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: accent }}>READING</span>}
                     </div>
                   ))}
                   {parsed.length > 50 && (
@@ -181,7 +174,7 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 16, padding: "24px 0" }}>
               <div className="spinner" />
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)" }}>
-                {format === "letterboxd" ? "Looking up films..." : "Importing books & fetching covers..."}
+                {format === "letterboxd" ? "Looking up films..." : "Importing..."}
               </div>
               <div style={{ width: "100%", background: `${accent}15`, borderRadius: 4, height: 6, overflow: "hidden" }}>
                 <div style={{

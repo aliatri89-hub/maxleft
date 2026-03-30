@@ -90,22 +90,6 @@ function parseRows(rows, headers, format) {
 // ═══════════════════════════════════════════════════════════
 
 async function deduplicateItems(items, format, userId) {
-  // ── Books: unchanged — true dedup ──
-  if (format !== "letterboxd") {
-    const { data } = await supabase.from("user_books_v").select("title, author").eq("user_id", userId);
-    const existingSet = new Set((data || []).map(b => `${b.title}::${b.author}`));
-
-    let dupeCount = 0;
-    const unique = items.filter(item => {
-      const key = `${item.title}::${item.author}`;
-      if (existingSet.has(key)) { dupeCount++; return false; }
-      existingSet.add(key);
-      return true;
-    });
-
-    return { unique, dupeCount };
-  }
-
   // ── Letterboxd: consolidate multiple watches into one item per movie ──
   // Group by title::year — count watches, collect dates, keep latest rating
   const groups = new Map();
@@ -262,72 +246,4 @@ export async function importMovies(items, userId, onProgress) {
   return { count, errs };
 }
 
-// ═══════════════════════════════════════════════════════════
-//  IMPORT BOOKS (Goodreads / StoryGraph)
-// ═══════════════════════════════════════════════════════════
 
-export async function importBooks(items, userId, onProgress) {
-  let count = 0, errs = 0;
-
-  const safeDate = (str, fallback) => {
-    if (!str) return fallback || null;
-    const d = new Date(str);
-    return isNaN(d.getTime()) ? (fallback || null) : d.toISOString();
-  };
-
-  const fetchCover = async (title, author, retries = 3) => {
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        const q = `${title} ${author || ""}`;
-        const data = await searchGoogleBooksRaw(q, 1);
-        if (data?.status === 429) {
-          const wait = Math.pow(2, attempt + 1) * 1000;
-          console.warn(`[Import] 429 rate limited, waiting ${wait / 1000}s... ("${title}")`);
-          await new Promise(r => setTimeout(r, wait));
-          continue;
-        }
-        if (!data || data.error) { console.warn(`[Import] Google Books error for "${title}"`); return null; }
-        return data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail || null;
-      } catch (e) { console.warn("[Import] Cover fetch error:", e); return null; }
-    }
-    console.warn(`[Import] Gave up on cover for "${title}" after ${retries} retries`);
-    return null;
-  };
-
-  for (let i = 0; i < items.length; i += 10) {
-    const chunk = items.slice(i, i + 10);
-
-    // Fetch covers sequentially to avoid 429
-    const covers = [];
-    for (const b of chunk) {
-      const cover = await fetchCover(b.title, b.author);
-      covers.push(cover);
-      await new Promise(r => setTimeout(r, 350));
-    }
-
-    // Write each book via unified media log
-    for (let j = 0; j < chunk.length; j++) {
-      const b = chunk[j];
-      const isReading = !!b.isReading;
-      const mediaId = await upsertMediaLog(userId, {
-        mediaType: "book",
-        title: b.title,
-        creator: b.author || null,
-        posterPath: covers[j] || null,
-        rating: (b.rating && b.rating > 0) ? b.rating : null,
-        watchedAt: isReading ? null : safeDate(b.dateRead),
-        source: b.source || "import",
-        status: isReading ? "watching" : "finished",
-      });
-      if (!mediaId) { console.error("[Import] upsert_media_log failed for", b.title); errs++; }
-      else count++;
-    }
-
-    if (onProgress) onProgress(Math.min(i + 10, items.length), items.length);
-
-    // Rate limit pause
-    if ((i + 1) % 8 === 0) await new Promise(r => setTimeout(r, 1000));
-  }
-
-  return { count, errs };
-}
