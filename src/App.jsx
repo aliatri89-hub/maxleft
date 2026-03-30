@@ -339,6 +339,7 @@ function AppMain() {
   useEffect(() => {
     initDeepLinkListener(); // Listen for OAuth deep link callbacks on native
     let loadingUserId = null;
+    let loadedUserId = null; // tracks which user we've fully loaded — prevents re-splash on token refresh
     let callbackTimeout = null;
     let nativeAuthTimeout = null;
 
@@ -361,11 +362,16 @@ function AppMain() {
       setSession(s);
       if (s && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         clearNativeAuthPending(); // auth succeeded, clear the flag
-        setScreen("loading"); // immediately show loading — don't stay on landing while user data loads
-        if (loadingUserId === s.user.id) return;
+        // If the app is already loaded for this user, don't re-run loadUserData.
+        // Supabase fires SIGNED_IN on every token refresh (e.g. returning from
+        // background) — re-running loadUserData resets screen to "loading" and
+        // shows the splash, which looks like a full reload.
+        if (loadingUserId === s.user.id || (event === "SIGNED_IN" && loadedUserId === s.user.id)) return;
+        setScreen("loading"); // show loading while user data loads
         loadingUserId = s.user.id;
-        loadUserData(s.user).finally(() => { loadingUserId = null; });
+        loadUserData(s.user).finally(() => { loadingUserId = null; loadedUserId = s.user.id; });
       } else if (!s) {
+        loadedUserId = null;
         // If URL has auth tokens, Supabase is still processing the OAuth callback —
         // stay on loading screen instead of flashing the landing page
         if (isOAuthCallback) return;
