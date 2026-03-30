@@ -1,5 +1,5 @@
 import { t } from "../../theme";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useActivityFeed } from "../../hooks/community/useActivityFeed";
 import ActivityCard from "./ActivityCard";
 import EmptyFeed from "./EmptyFeed";
@@ -10,8 +10,6 @@ import BadgeDetailScreen from "../community/shared/BadgeDetailScreen";
 // ════════════════════════════════════════════════
 // ACTIVITY PANE — Activity tab (watch logs)
 // ════════════════════════════════════════════════
-
-const ACTIVITY_CAP = 30;
 
 export default function ActivityPane({
   isVisible,
@@ -49,11 +47,10 @@ export default function ActivityPane({
   const [celebrationBadge, setCelebrationBadge] = useState(null);
   const [viewingBadgeDetail, setViewingBadgeDetail] = useState(null);
 
-  // Progressive rendering state (effects below, after filteredActivity)
-  const INITIAL_VISIBLE = 3;
-  const BATCH_SIZE = 4;
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
-  const growRef = useRef(null);
+  // ── Paginated rendering — show 10 at a time, cap at 50 ──
+  const PAGE_SIZE = 10;
+  const ACTIVITY_MAX = 50;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // ── Pull-to-refresh ──
   useEffect(() => {
@@ -90,28 +87,13 @@ export default function ActivityPane({
     return items;
   }, [activityItems, selectedPodcast, favoriteSlugs, sortOrder]);
 
-  // ── Progressive rendering — reset + grow on scroll ──
-  useEffect(() => { setVisibleCount(INITIAL_VISIBLE); }, [filteredActivity.length, selectedPodcast, sortOrder]);
-
-  const growMore = useCallback(() => {
-    setVisibleCount(v => Math.min(v + BATCH_SIZE, ACTIVITY_CAP));
-  }, []);
-
-  useEffect(() => {
-    const el = growRef.current;
-    if (!el || !isVisible) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) growMore(); },
-      { rootMargin: "300px" }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [visibleCount, isVisible, growMore]);
+  // Reset visible count when feed changes (filter, sort, refresh)
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [filteredActivity.length, selectedPodcast, sortOrder]);
 
   // ── Infinite scroll ──
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el || !hasMoreActivity || !isVisible || activityItems.length >= ACTIVITY_CAP) return;
+    if (!el || !hasMoreActivity || !isVisible || activityItems.length >= ACTIVITY_MAX) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMoreActivity(); },
       { rootMargin: "200px" }
@@ -175,10 +157,10 @@ export default function ActivityPane({
         </div>
       )}
 
-      {/* Cards — progressive rendering */}
+      {/* Cards — paginated rendering */}
       {(() => {
         const firstLogRef = { current: false };
-        const capped = filteredActivity.slice(0, ACTIVITY_CAP);
+        const capped = filteredActivity.slice(0, ACTIVITY_MAX);
         const rendered = capped.slice(0, visibleCount);
         return rendered.map((item, i) => {
           if (!item?.data) return null;
@@ -207,13 +189,31 @@ export default function ActivityPane({
         });
       })()}
 
-      {/* Progressive render sentinel — load more cards as user scrolls */}
-      {visibleCount < Math.min(filteredActivity.length, ACTIVITY_CAP) && (
-        <div ref={growRef} style={{ height: 1 }} />
+      {/* Show more button */}
+      {visibleCount < Math.min(filteredActivity.length, ACTIVITY_MAX) && (
+        <div style={{ padding: "16px 24px 8px", textAlign: "center" }}>
+          <button
+            onClick={() => setVisibleCount(v => Math.min(v + PAGE_SIZE, ACTIVITY_MAX))}
+            style={{
+              fontFamily: t.fontHeadline,
+              fontSize: 12,
+              fontWeight: 600,
+              color: "var(--accent-terra, #c97c5d)",
+              letterSpacing: "0.04em",
+              background: "rgba(201,124,93,0.08)",
+              border: "1px solid rgba(201,124,93,0.25)",
+              borderRadius: 20,
+              padding: "10px 24px",
+              cursor: "pointer",
+            }}
+          >
+            Show {Math.min(PAGE_SIZE, Math.min(filteredActivity.length, ACTIVITY_MAX) - visibleCount)} more
+          </button>
+        </div>
       )}
 
       {/* Infinite scroll sentinel */}
-      {hasMoreActivity && activityItems.length < ACTIVITY_CAP && (
+      {hasMoreActivity && activityItems.length < ACTIVITY_MAX && (
         <div ref={sentinelRef} style={{ height: 1 }} />
       )}
 
