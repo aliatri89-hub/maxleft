@@ -317,7 +317,7 @@ async function syncUserLetterboxd(
   synced: number;
   rewatches: number;
   community_logged: number;
-  synced_films: Array<{ tmdbId: number; title: string; rating: number | null }>;
+  synced_films: Array<{ tmdbId: number; title: string; rating: number | null; watchedAt: string }>;
   not_modified?: boolean;
 }> {
   // 1. Fetch RSS with conditional request headers
@@ -515,7 +515,7 @@ async function processNewFilm(
   tmdbKey: string,
   uid: string,
   film: RSSFilm
-): Promise<{ tmdbId: number; title: string; rating: number | null } | null> {
+): Promise<{ tmdbId: number; title: string; rating: number | null; watchedAt: string } | null> {
   let tmdbId = film.tmdbId;
   let poster: string | null = null;
   let backdrop: string | null = null;
@@ -574,6 +574,10 @@ async function processNewFilm(
     ? new Date(film.watchedDate).toISOString().slice(0, 10)
     : new Date().toISOString().slice(0, 10);
 
+  const watchedAt = film.watchedDate
+    ? toLogTimestamp(film.watchedDate)
+    : new Date().toISOString();
+
   const { data: mediaId, error } = await sb.rpc("upsert_media_log", {
     p_user_id: uid,
     p_media_type: "film",
@@ -590,9 +594,7 @@ async function processNewFilm(
     p_genre: genre,
     p_rating: film.rating ? Math.round(film.rating) : null,
     p_notes: null,
-    p_watched_at: film.watchedDate
-      ? toLogTimestamp(film.watchedDate)
-      : new Date().toISOString(),
+    p_watched_at: watchedAt,
     p_source: "letterboxd",
     p_watch_count: 1,
     p_watch_dates: [watchDateStr],
@@ -606,14 +608,14 @@ async function processNewFilm(
     return null;
   }
 
-  return { tmdbId, title: film.title, rating: film.rating };
+  return { tmdbId, title: film.title, rating: film.rating, watchedAt };
 }
 
 // ── Auto-log community progress ─────────────────────────────
 async function autoLogCommunityProgress(
   sb: any,
   uid: string,
-  syncedFilms: Array<{ tmdbId: number; title: string; rating: number | null }>
+  syncedFilms: Array<{ tmdbId: number; title: string; rating: number | null; watchedAt: string }>
 ): Promise<number> {
   try {
     const tmdbIds = syncedFilms.map((f) => f.tmdbId);
@@ -649,7 +651,7 @@ async function autoLogCommunityProgress(
           item_id: item.id,
           status: "completed",
           rating: filmData?.rating ? Math.round(filmData.rating) : null,
-          completed_at: new Date().toISOString(),
+          completed_at: filmData?.watchedAt || new Date().toISOString(),
           listened_with_commentary: false,
           brown_arrow: false,
           updated_at: new Date().toISOString(),
