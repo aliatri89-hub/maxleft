@@ -5,8 +5,8 @@ const BG = "#0f0d0b";
 const CARD = "#1a1714";
 const BORDER = "rgba(255,255,255,0.08)";
 const TEXT = "#ffffff";
-const MUTED = "rgba(255,255,255,0.60)";
-const FAINT = "rgba(255,255,255,0.40)";
+const MUTED = "rgba(255,255,255,0.88)";
+const FAINT = "rgba(255,255,255,0.60)";
 
 const GAMES_HUB_URL = "https://mymantl.app/play";
 
@@ -106,7 +106,7 @@ const sections = [
 
 function BadgeFilmsAnswer() {
   return (
-    <p style={{ margin: 0, color: MUTED, fontSize: 14, lineHeight: 1.65, fontFamily: "'Barlow Condensed', sans-serif" }}>
+    <p style={{ margin: 0, color: MUTED, fontSize: 16, lineHeight: 1.65, fontFamily: "'Barlow Condensed', sans-serif" }}>
       That's part of the fun — MANTL doesn't reveal the full list. Use the context clues on the{" "}
       <a
         href={GAMES_HUB_URL}
@@ -176,7 +176,7 @@ function FAQItem({ q, a, customKey }) {
               style={{
                 margin: 0,
                 color: MUTED,
-                fontSize: 14,
+                fontSize: 16,
                 lineHeight: 1.65,
                 fontFamily: "'Barlow Condensed', sans-serif",
               }}
@@ -244,9 +244,9 @@ export default function FAQScreen() {
           <p
             style={{
               fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 15,
+              fontSize: 16,
               color: MUTED,
-              margin: 0,
+              margin: "0 0 8px",
             }}
           >
             Can't find what you're looking for?{" "}
@@ -313,10 +313,10 @@ export default function FAQScreen() {
             <p
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 14,
+                fontSize: 16,
                 color: MUTED,
-                margin: "0 0 14px",
                 lineHeight: 1.6,
+                margin: "0 0 14px",
               }}
             >
               We're a small team and read every message.
