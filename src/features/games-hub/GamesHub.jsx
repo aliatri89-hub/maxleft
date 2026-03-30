@@ -330,12 +330,6 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
             A scavenger hunt through the libraries of your favorite podcasts.
           </div>
         </div>
-        <span style={{
-          fontFamily: t.fontSerif, fontSize: 11, fontWeight: 700, padding: "3px 8px",
-          borderRadius: 6, background: "rgba(212, 168, 83, 0.15)", color: "#d4a853",
-        }}>
-          View
-        </span>
         <div style={{
           position: "absolute", right: 14, top: "50%",
           width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
