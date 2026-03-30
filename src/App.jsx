@@ -1,7 +1,6 @@
 import { t } from "./theme";
 import { useState, useEffect, useRef, useCallback, lazy, Suspense } from "react";
 import { Capacitor } from "@capacitor/core";
-import { App as CapacitorApp } from "@capacitor/app";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { App as CapApp } from "@capacitor/app";
 import { supabase } from "./supabase";
@@ -53,7 +52,7 @@ if (Capacitor.isNativePlatform()) {
   // WebView after foregrounding, so a bare rAF fires too early and reads 0px.
   CapApp.addListener("appStateChange", ({ isActive }) => {
     if (isActive) {
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 150);
+      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 500);
     }
   });
 }

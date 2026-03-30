@@ -48,6 +48,19 @@ export async function initDeepLinkListener() {
       // Browser might already be closed
     }
 
+    // Re-probe safe area — Chrome Custom Tab closing returns focus to the
+    // WebView but Android takes ~300ms to restore window insets. Probing here
+    // (immediately post-Browser.close) is more reliable than appStateChange
+    // which doesn't always fire a clean false→true cycle with Custom Tabs.
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;height:env(safe-area-inset-top,0px)';
+      document.body.appendChild(el);
+      const top = el.getBoundingClientRect().height;
+      el.remove();
+      if (top > 0) document.documentElement.style.setProperty('--sat', `${top}px`);
+    }, 350);
+
     // Extract tokens from the URL hash fragment
     // Format: app.mymantl://login-callback#access_token=xxx&refresh_token=yyy&...
     const hashPart = url.split('#')[1];
