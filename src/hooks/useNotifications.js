@@ -96,7 +96,7 @@ export default function useNotifications(session) {
   // (badge digests after import, coverage alerts, etc.) without needing signals.
   useEffect(() => {
     if (!userId) return;
-    const id = setInterval(fetchNotifications, 30_000);
+    const id = setInterval(fetchNotifications, 15_000);
     return () => clearInterval(id);
   }, [userId, fetchNotifications]);
 
