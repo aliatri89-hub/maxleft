@@ -6,7 +6,7 @@
  * Lives in: src/utils/importUtils.js
  */
 
-import { supabase } from "../supabase";
+import { supabase, supabaseUrl } from "../supabase";
 
 // ═══════════════════════════════════════════════════════════
 //  CSV PARSING
@@ -184,7 +184,6 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
   const { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) throw new Error("Not authenticated");
 
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const fnUrl = `${supabaseUrl}/functions/v1/import-letterboxd-csv`;
 
   const response = await fetch(fnUrl, {
