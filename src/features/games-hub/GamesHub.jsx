@@ -286,8 +286,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
       {/* ── Anytime section ── */}
       <div style={{
-        fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: t.creamMuted, margin: "0 0 10px 4px",
+        fontSize: 13, textTransform: "uppercase", letterSpacing: 2,
+        fontWeight: 700, color: "#f0ebe1", margin: "0 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.2s",
       }}>
         Anytime
@@ -386,8 +386,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
       {/* Daily Games */}
       <div style={{
-        fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: t.creamMuted, margin: "20px 0 10px 4px",
+        fontSize: 13, textTransform: "uppercase", letterSpacing: 2,
+        fontWeight: 700, color: "#f0ebe1", margin: "20px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.3s",
       }}>
         Daily Games
@@ -456,8 +456,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
 
       {/* Other Games */}
       <div style={{
-        fontSize: 10, textTransform: "uppercase", letterSpacing: 3,
-        color: t.creamMuted, margin: "24px 0 10px 4px",
+        fontSize: 13, textTransform: "uppercase", letterSpacing: 2,
+        fontWeight: 700, color: "#f0ebe1", margin: "24px 0 10px 4px",
         opacity: loaded ? 1 : 0, transition: "opacity 0.4s ease 0.4s",
       }}>
         Other Games
