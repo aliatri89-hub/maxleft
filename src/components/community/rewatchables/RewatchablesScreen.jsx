@@ -8,7 +8,6 @@ import { supabase } from "../../../supabase";
 import RewatchablesHero from "./RewatchablesHero";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import RewatchablesLogModal from "./RewatchablesLogModal";
-import CommunityFilter from "../shared/CommunityFilter";
 import HostChipBar from "../shared/HostChipBar";
 import AddItemTool from "../dashboard/AddItemTool";
 import AdminFab from "../dashboard/AdminFab";
@@ -204,8 +203,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
         allItems={allItems}
       />
 
-      <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
-
+      {/* View mode + filter — single row */}
       <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center" }}>
         {[{ key: "az", label: "Genre" }, { key: "decades", label: "Decades" }].map(v => (
           <button
@@ -223,6 +221,26 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
           >{v.label}</button>
         ))}
         <div style={{ flex: 1 }} />
+        {[{ key: "all", label: "All" }, { key: "seen", label: "Seen" }, { key: "unseen", label: "Unseen" }].map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => setFilter(opt.key)}
+            style={{
+              background: filter === opt.key ? accent + "22" : "rgba(255,255,255,0.05)",
+              border: filter === opt.key ? "1px solid " + accent : "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 20, padding: "5px 14px",
+              color: filter === opt.key ? accent : t.textMuted,
+              fontSize: 12, fontWeight: 600, cursor: "pointer",
+              transition: "all 0.2s",
+              fontFamily: t.fontDisplay,
+              letterSpacing: "0.03em",
+              textTransform: "uppercase",
+              flexShrink: 0,
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
         <button
           onClick={() => {
             if (searchOpen) {
