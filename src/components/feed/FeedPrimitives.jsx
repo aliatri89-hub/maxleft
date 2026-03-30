@@ -453,7 +453,6 @@ export function getSlugAbbrev(slug) {
     filmspotting: "FS",
     rewatchables: "RW",
     chapo: "CT",
-    getplayed: "GP",
   };
   return map[slug] || (slug || "").slice(0, 2).toUpperCase();
 }
@@ -468,7 +467,6 @@ export function getCommunityAccent(slug) {
     filmspotting: "#fb923c",
     rewatchables: "#60a5fa",
     chapo: "#f87171",
-    getplayed: "#34d399",
   };
   return map[slug] || "#34d399";
 }

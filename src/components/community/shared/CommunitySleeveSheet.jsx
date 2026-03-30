@@ -26,7 +26,7 @@ function makeBarcode(seed) {
 const SLUG_ABBREV = {
   blankcheck: "BC", nowplaying: "NP", bigpicture: "BP",
   filmjunk: "FJ", hdtgm: "HD", filmspotting: "FS",
-  rewatchables: "RW", chapo: "CT", getplayed: "GP",
+  rewatchables: "RW", chapo: "CT",
   "staff-picks": "MO",
 };
 

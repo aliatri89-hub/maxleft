@@ -33,7 +33,7 @@ export function bustCommunityCache(slug) {
 
 // Only these communities actually display episode metadata (description,
 // title, duration) fetched from podcast_episodes. Everyone else skips it.
-const EPISODE_ENRICHED_SLUGS = new Set(["nowplaying", "getplayed"]);
+const EPISODE_ENRICHED_SLUGS = new Set(["nowplaying"]);
 
 export function useCommunityPage(slug) {
   const [community,  setCommunity]  = useState(null);

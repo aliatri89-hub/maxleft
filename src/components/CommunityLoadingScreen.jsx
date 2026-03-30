@@ -16,7 +16,6 @@ const COMMUNITY_BRANDS = {
   "filmspotting":  { name: "Filmspotting",        accent: "#475569" },
   "rewatchables":  { name: "The Rewatchables",    accent: "#1DB954" },
   "chapo":         { name: "Movie Mindset",       accent: "#D32F2F" },
-  "getplayed":     { name: "Get Played",          accent: "#e91e8c" },
 };
 
 const DEFAULT_BRAND = { name: "MANTL", accent: t.terra };

@@ -16,7 +16,6 @@ const CHUNK_LOADERS = {
   filmspotting:  () => import("../components/community/filmspotting/FilmspottingScreen"),
   rewatchables:  () => import("../components/community/rewatchables/RewatchablesScreen"),
   chapo:         () => import("../components/community/chapo/ChapoScreen"),
-  getplayed:     () => import("../components/community/getplayed/GetPlayedScreen"),
   "staff-picks": () => import("../components/community/originals/OriginalsScreen"),
 };
 
