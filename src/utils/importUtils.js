@@ -6,7 +6,7 @@
  * Lives in: src/utils/importUtils.js
  */
 
-import { supabase, supabaseUrl } from "../supabase";
+import { supabase, supabaseUrl, supabaseAnonKey } from "../supabase";
 
 // ═══════════════════════════════════════════════════════════
 //  CSV PARSING
@@ -191,6 +191,7 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${session.access_token}`,
+      "apikey": supabaseAnonKey,
     },
     body: JSON.stringify({
       items,
