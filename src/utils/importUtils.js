@@ -1,13 +1,13 @@
 /**
  * importUtils.js
- * Shared import logic for Letterboxd, Goodreads, StoryGraph CSVs.
+ * Shared import logic for Letterboxd CSVs.
  * Used by both ImportCSVModal (settings) and UsernameSetup (onboarding).
  *
  * Lives in: src/utils/importUtils.js
  */
 
 import { supabase } from "../supabase";
-import { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw, searchGoogleBooksRaw } from "./api";
+import { TMDB_IMG, searchTMDBRaw, fetchTMDBRaw } from "./api";
 import { upsertMediaLog, toPosterPath } from "./mediaWrite";
 
 // ═══════════════════════════════════════════════════════════
@@ -44,13 +44,11 @@ function parseCSV(text) {
 
 function detectFormat(headers) {
   const h = headers.map(c => c.toLowerCase().trim());
-  if (h.includes("book id") || h.includes("exclusive shelf")) return "goodreads";
-  if (h.includes("read status") || (h.includes("star rating") && h.includes("title"))) return "storygraph";
   if (h.includes("letterboxd uri") || (h.includes("name") && h.includes("year") && h.includes("rewatch"))) return "letterboxd";
   return null;
 }
 
-export const FORMAT_LABELS = { goodreads: "Goodreads", storygraph: "StoryGraph", letterboxd: "Letterboxd" };
+export const FORMAT_LABELS = { letterboxd: "Letterboxd" };
 
 // ═══════════════════════════════════════════════════════════
 //  ROW → ITEM PARSING (per format)
@@ -69,37 +67,7 @@ function parseRows(rows, headers, format) {
     const row = rows[i];
     if (!row || row.length < 2) continue;
 
-    if (format === "goodreads") {
-      const shelf = get(row, "exclusive shelf");
-      if (shelf === "to-read") continue;
-      const title = get(row, "title");
-      if (!title) continue;
-      items.push({
-        title,
-        author: get(row, "author") || get(row, "author l-f") || null,
-        rating: parseInt(get(row, "my rating")) || null,
-        pages: parseInt(get(row, "number of pages")) || null,
-        dateRead: get(row, "date read") || null,
-        dateAdded: get(row, "date added") || null,
-        isReading: shelf === "currently-reading",
-        source: "goodreads",
-      });
-    } else if (format === "storygraph") {
-      const status = get(row, "read status");
-      if (status === "to-read") continue;
-      const title = get(row, "title");
-      if (!title) continue;
-      items.push({
-        title,
-        author: get(row, "authors") || null,
-        rating: parseFloat(get(row, "star rating")) || null,
-        pages: parseInt(get(row, "number of pages")) || null,
-        dateRead: get(row, "date read") || null,
-        dateAdded: get(row, "date added") || null,
-        isReading: status === "currently-reading",
-        source: "storygraph",
-      });
-    } else if (format === "letterboxd") {
+    if (format === "letterboxd") {
       const title = get(row, "name");
       if (!title) continue;
       const ratingRaw = parseFloat(get(row, "rating"));

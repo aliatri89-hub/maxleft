@@ -2,11 +2,11 @@ import { useState, useRef, useCallback } from "react";
 import { supabase } from "../supabase";
 import { TMDB_IMG, fetchTMDBRaw, searchTMDBRaw } from "../utils/api";
 import { toLogTimestamp } from "../utils/helpers";
-import { upsertMediaLog, toPosterPath, logGame } from "../utils/mediaWrite";
+import { upsertMediaLog, toPosterPath } from "../utils/mediaWrite";
 import { useShelves } from "../contexts/ShelvesProvider";
 
 /**
- * useIntegrationSync — Letterboxd and Steam sync logic.
+ * useIntegrationSync — Letterboxd sync logic.
  *
  * Extracted from App.jsx. Owns all sync state (syncing flags, last sync times,
  * lock refs). Gets loadShelves from ShelvesProvider context.
@@ -21,11 +21,8 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   const [letterboxdSyncSignal, setLetterboxdSyncSignal] = useState(null);
   const [autoLogCompleteSignal, setAutoLogCompleteSignal] = useState(null);
 
-  const [steamSyncing, setSteamSyncing] = useState(false);
-
   // ── Lock refs (synchronous — prevents race conditions) ──
   const letterboxdLock = useRef(false);
-  const steamLock = useRef(false);
   const hasSyncedThisSession = useRef(false);
 
   // ════════════════════════════════════════════════
@@ -499,167 +496,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
   };
 
   // ════════════════════════════════════════════════
-  // STEAM
-  // ════════════════════════════════════════════════
-
-  const STEAM_EDGE = "https://api.mymantl.app/functions/v1/steam";
-
-  const syncSteam = async (steamId, uid, manual = false) => {
-    if (!steamId || !uid || steamLock.current) return;
-    steamLock.current = true;
-    setSteamSyncing(true);
-
-    const steamHeaders = {};
-    try {
-      const { data: { session: s } } = await supabase.auth.getSession();
-      if (s?.access_token) steamHeaders["Authorization"] = `Bearer ${s.access_token}`;
-    } catch {}
-
-    try {
-      const [recentRes, ownedRes] = await Promise.all([
-        fetch(`${STEAM_EDGE}?action=recent&steam_id=${steamId}`, { headers: steamHeaders }),
-        fetch(`${STEAM_EDGE}?action=owned&steam_id=${steamId}`, { headers: steamHeaders }),
-      ]);
-      const recentData = await recentRes.json();
-      const ownedData = await ownedRes.json();
-
-      if (recentData.error && ownedData.error) {
-        console.error("[Steam] API error:", recentData.error || ownedData.error);
-        if (manual) showToast("Steam sync failed — check your profile is public");
-        steamLock.current = false;
-        setSteamSyncing(false);
-        return;
-      }
-
-      const recentGames = recentData.games || [];
-      const recentIds = new Set(recentGames.map(g => String(g.appid)));
-
-      const MIN_HOURS = 5;
-      const allOwned = (ownedData.games || [])
-        .filter(g => (g.playtime_forever || 0) >= MIN_HOURS * 60)
-        .sort((a, b) => (b.playtime_forever || 0) - (a.playtime_forever || 0));
-
-      if (allOwned.length === 0 && recentGames.length === 0) {
-        if (manual) showToast("No Steam games found — is your profile public?");
-        steamLock.current = false;
-        setSteamSyncing(false);
-        return;
-      }
-
-      const { data: existingGames } = await supabase.from("user_games_v")
-        .select("steam_app_id, game_status").eq("user_id", uid).not("steam_app_id", "is", null);
-      const existingMap = {};
-      (existingGames || []).forEach(g => { existingMap[String(g.steam_app_id)] = g.game_status; });
-
-      let synced = 0;
-      const maxSync = manual ? 50 : 10;
-
-      for (const game of allOwned) {
-        if (synced >= maxSync) break;
-
-        const appId = String(game.appid);
-        const title = game.name;
-        const playtimeHours = Math.round((game.playtime_forever || 0) / 60 * 10) / 10;
-        const isRecentlyPlayed = recentIds.has(appId);
-
-        const coverUrl = `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/library_600x900_2x.jpg`;
-
-        let achievementsEarned = null, achievementsTotal = null;
-        try {
-          const achRes = await fetch(`${STEAM_EDGE}?action=achievements&steam_id=${steamId}&app_id=${appId}`, { headers: steamHeaders });
-          const achData = await achRes.json();
-          if (achData.achievements) {
-            achievementsTotal = achData.achievements.length;
-            achievementsEarned = achData.achievements.filter(a => a.achieved === 1).length;
-          }
-        } catch (e) {}
-
-        let noteParts = [];
-        if (playtimeHours > 0) noteParts.push(`${playtimeHours}h`);
-        if (achievementsTotal > 0) noteParts.push(`${achievementsEarned}/${achievementsTotal} 🏆`);
-        const notesStr = noteParts.length > 0 ? noteParts.join(" · ") : null;
-
-        const isBeat = achievementsTotal > 0 && achievementsEarned === achievementsTotal;
-        let status = isRecentlyPlayed ? "playing" : "backlog";
-        if (isBeat) status = "beat";
-
-        const existingStatus = existingMap[appId];
-        if (existingStatus === "beat" && !isBeat) continue;
-        if (existingStatus && existingStatus === status) continue;
-
-        await logGame(uid,
-          { title, steam_app_id: parseInt(appId) },
-          coverUrl,
-          { status, platform: "PC", steamAppId: parseInt(appId), notes: notesStr }
-        );
-
-        existingMap[appId] = status;
-
-        synced++;
-        if (synced % 5 === 0) await new Promise(r => setTimeout(r, 300));
-      }
-
-      if (synced > 0) {
-        if (manual) showToast(`Synced ${synced} game${synced !== 1 ? "s" : ""} from Steam`);
-        await loadShelves(uid);
-      } else if (manual) {
-        showToast("Steam up to date ✓");
-      }
-    } catch (e) {
-      console.error("[Steam] Sync error:", e);
-      if (manual) showToast("Steam sync failed");
-    } finally {
-      steamLock.current = false;
-      setSteamSyncing(false);
-    }
-  };
-
-  const connectSteam = async (input) => {
-    if (!input || !session) return;
-    const clean = input.trim();
-    setSteamSyncing(true);
-
-    let steamId = clean;
-    if (!/^\d+$/.test(clean)) {
-      const headers = {};
-      try {
-        const { data: { session: s } } = await supabase.auth.getSession();
-        if (s?.access_token) headers["Authorization"] = `Bearer ${s.access_token}`;
-      } catch {}
-      try {
-        const res = await fetch(`${STEAM_EDGE}?action=resolve&vanity=${encodeURIComponent(clean)}`, { headers });
-        const data = await res.json();
-        if (data.success === 1 && data.steamid) {
-          steamId = data.steamid;
-        } else {
-          showToast("Couldn't find that Steam profile — try your Steam ID number");
-          setSteamSyncing(false);
-          return;
-        }
-      } catch (e) {
-        showToast("Couldn't reach Steam");
-        setSteamSyncing(false);
-        return;
-      }
-    }
-
-    const { error } = await supabase.from("profiles").update({ steam_id: steamId }).eq("id", session.user.id);
-    if (error) { showToast("Couldn't save"); setSteamSyncing(false); return; }
-    setProfile(prev => ({ ...prev, steam_id: steamId }));
-    showToast("Steam connected! Syncing...");
-    setSteamSyncing(false);
-    syncSteam(steamId, session.user.id, true);
-  };
-
-  const disconnectSteam = async () => {
-    if (!session) return;
-    const { error } = await supabase.from("profiles").update({ steam_id: null }).eq("id", session.user.id);
-    if (error) { showToast("Couldn't disconnect Steam"); return; }
-    setProfile(prev => ({ ...prev, steam_id: null }));
-    showToast("Steam disconnected");
-  };
-
-  // ════════════════════════════════════════════════
   // SESSION-ONCE AUTO-SYNC
   // ════════════════════════════════════════════════
 
@@ -669,7 +505,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
     if (!id) return;
     const letterboxdFn = onLetterboxdSync || syncLetterboxd;
     if (profile.letterboxd_username) letterboxdFn(profile.letterboxd_username, id);
-    if (profile.steam_id) syncSteam(profile.steam_id, id);
     hasSyncedThisSession.current = true;
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -677,9 +512,6 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
     // Letterboxd
     letterboxdSyncing, letterboxdLastSync, letterboxdSyncSignal, autoLogCompleteSignal,
     syncLetterboxd, connectLetterboxd, disconnectLetterboxd,
-    // Steam
-    steamSyncing,
-    syncSteam, connectSteam, disconnectSteam,
     // Auto-sync
     runInitialSync,
   };

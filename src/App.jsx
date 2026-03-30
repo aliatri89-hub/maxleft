@@ -473,7 +473,7 @@ function AppMain() {
         }
         const p = {
           name: prof.name || "", username: prof.username || "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "",
-          letterboxd_username: prof.letterboxd_username || null, goodreads_user_id: prof.goodreads_user_id || null, steam_id: prof.steam_id || null,
+          letterboxd_username: prof.letterboxd_username || null,
           enabledShelves: { ...DEFAULT_ENABLED_SHELVES, ...(prof.enabled_shelves || {}) },
           shelfOrder: prof.shelf_order || [...DEFAULT_SHELF_ORDER],
           nextUpBook: prof.next_up_book || null,
