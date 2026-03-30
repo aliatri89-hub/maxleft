@@ -51,6 +51,11 @@ export default function SearchScreen({ session, isActive, onToast, pushNav, remo
   // pendingDeepLinkRef holds the tmdb_id to expand once results load.
   const pendingDeepLinkRef = useRef(null);
 
+  // ── Warm up api-proxy on mount so first TMDB search isn't slow ──
+  useEffect(() => {
+    supabase.functions.invoke("api-proxy", { body: { action: "ping" } }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     if (!initialTmdbId) return;
     pendingDeepLinkRef.current = initialTmdbId;
