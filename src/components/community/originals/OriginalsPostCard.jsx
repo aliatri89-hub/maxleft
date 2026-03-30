@@ -86,7 +86,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
           {/* READ */}
           <div style={{
             display: "flex", alignItems: "center",
-            paddingRight: 16, flexShrink: 0,
+            paddingRight: 16, paddingLeft: 20, flexShrink: 0,
           }}>
             <span style={{
               fontSize: 10, fontWeight: 700, color: accent,
