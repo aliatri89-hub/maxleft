@@ -83,39 +83,18 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
             </div>
           </div>
 
-          {/* Thumbnail with READ overlay */}
-          {post.cover_image_url && (
-            <div style={{
-              position: "relative", flexShrink: 0,
-              width: 100, minHeight: 72,
-            }}>
-              <img src={post.cover_image_url} alt="" style={{
-                width: "100%", height: "100%",
-                objectFit: "cover",
-              }} />
-              {/* dark scrim */}
-              <div style={{
-                position: "absolute", inset: 0,
-                background: "rgba(0,0,0,0.45)",
-              }} />
-              {/* READ label */}
-              <div style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, color: accent,
-                  fontFamily: t.fontBody,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  background: "rgba(0,0,0,0.5)",
-                  padding: "3px 8px",
-                  borderRadius: 4,
-                  border: `1px solid ${accent}55`,
-                }}>Read</span>
-              </div>
-            </div>
-          )}
+          {/* READ */}
+          <div style={{
+            display: "flex", alignItems: "center",
+            paddingRight: 16, flexShrink: 0,
+          }}>
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: accent,
+              fontFamily: t.fontBody,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}>Read</span>
+          </div>
         </div>
       </div>
 
