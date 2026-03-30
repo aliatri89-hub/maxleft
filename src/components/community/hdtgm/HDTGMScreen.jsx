@@ -7,7 +7,6 @@ import { useCommunityProgress, useCommunityActions } from "../../../hooks/commun
 import HDTGMHero from "./HDTGMHero";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import HDTGMLogModal from "./HDTGMLogModal";
-import CommunityFilter from "../shared/CommunityFilter";
 import AddItemTool from "../dashboard/AddItemTool";
 import AdminFab from "../dashboard/AdminFab";
 import RSSSyncTool from "../dashboard/RSSSyncTool";
@@ -148,9 +147,7 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
         progress={progress}
       />
 
-      <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
-
-      {/* View mode toggle */}
+      {/* View mode + filter — single row */}
       <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center" }}>
         {[{ key: "az", label: "Genre" }, { key: "decades", label: "Decades" }].map(v => (
           <button
@@ -169,7 +166,6 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
             {v.label}
           </button>
         ))}
-        <div style={{ flex: 1 }} />
         <button
           onClick={() => {
             if (searchOpen) {
@@ -199,6 +195,27 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
             <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
           </svg>
         </button>
+        <div style={{ flex: 1 }} />
+        {[{ key: "all", label: "All" }, { key: "seen", label: "Seen" }, { key: "unseen", label: "Unseen" }].map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => setFilter(opt.key)}
+            style={{
+              background: filter === opt.key ? accent + "22" : "rgba(255,255,255,0.05)",
+              border: filter === opt.key ? "1px solid " + accent : "1px solid rgba(255,255,255,0.08)",
+              borderRadius: 20, padding: "5px 14px",
+              color: filter === opt.key ? accent : t.textMuted,
+              fontSize: 12, fontWeight: 600, cursor: "pointer",
+              transition: "all 0.2s",
+              fontFamily: t.fontDisplay,
+              letterSpacing: "0.03em",
+              textTransform: "uppercase",
+              flexShrink: 0,
+            }}
+          >
+            {opt.label}
+          </button>
+        ))}
       </div>
 
       {/* ─── Expandable search input ── */}
