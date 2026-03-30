@@ -52,36 +52,23 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
           borderRadius: 12,
           overflow: "hidden",
           cursor: "pointer",
-          position: "relative",
-          minHeight: 80,
           border: `1px solid ${t.bgHover}`,
           background: t.bgElevated,
         }}
       >
-        {/* Backdrop image */}
-        {post.cover_image_url && (
-          <>
-            <div style={{
-              position: "absolute", inset: 0,
-              backgroundImage: `url(${post.cover_image_url})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              opacity: 0.35,
-            }} />
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(90deg, rgba(15,13,11,0.85) 40%, rgba(15,13,11,0.4) 100%)",
-            }} />
-          </>
-        )}
-
         {/* Content row */}
         <div style={{
-          position: "relative",
           display: "flex", alignItems: "center", gap: 12,
           padding: "14px 16px",
         }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          {post.cover_image_url && (
+            <img src={post.cover_image_url} alt="" style={{
+              width: 96, height: 68, borderRadius: 8, objectFit: "cover",
+              flexShrink: 0,
+            }} />
+          )}
+
+          <div style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
             <div style={{
               fontSize: 13, fontWeight: 700, color: t.textPrimary,
               fontFamily: t.fontDisplay,
@@ -99,7 +86,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}>
-              {cleanPreview.slice(0, 220)}
+              {cleanPreview}
             </div>
           </div>
 
@@ -109,6 +96,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
             textTransform: "uppercase",
             letterSpacing: "0.06em",
             flexShrink: 0,
+            paddingLeft: 8,
           }}>
             Read
           </div>
