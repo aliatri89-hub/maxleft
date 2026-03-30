@@ -176,7 +176,7 @@ export async function parseFile(file, userId) {
 
 export async function importMovies(items, userId, onProgress) {
   let count = 0, errs = 0;
-  const CONCURRENCY = 10;
+  const CONCURRENCY = 6;
   const importedTmdbIds = []; // track successfully imported tmdb_ids
 
   const processItem = async (m, tmdbId) => {
@@ -230,6 +230,7 @@ export async function importMovies(items, userId, onProgress) {
   for (let i = 0; i < items.length; i += CONCURRENCY) {
     const batch = items.slice(i, i + CONCURRENCY);
     await Promise.all(batch.map(m => processItem(m)));
+    await new Promise(r => setTimeout(r, 150)); // avoid TMDB rate limit
     if (onProgress) onProgress(Math.min(i + CONCURRENCY, items.length), items.length);
   }
 
