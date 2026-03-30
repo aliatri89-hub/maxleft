@@ -152,7 +152,10 @@ export default function OriginalsScreen({
             <MiniseriesShelf
               series={{
                 ...shelf,
-                items: [...(shelf.items || [])].sort((a, b) => a.title.localeCompare(b.title)),
+                items: [...(shelf.items || [])].sort((a, b) => {
+                const sortKey = t => t.replace(/^(the|a|an)\s+/i, "").replace(/^[^a-z0-9]+/i, "").trim();
+                return sortKey(a.title).localeCompare(sortKey(b.title));
+              }),
               }}
               progress={progress}
               onToggle={handleItemTap}
