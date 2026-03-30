@@ -432,6 +432,60 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
       }
 
       console.log(`[importMovies] Badge check complete: ${awarded} badges awarded`);
+
+      // ── Badge digest notification — "Your library has a head start!" ──
+      // Collect progress for unearned badges to show how close the user is.
+      // Only fires during the import (first time), not on re-imports.
+      try {
+        const progressEntries = [];
+
+        // Re-check unearned badges (excluding just-awarded ones) for partial progress
+        const { data: freshEarned } = await supabase
+          .from("user_badges").select("badge_id").eq("user_id", userId)
+          .in("badge_id", unearnedBadges.map(b => b.id));
+        const freshEarnedSet = new Set((freshEarned || []).map(r => r.badge_id));
+        const stillUnearned = unearnedBadges.filter(b => !freshEarnedSet.has(b.id));
+
+        for (const badge of stillUnearned) {
+          let required = [], current = 0;
+          if (badge.badge_type === "miniseries_completion" && badge.miniseries_id) {
+            const { data: items } = await supabase.from("community_items")
+              .select("tmdb_id").eq("miniseries_id", badge.miniseries_id);
+            required = [...new Set((items || []).map(i => i.tmdb_id).filter(Boolean))];
+            const { data: done } = required.length > 0
+              ? await supabase.from("community_user_progress")
+                  .select("community_items!inner(tmdb_id)")
+                  .eq("user_id", userId).eq("status", "completed")
+                  .in("community_items.tmdb_id", required)
+              : { data: [] };
+            current = new Set((done || []).map(r => r.community_items?.tmdb_id).filter(Boolean)).size;
+          }
+          if (current > 0 && current < required.length) {
+            progressEntries.push({ badge, current, total: required.length });
+          }
+        }
+
+        if (progressEntries.length > 0) {
+          progressEntries.sort((a, b) => (b.current / b.total) - (a.current / a.total));
+          const count = progressEntries.length + awarded; // include just-earned badges in the count
+          const topPct = Math.round((progressEntries[0].current / progressEntries[0].total) * 100);
+          const title = "Your library has a head start!";
+          const body = topPct >= 50
+            ? `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""} — you're over halfway to one. Tap to explore.`
+            : `Your synced films already count toward ${count} badge${count > 1 ? "s" : ""}. Tap to see how close you are.`;
+
+          await supabase.from("user_notifications").upsert({
+            user_id: userId, notif_type: "badge_digest", title, body,
+            image_url: progressEntries[0]?.badge?.image_url || null,
+            payload: { type: "badge_digest", badge_count: count, top_pct: topPct },
+            ref_key: "badge_digest:sync",
+            created_at: new Date().toISOString(),
+          }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+          console.log(`[importMovies] Badge digest: ${count} badges with progress, top at ${topPct}%`);
+        }
+      } catch (e) {
+        console.warn("[importMovies] Badge digest failed:", e.message);
+      }
     }
   } catch (e) {
     console.error("[importMovies] Badge check failed:", e.message, e);
