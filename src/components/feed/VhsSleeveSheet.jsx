@@ -1114,7 +1114,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             }}>{decodeEntities(ep.episode_title || ep.podcast_name)}</div>
                             <div style={{
                               fontFamily: t.fontBody,
-                              fontSize: 13, color: "rgba(240,235,225,0.9)",
+                              fontSize: 13, color: "#f0ebe1",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
@@ -1259,7 +1259,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                 padding: "4px 6px 10px 48px",
                                 fontFamily: t.fontSerif,
                                 fontSize: 14, lineHeight: 1.55,
-                                color: "rgba(240,235,225,0.8)",
+                                color: "#f0ebe1",
                                 whiteSpace: "pre-wrap",
                               }}>
                                 <span style={{ color: "rgba(240,235,225,0.75)", fontWeight: 600 }}>{renderWithTimecodes(hook, (sec) => handleTimecodeSeek(ep, sec))}</span>
@@ -1339,7 +1339,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                         </div>
                         <div style={{
                           fontFamily: t.fontBody, fontSize: 13,
-                          color: "rgba(240,235,225,0.9)",
+                          color: "#f0ebe1",
                           textTransform: "uppercase", letterSpacing: "0.04em",
                         }}>
                           {link.podcast_name} · outside network
@@ -1393,7 +1393,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           padding: "4px 6px 10px 48px",
                           fontFamily: t.fontSerif,
                           fontSize: 14, lineHeight: 1.55,
-                          color: "rgba(240,235,225,0.8)",
+                          color: "#f0ebe1",
                           whiteSpace: "pre-wrap",
                         }}>
                           {link.episode_description}
@@ -1423,7 +1423,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
               <div style={{
                 fontFamily: t.fontSerif,
                 fontSize: 14, lineHeight: 1.55,
-                color: "rgba(240,235,225,0.8)",
+                color: "#f0ebe1",
                 textAlign: "center",
                 marginBottom: 14,
               }}>

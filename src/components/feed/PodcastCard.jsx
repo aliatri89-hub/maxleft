@@ -504,7 +504,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             </div>
           )}
           <div style={{
-            fontFamily: t.fontSerif, fontSize: 14, color: "var(--text-secondary)",
+            fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
             lineHeight: 1.5,
           }}>
             {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
