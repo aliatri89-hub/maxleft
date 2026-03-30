@@ -6,7 +6,7 @@
 //   1. Find their TMDB person ID in the URL on their TMDB page (e.g. themoviedb.org/person/31-tom-hanks)
 //   2. Change ACTOR_ID and ACTOR_NAME below
 
-const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
+const TMDB_API_KEY = process.env.TMDB_KEY;
 const ACTOR_ID = 31;
 const ACTOR_NAME = 'Tom Hanks';
 

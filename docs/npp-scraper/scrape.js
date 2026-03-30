@@ -14,7 +14,7 @@ import { parseStringPromise } from "xml2js";
 import { writeFileSync } from "fs";
 
 const RSS_URL     = "https://www.nowplayingpodcast.com/NPP.xml";
-const TMDB_KEY    = "ec6edb453a82a8a1081d13e597ea95ce";
+const TMDB_KEY    = process.env.TMDB_KEY;
 const DELAY_MS    = 400;
 const TMDB_DELAY  = 250;
 const MAX_EPISODES = 9999;

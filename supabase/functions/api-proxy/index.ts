@@ -2,7 +2,7 @@
 // Proxies TMDB, RAWG, and Google Books API calls so keys stay server-side.
 //
 // Deploy:  supabase functions deploy api-proxy
-// Secrets: supabase secrets set TMDB_KEY=ec6edb453a82a8a1081d13e597ea95ce \
+// Secrets: supabase secrets set TMDB_KEY=<your_tmdb_key> \
 //            RAWG_KEY=744f042dd2e547eba93ea70774d66a00 \
 //            GOOGLE_BOOKS_KEY=AIzaSyDiuyC-AbpmuysA1Zy95NpbfbAbHvvJnuM
 

@@ -40,3 +40,11 @@ ios/App/Pods
 docs/npp-scraper/npp-data.json
 posters.sql
 scripts/bn_episode_urls_full.sql
+
+# Local dev environment — never commit real keys
+.env.local
+*.env
+
+# Local utility scripts — run with TMDB_KEY=xxx node scripts/actor-check.js
+scripts/*.js
+docs/npp-scraper/scrape.js
