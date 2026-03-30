@@ -53,6 +53,7 @@ export function useCastConnectionsPublic() {
   const [gameOver, setGameOver] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [revealAll, setRevealAll] = useState(false);
+  const [hints, setHints] = useState([]);
   const startTimeRef = useRef(null);
 
   const groupSize = puzzle?.movies[0]?.actors.length ?? 3;
@@ -142,6 +143,7 @@ export function useCastConnectionsPublic() {
           mistakes,
           solveOrder: newSolved,
           time_seconds: elapsed,
+          hintsUsed: hints.length,
         };
         saveResult(resultData);
         setResult(resultData);
@@ -162,12 +164,23 @@ export function useCastConnectionsPublic() {
           mistakes: newMistakes,
           solveOrder: solved,
           time_seconds: elapsed,
+          hintsUsed: hints.length,
         };
         saveResult(resultData);
         setResult(resultData);
       }
     }
   }, [selected, puzzle, solved, mistakes]);
+
+  const useHint = useCallback(() => {
+    if (gameOver || !puzzle) return;
+    const unsolvedUnhinted = puzzle.movies
+      .map((m, idx) => ({ tmdb_id: m.tmdb_id, idx }))
+      .filter(({ idx, tmdb_id }) => !solved.includes(idx) && !hints.includes(tmdb_id));
+    if (unsolvedUnhinted.length === 0) return;
+    const pick = unsolvedUnhinted[Math.floor(Math.random() * unsolvedUnhinted.length)];
+    setHints(prev => [...prev, pick.tmdb_id]);
+  }, [gameOver, puzzle, solved, hints]);
 
   const shuffleActors = useCallback(() => {
     setActors((prev) => shuffle(prev));
@@ -199,6 +212,7 @@ export function useCastConnectionsPublic() {
     selected, solved, solvedActorNames, solvedActorMovieIdx,
     mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
+    hints, useHint,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
   };
 }

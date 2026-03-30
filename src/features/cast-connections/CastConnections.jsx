@@ -172,6 +172,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     allActors, selected, solved, solvedActorNames, solvedActorMovieIdx,
     mistakes, maxMistakes, groupSize,
     gameOver, shaking, revealAll, won, puzzleNumber,
+    hints, useHint,
     toggleSelect, submitGuess, shuffleActors, deselectAll,
   } = hookFn(userId);
 
@@ -229,7 +230,6 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     if (!puzzle) return "";
     const pNum = puzzleNumber || "?";
     const solveEmojis = ["🟩", "🟨", "🟪"];
-    // Build grid: 3 blocks per row, one row per group
     const totalGroups = puzzle.movies.length;
     const rows = [];
     solved.forEach((_, i) => {
@@ -239,7 +239,9 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
     for (let i = solved.length; i < totalGroups; i++) {
       rows.push("🟥".repeat(groupSize));
     }
-    return `M▶NTL\nCast Connections #${pNum}\n${rows.join("\n")}\nmymantl.app/play`;
+    const hintsStr = hints.length > 0 ? ` 💡${hints.length}` : "";
+    const mistakesStr = mistakes > 0 ? ` ❌${mistakes}` : "";
+    return `M▶NTL\nCast Connections #${pNum}${hintsStr}${mistakesStr}\n${rows.join("\n")}\nmymantl.app/play`;
   }
 
   function handleShare() {
@@ -348,9 +350,13 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
             {won ? "Perfect Take!" : "That's a Wrap"}
           </div>
           <div style={{ fontSize: 13, color: t.creamMuted, marginTop: 6, fontFamily: t.fontBody }}>
-            {won
-              ? `Solved with ${mistakes === 0 ? "no" : mistakes} mistake${mistakes !== 1 ? "s" : ""}`
-              : "Better luck tomorrow"}
+            {won ? (() => {
+              const parts = [];
+              if (mistakes === 0) parts.push("no mistakes");
+              else parts.push(`${mistakes} mistake${mistakes !== 1 ? "s" : ""}`);
+              if (hints.length > 0) parts.push(`${hints.length} hint${hints.length !== 1 ? "s" : ""}`);
+              return `Solved with ${parts.join(" and ")}`;
+            })() : "Better luck tomorrow"}
           </div>
           <button
             className="cc-btn-primary"
@@ -362,6 +368,46 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         </div>
       ) : (
         <>
+          {/* Hint revealed movies */}
+          {hints.length > 0 && (
+            <div style={{ width: "100%", maxWidth: 420, display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+              {hints.map(tmdbId => {
+                const movie = puzzle.movies.find(m => m.tmdb_id === tmdbId);
+                if (!movie) return null;
+                const movieIdx = puzzle.movies.indexOf(movie);
+                const isSolved = solved.includes(movieIdx);
+                if (isSolved) return null; // disappears once solved
+                return (
+                  <div key={tmdbId} style={{
+                    borderRadius: 10, overflow: "hidden", position: "relative",
+                    height: 64, border: "1.5px solid #3a3530",
+                  }}>
+                    {movie.backdrop_path && (
+                      <div style={{
+                        position: "absolute", inset: 0,
+                        backgroundImage: `url(https://image.tmdb.org/t/p/w780${movie.backdrop_path})`,
+                        backgroundSize: "cover", backgroundPosition: "center 20%",
+                        filter: "brightness(0.45)",
+                      }} />
+                    )}
+                    <div style={{
+                      position: "relative", zIndex: 1, height: "100%",
+                      display: "flex", alignItems: "center", padding: "0 14px", gap: 8,
+                    }}>
+                      <span style={{ fontSize: 14 }}>💡</span>
+                      <span style={{
+                        fontFamily: t.fontBody, fontSize: 13, color: t.cream,
+                        fontWeight: 700, letterSpacing: 0.3,
+                      }}>
+                        {movie.title} <span style={{ color: t.creamMuted, fontWeight: 400 }}>({movie.year})</span>
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* actor grid — 3×3 or 4×4 depending on puzzle */}
           <div style={{ ...S.grid, gridTemplateColumns: `repeat(${groupSize}, 1fr)` }}>
             {allActors.map((actor, i) => {
@@ -450,6 +496,17 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
               disabled={selected.length === 0}
             >
               Deselect All
+            </button>
+            <button
+              className="cc-btn-secondary"
+              onClick={useHint}
+              style={{
+                ...S.btnSecondary,
+                opacity: hints.length >= puzzle.movies.length - solved.length - 1 ? 0.3 : 1,
+              }}
+              disabled={hints.length >= puzzle.movies.length - solved.length - 1}
+            >
+              💡 Hint
             </button>
             <button
               className="cc-btn-primary"

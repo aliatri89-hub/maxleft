@@ -52,7 +52,7 @@ export async function fetchTodaysResult(userId) {
 /**
  * Submit a game result
  */
-export async function submitResult({ userId, puzzleDate, solved, mistakes, solveOrder, timeSeconds }) {
+export async function submitResult({ userId, puzzleDate, solved, mistakes, solveOrder, timeSeconds, hintsUsed = 0 }) {
   const { data, error } = await supabase
     .from("cc_daily_results")
     .insert({
@@ -62,6 +62,7 @@ export async function submitResult({ userId, puzzleDate, solved, mistakes, solve
       mistakes,
       solve_order: solveOrder,
       time_seconds: timeSeconds,
+      hints_used: hintsUsed,
     })
     .select()
     .single();
