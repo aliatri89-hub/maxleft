@@ -5,19 +5,13 @@ import { supabase } from "../supabase";
 import { useShelves } from "../contexts/ShelvesProvider";
 import BadgeShelf from "../components/shelf/BadgeShelf";
 import ShelfModals from "../components/modals/ShelfModals";
+import { Stars } from "../components/feed/FeedPrimitives";
 
 const accent = "#EF9F27";
 
 function renderStars(rating) {
   if (!rating) return null;
-  const full = Math.floor(rating);
-  const hasHalf = rating % 1 >= 0.5;
-  return (
-    <span style={{ fontSize: 13, color: accent, letterSpacing: 1.5 }}>
-      {"★".repeat(full)}
-      {hasHalf && <span style={{ display: "inline-block", width: "0.55em", overflow: "hidden", verticalAlign: "top" }}>★</span>}
-    </span>
-  );
+  return <Stars rating={rating} size={13} sharpie />;
 }
 
 function parseDiaryDate(dateStr) {

@@ -95,7 +95,7 @@ async function processItem(
     p_backdrop_path: toPosterPath(match.backdrop_path),
     p_runtime: null,
     p_genre: null,
-    p_rating: item.ratingHalf ? Math.round(item.ratingHalf) : (item.rating || null),
+    p_rating: item.ratingHalf || item.rating || null,
     p_watched_at: watchedAt,
     p_watched_date: item.watchedDate || null,
     p_source: "letterboxd",
