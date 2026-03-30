@@ -1,9 +1,5 @@
 import { t } from "../../theme";
-import { useState, useRef } from "react";
-import { supabase } from "../../supabase";
-import { updateGameStatus } from "../../utils/mediaWrite";
-import { compressImage, sb } from "../../utils/api";
-import { formatDate } from "../../utils/helpers";
+import { useState } from "react";
 import ItemDetailModal from "./ItemDetailModal";
 
 /**
@@ -24,26 +20,15 @@ export default function ShelfModals({
   // Diary state
   const [diaryView, setDiaryView] = useState("diary");
   const [diarySort, setDiarySort] = useState("date-desc");
-  const [beatAnimId, setBeatAnimId] = useState(null);
   const [diarySearch, setDiarySearch] = useState("");
-  const [diaryDecade, setDiaryDecade] = useState(null); // e.g. 2020, 2010, ...
-  const [diaryRatingFilter, setDiaryRatingFilter] = useState(null); // null | "rated" | "unrated" | 5 | 4.5 | 4 ...
-  const [diaryYear, setDiaryYear] = useState(null); // specific year within a decade
-  const [diaryLimit, setDiaryLimit] = useState(50); // pagination cap
-
-  const toggleBeat = async (gameId, currentStatus) => {
-    const newStatus = currentStatus === "beat" ? "playing" : "beat";
-    setBeatAnimId(gameId);
-    const ok = await updateGameStatus(gameId, newStatus);
-    if (ok) onRefresh();
-    setTimeout(() => setBeatAnimId(null), 600);
-  };
+  const [diaryDecade, setDiaryDecade] = useState(null);
+  const [diaryRatingFilter, setDiaryRatingFilter] = useState(null);
+  const [diaryYear, setDiaryYear] = useState(null);
+  const [diaryLimit, setDiaryLimit] = useState(50);
 
   const shelfConfig = {
-    books: { icon: "📖", label: "Books", modalCat: "book" },
     movies: { icon: "🎬", label: "Movies", modalCat: "movie" },
     shows: { icon: "📺", label: "Shows", modalCat: "show" },
-    games: { icon: "🎮", label: "Games", modalCat: "game" },
   };
 
   const renderStars = (rating) => {
@@ -61,8 +46,6 @@ export default function ShelfModals({
   return (
     <>
 
-      {/* ── Diary / See All Overlay ── */}
-
       {/* ══ Diary / See All Overlay ══ */}
       {diaryShelf && (() => {
         const cfg = shelfConfig[diaryShelf];
@@ -78,8 +61,7 @@ export default function ShelfModals({
           const q = diarySearch.toLowerCase().trim();
           items = items.filter(i =>
             (i.title || "").toLowerCase().includes(q) ||
-            (i.director || "").toLowerCase().includes(q) ||
-            (i.author || "").toLowerCase().includes(q)
+            (i.director || "").toLowerCase().includes(q)
           );
         }
 
@@ -112,32 +94,15 @@ export default function ShelfModals({
           ? [...new Set(allItems.filter(i => i.year >= diaryDecade && i.year < diaryDecade + 10).map(i => i.year))].sort((a, b) => b - a)
           : [];
 
-        // Active filter count
-        const activeFilters = (diarySearch.trim() ? 1 : 0) + (diaryDecade !== null ? 1 : 0) + (diaryRatingFilter !== null ? 1 : 0);
-
         // ── Grouping + sorting ──
         let sortedGroups;
-        if (diaryShelf === "games") {
-          const playing = items.filter(i => i.status === "playing" || i.isPlaying);
-          const backlog = items.filter(i => i.status === "backlog" || (!i.isPlaying && i.status !== "beat" && i.status !== "playing"));
-          const beat = items.filter(i => i.status === "beat");
-          const byPlaytime = (a, b) => {
-            const hA = parseFloat((a.notes || "").match(/^([\d.]+)h/)?.[1] || "0");
-            const hB = parseFloat((b.notes || "").match(/^([\d.]+)h/)?.[1] || "0");
-            return hB - hA;
-          };
-          sortedGroups = [
-            ...(playing.length > 0 ? [{ label: `Now Playing · ${playing.length}`, items: playing.sort(byPlaytime).map(i => ({ ...i, _date: i.createdAt ? new Date(i.createdAt) : null })) }] : []),
-            ...(backlog.length > 0 ? [{ label: `Backlog · ${backlog.length}`, items: backlog.sort(byPlaytime).map(i => ({ ...i, _date: i.createdAt ? new Date(i.createdAt) : null })) }] : []),
-            ...(beat.length > 0 ? [{ label: `Beat · ${beat.length}`, items: beat.sort(byPlaytime).map(i => ({ ...i, _date: i.createdAt ? new Date(i.createdAt) : null })) }] : []),
-          ];
-        } else if (diarySort === "rating" || diarySort === "rating-asc") {
+        if (diarySort === "rating" || diarySort === "rating-asc") {
           const isAsc = diarySort === "rating-asc";
           const grouped = {};
           const unrated = [];
           items.forEach(item => {
             const r = item.rating > 0 ? Math.round(item.rating) : 0;
-            const dateStr = item.watchedAt || item.finishedAt || item.createdAt || item.completedAt;
+            const dateStr = item.watchedAt || item.createdAt;
             const enriched = { ...item, _date: dateStr ? new Date(dateStr) : null };
             if (r === 0) { unrated.push(enriched); return; }
             const key = isAsc ? `${r}` : `${5 - r}`;
@@ -152,10 +117,9 @@ export default function ShelfModals({
               items: g.items.sort((a, b) => (b._date || 0) - (a._date || 0)),
             }));
         } else if (diarySort === "alpha") {
-          // A-Z grouping
           const grouped = {};
           items.forEach(item => {
-            const dateStr = item.watchedAt || item.finishedAt || item.createdAt || item.completedAt;
+            const dateStr = item.watchedAt || item.createdAt;
             const d = dateStr ? new Date(dateStr) : null;
             const letter = (item.title || "?")[0].toUpperCase();
             const key = /[A-Z]/.test(letter) ? letter : "#";
@@ -171,7 +135,7 @@ export default function ShelfModals({
         } else {
           const grouped = {};
           items.forEach(item => {
-            const dateStr = item.watchedAt || item.finishedAt || item.createdAt || item.completedAt;
+            const dateStr = item.watchedAt || item.createdAt;
             const d = dateStr ? new Date(dateStr) : null;
             const key = d ? `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}` : "undated";
             const label = d ? `${MONTHS[d.getMonth()]} ${d.getFullYear()}` : "Undated";
@@ -196,7 +160,7 @@ export default function ShelfModals({
               <div className="modal-handle" />
               <button className="item-detail-close" onClick={() => { setDiaryShelf(null); setDiarySearch(""); setDiaryDecade(null); setDiaryYear(null); setDiaryRatingFilter(null); setDiaryLimit(50); }}>← Close</button>
 
-              {/* ── Header — sharpie label + count ── */}
+              {/* ── Header ── */}
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                   <div style={{
@@ -205,7 +169,6 @@ export default function ShelfModals({
                   }}>
                     {cfg?.label}
                   </div>
-                  {/* View toggle */}
                   <div style={{ display: "flex", background: `${accent}0a`, border: `1px solid ${accent}18`, borderRadius: 8, overflow: "hidden" }}>
                     <button className="mono" onClick={() => setDiaryView("diary")}
                       style={{ padding: "6px 14px", fontSize: 10, border: "none", cursor: "pointer",
@@ -223,11 +186,6 @@ export default function ShelfModals({
                 </div>
                 <div className="mono" style={{ fontSize: 11, color: "var(--text-faint)", letterSpacing: "0.06em" }}>
                   {items.length === allItems.length ? `${allItems.length} total` : `${items.length} of ${allItems.length}`}
-                  {diaryShelf === "games" && (() => {
-                    const beat = items.filter(i => i.status === "beat").length;
-                    const playing = items.filter(i => i.status === "playing" || i.isPlaying).length;
-                    return beat > 0 || playing > 0 ? ` · ${beat} beat · ${playing} playing` : "";
-                  })()}
                 </div>
               </div>
 
@@ -263,31 +221,29 @@ export default function ShelfModals({
               </div>
 
               {/* ── Sort pills ── */}
-              {diaryShelf !== "games" && (
-                <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
-                  {[
-                    { key: "date-desc", label: "Newest" },
-                    { key: "date-asc", label: "Oldest" },
-                    { key: "rating", label: "★ High" },
-                    { key: "rating-asc", label: "★ Low" },
-                    { key: "alpha", label: "A–Z" },
-                  ].map(s => (
-                    <button key={s.key} className="mono" onClick={() => setDiarySort(s.key)}
-                      style={{
-                        padding: "5px 12px", fontSize: 10, borderRadius: 20, cursor: "pointer",
-                        background: diarySort === s.key ? `${accent}20` : "transparent",
-                        color: diarySort === s.key ? accent : "var(--text-muted)",
-                        border: `1px solid ${diarySort === s.key ? `${accent}40` : "rgba(255,255,255,0.08)"}`,
-                        transition: "all 0.15s",
-                      }}>
-                      {s.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div style={{ display: "flex", gap: 6, marginBottom: 10, flexWrap: "wrap" }}>
+                {[
+                  { key: "date-desc", label: "Newest" },
+                  { key: "date-asc", label: "Oldest" },
+                  { key: "rating", label: "★ High" },
+                  { key: "rating-asc", label: "★ Low" },
+                  { key: "alpha", label: "A–Z" },
+                ].map(s => (
+                  <button key={s.key} className="mono" onClick={() => setDiarySort(s.key)}
+                    style={{
+                      padding: "5px 12px", fontSize: 10, borderRadius: 20, cursor: "pointer",
+                      background: diarySort === s.key ? `${accent}20` : "transparent",
+                      color: diarySort === s.key ? accent : "var(--text-muted)",
+                      border: `1px solid ${diarySort === s.key ? `${accent}40` : "rgba(255,255,255,0.08)"}`,
+                      transition: "all 0.15s",
+                    }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
 
               {/* ── Decade filter pills ── */}
-              {decades.length > 0 && diaryShelf !== "games" && (
+              {decades.length > 0 && (
                 <div style={{ marginBottom: 10 }}>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {diaryDecade !== null && (
@@ -313,7 +269,6 @@ export default function ShelfModals({
                       </button>
                     ))}
                   </div>
-                  {/* Year pills within selected decade */}
                   {diaryDecade !== null && yearsInDecade.length > 1 && (
                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>
                       <button className="mono" onClick={() => setDiaryYear(null)}
@@ -342,33 +297,31 @@ export default function ShelfModals({
               )}
 
               {/* ── Rating filter ── */}
-              {diaryShelf !== "games" && (
-                <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                  {[
-                    { key: "rated", label: "Rated" },
-                    { key: "unrated", label: "Unrated" },
-                    { key: 5, label: "★★★★★" },
-                    { key: 4, label: "★★★★" },
-                    { key: 3, label: "★★★" },
-                    { key: 2, label: "★★" },
-                    { key: 1, label: "★" },
-                  ].map(f => (
-                    <button key={f.key} className="mono" onClick={() => setDiaryRatingFilter(diaryRatingFilter === f.key ? null : f.key)}
-                      style={{
-                        padding: "5px 10px", fontSize: typeof f.key === "number" ? 11 : 10, borderRadius: 20, cursor: "pointer",
-                        background: diaryRatingFilter === f.key ? `${accent}20` : "transparent",
-                        color: diaryRatingFilter === f.key ? accent : "var(--text-faint)",
-                        border: `1px solid ${diaryRatingFilter === f.key ? `${accent}40` : "rgba(255,255,255,0.06)"}`,
-                        letterSpacing: typeof f.key === "number" ? 1 : "0.04em",
-                        transition: "all 0.15s",
-                      }}>
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                {[
+                  { key: "rated", label: "Rated" },
+                  { key: "unrated", label: "Unrated" },
+                  { key: 5, label: "★★★★★" },
+                  { key: 4, label: "★★★★" },
+                  { key: 3, label: "★★★" },
+                  { key: 2, label: "★★" },
+                  { key: 1, label: "★" },
+                ].map(f => (
+                  <button key={f.key} className="mono" onClick={() => setDiaryRatingFilter(diaryRatingFilter === f.key ? null : f.key)}
+                    style={{
+                      padding: "5px 10px", fontSize: typeof f.key === "number" ? 11 : 10, borderRadius: 20, cursor: "pointer",
+                      background: diaryRatingFilter === f.key ? `${accent}20` : "transparent",
+                      color: diaryRatingFilter === f.key ? accent : "var(--text-faint)",
+                      border: `1px solid ${diaryRatingFilter === f.key ? `${accent}40` : "rgba(255,255,255,0.06)"}`,
+                      letterSpacing: typeof f.key === "number" ? 1 : "0.04em",
+                      transition: "all 0.15s",
+                    }}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
 
-              {/* ── Empty state after filtering ── */}
+              {/* ── Empty state ── */}
               {items.length === 0 && (
                 <div style={{ textAlign: "center", padding: "40px 16px" }}>
                   <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>
@@ -387,20 +340,18 @@ export default function ShelfModals({
 
               {/* Grid View */}
               {diaryView === "grid" && items.length > 0 && (() => {
-                let gridItems = diaryShelf === "games" ? items : [...items];
-                if (diaryShelf !== "games") {
-                  if (diarySort === "rating" || diarySort === "rating-asc") {
-                    gridItems = gridItems.filter(i => i.rating > 0);
-                    gridItems.sort((a, b) => diarySort === "rating-asc" ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0));
-                  } else if (diarySort === "alpha") {
-                    gridItems.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-                  } else {
-                    gridItems.sort((a, b) => {
-                      const dA = new Date(a.watchedAt || a.finishedAt || a.createdAt || a.completedAt || 0);
-                      const dB = new Date(b.watchedAt || b.finishedAt || b.createdAt || b.completedAt || 0);
-                      return diarySort === "date-asc" ? dA - dB : dB - dA;
-                    });
-                  }
+                let gridItems = [...items];
+                if (diarySort === "rating" || diarySort === "rating-asc") {
+                  gridItems = gridItems.filter(i => i.rating > 0);
+                  gridItems.sort((a, b) => diarySort === "rating-asc" ? (a.rating || 0) - (b.rating || 0) : (b.rating || 0) - (a.rating || 0));
+                } else if (diarySort === "alpha") {
+                  gridItems.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+                } else {
+                  gridItems.sort((a, b) => {
+                    const dA = new Date(a.watchedAt || a.createdAt || 0);
+                    const dB = new Date(b.watchedAt || b.createdAt || 0);
+                    return diarySort === "date-asc" ? dA - dB : dB - dA;
+                  });
                 }
                 const totalGrid = gridItems.length;
                 const cappedGrid = gridItems.slice(0, diaryLimit);
@@ -408,21 +359,15 @@ export default function ShelfModals({
                 <div style={{ paddingBottom: 20 }}>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
                     {cappedGrid.map((item, i) => (
-                      <div key={i} style={{ cursor: "pointer", position: "relative" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
+                      <div key={i} style={{ cursor: "pointer" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
                         <div style={{
                           aspectRatio: "2/3", borderRadius: 6, overflow: "hidden",
                           border: `1px solid ${accent}12`,
                           background: item.cover ? `url(${item.cover}) center/cover` : "rgba(255,255,255,0.06)",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          opacity: diaryShelf === "games" && item.status === "beat" ? 0.5 : 1,
                         }}>
                           {!item.cover && <span style={{ fontSize: 24 }}>{cfg?.icon}</span>}
                         </div>
-                        {diaryShelf === "games" && item.status === "beat" && (
-                          <div style={{ position: "absolute", top: 4, right: 4, width: 18, height: 18, borderRadius: "50%", background: "var(--accent-green)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: 10, color: "white" }}>✓</span>
-                          </div>
-                        )}
                         {item.rating > 0 && (
                           <div style={{ fontSize: 10, color: accent, marginTop: 3, letterSpacing: 1 }}>
                             {renderStars(item.rating)}
@@ -449,7 +394,6 @@ export default function ShelfModals({
 
               {/* Diary View */}
               {diaryView === "diary" && items.length > 0 && (() => {
-                // Flatten all group items to apply a global cap
                 let runningCount = 0;
                 const cappedGroups = [];
                 for (const group of sortedGroups) {
@@ -475,29 +419,14 @@ export default function ShelfModals({
                       </div>
                       {group.items.map((item, i) => {
                         const day = item._date ? item._date.getDate() : null;
-                        const isGame = diaryShelf === "games";
                         return (
-                          <div key={i} className={beatAnimId === item.id && item.status !== "beat" ? "beat-fade" : ""} style={{
+                          <div key={i} style={{
                             display: "flex", alignItems: "center", gap: 10, padding: "10px 0",
                             borderBottom: "1px solid rgba(255,255,255,0.04)",
-                            opacity: isGame && item.status === "beat" && beatAnimId !== item.id ? 0.65 : 1,
                           }}>
-                            {isGame ? (
-                              <div onClick={(e) => { e.stopPropagation(); toggleBeat(item.id, item.status); }}
-                                className={beatAnimId === item.id ? "beat-pop" : ""}
-                                style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, cursor: "pointer",
-                                  display: "flex", alignItems: "center", justifyContent: "center",
-                                  background: item.status === "beat" ? "var(--accent-green)" : "rgba(255,255,255,0.06)",
-                                  border: item.status === "beat" ? "none" : "2px solid rgba(255,255,255,0.1)",
-                                  transition: "all 0.2s ease",
-                                }}>
-                                {item.status === "beat" ? <span style={{ fontSize: 14, color: "white" }}>✓</span> : ""}
-                              </div>
-                            ) : (
-                              <div className="mono" style={{ width: 28, fontSize: 13, fontWeight: 600, color: "var(--text-dim)", textAlign: "center", flexShrink: 0 }}>
-                                {day || "—"}
-                              </div>
-                            )}
+                            <div className="mono" style={{ width: 28, fontSize: 13, fontWeight: 600, color: "var(--text-dim)", textAlign: "center", flexShrink: 0 }}>
+                              {day || "—"}
+                            </div>
                             <div style={{
                               width: 36, height: 54, borderRadius: 4, overflow: "hidden", flexShrink: 0,
                               border: `1px solid ${accent}10`,
@@ -507,15 +436,11 @@ export default function ShelfModals({
                               {!item.cover && <span style={{ fontSize: 14 }}>{cfg?.icon}</span>}
                             </div>
                             <div style={{ flex: 1, minWidth: 0, cursor: "pointer" }} onClick={() => { setViewingItem({ ...item, shelfType: diaryShelf }); setDiaryShelf(null); }}>
-                              <div className="bb" style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: isGame && item.status === "beat" ? "line-through" : "none" }}>
+                              <div className="bb" style={{ fontSize: 13, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                 {item.title}
                               </div>
                               <div className="mono" style={{ fontSize: 10, color: "var(--text-faint)", marginTop: 1 }}>
-                                {isGame ? (
-                                  <>{item.notes || item.platform || ""}</>
-                                ) : (
-                                  <>{item.director || item.author || ""}{item.year ? ` · ${item.year}` : ""}</>
-                                )}
+                                {item.director || ""}{item.year ? ` · ${item.year}` : ""}
                               </div>
                             </div>
                             <div style={{ flexShrink: 0, textAlign: "right" }}>
@@ -530,12 +455,6 @@ export default function ShelfModals({
                                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#40BCF4" }} />
                                   <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#FF8000" }} />
                                 </div>
-                              )}
-                              {isGame && item.status === "beat" && (
-                                <div className="mono" style={{ fontSize: 9, color: "var(--accent-green)", marginTop: 2 }}>BEAT</div>
-                              )}
-                              {isGame && item.isPlaying && (
-                                <div className="mono" style={{ fontSize: 9, color: "var(--accent-terra)", marginTop: 2 }}>PLAYING</div>
                               )}
                             </div>
                           </div>

@@ -1,7 +1,7 @@
 import { t } from "../../theme";
 import { useState, useEffect } from "react";
 import { supabase } from "../../supabase";
-import { updateGameStatus as updateGameStatusHelper, updateMediaRating, deleteFullMediaLog } from "../../utils/mediaWrite";
+import { updateMediaRating, deleteFullMediaLog } from "../../utils/mediaWrite";
 import { formatDate } from "../../utils/helpers";
 import BottomSheet from "../shared/BottomSheet";
 import StarRating from "../shared/StarRating";
@@ -71,7 +71,6 @@ export default function ItemDetailModal({
 
   // ── Data loading ──
 
-  // Books: reading log
   // ── Actions ──
 
   const updateRating = async () => {
@@ -93,31 +92,6 @@ export default function ItemDetailModal({
       setDeleting(false);
       if (onToast) onToast("Couldn't delete — try again");
     }
-  };
-
-  const saveBookProgress = async () => {
-    if (!userId || !item.id) return;
-    setSaving(true);
-    setSaveStatus("saving");
-
-    try {
-      await supabase.from("user_media_logs").update({
-        status: "finished",
-        rating: finishRating || null,
-        watched_at: new Date().toISOString(),
-      }).eq("id", item.id);
-
-      setLocalItem(prev => ({
-        ...prev, isReading: false, rating: finishRating || null, status: "read",
-      }));
-      setFinishRating(0);
-      if (onRefresh) onRefresh();
-      flash("saved");
-    } catch (err) {
-      console.error("Book save error:", err);
-      flash("error");
-    }
-    setSaving(false);
   };
 
   const saveShowProgress = async () => {
@@ -145,38 +119,6 @@ export default function ItemDetailModal({
     setSaving(false);
   };
 
-  const finishGame = async () => {
-    if (!userId || !item.id) return;
-    setSaving(true);
-    setSaveStatus("saving");
-    try {
-      await updateGameStatusHelper(item.id, "beat", {
-        rating: finishRating || null,
-        finished_at: new Date().toISOString(),
-      });
-      setLocalItem(prev => ({ ...prev, isPlaying: false, isBeat: true, rating: finishRating || null, status: "beat" }));
-      setFinishRating(0);
-      if (onRefresh) onRefresh();
-      flash("saved");
-    } catch (err) {
-      console.error("Game save error:", err);
-      flash("error");
-    }
-    setSaving(false);
-  };
-
-  const setGameStatus = async (displayStatus) => {
-    const ok = await updateGameStatusHelper(item.id, displayStatus);
-    if (ok) {
-      setLocalItem(prev => ({
-        ...prev, status: displayStatus,
-        isPlaying: displayStatus === "playing",
-        isBeat: displayStatus === "beat",
-      }));
-      if (onRefresh) onRefresh();
-    }
-  };
-
   // ── Render helpers ──
   const renderStars = (rating) => {
     if (!rating) return null;
@@ -191,7 +133,7 @@ export default function ItemDetailModal({
       <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
         <div style={{
           width: 100, flexShrink: 0,
-          aspectRatio: shelfType === "games" ? "16/9" : "2/3",
+          aspectRatio: "2/3",
           borderRadius: 8, overflow: "hidden",
           background: "linear-gradient(135deg, #1a1a2e, #16213e)",
           boxShadow: "0 2px 6px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.2)",
@@ -204,7 +146,7 @@ export default function ItemDetailModal({
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 32,
             }}>
-              {{ movies: "🎬", books: "📖", shows: "📺", games: "🎮" }[shelfType]}
+              {{ movies: "🎬", shows: "📺" }[shelfType]}
             </div>
           )}
         </div>
@@ -216,10 +158,7 @@ export default function ItemDetailModal({
           }}>{localItem.title}</div>
 
           {localItem.year && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.year}</div>}
-          {localItem.author && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.author}</div>}
           {localItem.director && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.director}</div>}
-          {localItem.platform && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.platform}</div>}
-          {shelfType === "games" && localItem.genre && <div style={{ fontSize: 12, color: t.textSecondary, marginBottom: 2 }}>{localItem.genre}</div>}
 
           {localItem.rating && (
             <div style={{ marginTop: 8 }}>
@@ -229,50 +168,13 @@ export default function ItemDetailModal({
           )}
 
           {/* Status badges */}
-          {localItem.isReading && !localItem.rating && (
-            <div style={badgeStyle("#4ade80")}>📖 Currently reading</div>
-          )}
           {localItem.isWatching && (
-            <div style={badgeStyle("#e94560")}>📺 S{localItem.currentSeason}E{localItem.currentEpisode}</div>
-          )}
-          {localItem.isPlaying && (
-            <div style={badgeStyle("#a78bfa")}>
-              Playing
-              {localItem.source === "steam" && <span style={{ opacity: 0.5, fontSize: 10, marginLeft: 4 }}>· Steam</span>}
-            </div>
-          )}
-          {localItem.isBeat && (
-            <div style={badgeStyle("#4ade80")}>✓ Beat</div>
+            <div style={badgeStyle("#e94560")}>📺 Currently Watching</div>
           )}
 
           {localItem.watchedAt && <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>Watched {formatDate(localItem.watchedAt)}</div>}
-          {localItem.finishedAt && <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4 }}>Finished {formatDate(localItem.finishedAt)}</div>}
         </div>
       </div>
-
-      {/* ── Game: Mark as Finished ── */}
-      {localItem.isPlaying && shelfType === "games" && (
-        <Section>
-          {label("Finished playing?")}
-          <StarRating value={finishRating} onChange={setFinishRating} label="Rate This Game" />
-          <button style={primaryBtn} onClick={finishGame} disabled={saving}>
-            {saving ? "Saving..." : "Mark as Finished"}
-          </button>
-          {statusMsg()}
-        </Section>
-      )}
-
-      {/* ── Book: Mark as Finished ── */}
-      {localItem.isReading && shelfType === "books" && (
-        <Section>
-          {label("Finished reading?")}
-          <StarRating value={finishRating} onChange={setFinishRating} label="Rate This Book" />
-          <button style={primaryBtn} onClick={saveBookProgress} disabled={saving}>
-            {saving ? "Saving..." : "Mark as Finished"}
-          </button>
-          {statusMsg()}
-        </Section>
-      )}
 
       {/* ── Show: Mark as Finished ── */}
       {localItem.isWatching && shelfType === "shows" && (
@@ -286,69 +188,9 @@ export default function ItemDetailModal({
         </Section>
       )}
 
-      {/* ── Steam Stats (games) ── */}
-      {shelfType === "games" && localItem.source === "steam" && (() => {
-        const hours = localItem.playtimeHours != null ? Math.round(localItem.playtimeHours) : null;
-        const achTotal = localItem.achievementsTotal || 0;
-        const achEarned = localItem.achievementsEarned || 0;
-        const achPct = achTotal > 0 ? Math.round((achEarned / achTotal) * 100) : 0;
-        return (hours || achTotal) ? (
-          <Section>
-            {label("Steam Stats")}
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              {hours != null && (
-                <StatCard value={`${hours}h`} sub="PLAYED" />
-              )}
-              {achTotal > 0 && (
-                <div style={{ flex: 1, minWidth: 100, padding: "14px 16px", background: t.bgElevated, border: `1px solid ${t.borderSubtle}`, borderRadius: 10, textAlign: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 700, color: t.textPrimary, fontFamily: "var(--font-mono, monospace)" }}>
-                    {achEarned}<span style={{ fontSize: 14, color: t.textMuted }}>/{achTotal}</span>
-                  </div>
-                  <div style={{ fontSize: 10, color: t.textMuted, marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>ACHIEVEMENTS</div>
-                  <div style={{ height: 4, background: t.bgInput, borderRadius: 2, marginTop: 8, overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${achPct}%`, background: achPct === 100 ? t.green : "#a78bfa", borderRadius: 2, transition: "width 0.3s" }} />
-                  </div>
-                </div>
-              )}
-            </div>
-          </Section>
-        ) : null;
-      })()}
-
-
-      {/* ── Game status selector ── */}
-      {shelfType === "games" && (
-        <Section>
-          {label("Status")}
-          <div style={{ display: "flex", gap: 8 }}>
-            {[
-              { key: "playing", label: "🎮 Playing", bg: "linear-gradient(135deg, #a78bfa, #7c5cc4)", color: "white" },
-              { key: "backlog", label: "📋 Backlog", bg: "rgba(255,255,255,0.04)", color: t.textSecondary },
-              { key: "beat", label: "✓ Beat", bg: t.green, color: "#0a0a0a" },
-            ].map(opt => {
-              const isActive = (localItem.status || "backlog") === opt.key;
-              return (
-                <button key={opt.key} onClick={() => setGameStatus(opt.key)}
-                  style={{
-                    flex: 1, padding: "10px 8px", fontSize: 11, border: "none", borderRadius: 8,
-                    cursor: "pointer", fontFamily: "var(--font-mono, monospace)", fontWeight: isActive ? 700 : 400,
-                    background: isActive ? opt.bg : "rgba(255,255,255,0.04)",
-                    color: isActive ? opt.color : t.textFaint,
-                    boxShadow: isActive ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
-                    border: isActive ? "none" : `1px solid ${t.borderSubtle}`,
-                    transition: "all 0.2s",
-                  }}>
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </Section>
-      )}
-
       {/* ── Actions: Edit rating + Remove ── */}
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-        {!localItem.isReading && !localItem.isWatching && !localItem.isPlaying && (
+        {!localItem.isWatching && (
           <button style={secondaryBtn} onClick={() => {
             setEditingRating(!editingRating);
             setEditRatingVal(localItem.rating || 0);
@@ -404,20 +246,6 @@ export default function ItemDetailModal({
 
 function Section({ children }) {
   return <div style={{ marginBottom: 16 }}>{children}</div>;
-}
-
-function StatCard({ value, sub }) {
-  return (
-    <div style={{
-      flex: 1, minWidth: 100, padding: "14px 16px",
-      background: t.bgElevated,
-      border: `1px solid ${t.borderSubtle}`,
-      borderRadius: 10, textAlign: "center",
-    }}>
-      <div style={{ fontSize: 22, fontWeight: 700, color: t.textPrimary, fontFamily: "var(--font-mono, monospace)" }}>{value}</div>
-      <div style={{ fontSize: 10, color: t.textMuted, marginTop: 4, letterSpacing: "0.05em", fontFamily: "var(--font-mono, monospace)" }}>{sub}</div>
-    </div>
-  );
 }
 
 // ── Style constants ──

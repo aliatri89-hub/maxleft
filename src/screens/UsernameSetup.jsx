@@ -329,7 +329,7 @@ function UsernameSetup({ name, session, onComplete }) {
   const allSteps = ["username", "communities", "letterboxd"];
 
   // ── Default shelves — all on, user can toggle in settings later
-  const defaultShelves = { movies: true, shows: true, games: true, books: true };
+  const defaultShelves = { movies: true, shows: true };
 
   // ── Processing ───────────────────────────────────────────
   const beginProcessing = (communityIds) => {

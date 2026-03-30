@@ -64,8 +64,6 @@ export const t = {
   radiusFull:     9999,
 
   // ── Brand Colors (3rd-party services) ──
-  steam:          '#66C0F4',
-  steamDim:       'rgba(102,192,244,0.10)',
   imdb:           '#F5C518',
   imdbDim:        'rgba(245,197,24,0.12)',
   metacritic:     '#F96836',

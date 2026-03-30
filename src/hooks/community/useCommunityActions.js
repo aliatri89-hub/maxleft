@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { supabase } from "../../supabase";
-import { logFilm, logShow, logBook, logGame } from "../../utils/mediaWrite";
+import { logFilm, logShow } from "../../utils/mediaWrite";
 import { trackEvent } from "../../hooks/useAnalytics";
 
 /**
@@ -126,10 +126,6 @@ export function useCommunityActions(userId, setProgress) {
           await logFilm(userId, item, coverUrl, opts);
         } else if (item.media_type === "show" && item.tmdb_id) {
           await logShow(userId, item, coverUrl, opts);
-        } else if (item.media_type === "book") {
-          await logBook(userId, item, coverUrl, opts);
-        } else if (item.media_type === "game") {
-          await logGame(userId, item, coverUrl, opts);
         }
       }
 

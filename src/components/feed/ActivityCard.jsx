@@ -368,7 +368,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
 
           {/* Logo / skeleton / title */}
           {(() => {
-            const expectsLogo = data.tmdb_id && data.media_type !== "book" && data.media_type !== "game";
+            const expectsLogo = !!data.tmdb_id;
             const logoLoading = expectsLogo && !data.logo_url && !isLogoChecked(data.tmdb_id);
 
             return (
