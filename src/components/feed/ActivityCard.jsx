@@ -130,6 +130,7 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         position: "relative",
         cursor: "pointer",
         overflow: "hidden",
+        animation: "fadeIn 0.35s ease",
       }}
     >
       <FadeImg
@@ -317,6 +318,7 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
         borderRadius: 5,
         position: "relative",
         cursor: "pointer",
+        animation: "fadeIn 0.35s ease",
       }}
     >
       <div style={{
