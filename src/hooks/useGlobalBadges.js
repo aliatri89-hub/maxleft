@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../supabase";
 
 /**
@@ -17,15 +17,14 @@ export function useGlobalBadges(userId, active = false) {
   const [earnedBadges, setEarnedBadges] = useState([]);
   const [closestBadge, setClosestBadge] = useState(null);
   const [loading, setLoading] = useState(true);
-  const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (!userId || !active || fetchedRef.current) { setLoading(false); return; }
+    if (!userId || !active) { setLoading(false); return; }
     let cancelled = false;
-    fetchedRef.current = true;
 
     (async () => {
       setLoading(true);
+      setClosestBadge(null); // Reset — will be repopulated if still relevant
 
       try {
         // ── 1. Fetch earned badges with badge details ──

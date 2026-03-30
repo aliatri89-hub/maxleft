@@ -92,5 +92,13 @@ export default function useNotifications(session) {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [fetchNotifications]);
 
+  // Lightweight poll — catches notifications written by background processes
+  // (badge digests after import, coverage alerts, etc.) without needing signals.
+  useEffect(() => {
+    if (!userId) return;
+    const id = setInterval(fetchNotifications, 30_000);
+    return () => clearInterval(id);
+  }, [userId, fetchNotifications]);
+
   return { notifications, unreadCount, markAllSeen, refresh: fetchNotifications, loading };
 }
