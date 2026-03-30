@@ -1152,9 +1152,10 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                 }
                               }}
                               style={{
-                                width: 32, height: 32, borderRadius: "50%",
+                                width: 34, height: 34, borderRadius: 8,
                                 background: (isActiveAndPlaying || isActiveBuffering) ? "rgba(196,115,79,0.15)" : "rgba(240,235,225,0.04)",
-                                border: (isActiveAndPlaying || isActiveBuffering) ? "1px solid rgba(196,115,79,0.3)" : "1px solid rgba(240,235,225,0.08)",
+                                border: (isActiveAndPlaying || isActiveBuffering) ? "1.5px solid rgba(196,115,79,0.4)" : "1.5px solid rgba(240,235,225,0.1)",
+                                boxShadow: (isActiveAndPlaying || isActiveBuffering) ? "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(196,115,79,0.1)" : "0 2px 5px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07)",
                                 display: "flex", alignItems: "center", justifyContent: "center",
                                 flexShrink: 0,
                                 transition: "all 0.15s",
@@ -1167,7 +1168,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                                   <path d="M12 3a9 9 0 0 1 9 9" stroke="#c4734f" strokeWidth="2.5" strokeLinecap="round" />
                                 </svg>
                               ) : (
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.5)"}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill={isActiveAndPlaying ? "#c4734f" : "rgba(240,235,225,0.6)"}>
                                   {isActiveAndPlaying
                                     ? <><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></>
                                     : <path d="M8 5v14l11-7z" />
