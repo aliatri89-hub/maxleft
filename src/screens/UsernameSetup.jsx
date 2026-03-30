@@ -314,7 +314,9 @@ function UsernameSetup({ name, session, onComplete }) {
         .order("name", { ascending: true });
 
       if (!cancelled && !error && data) {
-        setPodcasts(data);
+        const sortKey = n => n.replace(/^(the|a|an)\s+/i, "").trim();
+        const sorted = [...data].sort((a, b) => sortKey(a.name).localeCompare(sortKey(b.name)));
+        setPodcasts(sorted);
         // Pre-select all — more podcasts = better experience
         const allSelected = {};
         data.forEach(p => { allSelected[p.id] = true; });
