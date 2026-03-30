@@ -836,14 +836,16 @@ function UsernameSetup({ name, session, onComplete }) {
           </button>
         </div>
         {!letterboxdUsername && !uploadedFile && (
-          <SkipButton onClick={() => beginProcessing(savedCommunityIds)} label="Skip — I don't use Letterboxd" />
-          <div style={{
-            textAlign: "center", fontSize: 12,
-            color: "rgba(255,255,255,0.35)",
-            fontFamily: t.fontBody, marginTop: 8,
-          }}>
-            You can always connect Letterboxd later in Settings
-          </div>
+          <>
+            <SkipButton onClick={() => beginProcessing(savedCommunityIds)} label="Skip — I don't use Letterboxd" />
+            <div style={{
+              textAlign: "center", fontSize: 12,
+              color: "rgba(255,255,255,0.35)",
+              fontFamily: t.fontBody, marginTop: 8,
+            }}>
+              You can always connect Letterboxd later in Settings
+            </div>
+          </>
         )}
       </div>
     );
