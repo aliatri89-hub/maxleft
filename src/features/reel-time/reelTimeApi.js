@@ -31,8 +31,6 @@ export async function fetchTodaysPuzzle() {
     return null;
   }
 
-  // Order movies by the puzzle's movie_ids array order
-  // First movie = seed (placed automatically), rest are placements
   const orderedMovies = puzzle.movie_ids.map((id) => {
     const movie = movies.find((m) => m.id === id);
     return {
@@ -41,10 +39,14 @@ export async function fetchTodaysPuzzle() {
     };
   });
 
-  // Sort by release_date to get chronological order (the "answer")
-  const sortedByDate = [...orderedMovies].sort(
-    (a, b) => new Date(a.release_date) - new Date(b.release_date)
-  );
+  // Shuffle all movies — no fixed seed, no chronological order leak.
+  // "Always place later" and "seed is always earliest" are both exploits.
+  // Scoring in useReelTime checks actual dates on insertion, not presentation order.
+  const shuffled = [...orderedMovies];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
 
   return {
     id: puzzle.id,
@@ -52,7 +54,7 @@ export async function fetchTodaysPuzzle() {
     year: puzzle.year,
     difficulty: puzzle.difficulty || puzzle.movie_count || orderedMovies.length,
     movieCount: puzzle.movie_count || orderedMovies.length,
-    movies: sortedByDate, // seed is first (earliest release)
+    movies: shuffled, // movies[0] = random seed, rest in random order
   };
 }
 
