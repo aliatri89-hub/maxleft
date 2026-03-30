@@ -447,6 +447,7 @@ function UsernameSetup({ name, session, onComplete }) {
       .from("profiles")
       .select("id")
       .eq("username", clean)
+      .neq("id", session?.user?.id)
       .maybeSingle();
 
     if (data) { setError("Already taken — try another"); setChecking(false); return; }
