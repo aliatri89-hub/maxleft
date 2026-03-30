@@ -96,9 +96,7 @@
 
   /* ── LANDING ── */
   .landing {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--sat, 0px) - var(--sab, 0px));
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -110,9 +108,7 @@
   }
 
   .landing-hero {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--sat, 0px) - var(--sab, 0px));
     display: flex;
     flex-direction: column;
     position: relative;
@@ -484,9 +480,7 @@
 
   /* ── USERNAME SETUP ── */
   .setup-screen {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: 100dvh;
+    min-height: calc(100dvh - var(--sat, 0px) - var(--sab, 0px));
     display: flex;
     flex-direction: column;
     padding: 80px 32px 48px;

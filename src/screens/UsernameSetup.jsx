@@ -25,7 +25,6 @@ const DARK_STYLES = `
   .setup-screen {
     background: ${dk.bg} !important;
     color: ${dk.text} !important;
-    min-height: 100vh;
   }
   .setup-title {
     color: ${dk.text} !important;
