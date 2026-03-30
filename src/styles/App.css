@@ -2174,6 +2174,7 @@
   .btn-pin-mantl.pinned {
     background: var(--terracotta);
     color: white;
+  }
   /* Event Form */
   .event-form-label {
     font-family: 'Barlow Condensed', sans-serif;
