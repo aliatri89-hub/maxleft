@@ -699,15 +699,15 @@ function UsernameSetup({ name, session, onComplete }) {
           borderRadius: 12,
         }}>
           <div style={{
-            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 15,
+            textTransform: "uppercase", color: dk.text, marginBottom: 6,
             display: "flex", alignItems: "center", gap: 8,
           }}>
-            <span style={{ fontSize: 15 }}>📡</span> Live Sync
+            <span style={{ fontSize: 17 }}>📡</span> Live Sync
           </div>
           <div style={{
-            fontFamily: t.fontDisplay, fontSize: 12, color: dk.textDim,
-            lineHeight: 1.5, marginBottom: 10,
+            fontFamily: t.fontDisplay, fontSize: 14, color: "#ffffff",
+            lineHeight: 1.6, marginBottom: 10,
           }}>
             Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
           </div>
@@ -722,8 +722,8 @@ function UsernameSetup({ name, session, onComplete }) {
           />
           {letterboxdUsername && (
             <div style={{
-              fontFamily: t.fontBody, fontSize: 10,
-              color: dk.textDim, marginTop: 6, letterSpacing: "0.02em",
+              fontFamily: t.fontBody, fontSize: 12,
+              color: "rgba(255,255,255,0.5)", marginTop: 6,
               wordBreak: "break-all",
             }}>
               RSS: {rssUrl}
@@ -739,22 +739,22 @@ function UsernameSetup({ name, session, onComplete }) {
           borderRadius: 12,
         }}>
           <div style={{
-            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-            textTransform: "uppercase", color: dk.text, marginBottom: 4,
+            fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 15,
+            textTransform: "uppercase", color: dk.text, marginBottom: 6,
             display: "flex", alignItems: "center", gap: 8,
           }}>
-            <span style={{ fontSize: 15 }}>📦</span> Import Full History
+            <span style={{ fontSize: 17 }}>📦</span> Import Full History
           </div>
           <div style={{
-            fontFamily: t.fontDisplay, fontSize: 12, color: dk.textDim,
-            lineHeight: 1.5, marginBottom: 10,
+            fontFamily: t.fontDisplay, fontSize: 14, color: "#ffffff",
+            lineHeight: 1.6, marginBottom: 10,
           }}>
             This brings in everything you've ever logged — ratings, dates, the works.
           </div>
 
           <div style={{
-            fontFamily: t.fontBody, fontSize: 11,
-            color: dk.text, lineHeight: 1.8, marginBottom: 12,
+            fontFamily: t.fontBody, fontSize: 13,
+            color: "#ffffff", lineHeight: 1.9, marginBottom: 12,
             padding: "10px 12px",
             background: "rgba(255,255,255,0.03)",
             borderRadius: 8,
@@ -769,9 +769,9 @@ function UsernameSetup({ name, session, onComplete }) {
                 }}
                 style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer", wordBreak: "break-all" }}
               >letterboxd.com/data/export</span>{" "}
-              <span id="lb-copy-confirm" style={{ fontSize: 9, color: dk.textDim }}>(tap to copy link)</span>
+              <span id="lb-copy-confirm" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>(tap to copy link)</span>
             </div>
-            <div style={{ fontSize: 9, color: dk.textDim, marginLeft: 14, marginTop: -4 }}>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginLeft: 14, marginTop: -4 }}>
               ⚠️ Use your browser, not the Letterboxd app
             </div>
             <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
@@ -853,8 +853,8 @@ function UsernameSetup({ name, session, onComplete }) {
           <>
             {hasErrors && (
               <div style={{
-                fontFamily: t.fontBody, fontSize: 10,
-                color: dk.textDim, textAlign: "center", marginBottom: 16,
+                fontFamily: t.fontBody, fontSize: 13,
+                color: "rgba(255,255,255,0.6)", textAlign: "center", marginBottom: 16,
               }}>
                 Some items couldn't be imported — you can retry from Settings anytime.
               </div>
