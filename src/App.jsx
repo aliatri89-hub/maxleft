@@ -468,8 +468,7 @@ function AppMain() {
       let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (!prof) {
         const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
-        const avatarUrl = user.user_metadata?.avatar_url || null;
-        const { data: newProf } = await supabase.from("profiles").insert({ id: user.id, name, avatar_url: avatarUrl, avatar_emoji: "👤" }).select().single();
+        const { data: newProf } = await supabase.from("profiles").insert({ id: user.id, name, avatar_emoji: "👤" }).select().single();
         prof = newProf;
       }
       if (prof) {
