@@ -66,7 +66,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
               backgroundImage: `url(${post.cover_image_url})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
-              opacity: 0.18,
+              opacity: 0.35,
             }} />
             <div style={{
               position: "absolute", inset: 0,
@@ -99,7 +99,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
               WebkitBoxOrient: "vertical",
               overflow: "hidden",
             }}>
-              {cleanPreview.slice(0, 160)}
+              {cleanPreview.slice(0, 220)}
             </div>
           </div>
 
