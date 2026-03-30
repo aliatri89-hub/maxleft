@@ -37,11 +37,12 @@ export default function FeedFilterBar({
         .order("name", { ascending: true });
       if (!cancelled && !error && pods) {
         // Sort: community podcasts by sort_order first, then non-community alphabetically
+        const sortKey = n => n.replace(/^(the|a|an)\s+/i, "").trim();
         const sorted = pods.sort((a, b) => {
           const aOrder = a.community_pages?.sort_order ?? 999;
           const bOrder = b.community_pages?.sort_order ?? 999;
           if (aOrder !== bOrder) return aOrder - bOrder;
-          return a.name.localeCompare(b.name);
+          return sortKey(a.name).localeCompare(sortKey(b.name));
         });
         setPodcasts(sorted.map(p => ({
           id: p.community_page_id || p.id,
