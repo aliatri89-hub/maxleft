@@ -182,9 +182,9 @@ export default function CommunitySleeveSheet({
           <div style={{
             position: "relative",
             width: "100%",
-            height: 200,
+            height: 220,
             overflow: "hidden",
-            marginBottom: -24,
+            marginBottom: -44,
           }}>
             <FadeImg
               src={sleeveHero}
