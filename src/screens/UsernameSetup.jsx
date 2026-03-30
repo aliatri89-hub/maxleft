@@ -650,10 +650,12 @@ function UsernameSetup({ name, session, onComplete }) {
         )}
 
         <div style={{
-          fontFamily: t.fontBody, fontSize: 10,
-          color: dk.textDim, textAlign: "center", marginBottom: 16, letterSpacing: "0.03em",
+          fontFamily: t.fontBody, fontSize: 13,
+          color: "#ffffff", textAlign: "center", marginBottom: 16,
+          lineHeight: 1.6,
         }}>
-          {selectedCount} selected · Manage anytime in settings
+          <div style={{ fontWeight: 600 }}>{selectedCount} selected</div>
+          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Manage anytime in settings</div>
         </div>
 
         <div className="setup-spacer" />
