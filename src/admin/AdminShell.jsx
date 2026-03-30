@@ -17,6 +17,7 @@ const AnalyticsDashboard = lazy(() => import("./AnalyticsDashboard"));
 const GamesManager = lazy(() => import("./GamesManager"));
 const ConfigFlags = lazy(() => import("./ConfigFlags"));
 const CoverageManager = lazy(() => import("./CoverageManager"));
+const PodcastRequestsManager = lazy(() => import("./PodcastRequestsManager"));
 
 const NAV_ITEMS = [
   { key: "mission-control", label: "Mission Control", icon: "◉" },
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { key: "originals",       label: "Staff Picks",      icon: "▶" },
   { key: "games",           label: "Games",            icon: "◇" },
   { key: "coverage",        label: "Coverage Links",   icon: "⊕" },
+  { key: "requests",        label: "Pod Requests",     icon: "📼" },
   { key: "analytics",       label: "Analytics",        icon: "◎" },
   { key: "config",          label: "Config & Flags",   icon: "◐" },
 ];
@@ -155,6 +157,9 @@ export default function AdminShell() {
           )}
           {activeSection === "coverage" && (
             <CoverageManager session={session} />
+          )}
+          {activeSection === "requests" && (
+            <PodcastRequestsManager session={session} />
           )}
           {activeSection === "analytics" && (
             <AnalyticsDashboard session={session} />
