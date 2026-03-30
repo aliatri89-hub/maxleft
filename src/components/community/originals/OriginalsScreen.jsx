@@ -150,7 +150,10 @@ export default function OriginalsScreen({
 
             {/* Standard poster shelf — title hidden, PostCard handles it */}
             <MiniseriesShelf
-              series={shelf}
+              series={{
+                ...shelf,
+                items: [...(shelf.items || [])].sort((a, b) => a.title.localeCompare(b.title)),
+              }}
               progress={progress}
               onToggle={handleItemTap}
               filter={filter}
