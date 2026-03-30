@@ -42,7 +42,7 @@ export default function HDTGMHero({ community, miniseries, progress }) {
         gradientStrength={tabHero?.gradient_strength}
       />
 
-      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 42px" }}>
         {/* Title + tagline */}
         <div style={{
           fontSize: 28,

@@ -204,7 +204,7 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
       />
 
       {/* View mode + filter — single row, overlaps into hero */}
-      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center", position: "relative", zIndex: 2, marginTop: -18 }}>
+      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center", position: "relative", zIndex: 2, marginTop: -36 }}>
         {[{ key: "az", label: "Genre" }, { key: "decades", label: "Decades" }].map(v => (
           <button
             key={v.key}
