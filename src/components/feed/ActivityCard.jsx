@@ -130,7 +130,6 @@ function BackdropFront({ url, timeAgo, communities, rating, hasPodcastCoverage, 
         position: "relative",
         cursor: "pointer",
         overflow: "hidden",
-        animation: "fadeIn 0.35s ease",
       }}
     >
       <FadeImg
@@ -318,7 +317,6 @@ function CreamFront({ data, timeAgo, brandLeft, brandRight, letterboxdUrl, onCli
         borderRadius: 5,
         position: "relative",
         cursor: "pointer",
-        animation: "fadeIn 0.35s ease",
       }}
     >
       <div style={{
@@ -634,58 +632,32 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
   const useBackdrop = USE_TITLE_BACKDROPS && enBackdropUrl;
   const isLoading = USE_TITLE_BACKDROPS && !backdropResolved;
 
-  // While loading, style as if it will be a backdrop card (most common case).
-  // This prevents the cream→dark layout shift on 90%+ of cards.
-  const wrapAsBackdrop = useBackdrop || isLoading;
+  // While loading, render BackdropFront immediately — FadeImg shows a dark
+  // placeholder and fades the image in when it loads. No skeleton needed.
+  // Only fall back to CreamFront once we KNOW there's no en-backdrop.
+  const showBackdrop = useBackdrop || isLoading;
 
   return (
     <>
     <div
       style={{
-        margin: wrapAsBackdrop ? "6px 16px" : "4px 16px",
-        borderRadius: wrapAsBackdrop ? 10 : 6,
+        margin: showBackdrop ? "6px 16px" : "4px 16px",
+        borderRadius: showBackdrop ? 10 : 6,
         position: "relative",
         cursor: "pointer",
-        background: wrapAsBackdrop ? "#111" : "#302c28",
+        background: showBackdrop ? "#111" : "#302c28",
         padding: "1px 1px",
-        boxShadow: wrapAsBackdrop
+        boxShadow: showBackdrop
           ? "inset 0 0 0 1px rgba(255,255,255,0.07), 0 3px 12px rgba(0,0,0,0.5)"
           : "0 2px 8px rgba(0,0,0,0.4)",
-        backgroundImage: wrapAsBackdrop ? "none" : NOISE_SVG,
+        backgroundImage: showBackdrop ? "none" : NOISE_SVG,
       }}
     >
       <div style={{
-        borderRadius: wrapAsBackdrop ? 9 : 4,
+        borderRadius: showBackdrop ? 9 : 4,
         overflow: "hidden",
       }}>
-        {isLoading ? (
-          /* Dark skeleton placeholder — matches backdrop card dimensions */
-          <div
-            onClick={openSleeve}
-            style={{
-              borderRadius: 8,
-              position: "relative",
-              overflow: "hidden",
-              aspectRatio: "16 / 9",
-              background: "var(--bg-card, #1a1714)",
-              cursor: "pointer",
-            }}
-          >
-            {/* Subtle shimmer */}
-            <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%)",
-              backgroundSize: "200% 100%",
-              animation: "badgeShimmer 2s ease infinite",
-            }} />
-            {/* Placeholder date sticker */}
-            <div style={{
-              position: "absolute", bottom: 10, left: 12,
-              width: 60, height: 18, borderRadius: 3,
-              background: "rgba(240,235,225,0.06)",
-            }} />
-          </div>
-        ) : useBackdrop ? (
+        {showBackdrop ? (
           <BackdropFront url={enBackdropUrl} timeAgo={timeAgo} communities={communities} rating={data.rating} hasPodcastCoverage={!!data.has_podcast_coverage} letterboxdUrl={data.letterboxd_url} onClick={openSleeve} />
         ) : (
           <CreamFront

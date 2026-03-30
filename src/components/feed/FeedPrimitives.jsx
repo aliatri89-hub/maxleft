@@ -100,23 +100,25 @@ export function FadeImg({ src, alt = "", style = {}, placeholderColor = "rgba(30
         ...(boxShadow !== undefined && { boxShadow }),
       }}
     >
-      <img
-        src={src}
-        alt={alt}
-        loading={loading}
-        onLoad={handleLoad}
-        onError={onError}
-        style={{
-          display: "block",
-          width: "100%",
-          height: "100%",
-          objectFit,
-          ...(objectPosition ? { objectPosition } : {}),
-          opacity: loaded ? 1 : 0,
-          transition: "opacity 0.35s ease",
-        }}
-        {...rest}
-      />
+      {src && (
+        <img
+          src={src}
+          alt={alt}
+          loading={loading}
+          onLoad={handleLoad}
+          onError={onError}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit,
+            ...(objectPosition ? { objectPosition } : {}),
+            opacity: loaded ? 1 : 0,
+            transition: "opacity 0.35s ease",
+          }}
+          {...rest}
+        />
+      )}
     </div>
   );
 }
