@@ -217,8 +217,8 @@ export default function ActivityPane({
         <div ref={sentinelRef} style={{ height: 1 }} />
       )}
 
-      {/* End of feed */}
-      {filteredActivity.length > 0 && !loading && (
+      {/* End of feed — only when all cards are rendered */}
+      {filteredActivity.length > 0 && !loading && visibleCount >= Math.min(filteredActivity.length, ACTIVITY_MAX) && (
         <div style={{ padding: "28px 24px 36px", textAlign: "center" }}>
           <div style={{
             width: 40, height: 1,
