@@ -90,7 +90,6 @@ function FileUploadZone({ file, onFileSelect, fileInputRef }) {
       }}>
         {extracting ? (
           <>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>⏳</div>
             <div style={{ fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>Extracting diary.csv…</div>
           </>
         ) : file ? (
@@ -101,7 +100,6 @@ function FileUploadZone({ file, onFileSelect, fileInputRef }) {
           </>
         ) : (
           <>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>📦</div>
             <div style={{ fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>Tap to upload export</div>
             <div style={{ fontSize: 12, color: dk.textMuted, marginTop: 3 }}>Upload the .zip, or drop in diary.csv if already extracted</div>
           </>
@@ -196,8 +194,7 @@ function RssPreview({ username, dk }) {
             {film.poster ? (
               <img src={film.poster} alt={film.title} style={{ width: "100%", aspectRatio: "2/3", objectFit: "cover", borderRadius: 6, display: "block", marginBottom: 4 }} />
             ) : (
-              <div style={{ width: "100%", aspectRatio: "2/3", background: "rgba(255,255,255,0.06)", borderRadius: 6, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 18 }}>🎬</span>
+              <div style={{ width: "100%", aspectRatio: "2/3", background: "rgba(255,255,255,0.06)", borderRadius: 6, marginBottom: 4 }}>
               </div>
             )}
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -229,6 +226,8 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
     }
     if (uploadedFile) {
       tasks.push({ id: "letterboxd-csv", label: "Importing film history", status: "pending", progress: 0, total: 0, result: null });
+      tasks.push({ id: "community-progress", label: "Logging community progress", status: "pending", progress: 0, total: 0, result: null });
+      tasks.push({ id: "badge-check", label: "Checking badges", status: "pending", progress: 0, total: 0, result: null });
     }
     if (tasks.length === 0) { onClose(); return; }
     setProcessingTasks(tasks);
@@ -246,6 +245,8 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
       const userId = session.user.id;
       for (const task of processingTasks) {
         if (cancelled) break;
+        // community-progress and badge-check are driven by onStatusMessage, not the main loop
+        if (task.id === "community-progress" || task.id === "badge-check") continue;
         updateTask(task.id, { status: "running" });
         try {
           if (task.id === "letterboxd-rss") {
@@ -259,11 +260,24 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
             updateTask(task.id, { total: items.length });
             const result = await importMovies(items, userId, (progress, total) => {
               if (!cancelled) updateTask(task.id, { progress, total });
+            }, {
+              onStatusMessage: (msg) => {
+                if (!cancelled) {
+                  if (msg.toLowerCase().includes("community")) {
+                    updateTask("community-progress", { status: "running" });
+                  } else if (msg.toLowerCase().includes("badge")) {
+                    updateTask("community-progress", { status: "done", result: "Done" });
+                    updateTask("badge-check", { status: "running" });
+                  }
+                }
+              },
             });
             updateTask(task.id, {
               status: "done",
               result: `${result.count} film${result.count !== 1 ? "s" : ""} imported${result.errs > 0 ? `, ${result.errs} skipped` : ""}`,
             });
+            updateTask("community-progress", { status: "done", result: "Done" });
+            updateTask("badge-check", { status: "done", result: "Done" });
           }
         } catch (err) {
           updateTask(task.id, { status: "error", result: err.message || "Something went wrong" });
@@ -291,17 +305,16 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
 
       {phase === "setup" && (
         <>
-          <div style={{ fontSize: 36, textAlign: "center", marginBottom: 12 }}>🎬</div>
-          <div className="lb-portal-title">Letterboxd</div>
-          <div className="lb-portal-sub">Connect your account to sync your history.</div>
+          <div className="lb-portal-title">Connect Letterboxd</div>
+          <div className="lb-portal-sub">Two ways to bring your watch history into Mantl. Do both for the best experience.</div>
 
           {/* Live Sync */}
           <div style={{ marginBottom: 14, padding: 14, background: dk.accent, border: "1px solid " + dk.border, borderRadius: 12 }}>
             <div style={{ fontWeight: 700, fontSize: 15, textTransform: "uppercase", color: dk.text, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
-              <span>📡</span> Live Sync
+              Live Sync
             </div>
             <div style={{ fontSize: 14, color: "#ffffff", lineHeight: 1.6, marginBottom: 10 }}>
-              Enter your username to auto-sync new logs going forward.
+              Enter your username to auto-sync new logs going forward. Every time you log a film on Letterboxd, it appears on Mantl.
             </div>
             <label style={{ fontSize: 13, letterSpacing: "0.2em", color: dk.terracotta, textTransform: "uppercase", display: "block", marginBottom: 6 }}>Letterboxd Username</label>
             <input
@@ -332,7 +345,7 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
                     Syncing…
                   </>
                 ) : (
-                  <>🔄 Sync Now</>
+                  <>Sync Now</>
                 )}
               </button>
             )}
@@ -341,18 +354,26 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
           {/* Import Full History */}
           <div style={{ marginBottom: 24, padding: 14, background: dk.accent, border: "1px solid " + dk.border, borderRadius: 12 }}>
             <div style={{ fontWeight: 700, fontSize: 15, textTransform: "uppercase", color: dk.text, marginBottom: 6, display: "flex", alignItems: "center", gap: 8 }}>
-              <span>📦</span> Import Full History
+              Import Full History
             </div>
             <div style={{ fontSize: 14, color: "#ffffff", lineHeight: 1.6, marginBottom: 10 }}>
               This brings in everything you've ever logged — ratings, dates, the works.
             </div>
             <div style={{ fontSize: 13, color: "#ffffff", lineHeight: 1.9, marginBottom: 12, padding: "10px 12px", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.05)" }}>
-              <div><span style={{ color: dk.terracotta }}>1.</span> Go to <span style={{ color: dk.terracotta, textDecoration: "underline" }}
-                onClick={() => { navigator.clipboard.writeText("https://letterboxd.com/data/export/"); }}>
-                letterboxd.com/data/export</span></div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginLeft: 14 }}>⚠️ Use your browser, not the app</div>
+              <div><span style={{ color: dk.terracotta }}>1.</span> Open your browser and go to:<br />
+                <span
+                  onClick={() => {
+                    navigator.clipboard.writeText("https://letterboxd.com/data/export/");
+                    const el = document.getElementById("lb-copy-confirm-settings");
+                    if (el) { el.textContent = "Copied!"; setTimeout(() => { el.textContent = "tap to copy link"; }, 1500); }
+                  }}
+                  style={{ color: dk.terracotta, textDecoration: "underline", cursor: "pointer", wordBreak: "break-all" }}
+                >letterboxd.com/data/export</span>{" "}
+                <span id="lb-copy-confirm-settings" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>(tap to copy link)</span>
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginLeft: 14 }}>Use your browser, not the Letterboxd app</div>
               <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
-              <div><span style={{ color: dk.terracotta }}>3.</span> Upload the .zip below — we'll extract it automatically</div>
+              <div><span style={{ color: dk.terracotta }}>3.</span> Upload the .zip, or drop in diary.csv if already extracted</div>
             </div>
             <FileUploadZone file={uploadedFile} onFileSelect={setUploadedFile} fileInputRef={fileInputRef} />
           </div>
@@ -370,7 +391,7 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
               textTransform: "uppercase", letterSpacing: "0.05em", cursor: hasAnything ? "pointer" : "default",
             }}
           >
-            {hasAnything ? "Let's Go 🚀" : "Add username or file above"}
+            {hasAnything ? "Let's Go" : "Add username or file above"}
           </button>
           {!hasAnything && (
             <button onClick={onClose} style={{
@@ -383,29 +404,41 @@ export default function LetterboxdSetupPortal({ session, profile, onClose, onCom
 
       {phase === "processing" && (
         <>
-          <div style={{ fontSize: 48, textAlign: "center", marginBottom: 16 }}>{processingDone ? "🎉" : "⚡"}</div>
           <div className="lb-portal-title">{processingDone ? "You're all set!" : "Setting up your library"}</div>
           <div className="lb-portal-sub">
-            {processingDone ? "Your library is loaded and ready to go." : "Hang tight — importing your data."}
+            {processingDone
+              ? "Your library is loaded and ready to go."
+              : "Hang tight — we're importing your data and connecting your accounts."}
           </div>
 
           <div style={{ padding: 16, background: dk.card, border: "1px solid " + dk.border, borderRadius: 14, marginBottom: 24 }}>
             {processingTasks.map(task => <TaskRow key={task.id} task={task} />)}
           </div>
 
-          {!processingDone && (
-            <div style={{ fontSize: 13, color: dk.textDim, textAlign: "center" }}>Large libraries may take a few minutes</div>
+          {processingDone && (
+            <>
+              {processingTasks.some(t => t.status === "error") && (
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", textAlign: "center", marginBottom: 16 }}>
+                  Some items couldn't be imported — you can retry anytime.
+                </div>
+              )}
+              <button onClick={() => { onComplete?.(); onClose(); }} style={{
+                width: "100%", padding: "16px", borderRadius: 12, border: "none",
+                background: dk.terracotta, color: "#fff",
+                fontSize: 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif",
+                textTransform: "uppercase", letterSpacing: "0.05em", cursor: "pointer",
+              }}>
+                Done
+              </button>
+            </>
           )}
 
-          {processingDone && (
-            <button onClick={() => { onComplete?.(); onClose(); }} style={{
-              width: "100%", padding: "16px", borderRadius: 12, border: "none",
-              background: dk.terracotta, color: "#fff",
-              fontSize: 16, fontWeight: 700, fontFamily: "'Barlow Condensed', sans-serif",
-              textTransform: "uppercase", letterSpacing: "0.05em", cursor: "pointer",
-            }}>
-              Done 🚀
-            </button>
+          {!processingDone && (
+            <div style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", textAlign: "center", lineHeight: 1.8, padding: "0 8px" }}>
+              Your library is loading.<br />
+              Feel free to navigate away from the app while you wait.<br />
+              <span style={{ color: dk.terracotta, fontSize: 13 }}>Don't close the app during import.</span>
+            </div>
           )}
         </>
       )}

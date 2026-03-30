@@ -195,7 +195,6 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
       >
         {extracting ? (
           <>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>⏳</div>
             <div style={{ fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>
               Extracting diary.csv…
             </div>
@@ -210,7 +209,6 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
           </>
         ) : (
           <>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>📦</div>
             <div style={{ fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>
               {label}
             </div>
@@ -380,8 +378,7 @@ function RssPreview({ username }) {
             {film.poster ? (
               <img src={film.poster} alt={film.title} style={{ width: "100%", aspectRatio: "2/3", objectFit: "cover", borderRadius: 6, display: "block", marginBottom: 4 }} />
             ) : (
-              <div style={{ width: "100%", aspectRatio: "2/3", background: "rgba(255,255,255,0.06)", borderRadius: 6, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontSize: 18 }}>🎬</span>
+              <div style={{ width: "100%", aspectRatio: "2/3", background: "rgba(255,255,255,0.06)", borderRadius: 6, marginBottom: 4 }}>
               </div>
             )}
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontFamily: t.fontBody, lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -831,7 +828,6 @@ function UsernameSetup({ name, session, onComplete }) {
       <div className="setup-screen">
         <style>{DARK_STYLES}</style>
         <StepDots total={allSteps.length} current={2} />
-        <div style={{ fontSize: 40, textAlign: "center", marginBottom: 12 }}>🎬</div>
         <div className="setup-title">Connect Letterboxd</div>
         <div className="setup-sub">
           Two ways to bring your watch history into Mantl. Do both for the best experience.
@@ -849,7 +845,7 @@ function UsernameSetup({ name, session, onComplete }) {
             textTransform: "uppercase", color: dk.text, marginBottom: 6,
             display: "flex", alignItems: "center", gap: 8,
           }}>
-            <span style={{ fontSize: 17 }}>📡</span> Live Sync
+            Live Sync
           </div>
           <div style={{
             fontFamily: t.fontDisplay, fontSize: 14, color: "#ffffff",
@@ -881,7 +877,7 @@ function UsernameSetup({ name, session, onComplete }) {
             textTransform: "uppercase", color: dk.text, marginBottom: 6,
             display: "flex", alignItems: "center", gap: 8,
           }}>
-            <span style={{ fontSize: 17 }}>📦</span> Import Full History
+            Import Full History
           </div>
           <div style={{
             fontFamily: t.fontDisplay, fontSize: 14, color: "#ffffff",
@@ -910,7 +906,7 @@ function UsernameSetup({ name, session, onComplete }) {
               <span id="lb-copy-confirm" style={{ fontSize: 11, color: "rgba(255,255,255,0.5)" }}>(tap to copy link)</span>
             </div>
             <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginLeft: 14, marginTop: -4 }}>
-              ⚠️ Use your browser, not the Letterboxd app
+              Use your browser, not the Letterboxd app
             </div>
             <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
             <div><span style={{ color: dk.terracotta }}>3.</span> Upload the .zip, or drop in diary.csv if already extracted</div>
@@ -933,7 +929,7 @@ function UsernameSetup({ name, session, onComplete }) {
             onClick={() => beginProcessing(savedCommunityIds)}
             style={{ flex: 1 }}
           >
-            {hasAnything ? "Let's Go 🚀" : "Finish"}
+            {hasAnything ? "Let's Go" : "Finish"}
           </button>
         </div>
         {!letterboxdUsername && !uploadedFile && (
@@ -969,9 +965,6 @@ function UsernameSetup({ name, session, onComplete }) {
     return (
       <div className="setup-screen">
         <style>{DARK_STYLES}</style>
-        <div style={{ fontSize: 48, textAlign: "center", marginBottom: 16 }}>
-          {allDone ? "🎉" : "⚡"}
-        </div>
         <div className="setup-title">
           {allDone ? "You're all set!" : "Setting up your library"}
         </div>
@@ -1011,7 +1004,7 @@ function UsernameSetup({ name, session, onComplete }) {
               onClick={handleFinalComplete}
               style={{ width: "100%" }}
             >
-              Let's Go 🚀
+              Let's Go
             </button>
           </>
         )}
