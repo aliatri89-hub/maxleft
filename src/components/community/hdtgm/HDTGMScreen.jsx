@@ -1,7 +1,7 @@
 import { t } from "../../../theme";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
 import HDTGMHero from "./HDTGMHero";
@@ -15,7 +15,7 @@ import RSSSyncTool from "../dashboard/RSSSyncTool";
 /**
  * HDTGMScreen — self-contained community screen for How Did This Get Made?
  *
- * The simplest community: single tab, films only, A-Z shelves.
+ * The simplest community: single tab, films only, genre shelves with decades toggle.
  * No commentary, no Patreon tab, no awards, no books/games.
  * Changing this file never touches any other community.
  *
@@ -34,6 +34,8 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
   useScrollToItem(scrollToTmdbId, miniseries, accent);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchInputRef = useRef(null);
   const [filter, setFilter] = useState("all");
   const [viewMode, setViewMode] = useState("az"); // "az" | "decades"
   const [coverCache, setCoverCache] = useState({});
@@ -45,6 +47,14 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
+  useBackGesture("hdtgmSearch", searchOpen, () => { setSearchOpen(false); setSearchQuery(""); }, pushNav, removeNav);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
   // ── Data ──────────────────────────────────────────────────
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
@@ -141,8 +151,8 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
       <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
 
       {/* View mode toggle */}
-      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0" }}>
-        {[{ key: "az", label: "A–Z" }, { key: "decades", label: "Decades" }].map(v => (
+      <div style={{ display: "flex", gap: 6, padding: "8px 16px 0", alignItems: "center" }}>
+        {[{ key: "az", label: "Genre" }, { key: "decades", label: "Decades" }].map(v => (
           <button
             key={v.key}
             onClick={() => setViewMode(v.key)}
@@ -153,11 +163,89 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
               color: viewMode === v.key ? accent : t.textMuted,
               fontSize: 12, fontWeight: 600, cursor: "pointer",
               transition: "all 0.2s",
+              flexShrink: 0,
             }}
           >
             {v.label}
           </button>
         ))}
+        <div style={{ flex: 1 }} />
+        <button
+          onClick={() => {
+            if (searchOpen) {
+              setSearchOpen(false);
+              setSearchQuery("");
+            } else {
+              setSearchOpen(true);
+            }
+          }}
+          style={{
+            width: 30, height: 30, borderRadius: "50%",
+            border: searchOpen || searchQuery
+              ? `1.5px solid ${accent}`
+              : `1px solid ${t.borderMedium}`,
+            background: searchOpen || searchQuery
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.04)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", flexShrink: 0,
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke={searchOpen || searchQuery ? accent : t.textFaint}
+            strokeWidth="2" strokeLinecap="round"
+          >
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+      </div>
+
+      {/* ─── Expandable search input ── */}
+      <div style={{
+        overflow: "hidden",
+        maxHeight: searchOpen ? 50 : 0,
+        opacity: searchOpen ? 1 : 0,
+        transition: "max-height 0.25s ease, opacity 0.2s ease",
+        padding: searchOpen ? "6px 16px 0" : "0 16px",
+      }}>
+        <div style={{ position: "relative" }}>
+          <input
+            ref={searchInputRef}
+            type="text"
+            placeholder="Search films, years..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px 36px 8px 32px",
+              background: "rgba(255,255,255,0.05)",
+              border: `1px solid ${t.bgHover}`,
+              borderRadius: 10,
+              color: t.textSecondary,
+              fontSize: 13,
+              fontFamily: "inherit",
+              outline: "none",
+              boxSizing: "border-box",
+              WebkitAppearance: "none",
+            }}
+          />
+          <div style={{
+            position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)",
+            fontSize: 13, color: t.textSecondary, pointerEvents: "none",
+          }}>🔍</div>
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{
+                position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)", border: "none", borderRadius: "50%",
+                width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center",
+                color: t.textSecondary, fontSize: 11, cursor: "pointer",
+              }}
+            >✕</button>
+          )}
+        </div>
       </div>
 
       <div style={{ paddingTop: 8 }}>
