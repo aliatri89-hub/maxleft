@@ -48,7 +48,6 @@ export default function NowPlayingHero({
   return (
     <div style={{
       position: "relative",
-      borderBottom: "1px solid rgba(255,255,255,0.06)",
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -59,7 +58,7 @@ export default function NowPlayingHero({
         gradientStrength={tabHero?.gradient_strength}
       />
 
-      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 36px" }}>
         <div style={{
           fontSize: 28, fontWeight: 800, color: t.textPrimary,
           fontFamily: t.fontDisplay,
