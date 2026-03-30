@@ -203,37 +203,47 @@ export async function importMovies(items, userId, onProgress, { communityIds: pr
     throw new Error(`Import function error: ${err}`);
   }
 
-  // Read NDJSON stream for live progress updates
+  // Read NDJSON stream for live progress updates.
+  // If the connection drops (user navigated away, backgrounded app), we treat
+  // it as a soft success — the edge function keeps running server-side and
+  // all DB writes complete regardless of whether the client is still connected.
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   let count = 0;
   let errs = 0;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n");
-    buffer = lines.pop(); // keep incomplete last line
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop(); // keep incomplete last line
 
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      try {
-        const msg = JSON.parse(line);
-        if (msg.type === "progress") {
-          count = msg.count;
-          errs = msg.errs;
-          if (onProgress) onProgress(msg.progress, msg.total);
-        } else if (msg.type === "done") {
-          count = msg.count;
-          errs = msg.errs;
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        try {
+          const msg = JSON.parse(line);
+          if (msg.type === "progress") {
+            count = msg.count;
+            errs = msg.errs;
+            if (onProgress) onProgress(msg.progress, msg.total);
+          } else if (msg.type === "done") {
+            count = msg.count;
+            errs = msg.errs;
+          }
+        } catch {
+          // malformed line — ignore
         }
-      } catch {
-        // malformed line — ignore
       }
     }
+  } catch (e) {
+    // Network error / connection dropped — edge function is still running
+    // server-side. Return whatever progress we tracked so the caller can
+    // complete onboarding normally. Data is already being written to the DB.
+    console.warn("[importMovies] Stream interrupted (user likely navigated away):", e.message);
   }
 
   return { count, errs };
