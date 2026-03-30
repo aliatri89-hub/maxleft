@@ -177,8 +177,9 @@ export async function parseFile(file, userId) {
 export async function importMovies(items, userId, onProgress) {
   let count = 0, errs = 0;
   const CONCURRENCY = 10;
+  const importedTmdbIds = []; // track successfully imported tmdb_ids
 
-  const processItem = async (m) => {
+  const processItem = async (m, tmdbId) => {
     try {
       const results = await searchTMDBRaw(m.title, m.year || null);
       const match = (results || [])[0];
@@ -219,8 +220,9 @@ export async function importMovies(items, userId, onProgress) {
         watchDates,
       });
 
-      if (!mediaId) errs++;
-      else count++;
+      if (!mediaId) { errs++; return; }
+      count++;
+      importedTmdbIds.push({ tmdbId: match.id, rating: m.ratingHalf || m.rating || null, watchedAt });
     } catch (e) { errs++; }
   };
 
@@ -229,6 +231,56 @@ export async function importMovies(items, userId, onProgress) {
     const batch = items.slice(i, i + CONCURRENCY);
     await Promise.all(batch.map(m => processItem(m)));
     if (onProgress) onProgress(Math.min(i + CONCURRENCY, items.length), items.length);
+  }
+
+  // ── Backfill community_user_progress ──────────────────────
+  // Match imported tmdb_ids to community_items and write progress rows
+  try {
+    const allTmdbIds = importedTmdbIds.map(f => f.tmdbId);
+    if (allTmdbIds.length > 0) {
+      const ratingMap = new Map(importedTmdbIds.map(f => [f.tmdbId, f]));
+
+      const { data: matchedItems } = await supabase
+        .from("community_items")
+        .select("id, tmdb_id")
+        .in("tmdb_id", allTmdbIds);
+
+      if (matchedItems?.length) {
+        const matchedItemIds = matchedItems.map(i => i.id);
+
+        const { data: existingProgress } = await supabase
+          .from("community_user_progress")
+          .select("item_id")
+          .eq("user_id", userId)
+          .in("item_id", matchedItemIds);
+
+        const existingSet = new Set((existingProgress || []).map(p => p.item_id));
+
+        const newRows = matchedItems
+          .filter(item => !existingSet.has(item.id))
+          .map(item => {
+            const filmData = ratingMap.get(item.tmdb_id);
+            return {
+              user_id: userId,
+              item_id: item.id,
+              status: "completed",
+              rating: filmData?.rating ? Math.round(filmData.rating) : null,
+              completed_at: filmData?.watchedAt || new Date().toISOString(),
+              listened_with_commentary: false,
+              brown_arrow: false,
+              updated_at: new Date().toISOString(),
+            };
+          });
+
+        if (newRows.length > 0) {
+          await supabase
+            .from("community_user_progress")
+            .upsert(newRows, { onConflict: "user_id,item_id" });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[importMovies] Community progress backfill failed:", e.message);
   }
 
   return { count, errs };
