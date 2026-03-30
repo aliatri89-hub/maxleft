@@ -5,7 +5,6 @@ import './styles/base.css'
 import './styles/modals-dark.css'
 import './styles/shell-dark.css'
 import './styles/profile-dark.css'
-import './styles/shelves-upgrade.css'
 import App from './App.jsx'
 
 createRoot(document.getElementById('root')).render(

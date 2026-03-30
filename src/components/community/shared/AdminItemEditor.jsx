@@ -124,7 +124,6 @@ export default function AdminItemEditor({
   const [quickSaving, setQuickSaving] = useState(false);
 
   // ─── Book cover search ───
-  const [coverSearching, setCoverSearching] = useState(false);
 
   if (userId !== ADMIN_USER_ID) return null;
 
@@ -374,34 +373,6 @@ export default function AdminItemEditor({
     }
   };
 
-  // ─── Google Books cover search ───
-  const handleCoverSearch = async () => {
-    setCoverSearching(true);
-    try {
-      const query = item.isbn
-        ? `isbn:${item.isbn}`
-        : `intitle:${title}+inauthor:${creator || item.creator || ""}`;
-      const data = await apiProxy("google_books", { query, max_results: "3" });
-      if (data?.items) {
-        for (const vol of data.items) {
-          const links = vol.volumeInfo?.imageLinks;
-          if (links) {
-            const url = (links.thumbnail || links.smallThumbnail || "")
-              .replace("&edge=curl", "")
-              .replace("http://", "https://")
-              .replace("zoom=1", "zoom=2");
-            if (url) {
-              setCoverImage(url);
-              break;
-            }
-          }
-        }
-      }
-    } catch (e) {
-      console.error("[AdminEdit] Cover search error:", e);
-    }
-    setCoverSearching(false);
-  };
 
   // ─── Fetch poster + backdrop from TMDB by ID ───
   const handleTmdbFetch = async (overrideId, overrideType) => {
@@ -974,15 +945,6 @@ export default function AdminItemEditor({
                     style={S.input}
                   />
                   <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
-                    {mediaType === "book" && (
-                      <button
-                        onClick={handleCoverSearch}
-                        disabled={coverSearching}
-                        style={S.smallBtn}
-                      >
-                        {coverSearching ? "…" : "Search Google Books"}
-                      </button>
-                    )}
                     {coverImage && (
                       <button
                         onClick={() => setCoverImage("")}

@@ -1,9 +1,9 @@
-// Community cover fetching — TMDB for films + shows, Google Books for books, RAWG for games
+// Community cover fetching — TMDB for films + shows
 // All API calls now go through the api-proxy edge function (no keys in client code).
 //
 // OPTIMIZATION: After fetching a cover from an external API, the raw poster_path
 // is written back to community_items in the DB. This means the SECOND user to visit
-// a community never hits TMDB/Google Books/RAWG — covers load instantly from the DB.
+// a community never hits TMDB — covers load instantly from the DB.
 
 import { apiProxy } from "./api";
 import { supabase } from "../supabase";
@@ -43,10 +43,6 @@ const saveCache = () => {
 
 // ─── Public getter ───────────────────────────────────────────
 export const getCoverUrl = (item) => {
-  // Books with cover_image in extra_data don't need the cache — read directly
-  if (item.media_type === "book" && item.extra_data?.cover_image) {
-    return item.extra_data.cover_image;
-  }
   const key = cacheKey(item);
   return coverCache[key] || null;
 };
@@ -81,8 +77,6 @@ export const fetchSinglePoster = async (tmdbId, mediaType = "film") => {
 const cacheKey = (item) => {
   if (item.media_type === "film") return `tmdb:${item.tmdb_id}`;
   if (item.media_type === "show") return `tmdb_tv:${item.tmdb_id}`;
-  if (item.media_type === "book") return `book:${item.isbn || item.title}`;
-  if (item.media_type === "game") return `game:${item.title}`;
   return `other:${item.id}`;
 };
 
@@ -139,62 +133,6 @@ const fetchShowPosterPath = async (tmdbId) => {
   }
 };
 
-// ─── Image validation helper (for fallback sources only) ─────
-const testImageUrl = (url) => new Promise((resolve) => {
-  if (!url) return resolve(false);
-  const img = new Image();
-  img.onload = () => resolve(img.naturalWidth > 50 && img.naturalHeight > 50);
-  img.onerror = () => resolve(false);
-  img.src = url;
-});
-
-// ─── Google Books (books via ISBN) ───────────────────────────
-const fetchBookCover = async (item) => {
-  // For books: extra_data.cover_image is the source of truth (seeded by us)
-  // Check it BEFORE poster_path to avoid stale write-backs overriding good URLs
-  if (item.extra_data?.cover_image) return item.extra_data.cover_image;
-  if (item.poster_path) return item.poster_path;
-
-  // 3. Try Open Library by ISBN — validate to skip placeholders
-  if (item.isbn) {
-    const olUrl = `https://covers.openlibrary.org/b/isbn/${item.isbn}-L.jpg`;
-    const olReal = await testImageUrl(olUrl);
-    if (olReal) return olUrl;
-  }
-
-  // 4. Last resort: Google Books API live lookup
-  const query = item.isbn
-    ? `isbn:${item.isbn}`
-    : `intitle:${item.title}+inauthor:${item.creator || ""}`;
-  try {
-    const data = await apiProxy("google_books", { query, max_results: "1" });
-    if (!data || data.error) return null;
-    const vol = data.items?.[0]?.volumeInfo;
-    if (!vol?.imageLinks) return null;
-    const url = (vol.imageLinks.thumbnail || vol.imageLinks.smallThumbnail || "")
-      .replace("&edge=curl", "")
-      .replace("http://", "https://")
-      .replace("zoom=1", "zoom=2");
-    return url || null;
-  } catch {
-    return null;
-  }
-};
-
-// ─── RAWG (games) ────────────────────────────────────────────
-const fetchGameCover = async (item) => {
-  if (item.poster_path) return item.poster_path;
-  const title = item.title || item;
-  if (!title) return null;
-  try {
-    const data = await apiProxy("rawg_search", { query: title, page_size: "1" });
-    if (!data || data.error) return null;
-    return data.results?.[0]?.background_image || null;
-  } catch {
-    return null;
-  }
-};
-
 // ─── Fetch single item cover ─────────────────────────────────
 const fetchCover = async (item) => {
   const key = cacheKey(item);
@@ -222,18 +160,6 @@ const fetchCover = async (item) => {
         if (item.id) pendingWriteBacks.push({ id: item.id, poster_path: rawPath });
       }
     }
-  } else if (item.media_type === "book") {
-    url = await fetchBookCover(item);
-    // Only write back if it came from a live API lookup (not from extra_data)
-    if (url && item.id && !item.poster_path && !item.extra_data?.cover_image) {
-      pendingWriteBacks.push({ id: item.id, poster_path: url });
-    }
-  } else if (item.media_type === "game") {
-    url = await fetchGameCover(item);
-    // Write back full URL for games
-    if (url && item.id && !item.poster_path) {
-      pendingWriteBacks.push({ id: item.id, poster_path: url });
-    }
   }
 
   if (url) coverCache[key] = url;
@@ -243,8 +169,6 @@ const fetchCover = async (item) => {
 // ─── Batch-fetch all covers with parallel rate limiting ───────
 export const fetchCoversForItems = async (items, onUpdate) => {
   const uncached = items.filter((i) => {
-    // Books with cover_image in extra_data resolve instantly via getCoverUrl — skip
-    if (i.media_type === "book" && i.extra_data?.cover_image) return false;
     return !coverCache[cacheKey(i)];
   });
 

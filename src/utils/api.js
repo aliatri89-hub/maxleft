@@ -8,7 +8,7 @@ const TMDB_IMG = "https://image.tmdb.org/t/p";
 
 export { TMDB_IMG };
 
-// ─── Edge function caller (replaces direct fetch to TMDB/RAWG/Google Books) ───
+// ─── Edge function caller (routes all external API calls through api-proxy) ───
 // Uses supabase.functions.invoke() so the user's JWT is attached automatically.
 // Returns the parsed JSON body, or null on error.
 // Retries once on timeout — the first call warms a cold edge function,
