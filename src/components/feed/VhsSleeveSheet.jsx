@@ -1098,21 +1098,21 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                             <FadeImg src={ep.podcast_artwork_url} alt={ep.podcast_name}
                               placeholderColor="rgba(240,235,225,0.05)"
                               style={{
-                                width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                                border: isExpanded ? "1.5px solid #c4734f" : isActive ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                                width: 40, height: 40, borderRadius: 8, objectFit: "cover",
+                                border: "1.5px solid rgba(240,235,225,0.1)",
                                 flexShrink: 0,
                               }} />
                           )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
                               fontFamily: t.fontDisplay,
-                              fontWeight: 700, fontSize: 13,
-                              color: isExpanded || isActive ? t.cream : "rgba(240,235,225,0.7)",
+                              fontWeight: 700, fontSize: 15,
+                              color: t.cream,
                               whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                             }}>{decodeEntities(ep.episode_title || ep.podcast_name)}</div>
                             <div style={{
                               fontFamily: t.fontBody,
-                              fontSize: 12, color: "rgba(240,235,225,0.65)",
+                              fontSize: 13, color: "rgba(240,235,225,0.9)",
                               textTransform: "uppercase", letterSpacing: "0.04em",
                             }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
                           </div>
@@ -1306,16 +1306,16 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                           alt={link.podcast_name}
                           placeholderColor="rgba(240,235,225,0.05)"
                           style={{
-                            width: 32, height: 32, borderRadius: 8, objectFit: "cover",
-                            border: isExpanded ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                            width: 40, height: 40, borderRadius: 8, objectFit: "cover",
+                            border: "1.5px solid rgba(240,235,225,0.1)",
                             flexShrink: 0,
                           }}
                         />
                       ) : (
                         <div style={{
-                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          width: 40, height: 40, borderRadius: 8, flexShrink: 0,
                           background: "rgba(240,235,225,0.05)",
-                          border: isExpanded ? "1.5px solid #c4734f" : "1.5px solid rgba(240,235,225,0.1)",
+                          border: "1.5px solid rgba(240,235,225,0.1)",
                           display: "flex", alignItems: "center", justifyContent: "center",
                         }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(240,235,225,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1327,15 +1327,15 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                       )}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{
-                          fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-                          color: isExpanded ? t.cream : "rgba(240,235,225,0.7)",
+                          fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 15,
+                          color: t.cream,
                           whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                         }}>
                           {decodeEntities(link.episode_title || link.podcast_name)}
                         </div>
                         <div style={{
-                          fontFamily: t.fontBody, fontSize: 12,
-                          color: "rgba(240,235,225,0.65)",
+                          fontFamily: t.fontBody, fontSize: 13,
+                          color: "rgba(240,235,225,0.9)",
                           textTransform: "uppercase", letterSpacing: "0.04em",
                         }}>
                           {link.podcast_name} · outside network
