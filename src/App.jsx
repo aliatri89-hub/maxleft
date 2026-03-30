@@ -19,7 +19,7 @@ const AdminShell = lazy(() => import("./admin/AdminShell"));
 // may silently resolve to 0px on some Android WebView versions. We probe
 // the actual value with a real element and set --sat/--sab as pixel values
 // from JS so every var(--sat) reference is guaranteed correct.
-export const probeSafeArea = () => {
+export const probeSafeArea = (tag = "?") => {
   const probe = document.createElement("div");
   probe.style.cssText = "position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;";
 
@@ -35,8 +35,14 @@ export const probeSafeArea = () => {
   const bottom = probe.getBoundingClientRect().height;
   probe.remove();
 
+  const prevSat = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+  const inlineSat = document.documentElement.style.getPropertyValue("--sat");
+  console.log(`[SAT:${tag}] env()=${top}px, prev --sat=${prevSat}, inline=${inlineSat}, bottom=${bottom}px`);
+
   if (top > 0) document.documentElement.style.setProperty("--sat", `${top}px`);
   if (bottom > 0) document.documentElement.style.setProperty("--sab", `${bottom}px`);
+
+  console.log(`[SAT:${tag}] → set --sat=${top > 0 ? top + 'px' : '(kept)'}, --sab=${bottom > 0 ? bottom + 'px' : '(kept)'}`);
 };
 
 if (Capacitor.isNativePlatform()) {
@@ -50,33 +56,38 @@ if (Capacitor.isNativePlatform()) {
   // The real probe will overwrite this with the exact value once available.
   const ANDROID_FALLBACK_SAT = "48px";
   document.documentElement.style.setProperty("--sat", ANDROID_FALLBACK_SAT);
+  console.log("[SAT:init] Fallback set to", ANDROID_FALLBACK_SAT);
 
   // Await the native bridge calls — setOverlaysWebView is async and the
   // WebView won't report safe-area insets until overlay mode is actually
   // applied.  Without awaiting, probeSafeArea races the native side and
   // reads 0px on cold start (first install / first login).
   (async () => {
+    console.log("[SAT:boot] Calling setOverlaysWebView...");
     await StatusBar.setOverlaysWebView({ overlay: true });
+    console.log("[SAT:boot] Overlay applied. Calling setBackgroundColor...");
     await StatusBar.setBackgroundColor({ color: t.bgPrimary });
     await StatusBar.setStyle({ style: Style.Dark });
+    console.log("[SAT:boot] StatusBar configured. Scheduling probe...");
 
     // Double-rAF lets the WebView
     // complete one full layout pass with overlay mode active.
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      probeSafeArea();
+      probeSafeArea("boot-rAF");
       // If the inset is still 0 (WebView lagging), retry a few times.
       // This covers slow cold-start on older devices / Android 15 edge-to-edge.
       let retries = 0;
       const retry = () => {
         if (retries++ >= 8) {
-          // Exhausted retries — keep the fallback (already set above).
-          // The appStateChange and auth-transition probes will still
-          // try to resolve the real value later.
+          console.log("[SAT:boot] Exhausted 8 retries, keeping current value");
           return;
         }
         const cur = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+        console.log(`[SAT:boot] Retry ${retries}/8, cur=${cur}`);
         if (!cur || cur === "0px" || cur === ANDROID_FALLBACK_SAT || cur === "env(safe-area-inset-top, 0px)") {
-          setTimeout(() => { probeSafeArea(); retry(); }, 250);
+          setTimeout(() => { probeSafeArea(`boot-retry${retries}`); retry(); }, 250);
+        } else {
+          console.log(`[SAT:boot] Got real value: ${cur}, stopping retries`);
         }
       };
       retry();
@@ -90,13 +101,14 @@ if (Capacitor.isNativePlatform()) {
   // state before we probe env(safe-area-inset-top).
   CapApp.addListener("appStateChange", ({ isActive }) => {
     if (isActive) {
+      console.log("[SAT:resume] App foregrounded, re-applying overlay...");
       (async () => {
         try {
           await StatusBar.setOverlaysWebView({ overlay: true });
           await StatusBar.setStyle({ style: Style.Dark });
-        } catch (_) { /* plugin may not be ready yet */ }
-        // Short delay lets the WebView recalculate insets after overlay re-apply
-        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 300);
+          console.log("[SAT:resume] Overlay re-applied, scheduling probe...");
+        } catch (e) { console.log("[SAT:resume] Overlay failed:", e.message); }
+        setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => probeSafeArea("resume"))), 300);
       })();
     }
   });
@@ -357,6 +369,17 @@ function AppMain() {
     if (screen === "loading") return;
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
+    // Debug: log actual computed padding when screen changes
+    if (screen === "app" && Capacitor.isNativePlatform()) {
+      requestAnimationFrame(() => {
+        const app = document.querySelector(".mantl-app");
+        const header = document.querySelector(".header");
+        const sat = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+        const appPad = app ? getComputedStyle(app).paddingTop : "no .mantl-app";
+        const headerPad = header ? getComputedStyle(header).paddingTop : "no .header";
+        console.log(`[SAT:render] screen=app → --sat=${sat}, .mantl-app paddingTop=${appPad}, .header paddingTop=${headerPad}`);
+      });
+    }
   }, [screen]);
 
   // ── AUTH ──
@@ -399,12 +422,14 @@ function AppMain() {
           // mounted, and the WebView may not have had correct insets
           // during the OAuth browser round-trip.
           if (Capacitor.isNativePlatform()) {
+            console.log("[SAT:auth-cb] Auth callback complete, re-applying overlay...");
             (async () => {
               try {
                 await StatusBar.setOverlaysWebView({ overlay: true });
                 await StatusBar.setStyle({ style: Style.Dark });
+                console.log("[SAT:auth-cb] Overlay re-applied");
               } catch (_) {}
-              setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(probeSafeArea)), 200);
+              setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => probeSafeArea("auth-cb"))), 200);
             })();
           }
         });
@@ -537,13 +562,19 @@ function AppMain() {
         window.history.replaceState(null, "", "/");
       }
       setAuthLoading(false); setSigningIn(false); setScreen("app");
+      if (Capacitor.isNativePlatform()) {
+        const satAtRender = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+        const inlineAtRender = document.documentElement.style.getPropertyValue("--sat");
+        console.log(`[SAT:screen→app] computed=${satAtRender}, inline=${inlineAtRender}`);
+      }
       initPushNotifications(showToast); // register for native push (no-op on web)
       // Re-apply overlay + probe — on fresh install the initial probe may have
       // fired before the OAuth browser round-trip, yielding --sat: 0px
       if (Capacitor.isNativePlatform()) {
+        console.log("[SAT:loadUser] User data loaded, re-applying overlay...");
         (async () => {
           try { await StatusBar.setOverlaysWebView({ overlay: true }); } catch (_) {}
-          requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+          requestAnimationFrame(() => requestAnimationFrame(() => probeSafeArea("loadUser")));
         })();
       }
     } catch (err) {
@@ -564,9 +595,14 @@ function AppMain() {
     await loadShelves(session.user.id);
     setScreen("app"); showToast(`Welcome to Mantl, @${username}`);
     if (Capacitor.isNativePlatform()) {
+      const satAtRender = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+      console.log(`[SAT:setup→app] computed=${satAtRender}`);
+    }
+    if (Capacitor.isNativePlatform()) {
+      console.log("[SAT:setup] Username setup complete, re-applying overlay...");
       (async () => {
         try { await StatusBar.setOverlaysWebView({ overlay: true }); } catch (_) {}
-        requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+        requestAnimationFrame(() => requestAnimationFrame(() => probeSafeArea("setup")));
       })();
     }
   };
