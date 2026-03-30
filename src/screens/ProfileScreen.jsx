@@ -569,6 +569,30 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
         </div>
       )}
 
+      {/* ── SUPPORT GROUP ── */}
+      <div className="profile-group">
+        <div className="profile-group-label">Support</div>
+        <div className="profile-group-card">
+          <div
+            className="profile-group-row"
+            onClick={() => window.open("https://mymantl.app/faq", "_blank")}
+          >
+            <span className="profile-group-row-text">Help & FAQ</span>
+            <span className="profile-group-row-chevron">›</span>
+          </div>
+          <div className="profile-group-divider" />
+          <div
+            className="profile-group-row"
+            onClick={() => window.open("mailto:hello@mymantl.app", "_blank")}
+          >
+            <span className="profile-group-row-text">Contact</span>
+            <span className="profile-group-row-chevron" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-faint)" }}>
+              hello@mymantl.app
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* ── ACCOUNT GROUP ── */}
       <div className="profile-group">
         <div className="profile-group-label">Account</div>

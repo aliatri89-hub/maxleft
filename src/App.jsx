@@ -109,6 +109,7 @@ import FeedScreen from "./screens/FeedScreen";
 import CommunityRouter from "./screens/CommunityRouter";
 
 // Screens (lazy — loaded on demand)
+const FAQScreen = lazy(() => import("./screens/FAQScreen"));
 const MyMantlScreen = lazy(() => import("./screens/MyMantlScreen"));
 const ProfileScreen = lazy(() => import("./screens/ProfileScreen"));
 const CommunitiesScreen = lazy(() => import("./screens/CommunitiesScreen"));
@@ -202,6 +203,16 @@ export default function App() {
     return (
       <Suspense fallback={<div style={{ background: t.bgPrimary, height: "100vh" }} />}>
         <GamesHubPublic />
+      </Suspense>
+    );
+  }
+
+  if (window.location.pathname.replace(/\/+$/, "") === "/faq") {
+    const splash = document.getElementById("splash-screen");
+    if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
+    return (
+      <Suspense fallback={<div style={{ background: t.bgPrimary, height: "100vh" }} />}>
+        <FAQScreen />
       </Suspense>
     );
   }
