@@ -611,8 +611,10 @@ function AppMain() {
                   <ErrorBoundary name="Feed">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
+                    onNavigateToCommunities={() => { tapLight(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); }}
                     onNavigateSearch={() => { tapLight(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); }}
                     onNavigateMantl={() => { tapLight(); if (activeTab !== "mantl") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("mantl"); }}
+                    onNavigateProfile={(initView) => { tapLight(); setProfileInitView(initView || null); setShowProfile(true); pushNav("profile", () => { setShowProfile(false); setProfileInitView(null); }); }}
                     letterboxdSyncSignal={sync.letterboxdSyncSignal} autoLogCompleteSignal={sync.autoLogCompleteSignal}
                     communitySubscriptions={communitySubscriptions}
                     favoritePodcasts={favoritePodcasts}

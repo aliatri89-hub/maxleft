@@ -22,7 +22,7 @@ const FEED_TABS = [
 
 export default function FeedScreen({
   session, profile, onToast, isActive,
-  onNavigateCommunity, onNavigateSearch, onNavigateMantl,
+  onNavigateCommunity, onNavigateToCommunities, onNavigateSearch, onNavigateMantl, onNavigateProfile,
   letterboxdSyncSignal, autoLogCompleteSignal,
   communitySubscriptions, favoritePodcasts,
   feedMode, setFeedMode,
@@ -204,7 +204,9 @@ export default function FeedScreen({
             letterboxdSyncSignal={letterboxdSyncSignal}
             autoLogCompleteSignal={autoLogCompleteSignal}
             onNavigateCommunity={onNavigateCommunity}
+            onNavigateToCommunities={onNavigateToCommunities}
             onNavigateMantl={onNavigateMantl}
+            onNavigateProfile={onNavigateProfile}
             pushNav={pushNav}
             removeNav={removeNav}
             pendingSleeveOpen={pendingSleeveOpen}

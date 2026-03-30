@@ -1,26 +1,29 @@
 // ════════════════════════════════════════════════
 // EMPTY STATE
 // ════════════════════════════════════════════════
-function EmptyFeed({ onNavigateCommunity }) {
+function EmptyFeed({ onNavigateToCommunities, onNavigateMantl, onNavigateProfile, profile }) {
+  const isRssSyncing = !!profile?.letterboxd_username && !profile?.letterboxd_last_synced_at;
+
   const starters = [
     {
       emoji: "🎙️",
       label: "Explore a community",
       desc: "Dive into Now Playing, Blank Check, Film Junk, and more — track what each podcast covers.",
-      action: () => onNavigateCommunity?.("nowplaying"),
-      actionLabel: "Browse communities",
+      action: () => onNavigateToCommunities?.(),
       accent: "#60a5fa",
     },
     {
       emoji: "📽️",
       label: "Log your first film",
       desc: "Watched something recently? Log it, rate it, start building your collection.",
+      action: () => onNavigateMantl?.(),
       accent: "var(--accent-terra, #c97c5d)",
     },
     {
       emoji: "📦",
       label: "Import from Letterboxd",
       desc: "Already tracking on Letterboxd? Import your history and hit the ground running.",
+      action: () => onNavigateProfile?.("letterboxd"),
       accent: "#34d399",
     },
   ];
@@ -45,24 +48,50 @@ function EmptyFeed({ onNavigateCommunity }) {
         </div>
       </div>
 
+      {/* RSS syncing banner */}
+      {isRssSyncing && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "12px 16px", marginBottom: 16,
+          background: "rgba(196,115,79,0.1)",
+          border: "1px solid rgba(196,115,79,0.3)",
+          borderRadius: 12,
+        }}>
+          <div style={{ fontSize: 18, flexShrink: 0 }}>⏳</div>
+          <div>
+            <div style={{
+              fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13,
+              color: "var(--terracotta, #c97849)", marginBottom: 2,
+            }}>
+              Syncing your Letterboxd…
+            </div>
+            <div style={{
+              fontFamily: "var(--font-body)", fontSize: 12,
+              color: "var(--text-muted, #8892a8)", lineHeight: 1.4,
+            }}>
+              First sync takes about 30 seconds. Your films will appear here shortly.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Starter action cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {starters.map((s, i) => (
           <div
             key={i}
-            onClick={s.action || undefined}
+            onClick={s.action}
             style={{
               display: "flex", alignItems: "center", gap: 14,
               padding: "16px 18px",
               background: "var(--bg-card, #1a1714)",
               borderRadius: 14,
               border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
-              cursor: s.action ? "pointer" : "default",
+              cursor: "pointer",
               position: "relative",
               overflow: "hidden",
             }}
           >
-            {/* Subtle accent glow */}
             <div style={{
               position: "absolute", top: -20, left: -20,
               width: 80, height: 80, borderRadius: "50%",
@@ -95,13 +124,11 @@ function EmptyFeed({ onNavigateCommunity }) {
               </div>
             </div>
 
-            {s.action && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="var(--text-faint, #5a6480)" strokeWidth="2" strokeLinecap="round"
-                style={{ flexShrink: 0 }}>
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            )}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="var(--text-faint, #5a6480)" strokeWidth="2" strokeLinecap="round"
+              style={{ flexShrink: 0 }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </div>
         ))}
       </div>

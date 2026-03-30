@@ -23,7 +23,9 @@ export default function ActivityPane({
   letterboxdSyncSignal,
   autoLogCompleteSignal,
   onNavigateCommunity,
+  onNavigateToCommunities,
   onNavigateMantl,
+  onNavigateProfile,
   pushNav,
   removeNav,
   pendingSleeveOpen,
@@ -145,7 +147,12 @@ export default function ActivityPane({
     <div>
       {/* Empty state */}
       {activityItems.length === 0 && !loading && (
-        <EmptyFeed onNavigateCommunity={onNavigateCommunity} />
+        <EmptyFeed
+          onNavigateToCommunities={onNavigateToCommunities}
+          onNavigateMantl={onNavigateMantl}
+          onNavigateProfile={onNavigateProfile}
+          profile={profile}
+        />
       )}
       {activityItems.length > 0 && filteredActivity.length === 0 && selectedPodcast && (
         <div style={{

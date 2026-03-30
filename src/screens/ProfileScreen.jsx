@@ -47,6 +47,11 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [notifLoaded, setNotifLoaded] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
 
+  // Open letterboxd section if navigated here with initialView="letterboxd"
+  useEffect(() => {
+    if (initialView === "letterboxd") setLetterboxdOpen(true);
+  }, [initialView]);
+
   useEffect(() => {
     if (!notifOpen || notifLoaded) return;
     let cancelled = false;
