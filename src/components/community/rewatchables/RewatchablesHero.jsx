@@ -91,7 +91,6 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
   return (
     <div style={{
       position: "relative",
-      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -102,7 +101,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
         gradientStrength={tabHero?.gradient_strength}
       />
 
-      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 32px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         {/* Title + tagline */}
         <div style={{
           fontSize: 28, fontWeight: 800, color: t.textPrimary,

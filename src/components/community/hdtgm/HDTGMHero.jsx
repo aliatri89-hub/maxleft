@@ -32,7 +32,6 @@ export default function HDTGMHero({ community, miniseries, progress }) {
   return (
     <div style={{
       position: "relative",
-      borderBottom: `1px solid ${t.borderSubtle}`,
       overflow: "hidden",
     }}>
       <HeroBanner
@@ -43,7 +42,7 @@ export default function HDTGMHero({ community, miniseries, progress }) {
         gradientStrength={tabHero?.gradient_strength}
       />
 
-      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 32px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 20px" }}>
         {/* Title + tagline */}
         <div style={{
           fontSize: 28,
