@@ -1020,10 +1020,10 @@ function UsernameSetup({ name, session, onComplete }) {
           <div style={{
             fontFamily: t.fontBody, fontSize: 15,
             color: "rgba(255,255,255,0.75)", textAlign: "center",
-            lineHeight: 1.5, padding: "0 8px",
+            lineHeight: 1.6, padding: "0 8px",
           }}>
-            Feel free to browse the app while we load your data —{" "}
-            <span style={{ color: dk.terracotta, fontWeight: 600 }}>just don't close it.</span>
+            Your library is loading in the background.<br />
+            <span style={{ color: dk.sage }}>Feel free to explore MANTL while you wait.</span>
           </div>
         )}
       </div>
