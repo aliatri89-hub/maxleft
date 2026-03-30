@@ -65,6 +65,10 @@ const DARK_STYLES = `
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
+  @keyframes shimmer {
+    0% { left: -40%; }
+    100% { left: 100%; }
+  }
 `;
 
 // ═══════════════════════════════════════════════════════════
@@ -286,6 +290,21 @@ function TaskRow({ task }) {
               color: dk.textMuted, marginTop: 3,
             }}>
               {task.progress} / {task.total}
+            </div>
+          </div>
+        )}
+
+        {task.status === "running" && task.total === 0 && (
+          <div style={{ marginTop: 6 }}>
+            <div style={{
+              width: "100%", background: dk.border, borderRadius: 3, height: 4,
+              overflow: "hidden", position: "relative",
+            }}>
+              <div style={{
+                position: "absolute", top: 0, left: 0, height: "100%", width: "40%",
+                background: dk.terracotta, borderRadius: 3,
+                animation: "shimmer 1.4s ease-in-out infinite",
+              }} />
             </div>
           </div>
         )}
@@ -999,11 +1018,12 @@ function UsernameSetup({ name, session, onComplete }) {
 
         {!allDone && (
           <div style={{
-            fontFamily: t.fontBody, fontSize: 10,
-            color: dk.textDim, textAlign: "center",
-            letterSpacing: "0.02em",
+            fontFamily: t.fontBody, fontSize: 15,
+            color: "rgba(255,255,255,0.75)", textAlign: "center",
+            lineHeight: 1.5, padding: "0 8px",
           }}>
-            Large libraries may take a few minutes
+            Feel free to browse the app while we load your data —{" "}
+            <span style={{ color: dk.terracotta, fontWeight: 600 }}>just don't close it.</span>
           </div>
         )}
       </div>
