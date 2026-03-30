@@ -1,20 +1,14 @@
 // supabase/functions/api-proxy/index.ts
-// Proxies TMDB, RAWG, and Google Books API calls so keys stay server-side.
+// Proxies TMDB API calls so keys stay server-side.
 //
 // Deploy:  supabase functions deploy api-proxy
-// Secrets: supabase secrets set TMDB_KEY=<your_tmdb_key> \
-//            RAWG_KEY=744f042dd2e547eba93ea70774d66a00 \
-//            GOOGLE_BOOKS_KEY=AIzaSyDiuyC-AbpmuysA1Zy95NpbfbAbHvvJnuM
+// Secrets: supabase secrets set TMDB_KEY=<your_tmdb_key>
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const TMDB_KEY = Deno.env.get("TMDB_KEY")!;
-const RAWG_KEY = Deno.env.get("RAWG_KEY")!;
-const GOOGLE_BOOKS_KEY = Deno.env.get("GOOGLE_BOOKS_KEY")!;
 
 const TMDB_BASE = "https://api.themoviedb.org/3";
-const RAWG_BASE = "https://api.rawg.io/api";
-const GBOOKS_BASE = "https://www.googleapis.com/books/v1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,46 +106,6 @@ async function handleTmdbImages(params: Record<string, string>) {
   return data;
 }
 
-async function handleRawgSearch(params: Record<string, string>) {
-  const { query, page_size = "8" } = params;
-  if (!query) return { error: "query required" };
-
-  const cacheKey = `rawg:search:${query}:${page_size}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const res = await fetch(
-    `${RAWG_BASE}/games?key=${RAWG_KEY}&search=${encodeURIComponent(query)}&page_size=${page_size}`
-  );
-  const data = await res.json();
-  setCache(cacheKey, data);
-  return data;
-}
-
-async function handleGoogleBooks(params: Record<string, string>) {
-  const { query, max_results = "8" } = params;
-  if (!query) return { error: "query required" };
-
-  const cacheKey = `gbooks:${query}:${max_results}`;
-  const cached = getCached(cacheKey);
-  if (cached) return cached;
-
-  const res = await fetch(
-    `${GBOOKS_BASE}/volumes?q=${encodeURIComponent(query)}&maxResults=${max_results}&langRestrict=en&key=${GOOGLE_BOOKS_KEY}`
-  );
-
-  if (res.status === 429) {
-    return { error: "rate_limited", status: 429 };
-  }
-  if (!res.ok) {
-    return { error: `Google Books API ${res.status}`, status: res.status };
-  }
-
-  const data = await res.json();
-  setCache(cacheKey, data);
-  return data;
-}
-
 async function handleTmdbNowPlaying(params: Record<string, string>) {
   const { page = "1", region = "US" } = params;
   const cacheKey = `tmdb:now_playing:${region}:${page}`;
@@ -229,12 +183,6 @@ serve(async (req) => {
         break;
       case "tmdb_discover":
         result = await handleTmdbDiscover(params);
-        break;
-      case "rawg_search":
-        result = await handleRawgSearch(params);
-        break;
-      case "google_books":
-        result = await handleGoogleBooks(params);
         break;
       default:
         result = { error: `Unknown action: ${action}` };
