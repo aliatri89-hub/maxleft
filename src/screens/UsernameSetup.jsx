@@ -660,7 +660,7 @@ function UsernameSetup({ name, session, onComplete }) {
         <StepDots total={allSteps.length} current={1} />
         <div className="setup-title">Your Podcasts</div>
         <div className="setup-sub">
-          We've selected all our podcasts. Deselect any you don't listen to.
+          We've selected all our podcasts.<br />Deselect any you don't listen to.
         </div>
 
         {loadingPodcasts ? (
