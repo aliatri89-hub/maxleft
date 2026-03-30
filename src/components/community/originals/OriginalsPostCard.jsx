@@ -8,7 +8,7 @@ import { supabase } from "../../../supabase";
  * Fetches the blog post linked to a miniseries, shows title + preview.
  * Tap → full-screen reader overlay with readable text sizing.
  */
-export default function OriginalsPostCard({ miniseriesId, accent }) {
+export default function OriginalsPostCard({ miniseriesId, accent, shelfTitle }) {
   const [post, setPost] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,68 +36,63 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
     return () => { cancelled = true; };
   }, [miniseriesId]);
 
-  if (loading || !post) return null;
+  // No post — render plain shelf title so MiniseriesShelf can stay hidden
+  if (loading) return null;
+  if (!post) {
+    return (
+      <div style={{ padding: "4px 16px 10px" }}>
+        <div style={{
+          fontSize: 17, fontWeight: 700, color: t.textPrimary,
+          fontFamily: t.fontDisplay, letterSpacing: "0.02em",
+        }}>
+          {shelfTitle}
+        </div>
+      </div>
+    );
+  }
 
   const preview = post.body.split(/\n\n/)[0] || "";
-
   const cleanPreview = preview.replace(/\*\*/g, "").replace(/\*/g, "").replace(/#+ /g, "");
 
   return (
     <>
-      {/* ── Compact card ── */}
+      {/* ── Header-style title + preview ── */}
       <div
         onClick={() => setOpen(true)}
-        style={{
-          margin: "0 16px 12px",
-          borderRadius: 12,
-          overflow: "hidden",
-          cursor: "pointer",
-          border: `1px solid ${t.bgHover}`,
-          background: t.bgElevated,
-        }}
+        style={{ padding: "4px 16px 12px", cursor: "pointer" }}
       >
-        {/* Content row */}
-        <div style={{
-          display: "flex", alignItems: "stretch", gap: 0,
-        }}>
-          {/* Text */}
-          <div style={{ flex: 1, minWidth: 0, padding: "14px 16px", overflow: "hidden" }}>
-            <div style={{
-              fontSize: 13, fontWeight: 700, color: t.textPrimary,
-              fontFamily: t.fontDisplay,
-              letterSpacing: "0.02em",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-              marginBottom: 5,
-            }}>
-              {post.title}
-            </div>
-            <div style={{
-              fontSize: 11, color: t.textSecondary,
-              lineHeight: 1.5,
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}>
-              {cleanPreview}
-            </div>
-          </div>
-
-          {/* READ */}
+        {/* Title row */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
           <div style={{
-            display: "flex", alignItems: "center",
-            paddingRight: 16, paddingLeft: 20, flexShrink: 0,
+            fontSize: 17, fontWeight: 700, color: t.textPrimary,
+            fontFamily: t.fontDisplay, letterSpacing: "0.02em",
+            flex: 1, minWidth: 0,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>
-            <span style={{
-              fontSize: 10, fontWeight: 700, color: accent,
-              fontFamily: t.fontBody,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              border: `1px solid ${accent}`,
-              borderRadius: 20,
-              padding: "4px 10px",
-            }}>Read</span>
+            {post.title}
           </div>
+          <span style={{
+            fontSize: 10, fontWeight: 700, color: accent,
+            fontFamily: t.fontBody,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            border: `1px solid ${accent}`,
+            borderRadius: 20,
+            padding: "3px 9px",
+            flexShrink: 0,
+          }}>Read</span>
+        </div>
+
+        {/* Preview */}
+        <div style={{
+          fontSize: 12, color: t.textSecondary,
+          lineHeight: 1.55,
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}>
+          {cleanPreview}
         </div>
       </div>
 

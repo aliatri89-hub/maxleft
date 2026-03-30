@@ -141,19 +141,21 @@ export default function OriginalsScreen({
 
         {sortedShelves.map((shelf) => (
           <div key={shelf.id}>
-            {/* Blog post card above the shelf */}
+            {/* Blog post card acts as shelf title */}
             <OriginalsPostCard
               miniseriesId={shelf.id}
               accent={accent}
+              shelfTitle={shelf.title}
             />
 
-            {/* Standard poster shelf */}
+            {/* Standard poster shelf — title hidden, PostCard handles it */}
             <MiniseriesShelf
               series={shelf}
               progress={progress}
               onToggle={handleItemTap}
               filter={filter}
               accent={accent}
+              hideTitle
             />
           </div>
         ))}
