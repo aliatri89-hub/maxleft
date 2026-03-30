@@ -160,21 +160,12 @@ function RssPreview({ username, dk }) {
     setState("loading");
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`https://letterboxd.com/${username}/rss/`, { cache: "no-store" });
-        if (!res.ok) { setState("notfound"); return; }
-        const text = await res.text();
-        const xml = new DOMParser().parseFromString(text, "text/xml");
-        const items = Array.from(xml.querySelectorAll("item")).slice(0, 3);
-        if (items.length === 0) { setState("notfound"); return; }
-        const films = items.map(item => {
-          const title =
-            item.getElementsByTagNameNS("*", "filmTitle")[0]?.textContent ||
-            item.querySelector("title")?.textContent?.replace(/,.*$/, "") || "Unknown";
-          const desc = item.querySelector("description")?.textContent || "";
-          const imgMatch = desc.match(/src="([^"]+)"/);
-          return { title, poster: imgMatch?.[1] || null };
+        const { data, error } = await supabase.functions.invoke("verify-letterboxd", {
+          body: { username },
         });
-        setState(films);
+        if (error || !data) { setState(null); return; }
+        if (!data.found) { setState("notfound"); return; }
+        setState(data.films || []);
       } catch {
         setState(null);
       }
