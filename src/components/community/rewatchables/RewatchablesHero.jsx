@@ -101,7 +101,7 @@ export default function RewatchablesHero({ community, miniseries, progress, allI
         gradientStrength={tabHero?.gradient_strength}
       />
 
-      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 42px" }}>
+      <div style={{ position: "relative", zIndex: 1, padding: "24px 16px 72px" }}>
         {/* Title + tagline */}
         <div style={{
           fontSize: 28, fontWeight: 800, color: t.textPrimary,
