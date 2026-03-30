@@ -1345,6 +1345,7 @@ export default function AudioPlayerProvider({ children, session }) {
   const seekTargetRef = useRef(null); // { time, ts } — holds seek position until playback catches up
   const queueRef = useRef([]);
   const advanceQueueRef = useRef(null);
+  const pendingAutoPlayRef = useRef(false);
   const queueToastRef = useRef(null);
   const [queueToast, setQueueToast] = useState(null); // null | { title }
   const [recents, setRecents] = useState(() => loadRecents());
@@ -1422,6 +1423,7 @@ export default function AudioPlayerProvider({ children, session }) {
     };
     const onPlay = () => {
       setIsPlaying(true); setBuffering(false); setError(null);
+      pendingAutoPlayRef.current = false;
     };
     const onPause = () => {
       setIsPlaying(false);
@@ -1482,9 +1484,22 @@ export default function AudioPlayerProvider({ children, session }) {
       setBufferedPct(pct || 0);
     };
     // On native, sync UI when app regains focus after background playback
-    const onFocusRegained = () => {
+    const onFocusRegained = async () => {
       // Force a state refresh — bridge already synced its internal state
       setProgress(bridge.currentTime);
+      // If queue advanced in background but play failed, retry now that we're in foreground
+      if (pendingAutoPlayRef.current && !bridge.playing) {
+        console.log("[AudioProvider] Resuming pending auto-play after focus regained");
+        pendingAutoPlayRef.current = false;
+        setBuffering(true);
+        try {
+          await bridge.play();
+        } catch (e) {
+          console.warn("[AudioProvider] Focus-resume play failed:", e);
+          setBuffering(false);
+          setError("Tap play to start the next episode");
+        }
+      }
     };
 
     bridge.on("timeupdate", onTimeUpdate);
@@ -1728,8 +1743,14 @@ export default function AudioPlayerProvider({ children, session }) {
     setError(null);
     setBufferedPct(0);
     const meta = { title: next.title, artist: next.community || "MANTL", artwork: next.artwork || "" };
+    pendingAutoPlayRef.current = true;
     bridge.load(next.enclosureUrl, meta, { rate: speed })
-      .then(() => bridge.play());
+      .then(() => bridge.play())
+      .then(() => { pendingAutoPlayRef.current = false; })
+      .catch((e) => {
+        console.warn("[AudioProvider] Queue advance play failed — will retry on focus:", e);
+        // Don't set error — leave pendingAutoPlayRef true so focusregained can retry
+      });
     return true;
   }, [currentEp, speed, updateRecents, updateQueue, bridge]);
 
