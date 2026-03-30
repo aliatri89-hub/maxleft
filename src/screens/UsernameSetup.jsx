@@ -142,7 +142,7 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
       <input
         ref={fileInputRef}
         type="file"
-        accept=".csv"
+        accept=".csv,text/csv,text/plain,application/octet-stream,*/*"
         style={{ display: "none" }}
         onChange={(e) => {
           const f = e.target.files?.[0];
@@ -179,9 +179,9 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
               color: dk.text, textTransform: "uppercase",
             }}>{label}</div>
             <div style={{
-              fontFamily: t.fontBody, fontSize: 9,
+              fontFamily: t.fontBody, fontSize: 11,
               color: dk.textMuted, marginTop: 3,
-            }}>.csv files only</div>
+            }}>diary.csv · Check Downloads folder</div>
           </>
         )}
       </div>
