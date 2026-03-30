@@ -95,10 +95,11 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
 
       if (!cancelled && !error) {
         // Sort: deep-dive pods first, then alphabetical
+        const sortKey = n => n.replace(/^(the|a|an)\s+/i, "").trim();
         const sorted = (data || []).sort((a, b) => {
           if (a.tier === "deep" && b.tier !== "deep") return -1;
           if (a.tier !== "deep" && b.tier === "deep") return 1;
-          return a.name.localeCompare(b.name);
+          return sortKey(a.name).localeCompare(sortKey(b.name));
         });
         setAllPodcasts(sorted);
       }
