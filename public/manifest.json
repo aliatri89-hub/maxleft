@@ -1,6 +1,6 @@
 {
-  "name": "MANTL — The podcast platform for movie lovers",
-  "short_name": "MANTL",
+  "name": "Mantl — The podcast platform for movie lovers",
+  "short_name": "Mantl",
   "description": "Browse movies by the podcasts that cover them. Track what you've watched, earn badges, and go deep with your favorite film podcast communities.",
   "start_url": "/",
   "display": "standalone",
