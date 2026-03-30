@@ -335,7 +335,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
           fontFamily: t.fontSerif, lineHeight: 1.5,
           marginBottom: 16, padding: "0 8px",
         }}>
-          Find three actors who starred in the same film. Select three, then submit.
+          Find {groupSize === 4 ? "four" : "three"} actors who starred in the same film. Select {groupSize === 4 ? "four" : "three"}, then submit.
         </div>
       )}
       {gameOver ? (
@@ -362,8 +362,8 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
         </div>
       ) : (
         <>
-          {/* 3×3 actor grid */}
-          <div style={S.grid}>
+          {/* actor grid — 3×3 or 4×4 depending on puzzle */}
+          <div style={{ ...S.grid, gridTemplateColumns: `repeat(${groupSize}, 1fr)` }}>
             {allActors.map((actor, i) => {
               const isSolved = solvedActorNames.has(actor.name);
               const isSelected = selected.includes(actor.name);
@@ -378,6 +378,8 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                   onClick={() => toggleSelect(actor.name)}
                   style={{
                     ...S.tile,
+                    padding: groupSize === 4 ? "14px 4px" : "22px 8px",
+                    minHeight: groupSize === 4 ? 64 : 76,
                     animationDelay: `${i * 0.04}s`,
                     ...(isSolved ? {
                       background: solvedColor,
@@ -397,6 +399,7 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
                 >
                   <span style={{
                     ...S.actorName,
+                    fontSize: groupSize === 4 ? 10 : 12,
                     color: isSolved ? t.textPrimary : isWrong ? "#e07060" : "#e8d3a2",
                   }}>
                     {(() => {

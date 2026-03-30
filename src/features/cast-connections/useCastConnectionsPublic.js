@@ -56,7 +56,7 @@ export function useCastConnectionsPublic() {
   const startTimeRef = useRef(null);
 
   const maxMistakes = 3;
-  const groupSize = 3;
+  const groupSize = puzzle?.movies[0]?.actors.length ?? 3;
 
   useEffect(() => {
     let cancelled = false;
