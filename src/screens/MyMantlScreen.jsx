@@ -444,9 +444,6 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(
         <ShelfModals
-          addingCountry={false} setAddingCountry={() => {}}
-          viewingCountry={null} setViewingCountry={() => {}}
-          showPassportMap={false} setShowPassportMap={() => {}}
           diaryShelf={diaryShelf} setDiaryShelf={setDiaryShelf}
           viewingItem={viewingItem} setViewingItem={setViewingItem}
           shelves={shelves} profile={profile} session={session}

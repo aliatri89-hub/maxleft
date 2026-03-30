@@ -421,7 +421,6 @@ function AppMain() {
       await supabase.from("feed_comments").delete().eq("user_id", userId);
       await supabase.from("community_user_progress").delete().eq("user_id", userId);
       await supabase.from("user_media_logs").delete().eq("user_id", userId);
-      await supabase.from("countries").delete().eq("user_id", userId);
       await supabase.from("wishlist").delete().eq("user_id", userId);
       await supabase.from("blocked_users").delete().eq("user_id", userId);
       await supabase.from("reports").delete().eq("reporter_id", userId);
