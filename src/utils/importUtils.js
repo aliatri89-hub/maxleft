@@ -176,27 +176,14 @@ export async function parseFile(file, userId) {
 
 export async function importMovies(items, userId, onProgress) {
   let count = 0, errs = 0;
+  const CONCURRENCY = 10;
 
-  for (let i = 0; i < items.length; i++) {
-    const m = items[i];
-    if (onProgress) onProgress(i + 1, items.length);
-
+  const processItem = async (m) => {
     try {
       const results = await searchTMDBRaw(m.title, m.year || null);
       const match = (results || [])[0];
-      if (!match) { errs++; continue; }
+      if (!match) { errs++; return; }
 
-      let director = null, genre = null, runtime = null;
-      try {
-        const detail = await fetchTMDBRaw(match.id, "movie", "credits");
-        if (detail && !detail.error) {
-          director = detail.credits?.crew?.find(c => c.job === "Director")?.name || null;
-          genre = (detail.genres || []).slice(0, 2).map(g => g.name).join(", ") || null;
-          runtime = detail.runtime || null;
-        }
-      } catch (e) { /* skip detail fetch */ }
-
-      // Build watch_dates array (sorted chronologically)
       const watchDates = (m.watchDates || [])
         .filter(Boolean)
         .map(d => {
@@ -206,41 +193,42 @@ export async function importMovies(items, userId, onProgress) {
         .filter(Boolean)
         .sort();
 
-      // If no dates from CSV, use today
       if (watchDates.length === 0) {
         watchDates.push(new Date().toISOString().slice(0, 10));
       }
 
-      // Use the ACTUAL watched date from CSV -- fixes the watched_at = now() bug
       const watchedAt = m.watchedDate
         ? new Date(m.watchedDate + "T12:00:00Z").toISOString()
         : new Date().toISOString();
 
-      // Write to media + user_media_logs (unified architecture)
       const mediaId = await upsertMediaLog(userId, {
         mediaType: "film",
         tmdbId: match.id,
         title: m.title,
         year: m.year || (match.release_date ? parseInt(match.release_date) : null),
-        creator: director,
+        creator: null,
         posterPath: match.poster_path || null,
         backdropPath: match.backdrop_path || null,
-        runtime,
-        genre,
+        runtime: null,
+        genre: null,
         rating: m.ratingHalf || m.rating || null,
         watchedAt,
-        watchedDate: m.watchedDate || null,  // raw "YYYY-MM-DD" — timezone-safe
+        watchedDate: m.watchedDate || null,
         source: "letterboxd",
         watchCount: watchDates.length,
         watchDates,
       });
 
-      if (!mediaId) { errs++; }
+      if (!mediaId) errs++;
       else count++;
     } catch (e) { errs++; }
+  };
 
-    // Rate limit: pause every 8 movies
-    if ((i + 1) % 8 === 0) await new Promise(r => setTimeout(r, 1000));
+  // Process in concurrent batches
+  for (let i = 0; i < items.length; i += CONCURRENCY) {
+    const batch = items.slice(i, i + CONCURRENCY);
+    await Promise.all(batch.map(m => processItem(m)));
+    if (onProgress) onProgress(Math.min(i + CONCURRENCY, items.length), items.length);
   }
 
   return { count, errs };

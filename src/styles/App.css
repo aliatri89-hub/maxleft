@@ -500,15 +500,15 @@
   .setup-sub {
     font-family: 'Barlow Condensed', sans-serif;
     font-style: italic;
-    font-size: 15px;
-    color: rgba(255,255,255,0.7);
+    font-size: 19px;
+    color: rgba(255,255,255,0.85);
     margin-bottom: 40px;
     line-height: 1.5;
   }
 
   .field-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.2em;
     color: var(--terracotta);
     text-transform: uppercase;
@@ -533,14 +533,14 @@
 
   .field-hint {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 14px;
     color: var(--text-faint);
     margin-top: 8px;
   }
 
   .field-error {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
+    font-size: 14px;
     color: #C45043;
     margin-top: 8px;
   }

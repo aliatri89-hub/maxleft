@@ -283,7 +283,7 @@ function TaskRow({ task }) {
               }} />
             </div>
             <div style={{
-              fontFamily: t.fontBody, fontSize: 9,
+              fontFamily: t.fontBody, fontSize: 13,
               color: dk.textMuted, marginTop: 3,
             }}>
               {task.progress} / {task.total}
@@ -293,7 +293,7 @@ function TaskRow({ task }) {
 
         {task.status === "done" && task.result && (
           <div style={{
-            fontFamily: t.fontBody, fontSize: 10,
+            fontFamily: t.fontBody, fontSize: 13,
             color: dk.textDim, marginTop: 2,
           }}>
             {task.result}
@@ -302,7 +302,7 @@ function TaskRow({ task }) {
 
         {task.status === "error" && task.result && (
           <div style={{
-            fontFamily: t.fontBody, fontSize: 10,
+            fontFamily: t.fontBody, fontSize: 13,
             color: dk.red, marginTop: 2,
           }}>
             {task.result}
