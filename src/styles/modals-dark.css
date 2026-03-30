@@ -164,6 +164,24 @@
 
 /* ── Primary Action Button ── */
 
+.btn-shelf-it {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-shelf-it:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-shelf-it.btn-shelf-it {
   background: linear-gradient(135deg, #4ade80, #22c55e);
   color: #0a0a0a;
@@ -358,6 +376,24 @@
 }
 
 /* ── Book Status Toggle ── */
+
+.book-status-toggle {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.book-status-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
 
 .book-status-toggle.book-status-toggle {
   border-color: var(--border-medium);

@@ -124,7 +124,7 @@ import { useAnalytics } from "./hooks/useAnalytics";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
-import ShelfItModal from "./components/ShelfItModal";
+import DiaryModal from "./components/DiaryModal";
 import LetterboxdSyncToast from "./components/LetterboxdSyncToast";
 import InitialAvatar from "./components/InitialAvatar";
 import AudioPip from "./components/AudioPip";
@@ -213,8 +213,8 @@ function AppMain() {
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
   const [ccUnplayed, setCcUnplayed] = useState(false);
-  const [showShelfIt, setShowShelfIt] = useState(false);
-  const [shelfItCategory, setShelfItCategory] = useState(null);
+  const [showDiary, setShowDiary] = useState(false);
+  const [diaryCategory, setDiaryCategory] = useState(null);
   const [letterboxdToast, setLetterboxdToast] = useState(null);
   const [feedMode, setFeedMode] = useState("podcast");
   const [pendingSleeveOpen, setPendingSleeveOpen] = useState(null); // tmdb_id from push notification tap
@@ -517,10 +517,10 @@ function AppMain() {
     }
   };
 
-  const openShelfIt = (category) => {
-    setShelfItCategory(category || null);
-    setShowShelfIt(true);
-    pushNav("shelfIt", () => setShowShelfIt(false));
+  const openDiary = (category) => {
+    setDiaryCategory(category || null);
+    setShowDiary(true);
+    pushNav("diary", () => setShowDiary(false));
   };
 
   // ── Letterboxd toast handler ──
@@ -662,7 +662,7 @@ function AppMain() {
                 <div className="tab-pane" key="shelf-tab">
                   {visitedTabs.has("mantl") && <ErrorBoundary name="My MANTL"><Suspense fallback={<CommunityLoadingSkeleton />}>
                     <MyMantlScreen profile={profile}
-                    onShelfIt={openShelfIt} session={session} pushNav={pushNav} removeNav={removeNav}
+                    onShelfIt={openDiary} session={session} pushNav={pushNav} removeNav={removeNav}
                     onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
@@ -866,9 +866,9 @@ function AppMain() {
           </div>
         )}
 
-        {showShelfIt && (
-          <ShelfItModal initialCategory={shelfItCategory}
-            onClose={() => { removeNav("shelfIt"); setShowShelfIt(false); }}
+        {showDiary && (
+          <DiaryModal initialCategory={diaryCategory}
+            onClose={() => { removeNav("diary"); setShowDiary(false); }}
             session={session} onToast={showToast}
             onSaved={async (type, status) => {
               if (session) {

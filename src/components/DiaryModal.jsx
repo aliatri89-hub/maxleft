@@ -3,7 +3,7 @@ import { supabase } from "../supabase";
 import { upsertMediaLog } from "../utils/mediaWrite";
 import { searchTMDB, fetchTMDBDetails } from "../utils/api";
 
-function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
+function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
   const [category, setCategory] = useState(initialCategory || null);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
@@ -296,4 +296,4 @@ function ShelfItModal({ initialCategory, onClose, session, onSaved, onToast }) {
   );
 }
 
-export default ShelfItModal;
+export default DiaryModal;
