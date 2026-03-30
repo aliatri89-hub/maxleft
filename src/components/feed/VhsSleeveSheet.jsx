@@ -1108,7 +1108,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               fontFamily: t.fontDisplay,
                               fontWeight: 700, fontSize: 15,
                               color: t.cream,
-                              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                              whiteSpace: isExpanded ? "normal" : "nowrap",
+                              overflow: isExpanded ? "visible" : "hidden",
+                              textOverflow: isExpanded ? "unset" : "ellipsis",
                             }}>{decodeEntities(ep.episode_title || ep.podcast_name)}</div>
                             <div style={{
                               fontFamily: t.fontBody,
@@ -1329,7 +1331,9 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                         <div style={{
                           fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 15,
                           color: t.cream,
-                          whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                          whiteSpace: isExpanded ? "normal" : "nowrap",
+                          overflow: isExpanded ? "visible" : "hidden",
+                          textOverflow: isExpanded ? "unset" : "ellipsis",
                         }}>
                           {decodeEntities(link.episode_title || link.podcast_name)}
                         </div>
