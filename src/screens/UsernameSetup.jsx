@@ -815,7 +815,7 @@ function UsernameSetup({ name, session, onComplete }) {
           <input
             className="field-input"
             type="text"
-            placeholder="e.g. aliatri"
+            placeholder="e.g. deniro"
             value={letterboxdUsername}
             onChange={(e) => { setLetterboxdUsername(e.target.value.trim().toLowerCase()); }}
             autoFocus
