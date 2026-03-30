@@ -124,7 +124,7 @@ export default function CommunitiesScreen({
             .map(s => s.id);
 
           if (followedSeriesIds.length > 0) {
-            const BATCH = 200;
+            const BATCH = 50;
             const itemBatches = [];
             for (let i = 0; i < followedSeriesIds.length; i += BATCH) {
               const batch = followedSeriesIds.slice(i, i + BATCH);

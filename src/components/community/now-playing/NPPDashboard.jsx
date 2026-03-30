@@ -1694,7 +1694,7 @@ export default function NPPDashboard({ session: sessionProp }) {
         if (userId) {
           const itemIds = items.map(i => i.item_id);
           if (itemIds.length > 0) {
-            const BATCH = 200;
+            const BATCH = 50;
             const allProgress = [];
             for (let i = 0; i < itemIds.length; i += BATCH) {
               const chunk = itemIds.slice(i, i + BATCH);
