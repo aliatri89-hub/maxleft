@@ -58,7 +58,7 @@ export default function OriginalsPostCard({ miniseriesId, accent }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {post.cover_image_url ? (
             <img src={post.cover_image_url} alt="" style={{
-              width: 44, height: 44, borderRadius: 8, objectFit: "cover",
+              width: 80, height: 56, borderRadius: 8, objectFit: "cover",
               flexShrink: 0,
             }} />
           ) : (
