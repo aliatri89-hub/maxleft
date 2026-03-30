@@ -228,14 +228,18 @@ function AppMain() {
   });
 
   // ── Community state ──
-  const [communityDashboard, setCommunityDashboard] = useState(() => {
+  // DISABLED: dashboards disabled — everything is private now, no public square purpose.
+  // Keeping code intact for potential future use. Re-enable by restoring the init logic below.
+  // Original init: hostname check (npp.mymantl.app / bc.mymantl.app) or path match (/community/{slug}/dashboard)
+  const [communityDashboard, setCommunityDashboard] = useState(null);
+  /* const [communityDashboard, setCommunityDashboard] = useState(() => {
     const host = window.location.hostname;
     if (host === "npp.mymantl.app") return "nowplaying";
     if (host === "bc.mymantl.app") return "blankcheck";
     const path = window.location.pathname.replace(/^\/+|\/+$/g, "");
     const match = path.match(/^community\/([^/]+)\/dashboard$/);
     return match ? match[1] : null;
-  });
+  }); */
   const [activeCommunitySlug, setActiveCommunitySlug] = useState(
     () => sessionStorage.getItem("mantl_community") || null
   );
