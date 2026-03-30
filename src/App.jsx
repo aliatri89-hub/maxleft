@@ -40,12 +40,32 @@ export const probeSafeArea = () => {
 };
 
 if (Capacitor.isNativePlatform()) {
-  StatusBar.setOverlaysWebView({ overlay: true });
-  StatusBar.setBackgroundColor({ color: t.bgPrimary });
-  StatusBar.setStyle({ style: Style.Dark });
+  // Await the native bridge calls — setOverlaysWebView is async and the
+  // WebView won't report safe-area insets until overlay mode is actually
+  // applied.  Without awaiting, probeSafeArea races the native side and
+  // reads 0px on cold start (first install / first login).
+  (async () => {
+    await StatusBar.setOverlaysWebView({ overlay: true });
+    await StatusBar.setBackgroundColor({ color: t.bgPrimary });
+    await StatusBar.setStyle({ style: Style.Dark });
 
-  // Wait for layout to settle after overlay mode is applied
-  requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+    // Double-rAF lets the WebView
+    // complete one full layout pass with overlay mode active.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      probeSafeArea();
+      // If the inset is still 0 (WebView lagging), retry a few times.
+      // This covers slow cold-start on older devices / Android 15 edge-to-edge.
+      let retries = 0;
+      const retry = () => {
+        if (retries++ >= 5) return;
+        const cur = getComputedStyle(document.documentElement).getPropertyValue("--sat").trim();
+        if (!cur || cur === "0px" || cur === "env(safe-area-inset-top, 0px)") {
+          setTimeout(() => { probeSafeArea(); retry(); }, 200);
+        }
+      };
+      retry();
+    }));
+  })();
 
   // Re-probe whenever the app returns to foreground (e.g. after OAuth system
   // browser closes). Android needs ~150ms to re-apply window insets to the
