@@ -55,6 +55,7 @@ export default function CommunitySleeveSheet({
   const podcastAbout = theme.podcast_about || null;
   const sleeveHero = theme.sleeve_hero || null;
   const sleeveHeroFit = theme.sleeve_hero_fit || "cover";
+  const sleeveHideTitle = theme.sleeve_hide_title || false;
   const slug = community?.slug || "";
   const abbrev = SLUG_ABBREV[slug] || slug.slice(0, 2).toUpperCase();
 
@@ -223,6 +224,7 @@ export default function CommunitySleeveSheet({
         )}
 
         {/* ── Podcast name + art — inline row ── */}
+        {!sleeveHideTitle && (
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -256,6 +258,7 @@ export default function CommunitySleeveSheet({
             {community.name}
           </div>
         </div>
+        )}
 
         {/* ── Billing — hosts as "starring" ── */}
         {topHosts.length > 0 && (
