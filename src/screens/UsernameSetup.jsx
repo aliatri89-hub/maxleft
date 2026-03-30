@@ -2,6 +2,7 @@ import { t } from "../theme";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../supabase";
 import { parseFile, importMovies } from "../utils/importUtils";
+import JSZip from "jszip";
 
 // ═══════════════════════════════════════════════════════════
 //  DARK THEME PALETTE
@@ -136,18 +137,48 @@ function BackButton({ onClick }) {
 // ═══════════════════════════════════════════════════════════
 //  FILE UPLOAD ZONE
 // ═══════════════════════════════════════════════════════════
-function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to upload CSV" }) {
+function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to upload" }) {
+  const [extracting, setExtracting] = useState(false);
+  const [extractError, setExtractError] = useState(null);
+
+  const handleFileChange = async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setExtractError(null);
+
+    const isZip = f.name.endsWith(".zip") || f.type === "application/zip" || f.type === "application/x-zip-compressed";
+    if (isZip) {
+      setExtracting(true);
+      try {
+        const zip = await JSZip.loadAsync(f);
+        const diaryEntry = Object.values(zip.files).find(
+          entry => !entry.dir && entry.name.toLowerCase().endsWith("diary.csv")
+        );
+        if (!diaryEntry) {
+          setExtractError("No diary.csv found in zip — make sure it's the Letterboxd export.");
+          setExtracting(false);
+          return;
+        }
+        const csvBlob = await diaryEntry.async("blob");
+        onFileSelect(new File([csvBlob], "diary.csv", { type: "text/csv" }));
+      } catch {
+        setExtractError("Couldn't read zip. Try uploading diary.csv directly.");
+      }
+      setExtracting(false);
+      return;
+    }
+
+    onFileSelect(f);
+  };
+
   return (
     <>
       <input
         ref={fileInputRef}
         type="file"
-        accept=".csv,text/csv,text/plain,application/octet-stream,*/*"
+        accept=".csv,.zip,text/csv,application/zip,application/x-zip-compressed,*/*"
         style={{ display: "none" }}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) onFileSelect(f);
-        }}
+        onChange={handleFileChange}
       />
       <div
         onClick={() => fileInputRef.current?.click()}
@@ -159,32 +190,38 @@ function FileUploadZone({ file, onFileSelect, fileInputRef, label = "Tap to uplo
           transition: "all 0.15s",
         }}
       >
-        {file ? (
+        {extracting ? (
+          <>
+            <div style={{ fontSize: 20, marginBottom: 4 }}>⏳</div>
+            <div style={{ fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>
+              Extracting diary.csv…
+            </div>
+          </>
+        ) : file ? (
           <>
             <div style={{ fontSize: 20, marginBottom: 4, color: dk.terracotta }}>✓</div>
-            <div style={{
-              fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-              color: dk.terracotta, textTransform: "uppercase",
-            }}>{file.name}</div>
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 9,
-              color: dk.textMuted, marginTop: 3,
-            }}>Tap to change file</div>
+            <div style={{ fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13, color: dk.terracotta, textTransform: "uppercase" }}>
+              {file.name}
+            </div>
+            <div style={{ fontFamily: t.fontBody, fontSize: 11, color: dk.textMuted, marginTop: 3 }}>Tap to change</div>
           </>
         ) : (
           <>
-            <div style={{ fontSize: 20, marginBottom: 4 }}>📄</div>
-            <div style={{
-              fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13,
-              color: dk.text, textTransform: "uppercase",
-            }}>{label}</div>
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 11,
-              color: dk.textMuted, marginTop: 3,
-            }}>diary.csv · Check Downloads folder</div>
+            <div style={{ fontSize: 20, marginBottom: 4 }}>📦</div>
+            <div style={{ fontFamily: t.fontDisplay, fontWeight: 700, fontSize: 13, color: dk.text, textTransform: "uppercase" }}>
+              {label}
+            </div>
+            <div style={{ fontFamily: t.fontBody, fontSize: 12, color: dk.textMuted, marginTop: 3 }}>
+              Upload the .zip export or diary.csv directly
+            </div>
           </>
         )}
       </div>
+      {extractError && (
+        <div style={{ fontFamily: t.fontBody, fontSize: 12, color: dk.red, marginTop: 6, textAlign: "center" }}>
+          {extractError}
+        </div>
+      )}
     </>
   );
 }
@@ -775,15 +812,14 @@ function UsernameSetup({ name, session, onComplete }) {
               ⚠️ Use your browser, not the Letterboxd app
             </div>
             <div><span style={{ color: dk.terracotta }}>2.</span> Click <strong>Export Your Data</strong></div>
-            <div><span style={{ color: dk.terracotta }}>3.</span> Unzip the download</div>
-            <div><span style={{ color: dk.terracotta }}>4.</span> Upload <strong>diary.csv</strong> below</div>
+            <div><span style={{ color: dk.terracotta }}>3.</span> Download and upload the .zip below — we'll extract it automatically</div>
           </div>
 
           <FileUploadZone
             file={uploadedFile}
             onFileSelect={(f) => setUploadedFile(f)}
             fileInputRef={fileInputRef}
-            label="Tap to upload diary.csv"
+            label="Tap to upload export"
           />
         </div>
 
