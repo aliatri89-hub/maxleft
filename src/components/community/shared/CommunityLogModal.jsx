@@ -18,7 +18,6 @@ import { toLogTimestamp } from "../../../utils/helpers";
  *   - Cover URL resolution, TMDB overview, watch providers
  *   - Poster + hero layout (100px), star rating (half-star), date picker
  *   - Log / Already Seen / Watchlist / Update / Unlog button group
- *   - Post-log episode toast ("Listen on MANTL", auto-dismiss 5s)
  *   - CrossCommunityChips, WatchProviders, ListenOnBadges
  *
  * Community-specific behavior is injected via config + render slots:
@@ -53,7 +52,6 @@ export default function CommunityLogModal({
 }) {
   const [rating, setRating] = useState(progressData?.rating || 0);
   const [saving, setSaving] = useState(false);
-  const [episodeToast, setEpisodeToast] = useState(false);
   const [overview, setOverview] = useState(null);
   const [overviewExpanded, setOverviewExpanded] = useState(false);
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -141,13 +139,7 @@ export default function CommunityLogModal({
 
   // ── Shared post-log behavior ──
   const afterLog = (wasUpdate) => {
-    if (!wasUpdate && (matchedEpisode || patreonFallbackUrl)) {
-      setSaving(false);
-      setEpisodeToast(true);
-      setTimeout(() => { setEpisodeToast(false); onClose(); }, 5000);
-    } else {
-      onClose();
-    }
+    onClose();
     if (wasUpdate && onShelvesChanged) onShelvesChanged();
   };
 
@@ -793,197 +785,6 @@ export default function CommunityLogModal({
             Cancel
           </button>
         </div>
-
-        {/* ── Post-log episode toast (auto-dismiss 5s) ── */}
-        {episodeToast && matchedEpisode && !isPatreonUrl(matchedEpisode.enclosureUrl) && (
-          <div style={{
-            position: "fixed", bottom: 0, left: 0, right: 0,
-            padding: "0 16px 24px",
-            background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
-            zIndex: 10,
-            animation: "clmSlideUp 0.3s ease",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-          }}>
-            <div style={{
-              fontSize: 11, color: t.textSecondary,
-              fontFamily: t.fontDisplay,
-              textTransform: "uppercase", letterSpacing: 1.5,
-            }}>Logged! Now hear what the hosts thought</div>
-
-            <button
-              onClick={() => { playEpisode(matchedEpisode); setEpisodeToast(false); onClose(); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%", maxWidth: 360,
-                padding: "12px 16px",
-                background: "rgba(245,197,24,0.12)",
-                border: "1.5px solid rgba(245,197,24,0.3)",
-                borderRadius: 14, cursor: "pointer",
-                WebkitTapHighlightColor: "transparent",
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: "50%", background: "#F5C518",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0a0a"><path d="M8 5v14l11-7z" /></svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                <div style={{
-                  fontSize: 14, fontWeight: 700, color: t.gold,
-                  fontFamily: t.fontDisplay,
-                  textTransform: "uppercase", letterSpacing: 0.5,
-                }}>Listen on MANTL</div>
-                <div style={{
-                  fontSize: 10, color: t.textSecondary,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
-                }}>{matchedEpisode.title}</div>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(245,197,24,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <path d="M3 18v-6a9 9 0 0118 0v6" />
-                <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => { setEpisodeToast(false); onClose(); }}
-              style={{
-                background: "none", border: "none", color: t.textSecondary,
-                fontSize: 12, cursor: "pointer", padding: "6px 16px",
-              }}
-            >Not now</button>
-          </div>
-        )}
-
-        {/* ── Post-log Patreon episode toast ── */}
-        {episodeToast && matchedEpisode && isPatreonUrl(matchedEpisode.enclosureUrl) && (
-          <div style={{
-            position: "fixed", bottom: 0, left: 0, right: 0,
-            padding: "0 16px 24px",
-            background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
-            zIndex: 10,
-            animation: "clmSlideUp 0.3s ease",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-          }}>
-            <div style={{
-              fontSize: 11, color: t.textSecondary,
-              fontFamily: t.fontDisplay,
-              textTransform: "uppercase", letterSpacing: 1.5,
-            }}>Logged! Hear what the hosts thought</div>
-
-            <a
-              href={matchedEpisode.enclosureUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => { setEpisodeToast(false); onClose(); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%", maxWidth: 360,
-                padding: "12px 16px",
-                background: "rgba(249,104,58,0.12)",
-                border: "1.5px solid rgba(249,104,58,0.3)",
-                borderRadius: 14, cursor: "pointer",
-                WebkitTapHighlightColor: "transparent",
-                textDecoration: "none",
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: "50%", background: "rgba(249,104,58,0.15)",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                <div style={{
-                  fontSize: 14, fontWeight: 700, color: t.orange,
-                  fontFamily: t.fontDisplay,
-                  textTransform: "uppercase", letterSpacing: 0.5,
-                }}>Listen on Patreon</div>
-                <div style={{
-                  fontSize: 10, color: t.textSecondary,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
-                }}>{matchedEpisode.title}</div>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </a>
-
-            <button
-              onClick={() => { setEpisodeToast(false); onClose(); }}
-              style={{
-                background: "none", border: "none", color: t.textSecondary,
-                fontSize: 12, cursor: "pointer", padding: "6px 16px",
-              }}
-            >Not now</button>
-          </div>
-        )}
-        {/* ── Post-log Patreon fallback toast (no audio in MANTL) ── */}
-        {episodeToast && !matchedEpisode && patreonFallbackUrl && (
-          <div style={{
-            position: "fixed", bottom: 0, left: 0, right: 0,
-            padding: "0 16px 24px",
-            background: "linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 70%, transparent 100%)",
-            zIndex: 10,
-            animation: "clmSlideUp 0.3s ease",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 10,
-          }}>
-            <div style={{
-              fontSize: 11, color: t.textSecondary,
-              fontFamily: t.fontDisplay,
-              textTransform: "uppercase", letterSpacing: 1.5,
-            }}>Logged! Hear what the hosts thought</div>
-
-            <a
-              href={patreonFallbackUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => { setEpisodeToast(false); onClose(); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 10, width: "100%", maxWidth: 360,
-                padding: "12px 16px",
-                background: "rgba(249,104,58,0.12)",
-                border: "1.5px solid rgba(249,104,58,0.3)",
-                borderRadius: 14, cursor: "pointer",
-                WebkitTapHighlightColor: "transparent",
-                textDecoration: "none",
-              }}
-            >
-              <div style={{
-                width: 36, height: 36, borderRadius: "50%", background: "rgba(249,104,58,0.15)",
-                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-              }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path fill="#F96836" d="M5 22V9a7 7 0 017-7h2a5.5 5.5 0 010 11h-4v9H5zm5-12h2a2.5 2.5 0 000-5h-2v5z"/>
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-                <div style={{
-                  fontSize: 14, fontWeight: 700, color: t.orange,
-                  fontFamily: t.fontDisplay,
-                  textTransform: "uppercase", letterSpacing: 0.5,
-                }}>Listen on Patreon</div>
-                <div style={{
-                  fontSize: 10, color: t.textSecondary,
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: 1,
-                }}>Patreon exclusive</div>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(249,104,58,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <path d="M7 17L17 7" />
-                <path d="M7 7h10v10" />
-              </svg>
-            </a>
-
-            <button
-              onClick={() => { setEpisodeToast(false); onClose(); }}
-              style={{
-                background: "none", border: "none", color: t.textSecondary,
-                fontSize: 12, cursor: "pointer", padding: "6px 16px",
-              }}
-            >Not now</button>
-          </div>
-        )}
       </div>
     </div>
   );
