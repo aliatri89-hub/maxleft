@@ -5,7 +5,7 @@ import { supabase } from "../supabase";
 
 import { sb } from "../utils/api";
 import InitialAvatar from "../components/InitialAvatar";
-import ImportCSVModal from "../components/ImportCSVModal";
+import LetterboxdSetupPortal from "../components/LetterboxdSetupPortal";
 import IngestReviewTool from "../components/feed/IngestReviewTool";
 
 /** Smooth expand/collapse wrapper using CSS grid trick */
@@ -32,9 +32,8 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [editName, setEditName] = useState(profile.name || "");
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [showImportCSV, setShowImportCSV] = useState(false);
+  const [showImportCSV, setShowImportCSV] = useState(false); // kept for safety
   const [letterboxdOpen, setLetterboxdOpen] = useState(false);
-  const [lbUsernameInput, setLbUsernameInput] = useState(profile.letterboxd_username || "");
   const [syncOpen, setSyncOpen] = useState(false);
   const [podcastsOpen, setPodcastsOpen] = useState(false);
   const [allPodcasts, setAllPodcasts] = useState([]);
@@ -239,75 +238,17 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
       <div className="profile-group">
         <div className="profile-group-label">Library</div>
         <div className="profile-group-card">
-          <div className="profile-group-row" onClick={() => setSyncOpen(!syncOpen)}>
-            <span className="profile-group-row-text">Sync</span>
+          <div className="profile-group-row" onClick={() => setLetterboxdOpen(true)}>
+            <span className="profile-group-row-text">Letterboxd</span>
             <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
               {letterboxdSyncing && <span style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--terracotta)" }}>syncing...</span>}
-              {profile.letterboxd_username && (
-                <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.6 }} />
-              )}
-              {syncOpen ? "▾" : "›"}
+              {profile.letterboxd_username
+                ? <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>@{profile.letterboxd_username}</span>
+                : <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)" }}>Not connected</span>
+              }
+              ›
             </span>
           </div>
-          <Expandable open={syncOpen}>
-            <div style={{ padding: "4px 0 8px" }}>
-              {/* Letterboxd */}
-              <div className="profile-group-sub-row" onClick={() => setLetterboxdOpen(!letterboxdOpen)}>
-                <span className="profile-group-row-text" style={{ fontSize: 14 }}>Letterboxd</span>
-                <span className="profile-group-row-chevron" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  {profile.letterboxd_username && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--terracotta)", opacity: 0.5 }} />}
-                  {letterboxdOpen ? "▾" : "›"}
-                </span>
-              </div>
-              <Expandable open={letterboxdOpen}>
-                <div className="profile-sync-panel">
-                  {profile.letterboxd_username ? (
-                    <>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                        <div style={{ display: "flex", gap: 3 }}>
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#00E054" }} />
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#40BCF4" }} />
-                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF8000" }} />
-                        </div>
-                        <span style={{ fontSize: 12, fontFamily: "var(--font-mono)", color: "var(--text-primary)", flex: 1 }}>
-                          letterboxd.com/<strong>{profile.letterboxd_username}</strong>
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--text-faint)", marginBottom: 12, lineHeight: 1.5 }}>
-                        Your diary syncs automatically when you open the app.
-                      </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button className="profile-sync-btn" onClick={onLetterboxdSync} disabled={letterboxdSyncing}>
-                          {letterboxdSyncing ? "Syncing..." : "Sync Now"}
-                        </button>
-                        <button className="profile-disconnect-btn" onClick={onLetterboxdDisconnect}>Disconnect</button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
-                        Auto-sync your Letterboxd diary. Films, ratings, and watch dates flow into your shelf and feed.
-                      </div>
-                      <div style={{ display: "flex", alignItems: "center", background: "var(--bg-input)", border: "1px solid var(--border-medium)", borderRadius: 10, overflow: "hidden", marginBottom: 10 }}>
-                        <span style={{ fontSize: 11, fontFamily: "var(--font-mono)", color: "var(--text-faint)", padding: "10px 0 10px 12px", whiteSpace: "nowrap" }}>letterboxd.com/</span>
-                        <input value={lbUsernameInput} onChange={e => setLbUsernameInput(e.target.value)}
-                          placeholder="username"
-                          style={{ flex: 1, border: "none", outline: "none", fontSize: 13, fontFamily: "var(--font-mono)", padding: "10px 12px 10px 2px", background: "transparent", color: "var(--text-primary)" }} />
-                      </div>
-                      <button className="profile-connect-btn" disabled={!lbUsernameInput.trim() || letterboxdSyncing}
-                        onClick={() => onLetterboxdConnect(lbUsernameInput.trim())}>
-                        {letterboxdSyncing ? "Connecting..." : "Connect & Sync"}
-                      </button>
-                      <div style={{ fontSize: 9, fontFamily: "var(--font-mono)", color: "var(--text-faint)", textAlign: "center", marginTop: 8 }}>
-                        Your Letterboxd profile must be public
-                      </div>
-                    </>
-                  )}
-                </div>
-              </Expandable>
-
-            </div>
-          </Expandable>
 
           <div className="profile-group-divider" />
 
@@ -524,13 +465,6 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
 
           <div className="profile-group-divider" />
 
-          <div className="profile-group-row" onClick={() => setShowImportCSV(true)}>
-            <span className="profile-group-row-text">Import Library</span>
-            <span className="profile-group-row-chevron">›</span>
-          </div>
-
-          <div className="profile-group-divider" />
-
           <div className="profile-group-row" onClick={() => { setWatchlistOpen(!watchlistOpen); if (!watchlistOpen && watchlist.length === 0) loadWatchlist(); }}>
             <span className="profile-group-row-text">Watchlist</span>
             <span className="profile-group-row-chevron">{watchlistOpen ? "▾" : "›"}</span>
@@ -681,14 +615,13 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
       </div>
 
       {/* Import CSV Modal — portaled to body to escape transform containing block */}
-      {showImportCSV && createPortal(
-        <ImportCSVModal
+      {letterboxdOpen && (
+        <LetterboxdSetupPortal
           session={session}
-          onClose={() => setShowImportCSV(false)}
-          onToast={onToast}
+          profile={profile}
+          onClose={() => setLetterboxdOpen(false)}
           onComplete={onImportComplete}
-        />,
-        document.body
+        />
       )}
     </div>
   );
