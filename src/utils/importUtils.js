@@ -238,26 +238,44 @@ export async function importMovies(items, userId, onProgress) {
   // Match imported tmdb_ids to community_items and write progress rows
   try {
     const allTmdbIds = importedTmdbIds.map(f => f.tmdbId);
+    console.log(`[importMovies] Backfill: ${allTmdbIds.length} tmdb_ids to match against community_items`);
+
     if (allTmdbIds.length > 0) {
       const ratingMap = new Map(importedTmdbIds.map(f => [f.tmdbId, f]));
 
-      const { data: matchedItems } = await supabase
-        .from("community_items")
-        .select("id, tmdb_id")
-        .in("tmdb_id", allTmdbIds);
+      // Batch the community_items lookup to avoid URL length limits
+      const BATCH = 100;
+      const allMatchedItems = [];
+      for (let i = 0; i < allTmdbIds.length; i += BATCH) {
+        const chunk = allTmdbIds.slice(i, i + BATCH);
+        const { data, error } = await supabase
+          .from("community_items")
+          .select("id, tmdb_id")
+          .in("tmdb_id", chunk);
+        if (error) console.error("[importMovies] community_items query error:", error.message);
+        if (data) allMatchedItems.push(...data);
+      }
 
-      if (matchedItems?.length) {
-        const matchedItemIds = matchedItems.map(i => i.id);
+      console.log(`[importMovies] Backfill: ${allMatchedItems.length} community_items matched`);
 
-        const { data: existingProgress } = await supabase
-          .from("community_user_progress")
-          .select("item_id")
-          .eq("user_id", userId)
-          .in("item_id", matchedItemIds);
+      if (allMatchedItems.length > 0) {
+        // Batch the existing progress lookup too
+        const matchedItemIds = allMatchedItems.map(i => i.id);
+        const allExisting = [];
+        for (let i = 0; i < matchedItemIds.length; i += BATCH) {
+          const chunk = matchedItemIds.slice(i, i + BATCH);
+          const { data } = await supabase
+            .from("community_user_progress")
+            .select("item_id")
+            .eq("user_id", userId)
+            .in("item_id", chunk);
+          if (data) allExisting.push(...data);
+        }
 
-        const existingSet = new Set((existingProgress || []).map(p => p.item_id));
+        const existingSet = new Set(allExisting.map(p => p.item_id));
+        console.log(`[importMovies] Backfill: ${existingSet.size} already have progress, ${allMatchedItems.length - existingSet.size} new`);
 
-        const newRows = matchedItems
+        const newRows = allMatchedItems
           .filter(item => !existingSet.has(item.id))
           .map(item => {
             const filmData = ratingMap.get(item.tmdb_id);
@@ -274,14 +292,22 @@ export async function importMovies(items, userId, onProgress) {
           });
 
         if (newRows.length > 0) {
-          await supabase
-            .from("community_user_progress")
-            .upsert(newRows, { onConflict: "user_id,item_id" });
+          // Batch the upsert too
+          for (let i = 0; i < newRows.length; i += BATCH) {
+            const chunk = newRows.slice(i, i + BATCH);
+            const { error: upsertErr } = await supabase
+              .from("community_user_progress")
+              .upsert(chunk, { onConflict: "user_id,item_id" });
+            if (upsertErr) console.error("[importMovies] Backfill upsert error:", upsertErr.message);
+          }
+          console.log(`[importMovies] Backfill: wrote ${newRows.length} community_user_progress rows`);
+        } else {
+          console.log("[importMovies] Backfill: no new rows to write (all already existed)");
         }
       }
     }
   } catch (e) {
-    console.warn("[importMovies] Community progress backfill failed:", e.message);
+    console.error("[importMovies] Community progress backfill FAILED:", e.message, e);
   }
 
   return { count, errs };
