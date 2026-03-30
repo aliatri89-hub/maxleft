@@ -330,6 +330,7 @@ function AppMain() {
   // ── Dismiss HTML splash ──
   useEffect(() => {
     if (screen === "loading") return;
+    console.warn(`[MANTL-RELOAD] screen changed to "${screen}" — dismissing splash`, new Date().toISOString());
     const splash = document.getElementById("splash-screen");
     if (splash) { splash.classList.add("hidden"); setTimeout(() => splash.remove(), 600); }
   }, [screen]);
@@ -354,6 +355,7 @@ function AppMain() {
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, s) => {
+      console.warn(`[MANTL-RELOAD] auth event: ${event}`, { hasSession: !!s, userId: s?.user?.id?.slice(0,8), screen }, new Date().toISOString());
       if (callbackTimeout) { clearTimeout(callbackTimeout); callbackTimeout = null; }
       if (nativeAuthTimeout) { clearTimeout(nativeAuthTimeout); nativeAuthTimeout = null; }
       setSession(s);
@@ -458,6 +460,7 @@ function AppMain() {
   };
 
   const loadUserData = async (user) => {
+    console.warn(`[MANTL-RELOAD] loadUserData called`, { userId: user?.id?.slice(0,8) }, new Date().toISOString());
     try {
       let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (!prof) {
