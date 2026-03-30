@@ -347,34 +347,14 @@ export default function CommunitySleeveSheet({
           </div>
         )}
 
-        {/* ── Listen label ── */}
-        <div style={{
-          display: "flex", alignItems: "center",
-          gap: 8, padding: "16px 20px 0",
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="rgba(240,235,225,0.5)" strokeWidth="2.5"
-            strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-          </svg>
-          <span style={{
-            fontFamily: t.fontDisplay,
-            fontWeight: 600, fontSize: 11,
-            color: "rgba(240,235,225,0.5)",
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-          }}>Listen</span>
-        </div>
-
         {/* ── Description ── */}
         {community.description && (
           <div style={{
             fontFamily: t.fontBody,
-            fontSize: 11,
-            lineHeight: 1.65,
-            color: "rgba(240,235,225,0.55)",
-            padding: "10px 20px 0",
+            fontSize: 13,
+            lineHeight: 1.7,
+            color: "rgba(240,235,225,0.85)",
+            padding: "16px 20px 0",
             letterSpacing: "0.01em",
           }}>
             {community.description}
