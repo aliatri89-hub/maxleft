@@ -18,31 +18,30 @@ const AdminShell = lazy(() => import("./admin/AdminShell"));
 // may silently resolve to 0px on some Android WebView versions. We probe
 // the actual value with a real element and set --sat/--sab as pixel values
 // from JS so every var(--sat) reference is guaranteed correct.
+export const probeSafeArea = () => {
+  const probe = document.createElement("div");
+  probe.style.cssText = "position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;";
+
+  // Top inset
+  probe.style.height = "env(safe-area-inset-top, 0px)";
+  document.body.appendChild(probe);
+  const top = probe.getBoundingClientRect().height;
+  probe.remove();
+
+  // Bottom inset
+  probe.style.height = "env(safe-area-inset-bottom, 0px)";
+  document.body.appendChild(probe);
+  const bottom = probe.getBoundingClientRect().height;
+  probe.remove();
+
+  if (top > 0) document.documentElement.style.setProperty("--sat", `${top}px`);
+  if (bottom > 0) document.documentElement.style.setProperty("--sab", `${bottom}px`);
+};
+
 if (Capacitor.isNativePlatform()) {
   StatusBar.setOverlaysWebView({ overlay: true });
   StatusBar.setBackgroundColor({ color: t.bgPrimary });
   StatusBar.setStyle({ style: Style.Dark });
-
-  // Probe actual safe-area inset values and set as pixel CSS variables
-  const probeSafeArea = () => {
-    const probe = document.createElement("div");
-    probe.style.cssText = "position:fixed;left:0;width:0;visibility:hidden;pointer-events:none;";
-
-    // Top inset
-    probe.style.height = "env(safe-area-inset-top, 0px)";
-    document.body.appendChild(probe);
-    const top = probe.getBoundingClientRect().height;
-    probe.remove();
-
-    // Bottom inset
-    probe.style.height = "env(safe-area-inset-bottom, 0px)";
-    document.body.appendChild(probe);
-    const bottom = probe.getBoundingClientRect().height;
-    probe.remove();
-
-    if (top > 0) document.documentElement.style.setProperty("--sat", `${top}px`);
-    if (bottom > 0) document.documentElement.style.setProperty("--sab", `${bottom}px`);
-  };
 
   // Wait for layout to settle after overlay mode is applied
   requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
@@ -461,6 +460,11 @@ function AppMain() {
       }
       setAuthLoading(false); setSigningIn(false); setScreen("app");
       initPushNotifications(showToast); // register for native push (no-op on web)
+      // Re-probe safe area insets — on fresh install the initial probe may have
+      // fired before the OAuth browser round-trip, yielding --sat: 0px
+      if (Capacitor.isNativePlatform()) {
+        requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+      }
     } catch (err) {
       console.error("Load user error:", err);
       setAuthLoading(false); setSigningIn(false); setScreen("landing");
@@ -475,6 +479,9 @@ function AppMain() {
     setProfile(prev => ({ ...prev, username, enabledShelves }));
     await loadShelves(session.user.id);
     setScreen("app"); showToast(`Welcome to Mantl, @${username}`);
+    if (Capacitor.isNativePlatform()) {
+      requestAnimationFrame(() => requestAnimationFrame(probeSafeArea));
+    }
   };
 
   const openShelfIt = (category) => {

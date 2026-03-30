@@ -52,6 +52,19 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
   const fetchedRef = useRef(false);
   const lastSlugRef = useRef(null);
   const lastSortRef = useRef(null);
+  const lastUserIdRef = useRef(userId);
+
+  // Reset fetch gate when userId changes (e.g. null → authenticated after OAuth)
+  // so the initial fetch retries with valid credentials
+  useEffect(() => {
+    if (userId !== lastUserIdRef.current) {
+      lastUserIdRef.current = userId;
+      if (userId && fetchedRef.current && items.length === 0) {
+        // Auth settled but initial fetch returned nothing — retry
+        fetchedRef.current = false;
+      }
+    }
+  }, [userId, items.length]);
 
   const fetchItems = useCallback(async (offset = 0, append = false, slug = null, sort = null) => {
     setLoading(true);
@@ -106,13 +119,27 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
   // Initial fetch when tab becomes active
   useEffect(() => {
     mountedRef.current = true;
+    let staleTimer;
     if (active && !fetchedRef.current) {
       fetchItems(0, false, podcastSlug, sortOrder);
       fetchedRef.current = true;
       lastSlugRef.current = podcastSlug;
       lastSortRef.current = sortOrder;
+      // Safety: if still loading with no items after 8s (e.g. Supabase client
+      // hung during OAuth token exchange on fresh install), reset and retry
+      staleTimer = setTimeout(() => {
+        if (!mountedRef.current) return;
+        // Check loading state by looking at items — if still empty, force retry
+        setItems(prev => {
+          if (prev.length === 0) {
+            fetchedRef.current = false;
+            fetchItems(0, false, podcastSlug, sortOrder).then(() => { fetchedRef.current = true; });
+          }
+          return prev;
+        });
+      }, 8000);
     }
-    return () => { mountedRef.current = false; };
+    return () => { mountedRef.current = false; clearTimeout(staleTimer); };
   }, [active, fetchItems, podcastSlug, sortOrder]);
 
   // Re-fetch when podcast filter or sort order changes
