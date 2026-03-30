@@ -20,11 +20,14 @@ function Expandable({ open, children }) {
   if (!mounted) return null;
 
   return (
+    // overflow:hidden + height:0 collapses instantly (no layout animation)
+    // only opacity transitions — fully GPU-composited, zero layout cost
     <div style={{
       overflow: "hidden",
-      maxHeight: open ? 2000 : 0,
+      height: open ? "auto" : 0,
       opacity: open ? 1 : 0,
-      transition: "max-height 0.32s cubic-bezier(0.2,0.9,0.3,1), opacity 0.2s ease",
+      pointerEvents: open ? "auto" : "none",
+      transition: "opacity 0.18s ease",
       willChange: "opacity",
     }}>
       {children}
