@@ -208,7 +208,7 @@ function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
               </div>
             )}
 
-            {(selected.type === "movie" || (selected.type === "tv" && showStatus === "finished")) && (
+            {(selected.type === "tv" && showStatus === "finished") && (
               <div className="rating-section">
                 <div className="rating-label">Your Rating</div>
                 <div className="star-row">{renderRatingStars()}</div>
@@ -216,9 +216,19 @@ function DiaryModal({ initialCategory, onClose, session, onSaved, onToast }) {
               </div>
             )}
 
-            <button className="btn-shelf-it" onClick={handleSave} disabled={saving}>
-              {saving ? "Logging..." : selected.type === "tv" ? (showStatus === "watching" ? "Start Watching" : "Log This Show") : "Log This Film"}
-            </button>
+            {(selected.type === "movie" && markedWatched) && (
+              <div className="rating-section">
+                <div className="rating-label">Your Rating <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>(optional)</span></div>
+                <div className="star-row">{renderRatingStars()}</div>
+                {rating > 0 && <div className="rating-display">{rating} / 5</div>}
+              </div>
+            )}
+
+            {(selected.type === "tv" || markedWatched) && (
+              <button className="btn-shelf-it" onClick={handleSave} disabled={saving}>
+                {saving ? "Logging..." : selected.type === "tv" ? (showStatus === "watching" ? "Start Watching" : "Log This Show") : "Log This Film"}
+              </button>
+            )}
           </div>
         </div>
       </div>
