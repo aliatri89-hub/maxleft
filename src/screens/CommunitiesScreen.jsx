@@ -11,7 +11,11 @@ const PODCAST_ART = {
   "blankcheck": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts211/v4/bb/82/cf/bb82cfa4-0bf8-bbe8-b5a6-407702ab1764/mza_4979053321172937662.jpeg/540x540bb.webp",
   "nowplaying": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/30/57/26/305726f4-a910-986d-af15-9d9630b96722/mza_632554795848485854.jpg/540x540bb.webp",
   "rewatchables": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/d0/b2/86/d0b286b1-c111-4346-18ab-8c1632551a41/mza_18001309740433796361.jpg/540x540bb.webp",
+  "hdtgm": "https://is1-ssl.mzstatic.com/image/thumb/Podcasts221/v4/4b/06/00/4b06006c-8936-1653-fc82-132b64441f4f/mza_5523773122723324139.jpg/540x540bb.webp",
 };
+
+// Communities that don't use series/franchise tracking (genre-based shelves)
+const HIDE_SERIES_TRACKING = new Set(["hdtgm", "rewatchables"]);
 
 // ════════════════════════════════════════════════
 // EXPLORE SCREEN — VHS tape shelf with sleeve discovery
@@ -251,7 +255,7 @@ export default function CommunitiesScreen({
                   artworkUrl={art}
                   showPlayButton={c.slug === "staff-picks"}
                   accent={accent}
-                  stats={stats[c.id]}
+                  stats={HIDE_SERIES_TRACKING.has(c.slug) ? null : stats[c.id]}
                   onTap={() => onOpenCommunity(c.slug)}
                   onFlip={() => openSleeve(c)}
                 />
@@ -283,7 +287,7 @@ export default function CommunitiesScreen({
                       artworkUrl={art}
                       showPlayButton={c.slug === "staff-picks"}
                       accent={accent}
-                      stats={stats[c.id]}
+                      stats={HIDE_SERIES_TRACKING.has(c.slug) ? null : stats[c.id]}
                       onTap={() => openSleeve(c)}
                     />
                   );
@@ -328,7 +332,7 @@ export default function CommunitiesScreen({
           onClose={closeSleeve}
           artworkUrl={PODCAST_ART[sleeveOpen.slug] || null}
           accent={sleeveOpen.theme_config?.accent || "#e94560"}
-          stats={stats[sleeveOpen.id]}
+          stats={HIDE_SERIES_TRACKING.has(sleeveOpen.slug) ? null : stats[sleeveOpen.id]}
           isSubscribed={communitySubscriptions?.has(sleeveOpen.id)}
           onFollow={() => handleFollowFromSleeve(sleeveOpen.id)}
           onUnfollow={() => handleUnfollowFromSleeve(sleeveOpen.id)}
