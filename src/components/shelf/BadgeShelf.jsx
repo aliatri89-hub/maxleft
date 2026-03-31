@@ -31,8 +31,8 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
             strokeLinecap="round" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={0} />
         </svg>
         <div style={{
-          position: "absolute", top: STROKE + 1, left: STROKE + 1,
-          width: SIZE - (STROKE + 1) * 2, height: SIZE - (STROKE + 1) * 2,
+          position: "absolute", top: STROKE, left: STROKE,
+          width: SIZE - STROKE * 2, height: SIZE - STROKE * 2,
           borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
@@ -113,8 +113,8 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
             style={{ transition: "stroke-dashoffset 0.6s ease-out" }} />
         </svg>
         <div style={{
-          position: "absolute", top: STROKE + 1, left: STROKE + 1,
-          width: SIZE - (STROKE + 1) * 2, height: SIZE - (STROKE + 1) * 2,
+          position: "absolute", top: STROKE, left: STROKE,
+          width: SIZE - STROKE * 2, height: SIZE - STROKE * 2,
           borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
