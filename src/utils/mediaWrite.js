@@ -54,6 +54,15 @@ export async function upsertMediaLog(userId, {
 } = {}) {
   if (!userId || !title) return null;
 
+  // Upgrade date-only strings ("2026-03-31") to real timestamps.
+  // Callers like QuickLogModal pass .slice(0,10) — without this,
+  // Postgres casts to midnight UTC and diary ordering breaks.
+  const resolvedWatchedAt = (() => {
+    if (!watchedAt) return new Date().toISOString();
+    if (typeof watchedAt === "string" && /^\d{4}-\d{2}-\d{2}$/.test(watchedAt)) return new Date().toISOString();
+    return watchedAt;
+  })();
+
   const { data, error } = await supabase.rpc("upsert_media_log", {
     p_user_id: userId,
     p_media_type: mediaType,
@@ -68,7 +77,7 @@ export async function upsertMediaLog(userId, {
     p_genre: genre || null,
     p_rating: rating ? Math.round(rating) : null,
     p_notes: notes || null,
-    p_watched_at: watchedAt || new Date().toISOString(),
+    p_watched_at: resolvedWatchedAt,
     p_source: source,
     p_watch_count: watchCount,
     p_watch_dates: watchDates,
