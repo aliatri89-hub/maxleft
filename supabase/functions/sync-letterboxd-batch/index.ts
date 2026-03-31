@@ -108,6 +108,7 @@ interface RSSFilm {
   year: number | null;
   rating: number | null;
   watchedDate: string | null;
+  pubDate: string | null;  // RFC 2822 — exact log timestamp, second-accurate
   tmdbId: number | null;
   reviewUrl: string | null;
   dedupKey: string;
@@ -148,11 +149,14 @@ function parseLetterboxdRSS(xml: string): RSSFilm[] {
 
     const reviewUrl = extractTag(content, "link") || null;
 
+    const pubDateStr = extractTag(content, "pubDate") || null;
+
     films.push({
       title,
       year,
       rating: rating || null,
       watchedDate: watchedDate || null,
+      pubDate: pubDateStr || null,
       tmdbId: !isNaN(tmdbId!) ? tmdbId : null,
       reviewUrl,
       dedupKey: `${title}::${year}`,
@@ -717,9 +721,15 @@ async function processNewFilm(
     ? new Date(film.watchedDate).toISOString().slice(0, 10)
     : new Date().toISOString().slice(0, 10);
 
-  const watchedAt = film.watchedDate
-    ? toLogTimestamp(film.watchedDate)
-    : new Date().toISOString();
+  // Prefer pubDate (second-accurate, from RSS) over noon-UTC approximation.
+  // This gives correct same-day ordering without any stagger hacks.
+  const watchedAt = (() => {
+    if (film.pubDate) {
+      const d = new Date(film.pubDate);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+    return film.watchedDate ? toLogTimestamp(film.watchedDate) : new Date().toISOString();
+  })();
 
   const { data: mediaId, error } = await sb.rpc("upsert_media_log", {
     p_user_id: uid,
