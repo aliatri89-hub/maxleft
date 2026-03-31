@@ -131,7 +131,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <div style={{ flexShrink: 0, paddingTop: 6 }}>
+      <div style={{ flexShrink: 0, paddingTop: 14 }}>
         <BadgeShelf session={session} isActive={isActive} />
       </div>
 
@@ -246,6 +246,9 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
               }} />
             ))}
 
+            {/* ── Diary section — anchored to bottom of hearth ── */}
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: 0 }}>
+
             {/* ── Diary Header ── */}
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
@@ -272,15 +275,13 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
 
             {recentMovies.length > 0 ? (
               <>
-                {/* Diary entries — fills available space, scrolls internally */}
-                <div style={{ flex: 1, minHeight: 0, overflow: "hidden", padding: "0 12px 0", position: "relative", zIndex: 2 }}>
+                {/* Diary entries — pushed to bottom */}
+                <div style={{ marginTop: "auto", padding: "0 12px 0", position: "relative", zIndex: 2, flexShrink: 0 }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
                     overflow: "hidden",
                     border: "0.5px solid rgba(255,255,255,0.04)",
-                    maxHeight: "100%",
-                    overflowY: "auto",
                   }}>
                     {recentMovies.map((movie, i) => {
                       const { month, day } = parseDiaryDate(movie.watchedAt);
@@ -359,12 +360,11 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                   </div>
                 </div>
 
-                {/* Bottom row: See all + Sync + Add — pinned to bottom */}
+                {/* Bottom row: See all + Sync + Add */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
                   gap: 10, padding: "8px 12px",
-                  position: "relative", zIndex: 2,
-                  marginTop: "auto", flexShrink: 0,
+                  position: "relative", zIndex: 2, flexShrink: 0,
                 }}>
                   {movies.length > 5 && (
                     <div
