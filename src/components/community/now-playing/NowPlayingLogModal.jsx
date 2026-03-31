@@ -1,5 +1,6 @@
 import { t } from "../../../theme";
 import CommunityLogModal from "../shared/CommunityLogModal";
+import { isComingSoon } from "../../../utils/comingSoon";
 import { useState } from "react";
 
 const PATREON_URL = "https://www.patreon.com/nowplayingpodcast";
@@ -20,7 +21,7 @@ export default function NowPlayingLogModal(props) {
 
   const isFilm = item.media_type === "film";
   const isShow = item.media_type === "show";
-  const itemIsPatreon = !!item.episode_url?.includes("patreon.com");
+  const itemIsPatreon = !!item.episode_url?.includes("patreon.com") && !isComingSoon(item);
 
   return (
     <CommunityLogModal
