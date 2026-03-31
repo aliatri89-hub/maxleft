@@ -182,15 +182,15 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       </div>
 
       {/* ── Fireplace Hearth ── */}
-      <div ref={fireplaceRef} style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
-        <div ref={hearthRowRef} style={{ display: "flex", flex: 1, minHeight: 0 }}>
+      <div ref={fireplaceRef} style={{ flexShrink: 0, marginTop: "auto", overflow: "hidden" }}>
+        <div ref={hearthRowRef} style={{ display: "flex" }}>
 
           {/* Left stone column */}
           <div style={{
             width: 22, flexShrink: 0,
             background: "linear-gradient(90deg, #2e2518 0%, #251e14 30%, #1c1710 70%, #161210 100%)",
             borderLeft: "0.5px solid rgba(255,255,255,0.05)",
-            position: "relative",
+            position: "relative", overflow: "hidden",
             boxShadow: "inset -6px 0 12px rgba(0,0,0,0.5)",
           }}>
             {/* Stone blocks */}
@@ -292,7 +292,6 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "14px 16px 6px",
               position: "relative", zIndex: 2, flexShrink: 0,
-              marginTop: "auto",
             }}>
               <div style={{
                 fontFamily: t.fontSerif, fontWeight: 700,
@@ -477,7 +476,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
             width: 22, flexShrink: 0,
             background: "linear-gradient(90deg, #161210 0%, #1c1710 30%, #251e14 70%, #2e2518 100%)",
             borderRight: "0.5px solid rgba(255,255,255,0.05)",
-            position: "relative",
+            position: "relative", overflow: "hidden",
             boxShadow: "inset 6px 0 12px rgba(0,0,0,0.5)",
           }}>
             {Array.from({ length: 24 }, (_, i) => {
