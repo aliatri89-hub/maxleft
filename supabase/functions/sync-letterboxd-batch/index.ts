@@ -214,6 +214,10 @@ serve(async (req) => {
 
       console.log(`[LBBatch:single] Syncing user ${profile.letterboxd_username}`);
 
+      // Capture before sync so we can skip coverage notifs on first-ever sync.
+      // Historical films don't earn "Coverage available" — only new logs going forward do.
+      const isFirstSync = !profile.letterboxd_last_synced_at;
+
       const result = await syncUserLetterboxd(
         sb, tmdbKey, uid,
         profile.letterboxd_username,
@@ -222,8 +226,8 @@ serve(async (req) => {
         profile.letterboxd_last_synced_at ?? null
       );
 
-      // Fire coverage notifications for newly synced films
-      if (result.synced_films && result.synced_films.length > 0) {
+      // Fire coverage notifications for newly synced films — but never on first sync
+      if (!isFirstSync && result.synced_films && result.synced_films.length > 0) {
         try {
           await fetch(`${supabaseUrl}/functions/v1/check-new-film-coverage`, {
             method: "POST",
@@ -299,8 +303,10 @@ serve(async (req) => {
           elapsed_ms: Date.now() - userStart,
         });
 
-        // Fire "You Watched It" coverage notifications for newly synced films
-        if (syncResult.synced_films && syncResult.synced_films.length > 0) {
+        // Fire coverage notifications for newly synced films — but never on first sync.
+        // Historical films don't earn "Coverage available" — only new logs going forward do.
+        const isFirstSync = !profile?.letterboxd_last_synced_at;
+        if (!isFirstSync && syncResult.synced_films && syncResult.synced_films.length > 0) {
           try {
             const coverageRes = await fetch(
               `${supabaseUrl}/functions/v1/check-new-film-coverage`,
