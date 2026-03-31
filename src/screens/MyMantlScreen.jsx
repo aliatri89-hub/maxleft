@@ -431,6 +431,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                 }}>No films yet</div>
               </div>
             )}
+            </div>
           </div>
 
           {/* Right stone column */}
