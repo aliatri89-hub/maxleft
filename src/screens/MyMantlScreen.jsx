@@ -115,16 +115,16 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
         // Check if already earned
         const { data: existing } = await supabase
           .from("user_badges")
-          .select("id")
+          .select("badge_id")
           .eq("user_id", userId)
           .eq("badge_id", badge.id)
           .maybeSingle();
         if (existing) return;
 
-        // Award it
+        // Award it (ignore duplicate conflict)
         await supabase
           .from("user_badges")
-          .insert({ user_id: userId, badge_id: badge.id });
+          .upsert({ user_id: userId, badge_id: badge.id }, { onConflict: "user_id,badge_id", ignoreDuplicates: true });
       } catch (e) {
         console.error("[PressPlay] Award error:", e);
       }
