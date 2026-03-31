@@ -180,9 +180,9 @@ function EmptySlot({ delay = 0 }) {
         background: "rgba(255,255,255,0.02)",
       }} />
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -4 }}>
-        <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #555, #3a3a3a)", borderRadius: "0 0 1px 1px" }} />
-        <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #444, #2a2a2a)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
-        <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #555, #333)", borderRadius: "1px 1px 2px 2px" }} />
+        <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #888, #666)", borderRadius: "0 0 1px 1px" }} />
+        <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #777, #4a4a4a)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
+        <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #888, #555)", borderRadius: "1px 1px 2px 2px" }} />
       </div>
     </div>
   );
