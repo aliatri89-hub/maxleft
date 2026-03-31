@@ -275,8 +275,8 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
 
             {recentMovies.length > 0 ? (
               <>
-                {/* Diary entries — pushed to bottom */}
-                <div style={{ marginTop: "auto", padding: "0 12px 0", position: "relative", zIndex: 2, flexShrink: 0 }}>
+                {/* Diary entries */}
+                <div style={{ padding: "0 12px 0", position: "relative", zIndex: 2, flexShrink: 0 }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
