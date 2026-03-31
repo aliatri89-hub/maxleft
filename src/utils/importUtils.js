@@ -73,7 +73,7 @@ function parseRows(rows, headers, format) {
         title,
         year: parseInt(get(row, "year")) || null,
         rating: ratingRaw || null,
-        watchedDate: get(row, "date") || get(row, "watched date") || null,
+        watchedDate: get(row, "watched date") || get(row, "date") || null,
         rewatch: get(row, "rewatch")?.toLowerCase() === "yes",
         source: "letterboxd",
       });
