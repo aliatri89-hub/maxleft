@@ -180,6 +180,77 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
+
+    // ── SINGLE-USER MODE ─────────────────────────────────────
+    // Called by the client on app-open / manual refresh.
+    // Authenticates via user JWT, looks up letterboxd_username,
+    // runs the same syncUserLetterboxd the cron uses.
+    // This replaces the old client-side sync in useIntegrationSync.
+    if (body.single_user === true) {
+      const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        return jsonRes({ error: "Missing auth" }, 401);
+      }
+
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: { user }, error: authError } = await userClient.auth.getUser();
+      if (authError || !user) {
+        return jsonRes({ error: "Unauthorized" }, 401);
+      }
+
+      const uid = user.id;
+      const { data: profile } = await sb
+        .from("profiles")
+        .select("letterboxd_username, letterboxd_etag, letterboxd_last_modified, letterboxd_last_synced_at")
+        .eq("id", uid)
+        .single();
+
+      if (!profile?.letterboxd_username) {
+        return jsonRes({ error: "No Letterboxd username connected", synced: 0, rewatches: 0, community_logged: 0, synced_films: [] });
+      }
+
+      console.log(`[LBBatch:single] Syncing user ${profile.letterboxd_username}`);
+
+      const result = await syncUserLetterboxd(
+        sb, tmdbKey, uid,
+        profile.letterboxd_username,
+        profile.letterboxd_etag || null,
+        profile.letterboxd_last_modified || null,
+        profile.letterboxd_last_synced_at ?? null
+      );
+
+      // Fire coverage notifications for newly synced films
+      if (result.synced_films && result.synced_films.length > 0) {
+        try {
+          await fetch(`${supabaseUrl}/functions/v1/check-new-film-coverage`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${serviceKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: uid,
+              new_films: result.synced_films.map((f: any) => ({
+                tmdb_id: f.tmdbId,
+                title: f.title,
+              })),
+            }),
+          });
+        } catch (notifErr: any) {
+          console.warn(`[LBBatch:single] Coverage check failed:`, notifErr.message);
+        }
+      }
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log(`[LBBatch:single] Done in ${elapsed}s: ${result.synced} new, ${result.rewatches} rewatches`);
+
+      return jsonRes(result);
+    }
+
+    // ── BATCH MODE (cron dispatcher) ─────────────────────────
     const users: Array<{ id: string; username: string }> = body.users || [];
     const batchIndex = body.batch_index ?? 0;
 

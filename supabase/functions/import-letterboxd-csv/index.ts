@@ -117,7 +117,7 @@ async function processItem(
     return null;
   }
 
-  return { tmdbId: match.id, rating: item.ratingHalf || item.rating || null, watchedAt };
+  return { tmdbId: match.id, rating: item.rating ?? null, watchedAt };
 }
 
 // ── Community progress backfill ───────────────────────────────
