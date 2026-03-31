@@ -1,5 +1,5 @@
 import { t } from "../theme";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { useShelves } from "../contexts/ShelvesProvider";
@@ -96,6 +96,47 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
   const movies = shelves.movies || [];
   const recentMovies = movies.slice(0, 5);
 
+  // ── DEBUG: measure all flex sections ──
+  const shellRef = useRef(null);
+  const badgeRef = useRef(null);
+  const statsRef = useRef(null);
+  const fireplaceRef = useRef(null);
+  const hearthRowRef = useRef(null);
+  const hearthOpenRef = useRef(null);
+  const diaryHeaderRef = useRef(null);
+  const diaryEntriesRef = useRef(null);
+  const diaryButtonsRef = useRef(null);
+  const [dbg, setDbg] = useState({});
+  const [showDebug, setShowDebug] = useState(true);
+
+  const measure = useCallback(() => {
+    const h = (ref) => ref.current ? Math.round(ref.current.getBoundingClientRect().height) : "?";
+    const cs = (ref, prop) => ref.current ? getComputedStyle(ref.current)[prop] : "?";
+    setDbg({
+      dvh: Math.round(window.innerHeight),
+      shell: h(shellRef),
+      badge: h(badgeRef),
+      stats: h(statsRef),
+      fireplace: h(fireplaceRef),
+      hearthRow: h(hearthRowRef),
+      hearth: h(hearthOpenRef),
+      diaryHdr: h(diaryHeaderRef),
+      diaryEntries: h(diaryEntriesRef),
+      diaryBtns: h(diaryButtonsRef),
+      hearthOverflow: cs(hearthOpenRef, "overflow"),
+      hearthDisplay: cs(hearthOpenRef, "display"),
+      hearthFlexDir: cs(hearthOpenRef, "flexDirection"),
+      diaryHdrMarginTop: cs(diaryHeaderRef, "marginTop"),
+    });
+  }, []);
+
+  useEffect(() => {
+    measure();
+    const timer = setTimeout(measure, 1000); // re-measure after badges load
+    window.addEventListener("resize", measure);
+    return () => { clearTimeout(timer); window.removeEventListener("resize", measure); };
+  }, [measure, shelvesLoaded]);
+
   // Count films this week for diary header
   const weekCount = useMemo(() => {
     const now = new Date();
@@ -104,7 +145,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
   }, [movies]);
 
   return (
-    <div className="shelf-home" style={{
+    <div ref={shellRef} className="shelf-home" style={{
       background: "var(--bg-primary)",
       height: "calc(100dvh - 52px - 64px)",
       display: "flex",
@@ -131,18 +172,18 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <div style={{ flexShrink: 0, paddingTop: 14 }}>
+      <div ref={badgeRef} style={{ flexShrink: 0, paddingTop: 14 }}>
         <BadgeShelf session={session} isActive={isActive} />
       </div>
 
       {/* ── Stats Ribbon ── */}
-      <div style={{ flexShrink: 0 }}>
+      <div ref={statsRef} style={{ flexShrink: 0 }}>
         <StatsRibbon userId={session?.user?.id} />
       </div>
 
       {/* ── Fireplace Hearth ── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
-        <div style={{ display: "flex", flex: 1, minHeight: 0 }}>
+      <div ref={fireplaceRef} style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
+        <div ref={hearthRowRef} style={{ display: "flex", flex: 1, minHeight: 0 }}>
 
           {/* Left stone column */}
           <div style={{
@@ -176,7 +217,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
           </div>
 
           {/* Hearth opening */}
-          <div style={{
+          <div ref={hearthOpenRef} style={{
             flex: 1,
             background: "radial-gradient(ellipse at center 120%, #12100c 0%, #0a0908 40%, #060505 100%)",
             borderTop: "2px solid #1a1510",
@@ -247,7 +288,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
             ))}
 
             {/* ── Diary Header ── */}
-            <div style={{
+            <div ref={diaryHeaderRef} style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "14px 16px 6px",
               position: "relative", zIndex: 2, flexShrink: 0,
@@ -274,7 +315,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
             {recentMovies.length > 0 ? (
               <>
                 {/* Diary entries */}
-                <div style={{ padding: "0 12px 0", position: "relative", zIndex: 2, flexShrink: 0 }}>
+                <div ref={diaryEntriesRef} style={{ padding: "0 12px 0", position: "relative", zIndex: 2, flexShrink: 0 }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
@@ -359,7 +400,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                 </div>
 
                 {/* Bottom row: See all + Sync + Add */}
-                <div style={{
+                <div ref={diaryButtonsRef} style={{
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
                   gap: 10, padding: "8px 12px",
                   position: "relative", zIndex: 2, flexShrink: 0,
@@ -463,6 +504,49 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
 
         </div>
       </div>
+
+      {/* ── DEBUG PANEL ── */}
+      {showDebug && createPortal(
+        <div
+          onClick={() => { measure(); }}
+          style={{
+            position: "fixed", bottom: 70, right: 6, zIndex: 99999,
+            background: "rgba(0,0,0,0.92)", color: "#0f0",
+            fontFamily: "monospace", fontSize: 10, lineHeight: 1.6,
+            padding: "8px 10px", borderRadius: 6,
+            border: "1px solid #0f03", maxWidth: 220,
+            pointerEvents: "auto", userSelect: "text",
+          }}
+        >
+          <div style={{ color: "#ff0", fontWeight: 700, marginBottom: 4 }}>📐 LAYOUT DEBUG (tap=refresh)</div>
+          <div>viewport (dvh): <b>{dbg.dvh}px</b></div>
+          <div>shell-home: <b>{dbg.shell}px</b></div>
+          <div style={{ color: "#8cf" }}>─ badgeShelf: <b>{dbg.badge}px</b></div>
+          <div style={{ color: "#8cf" }}>─ statsRibbon: <b>{dbg.stats}px</b></div>
+          <div style={{ color: "#8cf" }}>─ fireplace: <b>{dbg.fireplace}px</b></div>
+          <div style={{ color: "#aaa" }}>&nbsp;&nbsp;└ hearthRow: <b>{dbg.hearthRow}px</b></div>
+          <div style={{ color: "#aaa" }}>&nbsp;&nbsp;&nbsp;&nbsp;└ hearthOpen: <b>{dbg.hearth}px</b></div>
+          <div style={{ color: "#f88" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ diaryHdr: <b>{dbg.diaryHdr}px</b></div>
+          <div style={{ color: "#f88" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├ entries: <b>{dbg.diaryEntries}px</b></div>
+          <div style={{ color: "#f88" }}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ buttons: <b>{dbg.diaryBtns}px</b></div>
+          <div style={{ marginTop: 4, color: "#ccc" }}>
+            freeSpace: <b style={{ color: "#0f0" }}>
+              {typeof dbg.hearth === "number" && typeof dbg.diaryHdr === "number"
+                ? `${dbg.hearth - (dbg.diaryHdr + (dbg.diaryEntries || 0) + (dbg.diaryBtns || 0))}px`
+                : "?"}
+            </b>
+          </div>
+          <div style={{ color: "#888" }}>hearth overflow: {dbg.hearthOverflow}</div>
+          <div style={{ color: "#888" }}>hearth display: {dbg.hearthDisplay}</div>
+          <div style={{ color: "#888" }}>hearth flexDir: {dbg.hearthFlexDir}</div>
+          <div style={{ color: "#ff0" }}>diaryHdr marginTop: <b>{dbg.diaryHdrMarginTop}</b></div>
+          <button onClick={(e) => { e.stopPropagation(); setShowDebug(false); }}
+            style={{ marginTop: 4, fontSize: 9, background: "#333", color: "#fff", border: "none", borderRadius: 3, padding: "2px 8px", cursor: "pointer" }}>
+            Hide
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* ── All Modals (portaled to body so slider transform doesn't break fixed positioning) ── */}
       {createPortal(
