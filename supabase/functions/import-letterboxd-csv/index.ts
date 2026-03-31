@@ -20,7 +20,7 @@ const corsHeaders = {
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const CONCURRENCY = 6;
 const TMDB_DELAY_MS = 150;
-const DB_BATCH = 50;
+const DB_BATCH = 100;
 
 // ── TMDB helpers ─────────────────────────────────────────────
 
