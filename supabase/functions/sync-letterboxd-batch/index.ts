@@ -385,8 +385,16 @@ async function syncUserLetterboxd(
   const existingSet = new Set(
     (existingMovies || []).map((m: any) => `${m.title}::${m.year}`)
   );
+  // Fix 4: secondary dedup by tmdb_id — catches regional/encoding title mismatches
+  const existingTmdbSet = new Set(
+    (existingMovies || []).filter((m: any) => m.tmdb_id).map((m: any) => m.tmdb_id)
+  );
   const existingMap = new Map(
     (existingMovies || []).map((m: any) => [`${m.title}::${m.year}`, m])
+  );
+  // Also index by tmdb_id for rewatch detection when tmdb_id is available
+  const existingTmdbMap = new Map(
+    (existingMovies || []).filter((m: any) => m.tmdb_id).map((m: any) => [m.tmdb_id, m])
   );
 
   // 3. Separate new films vs rewatches
@@ -396,8 +404,15 @@ async function syncUserLetterboxd(
   for (const film of rssFilms) {
     if (workQueue.length >= MAX_SYNC_PER_USER) break;
 
-    if (existingSet.has(film.dedupKey)) {
-      const existing = existingMap.get(film.dedupKey);
+    // Fix 4: check by tmdb_id first (most reliable), fall back to title::year
+    const existsByTmdb = film.tmdbId != null && existingTmdbSet.has(film.tmdbId);
+    const existsByTitle = existingSet.has(film.dedupKey);
+    const alreadyExists = existsByTmdb || existsByTitle;
+
+    if (alreadyExists) {
+      // Resolve the existing record — prefer tmdb_id match, fall back to title match
+      const existing = (film.tmdbId != null && existingTmdbMap.get(film.tmdbId))
+        || existingMap.get(film.dedupKey);
       if (existing && film.watchedDate) {
         const dateStr = new Date(film.watchedDate).toISOString().slice(0, 10);
         const knownDates = (existing.watch_dates || []).map((d: string) =>
@@ -419,6 +434,7 @@ async function syncUserLetterboxd(
     }
 
     existingSet.add(film.dedupKey);
+    if (film.tmdbId != null) existingTmdbSet.add(film.tmdbId);
     workQueue.push(film);
   }
 
@@ -481,6 +497,23 @@ async function syncUserLetterboxd(
     communityLogged = await autoLogCommunityProgress(sb, uid, syncedFilms);
   }
 
+  // Fix 5: check badges when community progress was updated
+  // (mirrors the CSV import path — RSS was previously silent on badge awards)
+  if (communityLogged > 0) {
+    try {
+      const { data: subs } = await sb
+        .from("user_community_subscriptions")
+        .select("community_id")
+        .eq("user_id", uid);
+      const communityIds = (subs || []).map((s: any) => s.community_id);
+      if (communityIds.length > 0) {
+        await checkAndAwardBadges(sb, uid, communityIds);
+      }
+    } catch (e: any) {
+      console.warn(`[LBBatch:${username}] Badge check failed:`, e.message);
+    }
+  }
+
   if (synced > 0 || rewatchCount > 0) {
     console.log(
       `[LBBatch:${username}] Synced ${synced} new, ${rewatchCount} rewatches, ${communityLogged} community logs`
@@ -492,6 +525,116 @@ async function syncUserLetterboxd(
 
   return { synced, rewatches: rewatchCount, community_logged: communityLogged, synced_films: syncedFilms };
 }
+
+// ── Badge check (mirrors import-letterboxd-csv) ─────────────
+const DB_BATCH = 50;
+
+async function checkAndAwardBadges(
+  sb: any,
+  userId: string,
+  communityIds: string[]
+): Promise<number> {
+  if (!communityIds.length) return 0;
+  let awarded = 0;
+
+  const { data: allBadges } = await sb
+    .from("badges")
+    .select("id, name, image_url, accent_color, community_id, badge_type, miniseries_id, media_type_filter")
+    .in("community_id", communityIds)
+    .eq("is_active", true);
+  if (!allBadges?.length) return 0;
+
+  const { data: earnedRows } = await sb
+    .from("user_badges").select("badge_id").eq("user_id", userId)
+    .in("badge_id", allBadges.map((b: any) => b.id));
+  const earnedSet = new Set((earnedRows || []).map((r: any) => r.badge_id));
+  const unearnedBadges = allBadges.filter((b: any) => !earnedSet.has(b.id));
+  if (!unearnedBadges.length) return 0;
+
+  // ── miniseries_completion ──
+  const msBadges = unearnedBadges.filter((b: any) => b.badge_type === "miniseries_completion" && b.miniseries_id);
+  if (msBadges.length > 0) {
+    const msIds = [...new Set(msBadges.map((b: any) => b.miniseries_id))];
+    const allItems: any[] = [];
+    for (let i = 0; i < msIds.length; i += DB_BATCH) {
+      const { data } = await sb.from("community_items")
+        .select("id, tmdb_id, miniseries_id, media_type")
+        .in("miniseries_id", msIds.slice(i, i + DB_BATCH));
+      if (data) allItems.push(...data);
+    }
+    const allTmdbIds = [...new Set(allItems.map((i: any) => i.tmdb_id).filter(Boolean))];
+    const completedSet = new Set<number>();
+    for (let i = 0; i < allTmdbIds.length; i += DB_BATCH) {
+      const { data } = await sb.from("community_user_progress")
+        .select("community_items!inner(tmdb_id)")
+        .eq("user_id", userId).eq("status", "completed")
+        .in("community_items.tmdb_id", allTmdbIds.slice(i, i + DB_BATCH));
+      (data || []).forEach((r: any) => { if (r.community_items?.tmdb_id) completedSet.add(r.community_items.tmdb_id); });
+    }
+    for (const badge of msBadges) {
+      const items = allItems.filter((i: any) => i.miniseries_id === badge.miniseries_id &&
+        (!badge.media_type_filter || i.media_type === badge.media_type_filter));
+      const required = [...new Set(items.map((i: any) => i.tmdb_id).filter(Boolean))];
+      if (required.length > 0 && required.every((id: number) => completedSet.has(id))) {
+        const { error } = await sb.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
+        if (!error || error.message.includes("duplicate")) {
+          awarded++;
+          await sb.from("user_notifications").upsert({
+            user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
+            body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
+            payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+            ref_key: `badge_earned:${badge.id}`,
+          }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+        }
+      }
+    }
+  }
+
+  // ── item_set_completion ──
+  const setbadges = unearnedBadges.filter((b: any) => b.badge_type === "item_set_completion");
+  if (setbadges.length > 0) {
+    const badgeIds = setbadges.map((b: any) => b.id);
+    const allBadgeItems: any[] = [];
+    for (let i = 0; i < badgeIds.length; i += DB_BATCH) {
+      const { data } = await sb.from("badge_items")
+        .select("badge_id, community_items!inner(tmdb_id)")
+        .in("badge_id", badgeIds.slice(i, i + DB_BATCH));
+      if (data) allBadgeItems.push(...data);
+    }
+    const badgeItemsMap: Record<string, number[]> = {};
+    allBadgeItems.forEach((r: any) => {
+      if (!badgeItemsMap[r.badge_id]) badgeItemsMap[r.badge_id] = [];
+      if (r.community_items?.tmdb_id) badgeItemsMap[r.badge_id].push(r.community_items.tmdb_id);
+    });
+    const allSetTmdbIds = [...new Set(Object.values(badgeItemsMap).flat())];
+    const completedSetTmdb = new Set<number>();
+    for (let i = 0; i < allSetTmdbIds.length; i += DB_BATCH) {
+      const { data } = await sb.from("community_user_progress")
+        .select("community_items!inner(tmdb_id)")
+        .eq("user_id", userId).eq("status", "completed")
+        .in("community_items.tmdb_id", allSetTmdbIds.slice(i, i + DB_BATCH));
+      (data || []).forEach((r: any) => { if (r.community_items?.tmdb_id) completedSetTmdb.add(r.community_items.tmdb_id); });
+    }
+    for (const badge of setbadges) {
+      const required = [...new Set((badgeItemsMap[badge.id] || []).filter(Boolean))];
+      if (required.length > 0 && required.every((id: number) => completedSetTmdb.has(id))) {
+        const { error } = await sb.from("user_badges").insert({ user_id: userId, badge_id: badge.id });
+        if (!error || error.message.includes("duplicate")) {
+          awarded++;
+          await sb.from("user_notifications").upsert({
+            user_id: userId, notif_type: "badge_earned", title: "Badge unlocked",
+            body: `You earned "${badge.name}"`, image_url: badge.image_url || null,
+            payload: { type: "badge_earned", badge_id: badge.id, community_id: badge.community_id },
+            ref_key: `badge_earned:${badge.id}`,
+          }, { onConflict: "user_id,ref_key", ignoreDuplicates: true });
+        }
+      }
+    }
+  }
+
+  return awarded;
+}
+
 
 // ── Update sync metadata on profiles ────────────────────────
 async function updateSyncMeta(
