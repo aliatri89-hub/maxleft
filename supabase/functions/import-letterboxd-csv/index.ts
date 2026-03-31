@@ -156,7 +156,7 @@ async function backfillCommunityProgress(
         user_id: userId,
         item_id: item.id,
         status: "completed",
-        rating: filmData?.rating ? Math.round(filmData.rating) : null,
+        rating: filmData?.rating ?? null,
         completed_at: filmData?.watchedAt || new Date().toISOString(),
         listened_with_commentary: false,
         brown_arrow: false,

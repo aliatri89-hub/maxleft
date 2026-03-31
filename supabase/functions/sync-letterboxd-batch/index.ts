@@ -460,7 +460,7 @@ async function syncUserLetterboxd(
         p_tmdb_id: rw.tmdb_id,
         p_watch_dates: newDates,
         p_watched_at: new Date(watchedTimestamp).toISOString(),
-        p_rating: rw.rating ? Math.round(rw.rating) : null,
+        p_rating: rw.rating ?? null,
       });
 
       if (rwErr) {
@@ -592,7 +592,7 @@ async function processNewFilm(
     p_backdrop_path: toPosterPath(backdrop),
     p_runtime: runtime,
     p_genre: genre,
-    p_rating: film.rating ? Math.round(film.rating) : null,
+    p_rating: film.rating ?? null,
     p_notes: null,
     p_watched_at: watchedAt,
     p_source: "letterboxd",
@@ -650,7 +650,7 @@ async function autoLogCommunityProgress(
           user_id: uid,
           item_id: item.id,
           status: "completed",
-          rating: filmData?.rating ? Math.round(filmData.rating) : null,
+          rating: filmData?.rating ?? null,
           completed_at: filmData?.watchedAt || new Date().toISOString(),
           listened_with_commentary: false,
           brown_arrow: false,
@@ -711,7 +711,7 @@ async function updateCommunityRewatch(
       completed_at: rewatchTimestamp,
       updated_at: rewatchTimestamp,
     };
-    if (rw.rating) updatePayload.rating = Math.round(rw.rating);
+    if (rw.rating != null) updatePayload.rating = rw.rating;
 
     await sb
       .from("community_user_progress")
