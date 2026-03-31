@@ -593,6 +593,9 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           onToggleCommentary={handleToggleCommentary}
           onBack={() => setSelectedSeries(null)}
           CardComponent={BlankCheckItemCard}
+          getExtraCardProps={(item) => ({
+            showCommentaryBadge: patreonItemIds.has(item.id),
+          })}
           coverCacheVersion={coverCache}
           accent={accent}
           userId={userId}

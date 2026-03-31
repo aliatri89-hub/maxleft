@@ -25,6 +25,7 @@ export default function SeriesDetailView({
   progress,
   onItemTap,
   onToggleCommentary,
+  getExtraCardProps,
   onBack,
   CardComponent,
   coverCacheVersion,
@@ -286,6 +287,7 @@ export default function SeriesDetailView({
                 userRating={progress[item.id]?.rating || null}
                 listenedWithCommentary={!!progress[item.id]?.listened_with_commentary}
                 onToggleCommentary={onToggleCommentary}
+                {...(getExtraCardProps ? getExtraCardProps(item) : {})}
               />
             </div>
           );
