@@ -1,5 +1,5 @@
 import { t } from "../theme";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../supabase";
 import { useShelves } from "../contexts/ShelvesProvider";
