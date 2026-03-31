@@ -45,33 +45,52 @@ function StatsRibbon({ userId }) {
   ];
 
   return (
-    <div style={{
-      display: "flex", justifyContent: "space-around",
-      padding: "14px 12px",
-      background: "#080706",
-      borderTop: "0.5px solid rgba(255,255,255,0.04)",
-      borderBottom: "0.5px solid rgba(255,255,255,0.04)",
-      margin: 0,
-    }}>
-      {items.map((s) => (
-        <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
-          <div style={{
-            fontFamily: t.fontSerif, fontWeight: 900,
-            fontSize: 20, lineHeight: 1,
-            color: t.textSecondary,
-          }}>
-            {s.value}
+    <div style={{ display: "flex" }}>
+      {/* Left stone column — matches hearth */}
+      <div style={{
+        width: 22, flexShrink: 0,
+        background: "linear-gradient(90deg, #2e2518 0%, #251e14 30%, #1c1710 70%, #161210 100%)",
+        borderLeft: "0.5px solid rgba(255,255,255,0.05)",
+        boxShadow: "inset -6px 0 12px rgba(0,0,0,0.5)",
+      }} />
+
+      {/* Stats content */}
+      <div style={{
+        flex: 1,
+        display: "flex", justifyContent: "space-around",
+        padding: "14px 12px",
+        background: "#080706",
+        borderTop: "0.5px solid rgba(255,255,255,0.04)",
+        borderBottom: "0.5px solid rgba(255,255,255,0.04)",
+      }}>
+        {items.map((s) => (
+          <div key={s.label} style={{ textAlign: "center", flex: 1 }}>
+            <div style={{
+              fontFamily: t.fontSerif, fontWeight: 900,
+              fontSize: 20, lineHeight: 1,
+              color: t.textSecondary,
+            }}>
+              {s.value}
+            </div>
+            <div style={{
+              fontSize: 8, letterSpacing: 2,
+              color: "var(--text-faint)",
+              fontFamily: "var(--font-mono)",
+              fontWeight: 300, marginTop: 4,
+            }}>
+              {s.label}
+            </div>
           </div>
-          <div style={{
-            fontSize: 8, letterSpacing: 2,
-            color: "var(--text-faint)",
-            fontFamily: "var(--font-mono)",
-            fontWeight: 300, marginTop: 4,
-          }}>
-            {s.label}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+
+      {/* Right stone column — matches hearth */}
+      <div style={{
+        width: 22, flexShrink: 0,
+        background: "linear-gradient(90deg, #161210 0%, #1c1710 30%, #251e14 70%, #2e2518 100%)",
+        borderRight: "0.5px solid rgba(255,255,255,0.05)",
+        boxShadow: "inset 6px 0 12px rgba(0,0,0,0.5)",
+      }} />
     </div>
   );
 }
