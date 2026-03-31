@@ -219,7 +219,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
         {/* Close button + Admin gear */}
         <div style={{
           position: "sticky", top: 0, zIndex: 2,
-          background: "linear-gradient(180deg, #1a1a2e 0%, rgba(26,26,46,0.95) 80%, transparent 100%)",
+          background: "linear-gradient(180deg, rgba(26,26,46,0.5) 0%, rgba(26,26,46,0.3) 60%, transparent 100%)",
           padding: "12px 0 16px",
           display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
