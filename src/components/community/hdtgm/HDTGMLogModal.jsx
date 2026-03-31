@@ -35,13 +35,19 @@ export default function HDTGMLogModal({
   const [overviewExpanded, setOverviewExpanded] = useState(false);
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [providers, setProviders] = useState(null);
+  const [backdropUrl, setBackdropUrl] = useState(
+    item.backdrop_path ? `https://image.tmdb.org/t/p/w780${item.backdrop_path}` : null
+  );
 
   const { matchedEpisode, isThisEpPlaying, playEpisode, isPlaying } = useEpisodeMatch(item, "How Did This Get Made?");
   useEffect(() => {
     if (!item.tmdb_id) return;
 
 fetchTMDBRaw(item.tmdb_id, "movie", "")
-  .then((data) => { if (data?.overview) setOverview(data.overview); })
+  .then((data) => {
+    if (data?.overview) setOverview(data.overview);
+    if (data?.backdrop_path) setBackdropUrl(`https://image.tmdb.org/t/p/w780${data.backdrop_path}`);
+  })
   .catch(() => {});
 
 fetchTMDBWatchProviders(item.tmdb_id)
@@ -187,12 +193,29 @@ fetchTMDBWatchProviders(item.tmdb_id)
           width: "100%", maxWidth: 420,
           background: "linear-gradient(180deg, #1a1a2e 0%, #12121f 100%)",
           borderRadius: 0,
+          position: "relative", overflow: "hidden",
           padding: "0 20px calc(20px + var(--sab))",
           animation: "hdtgmLogSlideUp 0.25s ease",
           overflowY: "auto",
           WebkitOverflowScrolling: "touch",
         }}
       >
+        {/* Backdrop image */}
+        {backdropUrl && (
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0,
+            height: 280, zIndex: 0, overflow: "hidden",
+            pointerEvents: "none",
+            backgroundImage: `url(${backdropUrl})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+            filter: "saturate(0.6)",
+            maskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 30%, rgba(0,0,0,0.1) 55%, transparent 75%), linear-gradient(to bottom, black 70%, transparent 100%)",
+            maskComposite: "intersect",
+            WebkitMaskComposite: "source-in",
+          }} />
+        )}
         {/* Close button + Admin gear */}
         <div style={{
           position: "sticky", top: 0, zIndex: 2,
@@ -216,7 +239,7 @@ fetchTMDBWatchProviders(item.tmdb_id)
         </div>
 
         {/* Hero: poster + info */}
-        <div style={{ display: "flex", gap: 14, marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 14, marginBottom: 14, position: "relative", zIndex: 1 }}>
           <div style={{
             width: 110, flexShrink: 0,
             aspectRatio: "2/3",
