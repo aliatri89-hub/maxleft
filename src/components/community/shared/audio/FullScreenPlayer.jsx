@@ -617,16 +617,12 @@ export default function FullScreenPlayer({
         {!episode && (
           <div style={{ padding: "24px 24px 16px", textAlign: "center" }}>
             <div style={{
-              width: 64, height: 64, borderRadius: 16,
-              background: `linear-gradient(135deg, ${ACCENT}15, ${ACCENT}08)`,
-              border: `1px solid ${ACCENT}15`,
+              width: 80, height: 80, borderRadius: "50%",
               margin: "0 auto 16px",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "hidden",
+              opacity: 0.55,
             }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.6">
-                <path d="M3 18v-6a9 9 0 0118 0v6" />
-                <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z" />
-              </svg>
+              <img src="/icons/icon-512.png" alt="MANTL" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{
               fontSize: 16, fontWeight: 700,
