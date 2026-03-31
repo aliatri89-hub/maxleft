@@ -484,7 +484,7 @@ function UsernameSetup({ name, session, onComplete }) {
     }
 
     if (tasks.length === 0) {
-      onComplete(username, defaultShelves, communityIds);
+      onComplete(username, defaultShelves, communityIds, letterboxdUsername || null);
       return;
     }
 
@@ -572,7 +572,7 @@ function UsernameSetup({ name, session, onComplete }) {
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinalComplete = () => {
-    onComplete(username, defaultShelves, savedCommunityIds);
+    onComplete(username, defaultShelves, savedCommunityIds, letterboxdUsername || null);
   };
 
   // ═════════════════════════════════════════════════════════

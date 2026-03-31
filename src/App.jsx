@@ -565,7 +565,7 @@ function AppMain() {
     }
   };
 
-  const handleUsernameComplete = async (username, enabledShelves, communityIds) => {
+  const handleUsernameComplete = async (username, enabledShelves, communityIds, letterboxdUsername) => {
     if (!session) return;
     const { error } = await supabase.from("profiles").update({ username, enabled_shelves: enabledShelves, setup_complete: true }).eq("id", session.user.id);
     if (error) { console.error("Username save error:", error); return; }
@@ -573,9 +573,12 @@ function AppMain() {
     const STAFF_PICKS_ID = "6351c58f-a7c2-4db7-ab04-0a6b57a28cc4";
     const allCommunityIds = [...new Set([STAFF_PICKS_ID, ...(communityIds || [])])];
     await seedSubscriptions(allCommunityIds);
-    setProfile(prev => ({ ...prev, username, enabledShelves }));
+    setProfile(prev => ({ ...prev, username, enabledShelves, letterboxd_username: letterboxdUsername || prev.letterboxd_username || null }));
     await loadShelves(session.user.id);
     setScreen("app"); showToast(`Welcome to Mantl, @${username}`);
+    if (letterboxdUsername) {
+      sync.syncLetterboxd(letterboxdUsername, session.user.id);
+    }
     if (Capacitor.isNativePlatform()) {
       (async () => {
         try { await StatusBar.setOverlaysWebView({ overlay: true }); } catch (_) {}
