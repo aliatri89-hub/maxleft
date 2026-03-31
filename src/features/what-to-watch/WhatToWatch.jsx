@@ -540,7 +540,7 @@ function EpisodeRow({ ep, onPlay, onQueue, isCurrent, isPlaying }) {
           {decodeEntities(ep.episode_title || ep.podcast_name)}
         </div>
         <div style={{ color: CREAM, opacity: 0.4, fontSize: 11, marginTop: 2 }}>
-          {ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}
+          {ep.podcast_name}
         </div>
       </div>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

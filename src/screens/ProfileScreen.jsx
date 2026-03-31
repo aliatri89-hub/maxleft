@@ -335,14 +335,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
                             lineHeight: 1.2,
                             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           }}>{pod.name}</div>
-                          {pod.tier === "deep" && (
-                            <div style={{
-                              fontFamily: "var(--font-mono)", fontSize: 9,
-                              color: "var(--terracotta, #c97849)", opacity: 0.7,
-                              marginTop: 2, letterSpacing: "0.04em",
-                              textTransform: "uppercase",
-                            }}>Deep Dive</div>
-                          )}
+
                         </div>
 
                         {/* Star toggle */}

@@ -1116,7 +1116,7 @@ export default function VhsSleeveSheet({ data, open, onClose, onNavigateCommunit
                               fontFamily: t.fontBody,
                               fontSize: 13, color: "#f0ebe1",
                               textTransform: "uppercase", letterSpacing: "0.04em",
-                            }}>{ep.podcast_name}{ep.podcast_tier === "deep" ? " · deep dive" : ""}</div>
+                            }}>{ep.podcast_name}</div>
                           </div>
                           {/* Play/pause OR Patreon badge */}
                           {isPatreonUrl(epUrl) ? (
