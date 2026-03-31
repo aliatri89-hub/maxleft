@@ -474,10 +474,8 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
           }).then(r => r.json())
             .catch(err => console.warn("[Letterboxd] Coverage check failed:", err));
 
-          setTimeout(async () => {
-            await autoLogAndCheckBadges(syncedFilms, uid, isFirstImport);
-            setAutoLogCompleteSignal(Date.now());
-          }, 2800);
+          await autoLogAndCheckBadges(syncedFilms, uid, isFirstImport);
+          setAutoLogCompleteSignal(Date.now());
         } else {
           setTimeout(async () => {
             setAutoLogCompleteSignal(Date.now());
