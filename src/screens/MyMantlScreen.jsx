@@ -131,10 +131,14 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <BadgeShelf session={session} isActive={isActive} />
+      <div style={{ flexShrink: 0, paddingTop: 6 }}>
+        <BadgeShelf session={session} isActive={isActive} />
+      </div>
 
       {/* ── Stats Ribbon ── */}
-      <StatsRibbon userId={session?.user?.id} />
+      <div style={{ flexShrink: 0 }}>
+        <StatsRibbon userId={session?.user?.id} />
+      </div>
 
       {/* ── Fireplace Hearth ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", marginTop: 0 }}>
@@ -246,7 +250,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "14px 16px 6px",
-              position: "relative", zIndex: 2,
+              position: "relative", zIndex: 2, flexShrink: 0,
             }}>
               <div style={{
                 fontFamily: t.fontSerif, fontWeight: 700,
@@ -268,13 +272,15 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
 
             {recentMovies.length > 0 ? (
               <>
-                {/* Diary entries */}
-                <div style={{ padding: "0 12px 0", position: "relative", zIndex: 2 }}>
+                {/* Diary entries — fills available space, scrolls internally */}
+                <div style={{ flex: 1, minHeight: 0, overflow: "hidden", padding: "0 12px 0", position: "relative", zIndex: 2 }}>
                   <div style={{
                     background: "rgba(255,255,255,0.02)",
                     borderRadius: "var(--radius-sm)",
                     overflow: "hidden",
                     border: "0.5px solid rgba(255,255,255,0.04)",
+                    maxHeight: "100%",
+                    overflowY: "auto",
                   }}>
                     {recentMovies.map((movie, i) => {
                       const { month, day } = parseDiaryDate(movie.watchedAt);
@@ -353,11 +359,12 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                   </div>
                 </div>
 
-                {/* Bottom row: See all + Sync + Add */}
+                {/* Bottom row: See all + Sync + Add — pinned to bottom */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
-                  gap: 10, padding: "12px 12px",
+                  gap: 10, padding: "8px 12px",
                   position: "relative", zIndex: 2,
+                  marginTop: "auto", flexShrink: 0,
                 }}>
                   {movies.length > 5 && (
                     <div
@@ -417,7 +424,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                 </div>
               </>
             ) : (
-              <div style={{ textAlign: "center", padding: "32px 16px" }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "32px 16px" }}>
                 <div style={{
                   fontFamily: "var(--font-body)", fontSize: 14,
                   color: "var(--text-muted)", fontStyle: "italic",
