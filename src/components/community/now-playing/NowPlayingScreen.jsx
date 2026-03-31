@@ -241,12 +241,14 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
       >
         {(tabKey) => (
           <>
-            <NowPlayingHero
-              community={community}
-              miniseries={getHeroMiniseries(tabKey)}
-              progress={progress}
-              activeTab={tabKey}
-            />
+            {tabKey !== "upcoming" && (
+              <NowPlayingHero
+                community={community}
+                miniseries={getHeroMiniseries(tabKey)}
+                progress={progress}
+                activeTab={tabKey}
+              />
+            )}
             <NowPlayingGenreTab
               community={community}
               filter={filter}
@@ -264,6 +266,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
               progressLoading={recentLoading}
               episodesLoading={episodesLoading}
               upcomingCount={upcomingCount}
+              activeTab={tabKey}
               pushNav={pushNav}
               removeNav={removeNav}
               genreResetRef={genreResetRef}

@@ -51,6 +51,7 @@ export default function NowPlayingGenreTab({
   progressLoading = false,
   episodesLoading = false,
   upcomingCount = 0,
+  activeTab = "filmography",
   pushNav,
   removeNav,
   genreResetRef,
@@ -429,6 +430,81 @@ export default function NowPlayingGenreTab({
 
   // Whether we're in "grid overview" mode (no genre selected, no active search)
   const isGridView = activeGenre === ALL_KEY && !(searchQuery || "").trim() && !searchOpen;
+
+  // ── Upcoming tab — full-page 3-col grid, no genre navigation ──
+  if (activeTab === "upcoming") {
+    return (
+      <div style={{ padding: "0 0 100px" }}>
+        {/* Header row */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "12px 16px 8px",
+        }}>
+          <span style={{ fontSize: 16 }}>📅</span>
+          <span style={{
+            fontSize: 13, fontWeight: 800, color: "rgba(250,204,21,0.9)",
+            fontFamily: t.fontDisplay, letterSpacing: "0.04em", textTransform: "uppercase",
+          }}>
+            Coming Soon
+          </span>
+          <span style={{
+            fontSize: 12, fontWeight: 600, color: t.textMuted,
+            fontFamily: t.fontDisplay, marginLeft: 2,
+          }}>
+            ({upcomingSchedule.length})
+          </span>
+        </div>
+
+        {upcomingSchedule.length === 0 ? (
+          <div style={{
+            textAlign: "center", padding: "60px 0",
+            fontFamily: t.fontDisplay, fontSize: 13,
+            color: t.textSecondary, fontStyle: "italic",
+          }}>
+            Nothing scheduled yet
+          </div>
+        ) : (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 10,
+            padding: "4px 12px 0",
+          }}>
+            {upcomingSchedule.map((item, i) => (
+              <div key={item.id} style={{
+                animation: "shelfFadeIn 0.25s ease-out both",
+                animationDelay: `${i * 0.03}s`,
+              }}>
+                <NowPlayingItemCard
+                  item={item}
+                  isCompleted={!!progress[item.id]}
+                  userRating={progress[item.id]?.rating || null}
+                  brownArrow={progress[item.id]?.brown_arrow || false}
+                  onToggle={() => onToggle?.(item.id)}
+                  coverCacheVersion={coverCacheVersion}
+                />
+                <div style={{
+                  fontSize: 10, fontWeight: 700, color: "rgba(250,204,21,0.75)",
+                  fontFamily: t.fontDisplay,
+                  letterSpacing: "0.04em", textTransform: "uppercase",
+                  marginTop: 5,
+                }}>
+                  {new Date(item.air_date + "T00:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </div>
+                <div style={{
+                  fontSize: 9, color: t.textMuted, marginTop: 2,
+                  fontFamily: t.fontDisplay,
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {item._shelfTitle}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "0 0 100px", overflow: "hidden" }}>
