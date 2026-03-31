@@ -466,18 +466,15 @@ function BlankCheck({ director }) {
    3 rings: Films (outer), Commentary (middle), Both (inner)
    ═══════════════════════════════════════════════════════════════ */
 
-function PatreonRings({ stats, accent }) {
+function PatreonRings({ stats, accent, size = 130, strokeWidth = 7, gap = 4 }) {
   const watchedRevealed = useSlideReveal(stats.seenFilms);
-  const size = 130;
   const cx = size / 2;
   const cy = size / 2;
-  const strokeWidth = 7;
-  const gap = 4;
 
   const rings = [
-    { r: 52, pct: stats.seenPct, color: accent },
-    { r: 52 - strokeWidth - gap, pct: stats.listenedPct, color: t.gold },
-    { r: 52 - (strokeWidth + gap) * 2, pct: stats.bothPct, color: t.green },
+    { r: (size / 2) - strokeWidth, pct: stats.seenPct, color: accent },
+    { r: (size / 2) - strokeWidth - strokeWidth - gap, pct: stats.listenedPct, color: t.gold },
+    { r: (size / 2) - strokeWidth - (strokeWidth + gap) * 2, pct: stats.bothPct, color: t.green },
   ];
 
   return (
@@ -515,9 +512,9 @@ function PatreonRings({ stats, accent }) {
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
       }}>
-        <div style={{ overflow: "hidden", height: 30 }}>
+        <div style={{ overflow: "hidden", height: size < 100 ? 22 : 30 }}>
           <div style={{
-            fontSize: 26, fontWeight: 800,
+            fontSize: size < 100 ? 18 : 26, fontWeight: 800,
             color: t.textPrimary,
             fontFamily: t.fontDisplay,
             lineHeight: 1,
@@ -534,6 +531,53 @@ function PatreonRings({ stats, accent }) {
         }}>
           watched
         </div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   PatreonSeriesStats — Compact donut + pills scoped to one series.
+   Rendered as the subheader inside SeriesDetailView when the user
+   drills into a Patreon-tab series from the BC community.
+   ═══════════════════════════════════════════════════════════════ */
+
+export function PatreonSeriesStats({ series, progress, accent = "#e94560" }) {
+  const stats = useMemo(() => {
+    const items = series?.items || [];
+    let totalFilms = 0, seenFilms = 0, listenedCommentary = 0, both = 0;
+    items.forEach((i) => {
+      totalFilms++;
+      const p = progress[i.id];
+      const watched = p?.status === "completed";
+      const listened = !!p?.listened_with_commentary;
+      if (watched) seenFilms++;
+      if (listened) listenedCommentary++;
+      if (watched && listened) both++;
+    });
+    return {
+      totalFilms, seenFilms, listenedCommentary, both,
+      seenPct: totalFilms > 0 ? (seenFilms / totalFilms) * 100 : 0,
+      listenedPct: totalFilms > 0 ? (listenedCommentary / totalFilms) * 100 : 0,
+      bothPct: totalFilms > 0 ? (both / totalFilms) * 100 : 0,
+    };
+  }, [series, progress]);
+
+  if (!stats.totalFilms) return null;
+
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      gap: 20, padding: "12px 16px 14px",
+      borderBottom: "1px solid rgba(255,255,255,0.06)",
+      background: "rgba(15,13,11,0.6)",
+    }}>
+      <PatreonRings stats={stats} accent={accent} size={88} strokeWidth={5} gap={3} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <StatPill label="Seen"     value={`${stats.seenFilms}/${stats.totalFilms}`} color={accent} />
+        <StatPill label="Listened" value={`${stats.listenedCommentary}/${stats.totalFilms}`} color="#facc15" />
+        <StatPill label="Both"     value={stats.both} color="#4ade80" />
       </div>
     </div>
   );

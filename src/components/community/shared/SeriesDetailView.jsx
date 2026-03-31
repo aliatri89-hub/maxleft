@@ -26,6 +26,7 @@ export default function SeriesDetailView({
   onItemTap,
   onToggleCommentary,
   getExtraCardProps,
+  subheader,
   onBack,
   CardComponent,
   coverCacheVersion,
@@ -132,6 +133,9 @@ export default function SeriesDetailView({
           {completedCount}/{items.length}
         </div>
       </div>
+
+      {/* ── Optional subheader slot (e.g. BC Patreon series donut) ── */}
+      {subheader}
 
       {/* ── Series art hero ────────────────────────────────────── */}
       {series.thumbnail_url && (

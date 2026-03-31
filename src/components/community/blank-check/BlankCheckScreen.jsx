@@ -10,7 +10,7 @@ import BadgeCelebration from "../shared/BadgeCelebration";
 import BadgeProgressToast from "../shared/BadgeProgressToast";
 import BadgeDetailScreen from "../shared/BadgeDetailScreen";
 import BadgePage from "../shared/BadgePage";
-import BlankCheckHero from "./BlankCheckHero";
+import BlankCheckHero, { PatreonSeriesStats } from "./BlankCheckHero";
 import BlankCheckPatreonTab from "./BlankCheckPatreonTab";
 import CommunityAwardsTab from "./CommunityAwardsTab";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
@@ -596,6 +596,13 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
           getExtraCardProps={(item) => ({
             showCommentaryBadge: patreonItemIds.has(item.id),
           })}
+          subheader={selectedSeries?.tab_key === "patreon" ? (
+            <PatreonSeriesStats
+              series={selectedSeries}
+              progress={progress}
+              accent={accent}
+            />
+          ) : null}
           coverCacheVersion={coverCache}
           accent={accent}
           userId={userId}
