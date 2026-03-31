@@ -26,15 +26,39 @@ function ImportCSVModal({ session, onClose, onToast, onComplete }) {
     setStep("preview");
   };
 
+  const wakeLockRef = useRef(null);
+
+  const acquireWakeLock = async () => {
+    try {
+      if ("wakeLock" in navigator) {
+        wakeLockRef.current = await navigator.wakeLock.request("screen");
+      }
+    } catch (e) {
+      // Wake lock not available or denied — silent fallback
+    }
+  };
+
+  const releaseWakeLock = () => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release();
+      wakeLockRef.current = null;
+    }
+  };
+
   const startImport = async () => {
     setStep("importing");
     setProgress(0);
     setTotal(parsed.length);
     setImported(0);
     setErrors(0);
+    await acquireWakeLock();
     const onProgress = (current, total) => { setProgress(current); setTotal(total); };
     let result;
-    result = await importMovies(parsed, session.user.id, onProgress);
+    try {
+      result = await importMovies(parsed, session.user.id, onProgress);
+    } finally {
+      releaseWakeLock();
+    }
     setImported(result.count);
     setErrors(result.errs);
     setStep("done");
