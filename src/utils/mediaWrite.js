@@ -68,7 +68,7 @@ export async function upsertMediaLog(userId, {
     p_genre: genre || null,
     p_rating: rating ? Math.round(rating) : null,
     p_notes: notes || null,
-    p_watched_at: watchedAt || null,
+    p_watched_at: watchedAt || new Date().toISOString(),
     p_source: source,
     p_watch_count: watchCount,
     p_watch_dates: watchDates,
