@@ -118,7 +118,7 @@ const GAMES = [
 
 const EXTERNAL_GAMES = [
   { id: "framed", name: "Framed", tagline: "Guess the movie from stills", url: "https://framed.wtf" },
-  { id: "cinematrix", name: "Cinematrix", tagline: "Fill the film grid", url: "https://cinematrix.app" },
+  { id: "cinematrix", name: "Cinematrix", tagline: "Fill the film grid", url: "https://www.vulture.com/article/daily-movie-grid-trivia-game-cinematrix.html" },
   { id: "boxOffice", name: "Box Office Game", tagline: "Guess the weekend top 5", url: "https://boxofficega.me" },
 ];
 
