@@ -215,12 +215,8 @@ export default function BadgeShelf({ session, isActive }) {
         }
       `}</style>
 
-      {/* ── Glass case ── */}
+      {/* ── Badge area ── */}
       <div style={{
-        background: "rgba(255,255,255,0.02)",
-        border: "0.5px solid rgba(255,255,255,0.06)",
-        borderBottom: "none",
-        borderRadius: 0,
         padding: "8px 8px 2px",
       }}>
         {loading ? (
