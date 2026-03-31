@@ -246,14 +246,12 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
               }} />
             ))}
 
-            {/* ── Diary section — anchored to bottom of hearth ── */}
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: 0 }}>
-
             {/* ── Diary Header ── */}
             <div style={{
               display: "flex", justifyContent: "space-between", alignItems: "baseline",
               padding: "14px 16px 6px",
               position: "relative", zIndex: 2, flexShrink: 0,
+              marginTop: "auto",
             }}>
               <div style={{
                 fontFamily: t.fontSerif, fontWeight: 700,
@@ -431,7 +429,6 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                 }}>No films yet</div>
               </div>
             )}
-            </div>
           </div>
 
           {/* Right stone column */}
