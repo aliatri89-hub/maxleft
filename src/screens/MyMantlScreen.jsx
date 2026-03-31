@@ -76,7 +76,7 @@ function StatsRibbon({ userId }) {
   );
 }
 
-function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, isActive }) {
+function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefresh, onUpdateProfile, onToast, letterboxdSyncing, onLetterboxdSync, isActive }) {
   const { shelves, shelvesLoaded } = useShelves();
 
   // ── Trigger state (controls which modal/overlay is open) ──
@@ -353,7 +353,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                   </div>
                 </div>
 
-                {/* Bottom row: See all + Add */}
+                {/* Bottom row: See all + Sync + Add */}
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "flex-end",
                   gap: 10, padding: "12px 12px",
@@ -377,6 +377,30 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
                         <path d="M4.5 2.5L8 6L4.5 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
+                  )}
+                  {profile?.letterboxd_username && onLetterboxdSync && (
+                    <button
+                      onClick={onLetterboxdSync}
+                      disabled={letterboxdSyncing}
+                      style={{
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        fontFamily: "var(--font-mono)", fontSize: 11,
+                        fontWeight: 500, letterSpacing: "0.04em",
+                        color: `${accent}cc`, background: `${accent}0a`,
+                        border: `1px solid ${accent}20`,
+                        borderRadius: 20, padding: "6px 14px",
+                        cursor: letterboxdSyncing ? "default" : "pointer",
+                        opacity: letterboxdSyncing ? 0.5 : 1,
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                        style={letterboxdSyncing ? { animation: "spin 1s linear infinite" } : {}}>
+                        <path d="M1.5 6a4.5 4.5 0 0 1 7.73-3.12M10.5 6a4.5 4.5 0 0 1-7.73 3.12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                        <path d="M9.5 1.5v1.5H8M2.5 10.5V9H4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <span>{letterboxdSyncing ? "Syncing…" : "Sync"}</span>
+                    </button>
                   )}
                   <button
                     onClick={() => onShelfIt("movie")}

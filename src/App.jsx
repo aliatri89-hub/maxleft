@@ -738,6 +738,7 @@ function AppMain() {
                     onRefresh={refreshShelves}
                     onUpdateProfile={(updates) => setProfile(prev => ({ ...prev, ...updates }))}
                     onToast={showToast} letterboxdSyncing={sync.letterboxdSyncing}
+                    onLetterboxdSync={() => { if (session && profile.letterboxd_username) wrappedSyncLetterboxd(profile.letterboxd_username, session.user.id, true); }}
                     isActive={activeTab === "mantl"} />
                   </Suspense></ErrorBoundary>}
                 </div>
