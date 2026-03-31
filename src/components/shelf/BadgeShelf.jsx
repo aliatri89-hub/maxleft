@@ -193,7 +193,14 @@ export default function BadgeShelf({ session, isActive }) {
   const { earnedBadges, closestBadge, loading } = useGlobalBadges(userId, isActive);
   const [selectedBadge, setSelectedBadge] = useState(null);
 
-  const recentThree = useMemo(() => earnedBadges.slice(0, 3), [earnedBadges]);
+  // Partition: real community badges get priority, onboarding fillers fill remaining slots
+  const { shelfBadges, realCount } = useMemo(() => {
+    const real = earnedBadges.filter(b => b.community_id != null);
+    const onboarding = earnedBadges.filter(b => b.community_id == null);
+    // Real badges fill first, onboarding fills remaining (up to 3 total)
+    const combined = [...real.slice(0, 3), ...onboarding].slice(0, 3);
+    return { shelfBadges: combined, realCount: real.length };
+  }, [earnedBadges]);
   const hasAnyBadges = earnedBadges.length > 0 || closestBadge;
 
   return (
@@ -240,7 +247,7 @@ export default function BadgeShelf({ session, isActive }) {
         ) : (
           <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "nowrap" }}>
             {[0, 1, 2].map(i => {
-              const badge = recentThree[i];
+              const badge = shelfBadges[i];
               return badge ? (
                 <BadgeSlot key={badge.id} badge={badge} delay={i * 0.08}
                   onTap={() => setSelectedBadge({ badge, earnedAt: badge.earned_at })} />
@@ -257,7 +264,7 @@ export default function BadgeShelf({ session, isActive }) {
           </div>
         )}
 
-        {!loading && hasAnyBadges && recentThree.length < 3 && !closestBadge && (
+        {!loading && hasAnyBadges && realCount < 3 && !closestBadge && (
           <div style={{
             textAlign: "center", marginTop: 6,
             fontSize: 11, color: "var(--text-faint)",

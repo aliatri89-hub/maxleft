@@ -93,6 +93,44 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
     else if (!diaryShelf && removeNav) removeNav("diary");
   }, [!!diaryShelf]);
 
+  // ── Award "Press Play" onboarding badge on first visit ──
+  const pressPlayAwarded = useRef(false);
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId || !isActive || pressPlayAwarded.current) return;
+    pressPlayAwarded.current = true;
+
+    (async () => {
+      try {
+        // Look up the Press Play badge
+        const { data: badge } = await supabase
+          .from("badges")
+          .select("id")
+          .eq("badge_type", "onboarding")
+          .eq("name", "Press Play")
+          .eq("is_active", true)
+          .single();
+        if (!badge) return;
+
+        // Check if already earned
+        const { data: existing } = await supabase
+          .from("user_badges")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("badge_id", badge.id)
+          .maybeSingle();
+        if (existing) return;
+
+        // Award it
+        await supabase
+          .from("user_badges")
+          .insert({ user_id: userId, badge_id: badge.id });
+      } catch (e) {
+        console.error("[PressPlay] Award error:", e);
+      }
+    })();
+  }, [session?.user?.id, isActive]);
+
   const movies = shelves.movies || [];
   const recentMovies = movies.slice(0, 5);
 
