@@ -404,24 +404,47 @@ export function useIntegrationSync({ session, showToast, setProfile }) {
               .eq("user_id", uid)
               .in("item_id", itemIds);
 
-            if (existingProgress && existingProgress.length > 0) {
-              const progressItemIds = existingProgress.map(p => p.item_id);
-              const rewatchTimestamp = new Date(
-                new Date(toLogTimestamp(rw.newDate)).getTime()
-              ).toISOString();
+            const rewatchTimestamp = new Date(
+              new Date(toLogTimestamp(rw.newDate)).getTime()
+            ).toISOString();
+            const existingSet = new Set((existingProgress || []).map(p => p.item_id));
+
+            // Update rows that already exist
+            if (existingSet.size > 0) {
               const updatePayload = {
-                  rewatch_count: newCount - 1,
-                  rewatch_dates: rewatchDatesOnly,
-                  completed_at: rewatchTimestamp,
-                  updated_at: rewatchTimestamp,
-                };
+                rewatch_count: newCount - 1,
+                rewatch_dates: rewatchDatesOnly,
+                completed_at: rewatchTimestamp,
+                updated_at: rewatchTimestamp,
+              };
               if (rw.rating) updatePayload.rating = Math.round(rw.rating);
-              await supabase
+              const { error: updateErr } = await supabase
                 .from("community_user_progress")
                 .update(updatePayload)
                 .eq("user_id", uid)
-                .in("item_id", progressItemIds);
+                .in("item_id", [...existingSet]);
+              if (updateErr) console.error("[Letterboxd] Community rewatch update error:", updateErr.message);
+            }
 
+            // Create rows for any community items with no prior progress
+            const missingItems = communityItems.filter(ci => !existingSet.has(ci.id));
+            if (missingItems.length > 0) {
+              const newRows = missingItems.map(ci => ({
+                user_id: uid,
+                item_id: ci.id,
+                status: "completed",
+                rating: rw.rating ? Math.round(rw.rating) : null,
+                rewatch_count: newCount - 1,
+                rewatch_dates: rewatchDatesOnly,
+                completed_at: rewatchTimestamp,
+                listened_with_commentary: false,
+                brown_arrow: false,
+                updated_at: rewatchTimestamp,
+              }));
+              const { error: insertErr } = await supabase
+                .from("community_user_progress")
+                .upsert(newRows, { onConflict: "user_id,item_id" });
+              if (insertErr) console.error("[Letterboxd] Community rewatch insert error:", insertErr.message);
             }
           }
         } catch (e) {
