@@ -31,8 +31,8 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
             strokeLinecap="round" strokeDasharray={CIRCUMFERENCE} strokeDashoffset={0} />
         </svg>
         <div style={{
-          position: "absolute", top: STROKE + 3, left: STROKE + 3,
-          width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
+          position: "absolute", top: STROKE + 1, left: STROKE + 1,
+          width: SIZE - (STROKE + 1) * 2, height: SIZE - (STROKE + 1) * 2,
           borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
@@ -57,7 +57,7 @@ function BadgeSlot({ badge, delay = 0, onTap }) {
       </div>
 
       {/* ── Pedestal + plaque ── */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -4 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 0 }}>
         <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #c9a84c, #a07c28)", borderRadius: "0 0 1px 1px" }} />
         <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #b8942e, #7a5c12)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
         <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #c9a84c, #8b6914)", borderRadius: badge.plaque_name ? "1px 1px 0 0" : "1px 1px 2px 2px" }} />
@@ -113,8 +113,8 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
             style={{ transition: "stroke-dashoffset 0.6s ease-out" }} />
         </svg>
         <div style={{
-          position: "absolute", top: STROKE + 3, left: STROKE + 3,
-          width: SIZE - (STROKE + 3) * 2, height: SIZE - (STROKE + 3) * 2,
+          position: "absolute", top: STROKE + 1, left: STROKE + 1,
+          width: SIZE - (STROKE + 1) * 2, height: SIZE - (STROKE + 1) * 2,
           borderRadius: "50%", overflow: "hidden", background: t.bgCard,
         }}>
           {badge.image_url ? (
@@ -144,7 +144,7 @@ function NextUpSlot({ badge, delay = 0, onTap }) {
       </div>
 
       {/* ── Silver pedestal + "next up" plaque ── */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: -4 }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 0 }}>
         <div style={{ width: 30, height: 5, background: "linear-gradient(180deg, #888, #666)", borderRadius: "0 0 1px 1px" }} />
         <div style={{ width: 18, height: 10, background: "linear-gradient(180deg, #777, #4a4a4a)", clipPath: "polygon(8% 0%, 92% 0%, 100% 100%, 0% 100%)" }} />
         <div style={{ width: 36, height: 5, background: "linear-gradient(180deg, #888, #555)", borderRadius: "1px 1px 0 0" }} />
