@@ -172,7 +172,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       `}</style>
 
       {/* ── Badge Shelf Hero ── */}
-      <div ref={badgeRef} style={{ flexShrink: 0, paddingTop: 14 }}>
+      <div ref={badgeRef} style={{ flexShrink: 0, paddingTop: 14, marginTop: "auto" }}>
         <BadgeShelf session={session} isActive={isActive} />
       </div>
 
@@ -182,7 +182,7 @@ function MyMantlScreen({ profile, onShelfIt, session, pushNav, removeNav, onRefr
       </div>
 
       {/* ── Fireplace Hearth ── */}
-      <div ref={fireplaceRef} style={{ flexShrink: 0, marginTop: "auto", overflow: "hidden" }}>
+      <div ref={fireplaceRef} style={{ flexShrink: 0, overflow: "hidden" }}>
         <div ref={hearthRowRef} style={{ display: "flex" }}>
 
           {/* Left stone column */}
