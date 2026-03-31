@@ -224,7 +224,7 @@ export default function BadgeShelf({ session, isActive }) {
 
       {/* ── Badge area ── */}
       <div style={{
-        padding: "8px 8px 2px",
+        padding: "8px 8px 0",
       }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", gap: 10, padding: "8px 0" }}>
