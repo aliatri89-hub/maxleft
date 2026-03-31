@@ -50,10 +50,10 @@ interface ParsedItem {
   title: string;
   year: number | null;
   rating: number | null;
-  ratingHalf: number | null;
   watchedDate: string | null;
   watchDates: string[];
   watchCount: number;
+  dayPosition: number;
   rewatch: boolean;
   source: string;
 }
@@ -80,8 +80,15 @@ async function processItem(
     watchDates.push(new Date().toISOString().slice(0, 10));
   }
 
+  // Fix 2: stagger same-day films by 1 second per position so feed ordering
+  // is deterministic rather than arbitrary (insertion order) within a day.
+  const dayPos = item.dayPosition ?? 0;
   const watchedAt = item.watchedDate
-    ? new Date(item.watchedDate + "T12:00:00Z").toISOString()
+    ? (() => {
+        const base = new Date(item.watchedDate + "T12:00:00Z");
+        base.setSeconds(base.getSeconds() + dayPos);
+        return base.toISOString();
+      })()
     : new Date().toISOString();
 
   const { error } = await supabase.rpc("upsert_media_log", {
@@ -95,7 +102,7 @@ async function processItem(
     p_backdrop_path: toPosterPath(match.backdrop_path),
     p_runtime: null,
     p_genre: null,
-    p_rating: item.ratingHalf || item.rating || null,
+    p_rating: item.rating ?? null,
     p_watched_at: watchedAt,
     p_watched_date: item.watchedDate || null,
     p_source: "letterboxd",

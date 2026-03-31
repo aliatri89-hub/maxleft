@@ -72,8 +72,7 @@ function parseRows(rows, headers, format) {
       items.push({
         title,
         year: parseInt(get(row, "year")) || null,
-        rating: ratingRaw ? Math.round(ratingRaw) : null,
-        ratingHalf: ratingRaw || null,
+        rating: ratingRaw || null,
         watchedDate: get(row, "date") || get(row, "watched date") || null,
         rewatch: get(row, "rewatch")?.toLowerCase() === "yes",
         source: "letterboxd",
@@ -104,7 +103,6 @@ async function deduplicateItems(items, format, userId) {
     // Keep latest rating (non-null)
     if (item.rating && (!group.rating || item.watchedDate > group.watchedDate)) {
       group.rating = item.rating;
-      group.ratingHalf = item.ratingHalf;
     }
     // Keep latest watchedDate as the primary
     if (item.watchedDate && (!group.watchedDate || item.watchedDate > group.watchedDate)) {
@@ -144,6 +142,17 @@ async function deduplicateItems(items, format, userId) {
       // New movie
       consolidated.push(group);
     }
+  }
+
+  // Fix 2: Assign within-day position so the edge function can stagger
+  // watched_at timestamps and avoid arbitrary same-second ordering.
+  // Letterboxd CSV is newest-first, so position 0 = most recently logged that day.
+  const dateCounts = new Map();
+  for (const item of consolidated) {
+    const date = item.watchedDate || '';
+    const pos = dateCounts.get(date) || 0;
+    item.dayPosition = pos;
+    dateCounts.set(date, pos + 1);
   }
 
   return { unique: consolidated, dupeCount };
