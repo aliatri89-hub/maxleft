@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../supabase";
+import { Capacitor } from "@capacitor/core";
+import { PushNotifications } from "@capacitor/push-notifications";
 
 /**
  * useNotifications — fetches in-app notifications from user_notifications.
@@ -62,6 +64,12 @@ export default function useNotifications(session) {
     setNotifications((prev) =>
       prev.map((n) => (n.seen_at ? n : { ...n, seen_at: new Date().toISOString() }))
     );
+
+    // Clear delivered push notifications from the Android/iOS notification shade.
+    // This is what clears the app drawer dot — seen_at alone doesn't do it.
+    if (Capacitor.isNativePlatform()) {
+      try { await PushNotifications.removeAllDeliveredNotifications(); } catch (_) {}
+    }
 
     const { error } = await supabase
       .from("user_notifications")
