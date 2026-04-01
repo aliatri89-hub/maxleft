@@ -539,7 +539,7 @@ export default function GamesHubPublic() {
           fontFamily: t.fontSerif, fontSize: 16, fontWeight: 700,
           color: t.cream, marginBottom: 6,
         }}>
-          Track your stats. Earn badges. Join the community.
+          Track your stats. Earn badges.<br />Join the community.
         </div>
         <div style={{ fontSize: 12, color: t.creamMuted, marginBottom: 14, lineHeight: 1.4 }}>
           Sign up for MANTL to save your game history, compete on streaks, and unlock badges across your favorite film franchises.
