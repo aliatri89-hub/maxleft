@@ -539,8 +539,14 @@ function AppMain() {
     try {
       let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (!prof) {
-        const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
-        const { data: newProf } = await supabase.from("profiles").insert({ id: user.id, name, avatar_emoji: "👤" }).select().single();
+        const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest";
+        const isAnonGuest = user.is_anonymous && movieNightJoinCode;
+        const guestUsername = isAnonGuest ? `guest_${Date.now().toString(36)}` : undefined;
+        const { data: newProf } = await supabase.from("profiles").insert({
+          id: user.id, name,
+          avatar_emoji: isAnonGuest ? "🍿" : "👤",
+          ...(guestUsername ? { username: guestUsername, setup_complete: true } : {}),
+        }).select().single();
         prof = newProf;
       }
       if (!prof) {

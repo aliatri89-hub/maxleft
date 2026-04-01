@@ -6,7 +6,7 @@ import { t } from "../../theme";
 // After auth, user is redirected back to /night/CODE where
 // the normal deep link handler auto-opens Movie Night.
 //
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { supabase } from "../../supabase";
 
 const CREAM = "#f0ebe1";
@@ -14,6 +14,8 @@ const DARK = "#0f0d0b";
 const PURPLE = "#9b59b6";
 
 export default function MovieNightPublic({ code }) {
+  const [guestLoading, setGuestLoading] = useState(false);
+
   const handleSignIn = useCallback(async () => {
     // Redirect back to /night/CODE after auth so the deep link handler picks it up
     const redirectUrl = `${window.location.origin}/night/${code}`;
@@ -23,6 +25,17 @@ export default function MovieNightPublic({ code }) {
     });
     if (error) console.error("[MovieNightPublic] auth error:", error);
   }, [code]);
+
+  const handleGuestPlay = useCallback(async () => {
+    setGuestLoading(true);
+    const { error } = await supabase.auth.signInAnonymously();
+    if (error) {
+      console.error("[MovieNightPublic] anon auth error:", error);
+      setGuestLoading(false);
+    }
+    // Auth state change will be picked up by AppMain → creates guest profile →
+    // skips setup → opens Movie Night via deep link handler
+  }, []);
 
   return (
     <div style={{
@@ -83,6 +96,15 @@ export default function MovieNightPublic({ code }) {
           </svg>
           Sign in with Google to play
         </button>
+
+        <button onClick={handleGuestPlay} disabled={guestLoading} style={{
+          width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 10,
+          background: "transparent", color: CREAM,
+          border: `1.5px solid rgba(240,235,225,0.15)`,
+          fontSize: 15, fontWeight: 600, cursor: guestLoading ? "default" : "pointer",
+          fontFamily: t.fontDisplay, letterSpacing: 0.5,
+          opacity: guestLoading ? 0.5 : 0.8,
+        }}>{guestLoading ? "Joining…" : "Play as guest"}</button>
       </div>
 
       {/* How it works */}
