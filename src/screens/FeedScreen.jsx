@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { trackEvent } from "../hooks/useAnalytics";
+import { supabase } from "../supabase";
 import ShareShelf from "../components/ShareShelf";
 import FeedFilterBar from "../components/feed/FeedFilterBar";
 import MoviesPane from "../components/feed/MoviesPane";
@@ -81,6 +82,11 @@ export default function FeedScreen({
     }
     setPullDistance(0);
   }, [pullDistance]);
+
+  // ── Warm up api-proxy edge function on mount so backdrop fetches hit a warm instance ──
+  useEffect(() => {
+    supabase.functions.invoke("api-proxy", { body: { action: "ping" } }).catch(() => {});
+  }, []);
 
   // ── Analytics: track tab switches ──
   const prevFeedModeRef = useRef(feedMode);

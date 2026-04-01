@@ -544,7 +544,7 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
 
   const sleeveNavKey = `sleeve-${data.tmdb_id || data.title}`;
 
-  // ── Fetch en-language backdrop ──
+  // ── Fetch en-language backdrop (staggered to avoid cold-start burst) ──
   useEffect(() => {
     if (!USE_TITLE_BACKDROPS || !data.tmdb_id) return;
     if (_enBdCache.has(data.tmdb_id)) {
@@ -553,7 +553,10 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
       return;
     }
     let cancelled = false;
-    (async () => {
+    // Stagger by a hash of tmdb_id so cards don't all fire simultaneously.
+    // Spreads requests ~0–600ms apart, giving the edge function time to warm.
+    const staggerMs = (data.tmdb_id % 7) * 90; // 0, 90, 180, 270, 360, 450, 540ms
+    const timer = setTimeout(async () => {
       try {
         const type = (data.media_type === "show") ? "tv" : "movie";
         const res = await apiProxy("tmdb_images", {
@@ -567,14 +570,17 @@ function LogCard({ data, onNavigateCommunity, onViewBadgeDetail, isFirst = false
           .sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
         const best = enOnes[0];
         const url = best ? `${TMDB_BD}${best.file_path}` : null;
-        _enBdCache.set(data.tmdb_id, url);
+        // Only cache null when TMDB genuinely has no en-backdrop (res came back
+        // but had no results). Don't cache null on network failure (res === null)
+        // — that would poison the cache and strand the card on cream forever.
+        if (res !== null) _enBdCache.set(data.tmdb_id, url);
         if (!cancelled) { setEnBackdropUrl(url); setBackdropResolved(true); }
       } catch {
-        _enBdCache.set(data.tmdb_id, null);
+        // Network error — don't cache, just resolve to cream fallback for now
         if (!cancelled) setBackdropResolved(true);
       }
-    })();
-    return () => { cancelled = true; };
+    }, staggerMs);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [data.tmdb_id, data.media_type]);
 
   const openSleeve = async () => {
