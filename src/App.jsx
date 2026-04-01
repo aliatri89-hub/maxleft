@@ -540,12 +540,13 @@ function AppMain() {
       let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (!prof) {
         const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest";
-        const isAnonGuest = user.is_anonymous && movieNightJoinCode;
-        const guestUsername = isAnonGuest ? `guest_${Date.now().toString(36)}` : undefined;
+        const nightCode = window.location.pathname.match(/^\/night\/([A-Za-z0-9]{4,8})\/?$/);
+        const skipSetup = !!nightCode || !!movieNightJoinCode;
+        const autoUsername = skipSetup ? `guest_${Date.now().toString(36)}` : undefined;
         const { data: newProf } = await supabase.from("profiles").insert({
           id: user.id, name,
-          avatar_emoji: isAnonGuest ? "🍿" : "👤",
-          ...(guestUsername ? { username: guestUsername, setup_complete: true } : {}),
+          avatar_emoji: skipSetup ? "🍿" : "👤",
+          ...(autoUsername ? { username: autoUsername, setup_complete: true } : {}),
         }).select().single();
         prof = newProf;
       }
