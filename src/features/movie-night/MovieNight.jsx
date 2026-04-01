@@ -48,13 +48,21 @@ const GENRES = [
 // MAIN COMPONENT
 // ════════════════════════════════════════════════
 
-export default function MovieNight({ session: authSession, onBack, onToast, pushNav, removeNav }) {
+export default function MovieNight({ session: authSession, onBack, onToast, pushNav, removeNav, joinCode, onJoinCodeConsumed }) {
   const userId = authSession?.user?.id;
   const {
     phase, role, session, stack, currentIndex, error, loading, matches,
     currentFilm, remaining, total,
     createSession, joinSession, startSwiping, swipeRight, swipeLeft, reset,
   } = useMovieNight(userId);
+
+  // Auto-join when opened via deep link
+  useEffect(() => {
+    if (joinCode && phase === "setup" && userId && !loading) {
+      joinSession(joinCode);
+      onJoinCodeConsumed?.();
+    }
+  }, [joinCode, phase, userId, loading]);
 
   const handleClose = useCallback(() => { reset(); onBack(); }, [reset, onBack]);
 
@@ -280,12 +288,14 @@ function LobbyScreen({ userId, onCreateSession, onJoinSession, loading, error })
 // ════════════════════════════════════════════════
 
 function ShareScreen({ code, genreName, onStart, onToast }) {
+  const shareUrl = `https://mymantl.app/night/${code}`;
+
   const handleCopy = useCallback(() => {
     haptic();
-    navigator.clipboard?.writeText(code).then(() => {
-      onToast?.("Code copied!");
+    navigator.clipboard?.writeText(shareUrl).then(() => {
+      onToast?.("Link copied!");
     }).catch(() => {});
-  }, [code, onToast]);
+  }, [shareUrl, onToast]);
 
   const handleShare = useCallback(async () => {
     haptic();
@@ -293,14 +303,14 @@ function ShareScreen({ code, genreName, onStart, onToast }) {
       try {
         await navigator.share({
           title: "Movie Night on MANTL",
-          text: `Join my Movie Night! 🍿\nCode: ${code}`,
-          url: "https://mymantl.app",
+          text: "Join my Movie Night! 🍿",
+          url: shareUrl,
         });
       } catch {}
     } else {
       handleCopy();
     }
-  }, [code, handleCopy]);
+  }, [shareUrl, handleCopy]);
 
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 32px" }}>
@@ -312,28 +322,33 @@ function ShareScreen({ code, genreName, onStart, onToast }) {
         <div style={{ fontSize: 13, color: CREAM, opacity: 0.5, marginBottom: 20 }}>{genreName}</div>
       )}
 
-      {/* Code display */}
+      {/* Link display */}
       <div onClick={handleCopy} style={{
-        fontSize: 42, fontWeight: 800, fontFamily: t.fontDisplay,
-        letterSpacing: 10, color: CREAM, padding: "16px 28px",
-        background: "rgba(240,235,225,0.06)", borderRadius: 16,
+        padding: "14px 20px", borderRadius: 14,
+        background: "rgba(240,235,225,0.06)",
         border: "2px solid rgba(155,89,182,0.3)", cursor: "pointer",
-        userSelect: "all", WebkitUserSelect: "all",
-      }}>{code}</div>
+        userSelect: "all", WebkitUserSelect: "all", textAlign: "center",
+      }}>
+        <div style={{ fontSize: 13, color: CREAM, opacity: 0.4, marginBottom: 6 }}>Send this link to your movie partner</div>
+        <div style={{
+          fontSize: 18, fontWeight: 700, fontFamily: t.fontDisplay,
+          color: PURPLE, letterSpacing: 0.5, wordBreak: "break-all",
+        }}>mymantl.app/night/{code}</div>
+      </div>
 
-      <div style={{ marginTop: 12, fontSize: 12, color: CREAM, opacity: 0.4, textAlign: "center" }}>
-        Tap to copy · share this code with your movie partner
+      <div style={{ marginTop: 10, fontSize: 11, color: CREAM, opacity: 0.3, textAlign: "center" }}>
+        Tap to copy
       </div>
 
       <button onClick={handleShare} style={{
-        marginTop: 16, background: "rgba(240,235,225,0.08)", border: "1px solid rgba(240,235,225,0.12)",
+        marginTop: 14, background: "rgba(240,235,225,0.08)", border: "1px solid rgba(240,235,225,0.12)",
         color: CREAM, borderRadius: 20, padding: "10px 24px", fontSize: 14,
         fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
       }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={CREAM} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
         </svg>
-        Share code
+        Share link
       </button>
 
       {/* Start swiping */}

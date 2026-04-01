@@ -242,6 +242,10 @@ function AppMain() {
   const [showReelTime, setShowReelTime] = useState(false);
   const [showCastConnections, setShowCastConnections] = useState(false);
   const [showMovieNight, setShowMovieNight] = useState(false);
+  const [movieNightJoinCode, setMovieNightJoinCode] = useState(() => {
+    const m = window.location.pathname.match(/^\/night\/([A-Za-z0-9]{4,8})\/?$/);
+    return m ? m[1].toUpperCase() : null;
+  });
   const [showBadgeOverview, setShowBadgeOverview] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
@@ -375,6 +379,16 @@ function AppMain() {
       document.body.scrollTop = 0;
     }
   }, [screen]);
+
+  // ── Movie Night deep link: auto-open after auth ──
+  useEffect(() => {
+    if (screen === "app" && movieNightJoinCode) {
+      // Clear the URL so refresh doesn't re-trigger
+      window.history.replaceState(null, "", "/");
+      setShowMovieNight(true);
+      pushNav("movieNight", () => setShowMovieNight(false));
+    }
+  }, [screen, movieNightJoinCode]);
 
   // ── AUTH ──
   useEffect(() => {
@@ -816,7 +830,7 @@ function AppMain() {
         {showMovieNight && (
           <ErrorBoundary name="Movie Night">
             <Suspense fallback={<CommunityLoadingSkeleton />}>
-              <MovieNight session={session} onBack={() => { removeNav("movieNight"); setShowMovieNight(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+              <MovieNight session={session} onBack={() => { removeNav("movieNight"); setShowMovieNight(false); setMovieNightJoinCode(null); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} joinCode={movieNightJoinCode} onJoinCodeConsumed={() => setMovieNightJoinCode(null)} />
             </Suspense>
           </ErrorBoundary>
         )}
