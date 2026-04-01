@@ -14,6 +14,23 @@ export async function initPushNotifications(showToast) {
   if (!Capacitor.isNativePlatform()) return;
 
   try {
+    // Create the notification channel with IMPORTANCE_HIGH before registering.
+    // Must be done before any notifications arrive — Android ignores importance
+    // changes to existing channels, so we use a new channel ID (mantl_alerts)
+    // to guarantee the correct importance level on all installs.
+    if (Capacitor.getPlatform() === 'android') {
+      await PushNotifications.createChannel({
+        id: 'mantl_alerts',
+        name: 'MANTL Notifications',
+        description: 'Coverage alerts, badge updates, and activity from MANTL',
+        importance: 4,   // IMPORTANCE_HIGH — shows in Alerting, not Silent/Promotions
+        visibility: 1,   // VISIBILITY_PUBLIC
+        sound: 'default',
+        vibration: true,
+        lights: true,
+      });
+    }
+
     let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
