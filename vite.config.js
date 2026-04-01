@@ -6,6 +6,10 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
+      external: [
+        '@revenuecat/purchases-capacitor',
+        '@revenuecat/purchases-capacitor-ui',
+      ],
       output: {
         manualChunks(id) {
           // Vendor: Supabase SDK (postgrest, realtime, storage, auth, gotrue)
