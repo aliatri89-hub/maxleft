@@ -526,6 +526,11 @@ function AppMain() {
         const { data: newProf } = await supabase.from("profiles").insert({ id: user.id, name, avatar_emoji: "👤" }).select().single();
         prof = newProf;
       }
+      if (!prof) {
+        // Profile fetch AND insert both failed — bail to landing rather than
+        // opening the app shell with a blank profile state.
+        setAuthLoading(false); setSigningIn(false); setScreen("landing"); return;
+      }
       if (prof) {
         if (!prof.username || !prof.setup_complete) {
           setProfile({ name: prof.name || "", username: "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "" });
