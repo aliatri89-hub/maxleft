@@ -557,7 +557,7 @@ function AppMain() {
         window.history.replaceState(null, "", "/");
       }
       setAuthLoading(false); setSigningIn(false); setScreen("app");
-      initPushNotifications(showToast); // register for native push (no-op on web)
+      setTimeout(() => initPushNotifications(showToast), 5000); // delay so permission dialog does not fire on first render
       // Re-apply overlay + probe — on fresh install the initial probe may have
       // fired before the OAuth browser round-trip, yielding --sat: 0px
       if (Capacitor.isNativePlatform()) {
