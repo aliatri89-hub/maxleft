@@ -293,7 +293,8 @@ function ShareScreen({ code, genreName, onStart, onToast }) {
       try {
         await navigator.share({
           title: "Movie Night on MANTL",
-          text: `Join my Movie Night! Code: ${code}\nOpen MANTL → Games → Movie Night → Join`,
+          text: `Join my Movie Night! 🍿\nCode: ${code}`,
+          url: "https://mymantl.app",
         });
       } catch {}
     } else {
