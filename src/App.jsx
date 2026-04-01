@@ -130,6 +130,7 @@ const GamesHub = lazy(() => import("./features/games-hub/GamesHub"));
 import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
 const CastConnections = lazy(() => import("./features/cast-connections/CastConnections"));
 const MovieNight = lazy(() => import("./features/movie-night/MovieNight"));
+const MovieNightPublic = lazy(() => import("./features/movie-night/MovieNightPublic"));
 import { hasPlayedToday as ccHasPlayedToday } from "./features/cast-connections/castConnectionsApi";
 const BadgeOverviewPage = lazy(() => import("./components/BadgeOverviewPage"));
 
@@ -660,7 +661,12 @@ function AppMain() {
         <style>{`@keyframes toast-countdown { from { width: 100%; } to { width: 0%; } }`}</style>
 
         {screen === "loading" && <div className="loading-screen" />}
-        {screen === "landing" && <LandingScreen onSignIn={signIn} signingIn={signingIn} />}
+        {screen === "landing" && movieNightJoinCode && (
+          <Suspense fallback={<div style={{ background: t.bgPrimary, height: "100vh" }} />}>
+            <MovieNightPublic code={movieNightJoinCode} />
+          </Suspense>
+        )}
+        {screen === "landing" && !movieNightJoinCode && <LandingScreen onSignIn={signIn} signingIn={signingIn} />}
         {screen === "setup" && <UsernameSetup name={profile.name} session={session} onComplete={handleUsernameComplete} />}
 
         {screen === "app" && (
