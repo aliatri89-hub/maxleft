@@ -1,4 +1,5 @@
 import { t } from "../theme";
+import React from "react";
 // src/admin/AdminShell.jsx
 //
 // Desktop-only admin shell. Sidebar nav + content area.
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { key: "requests",        label: "Pod Requests",     icon: "◫" },
   { key: "analytics",       label: "Analytics",        icon: "◎" },
   { key: "config",          label: "Config & Flags",   icon: "◐" },
+  { key: "dev-tools",        label: "Dev Tools",         icon: "☢" },
 ];
 
 export default function AdminShell() {
@@ -166,6 +168,9 @@ export default function AdminShell() {
           )}
           {activeSection === "config" && (
             <ConfigFlags session={session} />
+          )}
+          {activeSection === "dev-tools" && (
+            <DevTools session={session} />
           )}
         </Suspense>
       </main>
