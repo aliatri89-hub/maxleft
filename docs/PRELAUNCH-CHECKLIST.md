@@ -32,6 +32,8 @@
   | 3 | *"Above the Pod"* / Direct to Video | item_set | Seagal / JCVD films — verify coverage in data sesh |
   | 4 | *"Insert Coin"* / Game Over | item_set | Video game movies — verify coverage in data sesh |
   | 5 | *"The Whole Damn Ride"* / Toretto | item_set | Fast & Furious franchise completion |
+- [ ] **Seed Sight & Sound community** — Static, no audio. 3 tabs: Directors List (top 100), Critics List (top 100), Individual ballots (publicly released top 10s from critics/podcasters). Data work only, no new code needed.
+
 - [ ] **Editorial blurbs** — per-film descriptions for MANTL Originals shelves. Currently null in log modal for all Originals items. Edit via Admin → Community Manager.
 
 ---
