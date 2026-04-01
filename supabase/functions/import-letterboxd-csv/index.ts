@@ -31,6 +31,10 @@ function toPosterPath(url: string | null): string | null {
   return match ? match[1] : url;
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms));
+}
+
 async function searchTMDB(apiKey: string, title: string, year: number | null): Promise<any | null> {
   const yearParam = year ? `&year=${year}` : "";
   const url = `${TMDB_BASE}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(title)}&page=1${yearParam}&include_adult=false`;
@@ -42,6 +46,40 @@ async function searchTMDB(apiKey: string, title: string, year: number | null): P
   } catch {
     return null;
   }
+}
+
+// Retries on null (covers 429s, transient failures) with exponential backoff.
+async function searchTMDBWithRetry(apiKey: string, title: string, year: number | null, retries = 3): Promise<any | null> {
+  for (let i = 0; i < retries; i++) {
+    const result = await searchTMDB(apiKey, title, year);
+    if (result !== null) return result;
+    if (i < retries - 1) await sleep(500 * (i + 1)); // 500ms, 1000ms
+  }
+  console.warn(`[import-letterboxd-csv] TMDB miss after ${retries} attempts: "${title}" (${year})`);
+  return null;
+}
+
+// Check the media table before hitting TMDB. Returns a match-shaped object
+// or null if not cached. Skips lookup if year is absent (title-only match
+// is too unreliable for remakes/same-title films).
+async function checkMediaCache(supabase: any, title: string, year: number | null): Promise<any | null> {
+  if (!year) return null;
+  const { data } = await supabase
+    .from("media")
+    .select("tmdb_id, poster_path, backdrop_path, year")
+    .eq("media_type", "film")
+    .eq("title", title)
+    .eq("year", year)
+    .maybeSingle();
+  if (!data?.tmdb_id) return null;
+  // Shape to match what searchTMDB returns (only fields used downstream)
+  return {
+    id: data.tmdb_id,
+    poster_path: data.poster_path,
+    backdrop_path: data.backdrop_path,
+    release_date: data.year ? `${data.year}-01-01` : null,
+    _fromCache: true,
+  };
 }
 
 // ── Process a single film ─────────────────────────────────────
@@ -63,8 +101,13 @@ async function processItem(
   userId: string,
   tmdbKey: string,
   supabase: any
-): Promise<{ tmdbId: number; rating: number | null; watchedAt: string } | null> {
-  const match = await searchTMDB(tmdbKey, item.title, item.year);
+): Promise<{ tmdbId: number; rating: number | null; watchedAt: string; tmdbCalled: boolean } | null> {
+  // Phase 1: check local media cache before hitting TMDB
+  let match = await checkMediaCache(supabase, item.title, item.year);
+  const tmdbCalled = !match;
+  if (!match) {
+    match = await searchTMDBWithRetry(tmdbKey, item.title, item.year);
+  }
   if (!match) return null;
 
   const watchDates = (item.watchDates || [])
@@ -117,7 +160,7 @@ async function processItem(
     return null;
   }
 
-  return { tmdbId: match.id, rating: item.rating ?? null, watchedAt };
+  return { tmdbId: match.id, rating: item.rating ?? null, watchedAt, tmdbCalled };
 }
 
 // ── Community progress backfill ───────────────────────────────
@@ -407,6 +450,8 @@ serve(async (req) => {
   (async () => {
     let count = 0;
     let errs = 0;
+    let cacheHits = 0;
+    let tmdbCalls = 0;
     const importedFilms: Array<{ tmdbId: number; rating: number | null; watchedAt: string }> = [];
 
     await write({ type: "start", total: items.length });
@@ -418,15 +463,25 @@ serve(async (req) => {
         batch.map(item => processItem(item, userId, tmdbKey, supabase))
       );
 
+      let batchHitTmdb = false;
       for (const result of results) {
-        if (result) { count++; importedFilms.push(result); }
-        else errs++;
+        if (result) {
+          count++;
+          if (result.tmdbCalled) { tmdbCalls++; batchHitTmdb = true; }
+          else cacheHits++;
+          importedFilms.push({ tmdbId: result.tmdbId, rating: result.rating, watchedAt: result.watchedAt });
+        } else {
+          errs++;
+        }
       }
 
       const progress = Math.min(i + CONCURRENCY, items.length);
       await write({ type: "progress", progress, total: items.length, count, errs });
-      await new Promise(r => setTimeout(r, TMDB_DELAY_MS));
+      // Only throttle when this batch actually called TMDB — cache-only batches run free
+      if (batchHitTmdb) await sleep(TMDB_DELAY_MS);
     }
+
+    console.log(`[import-letterboxd-csv] done — ${count} imported, ${errs} errors, ${cacheHits} cache hits, ${tmdbCalls} TMDB calls`);
 
     // Backfill community progress
     await write({ type: "status", message: "Syncing community progress…" });
