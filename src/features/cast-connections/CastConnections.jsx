@@ -182,33 +182,19 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
   const [wrongFlash, setWrongFlash] = useState(false);
   const [wrongNames, setWrongNames] = useState([]);
   const [dotPop, setDotPop] = useState(-1);
-  const [bouncingTiles, setBouncingTiles] = useState({}); // { actorName: delayMs }
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [flipTiles, setFlipTiles] = useState(new Set());
   const prevMistakes = useRef(mistakes);
-  const prevSolvedNames = useRef(new Set());
 
-  // Track mistake changes → trigger shake on wrong tiles + dot pop
+  // Track mistake changes → trigger red flash on wrong tiles + dot pop
   useEffect(() => {
     if (mistakes > prevMistakes.current) {
       setWrongNames([...selected]);
       setWrongFlash(true);
-      setDotPop(maxMistakes - mistakes);
-      setTimeout(() => { setWrongFlash(false); setWrongNames([]); }, 700);
+      setDotPop(maxMistakes - mistakes); // index of dot that just went dark
+      setTimeout(() => { setWrongFlash(false); setWrongNames([]); }, 600);
       setTimeout(() => setDotPop(-1), 500);
     }
     prevMistakes.current = mistakes;
   }, [mistakes]);
-
-  // Detect newly solved tiles → trigger flip reveal
-  useEffect(() => {
-    const newlyResolved = [...solvedActorNames].filter(n => !prevSolvedNames.current.has(n));
-    if (newlyResolved.length > 0) {
-      setFlipTiles(new Set(newlyResolved));
-      setTimeout(() => setFlipTiles(new Set()), 700);
-    }
-    prevSolvedNames.current = new Set(solvedActorNames);
-  }, [solvedActorNames.size]);
 
   // Fetch movie logos when puzzle loads
   useEffect(() => {
@@ -239,24 +225,6 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
       setTimeout(() => setShowConfetti(false), 2000);
     }
   }, [won]);
-
-  // ── Submit with bounce → shake/flip sequence ──
-  function handleSubmit() {
-    if (isSubmitting || selected.length !== groupSize) return;
-    setIsSubmitting(true);
-
-    // Stagger bounce: one tile at a time, 120ms apart
-    const delayMap = {};
-    selected.forEach((name, i) => { delayMap[name] = i * 120; });
-    setBouncingTiles(delayMap);
-
-    const totalBounceMs = selected.length * 120 + 350;
-    setTimeout(() => {
-      setBouncingTiles({});
-      submitGuess();
-      setIsSubmitting(false);
-    }, totalBounceMs);
-  }
 
   // ── Share ──
   function getShareText() {
@@ -456,19 +424,16 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
               const movieIdx = solvedActorMovieIdx[actor.name];
               const solvedColor = isSolved ? (puzzle.colors[movieIdx] || "#4a7c59") : null;
 
-              const isBouncing = bouncingTiles[actor.name] !== undefined;
-              const isFlipping = flipTiles.has(actor.name);
-
               return (
                 <button
                   key={actor.name}
-                  className={`cc-tile${isSolved ? " cc-tile-solved" : ""}${isSelected && !isWrong && !isBouncing ? " cc-tile-selected" : ""}${isWrong ? " cc-tile-wrong" : ""}${isBouncing ? " cc-tile-bouncing" : ""}${isFlipping ? " cc-tile-flip" : ""}`}
+                  className={`cc-tile${isSolved ? " cc-tile-solved" : ""}${isSelected && !isWrong ? " cc-tile-selected" : ""}${isWrong ? " cc-tile-wrong" : ""}`}
                   onClick={() => toggleSelect(actor.name)}
                   style={{
                     ...S.tile,
                     padding: groupSize === 4 ? "14px 4px" : "22px 8px",
                     minHeight: groupSize === 4 ? 64 : 76,
-                    animationDelay: isBouncing ? `${bouncingTiles[actor.name]}ms` : `${i * 0.04}s`,
+                    animationDelay: `${i * 0.04}s`,
                     ...(isSolved ? {
                       background: solvedColor,
                       borderColor: solvedColor,
@@ -552,9 +517,9 @@ export default function CastConnections({ session, onBack, onToast, useHook }) {
             </button>
             <button
               className="cc-btn-primary"
-              onClick={handleSubmit}
-              style={{ ...S.btnPrimary, opacity: selected.length !== groupSize || isSubmitting ? 0.3 : 1 }}
-              disabled={selected.length !== groupSize || isSubmitting}
+              onClick={submitGuess}
+              style={{ ...S.btnPrimary, opacity: selected.length !== groupSize ? 0.3 : 1 }}
+              disabled={selected.length !== groupSize}
             >
               Submit
             </button>
@@ -751,7 +716,12 @@ const CSS = `
   }
 
   .cc-tile-solved {
-    pointer-events: none;
+    animation: cc-tile-lock 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cc-tile-lock {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.1); }
+    100% { transform: scale(1); }
   }
 
   .cc-end-state {
@@ -762,41 +732,15 @@ const CSS = `
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Wrong guess — horizontal shake, all tiles at once */
+  /* Wrong guess — tiles flash red briefly */
   .cc-tile-wrong {
-    animation: cc-shake 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    animation: cc-wrong-flash 0.55s ease forwards;
   }
-  @keyframes cc-shake {
-    0%   { transform: translateX(0); }
-    10%  { transform: translateX(-7px); }
-    25%  { transform: translateX(6px); }
-    40%  { transform: translateX(-5px); }
-    55%  { transform: translateX(4px); }
-    70%  { transform: translateX(-3px); }
-    85%  { transform: translateX(2px); }
-    100% { transform: translateX(0); }
-  }
-
-  /* Pre-submit bounce — one tile at a time */
-  .cc-tile-bouncing {
-    animation: cc-bounce 0.32s cubic-bezier(0.34, 1.7, 0.64, 1) both !important;
-  }
-  @keyframes cc-bounce {
-    0%   { transform: translateY(0) scale(1); }
-    35%  { transform: translateY(-10px) scale(1.05); }
-    65%  { transform: translateY(-10px) scale(1.05); }
-    100% { transform: translateY(0) scale(1); }
-  }
-
-  /* Correct guess — pseudo-3D flip reveal */
-  .cc-tile-flip {
-    animation: cc-flip 0.45s ease both !important;
-  }
-  @keyframes cc-flip {
-    0%   { transform: scaleX(1); }
-    45%  { transform: scaleX(0); }
-    55%  { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
+  @keyframes cc-wrong-flash {
+    0% { transform: scale(1); }
+    15% { transform: scale(0.94); }
+    40% { transform: scale(1.02); border-color: #b43c32; }
+    100% { transform: scale(1); }
   }
 
   /* Selected tile subtle glow pulse */
