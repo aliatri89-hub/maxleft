@@ -141,6 +141,7 @@ import { useTabSwipe } from "./hooks/useTabSwipe";
 import { useIntegrationSync } from "./hooks/useIntegrationSync";
 import useNotifications from "./hooks/useNotifications";
 import { useAnalytics } from "./hooks/useAnalytics";
+import { useSubscription } from "./hooks/useSubscription";
 
 // Components
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -301,6 +302,7 @@ function AppMain() {
 
   const { notifications, unreadCount, markAllSeen } = useNotifications(session);
   const { track } = useAnalytics(session?.user?.id);
+  const subscription = useSubscription(session);
 
   // ── Analytics: track tab switches ──
   const prevTabRef = useRef(activeTab);
