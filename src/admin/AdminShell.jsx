@@ -419,8 +419,16 @@ function DevTools({ session }) {
       for (const [table, col] of tables) {
         await supabase.from(table).delete().eq(col, uid);
       }
-      await supabase.from("profiles").delete().eq("id", uid);
-      setResult({ ok: true, msg: "Wiped. You're a clean slate." });
+      // Reset profile but keep it (deleting it locks you out of admin)
+      await supabase.from("profiles").update({
+        username: null,
+        letterboxd_username: null,
+        letterboxd_etag: null,
+        letterboxd_last_modified: null,
+        letterboxd_last_synced_at: null,
+        setup_complete: false,
+      }).eq("id", uid);
+      setResult({ ok: true, msg: "Wiped. You're a clean slate — reload the app to re-onboard." });
     } catch (e) {
       setResult({ ok: false, msg: e.message });
     } finally {
