@@ -390,8 +390,8 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
         }} />
       </button>
 
-      {/* Movie Night — multiplayer swipe game */}
-      <button
+      {/* Movie Night — multiplayer swipe game (hidden until guest flow is polished) */}
+      {false && <button
         onClick={() => onLaunchGame("movieNight")}
         onPointerDown={() => setPressedId("movieNight")}
         onPointerUp={() => setPressedId(null)}
@@ -429,7 +429,7 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
           transform: "translateY(-50%) rotate(-45deg)",
         }} />
-      </button>
+      </button>}
 
       {/* Daily Games */}
       <div style={{
