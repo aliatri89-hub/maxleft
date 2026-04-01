@@ -390,3 +390,84 @@ const styles = {
     color: "rgba(240,235,225,0.3)",
   },
 };
+
+function DevTools({ session }) {
+  const [wiping, setWiping] = React.useState(false);
+  const [result, setResult] = React.useState(null);
+
+  const handleWipe = async () => {
+    if (!window.confirm("Wipe ALL your data? This cannot be undone.")) return;
+    setWiping(true);
+    setResult(null);
+    try {
+      const uid = session?.user?.id;
+      if (!uid) throw new Error("No user session");
+      const { supabase } = await import("../supabase");
+      const tables = [
+        ["user_media_logs", "user_id"],
+        ["community_user_progress", "user_id"],
+        ["user_community_subscriptions", "user_id"],
+        ["user_podcast_favorites", "user_id"],
+        ["user_badges", "user_id"],
+        ["user_notifications", "user_id"],
+        ["feed_activity", "user_id"],
+        ["wishlist", "user_id"],
+        ["cc_daily_results", "user_id"],
+        ["tf_daily_results", "user_id"],
+        ["wt_daily_results", "user_id"],
+      ];
+      for (const [table, col] of tables) {
+        await supabase.from(table).delete().eq(col, uid);
+      }
+      await supabase.from("profiles").delete().eq("id", uid);
+      setResult({ ok: true, msg: "Wiped. You're a clean slate." });
+    } catch (e) {
+      setResult({ ok: false, msg: e.message });
+    } finally {
+      setWiping(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: 32, maxWidth: 480 }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 8 }}>
+        ☢ Dev Tools
+      </h2>
+      <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "rgba(240,235,225,0.4)", marginBottom: 32 }}>
+        Danger zone. For testing only.
+      </p>
+      <div style={{ background: "rgba(220,60,60,0.06)", border: "1px solid rgba(220,60,60,0.25)", borderRadius: 12, padding: 24 }}>
+        <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: 8, color: "#e05555" }}>
+          Wipe My Data
+        </div>
+        <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "rgba(240,235,225,0.5)", marginBottom: 20, lineHeight: 1.5 }}>
+          Deletes all logs, progress, badges, notifications, subscriptions, and profile for <strong>{session?.user?.email}</strong>.
+        </p>
+        <button
+          onClick={handleWipe}
+          disabled={wiping}
+          style={{
+            background: wiping ? "rgba(220,60,60,0.3)" : "rgba(220,60,60,0.15)",
+            border: "1px solid rgba(220,60,60,0.4)",
+            color: "#e05555",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: 13,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            padding: "10px 20px",
+            borderRadius: 8,
+            cursor: wiping ? "not-allowed" : "pointer",
+          }}
+        >
+          {wiping ? "Wiping..." : "☢ Wipe My Data"}
+        </button>
+        {result && (
+          <div style={{ marginTop: 16, fontFamily: "var(--font-body)", fontSize: 13, color: result.ok ? "#5a9e6f" : "#e05555" }}>
+            {result.msg}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
