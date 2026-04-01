@@ -1,12 +1,12 @@
 import { t } from "../../theme";
 // src/features/movie-night/MovieNightPublic.jsx
 //
-// Public landing page for /night/CODE links — no auth required.
-// Shows an invite screen with "Sign up & Play" CTA.
-// After auth, user is redirected back to /night/CODE where
-// the normal deep link handler auto-opens Movie Night.
+// Public landing page for /night/CODE links.
+// Shows an invite screen with "Sign in with Google" CTA.
+// After auth + onboarding, user is redirected back to /night/CODE
+// where the deep link handler auto-opens Movie Night.
 //
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { supabase } from "../../supabase";
 
 const CREAM = "#f0ebe1";
@@ -14,10 +14,7 @@ const DARK = "#0f0d0b";
 const PURPLE = "#9b59b6";
 
 export default function MovieNightPublic({ code }) {
-  const [guestLoading, setGuestLoading] = useState(false);
-
   const handleSignIn = useCallback(async () => {
-    // Redirect back to /night/CODE after auth so the deep link handler picks it up
     const redirectUrl = `${window.location.origin}/night/${code}`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -25,17 +22,6 @@ export default function MovieNightPublic({ code }) {
     });
     if (error) console.error("[MovieNightPublic] auth error:", error);
   }, [code]);
-
-  const handleGuestPlay = useCallback(async () => {
-    setGuestLoading(true);
-    const { error } = await supabase.auth.signInAnonymously();
-    if (error) {
-      console.error("[MovieNightPublic] anon auth error:", error);
-      setGuestLoading(false);
-    }
-    // Auth state change will be picked up by AppMain → creates guest profile →
-    // skips setup → opens Movie Night via deep link handler
-  }, []);
 
   return (
     <div style={{
@@ -64,21 +50,10 @@ export default function MovieNightPublic({ code }) {
         }}>MOVIE NIGHT</div>
         <div style={{
           color: CREAM, opacity: 0.6, fontSize: 15, lineHeight: 1.5,
-          marginBottom: 24, maxWidth: 280, margin: "0 auto 24px",
+          maxWidth: 280, margin: "0 auto 24px",
         }}>
           You've been invited to swipe through movies together.
           Only the films you BOTH pick get revealed.
-        </div>
-
-        <div style={{
-          padding: "12px 16px", borderRadius: 12, marginBottom: 24,
-          background: "rgba(155,89,182,0.08)", border: "1px solid rgba(155,89,182,0.15)",
-        }}>
-          <div style={{ fontSize: 11, color: CREAM, opacity: 0.4, marginBottom: 4 }}>Session code</div>
-          <div style={{
-            fontSize: 28, fontWeight: 800, fontFamily: t.fontDisplay,
-            letterSpacing: 8, color: PURPLE,
-          }}>{code}</div>
         </div>
 
         <button onClick={handleSignIn} style={{
@@ -94,17 +69,8 @@ export default function MovieNightPublic({ code }) {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
-          Sign in with Google to play
+          Sign in to play
         </button>
-
-        <button onClick={handleGuestPlay} disabled={guestLoading} style={{
-          width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 10,
-          background: "transparent", color: CREAM,
-          border: `1.5px solid rgba(240,235,225,0.15)`,
-          fontSize: 15, fontWeight: 600, cursor: guestLoading ? "default" : "pointer",
-          fontFamily: t.fontDisplay, letterSpacing: 0.5,
-          opacity: guestLoading ? 0.5 : 0.8,
-        }}>{guestLoading ? "Joining…" : "Play as guest"}</button>
       </div>
 
       {/* How it works */}
