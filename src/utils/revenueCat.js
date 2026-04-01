@@ -23,7 +23,7 @@ let LOG_LEVEL = null;
 let RevenueCatUI = null;
 let PAYWALL_RESULT = null;
 
-const RC_API_KEY_GOOGLE = "test_ttZsXEQKINarORbnqQPrgKhhwZo";
+const RC_API_KEY_GOOGLE = "goog_dhdAQjsUohpCwZwlqmxWVhGfryx";
 // const RC_API_KEY_APPLE = ""; // Add when iOS is configured
 
 const ENTITLEMENT_ID = "mantl_pro";
