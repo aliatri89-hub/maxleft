@@ -69,6 +69,18 @@ function PickAFlickIcon({ color }) {
   );
 }
 
+function MovieNightIcon({ color }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="8" width="10" height="14" rx="2" stroke={color} strokeWidth="1.5" fill={color} fillOpacity="0.1" />
+      <rect x="15" y="8" width="10" height="14" rx="2" stroke={color} strokeWidth="1.5" fill={color} fillOpacity="0.1" />
+      <path d="M10 5 L14 2 L18 5" stroke={color} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="8" cy="15" r="1.5" fill={color} fillOpacity="0.4" />
+      <circle cx="20" cy="15" r="1.5" fill={color} fillOpacity="0.4" />
+    </svg>
+  );
+}
+
 function FlameIcon({ color, size = 12 }) {
   return (
     <svg width={size} height={size + 2} viewBox="0 0 12 14" fill="none">
@@ -369,6 +381,47 @@ export default function GamesHub({ session, onBack, onLaunchGame, gameStatuses =
           </div>
           <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2, lineHeight: 1.35 }}>
             Swipe to find what to watch
+          </div>
+        </div>
+        <div style={{
+          position: "absolute", right: 14, top: "50%",
+          width: 7, height: 7, borderRight: "1.5px solid #6b6256", borderBottom: "1.5px solid #6b6256",
+          transform: "translateY(-50%) rotate(-45deg)",
+        }} />
+      </button>
+
+      {/* Movie Night — multiplayer swipe game */}
+      <button
+        onClick={() => onLaunchGame("movieNight")}
+        onPointerDown={() => setPressedId("movieNight")}
+        onPointerUp={() => setPressedId(null)}
+        onPointerLeave={() => setPressedId(null)}
+        style={{
+          display: "flex", alignItems: "center", gap: 14, padding: "14px 16px",
+          background: "rgba(155, 89, 182, 0.06)",
+          border: "1px solid rgba(245,240,232,0.06)",
+          borderRadius: 14, cursor: "pointer", textAlign: "left", width: "100%",
+          position: "relative", overflow: "hidden",
+          fontFamily: "inherit", color: "inherit", outline: "none",
+          WebkitTapHighlightColor: "transparent",
+          transform: pressedId === "movieNight" ? "scale(0.98)" : "scale(1)",
+          transition: "transform 0.15s ease",
+          marginTop: 8,
+          animation: "gh-card-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 200ms backwards",
+        }}
+      >
+        <div style={{ flexShrink: 0 }}>
+          <MovieNightIcon color="#9b59b6" />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, paddingRight: 20 }}>
+          <div style={{
+            fontFamily: t.fontSerif, fontSize: 18, fontWeight: 700,
+            color: t.cream, lineHeight: 1.2,
+          }}>
+            Movie Night
+          </div>
+          <div style={{ fontSize: 13, color: "rgba(245,240,235,0.75)", marginTop: 2, lineHeight: 1.35 }}>
+            Swipe with a friend — reveal your matches
           </div>
         </div>
         <div style={{

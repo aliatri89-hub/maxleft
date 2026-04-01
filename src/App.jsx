@@ -129,6 +129,7 @@ const ReelTime = lazy(() => import("./features/reel-time/ReelTime"));
 const GamesHub = lazy(() => import("./features/games-hub/GamesHub"));
 import { hasPlayedToday as rtHasPlayedToday } from "./features/reel-time/reelTimeApi";
 const CastConnections = lazy(() => import("./features/cast-connections/CastConnections"));
+const MovieNight = lazy(() => import("./features/movie-night/MovieNight"));
 import { hasPlayedToday as ccHasPlayedToday } from "./features/cast-connections/castConnectionsApi";
 const BadgeOverviewPage = lazy(() => import("./components/BadgeOverviewPage"));
 
@@ -240,6 +241,7 @@ function AppMain() {
   const [showWhatToWatch, setShowWhatToWatch] = useState(false);
   const [showReelTime, setShowReelTime] = useState(false);
   const [showCastConnections, setShowCastConnections] = useState(false);
+  const [showMovieNight, setShowMovieNight] = useState(false);
   const [showBadgeOverview, setShowBadgeOverview] = useState(false);
   const [tfUnplayed, setTfUnplayed] = useState(false);
   const [rtUnplayed, setRtUnplayed] = useState(false);
@@ -719,6 +721,9 @@ function AppMain() {
                       } else if (gameId === "castConnections") {
                         setShowCastConnections(true);
                         pushNav("castConnections", () => setShowCastConnections(false));
+                      } else if (gameId === "movieNight") {
+                        setShowMovieNight(true);
+                        pushNav("movieNight", () => setShowMovieNight(false));
                       } else if (gameId === "badges") {
                         setShowBadgeOverview(true);
                         pushNav("badgeOverview", () => setShowBadgeOverview(false));
@@ -807,6 +812,15 @@ function AppMain() {
           </ErrorBoundary>
         )}
 
+        {/* Movie Night */}
+        {showMovieNight && (
+          <ErrorBoundary name="Movie Night">
+            <Suspense fallback={<CommunityLoadingSkeleton />}>
+              <MovieNight session={session} onBack={() => { removeNav("movieNight"); setShowMovieNight(false); }} onToast={showToast} pushNav={pushNav} removeNav={removeNav} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+
         {/* Badge Overview */}
         {showBadgeOverview && (
           <ErrorBoundary name="Badges">
@@ -883,7 +897,7 @@ function AppMain() {
 
         {/* Bottom Nav — Communities | Games | Search | Mantl */}
         {/* Floating back button — shown on iOS/Android when nav bar is hidden */}
-        {screen === "app" && (activeCommunitySlug || showWhatToWatch || showTripleFeature || showReelTime || showCastConnections) && (
+        {screen === "app" && (activeCommunitySlug || showWhatToWatch || showTripleFeature || showReelTime || showCastConnections || showMovieNight) && (
           <div
             onClick={() => { popNav(); }}
             style={{
@@ -913,7 +927,7 @@ function AppMain() {
           </div>
         )}
 
-        {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && !showCastConnections && (
+        {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && !showCastConnections && !showMovieNight && (
           <div className="nav-bar">
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}

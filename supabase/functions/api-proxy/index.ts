@@ -129,9 +129,11 @@ async function handleTmdbDiscover(params: Record<string, string>) {
     with_watch_monetization_types = "flatrate",
     release_date_gte,
     release_date_lte,
+    with_genres,
+    vote_count_gte,
   } = params;
 
-  const cacheKey = `tmdb:discover:${watch_region}:${with_watch_providers || "none"}:${sort_by}:${release_date_gte || ""}:${release_date_lte || ""}:${page}`;
+  const cacheKey = `tmdb:discover:${watch_region}:${with_watch_providers || "none"}:${sort_by}:${release_date_gte || ""}:${release_date_lte || ""}:${with_genres || ""}:${vote_count_gte || ""}:${page}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -146,6 +148,12 @@ async function handleTmdbDiscover(params: Record<string, string>) {
   // Date range filters (new releases tab)
   if (release_date_gte) url += `&primary_release_date.gte=${release_date_gte}`;
   if (release_date_lte) url += `&primary_release_date.lte=${release_date_lte}`;
+
+  // Genre filter (Movie Night)
+  if (with_genres) url += `&with_genres=${with_genres}`;
+
+  // Quality floor (Movie Night — skip obscure films)
+  if (vote_count_gte) url += `&vote_count.gte=${vote_count_gte}`;
 
   const res = await fetch(url);
   const data = await res.json();
