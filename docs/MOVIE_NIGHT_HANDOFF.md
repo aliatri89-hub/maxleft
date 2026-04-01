@@ -1,126 +1,124 @@
-# Movie Night — Handoff Doc
+# Movie Night — Handoff
 
-## What Was Built
+## Status: Hidden (card disabled in GamesHub, code intact)
 
-### Core Game
-Two users swipe through the same stack of 20 movies privately. When both finish, only the films they BOTH swiped right on are revealed. No negotiation — just matches.
+The game is fully built and functional for authenticated users. Hidden behind `{false &&` in GamesHub.jsx until the guest flow is polished.
 
-Close cousin of Pick a Flick: identical swipe physics, same VHS aesthetic, same card dimensions/animations/haptics. Purple accent color (#9b59b6) to distinguish it.
+---
 
-### Files Created
-- `src/features/movie-night/MovieNight.jsx` — full-screen overlay (lobby, share, swipe, waiting, reveal screens)
-- `src/features/movie-night/useMovieNight.js` — session creation, TMDB stack generation, swipe state machine, partner polling, match reveal
-- `src/features/movie-night/MovieNightPublic.jsx` — public invite landing page for `/night/CODE` links
-- `supabase/migrations/20260401_movie_night.sql` — schema reference (already applied)
+## What's shipped
 
-### Files Modified
-- `src/App.jsx` — lazy imports, state, game launcher, overlay, nav conditionals, deep link handler, guest setup skip
-- `src/features/games-hub/GamesHub.jsx` — Movie Night card + icon (purple, below Pick a Flick)
-- `supabase/functions/api-proxy/index.ts` — added `with_genres` + `vote_count_gte` to TMDB discover handler
-- `vite.config.js` — externalized `@revenuecat/purchases-capacitor` and `purchases-capacitor-ui`
+### Schema (live in Supabase)
+- `movie_night_sessions` — id, code, creator_id, partner_id, genre, stack (JSONB), creator_done, partner_done
+- `movie_night_swipes` — session_id, user_id, tmdb_id, choice (boolean)
+- `movie_night_matches()` RPC — security definer function, returns matching tmdb_ids when both players are done
+- RLS policies: each user can only see their own swipes, sessions visible to creator/partner
 
-### Schema (Applied via Supabase MCP)
-```sql
-movie_night_sessions
-  id, code (unique), creator_id, partner_id, genre_id, genre_name,
-  stack (jsonb — array of {tmdb_id, title, year, poster_path, overview}),
-  creator_done, partner_done, created_at
+### API
+- `api-proxy` updated with `with_genres` + `vote_count_gte` params on `tmdb_discover` action
 
-movie_night_swipes
-  id, session_id, user_id, tmdb_id, choice (boolean), created_at
-  unique(session_id, user_id, tmdb_id)
+### Frontend
+- `src/features/movie-night/MovieNight.jsx` — full-screen overlay, same swipe physics as Pick a Flick (purple accent)
+- `src/features/movie-night/useMovieNight.js` — session creation, TMDB stack generation, swiping state machine, partner polling, match reveal
+- `src/features/movie-night/MovieNightPublic.jsx` — public invite page for /night/CODE links
+- `GamesHub.jsx` — card + icon (currently hidden with `{false &&`)
+- `App.jsx` — lazy imports, overlay wiring, nav conditionals, /night/CODE deep link parsing, auto-open after auth
 
-movie_night_matches(p_session_id) — RPC, security definer
-  Returns {ready: bool, matches: [tmdb_ids]} when both players done
+### Deep linking
+- `/night/CODE` parsed from URL on app init -> `movieNightJoinCode` state
+- When authed: auto-opens Movie Night overlay + auto-joins session
+- When unauthed: shows MovieNightPublic invite page instead of landing screen
+
+---
+
+## What works
+- Creator picks genre -> session created with 20 TMDB films -> share link generated
+- Share screen shows `mymantl.app/night/CODE` with copy/share buttons
+- Both authenticated players swipe the same stack privately
+- When both done: match reveal with celebration animation (or zero-match humor)
+- Anonymous auth via "Play as guest" button (Supabase anonymous sign-ins enabled)
+- Deep link flow: /night/CODE -> invite page -> sign in -> auto-join
+
+---
+
+## Known issues
+
+### 1. Guest flow still hits username setup (BLOCKING)
+
+**Root cause:** `handle_new_user()` DB trigger creates a profile with `username: null, setup_complete: false` before `loadUserData` runs. By the time the code checks `if (!prof)`, the profile already exists — so the guest username/setup_complete INSERT never fires. The UPDATE attempt in the setup check has closure/timing issues with the `onAuthStateChange` callback.
+
+**Possible solutions (pick one):**
+
+**A. Reload after anonymous auth (simplest, recommended)**
+
+In MovieNightPublic, after `signInAnonymously()` resolves, update the profile directly and reload:
+
+```js
+const handleGuestPlay = async () => {
+  const { data } = await supabase.auth.signInAnonymously();
+  if (data?.session) {
+    await supabase.from("profiles").update({
+      username: `guest_${Date.now().toString(36)}`,
+      setup_complete: true,
+      avatar_emoji: "🍿",
+    }).eq("id", data.session.user.id);
+    window.location.reload();
+  }
+};
 ```
 
-RLS: creators/partners can read their sessions; users can insert/read only their own swipes; the match function reads across users securely.
+On reload: app initializes with valid session + /night/CODE URL -> normal deep link flow -> straight into game. Crude but bypasses all closure/timing issues.
 
-### Infra Fixes (Bonus)
-- **Vercel git deploys fixed**: Root cause was Vite 8 beta's Rolldown bundler treating `@revenuecat/purchases-capacitor` as a hard error. Fixed by adding it to `build.rollupOptions.external`. All git-triggered deploys now pass.
-- **Node version**: Changed from 24.x to 22.x (LTS). Keep it there.
-- **api-proxy v17**: Deployed with verify_jwt=false, genre + vote_count filters added.
+**B. Edge function for guest swipes (cleanest UX, more work)**
 
----
+Create a `movie-night-guest` edge function (verify_jwt=false):
+- Accepts: session code + array of swipe choices
+- Validates code, writes swipes with generated guest UUID, sets partner_id + partner_done
+- Returns matches if creator is also done
 
-## What Works
-- ✅ Game card appears in Games Hub (purple, below Pick a Flick)
-- ✅ Creator flow: pick genre → create session → share screen with `mymantl.app/night/CODE` link → start swiping
-- ✅ Swipe physics match Pick a Flick exactly
-- ✅ TMDB Discover stack generation (genre filter, vote_count floor, creator's logged films excluded)
-- ✅ Share screen copies/shares the deep link URL
-- ✅ `/night/CODE` deep link parsing in App.jsx
-- ✅ Auto-open Movie Night after auth when join code present
-- ✅ Auto-join session when opened via deep link
-- ✅ Public invite page renders for unauthenticated users on `/night/CODE`
-- ✅ Anonymous auth ("Play as guest") creates anon session in Supabase
-- ✅ Vercel git deploys pass on every push
+Guest never authenticates at all. MovieNightPublic renders the swipe UI directly, swipes accumulate in React state, POST to edge function when done. No profile, no setup, no auth.
 
----
+**C. Modify the DB trigger**
 
-## What's Broken / Needs Work
+Add logic to `handle_new_user()` to detect anonymous users and auto-set username + setup_complete. Couples trigger to game logic though.
 
-### 1. Guest setup skip — NOT WORKING
-**Problem**: Anonymous guests still hit the username setup screen despite the fix.
+### 2. Guest access to full app shell
 
-**Root cause identified**: The `handle_new_user()` Postgres trigger on `auth.users` auto-creates a profile with `username: null, setup_complete: false` BEFORE `loadUserData` runs. The latest fix (commit `9782f23`) detects `/night/CODE` in the URL at the setup-check stage and UPDATEs the profile — but Ali reports it's still not working.
+After anonymous auth, closing Movie Night leaves the guest in the full app with empty tabs. Not dangerous but not polished.
 
-**Debug approach**: 
-- Check if the UPDATE is actually firing (query profiles table for recent anon users — look for `avatar_emoji: '🍿'` and `setup_complete: true`)
-- If not firing, the URL check `window.location.pathname.match(/^\/night\/.../)` might be failing (www redirect? trailing slash? hash fragment from auth callback?)
-- Console.log the pathname at that point to see what it actually is
-- Nuclear option: don't check URL at all — check `user.is_anonymous` directly via `const { data: { user } } = await supabase.auth.getUser()` and skip setup for ALL anonymous users regardless of URL
+**Fix:** In MovieNight onBack, check if user is anonymous. If so, `supabase.auth.signOut()` instead of closing to app shell.
 
-**Location**: `src/App.jsx`, inside `loadUserData`, the `if (!prof.username || !prof.setup_complete)` block (around line 558).
+### 3. No "log this movie" CTA on reveal
 
-### 2. Anon guests can access full app shell
-**Problem**: After Movie Night overlay closes, anonymous guests land in the full app with empty tabs.
+Reveal screen shows matches but doesn't close the loop into MANTL tracking.
 
-**Fix**: In MovieNight.jsx `handleClose`, check if user is anonymous (`session?.user?.is_anonymous`) and call `supabase.auth.signOut()` instead of closing to app shell. This boots them back to the invite/landing page.
+**Fix:** Add "Watch tonight" button that logs the film for the user.
 
-### 3. Theater-only releases in stack
-**Problem**: TMDB Discover returns movies currently in theaters that aren't available for home viewing.
+### 4. Stack exclusion only covers creator
 
-**Fix options**:
-- Add a release date ceiling to the TMDB discover call: `release_date_lte` set to ~3 months ago (filters out current theatrical releases)
-- Or add `with_watch_monetization_types=flatrate` to only get streaming-available films (but this requires `with_watch_providers` which varies by region)
-- Simplest: add `release_date_lte: <3 months ago>` in `useMovieNight.js` `generateStack()` when calling apiProxy
+Creator's logged films are excluded from the stack. Partner's are not (partner isn't known at stack generation time).
 
-### 4. Partner join + reveal flow (untested end-to-end)
-The two-player flow hasn't been fully tested with both players completing and seeing the reveal screen. Needs testing:
-- Creator finishes first → waiting screen → partner finishes → both see reveal
-- Partner finishes first → waiting screen → creator finishes → both see reveal  
-- Zero matches → cheeky "nothing in common" screen
-- Multiple matches → poster grid with confetti
-
-### 5. No "watch tonight" log action on reveal
-The reveal screen shows matches but doesn't have a "Log it" button that writes to `user_media_logs`. This was in the original spec — post-reveal CTA that logs the film for both users.
+**Fix:** Acceptable for v1 — partner just swipes left on films they've seen.
 
 ---
 
-## Architecture Decisions (For Reference)
+## To re-enable
 
-- **Stack source**: TMDB Discover API via api-proxy edge function. Genre filter optional (default: any). 3 pages fetched (60 results), creator's logged films excluded, randomly sampled to 20. Vote count floor of 100 to skip obscure films.
-- **One round only**: No multi-round narrowing (unlike Pick a Flick). 20 films, one pass, show all matches.
-- **Session code**: 6-char alphanumeric (no I/O/0/1 for readability). Stored in `movie_night_sessions.code` with unique constraint.
-- **Polling**: Creator/partner poll session row every 3s to detect when partner finishes. Could upgrade to Supabase Realtime later.
-- **Pro gate**: Not yet implemented. Plan: creator needs Pro, joiner plays free.
-- **Deep link**: `mymantl.app/night/CODE` → parsed in App.jsx useState initializer → auto-opens after auth → auto-joins session.
-- **Purple accent**: `#9b59b6` — distinguishes Movie Night from Pick a Flick (green) in Games Hub.
+In `GamesHub.jsx` around line 393, change:
+```jsx
+{false && <button
+```
+back to:
+```jsx
+<button
+```
+And remove the matching `}` after the button's closing tag (around line 432).
 
 ---
 
-## Quick Reference
+## Also fixed this session (unrelated)
 
-| Item | Value |
-|------|-------|
-| Game ID in App.jsx | `movieNight` |
-| Overlay state | `showMovieNight` |
-| Nav key | `movieNight` |
-| Session table | `movie_night_sessions` |
-| Swipe table | `movie_night_swipes` |
-| Match RPC | `movie_night_matches(p_session_id)` |
-| Deep link pattern | `/night/[A-Za-z0-9]{4,8}` |
-| TMDB discover params | `with_genres`, `vote_count_gte` (added to api-proxy) |
-| Public component | `MovieNightPublic.jsx` |
-| Anon auth | Enabled in Supabase dashboard |
+### Vercel git deploy failures
+- **Root cause:** Vite 8 beta (Rolldown) treated `@revenuecat/purchases-capacitor` as a hard unresolved import error
+- **Fix:** Added to `build.rollupOptions.external` in vite.config.js
+- **Also:** Changed Node version from 24.x to 22.x (LTS) which fixed the patch-package cache issue as a side effect
