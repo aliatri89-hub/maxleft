@@ -540,14 +540,7 @@ function AppMain() {
       let { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
       if (!prof) {
         const name = user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest";
-        const nightCode = window.location.pathname.match(/^\/night\/([A-Za-z0-9]{4,8})\/?$/);
-        const skipSetup = !!nightCode || !!movieNightJoinCode;
-        const autoUsername = skipSetup ? `guest_${Date.now().toString(36)}` : undefined;
-        const { data: newProf } = await supabase.from("profiles").insert({
-          id: user.id, name,
-          avatar_emoji: skipSetup ? "🍿" : "👤",
-          ...(autoUsername ? { username: autoUsername, setup_complete: true } : {}),
-        }).select().single();
+        const { data: newProf } = await supabase.from("profiles").insert({ id: user.id, name, avatar_emoji: "👤" }).select().single();
         prof = newProf;
       }
       if (!prof) {
@@ -557,8 +550,20 @@ function AppMain() {
       }
       if (prof) {
         if (!prof.username || !prof.setup_complete) {
-          setProfile({ name: prof.name || "", username: "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "" });
-          setAuthLoading(false); setSigningIn(false); setScreen("setup"); return;
+          // Movie Night guest: auto-complete setup so they go straight to the game
+          const nightCode = window.location.pathname.match(/^\/night\/([A-Za-z0-9]{4,8})\/?$/);
+          if (nightCode) {
+            const guestUser = `guest_${Date.now().toString(36)}`;
+            await supabase.from("profiles").update({
+              username: guestUser, setup_complete: true, avatar_emoji: "🍿",
+            }).eq("id", user.id);
+            prof.username = guestUser;
+            prof.setup_complete = true;
+            prof.avatar_emoji = "🍿";
+          } else {
+            setProfile({ name: prof.name || "", username: "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "" });
+            setAuthLoading(false); setSigningIn(false); setScreen("setup"); return;
+          }
         }
         const p = {
           name: prof.name || "", username: prof.username || "", avatar: prof.avatar_emoji || "👤", bio: prof.bio || "", avatarUrl: prof.avatar_url || "",
