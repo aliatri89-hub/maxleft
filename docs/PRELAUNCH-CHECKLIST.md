@@ -5,7 +5,28 @@
 
 ## 🔴 Blockers
 
-- [ ] **Swap RevenueCat API key to production** — Integration is complete and fully wired. Replace `test_ttZsXEQKINarORbnqQPrgKhhwZo` in `src/utils/revenueCat.js` with the production Google key before launch. iOS key still pending MacBook setup.
+- [x] **Swap RevenueCat API key to production (Android)** — Done. `goog_dhdAQjsUohpCwZwlqmxWVhGfryx` live in `src/utils/revenueCat.js`.
+
+- [ ] **iOS launch** — Requires MacBook + Xcode. Full sub-checklist:
+  - [ ] Apple Developer Program enrolled ($99/yr) at developer.apple.com
+  - [ ] Xcode installed, repo cloned, `npm install` run
+  - [ ] `npx cap add ios` — add iOS platform to Capacitor
+  - [ ] Bundle ID set in `capacitor.config.ts` — e.g. `app.mymantl.mantl`
+  - [ ] Bundle ID registered in App Store Connect — create new App
+  - [ ] Signing certificate + provisioning profile in Xcode (automatic signing is fine)
+  - [ ] `npx cap sync ios` — sync web assets to Xcode project
+  - [ ] Build runs on simulator without errors
+  - [ ] Build runs on physical iPhone without errors
+  - [ ] **APNs** — enable Push Notifications capability in Xcode. Export APNs key from Apple Developer portal, add to Supabase Auth settings (alongside existing FCM config)
+  - [ ] **RevenueCat iOS key** — add `RC_API_KEY_APPLE` to `src/utils/revenueCat.js` (placeholder already in code). Get from RC Dashboard → API Keys → Apple App Store key (`appl_...`)
+  - [ ] **StoreKit / Apple IAP** — create matching products in App Store Connect: `mantl_monthly_pro` ($4.99) and `mantl_yearly_pro` ($39.99) with 7-day free trial. Link to RevenueCat.
+  - [ ] **Audio on iOS** — verify `@mediagrid/capacitor-native-audio` works on iPhone (plugin uses AVAudioPlayer on iOS vs ExoPlayer on Android). Test playback + background mode + lock screen controls.
+  - [ ] **Capacitor plugins audit** — confirm all plugins have iOS support (native audio, purchases, push notifications)
+  - [ ] TestFlight build submitted — test full flow on iPhone including billing sandbox
+  - [ ] App Store listing — screenshots (6.7" iPhone required), description, keywords, age rating, privacy policy URL
+  - [ ] Privacy manifest (`PrivacyInfo.xcprivacy`) — required by Apple for apps using certain APIs. Check if Capacitor plugins trigger requirement.
+  - [ ] App Store review submitted — budget 1–3 days for first review
+  - [ ] iOS billing tested end-to-end via sandbox account in TestFlight
 - [ ] **Seed badges** — Badge system is built and working; content just needs seeding. See `docs/HANDOFF-badge-seeding.md`.
 
   **Blank Check** — 7 seeded, 3 to go (target 10):

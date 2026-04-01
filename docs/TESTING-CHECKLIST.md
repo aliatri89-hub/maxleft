@@ -347,3 +347,67 @@ These were all fixed — confirm they stay fixed.
 ---
 
 *When all boxes are checked on a physical Android device against the production Supabase project: ship it.*
+
+---
+
+## 17. iOS (TestFlight — test before App Store submission)
+
+### Build & Install
+- [ ] `npx cap sync ios` completes without errors
+- [ ] Xcode build succeeds with no warnings treated as errors
+- [ ] App installs on physical iPhone via TestFlight
+- [ ] App icon, launch screen render correctly on iPhone
+- [ ] No landscape mode issues (if portrait-locked)
+
+### Auth
+- [ ] Sign up, log in, log out all work on iPhone
+- [ ] Session persists after app backgrounding and return
+- [ ] Deep links from email confirmation open the app correctly
+
+### Audio
+- [ ] Native audio plays on iPhone (AVAudioPlayer path, not ExoPlayer)
+- [ ] Audio continues when app is backgrounded
+- [ ] Lock screen controls appear (play/pause)
+- [ ] Control Centre audio widget appears
+- [ ] Audio ducks correctly when Siri activates
+- [ ] Audio resumes after phone call ends
+- [ ] Headphone disconnect pauses playback (iOS convention)
+
+### Push Notifications
+- [ ] Push permission prompt appears correctly
+- [ ] APNs token is registered (check Supabase Auth dashboard)
+- [ ] Test push arrives on iPhone
+- [ ] Tapping push notification deep-links correctly
+
+### Billing (iOS / StoreKit)
+- [ ] RevenueCat iOS SDK initialises — `appl_` key configured
+- [ ] Paywall renders correctly on iPhone
+- [ ] Tapping subscribe opens Apple payment sheet
+- [ ] Sandbox purchase completes, `mantl_pro` entitlement granted
+- [ ] `useSubscription` updates to `isPro: true` after purchase
+- [ ] Cancelling Apple payment sheet returns to app cleanly
+- [ ] Restore purchases works for existing iOS subscriber
+- [ ] RC webhook receives iOS purchase events (check RC dashboard)
+- [ ] `subscriptions` table updates after iOS purchase
+
+### Navigation & Gestures
+- [ ] iOS swipe-back gesture works throughout the app
+- [ ] No conflicts between swipe-back and in-app swipe gestures (tab swipe, card flip)
+- [ ] Safe area insets respected — no content clipped by notch or Dynamic Island
+- [ ] Bottom nav clears the home indicator bar
+- [ ] Keyboard does not cover input fields (scroll adjusts)
+
+### Performance
+- [ ] Cold start time acceptable on iPhone
+- [ ] Feed scroll smooth on iPhone (no jank)
+- [ ] Memory usage stable during extended session — no crashes from memory pressure
+
+### App Store Readiness
+- [ ] No use of private/restricted Apple APIs
+- [ ] Privacy manifest (`PrivacyInfo.xcprivacy`) in place if required
+- [ ] All required screenshot sizes captured (6.7" mandatory)
+- [ ] App description, keywords, support URL, privacy policy URL all filled in App Store Connect
+- [ ] Age rating questionnaire completed
+- [ ] Content rights declaration completed
+
+*Ship to TestFlight first. Do a full run of sections 1–16 on iPhone before submitting to App Store review.*
