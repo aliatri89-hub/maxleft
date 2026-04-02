@@ -5,7 +5,7 @@
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
 const ACTORS = [
-  { id: 2504, name: 'Eddie Murphy' },
+  { id: 776, name: 'Eddie Murphy' },
 ];
 
 
