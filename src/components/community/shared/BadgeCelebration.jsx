@@ -135,22 +135,11 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             position: "absolute", inset: 0, zIndex: 2,
             width: "100%", height: "100%",
             objectFit: "cover",
-            opacity: phase >= 1 ? 0.8 : 0,
+            opacity: phase >= 1 ? 1 : 0,
             transition: "opacity 1.5s ease-in",
             pointerEvents: "none",
-            filter: "brightness(0.7) saturate(1.2)",
           }}
         />
-      )}
-
-      {/* Video accent tint overlay */}
-      {isVideo && phase >= 1 && (
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 3,
-          background: `${accent}18`,
-          pointerEvents: "none",
-          mixBlendMode: "multiply",
-        }} />
       )}
 
       {/* Flicker overlay */}
