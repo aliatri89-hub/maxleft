@@ -6,6 +6,7 @@ const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
 const ACTORS = [
   { id: 1158, name: 'Jack Nicholson' },
+  { id: 19292, name: 'Adam Sandler' },
 ];
 
 
@@ -426,7 +427,7 @@ async function checkCast(film, actorId) {
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
-  console.log(`Checking ${uniqueFilms.length} Rewatchables films for Jack Nicholson...\n`);
+  console.log(`Checking ${uniqueFilms.length} Rewatchables films for Jack Nicholson + Adam Sandler...\n`);
 
   const hitsByActor = {};
   for (const actor of ACTORS) hitsByActor[actor.name] = [];
