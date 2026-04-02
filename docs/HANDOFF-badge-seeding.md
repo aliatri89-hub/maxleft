@@ -179,3 +179,53 @@ AND badge_id = 'YOUR-BADGE-UUID';
 - Aim for 20–40 seconds, compress to under 5MB
 - Subtitles in the source video? Crop the bottom: `ffmpeg -i input.mp4 -vf "crop=in_w:in_h-80:0:0" output.mp4`
 - If the celebration looks dim, the accent_color is too dark — update it directly in the DB
+
+---
+
+## Rewatchables Badge Seeding
+
+### Key IDs
+- **Rewatchables community_id:** `b144bdc9-6e76-4807-8cfb-30f7d5f573fa`
+- **Rewatchables has no miniseries badges** — all badges are `item_set_completion`
+- **Genre shelves** (for reference): Comedy (139), Action & Adventure (75), Crime & Thriller (68), Drama (45), Sci-Fi & Fantasy (32), Horror (20), Documentary & Music (15), Animation (0)
+
+### Actor Lookup Script
+Use `scripts/rewatchables-80s-check.cjs` (`.cjs` not `.js` — project has `"type": "module"` in package.json):
+```bash
+node scripts/rewatchables-80s-check.cjs
+```
+- Single actor: set one entry in `ACTORS` array
+- Multi-actor combo badge: set multiple entries — script dedupes and prints combined set
+- TMDB person IDs: find at `themoviedb.org/person/{id}-name`
+
+### Host-Based Badges (e.g. The Big Pic)
+Query community_item_guests to find films where specific hosts appeared together:
+```sql
+SELECT ci.id, ci.title, ci.year, ci.tmdb_id
+FROM community_items ci
+JOIN community_miniseries cm ON cm.id = ci.miniseries_id
+WHERE cm.community_id = 'b144bdc9-6e76-4807-8cfb-30f7d5f573fa'
+  AND ci.id IN (SELECT item_id FROM community_item_guests WHERE guest_id = 'HOST_UUID_1')
+  AND ci.id IN (SELECT item_id FROM community_item_guests WHERE guest_id = 'HOST_UUID_2')
+ORDER BY ci.year;
+```
+Find host UUIDs:
+```sql
+SELECT id, name FROM community_guests cg
+WHERE name ILIKE '%fennessey%' OR name ILIKE '%dobbins%';
+```
+
+### Existing Rewatchables Badges Reference
+| name | plaque_name | type | subject | sort |
+|---|---|---|---|---|
+| Original Gangster | OG | item_set_completion | Denzel Washington (10 films) | 1 |
+| The Rivalry | 1vs1 | item_set_completion | Stallone + Schwarzenegger (15 films) | 2 |
+| Klumpy | Klumpy | item_set_completion | Eddie Murphy (7 films) | 3 |
+| The Big Pic | Big Pic | item_set_completion | Sean Fennessey + Amanda Dobbins co-eps (8 films) | 4 |
+| BS 2000s List | BS | item_set_completion | Bill Simmons' 50 Most Rewatchable of 21st Century (42 in catalog) | 5 |
+
+### Notes
+- Videos play at full brightness — `BadgeCelebration.jsx` has no brightness filter (removed)
+- The Big Pic badge has no video (Bill Simmons IP concern)
+- Boomerang (1992) is in Comedy shelf — was incorrectly in Horror, now fixed
+- Ocean's Eleven (2001) is tmdb_id 161, year 2001 — was incorrectly seeded as 1092996/2013, now fixed
