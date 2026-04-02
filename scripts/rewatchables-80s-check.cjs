@@ -5,7 +5,7 @@
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
 const ACTORS = [
-  { id: 1158, name: 'Jack Nicholson' },
+  { id: 514, name: 'Jack Nicholson' },
   { id: 19292, name: 'Adam Sandler' },
 ];
 
