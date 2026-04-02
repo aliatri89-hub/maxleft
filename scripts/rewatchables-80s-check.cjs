@@ -5,8 +5,7 @@
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
 const ACTORS = [
-  { id: 16483, name: 'Sylvester Stallone' },
-  { id: 1100,  name: 'Arnold Schwarzenegger' },
+  { id: 2504, name: 'Eddie Murphy' },
 ];
 
 
@@ -427,7 +426,7 @@ async function checkCast(film, actorId) {
 async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function main() {
-  console.log(`Checking ${uniqueFilms.length} Rewatchables films for Stallone + Schwarzenegger...\n`);
+  console.log(`Checking ${uniqueFilms.length} Rewatchables films for Eddie Murphy...\n`);
 
   const hitsByActor = {};
   for (const actor of ACTORS) hitsByActor[actor.name] = [];
