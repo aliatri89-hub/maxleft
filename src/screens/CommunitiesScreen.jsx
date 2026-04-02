@@ -16,7 +16,7 @@ const PODCAST_ART = {
 };
 
 // Communities that don't use series/franchise tracking (genre-based shelves)
-const HIDE_SERIES_TRACKING = new Set(["hdtgm", "rewatchables", "staff-picks"]);
+const HIDE_SERIES_TRACKING = new Set(["hdtgm", "rewatchables", "staff-picks", "blankcheck", "nowplaying"]);
 
 // ════════════════════════════════════════════════
 // EXPLORE SCREEN — VHS tape shelf with sleeve discovery
