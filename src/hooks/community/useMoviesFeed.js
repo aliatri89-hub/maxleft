@@ -1,58 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../../supabase";
-import { fetchLogosForItems, getLogoUrl, isLogoChecked, clearSoftLogoMisses, clearAllLogoMisses } from "../../utils/communityTmdb";
 
 /**
  * useBrowseFeed — powers the New Releases and Streaming tabs.
  *
  * Reads pre-computed data from browse_feed_cache (populated by the
  * refresh-browse-feed edge function on a pg_cron schedule).
- * Logo enrichment still happens client-side from TMDB logo cache.
+ * logo_url is fetched server-side during cache refresh — no client-side TMDB calls needed.
  */
 
 const PAGE_SIZE = 20;
-
-function patchLogosIntoRef(allItemsRef) {
-  allItemsRef.current = allItemsRef.current.map(item => {
-    if (item.logo_url) return item;
-    const url = getLogoUrl(item.tmdb_id);
-    return url ? { ...item, logo_url: url } : item;
-  });
-}
-
-function enrichLogos(items, mountedRef, setItems, allItemsRef) {
-  let patched = false;
-  for (const item of items) {
-    if (item.logo_url) continue;
-    const url = getLogoUrl(item.tmdb_id);
-    if (url) { item.logo_url = url; patched = true; }
-  }
-
-  if (patched && mountedRef.current) {
-    patchLogosIntoRef(allItemsRef);
-    setItems(prev => prev.map(item => {
-      if (item.logo_url) return item;
-      const url = getLogoUrl(item.tmdb_id);
-      return url ? { ...item, logo_url: url } : item;
-    }));
-  }
-
-  const logoItems = items
-    .filter(m => !m.logo_url && !isLogoChecked(m.tmdb_id))
-    .map(m => ({ tmdb_id: m.tmdb_id, media_type: "film" }));
-
-  if (logoItems.length > 0) {
-    fetchLogosForItems(logoItems, () => {
-      if (!mountedRef.current) return;
-      patchLogosIntoRef(allItemsRef);
-      setItems(prev => prev.map(item => {
-        if (item.logo_url) return item;
-        const url = getLogoUrl(item.tmdb_id);
-        return url ? { ...item, logo_url: url } : item;
-      }));
-    }).catch(() => {});
-  }
-}
 
 // ── Exported: fetch episodes for a single film (called on-demand by BrowseCard) ──
 
@@ -105,21 +62,15 @@ export function useMoviesFeed(mode, active = false) {
         vote_average: row.vote_average || 0,
         genre_ids: row.genre_ids || [],
         media_type: "film",
-        logo_url: getLogoUrl(row.tmdb_id) || null,
+        logo_url: row.logo_url || null,
         podcast_count: row.podcast_count || 0,
         community_slugs: row.community_slugs || [],
       }));
 
       allItemsRef.current = normalized;
       visibleRef.current = PAGE_SIZE;
-
-      const visible = normalized.slice(0, PAGE_SIZE);
-      setItems(visible);
+      setItems(normalized.slice(0, PAGE_SIZE));
       setHasMore(normalized.length > PAGE_SIZE);
-
-      if (normalized.length > 0) {
-        enrichLogos(normalized, mountedRef, setItems, allItemsRef);
-      }
     } catch (err) {
       console.error(`[BrowseFeed] ${mode} fetch error:`, err);
     } finally {
@@ -136,7 +87,6 @@ export function useMoviesFeed(mode, active = false) {
   }, []);
 
   const refresh = useCallback(() => {
-    clearAllLogoMisses(); // explicit pull-to-refresh clears hard misses too
     fetchFromCache();
   }, [fetchFromCache]);
 
