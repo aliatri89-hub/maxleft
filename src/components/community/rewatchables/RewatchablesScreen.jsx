@@ -480,8 +480,6 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
-          pushNav={pushNav}
-          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;
