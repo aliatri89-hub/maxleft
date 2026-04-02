@@ -85,6 +85,30 @@ function BrandStamp({ brand, side = "right" }) {
   );
 }
 
+// ── Brightness analysis via a separate CORS image — never touches the displayed img ──
+function analyzeLogo(url, onResult) {
+  const probe = new window.Image();
+  probe.crossOrigin = "anonymous";
+  probe.onload = () => {
+    try {
+      const c = document.createElement("canvas");
+      c.width = 40; c.height = 40;
+      const ctx = c.getContext("2d");
+      ctx.drawImage(probe, 0, 0, 40, 40);
+      const px = ctx.getImageData(0, 0, 40, 40).data;
+      let light = 0, visible = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        if (px[i + 3] < 50) continue;
+        visible++;
+        if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
+      }
+      onResult(visible > 0 && light / visible > 0.5);
+    } catch { onResult(false); }
+  };
+  probe.onerror = () => onResult(false);
+  probe.src = url;
+}
+
 // ── Shared logo / title renderer ──
 function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLogo, theme }) {
   // Show fallback text as stable placeholder. When logo image loads, it fades in on top.
@@ -100,20 +124,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
     const img = imgRef.current;
     if (img?.complete && img.naturalWidth > 0 && !logoReady) {
       setLogoReady(true);
-      try {
-        const c = document.createElement("canvas");
-        c.width = 40; c.height = 40;
-        const ctx = c.getContext("2d");
-        ctx.drawImage(img, 0, 0, 40, 40);
-        const px = ctx.getImageData(0, 0, 40, 40).data;
-        let light = 0, visible = 0;
-        for (let i = 0; i < px.length; i += 4) {
-          if (px[i + 3] < 50) continue;
-          visible++;
-          if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
-        }
-        setIsLightLogo(visible > 0 && light / visible > 0.5);
-      } catch {}
+      analyzeLogo(data.logo_url, setIsLightLogo);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.logo_url]);
@@ -147,21 +158,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
             if (nw > 0 && nw < 300) {
               e.target.style.transform = `scale(${aspect < 2 ? 1.6 : 1.3})`;
             }
-            try {
-              const img = e.target;
-              const c = document.createElement("canvas");
-              c.width = 40; c.height = 40;
-              const ctx = c.getContext("2d");
-              ctx.drawImage(img, 0, 0, 40, 40);
-              const px = ctx.getImageData(0, 0, 40, 40).data;
-              let light = 0, visible = 0;
-              for (let i = 0; i < px.length; i += 4) {
-                if (px[i + 3] < 50) continue;
-                visible++;
-                if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
-              }
-              setIsLightLogo(visible > 0 && light / visible > 0.5);
-            } catch {}
+            analyzeLogo(data.logo_url, setIsLightLogo);
           }}
           style={{
             position: "absolute",
