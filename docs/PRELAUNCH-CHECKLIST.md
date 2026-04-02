@@ -36,14 +36,14 @@
   | 9 | *"I Know"* / Han | item_set | Harrison Ford — Star Wars (patreon) + Indiana Jones + others. Run `actor-check.js` (TMDB person ID: 3) to confirm full set. |
   | 10 | *"I Have a Bad Feeling About This"* / The Force | item_set | Star Wars — all 4 patreon films (A New Hope, Empire, Return of the Jedi, Force Awakens) |
 
-  **Rewatchables** — 0 seeded, 5 to go:
-  | # | Name | Type | Coverage |
-  |---|---|---|---|
-  | 1 | *"King Kong Ain't Got Sh*t on Me"* / Denzel | item_set | Denzel Washington films |
-  | 2 | *"I'll Be Back"* / The 80s | item_set | Stallone + Schwarzenegger films |
-  | 3 | *"Pick a Dom"* / The Dom | item_set | Amanda Dobbins episodes (time-boxed through end of 2024) — curate manually from episode list |
-  | 4 | *"You Talking to Me?"* / Eddie | item_set | Eddie Murphy films |
-  | 5 | *"Here's to You, Mrs. Robinson"* / Jack | item_set | Jack Nicholson films |
+  **Rewatchables** — 5 seeded ✅:
+  | # | Name | Plaque | Type | Coverage |
+  |---|---|---|---|---|
+  | 1 | *Original Gangster* | OG | item_set | Denzel Washington — 10 films |
+  | 2 | *The Rivalry* | 1vs1 | item_set | Stallone + Schwarzenegger — 15 films |
+  | 3 | *Klumpy* | Klumpy | item_set | Eddie Murphy — 7 films |
+  | 4 | *The Big Pic* | Big Pic | item_set | Sean Fennessey + Amanda Dobbins co-episodes — 8 films |
+  | 5 | *BS 2000s List* | BS | item_set | Bill Simmons' 50 Most Rewatchable Movies of the 21st Century — 42 films in catalog |
 
   **HDTGM** — 0 seeded, 5 to go:
   | # | Name | Type | Coverage |
