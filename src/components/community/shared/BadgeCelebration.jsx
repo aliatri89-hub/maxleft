@@ -1,6 +1,7 @@
 import { t } from "../../../theme";
 import { useState, useEffect, useRef } from "react";
 import { FadeImg } from "../../feed/FeedPrimitives";
+import { useBackGesture } from "../../../hooks/useBackGesture";
 
 /**
  * BadgeCelebration — Full-screen badge unlock celebration.
@@ -16,8 +17,10 @@ import { FadeImg } from "../../feed/FeedPrimitives";
  *   badge       — badge row from Supabase (name, image_url, audio_url, accent_color, tagline)
  *   onClose     — () => void
  *   onViewBadge — () => void (optional) — navigates to badge detail; falls back to onClose
+ *   pushNav     — back gesture stack push
+ *   removeNav   — back gesture stack remove
  */
-export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
+export default function BadgeCelebration({ badge, onClose, onViewBadge, pushNav, removeNav }) {
   const [phase, setPhase] = useState(0);
   const audioRef = useRef(null);
   const videoRef = useRef(null);

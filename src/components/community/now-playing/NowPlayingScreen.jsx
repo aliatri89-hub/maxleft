@@ -84,7 +84,6 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     completionToast, showBadgePage, setShowBadgePage,
     earnedCount, showCompletionToast, handleCompletionToastTap,
   } = useBadgeOrchestrator(community?.id, userId, letterboxdSyncSignal);
-  useBackGesture("badgeCelebration", !!celebrationBadge, () => setCelebrationBadge(null), pushNav, removeNav);
   useBackGesture("badgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
   useBackGesture("badgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
 
@@ -268,6 +267,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
               episodesLoading={episodesLoading}
               upcomingCount={upcomingCount}
               activeTab={tabKey}
+              pushNav={pushNav}
+              removeNav={removeNav}
               genreResetRef={genreResetRef}
             />
           </>
@@ -315,6 +316,8 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
+          pushNav={pushNav}
+          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;

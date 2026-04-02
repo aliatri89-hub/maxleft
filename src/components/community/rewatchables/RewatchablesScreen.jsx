@@ -66,7 +66,6 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
   useBackGesture("rwSearch", searchOpen, () => { setSearchOpen(false); setSearchQuery(""); }, pushNav, removeNav);
-  useBackGesture("rwBadgeCelebration", !!celebrationBadge, () => setCelebrationBadge(null), pushNav, removeNav);
   useBackGesture("rwBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
   useBackGesture("rwBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
 
@@ -481,6 +480,8 @@ export default function RewatchablesScreen({ community, miniseries, session, onB
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
+          pushNav={pushNav}
+          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;

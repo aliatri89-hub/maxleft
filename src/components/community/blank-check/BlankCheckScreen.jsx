@@ -111,7 +111,6 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   // ── Back gesture handlers (Android / swipe) ──────────────────
   useBackGesture("bcSeriesDetail", !!selectedSeries, () => setSelectedSeries(null), pushNav, removeNav);
   useBackGesture("bcLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
-  useBackGesture("bcBadgeCelebration", !!celebrationBadge, () => setCelebrationBadge(null), pushNav, removeNav);
   useBackGesture("bcBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
   useBackGesture("bcBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
   useBackGesture("bcTab", activeTab !== (tabs[0]?.key || "filmography"), () => { sliderRef.current?.animateToTab(tabs[0]?.key || "filmography"); setActiveTab(tabs[0]?.key || "filmography"); }, pushNav, removeNav);
@@ -681,6 +680,8 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
+          pushNav={pushNav}
+          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;
