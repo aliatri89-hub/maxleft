@@ -713,7 +713,8 @@ function AppMain() {
                     favoritePodcasts={favoritePodcasts}
                     feedMode={feedMode} setFeedMode={setFeedMode}
                     pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen}
-                    pushNav={pushNav} removeNav={removeNav} />
+                    pushNav={pushNav} removeNav={removeNav}
+                    onRefresh={profile?.letterboxd_username ? () => sync.syncLetterboxd(profile.letterboxd_username, session.user.id) : undefined} />
                   </ErrorBoundary>
                 </div>
                 <div className="tab-pane" key="communities-tab">

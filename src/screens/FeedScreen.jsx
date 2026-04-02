@@ -29,6 +29,7 @@ export default function FeedScreen({
   feedMode, setFeedMode,
   pendingSleeveOpen, setPendingSleeveOpen,
   pushNav, removeNav,
+  onRefresh,
 }) {
   const userId = session?.user?.id;
   const isAdmin = userId === ADMIN_ID;
@@ -76,6 +77,8 @@ export default function FeedScreen({
       setPullDistance(PULL_THRESHOLD);
       // Broadcast refresh signal to whichever pane is active
       setRefreshSignal(s => s + 1);
+      // Trigger Letterboxd sync if connected
+      onRefresh?.();
       // Minimum spinner time so it doesn't flash
       await new Promise(r => setTimeout(r, 600));
       setRefreshing(false);
