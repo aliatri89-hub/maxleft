@@ -475,15 +475,63 @@ function createWebBridge() {
     },
 
     async load(url, meta = {}, opts = {}) {
+      // Abort any previous load so its loadedmetadata can't fire after we reset
+      audio.src = "";
+      audio.load();
+
       audio.src = url;
       audio.playbackRate = opts.rate || 1;
-      if (opts.seekTo) {
-        const onLoaded = () => {
-          audio.currentTime = opts.seekTo;
-          audio.removeEventListener("loadedmetadata", onLoaded);
+
+      // Mirror the native bridge: return a Promise that resolves only after
+      // loadedmetadata fires and the seek position is applied. Previously load()
+      // resolved immediately, so .then(() => bridge.play()) fired before the
+      // seekTo listener ran — causing resumed episodes to start from 0.
+      //
+      // If metadata is already cached (readyState >= HAVE_METADATA) resolve sync.
+      // Otherwise wait, with an 8s safety timeout so we never hang forever.
+      const seekTo = opts.seekTo || 0;
+      emitter.emit("waiting");
+
+      const readyPromise = new Promise((resolve) => {
+        // Already have metadata (e.g. cached or same-src reload)
+        if (audio.readyState >= 1 /* HAVE_METADATA */) {
+          if (seekTo > 0) audio.currentTime = seekTo;
+          resolve();
+          return;
+        }
+
+        let settled = false;
+        const settle = () => {
+          if (settled) return;
+          settled = true;
+          audio.removeEventListener("loadedmetadata", onMeta);
+          audio.removeEventListener("error", onLoadErr);
         };
-        audio.addEventListener("loadedmetadata", onLoaded);
-      }
+
+        const onMeta = () => {
+          settle();
+          if (seekTo > 0) audio.currentTime = seekTo;
+          resolve();
+        };
+
+        const onLoadErr = () => {
+          settle();
+          resolve(); // still resolve — error event will surface via FORWARDED handlers
+        };
+
+        audio.addEventListener("loadedmetadata", onMeta, { once: true });
+        audio.addEventListener("error", onLoadErr, { once: true });
+
+        // Safety timeout — resolve anyway if metadata never arrives
+        setTimeout(() => {
+          if (!settled) {
+            console.warn("[AudioBridge] loadedmetadata timeout — resolving anyway");
+            settle();
+            resolve();
+          }
+        }, 8000);
+      });
+
       audio.load();
 
       // Set up Media Session for browser media keys
@@ -510,6 +558,10 @@ function createWebBridge() {
         try { navigator.mediaSession.setActionHandler("previoustrack", null); } catch {}
         try { navigator.mediaSession.setActionHandler("nexttrack", null); } catch {}
       }
+
+      // Wait for loadedmetadata + seek to be applied before resolving,
+      // so .then(() => bridge.play()) always starts from the correct position
+      await readyPromise;
     },
 
     async play() { await audio.play().catch(() => {}); },
