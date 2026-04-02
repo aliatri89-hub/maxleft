@@ -3,7 +3,11 @@ import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
-import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
+import { useCommunityProgress, useCommunityActions, useBadgeOrchestrator } from "../../../hooks/community";
+import BadgeCelebration from "../shared/BadgeCelebration";
+import BadgeProgressToast from "../shared/BadgeProgressToast";
+import BadgeDetailScreen from "../shared/BadgeDetailScreen";
+import BadgePage from "../shared/BadgePage";
 import HDTGMHero from "./HDTGMHero";
 import MiniseriesShelf from "../shared/MiniseriesShelf";
 import HDTGMLogModal from "./HDTGMLogModal";
@@ -42,11 +46,23 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
   const [showAddTool, setShowAddTool] = useState(false);
   const [showRSSSync, setShowRSSSync] = useState(false);
 
+  // ── Badge system ──────────────────────────────────────────
+  const {
+    badges, earnedBadgeIds, badgeProgress, checkForBadge,
+    revokeBadgeIfNeeded,
+    celebrationBadge, setCelebrationBadge,
+    detailBadge, setDetailBadge,
+    completionToast, showBadgePage, setShowBadgePage,
+    earnedCount, showCompletionToast, handleCompletionToastTap,
+  } = useBadgeOrchestrator(community?.id, userId, null);
+
   // ── Android back gesture → close modals ─────────────────
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
   useBackGesture("hdtgmSearch", searchOpen, () => { setSearchOpen(false); setSearchQuery(""); }, pushNav, removeNav);
+  useBackGesture("hdtgmBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
+  useBackGesture("hdtgmBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
 
   // Focus search input when opened
   useEffect(() => {
@@ -78,12 +94,19 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
     await logItem(itemId, item, coverUrl, { rating, completed_at, isUpdate });
     if (onToast) onToast(isUpdate ? "Updated!" : "Logged!");
     if (!isUpdate && onShelvesChanged) onShelvesChanged();
+
+    // ── Badge check ──
+    if (!isUpdate && item) {
+      const earnedBadge = await checkForBadge(itemId);
+      if (earnedBadge) showCompletionToast(earnedBadge);
+    }
   }, [allItems, logItem, onToast, onShelvesChanged]);
 
   const handleUnlog = useCallback(async (itemId) => {
+    await revokeBadgeIfNeeded(itemId);
     await unlogItem(itemId);
     if (onToast) onToast("Removed from log");
-  }, [unlogItem, onToast]);
+  }, [unlogItem, onToast, revokeBadgeIfNeeded]);
 
   const handleWatchlist = useCallback(async (item, coverUrl) => {
     await addToWatchlist(item, coverUrl);
@@ -138,7 +161,42 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
           flex: 1, textAlign: "center",
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
         }}>{community.name}</div>
-        <div style={{ width: 48 }} />
+        <div style={{ width: 48 }}>
+          {badges.length > 0 && (
+            <button
+              onClick={() => setShowBadgePage(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "none", border: "none",
+                padding: "4px 4px", cursor: "pointer",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path
+                  d="M8 1L2 3.5V7C2 10.87 4.56 14.47 8 15.5C11.44 14.47 14 10.87 14 7V3.5L8 1Z"
+                  fill="rgba(255,255,255,0.08)"
+                  stroke="rgba(255,255,255,0.35)"
+                  strokeWidth="1"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M6 8L7.5 9.5L10.5 6.5"
+                  stroke={earnedCount > 0 ? "#22c55e" : t.textFaint}
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                color: earnedCount > 0 ? t.textSecondary : t.textFaint,
+                fontFamily: t.fontDisplay,
+              }}>
+                {earnedCount}/{badges.length}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       <HDTGMHero
@@ -339,6 +397,53 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
           onClose={() => setShowRSSSync(false)}
           onToast={onToast}
           onAdded={() => { if (onShelvesChanged) onShelvesChanged(); }}
+        />
+      )}
+
+      {/* Badge celebration */}
+      {celebrationBadge && (
+        <BadgeCelebration
+          badge={celebrationBadge}
+          onClose={() => {
+            const badge = celebrationBadge;
+            setCelebrationBadge(null);
+            setDetailBadge(badge);
+          }}
+        />
+      )}
+
+      {/* Badge detail screen */}
+      {detailBadge && (
+        <BadgeDetailScreen
+          badge={detailBadge}
+          userId={userId}
+          earnedAt={new Date().toISOString()}
+          onClose={() => setDetailBadge(null)}
+        />
+      )}
+
+      {/* Badge collection page */}
+      {showBadgePage && (
+        <BadgePage
+          badges={badges}
+          earnedBadgeIds={earnedBadgeIds}
+          badgeProgress={badgeProgress}
+          userId={userId}
+          accent={accent}
+          onClose={() => setShowBadgePage(false)}
+        />
+      )}
+
+      {/* Badge completion toast */}
+      {completionToast && (
+        <BadgeProgressToast
+          badge={completionToast.badge}
+          current={completionToast.current}
+          total={completionToast.total}
+          isComplete={true}
+          visible={completionToast.visible}
+          bottomOffset={24}
+          onTap={handleCompletionToastTap}
         />
       )}
     </div>
