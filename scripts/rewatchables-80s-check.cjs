@@ -1,10 +1,6 @@
-// rewatchables-80s-check.js
+// rewatchables-80s-check.cjs
 // "I'll Be Back" badge — Stallone + Schwarzenegger combined set.
-// Cross-references ALL Rewatchables films against TMDB cast for both actors.
-// Run: node scripts/rewatchables-80s-check.js
-//
-// To swap actors, update the ACTORS array with TMDB person IDs from:
-//   themoviedb.org/person/{id}
+// Run: node scripts/rewatchables-80s-check.cjs
 
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
@@ -12,6 +8,7 @@ const ACTORS = [
   { id: 16483, name: 'Sylvester Stallone' },
   { id: 1100,  name: 'Arnold Schwarzenegger' },
 ];
+
 
 const films = [
   { title: "Suicide Commando", year: 1968, tmdb_id: 391414, genre: "Action & Adventure" },
@@ -409,6 +406,8 @@ const films = [
 ];
 
 // Deduplicate by tmdb_id (some films appear in multiple genre shelves)
+
+// Deduplicate by tmdb_id
 const seen = new Set();
 const uniqueFilms = films.filter(f => {
   if (seen.has(f.tmdb_id)) return false;
@@ -416,6 +415,7 @@ const uniqueFilms = films.filter(f => {
   return true;
 });
 
+async function checkCast(film, actorId) {
   const url = `https://api.themoviedb.org/3/movie/${film.tmdb_id}/credits?api_key=${TMDB_API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) return null;
@@ -429,11 +429,8 @@ async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function main() {
   console.log(`Checking ${uniqueFilms.length} Rewatchables films for Stallone + Schwarzenegger...\n`);
 
-  // hits keyed by actor name
   const hitsByActor = {};
   for (const actor of ACTORS) hitsByActor[actor.name] = [];
-
-  // Combined set — tmdb_id → { film, actors[] }
   const combined = {};
 
   for (let i = 0; i < uniqueFilms.length; i++) {
@@ -446,11 +443,9 @@ async function main() {
         const result = await checkCast(film, actor.id);
         if (result) {
           hitsByActor[actor.name].push(result);
-          matchedActors.push({ name: actor.name, character: result.character, order: result.order });
+          matchedActors.push({ name: actor.name, character: result.character });
         }
-      } catch (e) {
-        // silently skip errors
-      }
+      } catch (e) {}
     }
 
     if (matchedActors.length > 0) {
@@ -474,9 +469,9 @@ async function main() {
   console.log(`\n========== COMBINED SET (${combinedFilms.length} unique films) ==========`);
   combinedFilms
     .sort((a, b) => a.film.year - b.film.year)
-    .forEach(({ film, actors }) => {
-      console.log(`  ${film.year} — ${film.title} [${film.genre}] — ${actors.map(a => a.name.split(' ')[0]).join(' + ')}`);
-    });
+    .forEach(({ film, actors }) =>
+      console.log(`  ${film.year} — ${film.title} [${film.genre}] — ${actors.map(a => a.name.split(' ')[0]).join(' + ')}`)
+    );
 
   console.log('\n========== TMDB IDs (for badge_items query) ==========');
   console.log(combinedFilms.map(({ film }) => film.tmdb_id).join(', '));
