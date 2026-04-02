@@ -99,6 +99,7 @@ if (Capacitor.isNativePlatform()) {
 // Utils
 import { DEFAULT_ENABLED_SHELVES, DEFAULT_SHELF_ORDER } from "./utils/constants";
 import { tapLight } from "./utils/haptics";
+import { apiProxy } from "./utils/api";
 import { signInWithGoogle, initDeepLinkListener, isNativeAuthPending, clearNativeAuthPending } from "./utils/nativeAuth";
 import { initPushNotifications, setupPushListeners, removeDeviceToken } from "./utils/pushNotifications";
 
@@ -295,6 +296,9 @@ function AppMain() {
   const sync = useIntegrationSync({ session, showToast, setProfile });
   const syncRef = useRef(sync);
   useEffect(() => { syncRef.current = sync; });
+
+  // ── Warm up api-proxy on mount so logo fetches don't hit a cold start ──
+  useEffect(() => { apiProxy("ping"); }, []);
 
   const {
     subscriptions: communitySubscriptions, isSubscribed,
