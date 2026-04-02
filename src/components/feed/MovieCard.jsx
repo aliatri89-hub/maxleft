@@ -1,5 +1,5 @@
 import { t } from "../../theme";
-import { useState, useRef, memo } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 import { getEpisodesForFilm } from "../../hooks/community/useMoviesFeed";
 import { isPatreonUrl, FadeImg } from "./FeedPrimitives";
@@ -91,6 +91,32 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
   // This eliminates the text → skeleton → logo flash on first load.
   const [logoFailed, setLogoFailed] = useState(false);
   const hasLogo = !!data.logo_url && !logoFailed;
+  const imgRef = useRef(null);
+
+  // Handle cached images: if the browser already has the image, onLoad fires before
+  // React attaches the handler and logoReady stays false forever. Check img.complete
+  // after mount and trigger the ready state manually if needed.
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img?.complete && img.naturalWidth > 0 && !logoReady) {
+      setLogoReady(true);
+      try {
+        const c = document.createElement("canvas");
+        c.width = 40; c.height = 40;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, 40, 40);
+        const px = ctx.getImageData(0, 0, 40, 40).data;
+        let light = 0, visible = 0;
+        for (let i = 0; i < px.length; i += 4) {
+          if (px[i + 3] < 50) continue;
+          visible++;
+          if ((px[i] + px[i + 1] + px[i + 2]) / 3 > 200) light++;
+        }
+        setIsLightLogo(visible > 0 && light / visible > 0.5);
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.logo_url]);
 
   return (
     <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 36, width: "100%" }}>
@@ -110,6 +136,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
       {/* Logo image — absolutely positioned over text, fades in when loaded */}
       {hasLogo && (
         <img
+          ref={imgRef}
           src={data.logo_url} alt={data.title} crossOrigin="anonymous"
           onError={() => setLogoFailed(true)}
           onLoad={(e) => {
