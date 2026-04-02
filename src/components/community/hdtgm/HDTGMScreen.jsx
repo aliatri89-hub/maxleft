@@ -61,7 +61,9 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
   useBackGesture("hdtgmSearch", searchOpen, () => { setSearchOpen(false); setSearchQuery(""); }, pushNav, removeNav);
+  useBackGesture("hdtgmBadgeCelebration", !!celebrationBadge, () => setCelebrationBadge(null), pushNav, removeNav);
   useBackGesture("hdtgmBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
+  useBackGesture("hdtgmBadgeCelebration", !!celebrationBadge, handleCelebrationClose, pushNav, removeNav);
   useBackGesture("hdtgmBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
 
   // Focus search input when opened
@@ -403,8 +405,6 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
-          pushNav={pushNav}
-          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;
