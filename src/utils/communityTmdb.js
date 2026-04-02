@@ -280,6 +280,15 @@ export const clearSoftLogoMisses = () => {
   if (changed) saveLogoCache();
 };
 
+// Clear ALL logo misses (soft + hard) — used on explicit pull-to-refresh
+export const clearAllLogoMisses = () => {
+  let changed = false;
+  for (const k of Object.keys(logoCache)) {
+    if (logoCache[k]?.miss) { delete logoCache[k]; changed = true; }
+  }
+  if (changed) saveLogoCache();
+};
+
 // Fetch a single logo — returns full URL or null
 export const fetchMovieLogo = async (tmdbId, mediaType = "film") => {
   if (!tmdbId) return null;
