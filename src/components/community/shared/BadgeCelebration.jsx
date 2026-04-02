@@ -142,15 +142,6 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
         />
       )}
 
-      {/* Flicker overlay */}
-      {phase >= 1 && (
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none",
-          background: `radial-gradient(ellipse at 50% 40%, ${accent} 0%, transparent 55%)`,
-          animation: "badgeFlicker 3s ease-in-out infinite",
-        }} />
-      )}
-
       {/* Ambient glow */}
       <div style={{
         position: "absolute", top: "35%", left: "50%",
