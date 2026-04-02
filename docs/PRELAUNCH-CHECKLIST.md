@@ -45,14 +45,14 @@
   | 4 | *The Big Pic* | Big Pic | item_set | Sean Fennessey + Amanda Dobbins co-episodes — 8 films |
   | 5 | *BS 2000s List* | BS | item_set | Bill Simmons' 50 Most Rewatchable Movies of the 21st Century — 42 films in catalog |
 
-  **HDTGM** — 0 seeded, 5 to go:
-  | # | Name | Type | Coverage |
-  |---|---|---|---|
-  | 1 | *"It's Not the Bees!"* / Cage | item_set | Nicolas Cage — Con Air, Drive Angry, Face/Off, Season of the Witch, Trespass, Vampire's Kiss |
-  | 2 | *"Do You Smell What the Pod Is Cooking"* / The Rock | item_set | Dwayne Johnson — Fast 6, Furious 7, Fate of the Furious, Hobbs & Shaw, Hercules, Skyscraper |
-  | 3 | *"Above the Pod"* / Direct to Video | item_set | JCVD — 6 films: Bloodsport, Hard Target, Timecop, Street Fighter, The Quest, Double Team |
-  | 4 | *"Insert Coin"* / Game Over | item_set | Video game movies — curate from verified list: Street Fighter, Double Dragon, Mortal Kombat (2021), Super Mario Bros (2023), Dungeons & Dragons, In the Name of the King, Lawnmower Man, Lawnmower Man 2, Johnny Mnemonic, Gamer (10 clean hits in catalog). Needs manual review to confirm HDTGM episode coverage for each. |
-  | 5 | *"The Whole Damn Ride"* / Toretto | item_set | Fast & Furious franchise completion |
+  **HDTGM** — 3 seeded ✅, 1 skipped, 1 to go:
+  | # | Name | Plaque | Type | Coverage |
+  |---|---|---|---|---|
+  | 1 | *Cage Match* | Cage | item_set | Nicolas Cage — 6 films (Vampire's Kiss, Con Air, Face/Off, Season of the Witch, Drive Angry, Trespass) |
+  | 2 | *Family* | Family | item_set | Fast & Furious — 8 films covered by HDTGM (migrated from NPP) |
+  | 3 | *JCVD* | JCVD | item_set | Jean-Claude Van Damme — 6 films (Bloodsport, Hard Target, Timecop, Street Fighter, The Quest, Double Team) |
+  | 4 | ~~The Rock~~ | — | skipped | Dwayne Johnson — skipped, not enough distinct coverage |
+  | 5 | *"Insert Coin"* / Game Over | Game Over | item_set | Video game movies — curate from verified list: Street Fighter, Double Dragon, Mortal Kombat (2021), Super Mario Bros (2023), Dungeons & Dragons, In the Name of the King, Lawnmower Man, Lawnmower Man 2, Johnny Mnemonic, Gamer (10 clean hits in catalog). Needs manual review to confirm HDTGM episode coverage for each. |
 - [ ] **Seed Sight & Sound community** — Static, no audio. 3 tabs: Directors List (top 100), Critics List (top 100), Individual ballots (publicly released top 10s from critics/podcasters). Data work only, no new code needed.
 
 - [ ] **Editorial blurbs** — per-film descriptions for MANTL Originals shelves. Currently null in log modal for all Originals items. Edit via Admin → Community Manager.
