@@ -72,7 +72,29 @@ export default function usePlaybackEngine(bridge, session, {
   const stallTimerRef = useRef(null);
   const seekTargetRef = useRef(null); // { time, ts } — holds optimistic seek position
 
+  // ── Stable refs for values used inside bridge event handlers ─────────────
+  // Keeping these as refs (not closure captures) means the bridge listener
+  // useEffect only runs once — when bridge changes — instead of re-running on
+  // every episode switch or session refresh. This eliminates the teardown window
+  // where ended/canplay/play events can be silently dropped, which was the root
+  // cause of queue-advance failures and wrong saved-position on app hide.
+  const currentEpRef = useRef(null);
+  const speedRef     = useRef(1);
+  const sessionRef   = useRef(session);
+
+  // Keep refs in sync with state/props on every render (cheap, no effect needed)
+  currentEpRef.current = currentEp;
+  speedRef.current     = speed;
+  sessionRef.current   = session;
+
   // ── Bridge event listeners ────────────────────────────────────────────────
+  // IMPORTANT: dep array is intentionally minimal — only [bridge] plus the stable
+  // refs/callbacks that never change identity. currentEp, speed, and session are
+  // read via their refs (currentEpRef, speedRef, sessionRef) so this effect
+  // never tears down and re-registers listeners on episode switches or session
+  // refreshes. That teardown window was the root cause of:
+  //   - ended events being silently dropped → queue not advancing
+  //   - stale currentEp in save closures → wrong position saved on app hide
   useEffect(() => {
     const onTimeUpdate = ({ currentTime, duration: dur }) => {
       // Optimistic seek: suppress ticks until playback catches up (within 2s) or 8s timeout
@@ -89,12 +111,14 @@ export default function usePlaybackEngine(bridge, session, {
       setProgress(currentTime);
       setError(null);
       clearTimeout(stallTimerRef.current);
+      const ep  = currentEpRef.current;
+      const spd = speedRef.current;
       const now = Date.now();
       if (now - saveThrottle.current > SAVE_INTERVAL) {
         saveThrottle.current = now;
-        saveBookmark(currentEp, currentTime, speed, dur || bridge.duration);
-        if (currentEp && currentTime > 15) {
-          const updated = upsertRecent(recentsRef.current, currentEp, currentTime, speed, dur || bridge.duration);
+        saveBookmark(ep, currentTime, spd, dur || bridge.duration);
+        if (ep && currentTime > 15) {
+          const updated = upsertRecent(recentsRef.current, ep, currentTime, spd, dur || bridge.duration);
           recentsRef.current = updated;
           persistRecents(updated);
         }
@@ -115,11 +139,13 @@ export default function usePlaybackEngine(bridge, session, {
     const onPause = () => {
       setIsPlaying(false);
       clearTimeout(stallTimerRef.current);
-      const ct = bridge.currentTime;
+      const ep  = currentEpRef.current;
+      const spd = speedRef.current;
+      const ct  = bridge.currentTime;
       const dur = bridge.duration;
-      saveBookmark(currentEp, ct, speed, dur);
-      if (currentEp && ct > 15) {
-        const updated = upsertRecent(recentsRef.current, currentEp, ct, speed, dur);
+      saveBookmark(ep, ct, spd, dur);
+      if (ep && ct > 15) {
+        const updated = upsertRecent(recentsRef.current, ep, ct, spd, dur);
         recentsRef.current = updated;
         persistRecents(updated);
       }
@@ -127,12 +153,14 @@ export default function usePlaybackEngine(bridge, session, {
 
     const onEnded = () => {
       clearTimeout(stallTimerRef.current);
+      const ep  = currentEpRef.current;
+      const ses = sessionRef.current;
       // Analytics
-      if (currentEp && session?.user?.id) {
-        trackEvent(session.user.id, "episode_complete", {
-          episode_title: currentEp.title,
-          podcast_slug: currentEp.community || null,
-          episode_id: currentEp.guid || null,
+      if (ep && ses?.user?.id) {
+        trackEvent(ses.user.id, "episode_complete", {
+          episode_title: ep.title,
+          podcast_slug: ep.community || null,
+          episode_id: ep.guid || null,
           duration_seconds: Math.round(bridge.duration || 0),
         });
       }
@@ -153,7 +181,8 @@ export default function usePlaybackEngine(bridge, session, {
       setBuffering(false);
       setIsPlaying(false);
       clearTimeout(stallTimerRef.current);
-      if (currentEp) reportDeadAudio(currentEp, message || "bridge_error");
+      const ep = currentEpRef.current;
+      if (ep) reportDeadAudio(ep, message || "bridge_error");
     };
 
     const onWaiting = () => {
@@ -162,7 +191,8 @@ export default function usePlaybackEngine(bridge, session, {
       stallTimerRef.current = setTimeout(() => {
         setBuffering(false);
         setError("Stream stalled — check your connection");
-        if (currentEp) reportDeadAudio(currentEp, "waiting_timeout");
+        const ep = currentEpRef.current;
+        if (ep) reportDeadAudio(ep, "waiting_timeout");
       }, STALL_TIMEOUT);
     };
 
@@ -218,22 +248,28 @@ export default function usePlaybackEngine(bridge, session, {
       clearTimeout(stallTimerRef.current);
     };
   }, [
-    currentEp, speed, bridge, session,
+    // stable references only — currentEp/speed/session read via refs above
+    bridge,
     advanceQueueRef, sleepTimerRef, pendingAutoPlayRef,
     recentsRef, saveThrottle, clearSleepTimer,
   ]);
 
   // ── Save on tab hide / page unload ────────────────────────────────────────
-  // Lives here (not in usePlaybackPersistence) because currentEp and speed are
-  // owned by this hook.
+  // Uses currentEpRef/speedRef/recentsRef so the effect is stable and never
+  // re-registers its listeners when the episode or speed changes. The old version
+  // captured currentEp/speed from the closure, so a session refresh mid-playback
+  // could leave the save handler pointing at a stale episode, writing the wrong
+  // position to recents when the user left the app.
   useEffect(() => {
     const save = async () => {
-      if (!currentEp) return;
-      const ct = bridge.isNative ? await bridge.getFreshCurrentTime() : bridge.currentTime;
+      const ep  = currentEpRef.current;
+      const spd = speedRef.current;
+      if (!ep) return;
+      const ct  = bridge.isNative ? await bridge.getFreshCurrentTime() : bridge.currentTime;
       const dur = bridge.duration;
-      saveBookmark(currentEp, ct, speed, dur);
+      saveBookmark(ep, ct, spd, dur);
       if (ct > 15) {
-        const updated = upsertRecent(recentsRef.current, currentEp, ct, speed, dur);
+        const updated = upsertRecent(recentsRef.current, ep, ct, spd, dur);
         recentsRef.current = updated;
         persistRecents(updated);
       }
@@ -245,7 +281,7 @@ export default function usePlaybackEngine(bridge, session, {
       window.removeEventListener("beforeunload", save);
       document.removeEventListener("visibilitychange", onVis);
     };
-  }, [currentEp, speed, bridge, recentsRef]);
+  }, [bridge, recentsRef]);
 
   // ── Web media session metadata ────────────────────────────────────────────
   // Native sets metadata in bridge.load(); web needs an explicit update here.

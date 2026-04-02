@@ -46,6 +46,14 @@ export default function useQueueManager({
   const queueToastRef = useRef(null);
   const [queueToast, setQueueToast] = useState(null);
 
+  // Stable refs so advanceQueue never stale-captures currentEp/speed
+  const currentEpRef  = useRef(currentEp);
+  const speedRef      = useRef(speed);
+  const loadForQueueRef = useRef(loadForQueue);
+  currentEpRef.current    = currentEp;
+  speedRef.current        = speed;
+  loadForQueueRef.current = loadForQueue;
+
   // Keep queueRef in sync with state so advanceQueue reads fresh queue without
   // stale closure capture.
   const updateQueue = useCallback((updater) => {
@@ -92,24 +100,30 @@ export default function useQueueManager({
   // ── Auto-advance ──────────────────────────────────────────────────────────
   // Called by the engine's onEnded handler via advanceQueueRef.current().
   // Returns true if a next episode was found and loading started, false otherwise.
+  // Uses refs for currentEp, speed, and loadForQueue so this callback is stable
+  // across renders — advanceQueueRef.current never points at a stale version
+  // between the state update and the next useEffect tick.
   const advanceQueue = useCallback(() => {
     const next = queueRef.current[0];
     if (!next) return false;
     updateQueue(prev => prev.slice(1));
     // Save current episode to recents before switching
-    if (currentEp && bridge.currentTime > 15) {
-      updateRecents(prev => upsertRecent(prev, currentEp, bridge.currentTime, speed, bridge.duration));
+    const ep  = currentEpRef.current;
+    const spd = speedRef.current;
+    if (ep && bridge.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, ep, bridge.currentTime, spd, bridge.duration));
     }
-    // Delegate actual load+play to the engine via the callback the provider wired up
+    // Delegate actual load+play to the engine via the ref so we always call the
+    // latest version of loadForQueue without capturing it in this closure
     pendingAutoPlayRef.current = true;
-    loadForQueue(next)
+    loadForQueueRef.current(next)
       .then(() => { pendingAutoPlayRef.current = false; })
       .catch((e) => {
         console.warn("[QueueManager] Queue advance play failed — will retry on focus:", e);
         // Leave pendingAutoPlayRef true so focusregained can retry
       });
     return true;
-  }, [currentEp, speed, bridge, updateRecents, updateQueue, loadForQueue, pendingAutoPlayRef]);
+  }, [bridge, updateRecents, updateQueue, pendingAutoPlayRef]);
 
   // Keep the ref the engine reads up to date
   useEffect(() => { advanceQueueRef.current = advanceQueue; }, [advanceQueue, advanceQueueRef]);
