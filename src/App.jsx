@@ -714,7 +714,10 @@ function AppMain() {
                     feedMode={feedMode} setFeedMode={setFeedMode}
                     pendingSleeveOpen={pendingSleeveOpen} setPendingSleeveOpen={setPendingSleeveOpen}
                     pushNav={pushNav} removeNav={removeNav}
-                    onRefresh={profile?.letterboxd_username ? () => sync.syncLetterboxd(profile.letterboxd_username, session.user.id) : undefined} />
+                    onRefresh={profile?.letterboxd_username ? async () => {
+                      const result = await sync.syncLetterboxd(profile.letterboxd_username, session.user.id);
+                      if (result) setLetterboxdToast({ synced: result.synced, rewatches: result.rewatchCount });
+                    } : undefined} />
                   </ErrorBoundary>
                 </div>
                 <div className="tab-pane" key="communities-tab">
