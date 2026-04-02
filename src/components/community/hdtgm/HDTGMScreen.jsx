@@ -403,6 +403,8 @@ export default function HDTGMScreen({ community, miniseries, session, onBack, on
       {/* Badge celebration */}
       {celebrationBadge && (
         <BadgeCelebration
+          pushNav={pushNav}
+          removeNav={removeNav}
           badge={celebrationBadge}
           onClose={() => {
             const badge = celebrationBadge;
