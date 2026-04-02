@@ -103,14 +103,14 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
       />
       <style>{`
         @keyframes badgeFlicker {
-          0%, 100% { opacity: 0.08; }
-          10% { opacity: 0.15; }
-          20% { opacity: 0.05; }
-          40% { opacity: 0.2; }
-          50% { opacity: 0.06; }
-          70% { opacity: 0.18; }
-          80% { opacity: 0.04; }
-          90% { opacity: 0.12; }
+          0%, 100% { opacity: 0.02; }
+          10% { opacity: 0.04; }
+          20% { opacity: 0.01; }
+          40% { opacity: 0.05; }
+          50% { opacity: 0.02; }
+          70% { opacity: 0.04; }
+          80% { opacity: 0.01; }
+          90% { opacity: 0.03; }
         }
         @keyframes badgeRingPulse {
           0% { transform: scale(1); opacity: 0.6; }
@@ -140,6 +140,15 @@ export default function BadgeCelebration({ badge, onClose, onViewBadge }) {
             pointerEvents: "none",
           }}
         />
+      )}
+
+      {/* Flicker overlay — subtle atmosphere, very low opacity */}
+      {phase >= 1 && (
+        <div style={{
+          position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none",
+          background: `radial-gradient(ellipse at 50% 40%, ${accent} 0%, transparent 55%)`,
+          animation: "badgeFlicker 3s ease-in-out infinite",
+        }} />
       )}
 
       {/* Ambient glow */}
