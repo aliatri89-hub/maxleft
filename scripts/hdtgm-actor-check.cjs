@@ -7,8 +7,8 @@
 const TMDB_API_KEY = 'ec6edb453a82a8a1081d13e597ea95ce';
 
 const ACTORS = [
-  { id: 6905, name: 'Steven Seagal' },
-  { id: 19356, name: 'Jean-Claude Van Damme' },
+  { id: 23880, name: 'Steven Seagal' },
+  { id: 15111, name: 'Jean-Claude Van Damme' },
 ];
 
 const films = [
