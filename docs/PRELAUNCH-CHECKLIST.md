@@ -50,8 +50,8 @@
   |---|---|---|---|
   | 1 | *"It's Not the Bees!"* / Cage | item_set | Nicolas Cage — Con Air, Drive Angry, Face/Off, Season of the Witch, Trespass, Vampire's Kiss |
   | 2 | *"Do You Smell What the Pod Is Cooking"* / The Rock | item_set | Dwayne Johnson — Fast 6, Furious 7, Fate of the Furious, Hobbs & Shaw, Hercules, Skyscraper |
-  | 3 | *"Above the Pod"* / Direct to Video | item_set | Seagal / JCVD films — verify coverage in data sesh |
-  | 4 | *"Insert Coin"* / Game Over | item_set | Video game movies — verify coverage in data sesh |
+  | 3 | *"Above the Pod"* / Direct to Video | item_set | JCVD — 6 films: Bloodsport, Hard Target, Timecop, Street Fighter, The Quest, Double Team |
+  | 4 | *"Insert Coin"* / Game Over | item_set | Video game movies — curate from verified list: Street Fighter, Double Dragon, Mortal Kombat (2021), Super Mario Bros (2023), Dungeons & Dragons, In the Name of the King, Lawnmower Man, Lawnmower Man 2, Johnny Mnemonic, Gamer (10 clean hits in catalog). Needs manual review to confirm HDTGM episode coverage for each. |
   | 5 | *"The Whole Damn Ride"* / Toretto | item_set | Fast & Furious franchise completion |
 - [ ] **Seed Sight & Sound community** — Static, no audio. 3 tabs: Directors List (top 100), Critics List (top 100), Individual ballots (publicly released top 10s from critics/podcasters). Data work only, no new code needed.
 
