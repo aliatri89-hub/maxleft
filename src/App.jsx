@@ -975,8 +975,8 @@ function AppMain() {
                 <div style={{ position: "relative", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{
                     position: "absolute", inset: 0,
-                    background: activeTab === "feed" ? "rgba(196,115,79,0.18)" : "rgba(196,115,79,0.07)",
-                    border: `1px solid ${activeTab === "feed" ? "rgba(196,115,79,0.55)" : "rgba(196,115,79,0.2)"}`,
+                    background: activeTab === "feed" ? "rgba(74,222,128,0.12)" : "rgba(196,115,79,0.07)",
+                    border: `1px solid ${activeTab === "feed" ? "rgba(74,222,128,0.4)" : "rgba(196,115,79,0.2)"}`,
                     borderRadius: 5,
                     transition: "background 0.2s, border-color 0.2s",
                   }} />
@@ -984,7 +984,7 @@ function AppMain() {
                     width: 0, height: 0,
                     borderStyle: "solid",
                     borderWidth: "7px 0 7px 12px",
-                    borderColor: `transparent transparent transparent ${activeTab === "feed" ? "#c4734f" : "rgba(245,240,235,0.75)"}`,
+                    borderColor: `transparent transparent transparent ${activeTab === "feed" ? "#4ade80" : "rgba(245,240,235,0.75)"}`,
                     position: "relative", zIndex: 1,
                     marginLeft: 3,
                     transition: "border-color 0.2s",
