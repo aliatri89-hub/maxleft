@@ -48,8 +48,8 @@ export default function OriginalsScreen({
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
 
-  // Scroll to shelf when deep-linked
-  useScrollToItem(scrollToTmdbId, miniseries, accent);
+  // Scroll disabled — auto-open handles deep links directly
+  useScrollToItem(null, miniseries, accent);
 
   // ── Data ──
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
@@ -66,7 +66,7 @@ export default function OriginalsScreen({
     if (!scrollToTmdbId || allItems.length === 0) return;
     const item = allItems.find(i => String(i.tmdb_id) === String(scrollToTmdbId));
     if (!item) return;
-    const t = setTimeout(() => setModalItem(item), 650);
+    const t = setTimeout(() => setModalItem(item), 320);
     return () => clearTimeout(t);
   }, [scrollToTmdbId, allItems]);
 
