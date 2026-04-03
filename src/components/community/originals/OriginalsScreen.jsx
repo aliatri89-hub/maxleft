@@ -66,9 +66,11 @@ export default function OriginalsScreen({
     if (!scrollToTmdbId || allItems.length === 0) return;
     const item = allItems.find(i => String(i.tmdb_id) === String(scrollToTmdbId));
     if (!item) return;
-    const t = setTimeout(() => setModalItem(item), 320);
-    return () => clearTimeout(t);
+    setModalItem(item);
   }, [scrollToTmdbId, allItems]);
+
+  // True while we're waiting for the auto-open modal to appear
+  const isAutoOpening = !!scrollToTmdbId && !modalItem;
 
   // ── Handlers ──
   const handleItemTap = useCallback((itemId) => {
@@ -133,12 +135,13 @@ export default function OriginalsScreen({
         miniseries={miniseries}
         progress={progress}
         accent={accent}
+        style={{ visibility: isAutoOpening ? "hidden" : "visible" }}
       />
 
-      <CommunityFilter value={filter} onChange={setFilter} accent={accent} />
+      {!isAutoOpening && <CommunityFilter value={filter} onChange={setFilter} accent={accent} />}
 
       {/* ═══ Shelves with post cards ═══ */}
-      <div style={{ paddingTop: 8 }}>
+      {!isAutoOpening && <div style={{ paddingTop: 8 }}>
         {sortedShelves.length === 0 && (
           <div style={{
             textAlign: "center", color: t.textMuted,
@@ -174,7 +177,7 @@ export default function OriginalsScreen({
             />
           </div>
         ))}
-      </div>
+      </div>}
 
       {/* Log Modal */}
       {modalItem && (
