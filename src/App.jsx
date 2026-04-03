@@ -140,7 +140,7 @@ import { useCommunitySubscriptions } from "./hooks/useCommunitySubscriptions";
 import { useFavoritePodcasts } from "./hooks/useFavoritePodcasts";
 import { useToast } from "./hooks/useToast";
 import { useBackNav } from "./hooks/useBackNav";
-import { useTabSwipe } from "./hooks/useTabSwipe";
+import { useFeedSwipe } from "./hooks/useFeedSwipe";
 import { useIntegrationSync } from "./hooks/useIntegrationSync";
 import useNotifications from "./hooks/useNotifications";
 import { useAnalytics } from "./hooks/useAnalytics";
@@ -291,7 +291,7 @@ function AppMain() {
     sliderRef, tabSwipeOffset, preloadTab, setPreloadTab,
     syncSliderPosition,
     onTouchStart, onTouchMove, onTouchEnd, TABS,
-  } = useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
+  } = useFeedSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode);
 
   const sync = useIntegrationSync({ session, showToast, setProfile });
   const syncRef = useRef(sync);

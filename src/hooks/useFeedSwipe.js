@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { tapLight } from "../utils/haptics";
 
 /**
- * useTabSwipe — Navigation with two layers:
+ * useFeedSwipe — Navigation with two layers:
  *
  * TOP (swipe):   New Releases ↔ Streaming ↔ Activity  (feed sub-modes)
  * BOTTOM (tap):  Communities | Games | Search | My MANTL  (main tabs)
@@ -15,7 +15,7 @@ import { tapLight } from "../utils/haptics";
 const TABS = ["feed", "communities", "games", "search", "mantl"];
 const FEED_MODES = ["podcast", "releases", "activity"];
 
-export function useTabSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode) {
+export function useFeedSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode) {
   const tabSwipeStart = useRef(null);
   const tabSwipeDelta = useRef(0);
   const sliderRef = useRef(null);
