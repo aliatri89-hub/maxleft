@@ -86,27 +86,34 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
 
       if (error || !data) return [];
 
-      return data.map(item => ({
-        card_type: "editorial",
-        episode_id: `editorial-${item.id}`,
-        episode_air_date: item.published_at?.slice(0, 10),
-        episode_description: item.extra_data?.editorial_blurb || "",
-        episode_title: null,
-        audio_url: null,
-        audio_status: null,
-        duration_seconds: null,
-        podcast_name: item.community_miniseries?.title || "MANTL Staff Picks",
-        podcast_slug: "staff-picks",
-        podcast_artwork: null,
-        tmdb_id: item.tmdb_id,
-        film_title: item.title,
-        film_year: item.year,
-        poster_path: item.poster_path,
-        backdrop_path: item.backdrop_path,
-        watched: false,
-        logo_url: null,
-        sort_order: item.sort_order,
-      }));
+      return data.map(item => {
+        const shelfTitle = item.community_miniseries?.title || "MANTL Staff Picks";
+        // Shorten shelf name for card label: "2002 in Theaters: Simply the Best" → "2002: Simply the Best"
+        const shortShelf = shelfTitle.replace(/\s+in Theaters/i, "");
+        const editorial_label = `${shortShelf} #${item.sort_order}`;
+        return {
+          card_type: "editorial",
+          episode_id: `editorial-${item.id}`,
+          episode_air_date: item.published_at?.slice(0, 10),
+          episode_description: item.extra_data?.editorial_blurb || "",
+          episode_title: null,
+          editorial_label,
+          audio_url: null,
+          audio_status: null,
+          duration_seconds: null,
+          podcast_name: shelfTitle,
+          podcast_slug: "staff-picks",
+          podcast_artwork: null,
+          tmdb_id: item.tmdb_id,
+          film_title: item.title,
+          film_year: item.year,
+          poster_path: item.poster_path,
+          backdrop_path: item.backdrop_path,
+          watched: false,
+          logo_url: null,
+          sort_order: item.sort_order,
+        };
+      });
     } catch (err) {
       console.error("[PodcastFeed] editorial fetch error:", err);
       return [];

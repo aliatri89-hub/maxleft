@@ -84,11 +84,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
     tmdb_id, film_title, film_year, poster_path, watched, logo_url,
-    logo_display, card_type, blurb_author,
+    logo_display, card_type, blurb_author, editorial_label,
   } = item;
 
   const isEditorial = card_type === "editorial";
-  const editorialTitle = isEditorial ? `${podcast_name} #${item.sort_order}` : null;
 
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -523,12 +522,12 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             color: "rgba(255,255,255,0.85)", letterSpacing: "0.02em",
             marginBottom: 8,
           }}>
-            {editorialTitle}
+            {editorial_label}
           </div>
           <div style={{
             fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
             lineHeight: 1.6, whiteSpace: "pre-line",
-            display: "-webkit-box", WebkitLineClamp: 8, WebkitBoxOrient: "vertical",
+            display: "-webkit-box", WebkitLineClamp: 10, WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}>
             {episode_description}
@@ -553,43 +552,22 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           animation: "pcFadeSlide 0.2s ease forwards",
           position: "relative", zIndex: 1,
         }}>
-          {isEditorial ? (
-            <>
-              <div style={{
-                fontFamily: t.fontBody, fontSize: 10, fontWeight: 600,
-                color: "rgba(196,115,79,0.7)",
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                marginBottom: 10,
-              }}>
-                {podcast_name} · {blurb_author}
-              </div>
-              <div style={{
-                fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
-                lineHeight: 1.6, whiteSpace: "pre-line",
-              }}>
-                {episode_description}
-              </div>
-            </>
-          ) : (
-            <>
-              {episode_title && (
-                <div style={{
-                  fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
-                  color: "rgba(255,255,255,0.85)",
-                  letterSpacing: "0.02em",
-                  marginBottom: 8,
-                }}>
-                  {decodeEntities(episode_title)}
-                </div>
-              )}
-              <div style={{
-                fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
-                lineHeight: 1.5,
-              }}>
-                {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
-              </div>
-            </>
+          {episode_title && (
+            <div style={{
+              fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
+              color: "rgba(255,255,255,0.85)",
+              letterSpacing: "0.02em",
+              marginBottom: 8,
+            }}>
+              {decodeEntities(episode_title)}
+            </div>
           )}
+          <div style={{
+            fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
+            lineHeight: 1.5,
+          }}>
+            {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
+          </div>
         </div>
       )}
 
