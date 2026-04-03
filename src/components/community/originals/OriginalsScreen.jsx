@@ -2,7 +2,7 @@ import { t } from "../../../theme";
 import { supabase } from "../../../supabase";
 import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
 import OriginalsHero from "./OriginalsHero";
@@ -33,6 +33,7 @@ export default function OriginalsScreen({
   const [modalItem, setModalItem] = useState(null);
   const [showAddTool, setShowAddTool] = useState(false);
   const [authors, setAuthors] = useState({});
+  const hasAutoOpened = useRef(false);
 
   // ── Fetch authors (for avatar in blurb cards) ──
   useEffect(() => {
@@ -63,14 +64,15 @@ export default function OriginalsScreen({
 
   // Auto-open log modal when deep-linked from editorial feed card
   useEffect(() => {
-    if (!scrollToTmdbId || allItems.length === 0) return;
+    if (!scrollToTmdbId || allItems.length === 0 || hasAutoOpened.current) return;
     const item = allItems.find(i => String(i.tmdb_id) === String(scrollToTmdbId));
     if (!item) return;
+    hasAutoOpened.current = true;
     setModalItem(item);
   }, [scrollToTmdbId, allItems]);
 
-  // True while we're waiting for the auto-open modal to appear
-  const isAutoOpening = !!scrollToTmdbId && !modalItem;
+  // True only while waiting for the auto-open modal — false once it's fired
+  const isAutoOpening = !!scrollToTmdbId && !hasAutoOpened.current;
 
   // ── Handlers ──
   const handleItemTap = useCallback((itemId) => {
