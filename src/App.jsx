@@ -957,17 +957,17 @@ function AppMain() {
 
         {screen === "app" && !activeCommunitySlug && !showWhatToWatch && !showTripleFeature && !showReelTime && !showCastConnections && !showMovieNight && (
           <div className="nav-bar">
-            <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
-              onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
-              onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
-              <div className="nav-label">Communities</div>
-            </button>
             <button className={`nav-item${activeTab === "games" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "games") setPreloadTab("games"); }}
               onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "games") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("games"); setPreloadTab(null); }}>
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><circle cx="5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div>
               <div className="nav-label">Games</div>
+            </button>
+            <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
+              onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
+              onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
+              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+              <div className="nav-label">Communities</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
