@@ -991,7 +991,7 @@ function AppMain() {
                   }} />
                 </div>
               </div>
-              <div className="nav-label">Feed</div>
+              <div className="nav-label">Home</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
