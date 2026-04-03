@@ -140,7 +140,7 @@ function ItemsPanel({ community, showToast }) {
     const [{ data: ms }, { data: it }] = await Promise.all([
       supabase.from("community_miniseries").select("id, title, sort_order, status, tab_key, director_name")
         .eq("community_id", community.id).order("sort_order"),
-      supabase.from("community_items").select("id, title, year, tmdb_id, tmdb_tv_id, media_type, poster_path, sort_order, miniseries_id, creator, episode_url, air_date, extra_data")
+      supabase.from("community_items").select("id, title, year, tmdb_id, tmdb_tv_id, media_type, poster_path, sort_order, miniseries_id, creator, episode_url, air_date, extra_data, published_at")
         .in("miniseries_id", [])  // placeholder — we'll fetch differently
     ]);
     setMiniseries(ms || []);
@@ -294,6 +294,9 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
   const [creator, setCreator] = useState(item.creator || "");
   const [blurb, setBlurb] = useState(item.extra_data?.editorial_blurb || "");
   const [blurbAuthor, setBlurbAuthor] = useState(item.extra_data?.blurb_author || "Ali");
+  const [publishedAt, setPublishedAt] = useState(
+    item.published_at ? new Date(item.published_at).toISOString().slice(0, 16) : ""
+  );
   const [saving, setSaving] = useState(false);
   const [authors, setAuthors] = useState([]);
 
@@ -333,6 +336,7 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
         delete newExtra.blurb_author;
       }
       updates.extra_data = Object.keys(newExtra).length > 0 ? newExtra : null;
+      updates.published_at = publishedAt ? new Date(publishedAt).toISOString() : null;
     }
     const { error } = await supabase.from("community_items").update(updates).eq("id", item.id);
     if (error) { showToast(`Error: ${error.message}`); setSaving(false); return; }
@@ -411,6 +415,32 @@ function EditItemRow({ item, miniseries, communitySlug, showToast, onSaved, onCa
                 >
                   {authors.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
                 </select>
+              </div>
+              <div style={{ width: 200 }}>
+                <label style={S.fieldLabel}>
+                  Publish Date
+                  {" "}
+                  {(() => {
+                    if (!publishedAt) return <span style={{ color: "#888", fontSize: 10, fontWeight: 500 }}>DRAFT</span>;
+                    const d = new Date(publishedAt);
+                    if (d <= new Date()) return <span style={{ color: "#4ade80", fontSize: 10, fontWeight: 500 }}>● LIVE</span>;
+                    return <span style={{ color: "#EF9F27", fontSize: 10, fontWeight: 500 }}>◷ SCHEDULED</span>;
+                  })()}
+                </label>
+                <input
+                  type="datetime-local"
+                  value={publishedAt}
+                  onChange={e => setPublishedAt(e.target.value)}
+                  style={{ ...S.inlineInput, width: "100%", fontSize: 12 }}
+                />
+                {publishedAt && (
+                  <button
+                    onClick={() => setPublishedAt("")}
+                    style={{ marginTop: 4, fontSize: 11, color: "#888", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                  >
+                    Clear (save as draft)
+                  </button>
+                )}
               </div>
             </div>
           </td>
