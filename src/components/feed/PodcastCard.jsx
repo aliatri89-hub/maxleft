@@ -531,11 +531,12 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
             {editorial_label}
           </div>
           <div style={{
-            fontFamily: t.fontBody, fontSize: 11, color: "rgba(196,115,79,0.7)",
+            fontFamily: t.fontBody, fontSize: 11, fontWeight: 700,
+            color: "rgba(255,255,255,0.75)",
             letterSpacing: "0.05em", textTransform: "uppercase",
             marginBottom: 10,
           }}>
-            By {blurb_author}
+            By {blurb_author || "Ali"}
           </div>
           <div style={{
             fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",

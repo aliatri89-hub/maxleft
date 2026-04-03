@@ -112,7 +112,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
           watched: false,
           logo_url: null,
           logo_display: item.extra_data?.logo_display || "white",
-          sort_order: item.sort_order,
+          blurb_author: item.extra_data?.blurb_author || "Ali",
         };
       });
     } catch (err) {
