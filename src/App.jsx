@@ -972,18 +972,18 @@ function AppMain() {
             <button className={`nav-item${activeTab === "feed" ? " active" : ""}`}
               onClick={() => { tapLight(); dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("podcast"); setPreloadTab(null); }}>
               <div className="nav-icon">
-                <div style={{ position: "relative", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "relative", width: 36, height: 36, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{
                     position: "absolute", inset: 0,
                     background: activeTab === "feed" ? "rgba(74,222,128,0.12)" : "rgba(196,115,79,0.07)",
                     border: `1px solid ${activeTab === "feed" ? "rgba(74,222,128,0.4)" : "rgba(196,115,79,0.2)"}`,
-                    borderRadius: 5,
+                    borderRadius: 7,
                     transition: "background 0.2s, border-color 0.2s",
                   }} />
                   <div style={{
                     width: 0, height: 0,
                     borderStyle: "solid",
-                    borderWidth: "7px 0 7px 12px",
+                    borderWidth: "9px 0 9px 15px",
                     borderColor: `transparent transparent transparent ${activeTab === "feed" ? "#4ade80" : "rgba(245,240,235,0.75)"}`,
                     position: "relative", zIndex: 1,
                     marginLeft: 3,
@@ -991,7 +991,6 @@ function AppMain() {
                   }} />
                 </div>
               </div>
-              <div className="nav-label">Home</div>
             </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
