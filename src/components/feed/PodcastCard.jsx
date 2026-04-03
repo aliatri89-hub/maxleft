@@ -197,7 +197,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   return (
     <>
     <div
-      onClick={() => { if (!isEditorial) setExpanded(prev => !prev); }}
+      onClick={() => setExpanded(prev => !prev)}
       style={{
         borderRadius: 14,
         overflow: "hidden",
@@ -514,9 +514,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           </div>
         </div>
       )}
-      {/* Editorial: always-visible blurb, truncated, with Read more → log modal */}
-      {isEditorial && hasDesc && (
-        <div style={{ marginTop: 14, position: "relative", zIndex: 1 }}>
+      {/* Editorial: tap-to-expand blurb with Read more → log modal */}
+      {isEditorial && hasDesc && expanded && (
+        <div style={{ marginTop: 20, animation: "pcFadeSlide 0.2s ease forwards", position: "relative", zIndex: 1 }}>
           <div style={{
             fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
             color: "rgba(255,255,255,0.85)", letterSpacing: "0.02em",
