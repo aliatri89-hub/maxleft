@@ -969,6 +969,30 @@ function AppMain() {
               <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
             </button>
+            <button className={`nav-item${activeTab === "feed" ? " active" : ""}`}
+              onClick={() => { tapLight(); dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("podcast"); setPreloadTab(null); }}>
+              <div className="nav-icon">
+                <div style={{ position: "relative", width: 22, height: 22, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: activeTab === "feed" ? "rgba(196,115,79,0.18)" : "rgba(196,115,79,0.07)",
+                    border: `1px solid ${activeTab === "feed" ? "rgba(196,115,79,0.55)" : "rgba(196,115,79,0.2)"}`,
+                    borderRadius: 4,
+                    transition: "background 0.2s, border-color 0.2s",
+                  }} />
+                  <div style={{
+                    width: 0, height: 0,
+                    borderStyle: "solid",
+                    borderWidth: "5.5px 0 5.5px 10px",
+                    borderColor: `transparent transparent transparent ${activeTab === "feed" ? "#c4734f" : "rgba(245,240,235,0.75)"}`,
+                    position: "relative", zIndex: 1,
+                    marginLeft: 2,
+                    transition: "border-color 0.2s",
+                  }} />
+                </div>
+              </div>
+              <div className="nav-label">Feed</div>
+            </button>
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
               onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); setPreloadTab(null); }}>
