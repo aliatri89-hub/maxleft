@@ -526,14 +526,21 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           <div style={{
             fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
             color: "rgba(255,255,255,0.85)", letterSpacing: "0.02em",
-            marginBottom: 8,
+            marginBottom: 4,
           }}>
             {editorial_label}
           </div>
           <div style={{
+            fontFamily: t.fontBody, fontSize: 11, color: "rgba(196,115,79,0.7)",
+            letterSpacing: "0.05em", textTransform: "uppercase",
+            marginBottom: 10,
+          }}>
+            By {blurb_author}
+          </div>
+          <div style={{
             fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
             lineHeight: 1.6, whiteSpace: "pre-line",
-            display: "-webkit-box", WebkitLineClamp: 10, WebkitBoxOrient: "vertical",
+            display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical",
             overflow: "hidden",
           }}>
             {episode_description}
@@ -541,12 +548,13 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           <div
             onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.("staff-picks", tmdb_id); }}
             style={{
-              marginTop: 8, fontFamily: t.fontBody, fontSize: 12, fontWeight: 600,
-              color: "rgba(196,115,79,0.75)", cursor: "pointer",
-              letterSpacing: "0.04em", display: "inline-block",
+              marginTop: 14, fontFamily: t.fontBody, fontSize: 14, fontWeight: 700,
+              color: "rgba(196,115,79,0.85)", cursor: "pointer",
+              letterSpacing: "0.06em", textTransform: "uppercase",
+              textAlign: "center", width: "100%", display: "block",
             }}
           >
-            Read more →
+            Read More →
           </div>
         </div>
       )}
