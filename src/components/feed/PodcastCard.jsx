@@ -78,7 +78,7 @@ function formatDuration(seconds) {
   return `${m}m`;
 }
 
-function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
+function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
   const {
     episode_id, episode_title, episode_description, episode_air_date,
     audio_url, audio_status, duration_seconds,
@@ -533,7 +533,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
             {episode_description}
           </div>
           <div
-            onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }}
+            onClick={(e) => { e.stopPropagation(); onNavigateCommunity?.("staff-picks", tmdb_id); }}
             style={{
               marginTop: 8, fontFamily: t.fontBody, fontSize: 12, fontWeight: 600,
               color: "rgba(196,115,79,0.75)", cursor: "pointer",

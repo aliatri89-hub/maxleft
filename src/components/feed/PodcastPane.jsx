@@ -18,6 +18,7 @@ export default function PodcastPane({
   favoriteSlugs,
   sortOrder,
   onNavigateSearch,
+  onNavigateCommunity,
   refreshSignal,
 }) {
   // Server handles slug filtering + sort; client only filters favorites group
@@ -128,7 +129,7 @@ export default function PodcastPane({
             index={i}
             dismissable={false}
           >
-            <PodcastCard item={item} isAdmin={isAdmin} userId={userId} />
+            <PodcastCard item={item} isAdmin={isAdmin} userId={userId} onNavigateCommunity={onNavigateCommunity} />
           </FeedCard>
         ))}
       </div>
