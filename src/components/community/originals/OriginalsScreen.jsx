@@ -228,7 +228,7 @@ export default function OriginalsScreen({
                   marginBottom: 8,
                 }}>
                   {authorData?.avatar_url ? (
-                    <img src={sbImg(authorData.avatar_url, 80)} alt="" style={{
+                    <img src={authorData.avatar_url} alt="" style={{
                       width: 32, height: 32, borderRadius: "50%", objectFit: "cover",
                       border: "1.5px solid rgba(233,69,96,0.3)",
                     }} />

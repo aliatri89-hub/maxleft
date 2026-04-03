@@ -212,7 +212,7 @@ function ReaderOverlay({ post, accent, onClose }) {
             {/* Background image */}
             <div style={{
               position: "absolute", inset: 0,
-              backgroundImage: `url(${sbImg(post.cover_image_url, 600)})`,
+              backgroundImage: `url(${post.cover_image_url})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }} />
@@ -238,7 +238,7 @@ function ReaderOverlay({ post, accent, onClose }) {
                 display: "flex", alignItems: "center", gap: 10,
               }}>
                 {authorData?.avatar_url && (
-                  <img src={sbImg(authorData.avatar_url, 80)} alt="" style={{
+                  <img src={authorData.avatar_url} alt="" style={{
                     width: 55, height: 55, borderRadius: "50%", objectFit: "cover",
                     border: "2px solid rgba(255,255,255,0.3)",
                   }} />
@@ -298,7 +298,7 @@ function ReaderOverlay({ post, accent, onClose }) {
               marginBottom: 28,
             }}>
               {authorData?.avatar_url && (
-                <img src={sbImg(authorData.avatar_url, 80)} alt="" style={{
+                <img src={authorData.avatar_url} alt="" style={{
                   width: 55, height: 55, borderRadius: "50%", objectFit: "cover",
                   border: `1.5px solid ${accent}40`,
                 }} />
