@@ -277,18 +277,24 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
       )}
 
       {/* ── Admin logo mode — bottom left: cycle white → greyscale → hidden ── */}
-      {isAdmin && hasLogoFile && !isEditorial && (
+      {isAdmin && hasLogoFile && (
         <div
           onClick={async (e) => {
             e.stopPropagation();
             const cycle = { white: "greyscale", greyscale: "hidden", hidden: "white" };
             const next = cycle[logoMode] || "white";
             setLogoMode(next);
-            await supabase
-              .from('podcast_episode_films')
-              .update({ logo_display: next })
-              .eq('episode_id', episode_id)
-              .eq('tmdb_id', tmdb_id);
+            if (isEditorial) {
+              const itemId = episode_id.replace("editorial-", "");
+              const { data: current } = await supabase.from('community_items').select('extra_data').eq('id', itemId).single();
+              await supabase.from('community_items').update({ extra_data: { ...(current?.extra_data || {}), logo_display: next } }).eq('id', itemId);
+            } else {
+              await supabase
+                .from('podcast_episode_films')
+                .update({ logo_display: next })
+                .eq('episode_id', episode_id)
+                .eq('tmdb_id', tmdb_id);
+            }
           }}
           title={{ white: "White logo (tap for greyscale)", greyscale: "Greyscale logo (tap to hide)", hidden: "Hidden (tap for white)" }[logoMode]}
           style={{
@@ -477,7 +483,7 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
           {/* Handle / chevron — only when desc exists and collapsed */}
-          {hasDesc && !expanded && !isEditorial && (
+          {hasDesc && !expanded && (
             <div style={{
               width: 36, height: 3, borderRadius: 2,
               background: "rgba(255,255,255,0.25)",

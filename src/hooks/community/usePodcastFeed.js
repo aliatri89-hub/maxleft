@@ -111,6 +111,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
           backdrop_path: item.backdrop_path,
           watched: false,
           logo_url: null,
+          logo_display: item.extra_data?.logo_display || "white",
           sort_order: item.sort_order,
         };
       });
