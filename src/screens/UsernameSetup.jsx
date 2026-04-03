@@ -830,7 +830,7 @@ function UsernameSetup({ name, session, onComplete }) {
         <StepDots total={allSteps.length} current={2} />
         <div className="setup-title">Connect Letterboxd</div>
         <div className="setup-sub">
-          Two ways to bring your watch history into Mantl. Do both for the best experience.
+          Connect your Letterboxd and instantly unlock badges you've already earned. Do both for the best experience.
         </div>
 
         {/* 1. Username / RSS */}
@@ -883,7 +883,7 @@ function UsernameSetup({ name, session, onComplete }) {
             fontFamily: t.fontDisplay, fontSize: 14, color: "#ffffff",
             lineHeight: 1.6, marginBottom: 10,
           }}>
-            This brings in everything you've ever logged — ratings, dates, the works.
+            Import your full history to unlock every badge you qualify for — and to collect any you've already earned.
           </div>
 
           <div style={{
