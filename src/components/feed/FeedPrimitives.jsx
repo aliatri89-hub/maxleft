@@ -484,3 +484,12 @@ export function getTimeAgo(dateStr) {
   const monthNames = ["Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
   return `${monthNames[then.getMonth()]} ${then.getDate()}`;
 }
+
+// Transform a Supabase Storage URL to use the image render API for fast resized delivery.
+// Works on both supabase.co and custom domain (api.mymantl.app) storage URLs.
+export function sbImg(url, width = 400, quality = 75) {
+  if (!url) return url;
+  return url
+    .replace("/storage/v1/object/public/", `/storage/v1/render/image/public/`)
+    .split("?")[0] + `?width=${width}&quality=${quality}`;
+}

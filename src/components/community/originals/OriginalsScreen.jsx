@@ -4,6 +4,7 @@ import { useScrollToItem } from "../../../hooks/useScrollToItem";
 import { useBackGesture } from "../../../hooks/useBackGesture";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { fetchCoversForItems, getCoverUrl } from "../../../utils/communityTmdb";
+import { sbImg } from "../../feed/FeedPrimitives";
 import { useCommunityProgress, useCommunityActions } from "../../../hooks/community";
 import OriginalsHero from "./OriginalsHero";
 import OriginalsPostCard from "./OriginalsPostCard";
@@ -227,7 +228,7 @@ export default function OriginalsScreen({
                   marginBottom: 8,
                 }}>
                   {authorData?.avatar_url ? (
-                    <img src={authorData.avatar_url} alt="" style={{
+                    <img src={sbImg(authorData.avatar_url, 80)} alt="" style={{
                       width: 32, height: 32, borderRadius: "50%", objectFit: "cover",
                       border: "1.5px solid rgba(233,69,96,0.3)",
                     }} />
