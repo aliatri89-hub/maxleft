@@ -196,6 +196,7 @@ export default function FeedScreen({
             favoriteSlugs={favoriteSlugs}
             sortOrder={sortOrder}
             onNavigateSearch={onNavigateSearch}
+            onNavigateCommunity={onNavigateCommunity}
             refreshSignal={refreshSignal}
           />
         </div>
