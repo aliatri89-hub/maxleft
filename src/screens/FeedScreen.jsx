@@ -17,7 +17,7 @@ const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 const FEED_TABS = [
   { key: "releases", label: "Movies" },
-  { key: "podcast",  label: "Podcasts" },
+  { key: "podcast",  label: "Coverage" },
   { key: "activity", label: "Activity" },
 ];
 
