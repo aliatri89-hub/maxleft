@@ -324,31 +324,30 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
         {/* Podcast artwork / MANTL editorial logo */}
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
-          background: isEditorial ? "#1a1510" : "#2a2520", flexShrink: 0,
+          background: isEditorial ? "#1c1a15" : "#2a2520", flexShrink: 0,
           boxShadow: "0 3px 8px rgba(0,0,0,0.5)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          border: isEditorial ? "1px solid rgba(196,115,79,0.2)" : "none",
+          border: isEditorial ? "1px solid rgba(196,115,79,0.25)" : "none",
         }}>
           {isEditorial ? (
             <div style={{
               width: "100%", height: "100%",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "#1a1510",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              gap: 2,
+              background: "linear-gradient(160deg, #1e1b14 0%, #16130e 100%)",
             }}>
-              <div style={{ position: "relative", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: "rgba(196,115,79,0.12)",
-                  border: "1px solid rgba(196,115,79,0.3)",
-                  borderRadius: 6,
-                }} />
-                <div style={{
-                  width: 0, height: 0, borderStyle: "solid",
-                  borderWidth: "7px 0 7px 13px",
-                  borderColor: "transparent transparent transparent #f5f0eb",
-                  position: "relative", zIndex: 1, marginLeft: 3,
-                }} />
-              </div>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900, fontSize: 17, letterSpacing: "0.08em",
+                textTransform: "uppercase", color: "#f5f0eb",
+                lineHeight: 1,
+              }}>MANTL</div>
+              <div style={{
+                fontFamily: t.fontSharpie,
+                fontSize: 9, color: "rgba(196,115,79,0.85)",
+                lineHeight: 1.2, textAlign: "center",
+              }}>Staff{"\n"}Picks</div>
             </div>
           ) : podcast_artwork ? (
             <FadeImg src={podcast_artwork} alt={podcast_name}
