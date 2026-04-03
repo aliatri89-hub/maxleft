@@ -61,6 +61,7 @@
 
 ## 🟡 Should Fix Before Launch
 
+- [ ] **Reel Time → weekly cadence** — currently daily with 3 movies; pool burns out too fast and 3 films is thin strategically. Switch to weekly (Monday or Sunday), bump to 5 movies per puzzle. Makes it a distinct event vs the daily habit games (Triple Feature, Cast Connections). Requires: update game logic/scheduling, update `wt_daily_puzzles` seeding, update UI copy ("Today's" → "This Week's"), update `hasPlayedToday` check to `hasPlayedThisWeek`.
 - [ ] **Backfill missing episode descriptions** — 93 NPP + 16 BC episodes have null descriptions. NPP episodes have `rss_guid` and can be re-fetched via `enrich-episode-descriptions` edge function; BC episodes were manually seeded with no `rss_guid` and need a title/audio-URL match against the RSS feed. Data job, not a code change.
 - [ ] **Delete dead edge functions** — the following are still live on Supabase but serve no purpose. Delete from Supabase Dashboard → Edge Functions:
   - `seed-sleeve-data`
