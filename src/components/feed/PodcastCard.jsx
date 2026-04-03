@@ -88,6 +88,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   } = item;
 
   const isEditorial = card_type === "editorial";
+  const editorialTitle = isEditorial ? `${podcast_name} #${item.sort_order}` : null;
 
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -197,7 +198,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   return (
     <>
     <div
-      onClick={() => setExpanded(prev => !prev)}
+      onClick={() => { if (!isEditorial) setExpanded(prev => !prev); }}
       style={{
         borderRadius: 14,
         overflow: "hidden",
@@ -277,7 +278,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
       )}
 
       {/* ── Admin logo mode — bottom left: cycle white → greyscale → hidden ── */}
-      {isAdmin && hasLogoFile && (
+      {isAdmin && hasLogoFile && !isEditorial && (
         <div
           onClick={async (e) => {
             e.stopPropagation();
@@ -324,36 +325,25 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           border: isEditorial ? "1px solid rgba(196,115,79,0.2)" : "none",
         }}>
           {isEditorial ? (
-            <div style={{ textAlign: "center", lineHeight: 1 }}>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontWeight: 900, fontSize: 13, letterSpacing: "0.06em",
-                color: "#f5f0eb",
-              }}>
-                M<span style={{
-                  display: "inline-flex", alignItems: "center", justifyContent: "center",
-                  width: 11, height: 13, position: "relative",
-                  margin: "0 -0.5px",
-                }}>
-                  <span style={{
-                    position: "absolute", inset: 0,
-                    background: "rgba(196,115,79,0.15)",
-                    border: "0.75px solid rgba(196,115,79,0.35)",
-                    borderRadius: 2,
-                  }} />
-                  <span style={{
-                    width: 0, height: 0, borderStyle: "solid",
-                    borderWidth: "3px 0 3px 5.5px",
-                    borderColor: "transparent transparent transparent #f5f0eb",
-                    position: "relative", zIndex: 1, marginLeft: 1,
-                  }} />
-                </span>NTL
+            <div style={{
+              width: "100%", height: "100%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              background: "#1a1510",
+            }}>
+              <div style={{ position: "relative", width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{
+                  position: "absolute", inset: 0,
+                  background: "rgba(196,115,79,0.12)",
+                  border: "1px solid rgba(196,115,79,0.3)",
+                  borderRadius: 6,
+                }} />
+                <div style={{
+                  width: 0, height: 0, borderStyle: "solid",
+                  borderWidth: "7px 0 7px 13px",
+                  borderColor: "transparent transparent transparent #f5f0eb",
+                  position: "relative", zIndex: 1, marginLeft: 3,
+                }} />
               </div>
-              <div style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 6, letterSpacing: "0.14em", textTransform: "uppercase",
-                color: "rgba(196,115,79,0.7)", marginTop: 2,
-              }}>Staff Picks</div>
             </div>
           ) : podcast_artwork ? (
             <FadeImg src={podcast_artwork} alt={podcast_name}
@@ -488,7 +478,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           {/* Left spacer — mirrors badge width so bar stays centered */}
           <div style={{ flex: 1 }} />
           {/* Handle / chevron — only when desc exists and collapsed */}
-          {hasDesc && !expanded && (
+          {hasDesc && !expanded && !isEditorial && (
             <div style={{
               width: 36, height: 3, borderRadius: 2,
               background: "rgba(255,255,255,0.25)",
@@ -525,7 +515,39 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           </div>
         </div>
       )}
-      {hasDesc && expanded && (
+      {/* Editorial: always-visible blurb, truncated, with Read more → log modal */}
+      {isEditorial && hasDesc && (
+        <div style={{ marginTop: 14, position: "relative", zIndex: 1 }}>
+          <div style={{
+            fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
+            color: "rgba(255,255,255,0.85)", letterSpacing: "0.02em",
+            marginBottom: 8,
+          }}>
+            {editorialTitle}
+          </div>
+          <div style={{
+            fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
+            lineHeight: 1.6, whiteSpace: "pre-line",
+            display: "-webkit-box", WebkitLineClamp: 8, WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}>
+            {episode_description}
+          </div>
+          <div
+            onClick={(e) => { e.stopPropagation(); setShowLogModal(true); }}
+            style={{
+              marginTop: 8, fontFamily: t.fontBody, fontSize: 12, fontWeight: 600,
+              color: "rgba(196,115,79,0.75)", cursor: "pointer",
+              letterSpacing: "0.04em", display: "inline-block",
+            }}
+          >
+            Read more →
+          </div>
+        </div>
+      )}
+
+      {/* Podcast: tap-to-expand description */}
+      {!isEditorial && hasDesc && expanded && (
         <div style={{
           marginTop: 20,
           animation: "pcFadeSlide 0.2s ease forwards",

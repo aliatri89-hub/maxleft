@@ -73,7 +73,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
         .from("community_items")
         .select(`
           id, title, year, tmdb_id, poster_path, backdrop_path,
-          published_at, extra_data,
+          published_at, extra_data, sort_order,
           community_miniseries!inner ( title, community_id,
             community_pages!inner ( slug )
           )
@@ -105,7 +105,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
         backdrop_path: item.backdrop_path,
         watched: false,
         logo_url: null,
-        blurb_author: item.extra_data?.blurb_author || "MANTL",
+        sort_order: item.sort_order,
       }));
     } catch (err) {
       console.error("[PodcastFeed] editorial fetch error:", err);
