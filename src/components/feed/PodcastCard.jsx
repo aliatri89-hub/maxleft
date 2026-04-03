@@ -345,9 +345,10 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
               }}>MANTL</div>
               <div style={{
                 fontFamily: t.fontSharpie,
-                fontSize: 9, color: "rgba(196,115,79,0.85)",
-                lineHeight: 1.2, textAlign: "center",
-              }}>Staff{"\n"}Picks</div>
+                fontSize: 10, color: "rgba(196,115,79,0.85)",
+                lineHeight: 1.3, textAlign: "center",
+                whiteSpace: "pre",
+              }}>{"Staff\nPicks"}</div>
             </div>
           ) : podcast_artwork ? (
             <FadeImg src={podcast_artwork} alt={podcast_name}
