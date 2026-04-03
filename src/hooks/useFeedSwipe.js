@@ -13,7 +13,7 @@ import { tapLight } from "../utils/haptics";
  */
 
 const TABS = ["feed", "communities", "games", "search", "mantl"];
-const FEED_MODES = ["podcast", "releases", "activity"];
+const FEED_MODES = ["releases", "podcast", "activity"];
 
 export function useFeedSwipe(activeTab, setActiveTab, pushNav, removeNav, feedMode, setFeedMode) {
   const tabSwipeStart = useRef(null);

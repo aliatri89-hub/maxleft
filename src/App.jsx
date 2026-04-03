@@ -960,33 +960,33 @@ function AppMain() {
             <button className={`nav-item${activeTab === "games" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "games") setPreloadTab("games"); }}
               onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "games") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("games"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><circle cx="5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div>
+              <div className="nav-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="8" y1="2" x2="8" y2="22"/><line x1="16" y1="2" x2="16" y2="22"/><circle cx="5" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="5" cy="18" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="19" cy="18" r="1" fill="currentColor" stroke="none"/></svg></div>
               <div className="nav-label">Games</div>
             </button>
             <button className={`nav-item${activeTab === "communities" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "communities") setPreloadTab("communities"); }}
               onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "communities") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("communities"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
+              <div className="nav-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></div>
               <div className="nav-label">Communities</div>
             </button>
             <button className={`nav-item${activeTab === "feed" ? " active" : ""}`}
               onClick={() => { tapLight(); dismissOverlays(); removeNav("tab"); setActiveTab("feed"); setFeedMode("podcast"); setPreloadTab(null); }}>
               <div className="nav-icon">
-                <div style={{ position: "relative", width: 22, height: 22, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ position: "relative", width: 28, height: 28, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                   <div style={{
                     position: "absolute", inset: 0,
                     background: activeTab === "feed" ? "rgba(196,115,79,0.18)" : "rgba(196,115,79,0.07)",
                     border: `1px solid ${activeTab === "feed" ? "rgba(196,115,79,0.55)" : "rgba(196,115,79,0.2)"}`,
-                    borderRadius: 4,
+                    borderRadius: 5,
                     transition: "background 0.2s, border-color 0.2s",
                   }} />
                   <div style={{
                     width: 0, height: 0,
                     borderStyle: "solid",
-                    borderWidth: "5.5px 0 5.5px 10px",
+                    borderWidth: "7px 0 7px 12px",
                     borderColor: `transparent transparent transparent ${activeTab === "feed" ? "#c4734f" : "rgba(245,240,235,0.75)"}`,
                     position: "relative", zIndex: 1,
-                    marginLeft: 2,
+                    marginLeft: 3,
                     transition: "border-color 0.2s",
                   }} />
                 </div>
@@ -996,7 +996,7 @@ function AppMain() {
             <button className={`nav-item${activeTab === "search" ? " active" : ""}`}
               onTouchStart={() => { if (activeTab !== "search") setPreloadTab("search"); }}
               onClick={() => { tapLight(); dismissOverlays(); if (activeTab !== "search") pushNav("tab", () => { setActiveTab("feed"); }); setActiveTab("search"); setPreloadTab(null); }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
+              <div className="nav-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="10.5" cy="10.5" r="7.5"/><line x1="21" y1="21" x2="15.8" y2="15.8"/></svg></div>
               <div className="nav-label">Search</div>
             </button>
             <button className={`nav-item${activeTab === "mantl" ? " active" : ""}`}
@@ -1006,7 +1006,7 @@ function AppMain() {
                 if (activeTab !== "mantl") pushNav("tab", () => { setActiveTab("feed"); });
                 setActiveTab("mantl"); setPreloadTab(null);
               }}>
-              <div className="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V3H6v6z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><line x1="12" y1="15" x2="12" y2="18"/><path d="M8 21h8"/><path d="M8 21l1-3h6l1 3"/></svg></div>
+              <div className="nav-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9a6 6 0 0 0 12 0V3H6v6z"/><path d="M6 5H3v2a4 4 0 0 0 4 4"/><path d="M18 5h3v2a4 4 0 0 1-4 4"/><line x1="12" y1="15" x2="12" y2="18"/><path d="M8 21h8"/><path d="M8 21l1-3h6l1 3"/></svg></div>
               <div className="nav-label">Mantl</div>
             </button>
           </div>

@@ -16,8 +16,8 @@ import ActivityPane from "../components/feed/ActivityPane";
 const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
 
 const FEED_TABS = [
-  { key: "podcast",  label: "Podcasts" },
   { key: "releases", label: "Movies" },
+  { key: "podcast",  label: "Podcasts" },
   { key: "activity", label: "Activity" },
 ];
 
