@@ -51,16 +51,6 @@ export default function OriginalsScreen({
   // Scroll to shelf when deep-linked
   useScrollToItem(scrollToTmdbId, miniseries, accent);
 
-  // Auto-open log modal when deep-linked from editorial feed card
-  useEffect(() => {
-    if (!scrollToTmdbId || allItems.length === 0) return;
-    const item = allItems.find(i => String(i.tmdb_id) === String(scrollToTmdbId));
-    if (!item) return;
-    // Delay slightly so scroll animation settles before modal opens
-    const t = setTimeout(() => setModalItem(item), 650);
-    return () => clearTimeout(t);
-  }, [scrollToTmdbId, allItems]);
-
   // ── Data ──
   const allItems = useMemo(() => miniseries.flatMap(s => s.items || []), [miniseries]);
   const { progress, setProgress } = useCommunityProgress(community?.id, userId, allItems);
@@ -70,6 +60,15 @@ export default function OriginalsScreen({
     if (allItems.length === 0) return;
     fetchCoversForItems(allItems, setCoverCache);
   }, [allItems]);
+
+  // Auto-open log modal when deep-linked from editorial feed card
+  useEffect(() => {
+    if (!scrollToTmdbId || allItems.length === 0) return;
+    const item = allItems.find(i => String(i.tmdb_id) === String(scrollToTmdbId));
+    if (!item) return;
+    const t = setTimeout(() => setModalItem(item), 650);
+    return () => clearTimeout(t);
+  }, [scrollToTmdbId, allItems]);
 
   // ── Handlers ──
   const handleItemTap = useCallback((itemId) => {
