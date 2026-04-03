@@ -66,20 +66,71 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
     }
   }, [userId, items.length]);
 
+  // Fetch editorial cards from Staff Picks blurbs
+  const fetchEditorialItems = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("community_items")
+        .select(`
+          id, title, year, tmdb_id, poster_path, backdrop_path,
+          published_at, extra_data,
+          community_miniseries!inner ( title, community_id,
+            community_pages!inner ( slug )
+          )
+        `)
+        .not("extra_data->editorial_blurb", "is", null)
+        .not("published_at", "is", null)
+        .lte("published_at", new Date().toISOString())
+        .eq("community_miniseries.community_pages.slug", "staff-picks")
+        .order("published_at", { ascending: false });
+
+      if (error || !data) return [];
+
+      return data.map(item => ({
+        card_type: "editorial",
+        episode_id: `editorial-${item.id}`,
+        episode_air_date: item.published_at?.slice(0, 10),
+        episode_description: item.extra_data?.editorial_blurb || "",
+        episode_title: null,
+        audio_url: null,
+        audio_status: null,
+        duration_seconds: null,
+        podcast_name: item.community_miniseries?.title || "MANTL Staff Picks",
+        podcast_slug: "staff-picks",
+        podcast_artwork: null,
+        tmdb_id: item.tmdb_id,
+        film_title: item.title,
+        film_year: item.year,
+        poster_path: item.poster_path,
+        backdrop_path: item.backdrop_path,
+        watched: false,
+        logo_url: null,
+        blurb_author: item.extra_data?.blurb_author || "MANTL",
+      }));
+    } catch (err) {
+      console.error("[PodcastFeed] editorial fetch error:", err);
+      return [];
+    }
+  }, []);
+
   const fetchItems = useCallback(async (offset = 0, append = false, slug = null, sort = null) => {
     setLoading(true);
     try {
       // When a specific podcast is selected, show all-time; otherwise last 60 days
       const daysBack = slug ? 0 : 60;
 
-      const { data, error } = await supabase.rpc("podcast_feed_items", {
-        days_back: daysBack,
-        result_limit: PAGE_SIZE,
-        result_offset: offset,
-        podcast_slug: slug || null,
-        check_user_id: userId || null,
-        sort_asc: sort === "oldest",
-      });
+      const [{ data, error }, editorialRows] = await Promise.all([
+        supabase.rpc("podcast_feed_items", {
+          days_back: daysBack,
+          result_limit: PAGE_SIZE,
+          result_offset: offset,
+          podcast_slug: slug || null,
+          check_user_id: userId || null,
+          sort_asc: sort === "oldest",
+        }),
+        // Only mix editorial into the unfiltered first page
+        (!slug && offset === 0) ? fetchEditorialItems() : Promise.resolve([]),
+      ]);
 
       if (!mountedRef.current) return;
 
@@ -90,20 +141,28 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
         return;
       }
 
-      const rows = data || [];
+      const podcastRows = data || [];
+
+      // Merge and sort editorial + podcast by air_date
+      const merged = [...podcastRows, ...editorialRows].sort((a, b) => {
+        const da = a.episode_air_date || "";
+        const db = b.episode_air_date || "";
+        return sort === "oldest" ? da.localeCompare(db) : db.localeCompare(da);
+      });
+
       if (append) {
-        setItems(prev => [...prev, ...rows]);
+        setItems(prev => [...prev, ...merged]);
       } else {
-        setItems(rows);
+        setItems(merged);
       }
-      setHasMore(rows.length === PAGE_SIZE);
-      enrichLogos(rows, mountedRef, setItems);
+      setHasMore(podcastRows.length === PAGE_SIZE);
+      enrichLogos(merged, mountedRef, setItems);
     } catch (err) {
       console.error("[PodcastFeed] fetch error:", err);
     } finally {
       if (mountedRef.current) setLoading(false);
     }
-  }, [userId]);
+  }, [userId, fetchEditorialItems]);
 
   const loadMore = useCallback(() => {
     setItems(prev => {

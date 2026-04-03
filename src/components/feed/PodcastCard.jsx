@@ -84,8 +84,10 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
     audio_url, audio_status, duration_seconds,
     podcast_name, podcast_slug, podcast_artwork,
     tmdb_id, film_title, film_year, poster_path, watched, logo_url,
-    logo_display,
+    logo_display, card_type, blurb_author,
   } = item;
+
+  const isEditorial = card_type === "editorial";
 
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -119,7 +121,9 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
   const isActiveAndPlaying = isCurrent && isPlaying;
 
   const fullDesc = stripUrls(stripHtml(episode_description));
-  const hasDesc = fullDesc && !isJunkDesc(fullDesc);
+  const hasDesc = isEditorial
+    ? !!(episode_description?.trim())
+    : fullDesc && !isJunkDesc(fullDesc);
 
   const handlePlay = (e) => {
     e.stopPropagation();
@@ -311,13 +315,47 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
 
       {/* ── Art + right column ── */}
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start", position: "relative", zIndex: 1 }}>
-        {/* Podcast artwork */}
+        {/* Podcast artwork / MANTL editorial logo */}
         <div style={{
           width: 60, height: 60, borderRadius: 10, overflow: "hidden",
-          background: "#2a2520", flexShrink: 0,
+          background: isEditorial ? "#1a1510" : "#2a2520", flexShrink: 0,
           boxShadow: "0 3px 8px rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: isEditorial ? "1px solid rgba(196,115,79,0.2)" : "none",
         }}>
-          {podcast_artwork ? (
+          {isEditorial ? (
+            <div style={{ textAlign: "center", lineHeight: 1 }}>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontWeight: 900, fontSize: 13, letterSpacing: "0.06em",
+                color: "#f5f0eb",
+              }}>
+                M<span style={{
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  width: 11, height: 13, position: "relative",
+                  margin: "0 -0.5px",
+                }}>
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    background: "rgba(196,115,79,0.15)",
+                    border: "0.75px solid rgba(196,115,79,0.35)",
+                    borderRadius: 2,
+                  }} />
+                  <span style={{
+                    width: 0, height: 0, borderStyle: "solid",
+                    borderWidth: "3px 0 3px 5.5px",
+                    borderColor: "transparent transparent transparent #f5f0eb",
+                    position: "relative", zIndex: 1, marginLeft: 1,
+                  }} />
+                </span>NTL
+              </div>
+              <div style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 6, letterSpacing: "0.14em", textTransform: "uppercase",
+                color: "rgba(196,115,79,0.7)", marginTop: 2,
+              }}>Staff Picks</div>
+            </div>
+          ) : podcast_artwork ? (
             <FadeImg src={podcast_artwork} alt={podcast_name}
               placeholderColor="#2a2520"
               style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -362,7 +400,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   {film_year}
                 </span>
               )}
-              {!isPaywall && addToQueue && !isCurrent && (
+              {!isPaywall && !isEditorial && addToQueue && !isCurrent && (
                 <div onClick={handleQueue} title="Up Next" style={{
                   width: 34, height: 34, borderRadius: "50%",
                   background: inQueue ? "#4a4540" : "#2e2b27",
@@ -383,7 +421,7 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
                   )}
                 </div>
               )}
-              {!isPaywall && (
+              {!isPaywall && !isEditorial && (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                   <div onClick={handlePlay} style={{
                     width: 38, height: 38, borderRadius: 8,
@@ -493,22 +531,43 @@ function PodcastCard({ item, isAdmin, userId, onUnlinked }) {
           animation: "pcFadeSlide 0.2s ease forwards",
           position: "relative", zIndex: 1,
         }}>
-          {episode_title && (
-            <div style={{
-              fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
-              color: "rgba(255,255,255,0.85)",
-              letterSpacing: "0.02em",
-              marginBottom: 8,
-            }}>
-              {decodeEntities(episode_title)}
-            </div>
+          {isEditorial ? (
+            <>
+              <div style={{
+                fontFamily: t.fontBody, fontSize: 10, fontWeight: 600,
+                color: "rgba(196,115,79,0.7)",
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                marginBottom: 10,
+              }}>
+                {podcast_name} · {blurb_author}
+              </div>
+              <div style={{
+                fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
+                lineHeight: 1.6, whiteSpace: "pre-line",
+              }}>
+                {episode_description}
+              </div>
+            </>
+          ) : (
+            <>
+              {episode_title && (
+                <div style={{
+                  fontFamily: t.fontBody, fontSize: 15, fontWeight: 700,
+                  color: "rgba(255,255,255,0.85)",
+                  letterSpacing: "0.02em",
+                  marginBottom: 8,
+                }}>
+                  {decodeEntities(episode_title)}
+                </div>
+              )}
+              <div style={{
+                fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
+                lineHeight: 1.5,
+              }}>
+                {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
+              </div>
+            </>
           )}
-          <div style={{
-            fontFamily: t.fontSerif, fontSize: 14, color: "#f0ebe1",
-            lineHeight: 1.5,
-          }}>
-            {renderWithTimecodes(fullDesc, handleTimecodeSeek)}
-          </div>
         </div>
       )}
 
