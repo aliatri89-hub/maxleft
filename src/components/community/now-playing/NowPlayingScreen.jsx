@@ -53,7 +53,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
     return (t && Array.isArray(t) && t.length > 0) ? t : [{ key: "filmography", label: "Filmography", icon: "🎬" }];
   }, [community]);
 
-  const [activeTab, setActiveTab] = useState(tabs[0]?.key || "filmography");
+  const [activeTab, setActiveTab] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [coverCache, setCoverCache] = useState(() => getCoverCacheSnapshot());
@@ -68,7 +68,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
   useBackGesture("communityLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("communityAddTool", showAddTool, () => setShowAddTool(false), pushNav, removeNav);
   useBackGesture("communityRSSSync", showRSSSync, () => setShowRSSSync(false), pushNav, removeNav);
-  useBackGesture("communityTab", activeTab !== (tabs[0]?.key || "filmography"), () => setActiveTab(tabs[0]?.key || "filmography"), pushNav, removeNav);
+  useBackGesture("communityTab", activeTab !== "new", () => setActiveTab("new"), pushNav, removeNav);
 
   // Scroll to shelf when deep-linked from another community
   useScrollToItem(scrollToTmdbId, miniseries, accent, setActiveTab);
