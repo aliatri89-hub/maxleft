@@ -264,9 +264,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           overflow-y: auto;
           overscroll-behavior: contain;
           -webkit-overflow-scrolling: touch;
-          transform: translateZ(0);
-          -webkit-transform: translateZ(0);
-          isolation: isolate;
         }
       `}</style>
       <div
@@ -278,9 +275,6 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           overflow: "hidden",
           position: "relative",
           touchAction: "pan-y",
-          transform: "translateZ(0)",
-          WebkitTransform: "translateZ(0)",
-          isolation: "isolate",
         }}
         onTouchStart={tabs.length > 1 ? handleTouchStart : undefined}
         onTouchMove={tabs.length > 1 ? handleTouchMove : undefined}

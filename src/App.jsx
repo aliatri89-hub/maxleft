@@ -868,9 +868,7 @@ function AppMain() {
 
         {/* Community View */}
         {activeCommunitySlug && (
-          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "clip", paddingTop: "var(--sat)" }}>
-            {/* Permanent bottom strip — covers Android system nav bar scrim before community nav renders */}
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "calc(56px + var(--sab, 0px))", background: "#0f0d0b", zIndex: 0 }} />
+          <div className="overlay-fade-in" style={{ position: "fixed", inset: 0, zIndex: 200, background: t.bgPrimary, overflow: "hidden", paddingTop: "var(--sat)" }}>
             <CommunityLoadingSkeleton />
             <div style={{ position: "relative", zIndex: 1, width: "100%", height: "100%" }}>
               <CommunityRouter slug={activeCommunitySlug} session={session} onToast={showToast}
