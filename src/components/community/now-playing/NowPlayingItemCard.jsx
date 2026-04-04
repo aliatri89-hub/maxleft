@@ -51,6 +51,7 @@ export default function NowPlayingItemCard({
       isCompleted={isCompleted}
       onToggle={onToggle}
       coverCacheVersion={coverCacheVersion}
+      hideCreator
       bottomOverlay={hasReviews ? (
         <div style={{
           position: "absolute",

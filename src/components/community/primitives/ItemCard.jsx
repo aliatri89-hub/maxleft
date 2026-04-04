@@ -36,6 +36,7 @@ export default function ItemCard({
   coverCacheVersion,
   children,
   bottomOverlay,
+  hideCreator,
 }) {
   const [coverUrl, setCoverUrl] = useState(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -133,10 +134,10 @@ export default function ItemCard({
           }}>
             <div style={{ fontSize: 24, marginBottom: 4 }}>{MEDIA_ICONS[item.media_type] || "🎬"}</div>
             <div style={{ fontSize: 10, color: t.textSecondary, lineHeight: 1.2, fontWeight: 600 }}>{item.title}</div>
-            {item.creator && (
+            {!hideCreator && item.creator && (
               <div style={{ fontSize: 9, color: t.textSecondary, marginTop: 2 }}>{item.creator}</div>
             )}
-            {!item.creator && item.year && (
+            {(hideCreator || !item.creator) && item.year && (
               <div style={{ fontSize: 9, color: t.textMuted, marginTop: 2 }}>{item.year}</div>
             )}
           </div>
