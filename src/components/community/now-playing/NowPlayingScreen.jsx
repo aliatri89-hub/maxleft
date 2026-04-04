@@ -100,7 +100,7 @@ export default function NowPlayingScreen({ community, miniseries, session, onBac
 
   // ── Dynamic shelves ────────────────────────────────────────
   const { recentItems, loading: recentLoading } = useRecentlyLogged(community?.id, userId, allItems, progress, "film");
-  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes([], allItems, 10, "nowplaying", community?.theme_config?.episode_source);
+  const { recentEpisodeItems, loading: episodesLoading } = useRecentEpisodes([], allItems, 15, "nowplaying", community?.theme_config?.episode_source);
 
   // Stable fingerprint: only changes when the actual item set changes,
   // not when the parent re-provides miniseries with a new array reference.
