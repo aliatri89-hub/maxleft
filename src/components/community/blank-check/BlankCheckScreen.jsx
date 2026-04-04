@@ -67,7 +67,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
     return t && Array.isArray(t) && t.length > 0 ? t : DEFAULT_TABS;
   }, [community]);
 
-  const [activeTab, setActiveTab] = useState(() => tabs[0]?.key || "filmography");
+  const [activeTab, setActiveTab] = useState("filmography");
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
@@ -113,7 +113,7 @@ export default function BlankCheckScreen({ community, miniseries, session, onBac
   useBackGesture("bcLogModal", !!modalItem, () => setModalItem(null), pushNav, removeNav);
   useBackGesture("bcBadgeDetail", !!detailBadge, () => setDetailBadge(null), pushNav, removeNav);
   useBackGesture("bcBadgePage", showBadgePage, () => setShowBadgePage(false), pushNav, removeNav);
-  useBackGesture("bcTab", activeTab !== (tabs[0]?.key || "filmography"), () => { sliderRef.current?.animateToTab(tabs[0]?.key || "filmography"); setActiveTab(tabs[0]?.key || "filmography"); }, pushNav, removeNav);
+  useBackGesture("bcTab", activeTab !== "filmography", () => { sliderRef.current?.animateToTab("filmography"); setActiveTab("filmography"); }, pushNav, removeNav);
 
   // Reset on tab change
   useEffect(() => { setMediaFilter(null); setSearchQuery(""); setSearchOpen(false); setSelectedSeries(null); }, [activeTab]);
