@@ -278,6 +278,9 @@ const CommunityTabSlider = forwardRef(function CommunityTabSlider(
           overflow: "hidden",
           position: "relative",
           touchAction: "pan-y",
+          transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
+          isolation: "isolate",
         }}
         onTouchStart={tabs.length > 1 ? handleTouchStart : undefined}
         onTouchMove={tabs.length > 1 ? handleTouchMove : undefined}
