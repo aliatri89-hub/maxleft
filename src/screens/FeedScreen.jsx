@@ -149,7 +149,7 @@ export default function FeedScreen({
           overflowY: "auto",
           overflowX: "hidden",
           WebkitOverflowScrolling: "touch",
-          paddingBottom: "calc(120px + var(--sab))",
+          paddingBottom: "120px",
         }}
       >
         {/* Pull-to-refresh indicator */}
