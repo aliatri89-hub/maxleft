@@ -74,7 +74,6 @@
     position: relative;
     -webkit-tap-highlight-color: transparent;
     padding-top: var(--sat);
-    padding-bottom: var(--sab);
   }
 
   .bb { font-family: 'Barlow Condensed', sans-serif; }
