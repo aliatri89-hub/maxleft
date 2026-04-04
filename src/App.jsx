@@ -704,7 +704,7 @@ function AppMain() {
             {/* Tab slider */}
             <div className="main" style={{ touchAction: "pan-y" }} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
               <div className="tab-slider" ref={sliderRef}>
-                <div className="tab-pane" key="feed-tab">
+                <div className="tab-pane" key="feed-tab" style={{ paddingBottom: 0 }}>
                   <ErrorBoundary name="Feed">
                   <FeedScreen session={session} profile={profile} onToast={showToast} isActive={activeTab === "feed"}
                     onNavigateCommunity={(slug, tmdbId) => { tapLight(); setScrollToTmdbId(tmdbId || null); setActiveCommunitySlug(slug); }}
