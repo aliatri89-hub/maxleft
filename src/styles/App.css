@@ -1441,7 +1441,17 @@
     padding-bottom: max(var(--sab), 10px);
     z-index: 9999;
   }
-  /* Extend background below viewport — kills iOS safe-area bleed on overscroll */
+  .nav-bar::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: #0f0d0b;
+    pointer-events: none;
+  }
+
   .nav-bar::after {
     content: '';
     position: absolute;
