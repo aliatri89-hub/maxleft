@@ -100,8 +100,31 @@ export default function FeedScreen({
     prevFeedModeRef.current = feedMode;
   }, [feedMode, userId]);
 
+  const outerRef = useRef(null);
+
+  useEffect(() => {
+    if (!outerRef.current || !scrollContainerRef.current) return;
+    const outer = outerRef.current;
+    const scroll = scrollContainerRef.current;
+    const tabPane = outer.parentElement;
+    const navBar = document.querySelector('.nav-bar');
+    console.log('[FeedGap Debug]', {
+      outerHeight: outer.getBoundingClientRect().height,
+      outerBottom: outer.getBoundingClientRect().bottom,
+      scrollHeight: scroll.getBoundingClientRect().height,
+      tabPaneHeight: tabPane?.getBoundingClientRect().height,
+      tabPanePaddingBottom: tabPane ? getComputedStyle(tabPane).paddingBottom : null,
+      navBarTop: navBar?.getBoundingClientRect().top,
+      navBarHeight: navBar?.getBoundingClientRect().height,
+      windowInnerHeight: window.innerHeight,
+      sab: getComputedStyle(document.documentElement).getPropertyValue('--sab'),
+      sat: getComputedStyle(document.documentElement).getPropertyValue('--sat'),
+      gap: navBar ? (navBar.getBoundingClientRect().top - outer.getBoundingClientRect().bottom) : null,
+    });
+  }, [isActive]);
+
   return (
-    <div style={{
+    <div ref={outerRef} style={{
       background: "var(--bg-primary, #0f0d0b)",
       height: "100%",
       display: "flex",
