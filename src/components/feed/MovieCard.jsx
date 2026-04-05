@@ -148,6 +148,7 @@ function LogoOrTitle({ data, logoReady, setLogoReady, isLightLogo, setIsLightLog
       {hasLogo && (
         <img
           ref={imgRef}
+          crossOrigin="anonymous"
           src={data.logo_url} alt={data.title}
           onError={() => setLogoFailed(true)}
           onLoad={(e) => {
