@@ -274,6 +274,11 @@ export default function IngestReviewTool({ userId, onToast, session }) {
 
   // ── Re-match: swap tmdb_id on the mapping ──
   const handleRematchSwap = async (mappingId, newTmdbId, newTitle, newYear, newPoster) => {
+    // Seed tmdb_title_index so approve doesn't crash
+    await supabase.rpc("seed_tmdb_title", {
+      p_tmdb_id: newTmdbId, p_title: newTitle, p_year: newYear,
+    });
+
     const { error } = await supabase
       .from("podcast_episode_films")
       .update({ tmdb_id: newTmdbId, confidence_score: 1.0 })
@@ -312,6 +317,11 @@ export default function IngestReviewTool({ userId, onToast, session }) {
 
   // ── Add-match: create a podcast_episode_films row for an unmatched episode ──
   const handleAddMatch = async (episodeId, tmdbId, title, year, posterPath) => {
+    // Seed tmdb_title_index so approve doesn't crash
+    await supabase.rpc("seed_tmdb_title", {
+      p_tmdb_id: tmdbId, p_title: title, p_year: year,
+    });
+
     const { error } = await supabase
       .from("podcast_episode_films")
       .insert({
