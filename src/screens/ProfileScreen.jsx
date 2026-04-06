@@ -7,6 +7,7 @@ import { sb } from "../utils/api";
 import InitialAvatar from "../components/InitialAvatar";
 import LetterboxdSetupPortal from "../components/LetterboxdSetupPortal";
 import IngestReviewTool from "../components/feed/IngestReviewTool";
+import AboutMantlScreen from "./AboutMantlScreen";
 
 /** Smooth expand/collapse wrapper using CSS grid trick */
 function Expandable({ open, children }) {
@@ -56,6 +57,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
   const [notifPrefs, setNotifPrefs] = useState({ new_coverage: true, favorites_only: false });
   const [notifLoaded, setNotifLoaded] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
 
   // Open letterboxd section if navigated here with initialView="letterboxd"
   useEffect(() => {
@@ -568,6 +570,14 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
         <div className="profile-group-card">
           <div
             className="profile-group-row"
+            onClick={() => { setShowAbout(true); pushNav("about", () => setShowAbout(false)); }}
+          >
+            <span className="profile-group-row-text">About MANTL</span>
+            <span className="profile-group-row-chevron">›</span>
+          </div>
+          <div className="profile-group-divider" />
+          <div
+            className="profile-group-row"
             onClick={() => window.open("https://mymantl.app/faq", "_blank")}
           >
             <span className="profile-group-row-text">Help & FAQ</span>
@@ -641,6 +651,13 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
           </div>
         </div>
       </div>
+
+      {/* About MANTL Screen */}
+      {showAbout && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "var(--bg-shell, #0f0d0b)", overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+          <AboutMantlScreen onBack={() => { removeNav("about"); setShowAbout(false); }} />
+        </div>
+      )}
 
       {/* Import CSV Modal — portaled to body to escape transform containing block */}
       {letterboxdOpen && (
