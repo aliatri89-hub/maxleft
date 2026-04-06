@@ -28,13 +28,24 @@ const corsHeaders = {
 
 // ── XML helpers (same as rss-sync) ──────────────────────────
 
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
 function extractTag(content: string, tag: string): string {
   const regex = new RegExp(
     `<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]><\\/${tag}>|<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`,
     "i"
   );
   const match = content.match(regex);
-  return (match?.[1] || match?.[2] || "").trim();
+  return decodeEntities((match?.[1] || match?.[2] || "").trim());
 }
 
 function extractEnclosure(content: string): string | null {
