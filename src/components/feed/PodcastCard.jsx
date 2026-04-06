@@ -240,8 +240,8 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
         </div>
       )}
 
-      {/* ── Centered fallback title — sharpie style, same position as logo ── */}
-      {!showLogo && (film_title || isNoMovie) && (
+      {/* ── Centered fallback title — sharpie for movies, Barlow for podcast-only ── */}
+      {!showLogo && film_title && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -252,13 +252,36 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           <span style={{
             fontFamily: t.fontSharpie,
             fontWeight: 700,
-            fontSize: (film_title || episode_title || "").length > 20 ? 18 : 22,
+            fontSize: film_title.length > 20 ? 18 : 22,
             color: "var(--text-primary)",
             textAlign: "center",
             lineHeight: 1.15,
             textShadow: "0 2px 10px rgba(0,0,0,0.8)",
           }}>
-            {film_title || episode_title}
+            {film_title}
+          </span>
+        </div>
+      )}
+      {!showLogo && isNoMovie && (
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 110,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          pointerEvents: "none",
+          zIndex: 0,
+          padding: "0 80px 0 80px",
+        }}>
+          <span style={{
+            fontFamily: t.fontDisplay,
+            fontWeight: 900,
+            fontSize: (episode_title || "").length > 30 ? 14 : (episode_title || "").length > 20 ? 16 : 19,
+            color: "var(--text-primary)",
+            textAlign: "center",
+            lineHeight: 1.2,
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            textShadow: "0 2px 10px rgba(0,0,0,0.8)",
+          }}>
+            {episode_title}
           </span>
         </div>
       )}
