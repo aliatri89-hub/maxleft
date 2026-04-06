@@ -132,7 +132,7 @@ export function usePodcastFeed(active = false, userId = null, podcastSlug = null
           days_back: daysBack,
           result_limit: PAGE_SIZE,
           result_offset: offset,
-          podcast_slug: slug || null,
+          p_slug: slug || null,
           check_user_id: userId || null,
           sort_asc: sort === "oldest",
         }),

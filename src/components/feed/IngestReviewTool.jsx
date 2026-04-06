@@ -80,6 +80,12 @@ export default function IngestReviewTool({ userId, onToast, session }) {
   // ── On-demand sync state ──
   const [syncing, setSyncing] = useState(false);
 
+  // ── Expanded descriptions ──
+  const [expandedEps, setExpandedEps] = useState(new Set());
+
+  // ── Title editing (no-movie episodes) ──
+  const [editingTitle, setEditingTitle] = useState(null); // { epId, value }
+
   const isAdmin = userId === ADMIN_ID;
 
   // ── Fetch review queue ──
@@ -328,6 +334,21 @@ export default function IngestReviewTool({ userId, onToast, session }) {
     fetchQueue();
   };
 
+  // ── Save display_title for no-movie episodes ──
+  const handleSaveTitle = async (epId, newTitle) => {
+    const { error } = await supabase
+      .from("podcast_episodes")
+      .update({ display_title: newTitle.trim() || null })
+      .eq("id", epId);
+    if (error) {
+      if (onToast) onToast(`Save failed: ${error.message}`);
+    } else {
+      if (onToast) onToast(`Title updated ✓`);
+      setEditingTitle(null);
+      fetchQueue();
+    }
+  };
+
   // ═══════════════════════════════════════════
   //  RENDER
   // ═══════════════════════════════════════════
@@ -530,12 +551,21 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           borderRadius: 10,
           overflow: "hidden",
         }}>
-          {/* Episode header */}
-          <div style={{
-            padding: "10px 12px",
-            borderBottom: "1px solid rgba(255,255,255,0.04)",
-            display: "flex", alignItems: "center", gap: 10,
-          }}>
+          {/* Episode header — tap to expand description */}
+          <div
+            onClick={() => setExpandedEps(prev => {
+              const next = new Set(prev);
+              if (next.has(group.episode_id)) next.delete(group.episode_id);
+              else next.add(group.episode_id);
+              return next;
+            })}
+            style={{
+              padding: "10px 12px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              display: "flex", alignItems: "center", gap: 10,
+              cursor: "pointer",
+            }}
+          >
             {group.podcast_artwork && (
               <img
                 src={group.podcast_artwork}
@@ -571,7 +601,98 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                 {group.episode_title}
               </div>
             </div>
+            {/* Expand chevron */}
+            <div style={{
+              fontSize: 10, color: "rgba(240,235,225,0.25)", flexShrink: 0,
+              transform: expandedEps.has(group.episode_id) ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 0.15s",
+            }}>▼</div>
           </div>
+
+          {/* Expanded description + title edit */}
+          {expandedEps.has(group.episode_id) && (
+            <div style={{
+              padding: "8px 12px 10px",
+              borderBottom: "1px solid rgba(255,255,255,0.04)",
+              background: "rgba(255,255,255,0.01)",
+            }}>
+              {group.episode_description ? (
+                <div style={{
+                  fontSize: 11, color: "rgba(240,235,225,0.5)",
+                  fontFamily: t.fontMono, lineHeight: 1.5,
+                  maxHeight: 120, overflowY: "auto",
+                }}>
+                  {group.episode_description}
+                </div>
+              ) : (
+                <div style={{
+                  fontSize: 11, color: "rgba(240,235,225,0.25)",
+                  fontFamily: t.fontMono, fontStyle: "italic",
+                }}>
+                  No description
+                </div>
+              )}
+
+              {/* Edit display title (for no-movie episodes) */}
+              {group.is_unmatched && group.matches.length === 0 && (
+                <div style={{ marginTop: 8 }}>
+                  {editingTitle?.epId === group.episode_id ? (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <input
+                        type="text"
+                        value={editingTitle.value}
+                        onChange={(e) => setEditingTitle(prev => ({ ...prev, value: e.target.value }))}
+                        onKeyDown={(e) => e.key === "Enter" && handleSaveTitle(group.episode_id, editingTitle.value)}
+                        autoFocus
+                        style={{
+                          flex: 1, background: t.bgElevated,
+                          border: `1px solid ${t.bgHover}`,
+                          borderRadius: 6, color: t.textSecondary, padding: "5px 8px",
+                          fontSize: 11, outline: "none", fontFamily: t.fontMono,
+                        }}
+                      />
+                      <button
+                        onClick={() => handleSaveTitle(group.episode_id, editingTitle.value)}
+                        style={{
+                          padding: "5px 10px", borderRadius: 6,
+                          background: "rgba(52,211,153,0.1)",
+                          border: "1px solid rgba(52,211,153,0.25)",
+                          color: t.green, fontSize: 10, fontWeight: 700,
+                          fontFamily: t.fontDisplay, textTransform: "uppercase",
+                          cursor: "pointer",
+                        }}
+                      >Save</button>
+                      <button
+                        onClick={() => setEditingTitle(null)}
+                        style={{
+                          padding: "5px 8px", borderRadius: 6,
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.08)",
+                          color: "rgba(240,235,225,0.4)", fontSize: 10, fontWeight: 700,
+                          fontFamily: t.fontDisplay, cursor: "pointer",
+                        }}
+                      >✕</button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingTitle({ epId: group.episode_id, value: group.episode_title });
+                      }}
+                      style={{
+                        padding: "4px 10px", borderRadius: 6,
+                        background: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        color: "rgba(240,235,225,0.4)", fontSize: 10, fontWeight: 700,
+                        fontFamily: t.fontDisplay, textTransform: "uppercase",
+                        letterSpacing: "0.04em", cursor: "pointer",
+                      }}
+                    >✎ Edit Title</button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Unmatched episode — no film match */}
           {group.is_unmatched && group.matches.length === 0 && (

@@ -88,6 +88,7 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
   } = item;
 
   const isEditorial = card_type === "editorial";
+  const isNoMovie = !tmdb_id && !isEditorial;
 
   const [dismissed, setDismissed] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -240,7 +241,7 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
       )}
 
       {/* ── Centered fallback title — sharpie style, same position as logo ── */}
-      {!showLogo && film_title && (
+      {!showLogo && (film_title || isNoMovie) && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -251,13 +252,13 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           <span style={{
             fontFamily: t.fontSharpie,
             fontWeight: 700,
-            fontSize: film_title.length > 20 ? 18 : 22,
+            fontSize: (film_title || episode_title || "").length > 20 ? 18 : 22,
             color: "var(--text-primary)",
             textAlign: "center",
             lineHeight: 1.15,
             textShadow: "0 2px 10px rgba(0,0,0,0.8)",
           }}>
-            {film_title}
+            {film_title || episode_title}
           </span>
         </div>
       )}
@@ -491,9 +492,9 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
               flexShrink: 0,
             }} />
           )}
-          {/* Badges — right */}
+          {/* Badges — right (only for film-matched episodes) */}
           <div style={{ flex: 1, display: "flex", justifyContent: "flex-end", gap: 6 }}>
-            {isWatched ? (
+            {!isNoMovie && (isWatched ? (
               <div style={{ ...badgeBase, background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)", color: "rgba(52,211,153,0.7)" }}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                 Watched
@@ -503,8 +504,8 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                 Log
               </div>
-            ) : null}
-            {userId && !isWatched && (
+            ) : null)}
+            {!isNoMovie && userId && !isWatched && (
               addedToWatchlist ? (
                 <div onClick={handleWatchlist} style={{ ...badgeBase, background: "rgba(52,211,153,0.10)", border: "1px solid rgba(52,211,153,0.25)", color: "rgba(52,211,153,0.7)", cursor: "pointer" }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(52,211,153,0.7)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
