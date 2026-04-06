@@ -273,7 +273,7 @@ function PodcastCard({ item, isAdmin, userId, onNavigateCommunity }) {
           <span style={{
             fontFamily: t.fontDisplay,
             fontWeight: 900,
-            fontSize: (episode_title || "").length > 30 ? 14 : (episode_title || "").length > 20 ? 16 : 19,
+            fontSize: (episode_title || "").length > 30 ? 20 : (episode_title || "").length > 20 ? 24 : 28,
             color: "var(--text-primary)",
             textAlign: "center",
             lineHeight: 1.2,
