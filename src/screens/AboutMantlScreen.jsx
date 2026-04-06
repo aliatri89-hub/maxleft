@@ -54,13 +54,25 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: 0,
           }}>
-            If you listen to film podcasts and constantly add movies to a mental list you'll never remember — Mantl is for you.
+            If you see a pod drop and can't listen till you watch the movie — Mantl is for you.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            Track the films your favorite podcasts cover. See what's new, what's streaming, and what your community is watching. Earn badges for completing series and deep dives. Play daily film games. Connect your Letterboxd to bring your watch history along.
+            Track the films your favorite podcasts cover. See what's new, what's streaming, and what your community is watching.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            Earn badges for completing series and deep dives, play daily film games, and connect your Letterboxd to bring your watch history along.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            If a new podcast drops and the film is already in your watch history, we'll let you know.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
@@ -85,13 +97,25 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: 0,
           }}>
-            Solo builder. Film nerd. Podcast listener who kept losing track of what to watch next, so he built an app about it.
+            I built Mantl as a film lover and podcast listener. From the podcast side, I love pairing what to watch next with something to listen to.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            MANTL is designed, built, and maintained by one person. Every feature, every badge, every pixel. If you have ideas, feedback, or just want to say hi — reach out at{" "}
+            When I pick my own movies, I'm always curious who covered it — and got sick of wading through Spotify search results to find out.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            Mantl is designed, built, and maintained by one person. Every feature, badge, and game — built by hand with a rich pool of TMDB data.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            If you have ideas, feedback, or just want to say hi — reach out at{" "}
             <span
               onClick={() => window.open("mailto:hello@mymantl.app", "_blank")}
               style={{ color: AMBER, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}
