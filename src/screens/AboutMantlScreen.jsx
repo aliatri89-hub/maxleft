@@ -9,34 +9,52 @@ function AboutMantlScreen({ onBack }) {
         <button className="profile-back" onClick={onBack}>← Back</button>
       </div>
 
-      {/* ── About MANTL ── */}
+      {/* ── About Mantl ── */}
       <div className="profile-group">
-        <div className="profile-group-label">About MANTL</div>
+        <div className="profile-group-label">About Mantl</div>
         <div className="profile-group-card" style={{ padding: "16px 18px" }}>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: 0,
           }}>
-            MANTL started in a basement — watching Academy screener tapes with sharpie-scrawled labels on cream-colored VHS sleeves. That feeling of discovering a film because someone you trusted pressed it into your hands is the whole point.
+            Mantl recaptures that feeling of discovering a film because someone you trusted lent you a VHS tape. Or browsing the aisles of Blockbuster, reading the backs of tapes and checking out the staff picks.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            Film podcasts carry that same energy. Hosts spend hours pulling apart a movie — why it works, why it doesn't, what it meant to them — and suddenly you need to see it. MANTL is built around that moment. It connects what you hear to what you watch, so nothing falls through the cracks.
+            Both involve voices you trust helping you pick the next thing to watch.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            Today, film podcasts are our trusted voice. The hosts spend hours pulling apart a movie — why it works, why it doesn't, what it meant to them — and why you do or don't need to see it.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            Mantl is built around that trust and connecting what you hear to what you watch.
+          </p>
+          <p style={{
+            fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
+            lineHeight: 1.7, margin: "14px 0 0",
+          }}>
+            Helping you find another reason to press play.
           </p>
         </div>
       </div>
 
-      {/* ── Who MANTL is For ── */}
+      {/* ── Who Mantl is For ── */}
       <div className="profile-group">
-        <div className="profile-group-label">Who MANTL is For</div>
+        <div className="profile-group-label">Who Mantl is For</div>
         <div className="profile-group-card" style={{ padding: "16px 18px" }}>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: 0,
           }}>
-            If you listen to film podcasts and constantly add movies to a mental list you'll never remember — MANTL is for you.
+            If you listen to film podcasts and constantly add movies to a mental list you'll never remember — Mantl is for you.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",

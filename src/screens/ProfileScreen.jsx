@@ -572,7 +572,7 @@ function ProfileScreen({ profile, onBack, onSignOut, onDeleteAccount, session, o
             className="profile-group-row"
             onClick={() => { setShowAbout(true); pushNav("about", () => setShowAbout(false)); }}
           >
-            <span className="profile-group-row-text">About MANTL</span>
+            <span className="profile-group-row-text">About</span>
             <span className="profile-group-row-chevron">›</span>
           </div>
           <div className="profile-group-divider" />
