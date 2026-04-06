@@ -29,7 +29,7 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            Today, film podcasts are our trusted voice. The hosts spend hours pulling apart a movie — why it works, why it doesn't, what it meant to them — and why you do or don't need to see it.
+            Today, film podcasts are our trusted voice. The hosts spend hours pulling apart a movie, why it works, why it doesn't, what it meant to them, and why you do or don't need to see it.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
@@ -54,7 +54,7 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: 0,
           }}>
-            If you see a pod drop and can't listen till you watch the movie — Mantl is for you.
+            If you see a pod drop and can't listen till you watch the movie, Mantl is for you.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
@@ -78,7 +78,7 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            It's your film life — organized around the conversations that drive it.
+            It's your film life, organized around the conversations that drive it.
           </p>
         </div>
       </div>
@@ -103,19 +103,19 @@ function AboutMantlScreen({ onBack }) {
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            When I pick my own movies, I'm always curious who covered it — and got sick of wading through Spotify search results to find out.
+            When I pick my own movies, I'm always curious who covered it, and got sick of wading through Spotify search results to find out.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            Mantl is designed, built, and maintained by one person. Every feature, badge, and game — built by hand with a rich pool of TMDB data.
+            Mantl is designed, built, and maintained by one person. Every feature, badge, and game, built by hand with a rich pool of TMDB data.
           </p>
           <p style={{
             fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)",
             lineHeight: 1.7, margin: "14px 0 0",
           }}>
-            If you have ideas, feedback, or just want to say hi — reach out at{" "}
+            If you have ideas, feedback, or just want to say hi, reach out at{" "}
             <span
               onClick={() => window.open("mailto:hello@mymantl.app", "_blank")}
               style={{ color: AMBER, cursor: "pointer", textDecoration: "underline", textUnderlineOffset: 3 }}
