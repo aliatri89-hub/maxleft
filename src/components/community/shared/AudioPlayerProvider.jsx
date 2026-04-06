@@ -81,7 +81,7 @@ export default function AudioPlayerProvider({ children, session }) {
   });
 
   const {
-    queue, addToQueue, playNextInQueue, removeFromQueue, clearQueue,
+    queue, addToQueue, playNextInQueue, playFromQueue, removeFromQueue, clearQueue,
     showNudge, queueToast,
   } = useQueueManager({
     loadForQueue: engine.loadForQueue,
@@ -241,6 +241,7 @@ export default function AudioPlayerProvider({ children, session }) {
           onClearSleep={clearSleepTimer}
           queue={queue}
           onRemoveFromQueue={removeFromQueue}
+          onPlayFromQueue={playFromQueue}
           onClearQueue={clearQueue}
         />,
         document.body

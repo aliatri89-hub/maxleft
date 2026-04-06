@@ -21,7 +21,7 @@ export default function FullScreenPlayer({
   recents, queue, onTogglePlay, onSkip, onSeek, onCycleSpeed, onRetry,
   onResumeRecent, onClearRecent, onStop, onClose,
   sleepTimer, onSetSleep, onClearSleep,
-  onRemoveFromQueue, onClearQueue,
+  onRemoveFromQueue, onPlayFromQueue, onClearQueue,
 }) {
   const scrubberRef = useRef(null);
   const sheetRef = useRef(null);
@@ -690,9 +690,11 @@ export default function FullScreenPlayer({
               {queue.map((q, i) => (
                 <div
                   key={`queue-${i}-${q.enclosureUrl}`}
+                  onClick={() => onPlayFromQueue(i)}
                   style={{
                     display: "flex", alignItems: "center", gap: 12,
                     padding: "10px 20px",
+                    cursor: "pointer",
                   }}
                 >
                   {/* Index number */}

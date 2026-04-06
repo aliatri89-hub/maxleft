@@ -89,6 +89,25 @@ export default function useQueueManager({
     });
   }, [updateQueue]);
 
+  // Play a specific item from the queue by index (tap-to-play)
+  const playFromQueue = useCallback((index) => {
+    const item = queueRef.current[index];
+    if (!item) return;
+    updateQueue(prev => prev.filter((_, i) => i !== index));
+    // Save current episode to recents before switching
+    const ep  = currentEpRef.current;
+    const spd = speedRef.current;
+    if (ep && bridge.currentTime > 15) {
+      updateRecents(prev => upsertRecent(prev, ep, bridge.currentTime, spd, bridge.duration));
+    }
+    pendingAutoPlayRef.current = true;
+    loadForQueueRef.current(item)
+      .then(() => { pendingAutoPlayRef.current = false; })
+      .catch((e) => {
+        console.warn("[QueueManager] playFromQueue failed — will retry on focus:", e);
+      });
+  }, [bridge, updateRecents, updateQueue, pendingAutoPlayRef]);
+
   const removeFromQueue = useCallback((index) => {
     updateQueue(prev => prev.filter((_, i) => i !== index));
   }, [updateQueue]);
@@ -135,6 +154,7 @@ export default function useQueueManager({
     queue,
     addToQueue,
     playNextInQueue,
+    playFromQueue,
     removeFromQueue,
     clearQueue,
     showNudge,
