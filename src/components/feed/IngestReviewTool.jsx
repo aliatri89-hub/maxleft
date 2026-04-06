@@ -68,6 +68,15 @@ export default function IngestReviewTool({ userId, onToast, session }) {
   const [rematchResults, setRematchResults] = useState([]);
   const [rematchSearching, setRematchSearching] = useState(false);
 
+  // ── No-movie approve state ──
+  const [noMovieSelected, setNoMovieSelected] = useState(new Set()); // episode_ids
+
+  // ── Add-match state (for unmatched episodes) ──
+  const [addMatchEpId, setAddMatchEpId] = useState(null);
+  const [addMatchQuery, setAddMatchQuery] = useState("");
+  const [addMatchResults, setAddMatchResults] = useState([]);
+  const [addMatchSearching, setAddMatchSearching] = useState(false);
+
   // ── On-demand sync state ──
   const [syncing, setSyncing] = useState(false);
 
@@ -85,10 +94,10 @@ export default function IngestReviewTool({ userId, onToast, session }) {
     setSummary((summaryRes.data || [])[0] || null);
     setLoading(false);
 
-    // Auto-select high-confidence matches
+    // Auto-select high-confidence matches (not unmatched)
     const highConf = new Set();
     for (const item of (queueRes.data || [])) {
-      if (parseFloat(item.confidence_score) >= 0.9) {
+      if (!item.is_unmatched && parseFloat(item.confidence_score) >= 0.9) {
         highConf.add(item.mapping_id);
       }
     }
@@ -134,10 +143,13 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           podcast_name: item.podcast_name,
           podcast_slug: item.podcast_slug,
           podcast_artwork: item.podcast_artwork,
+          is_unmatched: item.is_unmatched || false,
           matches: [],
         });
       }
-      map.get(key).matches.push(item);
+      if (!item.is_unmatched) {
+        map.get(key).matches.push(item);
+      }
     }
     // Sort: newest episodes first
     return Array.from(map.values()).sort((a, b) =>
@@ -156,56 +168,89 @@ export default function IngestReviewTool({ userId, onToast, session }) {
   }, []);
 
   const selectAll = useCallback(() => {
-    setSelected(new Set(queue.map(q => q.mapping_id)));
+    setSelected(new Set(queue.filter(q => !q.is_unmatched).map(q => q.mapping_id)));
+    const unmatchedEpIds = new Set(queue.filter(q => q.is_unmatched).map(q => q.episode_id));
+    setNoMovieSelected(unmatchedEpIds);
   }, [queue]);
 
   const deselectAll = useCallback(() => {
     setSelected(new Set());
+    setNoMovieSelected(new Set());
   }, []);
 
   // ── Approve selected ──
   const handleApprove = useCallback(async () => {
-    if (selected.size === 0) return;
+    if (selected.size === 0 && noMovieSelected.size === 0) return;
     setApproving(true);
     try {
-      const { data, error } = await supabase.rpc("approve_ingest_matches", {
-        mapping_ids: Array.from(selected),
-      });
-      if (error) throw error;
-      const result = data || {};
-      if (onToast) {
-        const parts = [`✓ ${result.approved || 0} approved`];
+      const parts = [];
+
+      // Approve matched episodes
+      if (selected.size > 0) {
+        const { data, error } = await supabase.rpc("approve_ingest_matches", {
+          mapping_ids: Array.from(selected),
+        });
+        if (error) throw error;
+        const result = data || {};
+        parts.push(`✓ ${result.approved || 0} approved`);
         if (result.community_items_created) parts.push(`${result.community_items_created} seeded`);
         if (result.community_items_updated) parts.push(`${result.community_items_updated} updated`);
         if (result.media_ids_linked) parts.push(`${result.media_ids_linked} media linked`);
         if (result.notifications_queued) parts.push(`${result.notifications_queued} notifs`);
-        onToast(parts.join(" · "));
+        if (result.guests_linked) parts.push(`${result.guests_linked} guests`);
       }
+
+      // Approve no-movie episodes
+      if (noMovieSelected.size > 0) {
+        const { data, error } = await supabase.rpc("approve_no_movie", {
+          episode_ids: Array.from(noMovieSelected),
+        });
+        if (error) throw error;
+        parts.push(`${data?.approved_no_movie || 0} no-movie`);
+      }
+
+      if (onToast) onToast(parts.join(" · "));
       setSelected(new Set());
+      setNoMovieSelected(new Set());
       fetchQueue();
     } catch (err) {
       if (onToast) onToast(`Error: ${err.message}`);
     }
     setApproving(false);
-  }, [selected, fetchQueue, onToast]);
+  }, [selected, noMovieSelected, fetchQueue, onToast]);
 
   // ── Reject selected ──
   const handleReject = useCallback(async () => {
-    if (selected.size === 0) return;
+    if (selected.size === 0 && noMovieSelected.size === 0) return;
     setRejecting(true);
     try {
-      const { data, error } = await supabase.rpc("reject_ingest_matches", {
-        mapping_ids: Array.from(selected),
-      });
-      if (error) throw error;
-      if (onToast) onToast(`Removed ${data || 0} bad matches`);
+      let totalRejected = 0;
+
+      if (selected.size > 0) {
+        const { data, error } = await supabase.rpc("reject_ingest_matches", {
+          mapping_ids: Array.from(selected),
+        });
+        if (error) throw error;
+        totalRejected += (data || 0);
+      }
+
+      if (noMovieSelected.size > 0) {
+        const { data, error } = await supabase.rpc("reject_no_movie", {
+          episode_ids: Array.from(noMovieSelected),
+        });
+        if (error) throw error;
+        totalRejected += (data?.rejected || 0);
+      }
+
+      if (onToast) onToast(`Removed ${totalRejected} items`);
       setSelected(new Set());
+      setNoMovieSelected(new Set());
       fetchQueue();
     } catch (err) {
       if (onToast) onToast(`Error: ${err.message}`);
     }
     setRejecting(false);
-  }, [selected, fetchQueue, onToast]);
+  }, [selected, noMovieSelected, fetchQueue, onToast]);
 
   if (!isAdmin) return null;
 
@@ -244,8 +289,44 @@ export default function IngestReviewTool({ userId, onToast, session }) {
     if (onToast) onToast(`Swapped to "${newTitle}" ✓`);
   };
 
-  const selectedCount = selected.size;
+  const selectedCount = selected.size + noMovieSelected.size;
   const totalCount = queue.length;
+
+  // ── Add-match: search TMDB for unmatched episodes ──
+  const handleAddMatchSearch = async () => {
+    if (!addMatchQuery.trim()) return;
+    setAddMatchSearching(true);
+    try {
+      const results = await searchTMDB(addMatchQuery.trim());
+      setAddMatchResults((results || []).slice(0, 6));
+    } catch { setAddMatchResults([]); }
+    setAddMatchSearching(false);
+  };
+
+  // ── Add-match: create a podcast_episode_films row for an unmatched episode ──
+  const handleAddMatch = async (episodeId, tmdbId, title, year, posterPath) => {
+    const { error } = await supabase
+      .from("podcast_episode_films")
+      .insert({
+        episode_id: episodeId,
+        tmdb_id: tmdbId,
+        confidence_score: 1.0,
+        admin_reviewed: false,
+      });
+
+    if (error) {
+      if (onToast) onToast(`Add failed: ${error.message}`);
+      return;
+    }
+
+    // Remove from no-movie set if it was there
+    setNoMovieSelected(prev => { const next = new Set(prev); next.delete(episodeId); return next; });
+    setAddMatchEpId(null);
+    setAddMatchQuery("");
+    setAddMatchResults([]);
+    if (onToast) onToast(`Matched "${title}" ✓ — now approve it`);
+    fetchQueue();
+  };
 
   // ═══════════════════════════════════════════
   //  RENDER
@@ -433,7 +514,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
             fontSize: 12, fontFamily: t.fontMono,
             lineHeight: 1.5,
           }}>
-            No matches waiting for review.
+            No episodes waiting for review.
             <br />
             Hit Sync Now or wait for the 22:00 UTC cron.
           </div>
@@ -491,6 +572,176 @@ export default function IngestReviewTool({ userId, onToast, session }) {
               </div>
             </div>
           </div>
+
+          {/* Unmatched episode — no film match */}
+          {group.is_unmatched && group.matches.length === 0 && (
+            <>
+              <div
+                onClick={() => {
+                  setNoMovieSelected(prev => {
+                    const next = new Set(prev);
+                    if (next.has(group.episode_id)) next.delete(group.episode_id);
+                    else next.add(group.episode_id);
+                    return next;
+                  });
+                }}
+                style={{
+                  padding: "8px 12px",
+                  display: "flex", alignItems: "center", gap: 10,
+                  cursor: "pointer",
+                  background: noMovieSelected.has(group.episode_id) ? "rgba(52,211,153,0.03)" : "transparent",
+                  borderBottom: "1px solid rgba(255,255,255,0.02)",
+                }}
+              >
+                {/* Checkbox */}
+                <div style={{
+                  width: 20, height: 20, borderRadius: 5, flexShrink: 0,
+                  border: `2px solid ${noMovieSelected.has(group.episode_id) ? t.green : "rgba(255,255,255,0.15)"}`,
+                  background: noMovieSelected.has(group.episode_id) ? "rgba(52,211,153,0.15)" : "transparent",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  {noMovieSelected.has(group.episode_id) && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </div>
+
+                {/* No match placeholder */}
+                <div style={{
+                  width: 34, height: 51, borderRadius: 4, flexShrink: 0,
+                  background: t.bgElevated,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, color: "rgba(240,235,225,0.15)",
+                }}>✎</div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 13, fontWeight: 600,
+                    color: "rgba(240,235,225,0.5)",
+                    fontStyle: "italic",
+                  }}>
+                    No movie — sharpie title
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: "rgba(240,235,225,0.3)",
+                    fontFamily: t.fontMono, marginTop: 2,
+                  }}>
+                    Approve as podcast-only episode
+                  </div>
+                </div>
+
+                {/* No match pill */}
+                <div style={{
+                  padding: "3px 8px", borderRadius: 4,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  fontSize: 9, fontWeight: 800,
+                  fontFamily: t.fontDisplay,
+                  textTransform: "uppercase", letterSpacing: "0.06em",
+                  color: "rgba(240,235,225,0.35)",
+                  flexShrink: 0,
+                }}>
+                  NO MATCH
+                </div>
+
+                {/* Add movie button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (addMatchEpId === group.episode_id) {
+                      setAddMatchEpId(null);
+                    } else {
+                      setAddMatchEpId(group.episode_id);
+                      setAddMatchQuery("");
+                      setAddMatchResults([]);
+                    }
+                  }}
+                  style={{
+                    background: addMatchEpId === group.episode_id ? "rgba(196,115,79,0.12)" : "rgba(255,255,255,0.06)",
+                    border: "none", borderRadius: 6,
+                    width: 26, height: 26, flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: addMatchEpId === group.episode_id ? t.terra : "rgba(240,235,225,0.4)",
+                    fontSize: 13, cursor: "pointer",
+                  }}
+                  title="Add movie match"
+                >+</button>
+              </div>
+
+              {/* Add-match search panel */}
+              {addMatchEpId === group.episode_id && (
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    padding: "8px 12px 10px 54px",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                    background: "rgba(196,115,79,0.03)",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                    <input
+                      type="text"
+                      value={addMatchQuery}
+                      onChange={(e) => setAddMatchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddMatchSearch()}
+                      placeholder="Search TMDB…"
+                      autoFocus
+                      style={{
+                        flex: 1, background: t.bgElevated,
+                        border: `1px solid ${t.bgHover}`,
+                        borderRadius: 8, color: t.textSecondary, padding: "6px 10px",
+                        fontSize: 12, outline: "none", fontFamily: t.fontMono,
+                      }}
+                    />
+                    <button
+                      onClick={handleAddMatchSearch}
+                      disabled={addMatchSearching}
+                      style={{
+                        padding: "6px 10px", borderRadius: 8,
+                        background: "rgba(196,115,79,0.12)",
+                        border: "1px solid rgba(196,115,79,0.25)",
+                        color: t.terra, fontSize: 11, fontWeight: 700,
+                        fontFamily: t.fontDisplay, textTransform: "uppercase",
+                        cursor: "pointer",
+                      }}
+                    >{addMatchSearching ? "…" : "Search"}</button>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+                    {addMatchResults.map((alt) => (
+                      <button
+                        key={alt.id}
+                        onClick={() => handleAddMatch(
+                          group.episode_id, alt.id,
+                          alt.title || alt.name,
+                          parseInt((alt.release_date || "").split("-")[0]) || null,
+                          alt.poster_path
+                        )}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 6,
+                          background: t.bgElevated,
+                          border: `1px solid ${t.bgHover}`,
+                          borderRadius: 8, padding: "4px 8px",
+                          cursor: "pointer", color: t.textSecondary, flexShrink: 0,
+                        }}
+                      >
+                        {alt.poster_path && (
+                          <img
+                            src={`${TMDB_IMG}/w92${alt.poster_path}`}
+                            alt=""
+                            style={{ width: 24, height: 36, borderRadius: 3, objectFit: "cover" }}
+                          />
+                        )}
+                        <div style={{ fontSize: 11, whiteSpace: "nowrap", fontFamily: t.fontMono }}>
+                          {alt.title || alt.name} ({(alt.release_date || "").split("-")[0]})
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
           {/* Matched films */}
           {group.matches.map((match) => {

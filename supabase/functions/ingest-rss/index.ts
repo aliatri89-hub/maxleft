@@ -195,6 +195,7 @@ serve(async (req) => {
           rss_guid: ep.guid,
           duration_seconds: ep.durationSeconds,
           description: ep.description,
+          review_status: "pending",
         }));
 
         const { data: inserted, error: insErr } = await sb
