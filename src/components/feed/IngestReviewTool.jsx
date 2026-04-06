@@ -146,6 +146,7 @@ export default function IngestReviewTool({ userId, onToast, session }) {
           episode_title: item.episode_title,
           episode_air_date: item.episode_air_date,
           episode_description: item.episode_description,
+          duration_seconds: item.duration_seconds,
           podcast_name: item.podcast_name,
           podcast_slug: item.podcast_slug,
           podcast_artwork: item.podcast_artwork,
@@ -588,6 +589,17 @@ export default function IngestReviewTool({ userId, onToast, session }) {
                 {group.episode_air_date && (
                   <span style={{ marginLeft: 6, fontWeight: 600, opacity: 0.8 }}>
                     · {formatDate(group.episode_air_date)}
+                  </span>
+                )}
+                {group.duration_seconds && (
+                  <span style={{
+                    marginLeft: 6, fontWeight: 600,
+                    opacity: 0.8,
+                    color: group.duration_seconds < 600 ? "rgba(248,113,113,0.8)" : "inherit",
+                  }}>
+                    · {group.duration_seconds >= 3600
+                      ? `${Math.floor(group.duration_seconds / 3600)}h ${Math.floor((group.duration_seconds % 3600) / 60)}m`
+                      : `${Math.floor(group.duration_seconds / 60)}m`}
                   </span>
                 )}
               </div>
