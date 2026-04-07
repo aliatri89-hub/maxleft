@@ -128,18 +128,67 @@ function formatShortDate(dateStr) {
   });
 }
 
+// ── Guest helpers ─────────────────────────────────────────────────────────────
+// ── Guest helpers ─────────────────────────────────────────────────────────────
+
+function parseGuest(title) {
+  if (!title) return null;
+  const m = title.match(/\bw\/\s+(.+?)(?:\s*[,;(].*)?$/i)
+         || title.match(/\bwith\s+([A-Z][a-zA-Z\s\-\'.]+?)(?:\s*[,;(].*)?$/);
+  if (!m) return null;
+  return m[1].replace(/[.,;!?]+$/, '').trim();
+}
+
+async function fetchWikipediaImage(name) {
+  if (!name) return null;
+  try {
+    const direct = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name.replace(/ /g, '_'))}`,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (direct.ok) {
+      const d = await direct.json();
+      if (d?.thumbnail?.source) return d.thumbnail.source;
+    }
+    const searchRes = await fetch(
+      `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(name)}&srlimit=1&format=json&origin=*`
+    );
+    const searchData = await searchRes.json();
+    const pageTitle = searchData?.query?.search?.[0]?.title;
+    if (!pageTitle) return null;
+    const pageRes = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`,
+      { headers: { Accept: 'application/json' } }
+    );
+    const pageData = await pageRes.json();
+    return pageData?.thumbnail?.source || null;
+  } catch { return null; }
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function EpisodeDetail({ item, onClose }) {
   const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
-  const [moreEps, setMoreEps] = useState([]);
-  const [visible, setVisible] = useState(false);
+  const [moreEps, setMoreEps]       = useState([]);
+  const [visible, setVisible]       = useState(false);
+  const [guestName, setGuestName]   = useState(null);
+  const [guestImage, setGuestImage] = useState(null);
 
   useEffect(() => {
-    // Trigger slide-up animation
     requestAnimationFrame(() => setVisible(true));
+    setGuestName(null);
+    setGuestImage(null);
 
-    // Fetch more episodes from same podcast
+    // Guest photo — MR only
+    if (item?.podcast_slug === 'majority-report' && item?.episode_title) {
+      const guest = parseGuest(decodeEntities(item.episode_title));
+      if (guest) {
+        setGuestName(guest);
+        fetchWikipediaImage(guest).then(url => { if (url) setGuestImage(url); });
+      }
+    }
+
+    // More episodes
     if (item?.podcast_slug) {
       supabase
         .from('podcast_episodes')
@@ -305,6 +354,40 @@ export default function EpisodeDetail({ item, onClose }) {
             </div>
           </div>
 
+          {/* Guest inset — newspaper portrait, floated right */}
+          {guestName && guestImage && (
+            <div style={{ float: 'right', margin: '0 0 10px 14px', textAlign: 'center', clear: 'right' }}>
+              <div style={{
+                border: '3px solid white',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.08)',
+                display: 'inline-block',
+                lineHeight: 0,
+              }}>
+                <img
+                  src={guestImage}
+                  alt={guestName}
+                  style={{
+                    width: 88, height: 88,
+                    objectFit: 'cover',
+                    objectPosition: 'top center',
+                    filter: 'grayscale(100%) contrast(0.9)',
+                    display: 'block',
+                  }}
+                />
+              </div>
+              <div style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: 8, color: DIM,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                marginTop: 5,
+                maxWidth: 88,
+              }}>
+                {guestName}
+              </div>
+            </div>
+          )}
+
           {/* Play CTA */}
           <div
             onClick={handlePlay}
@@ -333,6 +416,9 @@ export default function EpisodeDetail({ item, onClose }) {
               </div>
             </div>
           </div>
+
+          {/* Clear float from guest photo */}
+          <div style={{ clear: 'both' }} />
 
           {/* MR parsed description */}
           {isMR && parsed && (
