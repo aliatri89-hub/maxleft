@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Max Left — Run Ingest</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f0d0b; color: #f0ece0; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  .card { background: #1a1714; border: 1px solid #2a2420; border-radius: 14px; padding: 32px; width: 480px; }
+  h2 { margin: 0 0 6px; font-size: 20px; }
+  p { color: #8a7e72; font-size: 14px; margin: 0 0 24px; }
+  button { background: #C4734F; color: #fff; border: none; padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status { margin-top: 16px; font-size: 13px; color: #8a7e72; }
+  pre { background: #110f0d; border-radius: 8px; padding: 12px; font-size: 12px; color: #c4b49a; overflow-x: auto; margin-top: 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>Max Left RSS Ingest</h2>
+  <p>Pulls the last 50 episodes from all 12 podcasts into Supabase.</p>
+  <button id="btn" onclick="run()">Run ingest now</button>
+  <div class="status" id="status"></div>
+  <pre id="output" style="display:none"></pre>
+</div>
+<script>
+async function run() {
+  const btn = document.getElementById('btn');
+  const status = document.getElementById('status');
+  const output = document.getElementById('output');
+  btn.disabled = true;
+  status.textContent = 'Running — fetching 12 RSS feeds… (30–60s)';
+  output.style.display = 'none';
+  try {
+    const res = await fetch('https://zgjvxcyvihqvhbknbmet.supabase.co/functions/v1/trigger-ingest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    const data = await res.json();
+    if (data.error) {
+      status.textContent = 'Error — see below';
+      output.textContent = JSON.stringify(data, null, 2);
+      output.style.display = 'block';
+    } else {
+      status.textContent = `Done! ${data.total_new_episodes} new episodes across ${data.podcasts_processed} podcasts (${data.elapsed_seconds}s)`;
+      output.textContent = (data.details || []).map(d =>
+        `${d.new_episodes > 0 ? '✓' : '–'} ${d.slug}: ${d.new_episodes} new (${d.episodes_in_feed} in feed)${d.errors?.length ? ' ⚠ ' + d.errors[0] : ''}`
+      ).join('\n');
+      output.style.display = 'block';
+    }
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>

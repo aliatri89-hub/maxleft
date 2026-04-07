@@ -243,3 +243,13 @@
 button, a, [role="button"] {
   -webkit-tap-highlight-color: transparent;
 }
+
+@keyframes mlPip {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.8; }
+}
+

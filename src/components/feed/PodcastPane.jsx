@@ -1,41 +1,33 @@
-import { t } from "../../theme";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "../../supabase";
-import PodcastCard from "./PodcastCard";
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '../../supabase';
+import PodcastCard from './PodcastCard';
 
 const PAGE_SIZE = 30;
 
-export default function PodcastPane({ isVisible, userId, selectedPodcast, sortOrder }) {
+export default function PodcastPane({ isVisible, onSelectEpisode }) {
   const [items, setItems]     = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const sentinelRef = useRef(null);
   const fetchedRef  = useRef(false);
 
-  const fetchItems = useCallback(async (offset = 0, append = false, slug = null) => {
+  const fetchItems = useCallback(async (offset = 0, append = false) => {
     setLoading(true);
     try {
-      let query = supabase
-        .from("podcast_episodes")
+      const { data, error } = await supabase
+        .from('podcast_episodes')
         .select(`
-          id,
-          title,
-          audio_url,
-          air_date,
-          description,
-          duration_seconds,
-          podcasts ( name, slug, artwork_url )
+          id, title, audio_url, air_date, description, duration_seconds,
+          podcasts (
+            name, slug, artwork_url,
+            backdrop_url, backdrop_mon, backdrop_tue, backdrop_wed, backdrop_thu, backdrop_fri
+          )
         `)
-        .not("audio_url", "is", null)
-        .order("air_date", { ascending: sortOrder === "oldest" })
+        .not('audio_url', 'is', null)
+        .order('air_date', { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1);
 
-      if (slug) {
-        query = query.eq("podcasts.slug", slug);
-      }
-
-      const { data, error } = await query;
-      if (error) { console.error("[PodcastPane]", error.message); return; }
+      if (error) { console.error('[PodcastPane]', error.message); return; }
 
       const rows = (data || []).map(ep => ({
         episode_id:          ep.id,
@@ -47,70 +39,78 @@ export default function PodcastPane({ isVisible, userId, selectedPodcast, sortOr
         podcast_name:        ep.podcasts?.name,
         podcast_slug:        ep.podcasts?.slug,
         podcast_artwork:     ep.podcasts?.artwork_url,
+        // Backdrop columns — null until DB migration is run
+        backdrop_url:        ep.podcasts?.backdrop_url,
+        backdrop_mon:        ep.podcasts?.backdrop_mon,
+        backdrop_tue:        ep.podcasts?.backdrop_tue,
+        backdrop_wed:        ep.podcasts?.backdrop_wed,
+        backdrop_thu:        ep.podcasts?.backdrop_thu,
+        backdrop_fri:        ep.podcasts?.backdrop_fri,
       }));
 
       if (append) setItems(prev => [...prev, ...rows]);
       else        setItems(rows);
       setHasMore(rows.length === PAGE_SIZE);
     } catch (err) {
-      console.error("[PodcastPane]", err);
+      console.error('[PodcastPane]', err);
     } finally {
       setLoading(false);
     }
-  }, [sortOrder]);
+  }, []);
 
   const loadMore = useCallback(() => {
-    setItems(prev => { fetchItems(prev.length, true, selectedPodcast); return prev; });
-  }, [fetchItems, selectedPodcast]);
+    setItems(prev => { fetchItems(prev.length, true); return prev; });
+  }, [fetchItems]);
 
-  // Initial fetch when tab becomes visible
   useEffect(() => {
     if (!isVisible || fetchedRef.current) return;
-    fetchItems(0, false, selectedPodcast);
+    fetchItems();
     fetchedRef.current = true;
-  }, [isVisible, fetchItems, selectedPodcast]);
+  }, [isVisible, fetchItems]);
 
-  // Re-fetch when filter changes
-  useEffect(() => {
-    if (!fetchedRef.current) return;
-    setItems([]);
-    fetchItems(0, false, selectedPodcast);
-  }, [selectedPodcast, sortOrder]);
-
-  // Infinite scroll
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !hasMore || !isVisible) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) loadMore(); },
-      { rootMargin: "200px" }
+      { rootMargin: '200px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, [hasMore, loadMore, isVisible]);
 
+  if (loading && items.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{ height: i === 0 ? 224 : 152, background: '#1a1a1a',
+            opacity: 0.5 + i * 0.1, animation: `pulse 1.5s ease ${i * 0.15}s infinite` }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (!loading && items.length === 0) {
+    return (
+      <div style={{ padding: 32, textAlign: 'center', color: '#888', fontSize: 14 }}>
+        No episodes yet.
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: "8px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-      {loading && items.length === 0 && (
-        [0,1,2,3].map(i => (
-          <div key={i} style={{ height: 82, borderRadius: 14, background: t.bgCard, border: `1px solid ${t.border}`, opacity: 0.6, animation: `skeleton-pulse 1.5s ease ${i * 0.1}s infinite` }} />
-        ))
-      )}
-
-      {!loading && items.length === 0 && (
-        <div style={{ padding: 32, textAlign: "center", color: t.textTertiary, fontSize: 14 }}>
-          No episodes yet.
-        </div>
-      )}
-
-      {items.map(item => (
-        <PodcastCard key={item.episode_id} item={item} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {items.map((item, i) => (
+        <PodcastCard
+          key={item.episode_id}
+          item={item}
+          isLead={i === 0}
+          onSelect={onSelectEpisode}
+        />
       ))}
-
       <div ref={sentinelRef} style={{ height: 1 }} />
-
       {loading && items.length > 0 && (
-        <div style={{ padding: 16, textAlign: "center", color: t.textTertiary, fontSize: 13 }}>Loading…</div>
+        <div style={{ padding: 16, textAlign: 'center', color: '#888', fontSize: 13 }}>Loading…</div>
       )}
     </div>
   );
