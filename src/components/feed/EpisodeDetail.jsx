@@ -131,12 +131,18 @@ function formatShortDate(dateStr) {
 // ── Guest helpers ─────────────────────────────────────────────────────────────
 // ── Guest helpers ─────────────────────────────────────────────────────────────
 
-function parseGuest(title) {
-  if (!title) return null;
-  const m = title.match(/\bw\/\s+(.+?)(?:\s*[,;(].*)?$/i)
-         || title.match(/\bwith\s+([A-Z][a-zA-Z\s\-\'.]+?)(?:\s*[,;(].*)?$/);
-  if (!m) return null;
-  return m[1].replace(/[.,;!?]+$/, '').trim();
+/** Returns array of guest names, or empty array if none. */
+function parseGuests(title) {
+  if (!title) return [];
+  // Match everything after "w/" or "with" at end of title
+  const m = title.match(/\bw\/\s+(.+)$/i)
+         || title.match(/\bwith\s+([A-Z].+)$/);
+  if (!m) return [];
+  // Split on commas or " and ", clean each name
+  return m[1]
+    .split(/,\s*|\s+and\s+/i)
+    .map(s => s.replace(/[.,;!?()\[\]]+$/, '').trim())
+    .filter(s => s.length > 2 && /[A-Z]/.test(s[0]));
 }
 
 async function fetchWikipediaImage(name) {
@@ -179,12 +185,18 @@ export default function EpisodeDetail({ item, onClose }) {
     setGuestName(null);
     setGuestImage(null);
 
-    // Guest photo — MR only
+    // Guest photos — MR only
     if (item?.podcast_slug === 'majority-report' && item?.episode_title) {
-      const guest = parseGuest(decodeEntities(item.episode_title));
-      if (guest) {
-        setGuestName(guest);
-        fetchWikipediaImage(guest).then(url => { if (url) setGuestImage(url); });
+      const guests = parseGuests(decodeEntities(item.episode_title));
+      if (guests.length > 0) {
+        setGuestName(guests.join(' / '));
+        // Try each guest in order, use first one with a Wikipedia image
+        (async () => {
+          for (const g of guests) {
+            const url = await fetchWikipediaImage(g);
+            if (url) { setGuestImage(url); break; }
+          }
+        })();
       }
     }
 
