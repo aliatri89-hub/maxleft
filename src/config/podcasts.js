@@ -28,7 +28,7 @@ export const DEFAULT_BACKDROPS = {
   'trueanon':           'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=900&q=85&auto=format&fit=crop',
   'trillbilly':         'https://images.unsplash.com/photo-1476041800959-2f6bb412c8ce?w=900&q=85&auto=format&fit=crop',
   'qaa':                'https://images.unsplash.com/photo-1522083165195-3424ed129620?w=900&q=85&auto=format&fit=crop',
-  'it-could-happen-here': 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=900&q=85&auto=format&fit=crop',
+  'it-could-happen-here': 'https://images.unsplash.com/photo-1575538439014-2b58a1da9a6c?w=900&q=85&auto=format&fit=crop',
   'secular-talk':       'https://images.unsplash.com/photo-1500916434205-0c77489c6cf7?w=900&q=85&auto=format&fit=crop',
   'left-reckoning':     'https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=900&q=85&auto=format&fit=crop',
   'ive-had-it':         'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=900&q=85&auto=format&fit=crop',

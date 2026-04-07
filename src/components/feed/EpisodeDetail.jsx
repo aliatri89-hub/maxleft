@@ -217,7 +217,7 @@ export default function EpisodeDetail({ item, onClose }) {
         <div style={{ position: 'relative', height: 230, flexShrink: 0, overflow: 'hidden' }}>
           {backdrop
             ? <img src={backdrop} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover',
-                filter: 'grayscale(100%) contrast(0.88) brightness(0.72)' }} />
+                filter: 'grayscale(100%) contrast(0.85) brightness(0.82)' }} />
             : <div style={{ width: '100%', height: '100%', background: slugColor }} />
           }
           {/* Gradient fades photo into paper */}

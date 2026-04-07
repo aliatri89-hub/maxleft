@@ -51,7 +51,7 @@ export default function PodcastCard({ item, isLead = false, onSelect }) {
       {backdrop
         ? <img src={backdrop} alt="" draggable={false}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', filter: 'grayscale(100%) contrast(0.88) brightness(0.72)' }} />
+              objectFit: 'cover', filter: 'grayscale(100%) contrast(0.85) brightness(0.82)' }} />
         : <div style={{ position: 'absolute', inset: 0, background: slugColor }} />
       }
       {/* Overlays */}
