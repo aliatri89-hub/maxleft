@@ -30,59 +30,86 @@ const SLUG_COLORS = {
 
 // ── Description parser ───────────────────────────────────────────────────────
 
-const FOOTER_PATTERNS = [
-  /The Congress switchboard[\s\S]*/i,
-  /To connect and organize[\s\S]*/i,
-  /Check out Russ[\s\S]*/i,
-  /Check out Matt[\s\S]*/i,
-  /Subscribe to Brandon[\s\S]*/i,
-  /Check out Ava[\s\S]*/i,
-  /Preorder[\s\S]*/i,
-  /Get all your MR merch[\s\S]*/i,
-  /COZY EARTH[\s\S]*/i,
-  /SELECT QUOTE[\s\S]*/i,
-  /SUNSET LAKE[\s\S]*/i,
-  /Go to https?:\/\/JustCoffee[\s\S]*/i,
+const JUNK_PATTERNS = [
+  /the congress switchboard/i,
+  /to connect and organize/i,
+  /check out russ/i,
+  /check out matt/i,
+  /subscribe to brandon/i,
+  /check out ava/i,
+  /get all your mr merch/i,
+  /cozy earth/i,
+  /select quote/i,
+  /sunset lake/i,
+  /justcoffee/i,
+  /zbiotics/i,
+  /welcome back to the majority report/i,
 ];
 
-function stripFooter(text) {
-  let out = text;
-  for (const pat of FOOTER_PATTERNS) out = out.replace(pat, '');
-  return out.trim();
+function isJunk(text) {
+  return JUNK_PATTERNS.some(p => p.test(text));
+}
+
+/** Strip HTML tags, preserving inner text. Decodes entities. */
+function htmlToText(html) {
+  if (!html) return '';
+  return html
+    .replace(/<strong>([\s\S]*?)<\/strong>/gi, '$1')
+    .replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .trim();
+}
+
+/** True when this is the Fun Half separator div */
+function isFunHalfDiv(text) {
+  return /in the fun half/i.test(text);
 }
 
 function parseMRDescription(raw) {
   if (!raw) return { program: [], funHalf: [], youtubeUrl: null };
-  let text = decodeEntities(raw);
 
-  // Extract YouTube URL
-  const ytMatch = text.match(/FUN HALF:\s*(https?:\/\/[^\s\]]+)/i);
+  // Extract YouTube URL before any processing
+  const ytMatch = raw.match(/FUN HALF:\s*(https?:\/\/[^\s"<\]]+)/i);
   const youtubeUrl = ytMatch?.[1] || null;
-  text = text.replace(/FUN HALF:\s*https?:\/\/[^\s\]]+\s*/gi, '');
 
-  // Split on "In the Fun Half:"
-  const funHalfIdx = text.toLowerCase().indexOf('in the fun half:');
+  // ── HTML path (Substack / newer MR format) ──
+  // Descriptions come as <div aria-hidden="true" data-edge="true">…</div> blocks
+  if (/<div[^>]*data-edge/i.test(raw)) {
+    const divContents = [];
+    const divRe = /<div[^>]*data-edge[^>]*>([\s\S]*?)<\/div>/gi;
+    let m;
+    while ((m = divRe.exec(raw)) !== null) {
+      const text = htmlToText(m[1]);
+      if (text.length > 0) divContents.push(text);
+    }
+
+    let funHalfIdx = divContents.findIndex(isFunHalfDiv);
+    const program  = (funHalfIdx > -1 ? divContents.slice(0, funHalfIdx) : divContents)
+      .map(t => t.replace(/^on today[''\u2019]s program:?\s*/i, '').trim())
+      .filter(t => t.length > 15 && !isJunk(t));
+    const funHalf  = funHalfIdx > -1
+      ? divContents.slice(funHalfIdx + 1).filter(t => t.length > 15 && !isJunk(t))
+      : [];
+
+    return { program, funHalf, youtubeUrl };
+  }
+
+  // ── Plain-text path (older Libsyn format) ──
+  let text = decodeEntities(raw).replace(/FUN HALF:\s*https?:\/\/[^\s]+\s*/gi, '');
+  const funHalfIdx = text.toLowerCase().indexOf('in the fun half');
   let programText  = funHalfIdx > -1 ? text.slice(0, funHalfIdx) : text;
-  let funHalfText  = funHalfIdx > -1 ? text.slice(funHalfIdx + 'in the fun half:'.length) : '';
+  let funHalfText  = funHalfIdx > -1 ? text.slice(funHalfIdx + 15) : '';
 
-  // Strip "On today's program:" header
-  programText = programText.replace(/on today[''\u2019]s program:\s*/i, '');
+  programText = programText.replace(/on today[''\u2019]s program:?\s*/i, '');
 
-  // Strip footer from both
-  programText = stripFooter(programText);
-  funHalfText = stripFooter(funHalfText);
-
-  // Split into story items by splitting on double newline or sentence-ending newlines
   const toItems = (t) =>
-    t.split(/\n+/)
-      .map(s => s.trim())
-      .filter(s => s.length > 20); // skip very short lines
+    t.split(/\n+/).map(s => s.trim()).filter(s => s.length > 20 && !isJunk(s));
 
-  return {
-    program: toItems(programText),
-    funHalf: toItems(funHalfText),
-    youtubeUrl,
-  };
+  return { program: toItems(programText), funHalf: toItems(funHalfText), youtubeUrl };
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
