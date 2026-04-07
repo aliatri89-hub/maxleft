@@ -1,4 +1,4 @@
-// ─── MANTL SERVICE WORKER ──────────────────────────────────
+// ─── Max Left SERVICE WORKER ──────────────────────────────────
 // Strategy: NEVER cache HTML or JS. Let Vite's content hashing handle that.
 // Only cache: images (aggressive) and fonts (forever).
 // This prevents the blank-page-after-deploy problem entirely.
@@ -21,7 +21,7 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_VERSION).then((cache) => cache.put(
       new Request('/_offline'),
       new Response(
-        '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mantl — Offline</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#F5F0E8;font-family:"Lora",serif;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#2C2824}.wrap{text-align:center;padding:32px}.brand{font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:44px;letter-spacing:.08em;text-transform:uppercase}.line{height:3px;width:52px;background:#C4734F;border-radius:2px;margin:6px auto 24px}.msg{font-style:italic;font-size:15px;color:#8A8279;line-height:1.6}.retry{display:inline-block;margin-top:24px;padding:12px 32px;background:#C4734F;color:#FDFBF7;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer}</style></head><body><div class="wrap"><div class="brand">MANTL</div><div class="line"></div><div class="msg">You\'re offline right now.<br>Check your connection and try again.</div><button class="retry" onclick="location.reload()">Retry</button></div></body></html>',
+        '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Mantl — Offline</title><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#F5F0E8;font-family:"Lora",serif;display:flex;align-items:center;justify-content:center;min-height:100vh;color:#2C2824}.wrap{text-align:center;padding:32px}.brand{font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:44px;letter-spacing:.08em;text-transform:uppercase}.line{height:3px;width:52px;background:#C4734F;border-radius:2px;margin:6px auto 24px}.msg{font-style:italic;font-size:15px;color:#8A8279;line-height:1.6}.retry{display:inline-block;margin-top:24px;padding:12px 32px;background:#C4734F;color:#FDFBF7;font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.1em;text-transform:uppercase;border:none;border-radius:10px;cursor:pointer}</style></head><body><div class="wrap"><div class="brand">Max Left</div><div class="line"></div><div class="msg">You\'re offline right now.<br>Check your connection and try again.</div><button class="retry" onclick="location.reload()">Retry</button></div></body></html>',
         { headers: { 'Content-Type': 'text/html' } }
       )
     ))
@@ -151,7 +151,7 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {
-        if (client.url.includes('mymantl.app') && 'focus' in client) return client.focus();
+        if (client.url.includes('maxleft.app') && 'focus' in client) return client.focus();
       }
       return self.clients.openWindow(url);
     })

@@ -289,7 +289,7 @@ export default function usePlaybackEngine(bridge, session, {
     if (bridge.isNative || !currentEp) return;
     bridge.changeMetadata({
       title: currentEp.title || "Unknown Episode",
-      artist: currentEp.community || "MANTL",
+      artist: currentEp.community || "Max Left",
       artwork: currentEp.artwork || currentEp.image || "",
     });
   }, [currentEp, bridge]);
@@ -330,7 +330,7 @@ export default function usePlaybackEngine(bridge, session, {
     setBuffering(true);
     setError(null);
     setBufferedPct(0);
-    const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
+    const meta = { title: ep.title, artist: ep.community || "Max Left", artwork: ep.artwork || "" };
     if (saved && saved.time > 15) {
       setProgress(saved.time);
       setDuration(saved.duration || 0);
@@ -355,7 +355,7 @@ export default function usePlaybackEngine(bridge, session, {
     setBuffering(true);
     setError(null);
     setBufferedPct(0);
-    const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
+    const meta = { title: ep.title, artist: ep.community || "Max Left", artwork: ep.artwork || "" };
     return bridge.load(ep.enclosureUrl, meta, { rate: speed }).then(() => bridge.play());
   }, [speed, bridge]);
 
@@ -389,7 +389,7 @@ export default function usePlaybackEngine(bridge, session, {
     setBufferedPct(0);
     clearTimeout(stallTimerRef.current);
     const savedTime = bridge.currentTime || progress;
-    const meta = { title: currentEp.title, artist: currentEp.community || "MANTL", artwork: currentEp.artwork || "" };
+    const meta = { title: currentEp.title, artist: currentEp.community || "Max Left", artwork: currentEp.artwork || "" };
     bridge.load(currentEp.enclosureUrl, meta, { seekTo: savedTime > 5 ? savedTime : 0, rate: speed })
       .then(() => bridge.play());
   }, [currentEp, speed, progress, bridge]);
@@ -456,7 +456,7 @@ export default function usePlaybackEngine(bridge, session, {
     setSpeed(resumeSpeed);
     setBuffering(true);
     setBufferedPct(0);
-    const meta = { title: ep.title, artist: ep.community || "MANTL", artwork: ep.artwork || "" };
+    const meta = { title: ep.title, artist: ep.community || "Max Left", artwork: ep.artwork || "" };
     bridge.load(ep.enclosureUrl, meta, { seekTo: resumeTime, rate: resumeSpeed })
       .then(() => bridge.play());
   }, [currentEp, speed, updateRecents, cleanupPendingSeek, bridge]);

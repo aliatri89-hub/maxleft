@@ -21,8 +21,8 @@ export async function initPushNotifications(showToast) {
     if (Capacitor.getPlatform() === 'android') {
       await PushNotifications.createChannel({
         id: 'mantl_alerts',
-        name: 'MANTL Notifications',
-        description: 'Coverage alerts, badge updates, and activity from MANTL',
+        name: 'Max Left Notifications',
+        description: 'Coverage alerts, badge updates, and activity from Max Left',
         importance: 4,   // IMPORTANCE_HIGH — shows in Alerting, not Silent/Promotions
         visibility: 1,   // VISIBILITY_PUBLIC
         sound: 'default',
@@ -75,7 +75,7 @@ export function setupPushListeners(showToast, navigate) {
   listeners.push(
     PushNotifications.addListener('pushNotificationReceived', (notification) => {
       if (showToast && notification.body) {
-        showToast(notification.title || 'MANTL', notification.body);
+        showToast(notification.title || 'Max Left', notification.body);
       }
     })
   );

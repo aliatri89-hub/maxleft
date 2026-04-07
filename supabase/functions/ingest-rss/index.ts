@@ -159,7 +159,7 @@ serve(async (req) => {
         // Fetch RSS
         console.log(`[Ingest] Fetching RSS for ${podcast.slug}: ${podcast.rss_url}`);
         const feedRes = await fetch(podcast.rss_url, {
-          headers: { "User-Agent": "MANTL-Ingest/1.0" },
+          headers: { "User-Agent": "Max Left-Ingest/1.0" },
         });
 
         if (!feedRes.ok) {

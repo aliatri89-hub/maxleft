@@ -8,7 +8,7 @@ const TEXT = "#ffffff";
 const MUTED = "rgba(255,255,255,0.88)";
 const FAINT = "rgba(255,255,255,0.60)";
 
-const GAMES_HUB_URL = "https://mymantl.app/play";
+const GAMES_HUB_URL = "https://maxleft.app/play";
 
 const sections = [
   {
@@ -20,7 +20,7 @@ const sections = [
       },
       {
         q: "An episode isn't showing up.",
-        a: "Every episode on MANTL is manually reviewed and matched to a film, so we're sometimes a few hours behind the official RSS feed. If it's not there yet, check back soon — it'll show up.",
+        a: "Every episode on Max Left is manually reviewed and matched to a film, so we're sometimes a few hours behind the official RSS feed. If it's not there yet, check back soon — it'll show up.",
       },
     ],
   },
@@ -47,7 +47,7 @@ const sections = [
     items: [
       {
         q: "How do I join a community?",
-        a: "Communities are part of the MANTL subscription ($5/month).",
+        a: "Communities are part of the Max Left subscription ($5/month).",
       },
       {
         q: "What can I do for free?",
@@ -63,8 +63,8 @@ const sections = [
         a: "Yes — open the film, tap your log entry, and choose Delete.",
       },
       {
-        q: "Does MANTL track TV shows?",
-        a: "Yes, MANTL tracks both films and TV shows.",
+        q: "Does Max Left track TV shows?",
+        a: "Yes, Max Left tracks both films and TV shows.",
       },
     ],
   },
@@ -107,7 +107,7 @@ const sections = [
 function BadgeFilmsAnswer() {
   return (
     <p style={{ margin: 0, color: MUTED, fontSize: 16, lineHeight: 1.65, fontFamily: "'Barlow Condensed', sans-serif" }}>
-      That's part of the fun — MANTL doesn't reveal the full list. Use the context clues on the{" "}
+      That's part of the fun — Max Left doesn't reveal the full list. Use the context clues on the{" "}
       <a
         href={GAMES_HUB_URL}
         target="_blank"
@@ -212,7 +212,7 @@ export default function FAQScreen() {
           zIndex: 10,
         }}
       >
-        <a href="https://mymantl.app" style={{ textDecoration: "none" }}>
+        <a href="https://maxleft.app" style={{ textDecoration: "none" }}>
           <div
             style={{
               fontFamily: "'Bebas Neue', sans-serif",
@@ -250,8 +250,8 @@ export default function FAQScreen() {
             }}
           >
             Can't find what you're looking for?{" "}
-            <a href="mailto:hello@mymantl.app" style={{ color: AMBER, textDecoration: "none" }}>
-              hello@mymantl.app
+            <a href="mailto:hello@maxleft.app" style={{ color: AMBER, textDecoration: "none" }}>
+              hello@maxleft.app
             </a>
           </p>
         </div>
@@ -322,7 +322,7 @@ export default function FAQScreen() {
               We're a small team and read every message.
             </p>
             <a
-              href="mailto:hello@mymantl.app"
+              href="mailto:hello@maxleft.app"
               style={{
                 display: "inline-block",
                 background: AMBER,
@@ -336,7 +336,7 @@ export default function FAQScreen() {
                 letterSpacing: "0.04em",
               }}
             >
-              hello@mymantl.app
+              hello@maxleft.app
             </a>
           </div>
         </div>
@@ -351,7 +351,7 @@ export default function FAQScreen() {
             paddingTop: 8,
           }}
         >
-          © {new Date().getFullYear()} mymantl LLC
+          © {new Date().getFullYear()} maxleft.app
         </div>
       </div>
     </div>

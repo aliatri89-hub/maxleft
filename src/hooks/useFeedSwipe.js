@@ -5,11 +5,11 @@ import { tapLight } from "../utils/haptics";
  * useFeedSwipe — Navigation with two layers:
  *
  * TOP (swipe):   New Releases ↔ Streaming ↔ Activity  (feed sub-modes)
- * BOTTOM (tap):  Communities | Games | Search | My MANTL  (main tabs)
+ * BOTTOM (tap):  Communities | Games | Search | My Max Left  (main tabs)
  *
  * Feed is position 0 in the slider. Bottom nav items are positions 1-3.
  * Swiping only works within the feed sub-tabs. Bottom nav is tap-only.
- * MANTL logo in header returns to feed.
+ * Max Left logo in header returns to feed.
  */
 
 const TABS = ["feed", "communities", "games", "search", "mantl"];

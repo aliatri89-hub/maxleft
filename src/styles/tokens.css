@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   MANTL Design Tokens — Dark-First Design System
+   Max Left Design Tokens — Dark-First Design System
    Based on the community page aesthetic that already works.
    
    Usage:  @import './tokens.css';
@@ -44,7 +44,7 @@
   --accent-purple:    #a78bfa;
   --accent-purple-dim:rgba(167,139,250,0.12);
   --accent-orange:    #fc4c02;        /* Strava */
-  --accent-terra:     #C4734F;        /* MANTL brand terracotta */
+  --accent-terra:     #C4734F;        /* Max Left brand terracotta */
   --accent-terra-dim: rgba(196,115,79,0.12);
 
   /* ── Typography — 3 fonts only ── */

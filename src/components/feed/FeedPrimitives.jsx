@@ -1,6 +1,5 @@
 import { t } from "../../theme";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { getPosterUrl, fetchSinglePoster } from "../../utils/communityTmdb";
 import { useAudioPlayer } from "../community/shared/AudioPlayerProvider";
 
 export const TMDB_IMG = "https://image.tmdb.org/t/p/w300";
@@ -9,12 +8,7 @@ export const TMDB_BACKDROP = "https://image.tmdb.org/t/p/w780";
 let _starsIdCounter = 0;
 
 // ── Resolve image URLs — shelf logs use full URLs, community logs use TMDB paths ──
-export function resolveImg(path, base) {
-  if (!path) return null;
-  if (path.startsWith("http")) return path;
-  return `${base}${path}`;
-}
-
+export 
 // ── Dominant color cache (localStorage) ──
 const COLOR_PREFIX = "mantl:imgcolor:";
 function getCachedColor(src) {
@@ -486,7 +480,7 @@ export function getTimeAgo(dateStr) {
 }
 
 // Transform a Supabase Storage URL to use the image render API for fast resized delivery.
-// Works on both supabase.co and custom domain (api.mymantl.app) storage URLs.
+// Works on both supabase.co and custom domain (api.maxleft.app) storage URLs.
 export function sbImg(url, width = 400, quality = 75) {
   if (!url) return url;
   return url

@@ -80,7 +80,7 @@ serve(async (req) => {
 
     console.log("[RSS-Sync] Fetching:", rss_url);
     const feedRes = await fetch(rss_url, {
-      headers: { "User-Agent": "MANTL-RSS-Sync/1.0" },
+      headers: { "User-Agent": "Max Left-RSS-Sync/1.0" },
     });
 
     if (!feedRes.ok) {

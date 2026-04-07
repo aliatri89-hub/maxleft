@@ -1,265 +1,54 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { trackEvent } from "../hooks/useAnalytics";
-import { supabase } from "../supabase";
-import ShareShelf from "../components/ShareShelf";
-import FeedFilterBar from "../components/feed/FeedFilterBar";
-import MoviesPane from "../components/feed/MoviesPane";
+import { t } from "../theme";
+import { useState } from "react";
 import PodcastPane from "../components/feed/PodcastPane";
-import ActivityPane from "../components/feed/ActivityPane";
 
-// ════════════════════════════════════════════════
-// FEED SCREEN — Movies | Podcasts | Activity
-// Coordinates tabs, filters, and pull-to-refresh.
-// Each tab's data + rendering lives in its own pane.
-// ════════════════════════════════════════════════
-
-const ADMIN_ID = "19410e64-d610-4fab-9c26-d24fafc94696";
+// Stub panes — will be built out
+function NewsPane() {
+  return <div style={{ padding: 24, color: t.textSecondary, fontSize: 14 }}>News feed coming soon.</div>;
+}
+function BlueSkyPane() {
+  return <div style={{ padding: 24, color: t.textSecondary, fontSize: 14 }}>Bluesky feed coming soon.</div>;
+}
 
 const FEED_TABS = [
-  { key: "releases", label: "Movies" },
-  { key: "podcast",  label: "Podcasts" },
-  { key: "activity", label: "Activity" },
+  { id: "podcasts", label: "Podcasts" },
+  { id: "news",     label: "News"     },
+  { id: "bluesky",  label: "Bluesky"  },
 ];
 
-export default function FeedScreen({
-  session, profile, onToast, isActive,
-  onNavigateCommunity, onNavigateToCommunities, onNavigateSearch, onNavigateMantl, onNavigateProfile,
-  letterboxdSyncSignal, autoLogCompleteSignal,
-  communitySubscriptions, favoritePodcasts,
-  feedMode, setFeedMode,
-  pendingSleeveOpen, setPendingSleeveOpen,
-  pushNav, removeNav,
-  onRefresh,
-}) {
-  const userId = session?.user?.id;
-  const isAdmin = userId === ADMIN_ID;
-
-  // ── Shared filter state (passed down to all three panes) ──
-  const [sortOrder, setSortOrder] = useState(null);
-  const [selectedPodcast, setSelectedPodcast] = useState(null);
-  const [favoriteSlugs, setFavoriteSlugs] = useState(null);
-
-  // ── Pull-to-refresh (wraps the whole scroll container) ──
-  const [pullDistance, setPullDistance] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [showShareShelf, setShowShareShelf] = useState(false);
-  const [refreshSignal, setRefreshSignal] = useState(0);
-  const touchStartY = useRef(0);
-  const isPulling = useRef(false);
-  const scrollContainerRef = useRef(null);
-  const PULL_THRESHOLD = 70;
-
-  const handleTouchStart = useCallback((e) => {
-    const el = scrollContainerRef.current;
-    const atTop = (el ? el.scrollTop <= 0 : true);
-    if (atTop && !refreshing) {
-      touchStartY.current = e.touches[0].clientY;
-      isPulling.current = true;
-    }
-  }, [refreshing]);
-
-  const handleTouchMove = useCallback((e) => {
-    if (!isPulling.current) return;
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (dy > 0) {
-      setPullDistance(Math.min(dy * 0.5, 120));
-    } else {
-      isPulling.current = false;
-      setPullDistance(0);
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback(async () => {
-    if (!isPulling.current) return;
-    isPulling.current = false;
-    if (pullDistance >= PULL_THRESHOLD) {
-      setRefreshing(true);
-      setPullDistance(PULL_THRESHOLD);
-      // Broadcast refresh signal to whichever pane is active
-      setRefreshSignal(s => s + 1);
-      // Trigger Letterboxd sync if connected
-      onRefresh?.();
-      // Minimum spinner time so it doesn't flash
-      await new Promise(r => setTimeout(r, 600));
-      setRefreshing(false);
-    }
-    setPullDistance(0);
-  }, [pullDistance]);
-
-  // ── Warm up api-proxy edge function on mount so backdrop fetches hit a warm instance ──
-  useEffect(() => {
-    supabase.functions.invoke("api-proxy", { body: { action: "ping" } }).catch(() => {});
-  }, []);
-
-  // ── Analytics: track tab switches ──
-  const prevFeedModeRef = useRef(feedMode);
-  useEffect(() => {
-    if (prevFeedModeRef.current !== feedMode && userId) {
-      trackEvent(userId, "feed_mode_switch", { from: prevFeedModeRef.current, to: feedMode });
-    }
-    prevFeedModeRef.current = feedMode;
-  }, [feedMode, userId]);
+export default function FeedScreen({ session, isActive }) {
+  const [tab, setTab] = useState("podcasts");
 
   return (
-    <div style={{
-      background: "var(--bg-primary, #0f0d0b)",
-      height: "100%",
-      display: "flex",
-      flexDirection: "column",
-      overflow: "hidden",
-    }}>
-      {/* ── Fixed header: tab toggle + filter bar ── */}
-      <div style={{ flexShrink: 0, zIndex: 50, background: "var(--bg-primary, #0f0d0b)" }}>
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "6px 16px 4px", position: "relative",
-        }}>
-          <div className="vhs-toggle">
-            {FEED_TABS.map(tab => (
-              <button
-                key={tab.key}
-                className={`vhs-toggle-btn${feedMode === tab.key ? " active" : ""}`}
-                onClick={() => setFeedMode(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
 
-        <FeedFilterBar
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-          selectedPodcast={selectedPodcast}
-          onPodcastChange={setSelectedPodcast}
-          communitySubscriptions={communitySubscriptions}
-          favoritePodcasts={favoritePodcasts}
-          onFavoriteSlugsReady={setFavoriteSlugs}
-        />
+      {/* Tab bar */}
+      <div style={{ display: "flex", borderBottom: `0.5px solid ${t.border}`, flexShrink: 0, background: t.bgPrimary }}>
+        {FEED_TABS.map(ft => (
+          <button
+            key={ft.id}
+            onClick={() => setTab(ft.id)}
+            style={{
+              flex: 1, padding: "12px 0", border: "none", background: "none",
+              color: tab === ft.id ? "#C4734F" : t.textSecondary,
+              fontSize: 13, fontWeight: tab === ft.id ? 600 : 400,
+              cursor: "pointer",
+              borderBottom: tab === ft.id ? "2px solid #C4734F" : "2px solid transparent",
+              marginBottom: -1,
+            }}
+          >
+            {ft.label}
+          </button>
+        ))}
       </div>
 
-      {/* ── Scrollable content ── */}
-      <div
-        ref={scrollContainerRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          WebkitOverflowScrolling: "touch",
-          paddingBottom: "120px",
-        }}
-      >
-        {/* Pull-to-refresh indicator */}
-        {(pullDistance > 0 || refreshing) && (
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            height: pullDistance, overflow: "hidden",
-            transition: refreshing ? "none" : "height 0.15s ease-out",
-          }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: "50%",
-              border: pullDistance >= PULL_THRESHOLD
-                ? "2.5px solid var(--accent-green, #34d399)"
-                : "2.5px solid var(--text-faint, #5a6480)",
-              borderTopColor: "transparent",
-              animation: refreshing ? "ptr-spin 0.8s linear infinite" : "none",
-              transform: refreshing ? "none" : `rotate(${pullDistance * 3}deg)`,
-              transition: "border-color 0.2s ease",
-            }} />
-          </div>
-        )}
-
-        {/* ── Three panes: show/hide by feedMode ── */}
-        <div style={{ display: feedMode === "releases" ? "block" : "none" }}>
-          <MoviesPane
-            isVisible={feedMode === "releases"}
-            selectedPodcast={selectedPodcast}
-            favoriteSlugs={favoriteSlugs}
-            sortOrder={sortOrder}
-            onNavigateSearch={onNavigateSearch}
-            onNavigateCommunity={onNavigateCommunity}
-            pushNav={pushNav}
-            removeNav={removeNav}
-            refreshSignal={refreshSignal}
-          />
-        </div>
-
-        <div style={{ display: feedMode === "podcast" ? "block" : "none" }}>
-          <PodcastPane
-            isVisible={feedMode === "podcast"}
-            userId={userId}
-            isAdmin={isAdmin}
-            selectedPodcast={selectedPodcast}
-            favoriteSlugs={favoriteSlugs}
-            sortOrder={sortOrder}
-            onNavigateSearch={onNavigateSearch}
-            onNavigateCommunity={onNavigateCommunity}
-            refreshSignal={refreshSignal}
-          />
-        </div>
-
-        <div style={{ display: feedMode === "activity" ? "block" : "none" }}>
-          <ActivityPane
-            isVisible={feedMode === "activity"}
-            userId={userId}
-            profile={profile}
-            favoritePodcasts={favoritePodcasts}
-            selectedPodcast={selectedPodcast}
-            favoriteSlugs={favoriteSlugs}
-            sortOrder={sortOrder}
-            isActive={isActive}
-            letterboxdSyncSignal={letterboxdSyncSignal}
-            autoLogCompleteSignal={autoLogCompleteSignal}
-            onNavigateCommunity={onNavigateCommunity}
-            onNavigateToCommunities={onNavigateToCommunities}
-            onNavigateMantl={onNavigateMantl}
-            onNavigateProfile={onNavigateProfile}
-            pushNav={pushNav}
-            removeNav={removeNav}
-            pendingSleeveOpen={pendingSleeveOpen}
-            setPendingSleeveOpen={setPendingSleeveOpen}
-            onToast={onToast}
-            refreshSignal={refreshSignal}
-          />
-        </div>
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {tab === "podcasts" && <PodcastPane isVisible={isActive && tab === "podcasts"} userId={session?.user?.id} />}
+        {tab === "news"     && <NewsPane />}
+        {tab === "bluesky"  && <BlueSkyPane />}
       </div>
 
-      {/* Animations */}
-      <style>{`
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
-          50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
-        @keyframes skeleton-pulse {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 0.2; }
-        }
-        @keyframes feedCardIn {
-          from { opacity: 0; transform: translateY(12px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes badgeShimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        @keyframes ptr-spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-
-      {showShareShelf && (
-        <ShareShelf
-          username={profile?.username}
-          onClose={() => setShowShareShelf(false)}
-          onToast={onToast}
-        />
-      )}
     </div>
   );
 }

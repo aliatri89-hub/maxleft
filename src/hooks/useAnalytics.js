@@ -1,5 +1,5 @@
 /**
- * useAnalytics — Lightweight event tracking for MANTL.
+ * useAnalytics — Lightweight event tracking for Max Left.
  *
  * Usage:
  *   const { track } = useAnalytics(userId);

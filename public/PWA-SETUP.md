@@ -81,7 +81,7 @@ Start from a **1024×1024 PNG** of the Mantl logo on the charcoal `#2c2420` back
 
 ## Step 4: Verify PWA Readiness
 
-1. Deploy to mymantl.app
+1. Deploy to maxleft.app
 2. Open Chrome DevTools → **Application** tab
 3. Check:
    - ✅ Manifest detected (no errors)
@@ -93,7 +93,7 @@ Start from a **1024×1024 PNG** of the Mantl logo on the charcoal `#2c2420` back
 ## Step 5: Google Play Store via PWABuilder
 
 1. Go to https://pwabuilder.com
-2. Enter `mymantl.app`
+2. Enter `maxleft.app`
 3. It'll validate your manifest + SW
 4. Choose **Android** → generates a TWA (Trusted Web Activity) APK
 5. Upload the APK + signing key to Google Play Console

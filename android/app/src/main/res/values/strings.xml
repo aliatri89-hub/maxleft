@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Mantl</string>
-    <string name="title_activity_main">Mantl</string>
-    <string name="package_name">app.mymantl</string>
-    <string name="custom_url_scheme">app.mymantl</string>
+    <string name="app_name">Max Left</string>
+    <string name="title_activity_main">Max Left</string>
+    <string name="package_name">app.maxleft</string>
+    <string name="custom_url_scheme">app.maxleft</string>
     <string name="audio_player_service_description">Allows podcast audio to play in the background.</string>
 </resources>

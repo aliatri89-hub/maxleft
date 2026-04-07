@@ -622,7 +622,7 @@ export default function FullScreenPlayer({
               overflow: "hidden",
               opacity: 0.55,
             }}>
-              <img src="/icons/icon-512.png" alt="MANTL" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              <img src="/icons/icon-512.png" alt="Max Left" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             </div>
             <div style={{
               fontSize: 16, fontWeight: 700,

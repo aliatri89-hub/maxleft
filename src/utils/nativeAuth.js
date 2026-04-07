@@ -25,7 +25,7 @@ export function clearNativeAuthPending() {
 
 /**
  * Start listening for deep link callbacks (call once on app startup)
- * When the OAuth redirect comes back via app.mymantl://login-callback#access_token=...
+ * When the OAuth redirect comes back via app.maxleft://login-callback#access_token=...
  * we parse the tokens and set the Supabase session.
  */
 export async function initDeepLinkListener() {
@@ -62,7 +62,7 @@ export async function initDeepLinkListener() {
     }, 350);
 
     // Extract tokens from the URL hash fragment
-    // Format: app.mymantl://login-callback#access_token=xxx&refresh_token=yyy&...
+    // Format: app.maxleft://login-callback#access_token=xxx&refresh_token=yyy&...
     const hashPart = url.split('#')[1];
     if (!hashPart) return;
 
@@ -118,7 +118,7 @@ async function signInNative(showToast) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'app.mymantl://login-callback',
+        redirectTo: 'app.maxleft://login-callback',
         skipBrowserRedirect: true,
       },
     });

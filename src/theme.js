@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════
-// MANTL Design Tokens — JS mirror of tokens.css
+// Max Left Design Tokens — JS mirror of tokens.css
 //
 // ONE source of truth for every color, font, and radius in JSX.
 // If you need a color in an inline style, import from here:

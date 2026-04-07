@@ -1,6 +1,6 @@
 {
-  "appId": "app.mymantl",
-  "appName": "Mantl",
+  "appId": "app.maxleft",
+  "appName": "Max Left",
   "webDir": "dist",
   "server": {
     "androidScheme": "https"

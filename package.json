@@ -1,5 +1,5 @@
 {
-  "name": "mantl",
+  "name": "maxleft",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -41,5 +41,6 @@
   },
   "overrides": {
     "vite": "8.0.0-beta.13"
-  }
+  },
+  "description": "Max Left \u2014 curated podcast app for the progressive left"
 }

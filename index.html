@@ -3,23 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>MANTL — Another reason to press play</title>
-    <meta name="description" content="The podcast platform for movie lovers." />
-    <meta property="og:title" content="MANTL — Another reason to press play" />
-    <meta property="og:description" content="The podcast platform for movie lovers." />
-    <meta property="og:url" content="https://mymantl.app" />
+    <title>Max Left</title>
+    <meta name="description" content="The podcast app for the progressive left." />
+    <meta property="og:title" content="Max Left" />
+    <meta property="og:description" content="The podcast app for the progressive left." />
+    <meta property="og:url" content="https://maxleft.app" />
     <meta property="og:type" content="website" />
     <meta name="theme-color" content="#0f0d0b" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Mantl" />
+    <meta name="apple-mobile-web-app-title" content="Max Left" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Preload fonts so splash text renders with correct font -->
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Permanent+Marker&family=Bebas+Neue&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet" />
     <style>
       body { margin: 0; background: #0f0d0b; }
       #splash-screen {
@@ -29,89 +25,27 @@
         transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s ease;
       }
       #splash-screen.hidden { opacity: 0; transform: scale(1.02); visibility: hidden; pointer-events: none; }
-      .splash-scanlines {
-        position: absolute; inset: 0; pointer-events: none;
-        background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
-        z-index: 0;
-      }
       .splash-wordmark {
-        display: flex; align-items: center; position: relative; z-index: 1;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-weight: 800; font-size: 42px;
+        color: #f5f0eb; letter-spacing: -0.02em;
         animation: splashUp 0.6s ease both;
       }
-      .splash-letter {
-        font-family: 'Barlow Condensed', sans-serif;
-        font-weight: 900; font-size: 52px;
-        line-height: 0.85; letter-spacing: 0.02em;
-        color: #f5f0eb; text-transform: uppercase;
-      }
-      .splash-play-btn {
-        position: relative; width: 36px; height: 40px;
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 -1px;
-      }
-      .splash-play-bg {
-        position: absolute; inset: 0;
-        background: rgba(15,13,11,0.85);
-        border: 1.5px solid rgba(255,255,255,0.12);
-        border-radius: 4px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 2px 6px rgba(0,0,0,0.3);
-      }
-      .splash-play-tri {
-        width: 0; height: 0; position: relative; z-index: 1;
-        border-style: solid; border-width: 10px 0 10px 17px;
-        border-color: transparent transparent transparent #f5f0eb;
-        margin-left: 3px;
-        animation: splashTriGlow 2.5s ease-in-out 1s infinite;
-      }
-      .splash-line {
-        height: 3px; background: #C4734F;
-        border-radius: 2px; margin-top: 8px;
-        position: relative; z-index: 1;
-        animation: splashLine 0.8s ease 0.3s both;
-      }
+      .splash-wordmark span { color: #C4734F; }
       .splash-tagline {
-        font-family: 'Lora', serif; font-style: italic;
         font-size: 13px; color: #8a7e72;
-        margin-top: 20px; letter-spacing: 0.02em;
-        position: relative; z-index: 1;
-        animation: splashUp 0.8s ease 0.6s both;
+        margin-top: 12px; letter-spacing: 0.03em;
+        animation: splashUp 0.8s ease 0.3s both;
       }
       @keyframes splashUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      @keyframes splashLine { from { width: 0; } to { width: 52px; } }
-      @keyframes splashTriGlow { 0%,100% { opacity: 0.6; filter: drop-shadow(0 0 4px rgba(240,236,224,0.1)); } 50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(240,236,224,0.25)); } }
     </style>
   </head>
   <body>
     <div id="splash-screen">
-      <div class="splash-scanlines"></div>
-      <div class="splash-wordmark">
-        <span class="splash-letter">M</span>
-        <div class="splash-play-btn">
-          <div class="splash-play-bg"></div>
-          <div class="splash-play-tri"></div>
-        </div>
-        <span class="splash-letter">N</span>
-        <span class="splash-letter">T</span>
-        <span class="splash-letter">L</span>
-      </div>
-      <div class="splash-line"></div>
-      <div class="splash-tagline">Another reason to press play</div>
+      <div class="splash-wordmark">Max <span>Left</span></div>
+      <div class="splash-tagline">The podcast app for the left</div>
     </div>
     <div id="root"></div>
-    <script>
-      // Intercept Strava OAuth code BEFORE Supabase module loads.
-      // Supabase's detectSessionInUrl consumes ?code= params — this runs first.
-      (function() {
-        var params = new URLSearchParams(window.location.search);
-        var code = params.get('code');
-        var scope = params.get('scope');
-        if (code && scope && scope.indexOf('activity:read') !== -1) {
-          sessionStorage.setItem('strava_code', code);
-          window.history.replaceState(null, '', window.location.pathname);
-        }
-      })();
-    </script>
     <script type="module" src="/src/main.jsx"></script>
-
   </body>
 </html>

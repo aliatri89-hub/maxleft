@@ -18,7 +18,7 @@ const COMMUNITY_BRANDS = {
   "chapo":         { name: "Movie Mindset",       accent: "#D32F2F" },
 };
 
-const DEFAULT_BRAND = { name: "MANTL", accent: t.terra };
+const DEFAULT_BRAND = { name: "Max Left", accent: t.terra };
 
 export default function CommunityLoadingScreen({ slug }) {
   const brand = COMMUNITY_BRANDS[slug] || DEFAULT_BRAND;

@@ -1,7 +1,7 @@
 /**
  * nativeAudioBridge.js
  *
- * Unified audio abstraction for MANTL.
+ * Unified audio abstraction for Max Left.
  *
  * - Native (Android/iOS): Uses @mediagrid/capacitor-native-audio
  *   → plays via Media3/ExoPlayer with a foreground service.
@@ -214,9 +214,9 @@ function createNativeBridge() {
         await AudioPlayer.create({
           audioId: AUDIO_ID,
           audioSource: url,
-          friendlyTitle: meta.title || "MANTL",
-          artistName: meta.artist || "MANTL",
-          albumTitle: meta.artist || "MANTL",
+          friendlyTitle: meta.title || "Max Left",
+          artistName: meta.artist || "Max Left",
+          albumTitle: meta.artist || "Max Left",
           artworkSource: meta.artwork || "",
           useForNotification: true,
           isBackgroundMusic: false,
@@ -349,8 +349,8 @@ function createNativeBridge() {
         await AudioPlayer.changeMetadata({
           audioId: AUDIO_ID,
           friendlyTitle: meta.title,
-          artistName: meta.artist || "MANTL",
-          albumTitle: meta.artist || "MANTL",
+          artistName: meta.artist || "Max Left",
+          albumTitle: meta.artist || "Max Left",
           artworkSource: meta.artwork || "",
         });
       } catch (e) {
@@ -538,9 +538,9 @@ function createWebBridge() {
       if ("mediaSession" in navigator) {
         const artwork = meta.artwork ? [{ src: meta.artwork, sizes: "512x512", type: "image/png" }] : [];
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: meta.title || "MANTL",
-          artist: meta.artist || "MANTL",
-          album: meta.artist || "MANTL",
+          title: meta.title || "Max Left",
+          artist: meta.artist || "Max Left",
+          album: meta.artist || "Max Left",
           ...(artwork.length ? { artwork } : {}),
         });
         // Action handlers
@@ -574,9 +574,9 @@ function createWebBridge() {
       if ("mediaSession" in navigator) {
         const artwork = meta.artwork ? [{ src: meta.artwork, sizes: "512x512", type: "image/png" }] : [];
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: meta.title || "MANTL",
-          artist: meta.artist || "MANTL",
-          album: meta.artist || "MANTL",
+          title: meta.title || "Max Left",
+          artist: meta.artist || "Max Left",
+          album: meta.artist || "Max Left",
           ...(artwork.length ? { artwork } : {}),
         });
       }
