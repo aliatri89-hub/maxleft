@@ -6,7 +6,7 @@ import decodeEntities from "../../utils/decodeEntities";
 import { fmtDuration } from "../../utils/helpers";
 
 export default function PodcastCard({ item, isAdmin }) {
-  const { playEpisode, currentEp, isPlaying } = useAudioPlayer();
+  const { play: playEpisode, currentEp, isPlaying } = useAudioPlayer();
   const [expanded, setExpanded] = useState(false);
 
   const {
