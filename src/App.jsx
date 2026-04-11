@@ -97,13 +97,14 @@ export default function App() {
 
   if (session === undefined) return null;
 
-  if (!session) return (
-    <Suspense fallback={null}><LandingScreen onAuth={() => {}} /></Suspense>
-  );
+  // AUTH BYPASSED — re-enable when ready
+  // if (!session) return (
+  //   <Suspense fallback={null}><LandingScreen onAuth={() => {}} /></Suspense>
+  // );
 
-  if (needsUsername) return (
-    <Suspense fallback={null}><UsernameSetup session={session} onComplete={() => setNeedsUsername(false)} /></Suspense>
-  );
+  // if (needsUsername) return (
+  //   <Suspense fallback={null}><UsernameSetup session={session} onComplete={() => setNeedsUsername(false)} /></Suspense>
+  // );
 
   return (
     <AudioPlayerProvider session={session}>
